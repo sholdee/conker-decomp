@@ -22,12 +22,6 @@ struct OscillatorObject {
     /* 0x80 */ FrameOscillator oscillator;
 };
 
-/* The owner whose +0x74 scales the spawned particle's velocity. */
-struct struct_EA11C_arg5 {
-    /* 0x00 */ u8  pad0[0x74];
-    /* 0x74 */ f32 unk74;
-};
-
 /* Creates a blood_spawnStrip object attached to `owner`, with a slowly pulsing oscillator. */
 OscillatorObject *effect_attachBone8SegmentStrip(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList) {
     BloodStripDesc desc;
@@ -73,7 +67,7 @@ s32 effect_resetOscillator(OscillatorObject *obj) {
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, struct_EA11C_arg5 *strip) {
+void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *strip) {
     ParticleDesc desc;
     u8 *particle;
     RiseMotion extra;
@@ -111,9 +105,9 @@ void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f
     extra.maxRiseSpeed = 3.5f;
     extra.swayPerSpeed = 0.2857143f;
 
-    desc.vel.x = (to->x - from->x) * strip->unk74;
-    desc.vel.y = (to->y - from->y) * strip->unk74;
-    desc.vel.z = (to->z - from->z) * strip->unk74;
+    desc.vel.x = (to->x - from->x) * strip->power;
+    desc.vel.y = (to->y - from->y) * strip->power;
+    desc.vel.z = (to->z - from->z) * strip->power;
     desc.pos = *from;
     desc.pos.x += desc.vel.x * t;
     desc.pos.y += desc.vel.y * t;

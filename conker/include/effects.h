@@ -3102,15 +3102,16 @@ typedef struct Struct150C29F0 {
 /* Sight beams (laser tripwires) and sight sprites, game/Effects/Sight/SightBeam/sightbeam.c and game/Effects/Sight/effects_sight.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
 
-/* Animation parameters copied into an emitter part by sight_spawnEmitter. */
+/* Texture list copied into an emitter part by sight_spawnEmitter; its draw handler (gModelParticleDrawFuncs[2],
+ * particle_bindListTextures) reads it as a ParticleTextureList. */
 typedef struct {
-    /* 0x00 */ u8  unk0;
+    /* 0x00 */ u8  count;
     /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8  unk6;
+    /* 0x04 */ s16 texture0;    /* gEffectTextures index, bound to segment0 */
+    /* 0x06 */ u8  segment0;
     /* 0x08 */ s32 unk8;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u8  unkE;
+    /* 0x0C */ s16 texture1;
+    /* 0x0E */ u8  segment1;
     /* 0x10 */ s32 unk10;
 } SightEmitterAnim;
 
@@ -3151,7 +3152,7 @@ typedef struct {
     TriggerZone *beam;
     ZoneNode *zone0;
     ZoneNode *zone1;
-    u8 unk94;
+    u8 breakHit;      /* index into gSightBeamBreakHits: the scripted hit dealt to the actor that breaks the beam */
     f32 pulseAngle;
     f32 pulseSpeed;
 } SightBeamState;

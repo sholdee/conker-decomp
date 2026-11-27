@@ -46,7 +46,7 @@ typedef struct {
     /* 0x04 */ u8 keepAlive;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ u16 soundHandle;
-    /* 0x08 */ f32 unk8;
+    /* 0x08 */ f32 waterHeight; /* the actor's waterHeight at spawn */
 } LoopSoundFxPayload;
 
 struct LoopSoundFx {
@@ -410,13 +410,8 @@ s32 effect_restartTaskPulse(PulseFx *fx) {
     return 1;
 }
 
-struct Obj151AA6D8 {
-    /* 0x00 */ u8 pad0[0x74];
-    /* 0x74 */ f32 unk74;
-};
-
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, Obj151AA6D8 *obj) {
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
@@ -454,9 +449,9 @@ void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 vel
     payload.maxRiseSpeed = 3.5f;
     payload.swayPerSpeed = 0.2857142985f;
 
-    burst.vel.x = (to->x - from->x) * obj->unk74;
-    burst.vel.y = (to->y - from->y) * obj->unk74;
-    burst.vel.z = (to->z - from->z) * obj->unk74;
+    burst.vel.x = (to->x - from->x) * obj->power;
+    burst.vel.y = (to->y - from->y) * obj->power;
+    burst.vel.z = (to->z - from->z) * obj->power;
     burst.pos = *from;
     burst.pos.x += burst.vel.x * t;
     burst.pos.y += burst.vel.y * t;
@@ -753,7 +748,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     payload.owner = task;
     payload.soundHandle = 0;
     payload.keepAlive = 1;
-    payload.unk8 = actor->waterHeight;
+    payload.waterHeight = actor->waterHeight;
     desc.target[0] = 0;
     desc.target[1] = 0;
     desc.ownerId = actor->unique_id;
@@ -777,13 +772,8 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     return fx;
 }
 
-struct Obj151AB3A4 {
-    /* 0x00 */ u8 pad0[0x60];
-    /* 0x60 */ f32 unk60;
-};
-
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
-void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Obj151AB3A4 *obj) {
+void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, LoopSoundFx *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
@@ -817,7 +807,7 @@ void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, O
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    payload.ceiling = obj->unk60;
+    payload.ceiling = obj->payload.waterHeight;
     payload.maxRiseSpeed = 4.0f;
     payload.swayPerSpeed = 0.25f;
     payload.widthPhase = 0;

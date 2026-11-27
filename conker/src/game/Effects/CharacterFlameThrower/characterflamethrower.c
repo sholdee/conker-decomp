@@ -621,7 +621,7 @@ void flamethrower_freeJet(CharacterFlamethrowerActor *actor) {
 /* Preset in gJetChildPresets for the child particles a jet point spawns (flamethrower_shedJetLines). */
 struct JetChildPreset {
     /* 0x0 */ f32 sizeScale;
-    /* 0x4 */ f32 unk4;
+    /* 0x4 */ f32 heightScale; /* scales the height terms of flamethrower_shedJetLines (sizeScale scales the widths) */
     /* 0x8 */ s16 lifeMin;
     /* 0xA */ s16 lifeRange;
 };
@@ -1446,9 +1446,9 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         data.unk1C = 0;
         spawn.width = (data.unk0 + data.unk4) * 0.5f;
         data.unk8 = spawn.width;
-        data.unkC = preset->unk4 * 3.961740017f;
-        data.unk10 = preset->unk4 * 2.919177055f;
-        data.unk14 = preset->unk4 * 8.116548538f;
+        data.unkC = preset->heightScale * 3.961740017f;
+        data.unk10 = preset->heightScale * 2.919177055f;
+        data.unk14 = preset->heightScale * 8.116548538f;
         data.unk1E = 0;
         spawn.scale.x = 1.0f;
         spawn.scale.z = 1.0f;

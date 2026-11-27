@@ -140,22 +140,18 @@ Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *need
 }
 
 typedef struct {
-    /* 0x00 */ f32 unk0;
+    /* 0x00 */ f32 angle;   /* func_151BEEE0's angle */
     /* 0x04 */ Vec3f pos;
-    /* 0x10 */ u8 unk10;
+    /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
 } S151BECB8Params;
 
 struct S151BECB8 {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ u8 unk10;
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 flags;       /* EffectParams.flags */
     /* 0x011 */ u8 pad11[0x37];
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
-    /* 0x054 */ Vec3f unk54;
+    /* 0x054 */ Vec3f pos;       /* EffectParams.pos */
     /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
@@ -198,10 +194,10 @@ s32 effect_updateStatPickup(S151BECB8 *fx) {
                     s32 mode;
                     s32 kind; // matching: switching on fx->unk48 directly changes the frame size
 
-                    player_setStat(obj->playernumber, 3, params->unk10);
+                    player_setStat(obj->playernumber, 3, params->count);
                     untouched = 0;
                     sound_play(0x511, 0x7D00, 0x40, 0, 0);
-                    effect_showStatCounter(fx->unkC, fx->unk1);
+                    effect_showStatCounter(fx->header.owner, fx->header.kind);
                     effect_spawnStatPickupBurst(&params->pos);
                     kind = fx->unk48;
                     switch (kind) {
@@ -217,8 +213,8 @@ s32 effect_updateStatPickup(S151BECB8 *fx) {
                             mode = 0;
                             break;
                     }
-                    func_151BEEE0(params->unk0, &fx->unk54, fx->unkFC, fx->unk11B, mode, fx->unk10 & 0x10,
-                                  fx->zone, fx->unkC, fx->unk1);
+                    func_151BEEE0(params->angle, &fx->pos, fx->unkFC, fx->unk11B, mode, fx->flags & 0x10,
+                                  fx->zone, fx->header.owner, fx->header.kind);
                 }
             }
             obj++;
@@ -446,9 +442,9 @@ void effect_showStatCounter(u8 owner, s32 kind) {
                 panelConfig.pos.y = 79.0f;
             }
             panelConfig.pos.z = 0.0f;
-            panelExtra.unk0 = gZeroVec3f;
-            panelExtra.unkC = 0.3010000288f;
-            panelExtra.unk10 = 0.3010000288f;
+            panelExtra.rot = gZeroVec3f;
+            panelExtra.scaleXZ = 0.3010000288f;
+            panelExtra.scaleY = 0.3010000288f;
             display->panel = effect_newModelEffect(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
             if (display->panel != NULL) {
                 memcpy(&display->panel->extra, &panelExtra, sizeof(panelExtra));

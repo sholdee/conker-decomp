@@ -118,7 +118,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     }
     state.pulseAngle = pulseAngle;
     state.pulseSpeed = pulseSpeed;
-    state.unk94 = arg11;
+    state.breakHit = arg11;
     state.triangle0 = *startTri;
     state.triangle1 = *endTri;
     state.activeTime = activeTime;
@@ -590,7 +590,7 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
         cont_spawnRumble(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
-        actor_hitScripted(actor, gSightBeamBreakHits[state->unk94], 0, -1);
+        actor_hitScripted(actor, gSightBeamBreakHits[state->breakHit], 0, -1);
     }
     sound_playAt(0x2F5, 0x7FFF, math_random() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
     sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, math_random() % 500U);
@@ -704,17 +704,17 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
             }
         }
         desc.drawFn = 2;
-        anim.unk0 = 2;
-        anim.unk6 = 4;
-        anim.unkE = 6;
+        anim.count = 2;
+        anim.segment0 = 4;
+        anim.segment1 = 6;
         anim.unk8 = 0x3E;
         anim.unk10 = 0x3E;
         if (altColors) {
-            anim.unk4 = 0x87;
-            anim.unkC = 0x88;
+            anim.texture0 = 0x87;
+            anim.texture1 = 0x88;
         } else {
-            anim.unk4 = 0x8B;
-            anim.unkC = 0x8C;
+            anim.texture0 = 0x8B;
+            anim.texture1 = 0x8C;
         }
         desc.model = 0x37;
         desc.matrixFn = 0;
@@ -727,11 +727,11 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         }
         desc.model = 0x38;
         if (altColors) {
-            anim.unk4 = 0x89;
-            anim.unkC = 0x8A;
+            anim.texture0 = 0x89;
+            anim.texture1 = 0x8A;
         } else {
-            anim.unk4 = 0x8D;
-            anim.unkC = 0x8E;
+            anim.texture0 = 0x8D;
+            anim.texture1 = 0x8E;
         }
         emitters[2] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, owner, list);
         if (emitters[2] != NULL) {

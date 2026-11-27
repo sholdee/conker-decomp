@@ -611,11 +611,10 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
 void effect_updateDistantTracers(void);
 
 /* game/Effects/Oscillator/oscillator.c */
-typedef struct struct_EA11C_arg5 struct_EA11C_arg5;
 typedef struct OscillatorObject OscillatorObject;
 OscillatorObject *effect_attachBone8SegmentStrip(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList);
 s32 effect_resetOscillator(OscillatorObject *obj);
-void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, struct_EA11C_arg5 *strip);
+void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *strip);
 f32 effect_stepOscillator(OscillatorObject *obj);
 void *effect_attachDriftEmitter(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList);
 void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
@@ -1481,8 +1480,6 @@ void func_151A6C90(Actor *obj, u8 owner, s32 list);
 struct SurfaceTrailOwner;
 typedef struct Task151AA30C Task151AA30C;
 typedef struct PulseFx PulseFx;
-typedef struct Obj151AB3A4 Obj151AB3A4;
-typedef struct Obj151AA6D8 Obj151AA6D8;
 typedef struct LoopSoundFx LoopSoundFx;
 typedef struct EmitterTask EmitterTask;
 typedef struct ActorTask ActorTask;
@@ -1503,7 +1500,7 @@ void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit);
 void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task);
 PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task);
 s32 effect_restartTaskPulse(PulseFx *fx);
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, Obj151AA6D8 *obj);
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj);
 f32 effect_stepTaskPulse(PulseFx *fx);
 void effect_refreshTaskEffects(ActorTask *task);
 void effect_destroyTaskPulse(PulseFx *fx);
@@ -1516,7 +1513,7 @@ s32 effect_updateTaskFlicker(FlickerSprite *fx);
 s32 effect_detachTaskFlicker(FlickerSprite *fx);
 void effect_watcherSubmerge(ActorTask *task);
 LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task);
-void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Obj151AB3A4 *obj);
+void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, LoopSoundFx *obj);
 s32 effect_updateLoopSound(LoopSoundFx *fx);
 void effect_destroyLoopSound(LoopSoundFx *fx);
 void effect_freeLoopSound(LoopSoundFx *fx);
@@ -1650,9 +1647,9 @@ void effect_freeBurstGlow(BurstGlow *glow);
 /* game/Effects/StatCounter/statcounter.c */
 /* The two-digit counter of effect_showStatCounter (game/Hud/CounterFree/counterfree.c frees it). The block copied to its panel's +0x120. */
 typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x00 */ Vec3f rot;     /* math_mtxRotateRPYF angles of the panel's root matrix */
+    /* 0x0C */ f32 scaleXZ;   /* scale of its X and Z axes */
+    /* 0x10 */ f32 scaleY;
 } PanelExtra;
 
 /* The object sprite_newScreenSprite returns: one digit of the counter. */
