@@ -108,11 +108,13 @@ jobs:
       - name: Build offline
         run: |
           cp "$RUNNER_TEMP/baserom.us.z64" test/baserom.us.z64
+          mkdir -p "$RUNNER_TEMP/scratch"
           # The checks run from a read-only mount of the trusted checkout, in Python's isolated mode (-I), so
           # nothing in the tree under test (a tools/collections.py, say) can be imported in their place.
           docker run --rm --network none --user "$(id -u):$(id -g)" \
             --volume "$GITHUB_WORKSPACE/test:/conker" --workdir /conker \
-            --volume "$GITHUB_WORKSPACE/trusted/tools:/trusted-tools:ro" "$IMAGE" \
+            --volume "$GITHUB_WORKSPACE/trusted/tools:/trusted-tools:ro" \
+            --volume "$RUNNER_TEMP/scratch:/scratch" "$IMAGE" \
             bash -euo pipefail -c '
               python3 tools/toolchain/patch_splat.py
               make extract
@@ -120,7 +122,7 @@ jobs:
               make -C conker -j"$(nproc)" 2>&1 | tee build-inner.log
               make -C conker replace
               make -j"$(nproc)"
-              python3 -I /trusted-tools/accounting.py --repo /conker --tsv /conker/build/accounting.trusted.tsv
+              python3 -I /trusted-tools/accounting.py --repo /conker --tsv /scratch/accounting.trusted.tsv
               python3 -I /trusted-tools/linkcheck.py /conker/conker'
 
       - name: Check the ROM sha1s
@@ -130,10 +132,13 @@ jobs:
 
       - name: Check the committed accounting manifest
         # The coverage (which ranges are C, hand-written asm or padding) must agree with the trusted checker's.
-        # Row boundaries and the proof column can change with the checker's version, so they are not compared.
+        # So must the name and size of every row both have. Row boundaries and the proof column can change
+        # with the checker's version, so they are not compared.
         run: |
           if [ -f trusted/tools/manifest_cmp.py ]; then
-            python3 -I trusted/tools/manifest_cmp.py test/tools/accounting.tsv test/build/accounting.trusted.tsv
+            # compare the committed blob (not a working-tree file, which could be a symlink)
+            git -C test show HEAD:tools/accounting.tsv > "$RUNNER_TEMP/accounting.committed.tsv"
+            python3 -I trusted/tools/manifest_cmp.py "$RUNNER_TEMP/accounting.committed.tsv" "$RUNNER_TEMP/scratch/accounting.trusted.tsv"
           else
             git -C test diff --exit-code -- tools/accounting.tsv
           fi

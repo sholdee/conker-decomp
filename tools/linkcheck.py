@@ -122,13 +122,9 @@ def objdump(conker, flags, objs):
     return "\n".join(out)
 
 
-def raw_data_pointers(conker, starts, inside):
-    """4. Raw pointers: a word in the .data or .rodata of any linked object (C, hand-written asm or splat's
-    data files) whose value lies inside a linked section but has no relocation is a pointer written as a
-    number. Words that are data although they look like addresses are listed in tools/linkcheck_allow.tsv
-    (object, section, offset, value, reason), which CI reads from the trusted checkout. It would not move with its target. In C, write the symbol; in asm, write it by name (for
-    splat's files, register the target in symbol_addrs.us.txt)."""
-    # words that are data, not pointers, although their value falls inside a linked section (reviewed)
+def load_allowed():
+    """(object, section, offset) of reviewed words that look like addresses but are not (linkcheck_allow.tsv,
+    read from this script's own directory, so CI uses the trusted copy)."""
     allowed = set()
     allow_file = Path(__file__).resolve().parent / "linkcheck_allow.tsv"
     if allow_file.exists():
@@ -136,6 +132,16 @@ def raw_data_pointers(conker, starts, inside):
             if line and not line.startswith("#"):
                 o, sec, off = line.split("\t")[:3]
                 allowed.add((o, sec, int(off, 16)))
+    return allowed
+
+
+def raw_data_pointers(conker, starts, inside):
+    """4. Raw pointers: a word in the .data or .rodata of any linked object (C, hand-written asm or splat's
+    data files) whose value lies inside a linked section but has no relocation is a pointer written as a
+    number. Words that are data although they look like addresses are listed in tools/linkcheck_allow.tsv
+    (object, section, offset, value, reason), which CI reads from the trusted checkout. It would not move with its target. In C, write the symbol; in asm, write it by name (for
+    splat's files, register the target in symbol_addrs.us.txt)."""
+    allowed = load_allowed()
     ld = (conker / "conker.ld").read_text()
     # build/assets/ are ROM blobs (IPL3, microcode), not code data
     objs = sorted({o for o, sec in re.findall(r"(build/\S+?\.o)\((\.\w+)\)", ld)
@@ -179,6 +185,58 @@ def raw_data_pointers(conker, starts, inside):
     return raw
 
 
+def raw_code_addresses(conker, inside, allowed):
+    """5. Addresses built from numbers in code: a lui with no relocation, combined by a following
+    addiu/ori/load/store on the same register (also with no relocation) into a value inside a linked
+    section. In hand-written asm, write %hi/%lo(symbol); reviewed exceptions are in linkcheck_allow.tsv."""
+    ld = (conker / "conker.ld").read_text()
+    objs = sorted({o for o, sec in re.findall(r"(build/\S+?\.o)\((\.\w+)\)", ld)
+                   if sec == ".text" and not o.startswith("build/assets/") and (conker / o).exists()})
+    out, found = objdump(conker, "-dr --no-show-raw-insn -j .text", objs), []
+    cur, ins = None, []
+
+    def scan():
+        for i, (off, op, args, rel) in enumerate(ins):
+            if op != "lui" or rel:
+                continue
+            m = re.match(r"(\w+),(0x[0-9a-f]+|\d+)$", args)
+            if not m:
+                continue
+            reg, hi = m.group(1), int(m.group(2), 0)
+            for off2, op2, args2, rel2 in ins[i + 1:i + 9]:
+                lo = None
+                m2 = re.match(r"(\w+),(\w+),(-?(?:0x[0-9a-f]+|\d+))$", args2)
+                if op2 in ("addiu", "ori") and m2 and m2.group(2) == reg:
+                    lo = int(m2.group(3), 0)
+                m3 = re.match(r"\$?(\w+),(-?(?:0x[0-9a-f]+|\d+))\((\w+)\)$", args2)
+                if m3 and m3.group(3) == reg:
+                    lo = int(m3.group(2), 0)
+                if lo is not None:
+                    if not rel2:
+                        v = ((hi << 16) + (lo if op2 != "ori" else lo & 0xFFFF)) & 0xFFFFFFFF
+                        if inside(v) and (cur, ".text", off) not in allowed:
+                            found.append(f"{cur}(.text) +0x{off:X}: lui/{op2} build 0x{v:08X} inside {inside(v)}")
+                    break
+                if args2.startswith(reg + ","):
+                    break  # the register is overwritten
+    for line in out.splitlines():
+        m = re.match(r"^(\S+\.o):\s+file format", line)
+        if m:
+            if cur:
+                scan()
+            cur, ins = m.group(1), []
+            continue
+        m = re.match(r"^\s+([0-9a-f]+):\s+(\S+)\s*(\S*)", line)
+        if m and cur:
+            ins.append([int(m.group(1), 16), m.group(2), m.group(3).replace("$", ""), False])
+            continue
+        if re.match(r"^\s+[0-9a-f]+: R_MIPS_", line) and ins:
+            ins[-1][3] = True
+    if cur:
+        scan()
+    return found
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     conker = Path(args[0]) if args else Path(__file__).resolve().parent.parent / "conker"
@@ -205,13 +263,18 @@ def main():
 
     # A hand-written definition such as `rspbootTextStart = D_800290D0 - 0x70000000;` is derived from a linked
     # symbol, so it moves with it. ld marks it ABS (it is assigned outside a section), but it is not pinned.
-    derived = set()
+    # A derived definition inside a linked section must be a plain alias of a symbol (`a = b;`): an offset
+    # from another symbol (`f = init_TEXT_START + 0x2BD0;`) pins the address relative to it.
+    derived, offset_defs = set(), set()
     for hand in ("undefined_syms.us.txt", "undefined_funcs.us.txt"):
         if (conker / hand).exists():
             text = re.sub(r"/\*.*?\*/", "", (conker / hand).read_text(), flags=re.S)
             for m in re.finditer(r"^\s*(\w+)\s*=\s*([^;]+);", text, re.M):
                 if re.search(r"[A-Za-z_]\w*", re.sub(r"\b0x[0-9A-Fa-f]+\b", "", m.group(2))):
                     derived.add(m.group(1))
+                    if not re.fullmatch(r"\s*[A-Za-z_]\w*\s*", m.group(2)):
+                        offset_defs.add(m.group(1))
+    real_secs = list(secs)
     wrong, pinned, fixed = [], {}, 0
     seen = set()
     for name, value, ndx in syms:
@@ -221,6 +284,8 @@ def main():
         m = ADDR_NAME.match(name)
         if m and int(m.group(1), 16) != value:
             wrong.append(f"{name} is at 0x{value:08X}")
+        if name in offset_defs and any(lo <= value < hi for lo, hi, _ in real_secs):
+            pinned.setdefault(inside(value), []).append(name)
         if ndx == "ABS" and name in used and not LINKER_MADE.search(name) and name not in derived:
             sec = inside(value)
             if sec:
@@ -239,6 +304,11 @@ def main():
         print("RAW POINTER:", r)
     print(f"raw pointers in linked data: {len(raw)}")
     wrong += raw
+    code = raw_code_addresses(conker, inside, load_allowed())
+    for c in code[:20]:
+        print("RAW ADDRESS IN CODE:", c)
+    print(f"addresses built from numbers in code: {len(code)}")
+    wrong += code
     jumps = unrelocated_jumps(conker)
     for j in jumps[:20]:
         print("RAW JUMP:", j)

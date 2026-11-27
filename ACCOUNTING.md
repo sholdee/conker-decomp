@@ -38,22 +38,24 @@ Hand-written functions are committed as `conker/src/*.s` (yaml `hasm` segments).
 hand-written only with a proof or with the search-tier evidence, which `tools/accounting.tsv` records in
 its `proof` column.
 
-Rules marked * are computed from the instructions by `tools/accounting.py`. Each one was checked against
+Rules marked * are computed from the instructions by `tools/accounting.py`, on runs: a run starts at an
+entry point, where the code changes kind, or at a 16-aligned object start after a finished routine. The
+counts below are the pieces whose run meets each rule. Each one was checked against
 the 5,761 functions IDO 5.3 compiles in this game, and none of them shows the pattern. The other rules come
 from `tools/hasm_proofs.tsv`.
 
 | Rule | Meaning | Functions |
 |------|---------|----------:|
 | a    | Source-identical: the SDK's own `.s` (ultralib), assembled by IDO 5.3 (`cc`, with as0 and as1), gives the same bytes | 16 |
-| b*   | An instruction IDO 5.3 `-mips2` cannot emit: cop0, TLB, cache, sync, syscall, 64-bit `d*`, `ld`/`sd`, trapping `add`/`addi`/`sub`, or the kernel registers `$k0`/`$k1` | 106 |
+| b*   | An instruction IDO 5.3 `-mips2` cannot emit: cop0, TLB, cache, sync, syscall, 64-bit `d*`, `ld`/`sd`, trapping `add`/`addi`/`sub`, or the kernel registers `$k0`/`$k1` | 174 |
 | c    | Dataflow: reads a register that is not an ABI input and was not written first | 45 |
-| d*   | An opcode-2 `j`, or a branch that leaves the function (IDO uses `b` and never tail-calls) | 149 |
-| e*   | `cvt.w.s`/`cvt.w.d` with no `ctc1` in the function (IDO always sets the rounding mode) | 20 |
-| f*   | Frame layout: a store below `$sp`, or `ra` saved in the argument area or without allocating a frame | 14 |
-| g*   | No return: execution falls into the next function | 45 |
-| h*   | An odd FPR as a single-precision arithmetic operand, or `jal` without saving `ra` | 94 |
+| d*   | An opcode-2 `j`, or a branch that leaves the function (IDO uses `b` and never tail-calls) | 195 |
+| e*   | `cvt.w.s`/`cvt.w.d` with no `ctc1` in the function (IDO always sets the rounding mode) | 75 |
+| f*   | Frame layout: a store below `$sp`, or `ra` saved in the argument area or without allocating a frame | 31 |
+| g*   | No return: execution falls into the next function | 4 |
+| h*   | An odd FPR as a single-precision arithmetic operand, or `jal` without saving `ra` | 154 |
 | i*   | 6 or more `mul.s`, every one followed by a `nop` (compiled C reaches at most 67%) | 2 |
-| k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` to 16 bytes at both ends: all 758 C objects with code) | 21 |
+| k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` to 16 bytes at both ends: all 758 C objects with code) | 7 |
 | s    | Search tier (below) | 8 |
 
 **Rule b and `-mips3`.** The 64-bit part of rule b is proof only for `-mips2` objects. With `-mips3`,
