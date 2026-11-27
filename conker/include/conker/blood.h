@@ -21,7 +21,6 @@
 /* A screen sprite of update kind 1 (gScreenSpriteUpdates[1] = func_15134CEC), with its extra data at 0x70. */
 typedef struct {
     /* 0x00 */ ScreenSprite sprite;
-    /* 0x6C */ u8 pad6C[4];
     /* 0x70 */ f32 speedY;          /* added to sprite.info.y each frame; grows by 0.125 per frame */
     /* 0x74 */ f32 halfHeightSpeed; /* added to sprite.info.halfHeight each frame; grows by 0.08 per frame */
 } Struct15134CEC; /* size 0x78 */

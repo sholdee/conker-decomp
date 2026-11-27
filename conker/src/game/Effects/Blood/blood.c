@@ -514,7 +514,7 @@ void blood_updateTrail(BloodTrail *trail) {
     }
 }
 
-/* Message handler: forwards to effect_bloodTrailOwnerMessage while the effect's unk28 is 1. */
+/* Message handler: forwards to effect_bloodTrailOwnerMessage while trail.mode is 1. */
 void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     if (effect->trail.mode == 1) {
         effect_bloodTrailOwnerMessage(effect, msg, msgId);

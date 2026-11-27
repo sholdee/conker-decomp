@@ -276,7 +276,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-/* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
+/* Handler: adds a point at the trail's position, or stops the shapeFn handler once the buffer is full. */
 s32 trail_growFallingTrail(FallingTrail *trail, TrailBurstParams *data) {
     if (trail->head.count < trail->head.tmpl.itemCount - 1) {
         FallingTrailPoint *points;

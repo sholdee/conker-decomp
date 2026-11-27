@@ -143,7 +143,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
                   sprite->info.colorLevel, sprite->info.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
-    // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
+    // matching: the draw reads only the low byte of render.combiner (lbu at 0x37)
     gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.render.combiner)[3], &update);
     gfx = math_gfxSetOtherMode(gfx, sprite->info.render.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.render.colorDither | sprite->info.render.alphaDither,

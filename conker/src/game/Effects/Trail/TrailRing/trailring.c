@@ -68,7 +68,7 @@ s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX
     return 1;
 }
 
-/* MotionTrail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
+/* MotionTrail fade handler: motion.alpha follows 8 * lifetime, capped at 0xFF. */
 s32 trail_fadeKind2Trail(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life << 3;

@@ -396,7 +396,7 @@ STATIC_ASSERT(sizeof(ClipVtx) == 0x14, ClipVtx_size);
 STATIC_ASSERT(sizeof(ShadowVtx) == 0x14, ShadowVtx_size);
 
 /* conker/sprite.h */
-STATIC_ASSERT(sizeof(ScreenSprite) == 0x6C, ScreenSprite_size);
+STATIC_ASSERT(sizeof(ScreenSprite) == 0x70, ScreenSprite_size);
 STATIC_ASSERT(sizeof(Game1A89B0Position) == 0xE, Game1A89B0Position_size);
 
 /* conker/swarm.h */

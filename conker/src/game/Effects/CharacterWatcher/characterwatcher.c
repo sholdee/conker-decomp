@@ -382,7 +382,7 @@ s32 effect_getWatcherMoveState(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     return ret;
 }
 
-/* Returns 3 on one of two animation ids (mode 0 only), 2 in water, 1 if unk28 is set, else 4. */
+/* Returns 3 on one of two animation ids (mode 0 only), 2 in water, 1 if shad is set, else 4. */
 s32 effect_getWatcherSurfaceState(Actor *chr, u8 mode) {
     s32 i;
     s32 found;

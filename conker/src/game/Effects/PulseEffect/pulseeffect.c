@@ -56,7 +56,7 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 fxOwner, s32 fxList)
         data.flags = 1;
     }
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
-                                     0x40, sizeof(EffectData), fxOwner, fxList); /* arg6 is the data size; its prototype is wrong */
+                                     0x40, sizeof(EffectData), fxOwner, fxList);
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));

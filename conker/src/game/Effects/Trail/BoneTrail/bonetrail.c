@@ -564,7 +564,7 @@ s32 trail_updateBurstParticle(SpriteParticle *particle, Vec3f *prevPos) {
     return 1;
 }
 
-/* Like trail_updateBurstParticle, but always sets unk2C from the age. */
+/* Like trail_updateBurstParticle, but always sets head.desc.brightness from the age. */
 s32 trail_updateBurstParticleTint(SpriteParticle *particle, Vec3f *prevPos) {
     s16 age;
     AgeFadeParams *params;

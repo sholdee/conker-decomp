@@ -246,7 +246,7 @@ void effect_scatterModels(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed
     }
 }
 
-/* Spawns the scene-specific square ring of particles under the actor, chosen by its unk72. */
+/* Spawns the scene-specific square ring of particles under the actor, chosen by its unique_id. */
 void effect_spawnObjectRectangleParticles(WorldObject *actor, u8 owner, s32 list) {
     switch (actor->unique_id) {
     case 0xEB:
