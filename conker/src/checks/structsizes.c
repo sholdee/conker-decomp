@@ -315,6 +315,7 @@ STATIC_ASSERT(sizeof(WavyBeamData) == 0x5A8, WavyBeamData_size);
 STATIC_ASSERT(sizeof(BoltRainState) == 0x48, BoltRainState_size);
 STATIC_ASSERT(sizeof(BoltArcState) == 0x74, BoltArcState_size);
 STATIC_ASSERT(sizeof(SparkState) == 0x10, SparkState_size);
+STATIC_ASSERT(sizeof(BeamPart) == 0x5C, BeamPart_size);
 
 /* conker/blood.h */
 STATIC_ASSERT(sizeof(Struct15134CEC) == 0x78, Struct15134CEC_size);

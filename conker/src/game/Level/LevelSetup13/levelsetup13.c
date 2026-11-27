@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+#include "conker/beam.h"
 #include "conker/collision.h"
 #include "conker/effect.h"
 #include "conker/flare.h"
@@ -7,38 +8,20 @@
 #include "conker/light.h"
 #include "conker/particle.h"
 
-/* Extra data copied to offset 0x170 of each emitter level_setup13 spawns. */
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-} EmitterExtra; /* size 0x1C */
-
-/* The particle object flare_spawnGlow returns, as level_setup13 uses it. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x60];
-    /* 0x170 */ EmitterExtra extra;
-} GlowEmitter;
-
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void level_setup13(void) {
     GlowShape params;
     ParticleDef packet;
-    EmitterExtra extra;
-    GlowEmitter *emitter;
+    GlowFlicker extra;
+    GlowObj *emitter;
 
-    extra.unk00 = 1.0420000553f;
-    extra.unk04 = 0.9010000229f;
-    extra.unk08 = 1.2009999752f;
-    extra.unk0C = 1.0f;
-    extra.unk10 = 0.0f;
-    extra.unk14 = 7.0f;
-    extra.unk18 = 0.7023000121f;
+    extra.base = 1.0420000553f;
+    extra.low = 0.9010000229f;
+    extra.high = 1.2009999752f;
+    extra.target = 1.0f;
+    extra.timer = 0.0f;
+    extra.period = 7.0f;
+    extra.rate = 0.7023000121f;
 
     packet.texture = 3;
     packet.renderModes = 0x3403;
@@ -84,7 +67,7 @@ void level_setup13(void) {
 
     emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->extra, &extra, sizeof(extra));
+        memcpy(&emitter->params.anim.flicker, &extra, sizeof(extra));
     }
 
     packet.pos.x = -520.0f;
@@ -95,7 +78,7 @@ void level_setup13(void) {
     packet.rot.z = 2220.0f;
     emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->extra, &extra, sizeof(extra));
+        memcpy(&emitter->params.anim.flicker, &extra, sizeof(extra));
     }
 
     packet.pos.y = 70.0f;
@@ -106,7 +89,7 @@ void level_setup13(void) {
     packet.rot.x = -584.0f;
     emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->extra, &extra, sizeof(extra));
+        memcpy(&emitter->params.anim.flicker, &extra, sizeof(extra));
     }
 
     packet.pos.x = 506.0f;
@@ -117,95 +100,50 @@ void level_setup13(void) {
     packet.rot.z = -208.0f;
     emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->extra, &extra, sizeof(extra));
+        memcpy(&emitter->params.anim.flicker, &extra, sizeof(extra));
     }
 }
 
-/* Per-owner data stored in the effect object level_spawnModelBeam spawns. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 id;
-    /* 0x08 */ struct MotionEffect *effect;
-    /* 0x0C */ LightEffect *light;
-} Controller; /* size 0x10 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Controller controller;
-} ControllerEffect;
-
-/* Motion data copied into the effect spawned by particle_newQuadParticle. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 id;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ ControllerEffect *controller;
-    /* 0x54 */ f32 size;
-    /* 0x58 */ u8 unk58;
-} ControllerMotion; /* size 0x5C */
-
-typedef struct MotionEffect {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ ControllerMotion motion;
-} MotionEffect;
-
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
 void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list) {
-    ControllerEffect *object;
-    Controller data;
-    Controller *controller;
+    ModelBeamEffect *object;
+    ModelBeamData data;
+    ModelBeamData *controller;
 
     data.owner = owner;
-    data.id = owner->unique_id;
-    data.effect = NULL;
-    data.light = NULL;
-    object = effect_newTimedEffect(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), fxOwner, list);
+    data.ownerId = owner->unique_id;
+    data.beam = NULL;
+    data.flash = NULL;
+    object = effect_newTimedEffect(300, -1, 0x54, -1, 0, 0x34, sizeof(ModelBeamData), fxOwner, list);
     if (object != NULL) {
-        controller = &object->controller;
+        controller = &object->data;
         memcpy(controller, &data, sizeof(data));
         // matching: the -g3 scope entry makes IDO load the shared constants at the top of this block
         {
-            ControllerMotion motion;
+            BeamPart motion;
             ParticleDef packet;
             Vec3i header2;
             LightEffectHeader header;
 
-            motion.unk58 = 0;
-            motion.size = (owner->scale_xz + owner->scale_y) * 0.5f;
+            motion.flags = 0;
+            motion.scale = (owner->scale_xz + owner->scale_y) * 0.5f;
             motion.owner = owner;
-            motion.id = owner->unique_id;
-            motion.unk08 = 15.04527187f;
-            motion.unk10 = 5.867655754f;
-            motion.unk18 = 12.11144447f;
-            motion.unk0C = 0.3961740136f;
-            motion.unk24 = 0.0f;
-            motion.unk28 = 0.0f;
-            motion.unk38 = 0.0f;
+            motion.ownerId = owner->unique_id;
+            motion.widthBase = 15.04527187f;
+            motion.widthRange = 5.867655754f;
+            motion.widthTarget = 12.11144447f;
+            motion.heightBase = 0.3961740136f;
+            motion.widthTimer = 0.0f;
+            motion.heightTimer = 0.0f;
+            motion.alphaTimer = 0.0f;
             packet.width = 0.0f;
             packet.height = 0.0f;
-            motion.unk3C = 0.0f;
-            motion.unk48 = 1.0f;
-            motion.unk40 = 1.0f;
-            motion.unk4C = 1.0f;
-            motion.unk44 = 1.0f;
-            motion.controller = object;
+            motion.alpha = 0.0f;
+            motion.beamWidthTarget = 1.0f;
+            motion.beamWidth = 1.0f;
+            motion.beamLengthTarget = 1.0f;
+            motion.beamLength = 1.0f;
+            motion.effect = object;
             packet.texture = 0x5F;
             packet.type = 9;
             packet.renderModes = 0x2203;
@@ -216,12 +154,12 @@ void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list) {
             packet.rgba[1] = 255;
             packet.rgba[2] = 255;
             packet.rgba[3] = 255;
-            motion.unk14 = 0.1042563021f;
-            motion.unk20 = 0.5197371244f;
-            motion.unk1C = 0.3440458775f;
-            motion.unk2C = 160.0f;
-            motion.unk30 = 95.0f;
-            motion.unk34 = 207.5f;
+            motion.heightRange = 0.1042563021f;
+            motion.heightRange2 = 0.5197371244f;
+            motion.heightTarget = 0.3440458775f;
+            motion.alphaBase = 160.0f;
+            motion.alphaRange = 95.0f;
+            motion.alphaTarget = 207.5f;
             packet.pos = gZeroVec3f;
             packet.rot = gZeroVec3f;
             packet.scale.x = 1.0f;
@@ -233,10 +171,10 @@ void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list) {
             packet.primMode = 0;
             packet.envMode = 7;
             packet.zone = 0;
-            controller->effect = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
+            controller->beam = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
                                                ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), fxOwner, list);
-            if (controller->effect != NULL) {
-                memcpy(&controller->effect->motion, &motion, sizeof(motion));
+            if (controller->beam != NULL) {
+                memcpy(&controller->beam->part, &motion, sizeof(motion));
             }
             header.flags = 2;
             header.update = -1;
@@ -245,7 +183,7 @@ void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list) {
             header2.x = 0;
             header2.y = 0;
             header2.z = 0;
-            controller->light = light_createWithEffect(&header, &header2, 40, 255, 255, 255, 255, 1, 0, fxOwner, list);
+            controller->flash = light_createWithEffect(&header, &header2, 40, 255, 255, 255, 255, 1, 0, fxOwner, list);
         }
     }
 }

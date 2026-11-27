@@ -325,14 +325,35 @@ typedef struct {
 
 typedef struct ModelBeamEffect ModelBeamEffect;
 
+/* The beam particle's data (at +0x110), set by level_spawnModelBeam (game/Level/LevelSetup13/levelsetup13.c). The
+ * particle runs effect_updateBurstSpark and effect_buildBurstSparkVtx, so the fields up to beamLengthTarget are
+ * BurstSparkData's. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;         /* owner->unique_id at spawn */
+    /* 0x05 */ u8 pad05[3];
+    /* 0x08 */ f32 widthBase;
+    /* 0x0C */ f32 heightBase;
+    /* 0x10 */ f32 widthRange;
+    /* 0x14 */ f32 heightRange;
+    /* 0x18 */ f32 widthTarget;
+    /* 0x1C */ f32 heightTarget;
+    /* 0x20 */ f32 heightRange2;
+    /* 0x24 */ f32 widthTimer;
+    /* 0x28 */ f32 heightTimer;
+    /* 0x2C */ f32 alphaBase;
+    /* 0x30 */ f32 alphaRange;
+    /* 0x34 */ f32 alphaTarget;
+    /* 0x38 */ f32 alphaTimer;
+    /* 0x3C */ f32 alpha;
+    /* 0x40 */ f32 beamWidth;
+    /* 0x44 */ f32 beamLength;
+    /* 0x48 */ f32 beamWidthTarget;  /* beamWidth and beamLength ease towards these */
+    /* 0x4C */ f32 beamLengthTarget;
     /* 0x50 */ ModelBeamEffect *effect; /* the beam effect that drives this beam */
-    /* 0x54 */ u8 pad54[0x58 - 0x54];
+    /* 0x54 */ f32 scale;            /* the owner's average scale */
     /* 0x58 */ u8 flags; /* bit 0 = shown */
-} BeamPart;
+} BeamPart; /* size 0x5C */
 
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
