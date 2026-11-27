@@ -190,7 +190,7 @@ void music_startLevelMusic(void) {
             music_setVolume(q.song2, q.volume2);
         }
     }
-    func_10017944(1, q.unkD);
+    audio_setBusReverbMode(1, q.unkD);
 }
 
 void music_initLevelViewState() {

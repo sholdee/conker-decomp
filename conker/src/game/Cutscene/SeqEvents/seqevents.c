@@ -1117,13 +1117,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 vol2 = (event->unk6 << 16) / 255;
             }
             duration = (duration * 0x5604) / 60;
-            func_151F2D6C(vol2, duration);
+            mp3_setVolume(vol2, duration);
         } else if (event->unk4 == 3) {
-            func_151F2BA8();
+            mp3_stop();
         } else if (event->unk4 == 4) {
-            func_151F2BE8();
+            mp3_pause();
         } else if (event->unk4 == 5) {
-            func_151F2C4C();
+            mp3_resume();
         }
     } else if (event->type == 0x11) {
         if (event->unk4 != 0) {

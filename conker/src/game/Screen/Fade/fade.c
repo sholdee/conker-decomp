@@ -57,7 +57,7 @@ void screen_updateFade(FadeEffect *effect) {
             owner = effect->owner;
             effect->state = 1;
             gFrameRateDivider = 1;
-            func_100176C4();
+            audio_stopAllSounds();
             sound_play(0x5B2, 0x7FFF, 0, 0, 0);
             sound_play(0x5B2, 0x7FFF, 127, -100, 0);
             sound_play(0x5B2, 0x7FFF, 0, 0, 0);

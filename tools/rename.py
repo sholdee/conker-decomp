@@ -10,8 +10,10 @@ FILE.tsv has one `old<TAB>new` pair per line (# comments allowed). The whole bat
   3. re-run splat (regenerates asm/ with the new names), restore the auto symbol files, rebuild with make -B;
   4. commit only if the whole-ROM sha1 still matches; otherwise restore everything exactly.
 """
-import argparse, fcntl, re, shutil, subprocess, sys, tempfile
+import argparse, fcntl, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
+
+COAUTHOR = os.environ.get("CONKER_COAUTHOR", "Claude Opus 5.5 <noreply@anthropic.com>")  # the commit trailer (AGENTS.md, Paths)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mw  # noqa: E402
@@ -179,7 +181,7 @@ def main():
         mw.git("add", *rels, "tools/accounting.tsv")
         msg = f"rename: {len(pairs)} symbols" + (f" ({a.message})" if a.message else "")
         body = "\n".join(f"{o} -> {n}" for o, n in pairs)
-        mw.git("commit", "-q", "-m", msg + "\n\n" + body + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+        mw.git("commit", "-q", "-m", msg + "\n\n" + body + "\n\nCo-Authored-By: " + COAUTHOR)
         print(f"RENAMED {len(pairs)} — {mw.git('rev-parse', '--short', 'HEAD').strip()}")
 
 

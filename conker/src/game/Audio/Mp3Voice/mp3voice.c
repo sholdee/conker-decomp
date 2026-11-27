@@ -24,6 +24,6 @@ void mp3_initVoice(ALHeap *arg0) {
     D_800E0D80.unk24 = 1;
     D_800E0D80.unk14 = 0x7FFC;
     D_800E0D80.unk16 = 0;
-    func_151F3C34(func_151F3C4C, D_800E0D80.em_volume, 0x40);
+    mp3_setReadFn(mp3_readStream, D_800E0D80.em_volume, 0x40);
 }
 

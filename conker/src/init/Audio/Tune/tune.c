@@ -413,7 +413,7 @@ s32 music_updateSeq1(s32 state, u8 channel, s32 arg2, s32 arg3) {
             } else if (level != LEVEL_W1_DOG_FISH) {
                 audio_fadeChannelsVolume(channel, 0xCA, 0, 0);
             }
-            func_100085B8(channel, 15, 1);
+            audio_setChannelNoteMesg(channel, 15, 1);
         }
         state = 1;
     } else if (state != 0) {
@@ -423,7 +423,7 @@ s32 music_updateSeq1(s32 state, u8 channel, s32 arg2, s32 arg3) {
         } else if (level != LEVEL_W1_DOG_FISH) {
             audio_fadeChannelsVolume(channel, 0xCA, 255, 0);
         }
-        func_100085B8(channel, 15, 0);
+        audio_setChannelNoteMesg(channel, 15, 0);
         state = 0;
     }
 
@@ -536,7 +536,7 @@ s32 music_updateSeq20(s32 state, s32 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 25. */
 s32 music_updateSeq25(s32 state, u8 channel, s32 arg2, s32 arg3) {
-    s32 volume = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
+    s32 volume = audio_getChannelFade(channel, 0) + audio_getChannelFade(channel, 6) + 1;
 
     if (volume >= 256) {
         volume = 255;
@@ -558,7 +558,7 @@ s32 music_updateSeq33(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     // matching: channel's address is taken so IDO keeps it in its arg slot
     if (state == 0) {
         audio_fadeChannelsVolume(*&channel, 3, 16, 0);
-        func_1000886C(channel, 4, 0);
+        audio_setChannelsFade(channel, 4, 0);
         state = 1;
     } else if (level == LEVEL_W2_HARBOUR) {
         x -= 24.0f;
@@ -570,7 +570,7 @@ s32 music_updateSeq33(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             volume = (u8)((6000.0f - sqrtf(distance)) * 0.041833334f) + 4;
         }
         if (state != volume) {
-            func_1000886C(channel, 3, volume);
+            audio_setChannelsFade(channel, 3, volume);
         }
         if (zone_isActorOutsideId(0, 0x4041) == 0) {
             distance = 1290.0f - y;
@@ -587,8 +587,8 @@ s32 music_updateSeq33(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         } else {
             volume = 0;
         }
-        if (volume != func_10008A4C(channel, 2)) {
-            func_1000886C(channel, 4, volume);
+        if (volume != audio_getChannelFade(channel, 2)) {
+            audio_setChannelsFade(channel, 4, volume);
         }
     }
     return state;
@@ -619,7 +619,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     }
 
     if (level != LEVEL_FRONTEND) {
-        audio_endSeqTrack(channel);
+        audio_stopSeq(channel);
         return state;
     }
 
@@ -635,7 +635,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     if (volume != (oldMix >> 8)) {
         volumeChanged = 1;
-        func_1000886C(channel, 6, volume);
+        audio_setChannelsFade(channel, 6, volume);
     }
 
     if (pan != (oldMix & 0xFF)) {
@@ -653,7 +653,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         if (volume < 0x4000) {
             volume = 0x4000;
         }
-        func_1000886C(channel, 1, volume >> 8);
+        audio_setChannelsFade(channel, 1, volume >> 8);
     }
 
     if (panChanged) {
@@ -666,7 +666,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         if (volume < 0x4000) {
             volume = 0x4000;
         }
-        func_1000886C(channel, 24, volume >> 8);
+        audio_setChannelsFade(channel, 24, volume >> 8);
     }
 
     if (panChanged) {
@@ -709,15 +709,15 @@ s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
         if (gCutsceneStates[0] != 1) {
-            func_1000886C(channel, 30, 1);
-            func_1000886C(channel, 1, 1);
+            audio_setChannelsFade(channel, 30, 1);
+            audio_setChannelsFade(channel, 1, 1);
             music_setVolume(35, 25000);
         } else if (gCutsceneIds[0] == 3) {
             music_setVolume(35, 250);
             effect_requestRainState(2);
         } else if (gCutsceneIds[0] == 6) {
-            func_1000886C(channel, 30, 1);
-            func_1000886C(channel, 1, 0x40);
+            audio_setChannelsFade(channel, 30, 1);
+            audio_setChannelsFade(channel, 1, 0x40);
             effect_requestRainState(2);
         } else {
             music_setVolume(35, 25000);
@@ -725,7 +725,7 @@ s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         return state;
     }
     if (level != LEVEL_FRONTEND) {
-        audio_endSeqTrack(channel);
+        audio_stopSeq(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
         case 1:
@@ -782,13 +782,13 @@ s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             audio_muteChannel(*&channel, oldMode + 9);
         }
         if (mode != 0) {
-            func_10008824(channel, mode + 9, low);
+            audio_setChannelFade(channel, mode + 9, low);
             func_100086FC(channel, mode + 9, high >> 7);
             audio_setChannelPan(channel, mode + 9, high & 0x7F);
         }
     } else if (oldMode != 0 && D_80041F08 != 0 && upper != D_80041F0C) {
         if (low != oldLow) {
-            func_10008824(channel, oldMode + 9, low);
+            audio_setChannelFade(channel, oldMode + 9, low);
         }
         if (high != oldHigh) {
             if ((high ^ oldHigh) & 0x80) {
@@ -800,7 +800,7 @@ s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (gMusicEventFlags & 0x10) {
         gMusicEventFlags &= ~0x10;
         if (fade == 0) {
-            func_1000886C(channel, 0xC0, 0x80);
+            audio_setChannelsFade(channel, 0xC0, 0x80);
         }
         fade = 0xFF000000;
     }
@@ -1086,7 +1086,7 @@ void music_readMarkers(s32 channel) {
         if (gChannelTunes[channel]->currentVolume == 0) {
             gMarkerBits[channel] |= 0x80;
             if (gChannelTunes[channel]->internallyPaused == 0) {
-                audio_stopSeq(channel);
+                audio_pauseSeq(channel);
                 gChannelTunes[channel]->internallyPaused = 1;
             }
         } else if (gChannelTunes[channel]->internallyPaused == 1) {
@@ -1199,7 +1199,7 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                 }
             } else if (music_isSyncReached(next->startSync, next->syncTune)) {
                 (*slot)->internallyPaused = 0;
-                audio_endSeqTrack(channel);
+                audio_stopSeq(channel);
             }
             track = *slot;
         } else if (track->seq_number == 0) {
@@ -1286,7 +1286,7 @@ void music_update(f32 x, f32 y, f32 z) {
         } else if (kind34Mask != 0) {
             music_setDuck(500, 0x400, kind34Mask ^ 0xFF);
             music_setDuck(0x8000, 0x800, kind34Mask);
-        } else if (func_151F2CDC() == 1 &&
+        } else if (mp3_getPlayState() == 1 &&
                    (gMp3LastTrack < 125 || gMp3LastTrack >= 129) &&
                    gMp3LastTrack < 457 && gMp3LastTrack != 368 &&
                    gMp3LastTrack != 369) {
@@ -1565,7 +1565,7 @@ void music_pauseTune(s32 id, s32 pause) {
         }
         if (2 != track->internallyPaused && pause != 0) {
             if (track->internallyPaused != 1) {
-                audio_stopSeq(track->player);
+                audio_pauseSeq(track->player);
             }
             track->internallyPaused = 2;
         }
@@ -1655,7 +1655,7 @@ void music_pauseAll(s32 pause) {
             if (gMusicInfo[gChannelTunes[i]->seq_number].flags & 0x10) {
                 continue;
             }
-            audio_stopSeq(i);
+            audio_pauseSeq(i);
         } else {
             if (!(gMusicInfo[track->seq_number].flags & 0x10)) {
                 audio_playSeqIfStopped(i);
@@ -1702,7 +1702,7 @@ s32 music_fadeChannelVolume(s32 id, s32 percent, s32 channelMask, s32 frames) {
     if (track != NULL) {
         if (track->player >= 0) {
             if (frames < 0) {
-                func_1000886C(track->player, channelMask, percent);
+                audio_setChannelsFade(track->player, channelMask, percent);
                 return TRUE;
             }
             audio_fadeChannelsVolume(track->player, channelMask, percent, frames);
@@ -1735,7 +1735,7 @@ s32 music_setChannelVolume(s32 id, s32 percent, s32 channelMask) {
             } else if (percent < 0) {
                 percent = 0;
             }
-            func_1000886C(track->player, channelMask, (percent * 255) / 100);
+            audio_setChannelsFade(track->player, channelMask, (percent * 255) / 100);
             return TRUE;
         }
         if (percent <= 0) {
@@ -1783,7 +1783,7 @@ s32 func_1000E704(s32 id, s32 arg1, s32 arg2) {
     MusicTrack *track = music_findTune(id);
 
     if (track != NULL && track->player >= 0) {
-        func_10008A94(track->player, arg2, arg1);
+        audio_setChannelsFxBus(track->player, arg2, arg1);
         return TRUE;
     }
     return FALSE;
@@ -1871,7 +1871,7 @@ void music_reset(void) {
             gMusicEventLevels[i][j] = 0x8000;
             gMusicEventDecay[i][j] = 0x100;
         }
-        audio_endSeqTrack(i);
+        audio_stopSeq(i);
         gChannelTunes[i] = NULL;
         gMarkerInterval[i] = 0;
         gLastMarkerPos[i] = 0;

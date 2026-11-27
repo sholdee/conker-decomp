@@ -23,8 +23,8 @@
  *   game/Effects/JointDecal/jointdecal.c
  *   game/Effects/ParticleBursts/particlebursts.c
  *   game/Effects/SegmentTrail/segmenttrail.c
- *   game/Effects/EmitterSpawner/emitterspawner.c
- *   game_EB600.c
+ *   game/Effects/Sfx/effects_sfx_w1_bee_cavern.c
+ *   game_EB6C0.c
  *   game/Effects/BoneGroundFx/bonegroundfx.c
  *   game/Effects/BoneRing/bonering.c
  *   game/Effects/PulseEffect/pulseeffect.c
@@ -127,7 +127,7 @@ typedef struct TextureFrameTables {
 } TextureFrameTables; /* size 0x8 */
 
 
-/* Level effect spawners (game/Effects/EmitterSpawner/emitterspawner.c, game_EB600.c). */
+/* The screen-sprite spawner of game/Effects/Sfx/effects_sfx_w1_bee_cavern.c. */
 /* The 8-byte payload effect_newEmitterSpawner copies to +0x28 of the object it creates. */
 typedef struct {
     /* 0x00 */ Camera *owner;
@@ -168,7 +168,7 @@ typedef struct {
 
 #define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
-/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game_EB600.c): the end points of its path. */
+/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game_EB6C0.c): the end points of its path. */
 typedef struct {
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
@@ -309,13 +309,13 @@ extern const Vec3f D_8009FF40[4];
 extern const Vec3f D_8009FF70[4];
 extern const Vec3f D_8009FFA0[4];
 
-/* game/Effects/EmitterSpawner/emitterspawner.c */
+/* game/Effects/Sfx/effects_sfx_w1_bee_cavern.c */
 void effect_newEmitterSpawner(Camera *owner, u8 arg1, s32 arg2);
 void effect_updateEmitterSpawner(EB340Obj *obj);
-
-/* game_EB600.c */
 void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
 s32 effect_updateRisingScreenSprite(EB340Rising *arg0);
+
+/* game_EB6C0.c */
 void func_150BE210(WorldObject *obj);
 void effect_updatePathMover(WorldObject *mover);
 GameCommand *func_150BE438(GameCommand *cmd, s32 id);

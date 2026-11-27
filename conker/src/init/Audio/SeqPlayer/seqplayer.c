@@ -57,7 +57,7 @@ void audio_init(void) {
     rom_loadPathInto(bankFile, bankSize, 2, 0x17, 0);
     bankAddress = (u32)rom_findPath(0, 2, 0x17, 1);
     waveBase = rom_findPath(0, 2, 0x17, 2);
-    func_10012934(bankFile, waveBase, bankAddress);
+    alBnkfNew(bankFile, waveBase, bankAddress);
     gSoundBank = bankFile->bankArray[0];
 
     // read the sequence table header for its count, then the whole table
@@ -81,13 +81,13 @@ void audio_init(void) {
     playerConfig.debugFlags = 0;
     playerConfig.maxChannels = 16;
     playerConfig.heap = &gAudioHeap;
-    func_100131FC(&playerConfig, 88);
+    audio_initOscStates(&playerConfig, 88);
     for (i = 0; i < NUM_SEQ_PLAYERS; i++) {
         gSeqPlayerSeqIds[i] = 0xFFFF;
         gSeqPlayerBuffers[i] = NULL;
         gSeqPlayers[i] = alHeapAlloc(&gAudioHeap, 1, sizeof(N_ALCSPlayer));
         n_alCSPNew(gSeqPlayers[i], &playerConfig);
-        func_10015550(gSeqPlayers[i], bankFile->bankArray[0]);
+        n_alCSPSetBank(gSeqPlayers[i], bankFile->bankArray[0]);
     }
 
     soundConfig.maxEvents = 64;
@@ -96,17 +96,17 @@ void audio_init(void) {
     soundConfig.maxVolumes = 8;
     soundConfig.heap = &gAudioHeap;
     soundConfig.waveRom = waveBase;
-    func_100155A0(&soundConfig);
-    func_10017870(4);
-    func_10017944(0, 2);
-    func_10017944(1, 2);
+    n_alSndpNew(&soundConfig);
+    audio_setOutputMode(4);
+    audio_setBusReverbMode(0, 2);
+    audio_setBusReverbMode(1, 2);
 }
 
-/* Stop the player's sequence unless it is already stopped or stopping. */
+/* Play the player's sequence if it is stopped or paused (state 3). */
 void audio_playSeqIfStopped(u8 player) {
     if (n_alCSPGetState(gSeqPlayers[player]) == AL_STOPPED ||
         n_alCSPGetState(gSeqPlayers[player]) == 3) {
-        func_10017AA0(gSeqPlayers[player]);
+        n_alCSPPlay(gSeqPlayers[player]);
     }
 }
 
@@ -115,22 +115,23 @@ s32 audio_getSeqState(u8 player) {
 }
 
 void audio_setSeqMsgQueue(u8 player, OSMesgQueue *queue) {
-    func_10017AF0(gSeqPlayers[player], queue);
+    audio_setCspMsgQueue(gSeqPlayers[player], queue);
 }
 
 void func_100085A4(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-void func_100085B8(u8 player, s32 chan, u8 arg2) {
-    func_10017B04(gSeqPlayers[player], chan, arg2);
+/* Sets the note messages of a channel of the player (ALChanState.noteMesg). */
+void audio_setChannelNoteMesg(u8 player, s32 chan, u8 arg2) {
+    audio_setCspNoteMesg(gSeqPlayers[player], chan, arg2);
 }
 
 void audio_muteChannel(u8 player, s32 chan) {
-    func_10017BB8(gSeqPlayers[player], chan);
+    audio_muteCspChannel(gSeqPlayers[player], chan);
 }
 
 void audio_unmuteChannel(u8 player, s32 chan) {
-    func_10017C00(gSeqPlayers[player], chan);
+    audio_unmuteCspChannel(gSeqPlayers[player], chan);
 }
 
 /* Fade a channel to `volume`; `time` is scaled by 10/60 and clamped to 1..127 (0 if not positive). */
@@ -145,7 +146,7 @@ void audio_fadeChannelVolume(u8 player, u8 chan, u8 volume, s32 time) {
     } else {
         time = 0;
     }
-    func_10017C68(gSeqPlayers[player], chan, volume, time);
+    audio_fadeCspChannel(gSeqPlayers[player], chan, volume, time);
 }
 
 void func_100086FC(u8 player, u8 chan, u8 arg2) {
@@ -153,7 +154,7 @@ void func_100086FC(u8 player, u8 chan, u8 arg2) {
 }
 
 void audio_setChannelPan(u8 player, u8 chan, u8 pan) {
-    func_10017D80(gSeqPlayers[player], chan, pan);
+    n_alCSPSetChlPan(gSeqPlayers[player], chan, pan);
 }
 
 /* audio_fadeChannelVolume for every channel in `mask`. */
@@ -167,17 +168,18 @@ void audio_fadeChannelsVolume(u8 player, s32 mask, u8 volume, s32 time) {
     }
 }
 
-void func_10008824(u8 player, u8 chan, u8 arg2) {
-    func_10017D30(gSeqPlayers[player], chan, arg2);
+/* Sets the fade volume of a channel at once. */
+void audio_setChannelFade(u8 player, u8 chan, u8 arg2) {
+    audio_setCspChannelFade(gSeqPlayers[player], chan, arg2);
 }
 
-/* func_10008824 for every channel in `mask`. */
-void func_1000886C(u8 player, s32 mask, u8 arg2) {
+/* audio_setChannelFade for every channel in `mask`. */
+void audio_setChannelsFade(u8 player, s32 mask, u8 arg2) {
     s32 chan;
 
     for (chan = 0; chan < 16; chan++) {
         if ((1 << chan) & mask) {
-            func_10008824(player, chan, arg2);
+            audio_setChannelFade(player, chan, arg2);
         }
     }
 }
@@ -212,17 +214,18 @@ void audio_setChannelMask(u8 player, s32 mask, s32 enable) {
     }
 }
 
-u8 func_10008A4C(u8 player, u8 chan) {
-    return gSeqPlayers[player]->chanState[chan].unkD;
+/* The fade volume of a channel (255 is full). */
+u8 audio_getChannelFade(u8 player, u8 chan) {
+    return gSeqPlayers[player]->chanState[chan].fadeVol;
 }
 
-/* func_10017E4C for every channel in `mask`. */
-void func_10008A94(u8 player, s32 mask, s32 arg2) {
+/* audio_setCspChannelFxBus for every channel in `mask`. */
+void audio_setChannelsFxBus(u8 player, s32 mask, s32 arg2) {
     s32 chan;
 
     for (chan = 0; chan < 16; chan++) {
         if ((1 << chan) & mask) {
-            func_10017E4C(gSeqPlayers[player], chan, arg2);
+            audio_setCspChannelFxBus(gSeqPlayers[player], chan, arg2);
         }
     }
 }
@@ -232,21 +235,21 @@ void func_10008B2C(u8 player) {
 }
 
 void audio_setSeqFxParam(u8 player, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    func_10017F10(gSeqPlayers[player], arg1, arg2, arg3, arg4);
+    audio_setCspFxParam(gSeqPlayers[player], arg1, arg2, arg3, arg4);
 }
 
 void audio_setSeqFxMix(u8 player, f32 arg1, f32 arg2) {
-    func_10017DF0(gSeqPlayers[player], arg1, arg2);
+    audio_setCspFxMix(gSeqPlayers[player], arg1, arg2);
 }
 
 /* Scan the player's sequence for `count` loop markers starting at number `base`. */
 void audio_findSeqLoopMarkers(u8 player, u8 count, s32 base) {
-    func_10018790(&gSeqPlayerSeqs[player], gSeqMarkers[player], count, base);
+    audio_findLoopMarkers(&gSeqPlayerSeqs[player], gSeqMarkers[player], count, base);
 }
 
 /* Jump the player's sequence to one of its saved markers. */
 void audio_jumpToSeqMarker(u8 player, u8 marker) {
-    func_100186DC(&gSeqPlayerSeqs[player], &gSeqMarkers[player][marker]);
+    alCSeqSetLoc(&gSeqPlayerSeqs[player], &gSeqMarkers[player][marker]);
 }
 
 /* Stop the player, load `sequence` into its buffer if it isn't loaded already, and start playing it. */
@@ -256,12 +259,12 @@ s32 audio_playSequence(u8 player, s32 sequence) {
 
     // wait (bounded) for the player to stop
     count = 0;
-    func_10018C60(gSeqPlayers[player]);
+    n_alCSPStop(gSeqPlayers[player]);
     while (n_alCSPGetState(gSeqPlayers[player]) != AL_STOPPED && count < 2000000) {
         count++;
     }
     if (count >= 2000000) {
-        func_10018C60(gSeqPlayers[player]);
+        n_alCSPStop(gSeqPlayers[player]);
         while (n_alCSPGetState(gSeqPlayers[player]) != AL_STOPPED && count < 4000000) {
             count++;
         }
@@ -282,20 +285,19 @@ s32 audio_playSequence(u8 player, s32 sequence) {
         gSeqPlayerSeqIds[player] = sequence;
     }
     n_alCSeqNew(&gSeqPlayerSeqs[player], gSeqPlayerBuffers[player]);
-    func_10018CB0(gSeqPlayers[player], &gSeqPlayerSeqs[player]);
-    func_10017B30(gSeqPlayers[player]);
+    n_alCSPSetSeq(gSeqPlayers[player], &gSeqPlayerSeqs[player]);
+    audio_enableAllCspChannels(gSeqPlayers[player]);
     return 0;
 }
 
 void audio_setSeqVolume(u8 player, s32 vol) {
-    func_10018D00(gSeqPlayers[player], vol);
-}
-
-void audio_endSeqTrack(u8 player) {
-    // AL_TRACK_END
-    func_10018C60(gSeqPlayers[player]);
+    n_alCSPSetVol(gSeqPlayers[player], vol);
 }
 
 void audio_stopSeq(u8 player) {
-    func_10018D50(gSeqPlayers[player]);
+    n_alCSPStop(gSeqPlayers[player]);
+}
+
+void audio_pauseSeq(u8 player) {
+    audio_pauseCsp(gSeqPlayers[player]);
 }

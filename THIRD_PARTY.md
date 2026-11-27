@@ -59,6 +59,52 @@ SOFTWARE.
 DevOldSchool's project is not a fork. Its own reused material (ultralib, Rare-modified library sources
 from n64decomp/007, RSP sources) was not copied here. Only its configuration and names were used.
 
+## Other decompilations used as references
+
+Rare's other N64 games use the same modified audio library (n_audio). The decompilations below were
+compared with this game's audio code function by function, with their sources compiled by this
+project's own IDO 5.3. No code was copied from them. What was taken:
+
+- the SDK names of functions whose bytes match (for example `n_alCSPSetBank`, `alCSeqSetLoc`,
+  `_bnkfPatchSound`, `_n_sndpVoiceHandler`, `_depth2Cents`, `initOsc`);
+- the split of `conker/src/libultra/audio/` into translation units where Perfect Dark and Donkey Kong 64
+  have the same functions in the same order (for example `bnkf.c` and `osc.c`, `n_cspsetbank.c` and
+  `n_sndplayer.c`, `n_seqplayer.c`, `n_event.c`). The file names are the SDK's. `osc.c`, which the SDK
+  does not have, is named after its functions (the SDK demo code's `initOsc`, `updateOsc`, `stopOsc`).
+
+| Project | Licence |
+|---------|---------|
+| Perfect Dark, <https://github.com/n64decomp/perfect_dark> | MIT, Copyright (c) 2022 Ryan Dwyer (notice below) |
+| Donkey Kong 64, <https://gitlab.com/dk64_decomp/dk64> | CC0 1.0 |
+| Diddy Kong Racing, <https://github.com/DavidSM64/Diddy-Kong-Racing> | CC0 1.0 |
+| Banjo-Kazooie, <https://github.com/n64decomp/banjo-kazooie> | CC0 1.0 |
+
+Perfect Dark uses the following notice:
+
+```
+MIT License
+
+Copyright (c) 2022 Ryan Dwyer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Nintendo SDK (libultra) material
 
 | Path | Origin | Terms |

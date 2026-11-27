@@ -42,7 +42,7 @@ typedef struct {
  */
 static SoundQueueEntry gSoundStopQueue[16];
 static s32 gSoundStopQueueCount;
-static s32 gSoundVolume;            /* music volume; its low half is what func_10017780 takes */
+static s32 gSoundVolume;            /* music volume; its low half is what audio_setSoundGroupVolume takes */
 static f32 gSoundVolumeFadeRate;
 static u8 *gSoundVariantHistory;            /* per-sound variant history */
 static u8 gSoundMutedApplied;
@@ -301,7 +301,7 @@ void sound_resetVoices(void) {
     }
 
     gSoundStopQueueCount = 0;
-    func_100176EC();
+    audio_stopLoopingSounds();
     gSoundMutedApplied = gSoundMuted = 0;
 }
 
@@ -341,9 +341,9 @@ void sound_initLevel(s32 mode) {
     }
     sound_emptyInitLevel(mode);
     gSoundMutedApplied = gSoundMuted = 0;
-    func_10017780(0, gSoundVolume);
-    func_10017780(1, gSoundVolume);
-    func_10017780(2, 23000);
+    audio_setSoundGroupVolume(0, gSoundVolume);
+    audio_setSoundGroupVolume(1, gSoundVolume);
+    audio_setSoundGroupVolume(2, 23000);
 }
 
 // Is the voice behind this handle still playing? A bare slot number (< 16) matches any
@@ -354,7 +354,7 @@ s32 sound_isPlaying(u16 handle) {
     slot = &gVoiceSlots[handle & 0xF];
     if (slot->voice != NULL) {
         if ((slot->handle == handle) || (handle == (handle & 0xF))) {
-            if (func_100173C4(&slot->voice) != 0) {
+            if (audio_getSoundPlayState(&slot->voice) != 0) {
                 return 1;
             }
         }
@@ -386,7 +386,7 @@ s32 sound_isSoundPlaying(u16 sound) {
     for (i = 0; i < 16; i++) {
         if (gVoiceSlots[i].voice != NULL) {
             if ((gVoiceSlots[i].sound & 0x7FFF) == sound) {
-                if (func_100173C4(&gVoiceSlots[i].voice) != 0) {
+                if (audio_getSoundPlayState(&gVoiceSlots[i].voice) != 0) {
                     return 1;
                 }
             }
@@ -489,7 +489,7 @@ void sound_setVoiceParam(u16 handle, s16 param, s32 value) {
             // value already holds a ratio's f32 bits
             param = 0x10;
         }
-        func_10017714(gVoiceSlots[handle & 0xF].voice, param, value);
+        audio_postSoundEvent(gVoiceSlots[handle & 0xF].voice, param, value);
     }
 }
 
@@ -921,15 +921,15 @@ u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mi
 
     slot = handle & 0xF;
     if ((handle == gVoiceSlots[slot].handle) && (handle != 0)) {
-        if ((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) {
-            func_10017594(gVoiceSlots[slot].voice);
+        if ((gVoiceSlots[slot].voice != NULL) && (audio_getSoundPlayState(&gVoiceSlots[slot].voice) != 0)) {
+            audio_stopSound(gVoiceSlots[slot].voice);
             gVoiceSlots[slot].voice = NULL;
         }
-    } else if (((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) ||
+    } else if (((gVoiceSlots[slot].voice != NULL) && (audio_getSoundPlayState(&gVoiceSlots[slot].voice) != 0)) ||
                (gVoiceSlots[slot].sound & 0x8000)) {
         slot = 0;
         while ((slot < 16) &&
-               (((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) ||
+               (((gVoiceSlots[slot].voice != NULL) && (audio_getSoundPlayState(&gVoiceSlots[slot].voice) != 0)) ||
                 (gVoiceSlots[slot].sound & 0x8000))) {
             slot++;
         }
@@ -962,7 +962,7 @@ u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mi
         } else {
             mix |= 0x7F;
         }
-        func_10017438(gSoundBank, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
+        audio_playSound(gSoundBank, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
                       &gVoiceSlots[slot].voice);
     }
     return newHandle;
@@ -1030,7 +1030,7 @@ void sound_stop(u16 handle) {
     if ((slot->voice != NULL) && (slot->handle == handle)) {
         slot->handle = 0;
         slot->sound = 0;
-        func_10017594(slot->voice);
+        audio_stopSound(slot->voice);
         slot->voice = NULL;
     }
 }
@@ -1041,7 +1041,7 @@ void sound_stopNextUpdate(u16 handle) {
 
     if ((slot->voice != NULL) && (slot->handle == handle)) {
         if (sound_queueStop(handle, 1) == 0) {
-            func_10017594(slot->voice);
+            audio_stopSound(slot->voice);
             slot->voice = NULL;
         }
     }
@@ -1085,7 +1085,7 @@ void sound_runStopQueue(void) {
                 gVoiceSlots[slot].handle = 0;
                 gVoiceSlots[slot].sound = 0;
                 if (voice != NULL) {
-                    func_10017594(voice);
+                    audio_stopSound(voice);
                 }
                 gVoiceSlots[slot].voice = NULL;
             }
@@ -1366,11 +1366,11 @@ void sound_update(void) {
     }
     if ((gSoundVolume != gSoundTargetVolume) || (gSoundMutedApplied != gSoundMuted)) {
         if (gSoundMuted == 1) {
-            func_10017780(0, 0);
-            func_10017780(1, 0);
+            audio_setSoundGroupVolume(0, 0);
+            audio_setSoundGroupVolume(1, 0);
         } else {
-            func_10017780(0, gSoundVolume);
-            func_10017780(1, ((u16 *)&gSoundVolume)[1]); // matching: low half via &gSoundVolume, not D_80041F56
+            audio_setSoundGroupVolume(0, gSoundVolume);
+            audio_setSoundGroupVolume(1, ((u16 *)&gSoundVolume)[1]); // matching: low half via &gSoundVolume, not D_80041F56
             delta = (gSoundTargetVolume - gSoundVolume) * gSoundVolumeFadeRate;
             if (delta != 0) {
                 gSoundVolume += delta;

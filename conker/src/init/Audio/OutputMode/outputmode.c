@@ -1,0 +1,78 @@
+#include <ultra64.h>
+
+/* This file's .bss, defined before the subsystem headers: their externs would change the order. */
+u8 D_800428C0;
+u8 D_800428C1;
+u8 D_800428C2;
+u8 D_800428C4[2]; /* per bus */
+u8 D_800428C6[2]; /* per bus */
+static u8 D_800428C8[2]; /* per bus: the mode last set */
+
+#include "conker/audio.h"
+
+
+/* Sets the output mode flags from `arg0`: 1 sets D_800428C1 (n_alEnvmixerPull then centres every pan: mono),
+ * 3 sets D_800428C2 (it halves the pan range), 4 sets D_800428C0 (the surround code of the envelope
+ * mixer); any other value clears all three (stereo). Then it sets both aux buses again for the new mode. */
+void audio_setOutputMode(u8 arg0) {
+    s32 i;
+
+    D_800428C0 = 0;
+    D_800428C1 = 0;
+    D_800428C2 = 0;
+
+    switch (arg0) {
+
+        case 1:
+            D_800428C1 = 1;
+            break;
+        case 3:
+            D_800428C2 = 1;
+            break;
+        case 4:
+            D_800428C0 = 1;
+            break;
+    }
+
+    for(i = 0; i < 2; i++) {
+        audio_setBusReverbMode(i, 0);
+    }
+}
+
+/* Sets how aux bus `arg0` runs its reverb in mode `arg1` (0: the mode last set), from the output mode:
+ * D_800428C4 gives the bus a second delay line and D_800428C6 inverts its feed (see libultra/audio/n_reverb.c). */
+void audio_setBusReverbMode(s32 arg0, u32 arg1) {
+    if (arg1 == 0) {
+        arg1 = D_800428C8[arg0];
+    }
+
+    D_800428C4[arg0] = 0;
+    D_800428C6[arg0] = 0;
+
+    switch (arg1)
+    {
+        case 2:
+            if (D_800428C0 != 0) {
+                D_800428C6[arg0] = 1;
+            }
+            break;
+        case 3:
+            if (D_800428C0 != 0) {
+                D_800428C4[arg0] = 1;
+            }
+            break;
+        case 4:
+            if (D_800428C1 == 0) {
+                D_800428C4[arg0] = 1;
+            }
+            break;
+        case 5:
+            if (D_800428C1 == 0) {
+                D_800428C4[arg0] = 1;
+                D_800428C6[arg0] = 1;
+            }
+            break;
+    }
+
+    D_800428C8[arg0] = arg1;
+}

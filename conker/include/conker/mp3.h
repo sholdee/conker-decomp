@@ -9,7 +9,7 @@
  * that these files define, grouped by file in address order:
  *   init/Audio/Mp3Stream/mp3stream.c
  *   game/Audio/Mp3Voice/mp3voice.c
- *   libultra/audio/game_21FC90.c
+ *   game/Audio/Mp3Player/mp3player.c
  *   game/Audio/Mp3Decoder/mp3decoder.c
  *   game/Audio/Mp3Decoder/mp3huffman.s
  *   game/Audio/Mp3Decoder/mp3imdctlong.s
@@ -34,26 +34,26 @@ extern u16 gMp3LastTrack; /* the track last started */
 /* game/Audio/Mp3Voice/mp3voice.c */
 void mp3_initVoice(ALHeap *arg0);
 
-/* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
+/* game/Audio/Mp3Player/mp3player.c: the streaming music player (StreamVoice D_800E0D80) */
 extern StreamVoice D_800E0D80; /* the streaming music player's voice */
 extern s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */
 extern void *D_800E0E28;       /* the Huffman table data */
-void func_151F2960(s32 data, s32 size);
-void func_151F2BA8(void);
-void func_151F2BE8(void);
-void func_151F2C4C(void);
-s32 func_151F2CDC(void);
-void func_151F2D6C(s32 volume, s32 arg1);
-void func_151F2DFC(s32 pan, s32 now);
-void func_151F2E4C(s32 arg0, s32 arg1);
-s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
-void func_151F39E4(StreamVoice *v);
-void func_151F3C1C(void (*callback)(s32, void *, s32));
+void mp3_playStream(s32 data, s32 size);
+void mp3_stop(void);
+void mp3_pause(void);
+void mp3_resume(void);
+s32 mp3_getPlayState(void);
+void mp3_setVolume(s32 volume, s32 arg1);
+void mp3_setPan(s32 pan, s32 now);
+void mp3_setLowPass(s32 arg0, s32 arg1);
+s32 mp3_pullFrame(s32 nSamples, Acmd **cmdList);
+void mp3_updateVolumeRamp(StreamVoice *v);
+void mp3_setTagCallback(void (*callback)(s32, void *, s32));
 /* (Mp3ReadFn read): sets the stream's read callback; declared without a prototype: mp3_initVoice (game/Audio/Mp3Voice/mp3voice.c)
  * passes it with the volume and the pan */
-void func_151F3C34();
-s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
-void func_151F3D78(void);
+void mp3_setReadFn();
+s32 mp3_readStream(s32 arg0, void *dst, s32 len, s32 offset);
+void mp3_prefetchStream(void);
 
 /* game/Audio/Mp3Decoder/mp3decoder.c */
 s32 mp3_initTables(void);

@@ -104,7 +104,7 @@ struct Mp3Decoder {
 
 /* .bss, linked at 0x800E0E30..0x800E9D00 in this order (with the decoder gMp3Decoder last).
  * The tables mp3_initTables builds: */
-f32 *gMp3Pow43Buffer; // pow43 table storage (0x8000 bytes), allocated by func_151F2960
+f32 *gMp3Pow43Buffer; // pow43 table storage (0x8000 bytes), allocated by mp3_playStream
 /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
 static f32 gMp3ImdctWindows[4][36];
 static f32 *gMp3Pow43;          /* pow43: i^(4/3) */

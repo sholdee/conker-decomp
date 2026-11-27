@@ -32,7 +32,7 @@
 
 
 /* Conker: __n_unmapVoice, __n_voiceNeedsNoteKill, __n_lookupVoice and __n_lookupSoundQuick are Rare's copies in
- * init/Audio/SeqVoice/seqvoice.c. Conker's __n_voiceNeedsNoteKill returns s32 (the 2.0L header says char). */
+ * libultra/audio/n_seqplayer.c. Conker's __n_voiceNeedsNoteKill returns s32 (the 2.0L header says char). */
 void            __n_unmapVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice);
 s32             __n_voiceNeedsNoteKill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
 void		__n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice,
@@ -53,14 +53,14 @@ void              __n_setInstChanState(N_ALSeqPlayer *seqp, ALInstrument *inst, 
 void              __n_seqpStopOsc(N_ALSeqPlayer *seqp, N_ALVoiceState *vs);
 void		  __n_postNextSeqEvent(N_ALSeqPlayer *seqp);
 
-/* Conker: Rare's sequence player helpers in src/init_1AAE0.c (subsystem audio), used by n_csplayer.c. */
+/* Conker: Rare's sequence player helpers in libultra/audio/n_seqplayer.c (subsystem audio), used by n_csplayer.c. */
 u8                audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
 s32               audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
 
-/* Conker: the controller-change handlers of the compact sequence player (src/libultra/audio/init_19B50.c).
- * D_8002BA50[0..0x5C] is indexed by the controller number, D_8002BA50[0x5D..0x60] by 0xFF - controller
+/* Conker: the controller-change handlers of the compact sequence player (src/init/Audio/SeqCtrl/seqctrl.c).
+ * gCspCtrlHandlers[0..0x5C] is indexed by the controller number, gCspCtrlHandlers[0x5D..0x60] by 0xFF - controller
  * for the controllers 0xFF..0xFC. */
 typedef void (*CSPCtrlHandler)(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value);
-extern CSPCtrlHandler D_8002BA50[0x5D + 4];
+extern CSPCtrlHandler gCspCtrlHandlers[0x5D + 4];
 
 #endif /* __N_SEQP__ */

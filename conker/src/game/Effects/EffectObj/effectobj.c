@@ -9,7 +9,7 @@
 #include "conker/trail.h"
 #include "conker/view.h"
 
-/* This file's .rodata: the two object types of the effect objects (effect_newEffectObj), read by game/Trail/LevelStream/levelstream.c too. */
+/* This file's .rodata: the two object types of the effect objects (effect_newEffectObj), read by game/Effects/Trail/LevelStream/levelstream.c too. */
 const s32 gEffectObjTypes[2] = { 0x4D, 0x22 };
 
 /*
