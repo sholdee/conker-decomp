@@ -2228,13 +2228,13 @@ typedef struct WaterStage {
     /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
     /* 0x8C */ WaterBase *shapes[2]; /* [0] the rest shape, [1] the shape it blends to */
-    /* 0x94 */ f32 unk94;
-    /* 0x98 */ f32 unk98;
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
-    /* 0xA4 */ f32 unkA4;
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ f32 unkAC;
+    /* 0x94 */ f32 blend;       /* 0..1 from shapes[0] to shapes[1] */
+    /* 0x98 */ f32 blendSpeed;  /* per tick, reversed at blendCentre -/+ 0.2 */
+    /* 0x9C */ f32 blendCentre;
+    /* 0xA0 */ f32 rotXOffset;  /* degrees, subtracted from the surface's x rotation */
+    /* 0xA4 */ f32 rotXSpeed;   /* added to rotXOffset each frame */
+    /* 0xA8 */ f32 rotYOffset;  /* degrees, added to the surface's y rotation (rocks between -2 and 2) */
+    /* 0xAC */ f32 rotYSpeed;   /* per tick */
     /* 0xB0 */ u16 tex[4];
     /* 0xB8 */ s16 timer;
     /* 0xBA */ u8  alpha;
