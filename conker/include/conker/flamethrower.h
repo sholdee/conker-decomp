@@ -57,10 +57,10 @@ typedef struct FlameLineParams {
     /* 0x04 */ f32 rateRange;
     /* 0x08 */ s16 lifeMin;
     /* 0x0A */ s16 lifeRange;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
+    /* 0x0C */ f32 widthMin;
+    /* 0x10 */ f32 heightMin;
+    /* 0x14 */ f32 widthRange;
+    /* 0x18 */ f32 heightRange;
     /* 0x1C */ f32 speedMin;
     /* 0x20 */ f32 speedRange;
     /* 0x24 */ f32 gravityMin;
@@ -70,53 +70,53 @@ typedef struct FlameLineParams {
     /* 0x34 */ s16 fadeStart;
     /* 0x36 */ s16 alphaPerLife;
     /* 0x38 */ f32 position; /* fraction of the length where they spawn */
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 unk3D;
+    /* 0x3C */ u8 alphaMin;
+    /* 0x3D */ u8 alphaRange;
     /* 0x3E */ u8 pad3E[2];
     /* 0x40 */ f32 shrinkRate;
-} FlameLineParams;
+} FlameLineParams; // size 0x44
 
 /* Parameters of the particles (trail_createMotionTrail) a flame scatters towards `target`; random values are min + range. */
 typedef struct FlameScatterParams {
     /* 0x00 */ Vec3f target; /* bone-relative */
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
+    /* 0x14 */ s32 itemCountMin;
+    /* 0x18 */ s32 itemCountRange;
+    /* 0x1C */ s16 lifeMin;
+    /* 0x1E */ s16 lifeRange;
+    /* 0x20 */ f32 halfWidthMin;
+    /* 0x24 */ f32 halfWidthRange;
     /* 0x28 */ f32 speedMin;
     /* 0x2C */ f32 speedRange;
     /* 0x30 */ f32 spread;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42;
-} FlameScatterParams;
+    /* 0x34 */ f32 gravityMin;
+    /* 0x38 */ f32 gravityRange;
+    /* 0x3C */ s16 alphaMin;
+    /* 0x3E */ s16 alphaRange;
+    /* 0x40 */ s16 fadeStart;
+    /* 0x42 */ s16 fadeRate;
+} FlameScatterParams; // size 0x44
 
 /* Parameters of the particles (particle_newSpriteParticleWithFloor) a flame emits towards `target`; random values are min + range. */
 typedef struct FlameEmitParams {
     /* 0x00 */ Vec3f target; /* bone-relative */
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
+    /* 0x14 */ s16 lifeMin;
+    /* 0x16 */ s16 lifeRange;
+    /* 0x18 */ s16 alphaMin;
+    /* 0x1A */ s16 alphaRange;
+    /* 0x1C */ f32 sizeMin;
+    /* 0x20 */ f32 sizeRange;
     /* 0x24 */ f32 speedMin;
     /* 0x28 */ f32 speedRange;
     /* 0x2C */ f32 spread;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-} FlameEmitParams;
+    /* 0x30 */ f32 gravityMin;
+    /* 0x34 */ f32 gravityRange;
+    /* 0x38 */ s16 fadeStart;
+    /* 0x3A */ s16 fadeRate;
+} FlameEmitParams; // size 0x3C
 
 /* Spawn parameters for flamethrower_spawnFlame. */
 struct CharacterFlamethrowerSetup {

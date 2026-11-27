@@ -2166,7 +2166,7 @@ void actor_updatePlayer(Actor *actor) {
     if ((actor->floorY < -9000.0f) && (actor->yspd < -120.0f)) {
         actor->mv->over_edge += gFrameSteps;
         if (actor->mv->over_edge >= 0x24) {
-            func_1506D538();
+            event_finishDeathOutsideCutscene();
         }
     } else {
         actor->mv->over_edge = 0;
@@ -4106,7 +4106,7 @@ void actor_updateOverEdge(Actor *obj) {
             obj->ygrav = 0.0f;
             return;
         }
-        func_1506D538();
+        event_finishDeathOutsideCutscene();
     }
     obj->energy = 0;
     obj->scale_xz *= 0.9499999881f;

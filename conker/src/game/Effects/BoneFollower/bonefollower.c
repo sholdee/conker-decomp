@@ -41,16 +41,19 @@ struct BoneFollower {
 }; // size 0x48
 
 /*
- * The follower and group callbacks, indexed by the fields named above. They are declared without a
+ * The follower and group callbacks, indexed by the fields named above. Most are declared without a
  * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
- * AnchorEmitter in game/Particle/AnchorEmitter/anchoremitter.c). The message table keeps the prototype of its call, which passes the
- * type as a u8; its entry still takes the AnchorEmitter view (warning 709).
+ * AnchorEmitter in game/Particle/AnchorEmitter/anchoremitter.c). The untrack entry takes the group
+ * itself, so its table has the prototype. The message table keeps the prototype of its call, which
+ * passes the type as a u8; its entry still takes the AnchorEmitter view (warning 709).
  */
+typedef void (*FollowerGroupUntrackFn)(ActorFollowerGroup *group);
+
 static s32 (*gBoneFollowerUpdateFuncs[])() = { particle_followAnchorEased, particle_followAnchor }; /* BoneFollower.updateFn */
 static void (*gBoneFollowerExpireFuncs[])() = { particle_launchAnchorParticle };               /* BoneFollower.expireFn */
 static s32 (*gFollowerGroupUpdateFuncs[])() = { particle_updateAnchorEmitter };                /* ActorFollowerGroup.updateFn */
 static void (*gFollowerGroupTrackFuncs[])() = { particle_emitAnchorBurst };               /* ActorFollowerGroup.trackFn */
-static void (*gFollowerGroupUntrackFuncs[])() = { effect_clearGroupFollowers };               /* ActorFollowerGroup.untrackFn */
+static FollowerGroupUntrackFn gFollowerGroupUntrackFuncs[] = { effect_clearGroupFollowers };   /* ActorFollowerGroup.untrackFn */
 static void (*gFollowerGroupExpireFuncs[])() = { particle_runAnchorEmitterExpire };               /* ActorFollowerGroup.expireFn */
 static void (*gFollowerGroupDestroyFuncs[])() = { NULL, particle_destroyAnchorEmitter };         /* per kind, before the followers go */
 static void (*gFollowerGroupMessageFuncs[])(ActorFollowerGroup *, ActorMsg *, u8) = { NULL, effect_anchorEmitterMessage }; /* per kind, after a message */
