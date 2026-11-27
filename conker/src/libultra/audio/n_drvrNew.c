@@ -1,7 +1,4 @@
-/* n_synthInternals.h declares n_alFxNew over ALFx; this file defines it over its own N_ALFx. */
-#define n_alFxNew n_alFxNew_hdr_decl
 #include "n_synthInternals.h"
-#undef n_alFxNew
 
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
@@ -146,14 +143,15 @@ static s32 D_8002BBE0[10] = {
 
 #define RANGE 2.0f
 
-void n_alFxNew(N_ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp) {
+/* The effect is this file's N_ALFx; the callers hold it as an ALFx (n_synthInternals.h). */
+void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp) {
     u16 i, j, k;
     s32 *param = 0;
     N_ALDelay *d;
     N_ALFx *r;
 
     r = alHeapAlloc(hp, 1, sizeof(N_ALFx));
-    *fx_ar = r;
+    *fx_ar = (ALFx *)r;
 
     switch (c->fxType[bus]) {
         case AL_FX_CUSTOM:
