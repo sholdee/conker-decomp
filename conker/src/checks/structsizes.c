@@ -337,6 +337,8 @@ STATIC_ASSERT(sizeof(EmitterConfig) == 0x2C, EmitterConfig_size);
 STATIC_ASSERT(sizeof(FlashSpawner) == 0x40, FlashSpawner_size);
 STATIC_ASSERT(sizeof(FF0E0State) == 0x48, FF0E0State_size);
 STATIC_ASSERT(sizeof(DiskEmitter) == 0x34, DiskEmitter_size);
+STATIC_ASSERT(sizeof(Sway) == 0x18, Sway_size);
+STATIC_ASSERT(sizeof(SwayBlock) == 0x2C, SwayBlock_size);
 
 /* conker/face.h */
 STATIC_ASSERT(sizeof(ExpressionRecord) == 0xA, ExpressionRecord_size);

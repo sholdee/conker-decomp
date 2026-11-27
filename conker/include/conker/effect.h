@@ -660,6 +660,22 @@ void effect_spawnFootprintAtAltFoot(s32 actor, s32 side, s32 strength);
 
 /* game/Effects/SwayObject/swayobject.c */
 typedef struct SwayObject SwayObject;
+/* A two-axis sine sway: each axis advances its phase (radians) by `speed` per frame and swings by `amplitude`. */
+typedef struct Sway {
+    /* 0x00 */ f32 phaseX;
+    /* 0x04 */ f32 phaseZ;
+    /* 0x08 */ f32 speedX;
+    /* 0x0C */ f32 speedZ;
+    /* 0x10 */ f32 amplitudeX;
+    /* 0x14 */ f32 amplitudeZ;
+} Sway; // size 0x18
+/* A swaying DynModel's user data (DYNMODEL_USERDATA; effect_updateModelSway, effect_buildSwayMatrix). */
+typedef struct SwayBlock {
+    /* 0x00 */ Sway sway;
+    /* 0x18 */ Vec3f pos;
+    /* 0x24 */ f32 rotX; /* amplitudeX * sin(phaseX) */
+    /* 0x28 */ f32 rotZ;
+} SwayBlock; // size 0x2C
 s32 effect_getLegBonePoint(Vec3f *out, Actor *owner, u8 slot);
 s32 effect_selectLegImpactEffect(s32 arg0, s32 arg1);
 void effect_spawnLegImpactBurst(Actor *owner, s32 slot, s32 arg2);

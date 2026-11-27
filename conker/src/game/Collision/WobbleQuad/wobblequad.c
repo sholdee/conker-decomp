@@ -5,60 +5,37 @@
 #include "conker/game.h"
 #include "conker/particle.h"
 
-struct Foo150AE280Inner {
-    char pad0[0x8];
-    f32 unk8;
-    f32 unkC;
-};
+/* The data of a wobbling model particle (gModelParticleUpdateFuncs[11], collision_updateWobble) after its
+ * ModelParticle (MODEL_PARTICLE_DATA). */
+typedef struct WobblePhases {
+    /* 0x0 */ u8 pad0[8];
+    /* 0x8 */ f32 phaseX; /* radians; rot.x = sin(phaseX) * 3.086 */
+    /* 0xC */ f32 phaseZ; /* radians; rot.z = sin(phaseZ) * 5.914 */
+} WobblePhases;
 
-struct Foo150AE280 {
-    char pad0[0x20];
-    f32 unk20;
-    char pad24[0x4];
-    f32 unk28;
-    char pad2C[0x144];
-    struct Foo150AE280Inner unk170;
-};
+typedef struct WobbleModelParticle {
+    /* 0x000 */ ModelParticle base;
+    /* 0x170 */ WobblePhases wobble;
+} WobbleModelParticle;
 
-struct Foo150AE36CInner {
-    char pad0[0x18];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-};
+/* A quad particle (gQuadParticleVertexFuncs[21], collision_buildTransformedUprightQuad) that stands upright at
+ * head.def.pos in the frame of the model particle `parent`. */
+typedef struct UprightQuad {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x50];
+    /* 0x160 */ ModelParticle *parent;
+} UprightQuad;
 
-struct Foo150AE36C {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[0x18];
-    struct Foo150AE36CInner *unk160;
-};
+s32 collision_updateWobble(WobbleModelParticle *particle) {
+    WobblePhases *phases;
 
-
-
-
-s32 collision_updateWobble(struct Foo150AE280 *particle) {
-    struct Foo150AE280Inner *phases;
-
-    particle->unk170.unk8 += 0.065f * gFrameDelta;
-    particle->unk170.unkC += 0.0484f * gFrameDelta;
-    phases = &particle->unk170;
-    phases->unk8 = math_wrapRadians(particle->unk170.unk8);
-    phases->unkC = math_wrapRadians(phases->unkC);
-    particle->unk20 = sinf(phases->unk8) * 3.0860002f;
-    particle->unk28 = sinf(phases->unkC) * 5.9140005f;
+    particle->wobble.phaseX += 0.065f * gFrameDelta;
+    particle->wobble.phaseZ += 0.0484f * gFrameDelta;
+    phases = &particle->wobble;
+    phases->phaseX = math_wrapRadians(particle->wobble.phaseX);
+    phases->phaseZ = math_wrapRadians(phases->phaseZ);
+    particle->base.rot.x = sinf(phases->phaseX) * 3.0860002f;
+    particle->base.rot.z = sinf(phases->phaseZ) * 5.9140005f;
     return 1;
 }
 
@@ -66,7 +43,7 @@ s32 func_150AE35C(s32 particle) {
     return 1;
 }
 
-s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 viewport) {
+s16 *collision_buildTransformedUprightQuad(UprightQuad *particle, s16 viewport) {
     s16 *vertices;
     s16 *ret;
     f32 offsetX;
@@ -78,22 +55,22 @@ s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 vie
     MtxF mtx;
     u8 fresh;
 
-    particle_getViewBuffer(particle->unk100, viewport, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(particle->head.vtxBuffers, viewport, 0x40, &vertices, &fresh);
     ret = vertices;
     if (vertices) {
         if (fresh) {
-            memcpy(particle->unk100[viewport], particle->unkC0, 0x40);
-            memcpy(particle->unk100[viewport] + 0x20, particle->unkC0, 0x40);
+            memcpy(particle->head.vtxBuffers[viewport], particle->head.vtxTemplate, 0x40);
+            memcpy(particle->head.vtxBuffers[viewport] + 4, particle->head.vtxTemplate, 0x40);
         }
     } else {
         return 0;
     }
 
-    math_mtxFRotScaleXZ(mtx, particle->unk160->unk18, particle->unk160->unk1C, particle->unk160->unk20, particle->unk160->unk24, particle->unk160->unk28, particle->unk160->unk38, particle->unk160->unk3C, particle->unk160->unk40);
-    math_transformPoint(mtx, particle->unk34, particle->unk38, particle->unk3C, &x, &y, &z);
+    math_mtxFRotScaleXZ(mtx, particle->parent->sizeXZ, particle->parent->sizeY, particle->parent->rot.x, particle->parent->rot.y, particle->parent->rot.z, particle->parent->pos.x, particle->parent->pos.y, particle->parent->pos.z);
+    math_transformPoint(mtx, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, &x, &y, &z);
 
-    offsetX = gCameraAngleCosines[viewport] * particle->unk2C;
-    offsetZ = gCameraAngleSines[viewport] * particle->unk2C;
+    offsetX = gCameraAngleCosines[viewport] * particle->head.def.width;
+    offsetZ = gCameraAngleSines[viewport] * particle->head.def.width;
 
     vertices[3] = 0;
     vertices[0xB] = 0;
@@ -103,7 +80,7 @@ s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 vie
     vertices[1] = vertices[9] = y;
     vertices[2] = vertices[0x1A] = z - offsetZ;
     vertices[8] = vertices[0x10] = x - offsetX;
-    vertices[0x11] = vertices[0x19] = y + particle->unk30;
+    vertices[0x11] = vertices[0x19] = y + particle->head.def.height;
     vertices[0xA] = vertices[0x12] = z + offsetZ;
 
     return ret;

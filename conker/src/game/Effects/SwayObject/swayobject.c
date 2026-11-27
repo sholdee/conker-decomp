@@ -54,16 +54,6 @@ void effect_spawnLegImpactBurst(Actor *owner, s32 slot, s32 arg2) {
     }
 }
 
-/* A two-axis sine sway: each axis advances its phase by `speed` per frame and swings by `amplitude`. */
-typedef struct {
-    f32 phaseX;
-    f32 phaseZ;
-    f32 speedX;
-    f32 speedZ;
-    f32 amplitudeX;
-    f32 amplitudeZ;
-} Sway; // size 0x18
-
 struct SwayObject {
     u8 pad0[0x20];
     f32 rotX;
@@ -76,13 +66,6 @@ struct SwayObject {
     u8 pad44[0x12C];
     Sway sway;
 };
-
-typedef struct {
-    Sway sway;
-    f32 pos[3];
-    f32 rotX;
-    f32 rotZ;
-} SwayBlock;
 
 /* Steps the object's sway and stores the resulting X/Z rotation. */
 s32 effect_updateSway(SwayObject *obj) {
@@ -113,9 +96,9 @@ s32 effect_buildSwayMatrix(DynModel *model, s32 viewport) {
 
     block = DYNMODEL_USERDATA(model);
     math_mtxRotateRPYF(mtx, block->rotX, 0.0f, block->rotZ);
-    mtx[3][0] = block->pos[0];
-    mtx[3][1] = block->pos[1];
-    mtx[3][2] = block->pos[2];
+    mtx[3][0] = block->pos.x;
+    mtx[3][1] = block->pos.y;
+    mtx[3][2] = block->pos.z;
     guMtxF2L(mtx, &model->mtx[gDrawBufferIndex]);
     return 1;
 }

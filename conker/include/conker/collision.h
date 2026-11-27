@@ -26,9 +26,9 @@
 /* Types that these files define; the declarations below use them. */
 typedef struct QuadNode QuadNode;
 typedef struct TriggerVolume TriggerVolume;
-struct Foo150AE280;
+struct WobbleModelParticle;
 struct ShadowVtx;
-struct Foo150AE36C;
+struct UprightQuad;
 
 /* A TriggerNode with a box volume (collision_addTriggerVolume). */
 struct TriggerVolume {
@@ -364,9 +364,9 @@ void script_runTask(IdRecord *node, s32 mode);
 void script_exitTask(void);
 
 /* game/Collision/WobbleQuad/wobblequad.c */
-s32 collision_updateWobble(struct Foo150AE280 *particle);
+s32 collision_updateWobble(struct WobbleModelParticle *particle);
 s32 func_150AE35C(s32 particle);
-s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 viewport);
+s16 *collision_buildTransformedUprightQuad(struct UprightQuad *particle, s16 viewport);
 
 /* game/Collision/ObjectRay/objectray.c */
 s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
