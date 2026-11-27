@@ -81,7 +81,7 @@ s32 mp_findNodeById(id)
     s32 i;
 
     for (i = 0; i < gPathNodeCount; i++) {
-        if (id == gPathNodes[i].unk7) {
+        if (id == gPathNodes[i].id) {
             return i;
         }
     }

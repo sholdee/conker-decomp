@@ -31,14 +31,9 @@
 void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
                    s32 hitRoute, s32 force, s32 soundCmd);
 
-struct C4DC0_arg1 {
-    u8 pad0[4];
-    s32 unk4;
-};
-
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
-s32 script_spawnActor(s32 scriptId, s32 unused) {
+s32 script_spawnActor(s32 scriptId, s32 cmd) {
     s32 ret;
     Actor *obj;
 
@@ -46,7 +41,7 @@ s32 script_spawnActor(s32 scriptId, s32 unused) {
     if (ret != -1) {
         obj = collision_findObjectById(scriptId);
         if (obj == NULL) {
-            gSpawnRecords[ret].unk2 = 0;
+            gSpawnRecords[ret].removed = 0;
             if (collision_spawnObject(ret + gSpawnRecords, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
@@ -62,7 +57,7 @@ s32 script_spawnActor(s32 scriptId, s32 unused) {
 }
 
 /* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
-s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1) {
+s32 script_removeActor(s32 objId, ScriptCmd *cmd) {
     Actor *obj;
 
     obj = actor_findOnPath(objId);
@@ -70,10 +65,10 @@ s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1) {
         return 0;
     }
     if (objId < gSpawnRecordCount) {
-        gSpawnRecords[objId].unk2 = 1;
+        gSpawnRecords[objId].removed = 1;
     }
     if (gScriptCmdWordCount == 2) {
-        if (arg1->unk4 == 0) {
+        if (cmd->arg.w == 0) {
             actor_remove(obj, 0);
         } else {
             actor_handleDeath(obj);
@@ -188,20 +183,20 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->scriptTimer = 0;
         break;
     case 0x61: {
-        s32 v;
+        s32 buttons;
 
-        v = cmd->a[0].w;
+        buttons = cmd->a[0].w;
         if (obj->mv != NULL) {
-            if (v == -1) {
-                v = 0x8000;
+            if (buttons == -1) {
+                buttons = 0x8000;
             }
-            obj->mv->pressedButtons = v;
+            obj->mv->pressedButtons = buttons;
             obj->mv->pressedButtonsTimer = 0;
             switch (cmd->a[0].w) {
             case -1:
             case 4:
             case 0x2000:
-                obj->mv->buttons = v;
+                obj->mv->buttons = buttons;
                 obj->mv->buttonsTimer = 2;
                 break;
             }
@@ -212,14 +207,14 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         text_setAnchor(obj, cmd->a[0].w);
         break;
     case 0x67: {
-        s32 v;
+        s32 quadrant;
 
-        v = cmd->a[0].w;
+        quadrant = cmd->a[0].w;
         text_setFlags(0);
         switch (gScreenLayout) {
         case 2:
         case 3:
-            text_setPosition((v & 1) * 150 + 10, (v >> 1) * 115);
+            text_setPosition((quadrant & 1) * 150 + 10, (quadrant >> 1) * 115);
             break;
         }
         break;
@@ -243,14 +238,14 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x64: {
-        s32 v;
+        s32 value;
 
-        v = cmd->a[0].w;
+        value = cmd->a[0].w;
         if (gIsMultiplayer == 0 && (D_800E9D00 & 0x200)) {
-            v = 0x33;
+            value = 0x33;
         }
         if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < gPlayerCount) {
-            player_setStat(OBJ_INDEX(obj), 2, v);
+            player_setStat(OBJ_INDEX(obj), 2, value);
         }
         break;
     }
@@ -317,7 +312,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x72:
         if (obj->mv != NULL) {
-            obj->mv->unk129 = cmd->a[0].w;
+            obj->mv->targetIndex = cmd->a[0].w;
         } else {
             obj->targetIndex = cmd->a[0].w;
         }
@@ -556,7 +551,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x3B:
         obj->mv->walk_attrib |= cmd->a[0].w;
         if (gScriptCmdWordCount == 4) {
-            obj->mv->unk34 = cmd->a[1].w;
+            obj->mv->lockAngle = cmd->a[1].w;
         }
         break;
     case 0x3C:
@@ -636,30 +631,30 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         face_setDefaultExpression(obj, cmd->a[0].w);
         break;
     case 0x4B: {
-        s32 v;
+        s32 setId;
 
-        v = cmd->a[0].w;
-        collision_createPartSet(obj, v, 0.0f, 0);
+        setId = cmd->a[0].w;
+        collision_createPartSet(obj, setId, 0.0f, 0);
         break;
     }
     case 0x4C:
     {
-        s32 v;
+        s32 setId;
 
-        v = cmd->a[0].w;
-        collision_removePartSet(obj, v);
+        setId = cmd->a[0].w;
+        collision_removePartSet(obj, setId);
         break;
     }
     case 0x4D: {
-        ModelAttachment *p;
-        s32 v1;
-        s32 v2;
+        ModelAttachment *attachment;
+        s32 setId;
+        s32 index;
 
-        v1 = cmd->a[0].w;
-        v2 = cmd->a[1].w;
-        p = attach_find(obj, v1, v2);
-        if (p != NULL) {
-            p->hookState = cmd->a[2].w;
+        setId = cmd->a[0].w;
+        index = cmd->a[1].w;
+        attachment = attach_find(obj, setId, index);
+        if (attachment != NULL) {
+            attachment->hookState = cmd->a[2].w;
         }
     }
         break;
@@ -687,19 +682,19 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->chased = cmd->a[0].w;
         break;
     case 0x54: {
-        s32 a;
-        s32 b;
-        s32 c;
+        s32 fadeCmd;
+        s32 step;
+        s32 value;
 
-        c = cmd->a[0].w;
+        value = cmd->a[0].w;
         if (gScriptCmdWordCount == 3) {
-            a = 1;
-            b = 0;
+            fadeCmd = 1;
+            step = 0;
         } else {
-            a = 2;
-            b = cmd->a[1].w;
+            fadeCmd = 2;
+            step = cmd->a[1].w;
         }
-        actor_fadeCommand(obj, a, c, b, 0);
+        actor_fadeCommand(obj, fadeCmd, value, step, 0);
         break;
     }
     case 0x57:
@@ -824,10 +819,10 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x78:
         switch (cmd->a[0].w) {
         case 0: {
-            s32 v;
+            s32 setId;
 
-            v = 0x79;
-            collision_createPartSet(obj, v, 0.0f, 0);
+            setId = 0x79;
+            collision_createPartSet(obj, setId, 0.0f, 0);
             if (OBJ_INDEX(obj) < gHumanCount) {
                 obj->mv->transport = 2;
                 actor_playAnim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -890,17 +885,17 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->radarColor = cmd->a[0].w + 1;
         break;
     case 0x7E:
-        obj->mv->unk7C = cmd->a[0].w;
+        obj->mv->defaultContext = cmd->a[0].w;
         break;
     case 0x7F:
         obj->listpos_ptr->flags = cmd->a[0].w;
         break;
     case 0x80:
         {
-            f32 f;
+            f32 scale;
 
-            f = cmd->a[2].w * 0.01f;
-            actor_respawnInPlace(obj, cmd->a[0].w, cmd->a[1].w, f);
+            scale = cmd->a[2].w * 0.01f;
+            actor_respawnInPlace(obj, cmd->a[0].w, cmd->a[1].w, scale);
         }
         break;
     case 0x81:
@@ -1071,13 +1066,13 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x9D:
         return (u32)(u16)(actor_getDirectionAngle(cmd->a[0].w - obj->xpos, obj->zpos - cmd->a[1].w, 0) - 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9E: {
-        s32 r;
+        s32 radius;
         s32 dx;
         s32 dz;
-        r = cmd->a[2].w;
+        radius = cmd->a[2].w;
         dx = (s32)obj->xpos - cmd->a[0].w;
         dz = (s32)obj->zpos - cmd->a[1].w;
-        if (dx * dx + dz * dz < r * r) {
+        if (dx * dx + dz * dz < radius * radius) {
             return 1;
         }
         return 0;
@@ -1133,20 +1128,20 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB4:
         return obj->lastAttacker;
     case 0xB5: {
-        u8 v;
-        v = obj->lastAttacker;
-        if (v & 0x80) {
-            return movement_obj[v & ~0x80].type;
+        u8 attacker;
+        attacker = obj->lastAttacker;
+        if (attacker & 0x80) {
+            return movement_obj[attacker & ~0x80].type;
         }
         return 0xFFFF;
     }
     case 0xB6: {
         u8 *p;
-        s32 v;
+        s32 attacker;
         p = &D_800E0BB8[OBJ_INDEX(obj)];
-        v = *p;
+        attacker = *p;
         *p &= 0x7F;
-        return v;
+        return attacker;
     }
     case 0xB8:
         return obj->lookYaw;
@@ -1200,12 +1195,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (obj->pathNode == 0xFF) {
                 return 0xFF;
             }
-            return gPathNodes[obj->pathNode].unk7;
+            return gPathNodes[obj->pathNode].id;
         }
         if (obj->pathGoal == 0xFF) {
             return 0xFF;
         }
-        return gPathNodes[obj->pathGoal].unk7;
+        return gPathNodes[obj->pathGoal].id;
     case 0xC8: {
         f32 x;
         f32 y;
@@ -1240,16 +1235,16 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xC9:
         return path_getLayerAt(obj->ypos);
     case 0xCA: {
-        u8 b;
-        b = 0xFF;
+        u8 empty;
+        empty = 0xFF;
         if (obj->pathNode != 0xFF) {
-            return gPathNodes[obj->pathNode].unk7;
+            return gPathNodes[obj->pathNode].id;
         }
         gPathNearerThanNode = obj->lastNearNode;
-        ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
+        ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &empty, &empty);
         obj->lastNearNode = ret;
         if (ret != 0xFF) {
-            return gPathNodes[ret].unk7;
+            return gPathNodes[ret].id;
         }
         return 0xFF;
     }
@@ -1282,12 +1277,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return 0;
     }
     case 0xCC: {
-        TriggerZone *p;
-        p = zone_findAt(3, 11, obj->xpos, obj->ypos, obj->zpos);
-        if (p == NULL) {
+        TriggerZone *zone;
+        zone = zone_findAt(3, 11, obj->xpos, obj->ypos, obj->zpos);
+        if (zone == NULL) {
             return -1;
         }
-        ret = p - zones;
+        ret = zone - zones;
         return ret;
     }
     case 0xCF: {
@@ -1296,12 +1291,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 i;
         s32 ret;
         s8 count;
-        s8 n2; // matching: s8 (a u8 count changes the code); &n2 is also the empty avoid list
+        s8 nAvoid; // matching: s8 (a u8 count changes the code); &nAvoid is also the empty avoid list
         u8 nodes[18];
 
         /* Resolve the cmd->a[0].w node ids in cmd->a[1..].w (dropping unknown ones), then pick one from the
          * object position with path_getNextNode / path_search. */
-        n2 = 0;
+        nAvoid = 0;
         ret = cmd->a[0].w;
         count = 0;
         for (i = 0; i < ret; i++) {
@@ -1312,14 +1307,14 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         ret = -1;
         if (count != 0) {
-            found = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, (u8 *)&n2);
+            found = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, count, nAvoid, nodes, (u8 *)&nAvoid);
             foundNode = found;
             gPathGoalReached = 0xFF;
             if ((u8)found != 0xFF) {
-                path_search(foundNode, count, n2, nodes, (u8 *)&n2);
+                path_search(foundNode, count, nAvoid, nodes, (u8 *)&nAvoid);
             }
             if (gPathGoalReached != 0xFF) {
-                ret = gPathNodes[gPathGoalReached].unk7;
+                ret = gPathNodes[gPathGoalReached].id;
             }
         }
         return ret;
@@ -1340,42 +1335,42 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return ret;
     }
     case 0xCD: {
-        s32 temp;
+        s32 angle;
         s32 pad1;
         s32 pad2;
-        f32 a;
-        f32 b;
-        f32 c;
+        f32 bearing;
+        f32 facing;
+        f32 delta;
         other = actor_findOnPath(cmd->a[0].w & 0xFFFF0FFF);
-        temp = actor_getDirectionAngle(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
-        a = temp * 0.0054931640625f;
-        b = obj->theta;
-        a = math_wrapDegrees(a);
-        c = math_wrapDegrees(math_wrapDegrees(b) - a);
-        if (c > 180.0f) {
-            c = -360.0f + c;
+        angle = actor_getDirectionAngle(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
+        bearing = angle * 0.0054931640625f;
+        facing = obj->theta;
+        bearing = math_wrapDegrees(bearing);
+        delta = math_wrapDegrees(math_wrapDegrees(facing) - bearing);
+        if (delta > 180.0f) {
+            delta = -360.0f + delta;
         }
-        if (cmd->a[1].w == 1 && c < 0.0f) {
-            c = -c;
+        if (cmd->a[1].w == 1 && delta < 0.0f) {
+            delta = -delta;
         }
-        return c;
+        return delta;
     }
     case 0xCE: {
         f32 dx;
         f32 dz;
-        f32 c;
+        f32 pitch;
         other = actor_findOnPath(cmd->a[0].w & 0xFFFF0FFF);
         dx = other->xpos - obj->xpos;
         dz = other->zpos - obj->zpos;
-        c = (u32)actor_getDirectionAngle(sqrtf(dx * dx + dz * dz), other->ypos - obj->ypos, 0) * 0.0054931640625f;
-        c = math_wrapDegrees(c);
-        if (c > 180.0f) {
-            c = -360.0f + c;
+        pitch = (u32)actor_getDirectionAngle(sqrtf(dx * dx + dz * dz), other->ypos - obj->ypos, 0) * 0.0054931640625f;
+        pitch = math_wrapDegrees(pitch);
+        if (pitch > 180.0f) {
+            pitch = -360.0f + pitch;
         }
-        if (cmd->a[1].w == 1 && c < 0.0f) {
-            c = -c;
+        if (cmd->a[1].w == 1 && pitch < 0.0f) {
+            pitch = -pitch;
         }
-        return c;
+        return pitch;
     }
     case 0xD1:
         ret = obj->unk22C;
@@ -1386,22 +1381,22 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk22C = ret & ~0x200;
         return ret & 0x200;
     case 0xD4: {
-        ActorCtl *p;
-        s32 v;
-        p = obj->mv;
-        v = 0;
-        if (p != NULL) {
-            v = p->rt_context_b;
+        ActorCtl *mv;
+        s32 context;
+        mv = obj->mv;
+        context = 0;
+        if (mv != NULL) {
+            context = mv->rt_context_b;
         }
-        return v;
+        return context;
     }
     case 0xD3: {
-        ActorCtl *p;
-        s32 v;
-        p = obj->mv;
-        v = 0;
-        if (p != NULL) {
-            switch (p->context_b & 0x7F) {
+        ActorCtl *mv;
+        s32 result;
+        mv = obj->mv;
+        result = 0;
+        if (mv != NULL) {
+            switch (mv->context_b & 0x7F) {
             case 3:
             case 9:
             case 21:
@@ -1419,11 +1414,11 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             case 57:
             case 63:
             case 65:
-                v = 1;
+                result = 1;
                 break;
             }
         }
-        return v;
+        return result;
     }
     case 0xD5:
         return save_isFreeForAll();
@@ -1480,11 +1475,11 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return obj->touching_char;
     case 0xE6: {
         u8 v;
-        Actor *p;
+        Actor *toucher;
         if (obj->touching_char != 0) {
-            p = &movement_obj[obj->touching_char - 1];
+            toucher = &movement_obj[obj->touching_char - 1];
             obj->touching_char = 0;
-            if (p->character_type == cmd->a[0].w) {
+            if (toucher->character_type == cmd->a[0].w) {
                 return 1;
             }
             return 0;
@@ -1538,20 +1533,20 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE9:
         return obj->mv->land_floor;
     case 0xEA: {
-        ModelAttachment *p;
-        s32 a;
-        s32 b;
-        a = cmd->a[0].w;
-        b = cmd->a[1].w;
-        p = attach_find(obj, a, b);
-        if (p != NULL) {
-            return p->hookState;
+        ModelAttachment *attachment;
+        s32 setId;
+        s32 index;
+        setId = cmd->a[0].w;
+        index = cmd->a[1].w;
+        attachment = attach_find(obj, setId, index);
+        if (attachment != NULL) {
+            return attachment->hookState;
         }
         return 0;
     }
     case 0xEB: {
-        f32 r;
-        f32 s;
+        f32 radius;
+        f32 scale;
         s32 pad2;
         s32 pad3;
         s32 pad4;
@@ -1567,18 +1562,18 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         pp = &dist;
         ix = cmd->a[0].w;
         iz = cmd->a[1].w;
-        r = cmd->a[2].w;
+        radius = cmd->a[2].w;
         dx = obj->xpos - ix;
         dy = 0.0f;
         dz = obj->zpos - iz;
         dist = dz * dz + dx * dx;
-        if (dist <= r * r) {
+        if (dist <= radius * radius) {
             ret = obj->xpos;
             iz = obj->zpos;
         } else {
-            s = r / sqrtf(dist);
-            ret = (dx *= s) + ix;
-            iz = (dz *= s) + iz;
+            scale = radius / sqrtf(dist);
+            ret = (dx *= scale) + ix;
+            iz = (dz *= scale) + iz;
         }
         return (ret << 16) | (iz & 0xFFFF);
     }

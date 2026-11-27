@@ -3,7 +3,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-u8 D_800D2E40;
+u8 gStartedFromListSelection;
 u8 D_800D2E41;
 u8 D_800D2E42;
 u8 gAutoSavePending;
@@ -232,7 +232,7 @@ void script_purgeTasks(s32 unloadAll) {
     count = gTaskWorkingSet.count;
     node = gTaskWorkingSet.head;
     if (gSeenTextChanged != 0) {
-        func_1509C228();
+        script_updateDiveLock();
         gSeenTextChanged = 0;
     }
     for (i = 0; i < count; i++, node = next) {
@@ -272,7 +272,7 @@ void script_runTasks(s32 mode) {
     if (!gIsMultiplayer && level != LEVEL_W1_VOLCANO_RACE && !script_query(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
-    func_1509C228();
+    script_updateDiveLock();
     for (i = 0; i < gTaskWorkingSet.count; i++) {
         id = node->TaskID & TASK_ID_MASK;
         gCurrentTaskId = id;
@@ -416,7 +416,7 @@ void script_reallocTaskDoneBits(void) {
     }
 }
 
-void func_1509C228(void) {
+void script_updateDiveLock(void) {
     if ((gSeenTextBits[8] & 8) || ID_FLAG(120)) {
         script_command(2, 0x2000, 0x36, 0, 1);
         return;

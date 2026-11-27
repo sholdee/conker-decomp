@@ -10,82 +10,83 @@
 #define FIX16_TO_F32 (1.0f / 65536.0f)
 
 /*
- * Event handler (address-taken, see the table at 800884D4). `event` selects the action; for
- * gScriptCmdWordCount mode 6 the params hold a position (a[0..2]) and a 16.16 angle (a[3]).
+ * Event handler (address-taken, see the table at 800884D4). `opcode` selects the action and `cutscene` is
+ * the cutscene it starts; for gScriptCmdWordCount mode 6 the parameters hold a position (a[0..2]) and a
+ * 16.16 angle (a[3]).
  */
-s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
+s32 script_cutsceneCommand(s32 cutscene, s32 opcode, ScriptCmd *cmd) {
     s32 value;
-    s32 savedValue;
+    s32 savedLevel;
     s32 value2;
-    s32 extra0;
-    s32 extra1;
+    s32 callback;
+    s32 callbackArg;
 
-    switch (event) {
+    switch (opcode) {
     case 1:
         if (gCutsceneStates[0] == 0) {
             value = level;
             if (gScriptCmdWordCount == 6) {
-                cutscene_setAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
+                cutscene_setAnchor(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w * FIX16_TO_F32);
             } else if (gScriptCmdWordCount == 3) {
                 // Type 2 in bits 12-15: the low 12 bits are an object id.
-                if ((params->a[0].w & 0xF000) == 0x2000) {
-                    script_setAnchorAtObject(params->a[0].w, 0);
+                if ((cmd->a[0].w & 0xF000) == 0x2000) {
+                    script_setAnchorAtObject(cmd->a[0].w, 0);
                 } else {
-                    value = params->a[0].w;
+                    value = cmd->a[0].w;
                 }
             }
-            cutscene_start(value, id, 0, 0, 0);
+            cutscene_start(value, cutscene, 0, 0, 0);
             return 1;
         }
         return 0;
     case 4:
         if (gCutsceneStates[0] == 0) {
             if (gScriptCmdWordCount == 6) {
-                cutscene_setAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
+                cutscene_setAnchor(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w * FIX16_TO_F32);
             }
-            savedValue = level;
+            savedLevel = level;
             level = LEVEL_GENERIC_CUTSCENES;
             // matching: passing 0x25 directly reschedules the switch
-            cutscene_start(level, id, 0, 0, 0);
-            level = savedValue;
+            cutscene_start(level, cutscene, 0, 0, 0);
+            level = savedLevel;
             return 1;
         }
         return 0;
     case 3:
         if (gCutsceneStates[0] == 0) {
-            extra0 = params->a[0].w;
-            extra1 = params->a[1].w;
+            callback = cmd->a[0].w;
+            callbackArg = cmd->a[1].w;
             value2 = level;
             if (gScriptCmdWordCount == 8) {
-                cutscene_setAnchor(params->a[2].w, params->a[3].w, params->a[4].w, params->a[5].w * FIX16_TO_F32);
+                cutscene_setAnchor(cmd->a[2].w, cmd->a[3].w, cmd->a[4].w, cmd->a[5].w * FIX16_TO_F32);
             } else if (gScriptCmdWordCount == 5) {
-                value2 = params->a[2].w;
+                value2 = cmd->a[2].w;
             }
-            cutscene_start(value2, id, 0, extra0, extra1);
+            cutscene_start(value2, cutscene, 0, callback, callbackArg);
             return 1;
         }
         return 0;
     case 2: {
         s32 current = level;
 
-        gNextCutscene = id + 1;
+        gNextCutscene = cutscene + 1;
         gNextCutsceneMap = current;
         gCutsceneChained = 1;
         if (gScriptCmdWordCount == 6) {
-            cutscene_setNextAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
+            cutscene_setNextAnchor(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w * FIX16_TO_F32);
         } else if (gScriptCmdWordCount == 3) {
-            if ((params->a[0].w & 0xF000) == 0x2000) {
-                script_setAnchorAtObject(params->a[0].w, 1);
+            if ((cmd->a[0].w & 0xF000) == 0x2000) {
+                script_setAnchorAtObject(cmd->a[0].w, 1);
             } else {
-                gNextCutsceneMap = params->a[0].w;
+                gNextCutsceneMap = cmd->a[0].w;
             }
         }
     } break; // matching: the block must close before the break (line steers as1)
     case 5:
-        gNextCutscene = id + 1;
+        gNextCutscene = cutscene + 1;
         gNextCutsceneMap = 0x25;
         if (gScriptCmdWordCount == 6) {
-            cutscene_setNextAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
+            cutscene_setNextAnchor(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w * FIX16_TO_F32);
         }
         break;
     case 6:
@@ -96,9 +97,9 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
 }
 
 
-/* Condition check per event; its table entry (80088498) sits near script_cutsceneCommand's (800884D4). */
-s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
-    switch (event) {
+/* Condition check per opcode about `cutscene`; its table entry (80088498) sits near script_cutsceneCommand's (800884D4). */
+s32 script_cutsceneQuery(s32 cutscene, s32 opcode, s32 cmd) {
+    switch (opcode) {
     case 1:
         if (gPendingCutscene != 0) {
             return 0;
@@ -106,17 +107,17 @@ s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
         if (gCutsceneStates[0] == 0) {
             return 1;
         }
-        if (id == gLastCutscene) {
+        if (cutscene == gLastCutscene) {
             return 0;
         }
         return 1;
     case 2:
-        if ((gCutsceneStates[0] == 1) && (id == gLastCutscene)) {
+        if ((gCutsceneStates[0] == 1) && (cutscene == gLastCutscene)) {
             return 1;
         }
         return 0;
     case 3:
-        if ((gCutsceneStates[0] == 1) && (id == gCutsceneIds[0])) {
+        if ((gCutsceneStates[0] == 1) && (cutscene == gCutsceneIds[0])) {
             return 1;
         }
         return 0;
@@ -125,7 +126,7 @@ s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
     case 5:
         return gCutsceneSkipped;
     case 6:
-        if ((gCutsceneStates[0] == 1) && (id == gCutsceneIds[0])) {
+        if ((gCutsceneStates[0] == 1) && (cutscene == gCutsceneIds[0])) {
             return 1;
         }
         return 0;

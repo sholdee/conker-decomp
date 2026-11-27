@@ -58,58 +58,58 @@ s32 script_isPoseCommandActive(s32 count) {
 s32 script_updatePoseCommand(s32 slot) {
     switch (gPoseCommands[slot].state) {
     case 1: {
-        u8 actorIndex;
+        u8 camIndex;
         CamPose *pose;
-        Camera *actor;
+        Camera *cam;
 
-        actorIndex = gPoseCommands[slot].actor;
-        actor = &camera_global_Cameras[actorIndex];
+        camIndex = gPoseCommands[slot].actor;
+        cam = &camera_global_Cameras[camIndex];
         pose = gCameraPoses;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[gPoseCommands[slot].poseIndex & 0xFF];
-        gPoseSavedTargetY = actor->target.y;
+        gPoseSavedTargetY = cam->target.y;
         gPoseCommandRunning = 1;
-        gCameraSnapTimers[actorIndex] = 3;
+        gCameraSnapTimers[camIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.scene = 0;
         gCamShot.eye.x = pose->x;
         gCamShot.eye.y = pose->y;
         gCamShot.eye.z = pose->z;
-        gCamShot.at.aim.roll = pose->unk14;
-        gCamShot.at.aim.pitch = pose->unkC;
-        gCamShot.at.aim.yaw = pose->unk10;
+        gCamShot.at.aim.roll = pose->roll;
+        gCamShot.at.aim.pitch = pose->pitch;
+        gCamShot.at.aim.yaw = pose->yaw;
         gCamShot.fovOffset = 0.0f;
-        camera_queueMessage(actor, 5, NULL);
-        camera_queueMessage(actor, 7, &gCamShot);
+        camera_queueMessage(cam, 5, NULL);
+        camera_queueMessage(cam, 7, &gCamShot);
         if (!(gPoseCommands[slot].flags & 1)) {
-            actor->CharPtr->alpha = 0;
-            actor->CharPtr->task_attrib |= 0x200;
+            cam->CharPtr->alpha = 0;
+            cam->CharPtr->task_attrib |= 0x200;
         }
         gPoseCommandScales[slot] = gPoseCommands[slot].scale;
         gPoseCommands[slot].state = 2;
     }
         break;
     case 2: {
-        Camera *actor;
+        Camera *cam;
 
-        actor = &camera_global_Cameras[gPoseCommands[slot].actor];
+        cam = &camera_global_Cameras[gPoseCommands[slot].actor];
         gPoseCommands[slot].timer -= gFrameSteps;
-        if (actor->CharPtr->energy == 0) {
+        if (cam->CharPtr->energy == 0) {
             gPoseCommands[slot].timer = 0;
         }
         if (gPoseCommands[slot].timer <= 0) {
-            actor->CutbackAngle = gPoseCommands[slot].savedCameraAngle;
+            cam->CutbackAngle = gPoseCommands[slot].savedCameraAngle;
             if (!(gPoseCommands[slot].flags & 2)) {
-                camera_queueMessage(actor, 6, NULL);
+                camera_queueMessage(cam, 6, NULL);
             }
             gPoseCommandRunning = 0;
             if (!(gPoseCommands[slot].flags & 1)) {
-                actor->CharPtr->task_attrib &= ~0x200;
-                actor->CharPtr->alpha = 0xFF;
+                cam->CharPtr->task_attrib &= ~0x200;
+                cam->CharPtr->alpha = 0xFF;
             }
             gPoseCommands[slot].timer = 0;
             gPoseCommands[slot].state = 0;
-            actor->target.y = gPoseSavedTargetY;
+            cam->target.y = gPoseSavedTargetY;
             return FALSE;
         }
     }
@@ -132,187 +132,187 @@ void script_updatePoseCommands(void) {
 }
 
 /*
- * Applies script command `command` with arguments args[2..] to actor `actorIndex`.
+ * Applies script command `opcode` with arguments cmd[2..] to camera `camIndex`.
  * Fixed-point arguments are 16.16. Returns 1 for some commands, else 0.
  */
-s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
-    Camera *actor;
+s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd) {
+    Camera *cam;
 
-    actor = &camera_global_Cameras[actorIndex];
-    if (actorIndex > gScreenLayout) {
+    cam = &camera_global_Cameras[camIndex];
+    if (camIndex > gScreenLayout) {
         return 0;
     }
-    switch (command) {
+    switch (opcode) {
     case 12:
-        gPoseCommands[args[2]].savedCameraAngle = actor->CameraAngle;
-        gPoseCommands[args[2]].actor = actorIndex;
-        gPoseCommands[args[2]].poseIndex = args[3];
-        gPoseCommands[args[2]].timer = args[4];
-        gPoseCommands[args[2]].state = 1;
+        gPoseCommands[cmd[2]].savedCameraAngle = cam->CameraAngle;
+        gPoseCommands[cmd[2]].actor = camIndex;
+        gPoseCommands[cmd[2]].poseIndex = cmd[3];
+        gPoseCommands[cmd[2]].timer = cmd[4];
+        gPoseCommands[cmd[2]].state = 1;
         if (gScriptCmdWordCount >= 6) {
-            gPoseCommands[args[2]].flags = args[5];
+            gPoseCommands[cmd[2]].flags = cmd[5];
         } else {
-            gPoseCommands[args[2]].flags = 0;
+            gPoseCommands[cmd[2]].flags = 0;
         }
         if (gScriptCmdWordCount >= 7) {
-            gPoseCommands[args[2]].scale = args[6] * (1.0f / 65536.0f);
+            gPoseCommands[cmd[2]].scale = cmd[6] * (1.0f / 65536.0f);
         } else {
-            gPoseCommands[args[2]].scale = 1.0f;
+            gPoseCommands[cmd[2]].scale = 1.0f;
         }
-        if (!script_isPoseCommandActive(args[2])) {
-            script_updatePoseCommand(args[2]);
+        if (!script_isPoseCommandActive(cmd[2])) {
+            script_updatePoseCommand(cmd[2]);
         }
         break;
     case 4:
-        camera_pushMode(actor, args[2], args[3], args[4], CAMERA_MODE_TASK);
+        camera_pushMode(cam, cmd[2], cmd[3], cmd[4], CAMERA_MODE_TASK);
         return 1;
     case 5:
-        camera_popMode(actor, CAMERA_MODE_TASK);
+        camera_popMode(cam, CAMERA_MODE_TASK);
         return 1;
     case 6:
-        if (args[2] != 0) {
-            actor->AvailableModes |= args[3];
+        if (cmd[2] != 0) {
+            cam->AvailableModes |= cmd[3];
         } else {
-            actor->AvailableModes &= ~args[3];
+            cam->AvailableModes &= ~cmd[3];
         }
         return 1;
     case 8:
-        if (actor->mv->death_State == 0) {
-            actor->IdealTripodMagnitude = args[2];
-            actor->unk34C = args[3];
-            actor->height = args[3];
+        if (cam->mv->death_State == 0) {
+            cam->IdealTripodMagnitude = cmd[2];
+            cam->unk34C = cmd[3];
+            cam->height = cmd[3];
         }
         return 1;
     case 7:
-        actor->DistMask = args[2];
-        actor->DistIndex = args[3];
+        cam->DistMask = cmd[2];
+        cam->DistIndex = cmd[3];
         return 1;
     case 9:
-        actor->Tightness = args[2];
+        cam->Tightness = cmd[2];
         return 1;
     case 10: {
         CamPose *pose;
 
         pose = gCameraPoses;
-        pose = &pose[args[2] & 0xFFF];
+        pose = &pose[cmd[2] & 0xFFF];
         gPoseCommandRunning = 1;
-        gCameraSnapTimers[actorIndex] = 3;
+        gCameraSnapTimers[camIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.scene = 0;
         gCamShot.eye.x = pose->x;
         gCamShot.eye.y = pose->y;
         gCamShot.eye.z = pose->z;
-        gCamShot.at.aim.roll = pose->unk14;
-        gCamShot.at.aim.pitch = pose->unkC;
-        gCamShot.at.aim.yaw = pose->unk10;
+        gCamShot.at.aim.roll = pose->roll;
+        gCamShot.at.aim.pitch = pose->pitch;
+        gCamShot.at.aim.yaw = pose->yaw;
         gCamShot.fovOffset = 0.0f;
         D_800C365C[0] = 0;
-        camera_queueMessage(actor, 5, NULL);
-        camera_queueMessage(actor, 7, &gCamShot);
+        camera_queueMessage(cam, 5, NULL);
+        camera_queueMessage(cam, 7, &gCamShot);
         movement_obj[0].task_attrib |= 0x200;
     }
         break;
     case 11:
-        camera_queueMessage(actor, 6, NULL);
+        camera_queueMessage(cam, 6, NULL);
         gPoseCommandRunning = 0;
         movement_obj[0].task_attrib &= ~0x200;
         break;
     case 14:
-        actor->focus.x = args[2];
-        actor->focus.y = args[3];
-        actor->focus.z = args[4];
-        actor->target.x = args[2];
-        actor->target.y = args[3];
-        actor->target.z = args[4];
-        actor->eye.x = args[5];
-        actor->eye.y = args[6];
-        actor->eye.z = args[7];
-        actor->unk358 = actor->eye.y;
-        camera_updateFloorHeights(actor);
+        cam->focus.x = cmd[2];
+        cam->focus.y = cmd[3];
+        cam->focus.z = cmd[4];
+        cam->target.x = cmd[2];
+        cam->target.y = cmd[3];
+        cam->target.z = cmd[4];
+        cam->eye.x = cmd[5];
+        cam->eye.y = cmd[6];
+        cam->eye.z = cmd[7];
+        cam->unk358 = cam->eye.y;
+        camera_updateFloorHeights(cam);
         break;
     case 2:
-        actor->eye.x = args[2];
-        actor->eye.y = args[3];
-        actor->eye.z = args[4];
-        actor->unk358 = actor->eye.y;
-        camera_updateFloorHeights(actor);
+        cam->eye.x = cmd[2];
+        cam->eye.y = cmd[3];
+        cam->eye.z = cmd[4];
+        cam->unk358 = cam->eye.y;
+        camera_updateFloorHeights(cam);
         break;
     case 3:
-        actor->focus.x = args[2];
-        actor->focus.y = args[3];
-        actor->focus.z = args[4];
+        cam->focus.x = cmd[2];
+        cam->focus.y = cmd[3];
+        cam->focus.z = cmd[4];
         break;
     case 15:
-        actor->XZOffsetTget = args[2];
+        cam->XZOffsetTget = cmd[2];
         if (gScriptCmdWordCount == 4) {
-            actor->XZOffset = args[3];
+            cam->XZOffset = cmd[3];
         }
         break;
     case 16:
-        actor->YOffsetTget = args[2];
+        cam->YOffsetTget = cmd[2];
         if (gScriptCmdWordCount == 4) {
-            actor->YOffset = args[3];
+            cam->YOffset = cmd[3];
         }
         break;
     case 17:
-        if (gScriptCmdWordCount == 5 && args[4] != 0) {
-            camera_startEnvelope(actor, args[2], args[3]);
+        if (gScriptCmdWordCount == 5 && cmd[4] != 0) {
+            camera_startEnvelope(cam, cmd[2], cmd[3]);
             return 1;
         }
-        if (gViewEnvelopes[actorIndex].stage == 5) {
-            camera_startEnvelope(actor, args[2], args[3]);
+        if (gViewEnvelopes[camIndex].stage == 5) {
+            camera_startEnvelope(cam, cmd[2], cmd[3]);
             return 1;
         }
         return 0;
     case 18:
-        camera_attachToObject(actor, collision_findSlotBySpawnIndex(args[2] & 0xFFF));
+        camera_attachToObject(cam, collision_findSlotBySpawnIndex(cmd[2] & 0xFFF));
         break;
     case 19:
-        camera_setPairObject(actor, collision_findSlotBySpawnIndex(args[2] & 0xFFF));
+        camera_setPairObject(cam, collision_findSlotBySpawnIndex(cmd[2] & 0xFFF));
         break;
     case 20:
-        actor->TgetFOVX = args[2] * (1.0f / 65536.0f);
-        actor->TgetFOVY = args[3] * (1.0f / 65536.0f);
-        if (gScriptCmdWordCount == 5 && args[4] != 0) {
-            actor->FOVX = actor->TgetFOVX;
-            actor->FOVY = actor->TgetFOVY;
+        cam->TgetFOVX = cmd[2] * (1.0f / 65536.0f);
+        cam->TgetFOVY = cmd[3] * (1.0f / 65536.0f);
+        if (gScriptCmdWordCount == 5 && cmd[4] != 0) {
+            cam->FOVX = cam->TgetFOVX;
+            cam->FOVY = cam->TgetFOVY;
         }
         break;
     case 21: {
         CamPose *pose;
 
         pose = gCameraPoses;
-        pose = &pose[args[2] & 0xFFF];
-        pose->x = args[3];
-        pose->y = args[4];
-        pose->z = args[5];
+        pose = &pose[cmd[2] & 0xFFF];
+        pose->x = cmd[3];
+        pose->y = cmd[4];
+        pose->z = cmd[5];
     }
         break;
     case 22:
-        actor->Snap = 1;
+        cam->Snap = 1;
         break;
     case 23:
-        actor->CentreBiasTarget = args[2] * (1.0f / 65536.0f);
+        cam->CentreBiasTarget = cmd[2] * (1.0f / 65536.0f);
         break;
     case 24:
         if (gScriptCmdWordCount == 5) {
-            actor->aim.useOverride = 1;
-            actor->aim.overrideYawOffset = args[2];
-            actor->aim.overridePitch = args[3];
-            actor->aim.overrideDistance = args[4];
+            cam->aim.useOverride = 1;
+            cam->aim.overrideYawOffset = cmd[2];
+            cam->aim.overridePitch = cmd[3];
+            cam->aim.overrideDistance = cmd[4];
         } else {
-            actor->aim.useOverride = 0;
+            cam->aim.useOverride = 0;
         }
         break;
     case 25:
-        actor->CutbackAngle = args[2] * (1.0f / 65536.0f);
-        gPendingCutbackAngle = actor->CutbackAngle;
+        cam->CutbackAngle = cmd[2] * (1.0f / 65536.0f);
+        gPendingCutbackAngle = cam->CutbackAngle;
         break;
     case 26:
-        camera_reset(actor);
+        camera_reset(cam);
         break;
     case 27:
-        D_80089520 = args[2] - 1;
+        D_80089520 = cmd[2] - 1;
         break;
     case 13:
         break;
@@ -324,11 +324,11 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
 
 
 /*
- * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
+ * Answers script query `opcode` about camera `camIndex` (arguments in cmd[2..]); fixed-point results
  * are 16.16.
  */
-s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
-    Camera *actor;
+s32 script_cameraQuery(s32 camIndex, s32 opcode, s32 *cmd) {
+    Camera *cam;
     s32 side;
     Vec3f facing;
     Vec3f toTarget;
@@ -338,35 +338,35 @@ s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
     f32 dx;
     f32 dz;
 
-    actor = &camera_global_Cameras[actorIndex];
-    if (actorIndex > gScreenLayout) {
+    cam = &camera_global_Cameras[camIndex];
+    if (camIndex > gScreenLayout) {
         return 0;
     }
-    switch (query) {
+    switch (opcode) {
     case 31:
-        return actor->CharRelAngle * 65536.0f;
+        return cam->CharRelAngle * 65536.0f;
     case 30:
-        return actor->CameraAngle * 65536.0f;
+        return cam->CameraAngle * 65536.0f;
     case 29:
-        return gPoseCommands[args[2]].state;
+        return gPoseCommands[cmd[2]].state;
     case 32:
         // Horizontal distance from the actor to a pose.
         pose = gCameraPoses;
-        pose = &pose[args[2] & 0xFFF];
-        dx = actor->eye.x - pose->x;
-        dz = actor->eye.z - pose->z;
+        pose = &pose[cmd[2] & 0xFFF];
+        dx = cam->eye.x - pose->x;
+        dz = cam->eye.z - pose->z;
         return sqrtf(dx * dx + dz * dz);
     case 33:
         // Which side of the actor's facing direction a path object is on: -1 or 1 (-1 if not found).
-        target = actor_findOnPath(args[2] & 0xFFF);
+        target = actor_findOnPath(cmd[2] & 0xFFF);
         if (target == NULL) {
             return -1;
         }
-        angle = actor->CameraAngleRad + 1.570796371f;
+        angle = cam->CameraAngleRad + 1.570796371f;
         facing.x = sinf(angle);
         facing.y = 0.0f;
         facing.z = cosf(angle);
-        math_vec3Diff(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
+        math_vec3Diff(&cam->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
         if (math_dot3(&facing.x, &toTarget.x) >= 0.0f) {
             side = -1;
@@ -383,20 +383,20 @@ unknown_query:
 }
 
 /* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by gPoseCommandScales. */
-void script_dollyPoseCamera(s32 actorIndex) {
-    Camera *actor;
+void script_dollyPoseCamera(s32 camIndex) {
+    Camera *cam;
     Vec3f dir;
 
-    actor = &camera_global_Cameras[actorIndex];
+    cam = &camera_global_Cameras[camIndex];
     if (gPoseCommandRunning != 0) {
-        math_vec3Diff(&actor->focus, &actor->eye, &dir);
+        math_vec3Diff(&cam->focus, &cam->eye, &dir);
         math_vec3Unit(&dir, &dir);
 
-        actor->focus.x += dir.x * -2.5f * gPoseCommandScales[actorIndex];
-        actor->focus.y += dir.y * -2.0f * gPoseCommandScales[actorIndex];
-        actor->focus.z += dir.z * -2.5f * gPoseCommandScales[actorIndex];
-        actor->eye.x += dir.x * -2.5f * gPoseCommandScales[actorIndex];
-        actor->eye.y += dir.y * -2.0f * gPoseCommandScales[actorIndex];
-        actor->eye.z += dir.z * -2.5f * gPoseCommandScales[actorIndex];
+        cam->focus.x += dir.x * -2.5f * gPoseCommandScales[camIndex];
+        cam->focus.y += dir.y * -2.0f * gPoseCommandScales[camIndex];
+        cam->focus.z += dir.z * -2.5f * gPoseCommandScales[camIndex];
+        cam->eye.x += dir.x * -2.5f * gPoseCommandScales[camIndex];
+        cam->eye.y += dir.y * -2.0f * gPoseCommandScales[camIndex];
+        cam->eye.z += dir.z * -2.5f * gPoseCommandScales[camIndex];
     }
 }

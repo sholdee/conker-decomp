@@ -20,6 +20,7 @@
 #include "conker/particle.h"
 #include "conker/rope.h"
 #include "conker/screen.h"
+#include "conker/script.h"
 #include "conker/shadow.h"
 #include "conker/sprite.h"
 #include "conker/swarm.h"
@@ -106,6 +107,7 @@ STATIC_ASSERT(sizeof(LightStorm) == 0x34, LightStorm_size);
 STATIC_ASSERT(sizeof(LightTrack) == 0x10, LightTrack_size);
 STATIC_ASSERT(sizeof(LightFollow) == 0xC, LightFollow_size);
 STATIC_ASSERT(sizeof(LightFlash) == 0x8, LightFlash_size);
+STATIC_ASSERT(sizeof(LightFlashEvent) == 0x8, LightFlashEvent_size);
 STATIC_ASSERT(sizeof(LightTransformed) == 0x10, LightTransformed_size);
 STATIC_ASSERT(sizeof(LightSwing) == 0x18, LightSwing_size);
 STATIC_ASSERT(sizeof(struct GroundFlash) == 0x40, GroundFlash_size);
@@ -139,6 +141,9 @@ STATIC_ASSERT(sizeof(MenuState) == 0x98, MenuState_size);
 STATIC_ASSERT(sizeof(ModeEntry) == 0xA, ModeEntry_size);
 STATIC_ASSERT(sizeof(Racer) == 0x84, Racer_size);
 STATIC_ASSERT(sizeof(PathNode) == 0x10, PathNode_size);
+STATIC_ASSERT(sizeof(PathPoint) == 0x8, PathPoint_size);
+STATIC_ASSERT(sizeof(ObjScriptCmd) == 0x5, ObjScriptCmd_size);
+STATIC_ASSERT(sizeof(ScriptCmd) == sizeof(gScriptCmdBuffer), ScriptCmd_size);
 STATIC_ASSERT(sizeof(ObjTexture) == 0xC, ObjTexture_size);
 STATIC_ASSERT(sizeof(VtxMorphGroup) == 0x8, VtxMorphGroup_size);
 STATIC_ASSERT(sizeof(WaveSample) == 0xC, WaveSample_size);

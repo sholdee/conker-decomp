@@ -22,8 +22,8 @@ typedef union {
 /* Script-set scratch words of an object (its WorldObject.touch), each a float or a raw value. */
 #define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
-/* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
-s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
+/* Script "set" handler for the object with id `objId`: applies operation `opcode` with operands cmd[2..]. */
+s32 script_worldObjectCommand(s32 objId, s32 opcode, s32 *cmd) {
     WorldObject *obj;
     f32 x;
     f32 y;
@@ -31,11 +31,11 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
     s32 index;
     s32 pad[2]; // matching: unused stack slots (target frame is 0x40)
 
-    obj = gfx_findObjectById(id);
+    obj = gfx_findObjectById(objId);
     if (obj == NULL) {
         return 0;
     }
-    switch (op) {
+    switch (opcode) {
     case 0:
         obj->inactive = 0;
         if (obj->moveProc != NULL) {
@@ -166,17 +166,17 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
 }
 
 
-/* Script "query" handler for the object with id `id`: returns the value that operation `op` asks for. */
-s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd) {
+/* Script "query" handler for the object with id `objId`: returns the value that operation `opcode` asks for. */
+s32 script_worldObjectQuery(s32 objId, s32 opcode, s32 *cmd) {
     WorldObject *obj;
     s32 i;
     s32 result;
 
-    obj = gfx_findObjectById(id);
+    obj = gfx_findObjectById(objId);
     if (obj == NULL) {
         return 0;
     }
-    switch (op) {
+    switch (opcode) {
     case 19:
         return gfx_isObjectTouchedBy(obj, -1);
     case 20:
@@ -319,16 +319,16 @@ s32 script_playSound(s32 sound, u32 *cmd) {
 }
 
 /* Script "stop sound" handler: stops the voice whose handle is in the command's top halfword. */
-s32 script_stopSound(s32 arg0, u32 *cmd) {
-    if (arg0 != 0) {
+s32 script_stopSound(s32 cmdId, u32 *cmd) {
+    if (cmdId != 0) {
         sound_stop((cmd[0] & 0xFFFF0000) >> 16);
     }
     return 1;
 }
 
-/* Script actor-sound handler: stops (op 0/1) or moves (op 2) the sound of the actor on path cmd[2]. */
-s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd) {
-    switch (op) {
+/* Script actor-sound handler: stops (opcode 0/1) or moves (opcode 2) the sound of the actor on path cmd[2]. */
+s32 script_actorSoundCommand(s32 cmdId, s32 opcode, u32 *cmd) {
+    switch (opcode) {
     case 1:
         script_stopActorSound(cmd[2] & 0xFFF, FALSE);
         return 1;
@@ -342,7 +342,7 @@ s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd) {
     return 0;
 }
 
-s32 script_soundQuery(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_soundQuery(s32 cmdId, s32 opcode, s32 cmd) {
     return 0;
 }
 
@@ -472,11 +472,11 @@ void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, 
     sound_setVoiceSpatial(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
-s32 script_emptyQuery12(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_emptyQuery12(s32 cmdId, s32 opcode, s32 cmd) {
     return 0;
 }
 
-s32 script_trapCommand12(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_trapCommand12(s32 cmdId, s32 opcode, s32 cmd) {
     debug_fatalTrap();
     return 0;
 }

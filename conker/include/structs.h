@@ -520,7 +520,7 @@ typedef struct {
     /* 0x030 */ s8  gpoint;
     /* 0x031 */ u8  prop;
     /* 0x032 */ u16 walk_attrib;
-    /* 0x034 */ u16 unk34;
+    /* 0x034 */ u16 lockAngle;   // walk_attrib & 2: the input angle snaps to this axis (binary angle)
     /* 0x036 */ u8  over_edge;
     /* 0x037 */ u8  dwalk;
     /* 0x038 */ s32 old_keys;
@@ -561,7 +561,7 @@ typedef struct {
     /* 0x079 */ u8  rt_context_z;
     /* 0x07A */ u8  cont_zone_ind;
     /* 0x07B */ u8  inst_context;
-    /* 0x07C */ u8  unk7C;
+    /* 0x07C */ u8  defaultContext; // the context used while context_b (without bit 0x80) is 0
     /* 0x07D */ u8  matrix_physics;
     /* 0x07E */ u16 unk7E;
     /* 0x080 */ s16 unk80;
@@ -604,7 +604,7 @@ typedef struct {
     /* 0x124 */ s16 deathTimer;      // countdown for death_State 2 and 7 (game/Actor/KillRespawn/killrespawn.c)
     /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
-    /* 0x129 */ s8  unk129;
+    /* 0x129 */ s8  targetIndex;  // index into movement_obj, < 0 for none
     /* 0x12A */ s8  unk12A;
     /* 0x12B */ u8  pad12B;
     /* 0x12C */ u16 unk12C;
@@ -658,7 +658,7 @@ typedef struct {
 /* One 0x30-byte entry of the level's spawn table gSpawnRecords; Actor.spawn points at the one it came from. */
 typedef struct SpawnRecord {
     /* 0x00 */ u16 flags;
-    /* 0x02 */ u8  unk2;
+    /* 0x02 */ u8  removed;      // 1: removed, collision_trySpawnRecord does not spawn it
     /* 0x03 */ u8  interaction_state;
     /* 0x04 */ u8  type;         // model id, 0xFF for none
     /* 0x05 */ u8  unk5;
@@ -668,7 +668,7 @@ typedef struct SpawnRecord {
     /* 0x0C */ u8  angle;        // high byte of the facing angle
     /* 0x0D */ u8  unkD;
     /* 0x0E */ u8  unkE;
-    /* 0x0F */ u8  unkF;
+    /* 0x0F */ u8  turnRate;     // the spawned actor's moveTurnRate and faceTurnRate
     /* 0x10 */ u8  unk10;
     /* 0x11 */ u8  unk11;
     /* 0x12 */ u8  unk12;
@@ -696,7 +696,7 @@ typedef struct PathPoint {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
-} PathPoint;
+} PathPoint; // size 0x8
 
 /* Per-player stats, read and written through player_getStat / player_setStat (game/Player/PlayerStats/playerstats). */
 typedef struct PlayerStats {
@@ -1087,7 +1087,7 @@ struct Actor {
     /* 0x10A */ u8  lastAttacker; // slot of the last attacker | 0x80
     /* 0x10B */ u8  unk10B;
     /* 0x10C */ s16 reactionTimer; // also the carry height * 100 of a carried actor (actor_moveToHost)
-    /* 0x10E */ u8  unk10E;
+    /* 0x10E */ u8  deathReaction; // 1..0xEF: instead of dying, knockback with reaction kind (& 0x7F), once; >= 0xF0: none, no death puff
     /* 0x10F */ u8  unk10F;
     /* 0x110 */ u8  slideState;
     /* 0x111 */ u8  pad111;
@@ -1229,7 +1229,7 @@ struct Actor {
     /* 0x238 */ u8  stunEndScript;
     /* 0x239 */ s8  intelhitroute;
     /* 0x23A */ u8  pendingScript;
-    /* 0x23B */ u8  unk23B;
+    /* 0x23B */ u8  hitReactionOverride; // nonzero: replaces the reaction kind of a hit (actor_applyHit)
     /* 0x23C */ u8  nearRangeDefault;
     /* 0x23D */ u8  sightRange;
     /* 0x23E */ u8  arriveRange;
@@ -2374,12 +2374,12 @@ typedef struct SwarmTargetCmd {
     /* 0x14 */ s32 yOffset;         /* op 1 */
 } SwarmTargetCmd;
 
-/* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
+/* One 5-byte command of an object script (Actor.scriptCmd, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
  * command table gObjScriptHandlers, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
-};
+}; // size 0x5
 
 /*
  * Light effect payloads (game/Effects/Light/light.c, "../Effects/Light/light.c"). Each is stored inline at
@@ -2852,9 +2852,9 @@ typedef struct CamPose {
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
     /* 0x06 */ u8  pad6[6];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x0C */ f32 pitch; // degrees
+    /* 0x10 */ f32 yaw;   // degrees
+    /* 0x14 */ f32 roll;  // degrees
 } CamPose; // size 0x18
 
 /* Mtx viewed as its s16 integer and fraction halves. */
@@ -3185,7 +3185,7 @@ typedef struct PathNode {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
     /* 0x6 */ u8 layer; /* height band, see path_getLayerAt */
-    /* 0x7 */ u8 unk7;  /* id looked up by mp_findNodeById */
+    /* 0x7 */ u8 id;    /* the node's level/script id, looked up by mp_findNodeById */
     /* 0x8 */ u8 unk8;
     /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
     /* 0xE */ u8 type;

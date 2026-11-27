@@ -52,7 +52,7 @@ s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1) {
     if (gSpawnInUse[spawnIdx] != 0) {
         return 0;
     }
-    if (gSpawnRecords[spawnIdx].unk2 == 1) {
+    if (gSpawnRecords[spawnIdx].removed == 1) {
         return 0;
     }
     if (gSpawnRecords[spawnIdx].x == 0x7FFF) {
@@ -258,7 +258,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         }
     }
     obj->energy = spawn->unkE & 0xF;
-    obj->moveTurnRate = spawn->unkF;
+    obj->moveTurnRate = spawn->turnRate;
     obj->faceTurnRate = obj->moveTurnRate;
     obj->waypointStep = 1;
     obj->nearRangeDefault = spawn->unk1C;

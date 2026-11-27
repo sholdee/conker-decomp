@@ -46,18 +46,14 @@ typedef union CmdArg {
 typedef struct ScriptCmd {
     /* 0x00 */ s32 id;     /* bits 12-15: handler table + 1, bits 0-11: command or object id */
     /* 0x04 */ CmdArg arg; /* the handler's opcode, phase or first argument */
-    /* 0x08 */ CmdArg a[7]; /* the parameters (gScriptCmdWordCount - 2 of them) */
+    /* 0x08 */ CmdArg a[14]; /* the parameters (gScriptCmdWordCount - 2 of them; gScriptCmdBuffer holds 16 words) */
 } ScriptCmd;
 
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
 
-/* Types that these files define; the declarations below use them. */
-typedef struct C4DC0_arg1 C4DC0_arg1;
-typedef struct CommandArgs CommandArgs;
-typedef struct QueryArgs QueryArgs;
+/* A type that game/Script/TimerCmd/timercmd.c defines; the declarations below use it. */
 typedef struct Src150A0264 Src150A0264;
-typedef struct Msg_CD860 Msg_CD860;
 
 /* game/Script/ObjScript/objscript.c */
 void script_jump(s32 target);
@@ -68,45 +64,45 @@ void script_startTimedMove(void);
 void script_jumpIfWaypointCompare(void);
 void script_jumpIfWaypoint(void);
 void script_startMoveUnlessNear(void);
-void func_15075B60(void);
-void func_15075B8C(void);
+void script_startMoveWatchingTarget(void);
+void script_pickWaypointWatchingTarget(void);
 void func_15075BB8(void);
-void func_15075BE8(void);
+void script_setSpotScript(void);
 void script_setYSpeedAndGravity(void);
-void func_15075CA0(void);
-void func_15075CCC(void);
-void func_15075D0C(void);
-void func_15075D38(void);
-void func_15075D64(void);
-void func_15075D9C(void);
-void func_15075DC8(void);
+void script_startChase(void);
+void script_startIntercept(void);
+void script_startChaseNoLeash(void);
+void script_startChase3D(void);
+void script_startChasePlayer(void);
+void script_startMoveToTarget(void);
+void script_startChaseAlt(void);
 void script_switchScript(void);
-void func_15075E6C(void);
-void func_15075E98(void);
+void script_startFlee(void);
+void script_setSpotWideScript(void);
 void script_jumpRandom(void);
-void func_15075F00(void);
-void func_15075F40(void);
-void func_15075F6C(void);
+void script_setNearScript(void);
+void script_startFollowTarget(void);
+void script_setYSpeedGravityAndHop(void);
 void script_leapToWaypoint(void);
-void func_150761C8(void);
+void script_startOrbitWaypoint(void);
 void func_150761F4(void);
-void func_15076220(void);
+void script_startHoldTargetOffset(void);
 void script_playPlayerSound(void);
 void script_fadeFirstTwoChannels(void);
 void script_spawnPuff(void);
 void script_jumpIfNotHit(void);
-void func_15076394(void);
-void func_150763B0(void);
-void func_150764C8(void);
+void script_setNearRange(void);
+void script_setTurnRates(void);
+void script_setStunEndScript(void);
 void script_setHitRoute(void);
-void func_15076500(void);
+void script_setAlertCooldown(void);
 void script_setImmune(void);
 void func_1507659C(void);
 void script_emptyCommand61(void);
-void func_15076608(void);
+void script_setTurnStopScript(void);
 void script_setNoshoveFlags(void);
 void script_clearNoshoveFlags(void);
-void func_150766D0(void);
+void script_waitUntilNearGround(void);
 void script_emptyCommand70(void);
 void func_15076768(void);
 void script_jumpIfBehindTarget(void);
@@ -114,54 +110,54 @@ void script_findNearestInView(void);
 void script_targetFoundObject(void);
 void script_setDrawType(void);
 void script_moveToLastOfType(void);
-void func_15076C7C(void);
-void func_15076CB4(void);
-void func_15076CCC(void);
+void script_setAlpha(void);
+void script_setAngleFromFangle(void);
+void script_removeSelf(void);
 void script_setSpeed(void);
 void script_setScale(void);
 void script_setType(void);
 void func_15076E10(void);
 void script_emptyCommand113(void);
 void script_startRandomJump(void);
-void func_15076F40(void);
-void func_15076F78(void);
+void script_removeSelfAlt(void);
+void script_setHeightOffset(void);
 void func_15076FA8(void);
 void script_jumpIfTargetSlow(void);
-void func_15077174(void);
+void script_setDeathReaction(void);
 void script_playUntrackedSound(void);
 void script_runFadeCommand(void);
 void script_setEnergy(void);
 void script_breakIntoParts(void);
-void func_15077318(void);
+void script_setHidden(void);
 void script_doNothing(void);
 void script_setAnimSpeedAndAccel(void);
 void func_15077404(void);
 void script_jumpIfAtDestination(void);
 void script_stepPathGraph(void);
 void script_advanceWaypoint(void);
-void func_150779A8(void);
+void script_pickWaypointNoAdvance(void);
 void script_jumpIfWithinRange(void);
 void script_setHitRouteAlt(void);
-void func_15077ABC(void);
-void func_15077B14(void);
+void script_setOrbit(void);
+void script_setStandOnScript(void);
 void script_playSoundOnSelf(void);
 void script_setTaskAttrib(void);
 void script_restartObjectOfType(void);
 void script_clearTaskAttrib(void);
-void func_15077C1C(void);
+void script_setSightRange(void);
 void script_findTarget(void);
 void script_setWaypoint(void);
 void script_warpToWaypoint(void);
 void script_startTrackAt(void);
-void func_15077EEC(void);
-void func_15077F08(void);
-void func_15077F34(void);
+void script_setHitPlayerScript(void);
+void script_setTurnAccel(void);
+void script_setTurnAnim(void);
 void script_turnToWaypoint(void);
 void script_jumpIfAnyObjectNear(void);
 void script_jumpIfTargetInactive(void);
-void func_150781A4(void);
+void script_setTypeSpot(void);
 void script_jumpIfNearWaypoint(void);
-void func_150782CC(void);
+void script_setArriveRange(void);
 void script_jumpIfUniqueId(void);
 void script_targetUniqueId(void);
 void script_jumpIfTargetDistance(void);
@@ -181,7 +177,7 @@ void script_jumpIfCoordBelow(void);
 void script_setForcedLod(void);
 void func_15079228(void);
 void script_setIntelWalk(void);
-void func_150792FC(void);
+void script_setAimTargetMode(void);
 void script_restartFoundObject(void);
 void script_sendAttachmentMessage(void);
 void script_placeWaypointNearPlayer(void);
@@ -194,29 +190,29 @@ void script_jumpIfAtWaypoint(void);
 void script_requestExpression(void);
 void script_setDefaultExpression(void);
 void script_playRandomSoundOnSelf(void);
-void func_15079A28(void);
+void script_setFallReaction(void);
 void script_setSpawnDelay(void);
-u16 script_getAngleToPathStart(s32 arg0);
+u16 script_getAngleToPathStart(s32 index);
 void script_changeObjectProperty(void);
 void script_setSpeedup(void);
-void func_15079F50(void);
+void script_setHitReaction(void);
 void func_15079F6C(void);
 void script_steerByPlayerStick(void);
 void script_setWaypointCoord(void);
 void script_setSpeedFromPlayer(void);
-void func_1507A210(void);
+void script_startMoveKeepSpeed(void);
 void script_breakIntoPartsVariant(void);
-void func_1507A2A4(void);
+void script_startChaseRandomAnim(void);
 void script_targetRandomOfType(void);
-void func_1507A3B4(void);
-void func_1507A3CC(void);
+void script_restoreTarget(void);
+void script_setSpotHeight(void);
 s32 script_getArgWord(void);
-void func_1507A428(void);
-void func_1507A47C(void);
-void func_1507A4D4(void);
+void script_showOnlyParts(void);
+void script_showParts(void);
+void script_hideParts(void);
 void script_changeWaypointDirection(void);
 void script_jumpIfAngleInRange(void);
-s32 script_getPadButtons(s32 arg0);
+s32 script_getPadButtons(s32 player);
 void script_jumpIfButtonsHeld(void);
 void script_jumpIfLevel(void);
 void script_setNorun(void);
@@ -224,22 +220,22 @@ void script_removePartSet(void);
 void func_1507A808(void);
 void script_jumpIfEnergy(void);
 void script_startViewEnvelope(void);
-void func_1507A8A8(void);
+void script_jumpIfPlayerAttachedOrMultiplayer(void);
 void script_jumpIfTargetType(void);
 void script_attachToObject(void);
 void script_setFacing(void);
 void script_setWaypointRange(void);
-void func_1507ACE0(void);
-void func_1507AD30(void);
+void script_setTurnRatesWithFrac(void);
+void script_setFallScript(void);
 void script_setFamily(void);
 void script_setMvmtControl(void);
 void script_clearMvmtControl(void);
-void func_1507ADE0(void);
-void func_1507AE78(void);
-void func_1507AE94(void);
-void func_1507AF3C(void);
-void func_1507AF98(void);
-void func_1507B040(void);
+void script_setFaceTurnTime(void);
+void script_setSpotHeightAlt(void);
+void script_setHitCylinder(void);
+void script_setHitOffsetY(void);
+void script_setHitOffsetXZ(void);
+void script_setAngleFromLangle(void);
 void script_commandOwnedObject(void);
 void script_setNojump(void);
 void script_setBodySize(void);
@@ -254,20 +250,20 @@ void script_playSound1Range1300(void);
 void script_playSound2Range1300(void);
 void script_playSound1Range800(void);
 void script_playSound2Range800(void);
-void func_1507B578(void);
+void script_setDoingHit(void);
 void script_jumpIfContext(void);
 void func_1507B630(void);
-void func_1507B6E0(void);
+void script_waitUntilCanRun(void);
 void script_pressButtons(void);
-void func_1507B7BC(void);
+void script_startWeavingMove(void);
 void script_jumpIfTargetStunned(void);
 void script_callHandler(void);
 void func_1507B8F4(void);
-void func_1507B958(void);
+void script_setFloatDepth(void);
 void script_jumpIfWaypointParam(void);
 void script_playRandomUntrackedSound(void);
-void func_1507BAD0(void);
-void func_1507BAF8(void);
+void script_setHitSound(void);
+void script_setImpactSound(void);
 void script_emptyCommand108(void);
 const ObjScriptCmd *script_getScript(s32 arg0, s32 scriptId);
 void script_runActor(Actor *obj);
@@ -281,13 +277,13 @@ void script_clearPoseCommands(void);
 s32 script_isPoseCommandActive(s32 count);
 s32 script_updatePoseCommand(s32 slot);
 void script_updatePoseCommands(void);
-s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args);
-s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args);
-void script_dollyPoseCamera(s32 actorIndex);
+s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd);
+s32 script_cameraQuery(s32 camIndex, s32 opcode, s32 *cmd);
+void script_dollyPoseCamera(s32 camIndex);
 
 /* game/Script/ActorCmd/actorcmd.c */
-s32 script_spawnActor(s32 scriptId, s32 unused);
-s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1);
+s32 script_spawnActor(s32 scriptId, s32 cmd);
+s32 script_removeActor(s32 objId, ScriptCmd *cmd);
 s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd);
 s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd);
 
@@ -297,7 +293,7 @@ typedef struct {
     u8 unk1;
 } Struct_80087410;
 
-extern u8 D_800D2E40;
+extern u8 gStartedFromListSelection;
 extern u8 D_800D2E41;
 extern u8 D_800D2E42;
 extern u8 gAutoSavePending;
@@ -327,21 +323,21 @@ void script_runTasks(s32 mode);
 s32 script_query(s32 count, s32 cmdWord, s32 arg, ...);
 s32 script_command(s32 count, s32 cmdWord, s32 arg, ...);
 void script_reallocTaskDoneBits(void);
-void func_1509C228(void);
+void script_updateDiveLock(void);
 s32 script_canAutoSave(void);
 void script_autoSave(void);
 s32 func_1509C414(s32 index);
 extern s32 gScriptCmdBuffer[16];
 
 /* game/Script/CutsceneCmd/cutscenecmd.c */
-s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params);
-s32 script_cutsceneQuery(s32 id, s32 event, s32 unused);
+s32 script_cutsceneCommand(s32 cutscene, s32 opcode, ScriptCmd *cmd);
+s32 script_cutsceneQuery(s32 cutscene, s32 opcode, s32 cmd);
 void script_setAnchorAtObject(s32 ref, s32 alt);
 
-/* The resource manifest D_80087430 (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
+/* The resource manifest gTaskManifest (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
  * (.rodata 0x242F30) stay data extracted from the ROM: the names are game text, which stays out of the
  * repository. */
-/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
+/* One 0x14-byte record per resource/task; gTaskManifest holds RESOURCE_COUNT of them. */
 typedef struct ResourceDescriptor {
     /* 0x00 */ const char *name;                 // NULL for unused slots
     /* 0x04 */ s32 packedId;                     // low 29 bits: id - 1
@@ -354,7 +350,7 @@ typedef struct ResourceDescriptor {
 #define RESOURCE_COUNT 204
 #define RESOURCE_LIST_END 0xFFFF
 
-extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
+extern ResourceDescriptor gTaskManifest[RESOURCE_COUNT];
 
 /* game/Script/CmdTables/cmdtables.c: the script command handlers by class (bits 12-15 of the command word, minus one): start,
  * end, query and command. Declared without a prototype: the handlers take different parameter types. */
@@ -376,13 +372,13 @@ void script_markTaskDepsDone(s32 index);
 s32 script_markRelatedTasksDone(s32 index);
 void script_propagateTasksDone(s32 index);
 void script_markTasksDone(const u16 *list, void (*callback)(s32));
-s32 script_loadResourceTable(s32 arg0, s32 *countOut);
+s32 script_loadResourceTable(s32 category, s32 *countOut);
 void script_freeResourceTable(void);
-s32 script_areResourceDepsLoaded(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out);
+s32 script_areResourceDepsLoaded(s32 category, s32 index, s32 *firstDepOut, s32 *unk0Out);
 s32 script_startEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_endEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd);
-s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2);
+s32 script_effectQuery(s32 cmdId, s32 phase, s32 cmd);
 
 /* game/Script/SwarmCmd/swarmcmd.c */
 s32 script_alwaysTrue0(s32 arg0);
@@ -391,28 +387,28 @@ s32 script_alwaysTrue2(s32 arg0);
 s32 script_alwaysTrue13(s32 arg0);
 s32 script_spawnSwarm(s32 arg0, SwarmSpawnCmd *cmd);
 s32 script_destroySwarm(s32 tag, ScriptCmd *cmd);
-s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd);
-s32 script_swarmQuery(s32 tag, s32 op, SwarmTargetCmd *cmd);
+s32 script_swarmCommand(s32 tag, s32 opcode, SwarmTargetCmd *cmd);
+s32 script_swarmQuery(s32 tag, s32 opcode, SwarmTargetCmd *cmd);
 
 /* game/Script/MiscCmd/misccmd.c */
-s32 script_initSpringValue(s32 arg0, ScriptCmd *record);
-s32 script_emptyMiscEnd(s32 arg0, ScriptCmd *record);
-s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args);
-s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args);
+s32 script_initSpringValue(s32 cmdId, ScriptCmd *cmd);
+s32 script_emptyMiscEnd(s32 cmdId, ScriptCmd *cmd);
+s32 script_miscCommand(s32 cmdId, s32 opcode, ScriptCmd *cmd);
+s32 script_miscQuery(s32 cmdId, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/MusicCmd/musiccmd.c */
-s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd);
-s32 script_streamQuery(s32 id, s32 opcode, ScriptCmd *cmd);
-s32 script_musicCommand(s32 id, u32 opcode, ScriptCmd *cmd);
-s32 script_musicQuery(s32 id, s32 opcode, ScriptCmd *cmd);
+s32 script_streamCommand(s32 track, s32 opcode, ScriptCmd *cmd);
+s32 script_streamQuery(s32 track, s32 opcode, ScriptCmd *cmd);
+s32 script_musicCommand(s32 tune, u32 opcode, ScriptCmd *cmd);
+s32 script_musicQuery(s32 tune, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/ObjectCmd/objectcmd.c */
-s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd);
-s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd);
+s32 script_worldObjectCommand(s32 objId, s32 opcode, s32 *cmd);
+s32 script_worldObjectQuery(s32 objId, s32 opcode, s32 *cmd);
 s32 script_playSound(s32 sound, u32 *cmd);
-s32 script_stopSound(s32 arg0, u32 *cmd);
-s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd);
-s32 script_soundQuery(s32 arg0, s32 arg1, s32 arg2);
+s32 script_stopSound(s32 cmdId, u32 *cmd);
+s32 script_actorSoundCommand(s32 cmdId, s32 opcode, u32 *cmd);
+s32 script_soundQuery(s32 cmdId, s32 opcode, s32 cmd);
 s32 script_playRandomActorSound(); /* (s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
 void script_playRandomObjectSound(); /* (s32 first, s32 last, s32 volume, s32 objId, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
 s32 script_playRandomZoneSound(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance);
@@ -422,23 +418,23 @@ void script_stopActorSound(s32 path, s32 secondVoice);
 s32 script_playPlainSound(s32 sound, s32 volume, s32 cents, s32 pan);
 s32 script_playSoundAtActor(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);
 void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance);
-s32 script_emptyQuery12(s32 arg0, s32 arg1, s32 arg2);
-s32 script_trapCommand12(s32 arg0, s32 arg1, s32 arg2);
+s32 script_emptyQuery12(s32 cmdId, s32 opcode, s32 cmd);
+s32 script_trapCommand12(s32 cmdId, s32 opcode, s32 cmd);
 
 /* game/Script/TaskCmd/taskcmd.c */
-s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args);
-s32 script_taskQuery(s32 id, s32 query, QueryArgs *args);
+s32 script_taskCommand(s32 id, s32 opcode, ScriptCmd *cmd);
+s32 script_taskQuery(s32 id, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/TimerCmd/timercmd.c */
 void script_resetTimers(void);
 void script_updateTimers(void);
-s32 script_startTimer(s32 arg0, Src150A0264 *arg1);
-s32 script_timerCommand(s32 arg0, s32 arg1, Src150A0264 *arg2);
-s32 script_timerQuery(s32 arg0, s32 arg1, s32 arg2);
+s32 script_startTimer(s32 timer, Src150A0264 *cmd);
+s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd);
+s32 script_timerQuery(s32 timer, s32 opcode, s32 cmd);
 
 /* game/Script/ZoneCmd/zonecmd.c */
-s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg);
-s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg);
+s32 script_zoneCommand(s32 zone, u32 opcode, ScriptCmd *cmd);
+s32 script_zoneQuery(s32 zone, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/ScriptInterp/scriptinterp.s */
 extern s32 gScriptCmdWordCount;

@@ -317,7 +317,7 @@ s32 save_invertBits(s32 value) {
 
 /* Requests a switch to map 0x1D (game_requestLevelChange mode 6) and resets this mode's state flags. */
 void save_quitToFrontEnd(void) {
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
     gFrontEndState = 3;
     gMenuLoadStep = 0;
@@ -574,7 +574,7 @@ void save_updateStartupScene(void) {
     if (timer >= 841) {
         gFrontEndInputDelay = 2;
         gFrontEndState = 1;
-        D_800D2E40 = 0;
+        gStartedFromListSelection = 0;
         game_requestLevelChange(6, LEVEL_WFRONTEND_TABLE, 0, 0, 1);
         gFrontEndFade = 0xFF;
     }
@@ -600,7 +600,7 @@ void func_151DE81C(void) {
 
 /* Enters state 3 (gFrontEndState) and puts the path state back on path 0, stop 5. */
 void func_151DE85C(void) {
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
     gFrontEndState = 3;
     D_8008FD80 = 1;
@@ -2425,7 +2425,7 @@ void save_setupMatch(void) {
     D_800E0AA0[1] = 0;
     save_checkCodeTamper();
     gMatchResult = 0;
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     D_8008FD7C = D_80087270[0];
     game_requestLevelChange(6, param, 0, (D_8008FF38 - 1)[D_8008FD88], playerMask);
 }
@@ -2477,7 +2477,7 @@ void save_startListSelection(void) {
     gRespawnPending = 0;
     D_800E0BB1 = 1;
     save_checkCodeTamper();
-    D_800D2E40 = 1;
+    gStartedFromListSelection = 1;
     game_requestLevelChange(6, gNextLevel, script_getTaskSpawnPoint(resource), 0, 1);
 }
 
@@ -2496,7 +2496,7 @@ void save_startSavedGame(void) {
     D_800BE618 = 1;
     gRaceDirection = 0;
     gFrontEndState = 0;
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, gCheckpointLevel, gCheckpointSpawn, 0, 1);
     D_800E0B99 = 1;
     D_800E0BB1 = 1;
@@ -3078,7 +3078,7 @@ void save_endRound(void) {
         gFrontEndState = 6;
         D_8008FD80 = 1;
     }
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, param, 0, 0, 1);
     save_resetControllerMap();
     gPlayerCount = 1;
@@ -3104,7 +3104,7 @@ void func_151E4E00(void) {
     gFrontEndState = 3;
     gMenuLoadStep = 0;
     D_8008FD80 = 0;
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
 }
 
@@ -3193,7 +3193,7 @@ void save_initMenu(void) {
     }
     zone_resetTaskProgress();
     gFrontEndState = 11;
-    D_800D2E40 = 0;
+    gStartedFromListSelection = 0;
     game_requestLevelChange(6, LEVEL_GENERIC_CUTSCENES, 0, 0, 1);
     gPrevFrontEndState = gFrontEndState;
 }
@@ -4436,7 +4436,7 @@ void save_updateAfterCredits(void) {
         gMenuLoadStep = 0;
         gFrontEndState = 1;
         gFrontEndTimer = 0;
-        D_800D2E40 = 0;
+        gStartedFromListSelection = 0;
         game_requestLevelChange(6, LEVEL_WFRONTEND_TABLE, 0, 0, 1);
     }
 }

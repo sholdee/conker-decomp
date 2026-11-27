@@ -253,7 +253,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor == NULL) {
                 slot = collision_findSpawnById(0x14);
-                gSpawnRecords[slot].unk2 = 0;
+                gSpawnRecords[slot].removed = 0;
                 collision_trySpawnRecord(slot, 0);
                 actor = collision_findObjectById(0x14);
             }
@@ -278,7 +278,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor == NULL) {
                 slot = collision_findSpawnById(0x14);
-                gSpawnRecords[slot].unk2 = 0;
+                gSpawnRecords[slot].removed = 0;
                 collision_trySpawnRecord(slot, 0);
                 actor = collision_findObjectById(0x14);
             }

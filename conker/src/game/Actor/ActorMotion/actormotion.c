@@ -2392,7 +2392,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         if ((base[index].flags & 0x40) && (victim->type == 1)) {
             movement_obj[slot].mv->bitten = 8000;
         } else {
-            v = victim->unk23B;
+            v = victim->hitReactionOverride;
             if (v != 0) {
                 reaction = v;
             }
@@ -2903,8 +2903,8 @@ void actor_startKnockback(Actor *actor, u8 entryIdx) {
     actor->ygrav = entry->gravity;
     actor->stunned = 0xFE;
     actor->stunnednum = 0;
-    actor->stunnedseq = actor_findReaction(actor->unk10E & 0x7F, actor);
-    actor->unk10E = 0xFF;
+    actor->stunnedseq = actor_findReaction(actor->deathReaction & 0x7F, actor);
+    actor->deathReaction = 0xFF;
     actor_advanceReaction(dc_glbl_CharNum, actor);
 }
 
@@ -4217,8 +4217,8 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
     }
 
     state = actor->mv->context_b & ~0x80;
-    if ((actor->mv->unk7C != 0) && (state == 0)) {
-        state = actor->mv->unk7C;
+    if ((actor->mv->defaultContext != 0) && (state == 0)) {
+        state = actor->mv->defaultContext;
     }
 
     if ((level != LEVEL_W1_TRAINING) && (level != LEVEL_W1_TRAINING_CAVE) && (actor->mv->rt_context_b == 0) &&
@@ -4462,13 +4462,13 @@ void actor_remove(Actor *actor, s32 mode) {
             /* matching: spawn is read as an s32 at each use; pointer reads let IDO keep it in a register */
             if ((*(s32 *)&actor->listpos_ptr) != 0) {
                 if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 0x20) {
-                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->removed = 1;
                     gSpawnInUse[actor->listpos] = 0;
                 } else if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 1) {
                     gSpawnInUse[actor->listpos] = 0;
                 } else {
                     s32 pad;
-                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->removed = 1;
                     gSpawnInUse[actor->listpos] &= 0x80;
                 }
             } else {
@@ -5332,7 +5332,7 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     spawn->interaction_state = interaction_state;
     spawn->xz_scale = scale;
     spawn->y_scale = scale;
-    spawn->unk2 = 0;
+    spawn->removed = 0;
     camera = actor->CameraPtr;
     x = actor->xpos;
     y = actor->ypos;
