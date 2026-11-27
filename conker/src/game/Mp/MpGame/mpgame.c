@@ -307,9 +307,9 @@ s32 mp_update(void) {
     s32 count;
     s32 *arr1C;
     s32 *teams;
-    s32 *arr35C;
+    s32 *deathHandled;
     s32 *arr31C;
-    s32 *arr39C;
+    s32 *health;
     s32 *arr19C;
     s32 *aimTimes;
     s32 *attackTimers;
@@ -332,7 +332,7 @@ s32 mp_update(void) {
     seenMask = gMpGame->seenMask;
     count = gMpGame->numPlayers;
     teams = gMpGame->team;
-    arr35C = gMpGame->deathHandled;
+    deathHandled = gMpGame->deathHandled;
     arr31C = gMpGame->unk31C;
     arr19C = gMpGame->unk19C;
     aimTimes = gMpGame->aimTime;
@@ -343,7 +343,7 @@ s32 mp_update(void) {
     teamScores = gMpGame->teamScore;
     countdowns = gMpGame->countdown;
     arr1C = gMpGame->unk1C;
-    arr39C = gMpGame->health;
+    health = gMpGame->health;
     layers = gMpGame->layer;
     for (i = 0; i < count; i++) {
         bit = 1 << i;
@@ -384,10 +384,10 @@ s32 mp_update(void) {
             if (gMpGame->grenades != NULL) {
                 gMpGame->grenades[i] = obj->mv->numGrenades;
             }
-            arr39C[i] = player_getStat(i, 4);
+            health[i] = player_getStat(i, 4);
             layers[i] = path_getLayerAt(obj->ypos);
-            if (arr39C[i] == 0 || isNew || obj->snapTimer != 0) {
-                if (arr35C[i] == 0) {
+            if (health[i] == 0 || isNew || obj->snapTimer != 0) {
+                if (deathHandled[i] == 0) {
                     if (obj->pathNode != 0xFF) {
                         gMpGame->unk59C[i] = obj->pathNode;
                     } else {
@@ -395,7 +395,7 @@ s32 mp_update(void) {
                         if (!attackers) { // matching: an extra use of attackers steers IDO's register allocation
                         }
                     }
-                    arr35C[i] = 1;
+                    deathHandled[i] = 1;
                     arr25C[i] = 0;
                     arr19C[i] = 0;
                     gMpGame->unk5C[i] = 1;
@@ -414,7 +414,7 @@ s32 mp_update(void) {
                     result |= bit;
                 }
             } else {
-                arr35C[i] = 0;
+                deathHandled[i] = 0;
             }
             flag = 1;
             if (arr31C[i] != 0 && gMpGame->gameType != 0xB8) {
@@ -488,7 +488,7 @@ s32 mp_update(void) {
                 arr25C[i] = 20;
             }
         } else {
-            arr39C[i] = 0;
+            health[i] = 0;
             layers[i] = -1;
         }
     }

@@ -3107,7 +3107,9 @@ typedef struct {
     /* 0x20 */ u16 input;        /* MENU_* bits pressed this frame on controller 1 */
     /* 0x22 */ u16 padInput[4];  /* MENU_* bits pressed this frame, per controller */
     /* 0x2A */ s8 lookBack;       /* nonzero: the focus is mirrored through the eye; 1: entered menu 1 from the end of
-                                     path 0, 2: a B jump from stops 2..6, 3: after the jump */
+                                     path 0, 2: a B jump from stops 2..6, 3: the last quarter of that entry (set from 1
+                                     once pathProgress < 0.25; focusShiftWeight ramps; cleared at progress 0 with
+                                     currentStop 4) */
     /* 0x2B */ s8 currentStop;    /* current path stop */
     /* 0x2C */ s8 displayedStop;  /* displayed stop */
     /* 0x2D */ s8 unmappedStop;   /* displayedStop before menu 1 remaps it through D_800AB570 */

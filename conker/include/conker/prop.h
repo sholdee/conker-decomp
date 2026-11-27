@@ -131,7 +131,7 @@ void func_150BF760(WorldObject *obj);
 void prop_updateSinkingPlatform(WorldObject *platform);
 void prop_spawnDeathBurst(Actor *obj);
 struct Piece; /* game/Prop/Scenery/scenery.c */
-s32 prop_burstPieceOnFloor(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight);
+s32 prop_burstPieceOnFloor(struct ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
 void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list);
 s32 prop_onPieceFloorHit(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
@@ -307,7 +307,7 @@ Gfx *prop_emptyDrawEffect(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 extern WaveDeformer *gWaveDeformers[2]; /* the wave deformers, gNumWaveDeformers of them in use */
 extern u8 gNumWaveDeformers;
 void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude, s8 speed,
-                   s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
+                   s8 phaseStep, u8 r, u8 rAmp, u8 g, u8 gAmp, u8 b, u8 bAmp);
 void prop_updateWaveDeformers(void);
 
 /* game/Prop/WaveChain/wavechain.c */

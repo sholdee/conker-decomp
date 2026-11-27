@@ -23,7 +23,7 @@ u8 gNumWaveDeformers;
  * phase offset (and, with the matching flags, its falloff weight and its angle around the center).
  */
 void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude,
-                   s8 speed, s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF) {
+                   s8 speed, s8 phaseStep, u8 r, u8 rAmp, u8 g, u8 gAmp, u8 b, u8 bAmp) {
     WaveDeformer *deformer;
     WorldObject *obj;
     WaveDeformer *other;
@@ -76,12 +76,12 @@ void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 hea
             deformer->params.falloff = 0.0f;
         }
         if ((flags & WAVE_MODE_MASK) == 1) {
-            deformer->params.colorWave[0] = argA;
-            deformer->params.colorWave[1] = argB;
-            deformer->params.colorWave[2] = argC;
-            deformer->params.colorWave[3] = argD;
-            deformer->params.colorWave[4] = argE;
-            deformer->params.colorWave[5] = argF;
+            deformer->params.colorWave[0] = r;
+            deformer->params.colorWave[1] = rAmp;
+            deformer->params.colorWave[2] = g;
+            deformer->params.colorWave[3] = gAmp;
+            deformer->params.colorWave[4] = b;
+            deformer->params.colorWave[5] = bAmp;
         }
         deformer->vertexPhase = allocate_memory(obj->numVertices, 1, 0, 0);
         if ((flags & WAVE_MODE_MASK) == 2) {

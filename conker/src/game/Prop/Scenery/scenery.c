@@ -482,21 +482,22 @@ void prop_spawnDeathBurst(Actor *obj) {
     particle_spawnSpriteBurst(&spawn, 0xFF, 0xFF, 1);
 }
 
-/* A model particle spawned by prop_scatterPieces (particle_spawnDebrisScatter), with prop_burstPieceOnFloor and
- * prop_onPieceFloorHit as its floor handlers. */
+/* A model particle spawned by prop_scatterPieces (particle_spawnDebrisScatter), with prop_onPieceFloorHit as its floor
+ * handler. */
 typedef struct Piece {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ f32 burstChance; /* prop_scatterPieces's extraData (MODEL_PARTICLE_DATA) */
 } Piece;
 
-/* Piece floor handler: two particle bursts 20 units above the floor height at the piece's position. */
-s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight) {
+/* Model particle floor handler 13 (used by blood_spawnProfileBurst): two particle bursts 20 units above the floor height
+ * at the particle's position. */
+s32 prop_burstPieceOnFloor(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
     Vec3f pos;
     DebrisBurst burst;
 
-    pos.x = piece->head.pos.x;
+    pos.x = particle->pos.x;
     pos.y = floorHeight + 20.0f;
-    pos.z = piece->head.pos.z;
+    pos.z = particle->pos.z;
     {
     const s32 ids[1] = { 5 };
     const f32 scales[1] = { 1.0f };
@@ -517,7 +518,7 @@ s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight) {
     burst.scaleBase = 0.8000000119f;
     burst.scaleRange = 1.200000048f;
     burst.spin = 15.29900074f;
-    particle_spawnDebrisBurst(&burst, ids, scales, 1, 0.0f, 1, piece->head.header.owner, piece->head.header.kind);
+    particle_spawnDebrisBurst(&burst, ids, scales, 1, 0.0f, 1, particle->header.owner, particle->header.kind);
     }
     {
     SpriteBurst spawn;
@@ -564,7 +565,7 @@ s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight) {
     spawn.envColorMode = 6;
     spawn.kind = 1;
     spawn.extra = 0.8977670074f;
-    particle_spawnSpriteBurst(&spawn, 0xFF, piece->head.header.owner, piece->head.header.kind);
+    particle_spawnSpriteBurst(&spawn, 0xFF, particle->header.owner, particle->header.kind);
     }
     return 0;
 }
