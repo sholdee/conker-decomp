@@ -113,8 +113,8 @@ void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, 
 
     burst.texture = 47;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;

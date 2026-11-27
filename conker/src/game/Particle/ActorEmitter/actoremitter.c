@@ -459,8 +459,8 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                     spawn.scale.y = 0.0f;
                     spawn.scale.z = 1.0f;
                     spawn.flags = 0x40000000;
-                    spawn.unk44 = 0xFF;
-                    spawn.unk45 = 0xFF;
+                    spawn.alpha = 0xFF;
+                    spawn.colorLevel = 0xFF;
                     while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
                         s32 skip;
 

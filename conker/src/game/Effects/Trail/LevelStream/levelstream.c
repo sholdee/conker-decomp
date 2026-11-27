@@ -594,10 +594,10 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
             packet.scale.y = 0.0f;
             packet.scale.z = 1.0f;
             packet.flags = 0x01CC0061;
-            packet.unk45 = 0xFF;
-            packet.unk46 = 0;
-            packet.unk47 = 7;
-            packet.unk48 = effect->zone;
+            packet.colorLevel = 0xFF;
+            packet.primMode = 0;
+            packet.envMode = 7;
+            packet.zone = effect->zone;
             do {
                 // matching: `+ -1308.0f` (add.s); `- 1308.0f` emits sub.s
                 packet.rot.x = (math_randomFloat() * 409.0f + -1308.0f) * 0.001f;
@@ -607,7 +607,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
                 math_randomZoneFootprintPoint(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
                 if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
-                    packet.unk44 = math_random() % 101U + 155;
+                    packet.alpha = math_random() % 101U + 155;
                     particle_newQuadParticle(&packet, &gWhiteVtxColors, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
                 }
                 effect->accumulator -= 1.0f;
@@ -1541,8 +1541,8 @@ void trail_emitLineBursts(Actor *obj, u8 owner, s32 list) {
             count = (math_random() % 6U) + 5;
             spawn.texture = 0x3E;
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.r = 0;

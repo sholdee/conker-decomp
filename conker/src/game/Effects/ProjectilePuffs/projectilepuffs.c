@@ -249,19 +249,19 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
             spawn.flags = 0xCC0008;
-            spawn.unk45 = 0xFF;
-            spawn.unk46 = 0;
-            spawn.unk47 = 6;
-            spawn.unk48 = 0;
+            spawn.colorLevel = 0xFF;
+            spawn.primMode = 0;
+            spawn.envMode = 6;
+            spawn.zone = 0;
             spawn.viewportMask = 0xFF;
-            spawn.unk50 = 0;
+            spawn.material = 0;
             do {
                 const VtxColor *colors = gWhiteVtxColors;
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
                 spawn.pos = state->trailPos;
-                spawn.unk44 = puffState.timeLeft * 6.481481552f;
+                spawn.alpha = puffState.timeLeft * 6.481481552f;
                 puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                 if (puff != NULL) {
                     memcpy(&puff->state, &puffState, sizeof(puffState));
@@ -284,7 +284,7 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
     PuffState *state;
 
     state = &obj->state;
-    obj->head.def.unk44 = state->timeLeft * 6.481481552f;
+    obj->head.def.alpha = state->timeLeft * 6.481481552f;
     size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
     obj->head.def.height = size;
     obj->head.def.width = size;
@@ -426,19 +426,19 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
                 spawn.scale.y = 1.0f;
                 spawn.scale.z = 1.0f;
                 spawn.flags = 0xCC0008;
-                spawn.unk45 = 0xFF;
-                spawn.unk46 = 0;
-                spawn.unk47 = 6;
-                spawn.unk48 = 0;
+                spawn.colorLevel = 0xFF;
+                spawn.primMode = 0;
+                spawn.envMode = 6;
+                spawn.zone = 0;
                 spawn.viewportMask = 0xFF;
-                spawn.unk50 = 0;
+                spawn.material = 0;
                 do {
                     const VtxColor *colors = gWhiteVtxColors;
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
                     spawn.pos = follow->trailPos;
-                    spawn.unk44 = puffState.timeLeft * 6.481481552f;
+                    spawn.alpha = puffState.timeLeft * 6.481481552f;
                     puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));

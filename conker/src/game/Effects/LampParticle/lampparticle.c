@@ -157,11 +157,11 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list) {
                     desc.scale.y = 1.0f;
                     desc.scale.z = 1.0f;
                     desc.flags = 0x1CD2006;
-                    desc.unk44 = 255;
-                    desc.unk45 = 255;
-                    desc.unk46 = 0;
-                    desc.unk47 = 6;
-                    desc.unk48 = spawn.zone;
+                    desc.alpha = 255;
+                    desc.colorLevel = 255;
+                    desc.primMode = 0;
+                    desc.envMode = 6;
+                    desc.zone = spawn.zone;
                     desc.viewportMask = 255;
                     state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, owner, list);
                 }

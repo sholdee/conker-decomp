@@ -128,8 +128,8 @@ void particle_updatePoolEmitter(PoolEmitter *emitter) {
 
                 spawn.texture = 0x6C;
                 spawn.renderMode = 0x5103;
-                spawn.unk0 = 0x200005;
-                spawn.unk4 = 0x1F0600;
+                spawn.setGeometryMode = 0x200005;
+                spawn.clearGeometryMode = 0x1F0600;
                 spawn.frame = 0;
                 spawn.frameRate = 0;
                 spawn.a = 0xFF;

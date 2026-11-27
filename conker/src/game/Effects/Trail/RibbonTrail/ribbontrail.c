@@ -419,8 +419,8 @@ void trail_spawnParticleAtTarget(Actor *target, u8 owner, s32 list) {
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.fadeStart = 18;
@@ -529,8 +529,8 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 owner, s3
         s32 flag40;
         particle.texture = unk1DChoices[math_random() & 3];
         particle.renderMode = 0x1303;
-        particle.unk0 = 0x200005;
-        particle.unk4 = 0;
+        particle.setGeometryMode = 0x200005;
+        particle.clearGeometryMode = 0;
         particle.timer = 300;
         particle.frame = 0;
         particle.frameRate = 0;

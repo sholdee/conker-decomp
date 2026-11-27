@@ -124,10 +124,10 @@ BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec
     def.pos = *start;
     def.rot = *end;
     def.flags = 0x40CC0009;
-    def.unk44 = alpha;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 7;
+    def.alpha = alpha;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 7;
     def.scale.x = 0.0f;
     def.scale.y = 0.0f;
     def.scale.z = 0.0f;
@@ -279,8 +279,8 @@ void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 
     index = math_random() & 3;
     desc.texture = gFlashTextures[index];
     desc.renderMode = 0x2203;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x20000;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x20000;
     desc.timer = lifetime + 1;
     desc.frame = 0;
     desc.frameRate = 0;

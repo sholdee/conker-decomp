@@ -1176,8 +1176,8 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
         desc.lifetime = lifetime + 32;
         desc.flags = 1;
     }
-    desc.unk44 = alpha;
-    desc.unk45 = arg3;
+    desc.alpha = alpha;
+    desc.colorLevel = arg3;
     if (arg8 != 0) {
         argB = 3;
         argC = 255;
@@ -1204,8 +1204,8 @@ s32 blood_updateGrowingParticle(GrowingBloodParticle *particle) {
 
     if (timer < 32) {
         s32 alpha = timer << 3;
-        if (alpha < particle->head.def.unk44) {
-            particle->head.def.unk44 = alpha;
+        if (alpha < particle->head.def.alpha) {
+            particle->head.def.alpha = alpha;
         }
     }
     particle->head.def.width += *growth * gFrameDelta;

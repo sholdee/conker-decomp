@@ -188,8 +188,8 @@ void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
 
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4403;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x20000;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x20000;
     spawn.timer = math_random() % 7U + 4;
     spawn.frame = 0;
     spawn.frameRate = 0;

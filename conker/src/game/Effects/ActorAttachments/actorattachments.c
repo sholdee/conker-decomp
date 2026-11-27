@@ -562,7 +562,7 @@ void effect_attachRedBoneGlowsAndLight(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
@@ -609,7 +609,7 @@ void effect_attachRedBoneGlowsAndLight(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
@@ -873,7 +873,7 @@ void effect_attachBone6GlowAndBone5Trail(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12002;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0x8E;
     spawn.rgba[2] = 0x19;
@@ -927,7 +927,7 @@ void effect_attachNarrowBone6GlowAndBone5Trail(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12002;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0x8E;
     spawn.rgba[2] = 0x19;
@@ -981,7 +981,7 @@ void effect_attachBone12GlowAndLight(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x2012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0xE6;
     spawn.rgba[2] = 0;
@@ -1405,7 +1405,7 @@ void effect_attachBone1RedLightAndGlow(Actor *obj) {
         spawn.lifetime = 300;
         spawn.frame = 0;
         spawn.frameSpeed = 0;
-        spawn.unk45 = 0xFF;
+        spawn.colorLevel = 0xFF;
         spawn.rgba[0] = 0xFF;
         spawn.rgba[1] = 0;
         spawn.rgba[2] = 0;
@@ -1423,12 +1423,12 @@ void effect_attachBone1RedLightAndGlow(Actor *obj) {
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
-        spawn.unk44 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 6;
-        spawn.unk48 = 0;
+        spawn.alpha = 0xFF;
+        spawn.primMode = 0;
+        spawn.envMode = 6;
+        spawn.zone = 0;
         spawn.viewportMask = 0xFF;
-        spawn.unk50 = 0;
+        spawn.material = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
 

@@ -334,7 +334,7 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 particle_getSpriteColors(&primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, p);
             }
             gfx = particle_setCombineMode(gfx, shade, &needSync);
-            gfx = math_gfxUpdateGeometryMode(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
+            gfx = math_gfxUpdateGeometryMode(gfx, p->head.desc.setGeometryMode, p->head.desc.clearGeometryMode | 0x10000 | 0x100000);
             gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
             gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
@@ -705,8 +705,8 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.alpha = (u32)flash.startAlpha;
     desc.texture = 0x69;
     desc.renderMode = 0x4417;
-    desc.unk0 = 0x200004;
-    desc.unk4 = 1;
+    desc.setGeometryMode = 0x200004;
+    desc.clearGeometryMode = 1;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xFF;

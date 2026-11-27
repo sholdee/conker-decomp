@@ -423,8 +423,8 @@ void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 vel
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;
@@ -790,8 +790,8 @@ void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, O
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;

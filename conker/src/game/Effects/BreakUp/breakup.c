@@ -265,8 +265,8 @@ void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timer = (math_random() % 11U) + 35;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -312,8 +312,8 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     extra = 0.9172409773f;
     spawn.timer = (math_random() & 0xF) + 25;
     spawn.frame = 0;

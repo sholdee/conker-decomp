@@ -677,7 +677,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
 
         arg.texture = 0x6C;
         arg.renderMode = 0x5103;
-        arg.unk0 = 0x200005;
+        arg.setGeometryMode = 0x200005;
         arg.fadeStart = 0x73;
         arg.fadeRate = 2;
         arg.flags = 0x80DE07;
@@ -687,7 +687,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
         arg.deathFunc = -1;
         extra.phase[0] = 0;
         extra.phase[1] = 0;
-        arg.unk4 = 0;
+        arg.clearGeometryMode = 0;
         arg.frame = 0;
         arg.frameRate = 0;
         arg.drawFunc = -1;
@@ -875,8 +875,8 @@ void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect) {
 
             arg.texture = 0x16;
             arg.renderMode = 0xE01;
-            arg.unk0 = 0x200005;
-            arg.unk4 = 0;
+            arg.setGeometryMode = 0x200005;
+            arg.clearGeometryMode = 0;
             arg.frame = 0;
             arg.frameRate = 0;
             arg.flags = 0x801E05;

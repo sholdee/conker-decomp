@@ -360,8 +360,8 @@ void effect_ringEmitDarkParticle(RadialEffect *effect, Vec3f *pos, u8 heading, f
 
     packet.texture = 0x26;
     packet.renderMode = 0xC01;
-    packet.unk0 = 0x200005;
-    packet.unk4 = 0;
+    packet.setGeometryMode = 0x200005;
+    packet.clearGeometryMode = 0;
     packet.timer = (math_random() % 81U) + 25;
     packet.frame = 0;
     packet.frameRate = 0;
@@ -684,8 +684,8 @@ s32 effect_spawnDampedParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 or
 
     packet.texture = 0x29;
     packet.renderMode = 0xE03;
-    packet.unk0 = 0x200005;
-    packet.unk4 = 0;
+    packet.setGeometryMode = 0x200005;
+    packet.clearGeometryMode = 0;
     packet.timer = (math_random() % 26U) + 25;
     packet.frame = 0;
     packet.frameRate = 0;

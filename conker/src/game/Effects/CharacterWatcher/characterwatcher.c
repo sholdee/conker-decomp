@@ -633,8 +633,8 @@ EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 
 
     spawn.texture = 0x2F;
     spawn.renderMode = 0xC01;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.b2 = 0;
     spawn.g2 = 0;
     spawn.r2 = 0;
@@ -753,8 +753,8 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
             spawn.texture = 0x2F;
             spawn.renderMode = 0xC01;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.b2 = 0;
             spawn.g2 = 0;
             spawn.r2 = 0;
@@ -870,8 +870,8 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
 
     spawn.texture = 0x2F;
     spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.b2 = 0;
     spawn.g2 = 0;
     spawn.r2 = 0;
@@ -1160,8 +1160,8 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
         rise.ceiling = emitter->ceiling;
         spawn.texture = 0x2F;
         spawn.renderMode = 0x4403;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0x9F0600;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0x9F0600;
         spawn.timer = 300;
         spawn.frame = 0;
         spawn.frameRate = 0;

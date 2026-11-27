@@ -62,8 +62,8 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
         spawn.texture = 0x2B;
         spawn.renderMode = 0x4404;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0;
         spawn.timer = 300;
         spawn.frame = 0;
         spawn.frameRate = 0;

@@ -165,13 +165,13 @@ void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime
     def.scale.y = 1.0f;
     def.scale.z = 1.0f;
     def.flags = 0x45C0081;
-    def.unk44 = 0xFF;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 7;
-    def.unk48 = NULL;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 7;
+    def.zone = NULL;
     def.viewportMask = 0xFF;
-    def.unk50 = 0;
+    def.material = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
 

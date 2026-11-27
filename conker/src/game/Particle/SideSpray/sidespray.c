@@ -139,12 +139,12 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = 0x401C0001;
-    desc.unk44 = (math_random() % 41U) + 80;
-    desc.unk45 = 0xFF;
+    desc.alpha = (math_random() % 41U) + 80;
+    desc.colorLevel = 0xFF;
     growth.growEndTimer = (desc.lifetime - (math_random() % 6U)) - 8;
     growth.growRate = (((math_randomFloat() * 40.0f) + 51.0f) * desc.width) * 0.001f;
-    desc.unk46 = 0;
-    desc.unk47 = 6;
+    desc.primMode = 0;
+    desc.envMode = 6;
     particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
                              500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
@@ -184,9 +184,9 @@ s32 particle_updateSpray(SprayParticle *spray) {
         desc = &spray->head.def;
         growth = &spray->growth;
         if (spray->head.def.lifetime < 32) {
-            if (spray->head.def.lifetime * 8 < spray->head.def.unk44) {
+            if (spray->head.def.lifetime * 8 < spray->head.def.alpha) {
                 // matching: a store through a second pointer makes IDO reload life afterwards
-                desc->unk44 = spray->head.def.lifetime * 8;
+                desc->alpha = spray->head.def.lifetime * 8;
             }
         }
         if (growth->growEndTimer < spray->head.def.lifetime) {
@@ -212,8 +212,8 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
 
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = (math_random() & 0xF) + 25;
     desc.frame = 0;
     desc.frameRate = 0;

@@ -137,13 +137,13 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.pos = gZeroVec3f;
     spawn.rot = gZeroVec3f;
     spawn.flags = 0x046C0008;
-    spawn.unk44 = 0xFF;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 7;
-    spawn.unk48 = 0;
+    spawn.alpha = 0xFF;
+    spawn.colorLevel = 0xFF;
+    spawn.primMode = 0;
+    spawn.envMode = 7;
+    spawn.zone = 0;
     spawn.viewportMask = 0xFF;
-    spawn.unk50 = 0;
+    spawn.material = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     beam = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
@@ -245,7 +245,7 @@ s32 beam_updateAimed(AimedBeam *beam) {
     link->alphaPhase += 0.1600000113f * gFrameDelta;
     angle = math_wrapRadians(link->alphaPhase);
     link->alphaPhase = angle;
-    beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
+    beam->head.def.alpha = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
         if (link->flash != NULL) {
             link->flash->light->disabled = FALSE;
@@ -506,11 +506,11 @@ Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
     spawn.flags = 0xCD2002;
-    spawn.unk44 = 0xFF;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 6;
-    spawn.unk48 = 0;
+    spawn.alpha = 0xFF;
+    spawn.colorLevel = 0xFF;
+    spawn.primMode = 0;
+    spawn.envMode = 6;
+    spawn.zone = 0;
 
     sprite.height1 = 160.0f;
     sprite.width1 = 160.0f;
@@ -848,8 +848,8 @@ void beam_spawnFollowParticle(Actor *actor) {
 
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4403;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x70600;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x70600;
     spawn.timer = 300;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -1012,7 +1012,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
         ext.unkC = 0.986371994f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.fadeStart = 0x23;
         spawn.fadeRate = 7;
         spawn.flags = 0x90DE07;
@@ -1020,7 +1020,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
         spawn.envColorMode = 6;
         spawn.updateFunc = 0x20;
         spawn.deathFunc = -1;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.drawFunc = -1;

@@ -705,7 +705,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
                 spawn.renderMode = 0x5103;
-                spawn.unk0 = 0x200005;
+                spawn.setGeometryMode = 0x200005;
                 spawn.fadeStart = 0x2E;
                 spawn.fadeRate = 5;
                 spawn.flags = 0x90DE07;
@@ -713,7 +713,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 spawn.envColorMode = 6;
                 spawn.updateFunc = 0x24;
                 spawn.deathFunc = -1;
-                spawn.unk4 = 0;
+                spawn.clearGeometryMode = 0;
                 spawn.frame = 0;
                 spawn.frameRate = 0;
                 spawn.drawFunc = -1;

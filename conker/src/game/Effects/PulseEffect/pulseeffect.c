@@ -72,8 +72,8 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 fxOwner, s32 fxList)
             pulse.amplitude[1] = (math_randomFloat() * 0.25f + 0.200000003f) * pulse.baseSize;
             spawn.texture = *(textures + (math_random() & 3)); // matching: textures[i] reserves an extra temp
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.r = 0;

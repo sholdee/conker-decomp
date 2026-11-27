@@ -151,13 +151,13 @@ s32 particle_fadeTumbling(TumblingParticle *particle) {
     }
 
     if (heightAlpha < lifeAlpha) {
-        particle->head.def.unk44 = heightAlpha;
+        particle->head.def.alpha = heightAlpha;
     } else {
-        particle->head.def.unk44 = lifeAlpha;
+        particle->head.def.alpha = lifeAlpha;
     }
 
     // matching: never true for a u8, but the original tests it (IDO reloads the stored byte)
-    if (particle->head.def.unk44 < 0) {
+    if (particle->head.def.alpha < 0) {
         return 0;
     }
     return 1;

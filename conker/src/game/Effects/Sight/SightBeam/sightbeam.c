@@ -199,10 +199,10 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     spawn.pos = *start;
     spawn.rot = *end;
     spawn.flags = (level == LEVEL_W5_BANK ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
-    spawn.unk44 = 0xFF;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 6;
+    spawn.alpha = 0xFF;
+    spawn.colorLevel = 0xFF;
+    spawn.primMode = 0;
+    spawn.envMode = 6;
     obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, owner, list);
     if (obj != NULL) {
         SightBeamState *objState;
@@ -402,7 +402,7 @@ s32 sight_updateBeam(SightBeamObject *obj) {
         emitter3->head.flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        obj->head.def.unk44 = math_sin(state->pulseAngle) * 112.5f + 142.5f;
+        obj->head.def.alpha = math_sin(state->pulseAngle) * 112.5f + 142.5f;
         state->pulseAngle = math_wrapRadians(state->pulseAngle + state->pulseSpeed * gFrameDelta);
     }
     return 1;
@@ -628,10 +628,10 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = (zoneMasked ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
-    desc.unk45 = 0xFF;
-    desc.unk44 = 0xFF;
-    desc.unk46 = 0;
-    desc.unk47 = 6;
+    desc.colorLevel = 0xFF;
+    desc.alpha = 0xFF;
+    desc.primMode = 0;
+    desc.envMode = 6;
     desc.type = 3;
     params.visibility[0] = 0;
     params.visibility[1] = 0;
@@ -639,7 +639,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
     params.visibility[3] = 0;
     params.scale = 1.0f;
     params.type = 0;
-    desc.unk48 = zone;
+    desc.zone = zone;
     params.fadeRate = 9.999999975e-07f;
     effect = flare_spawnGlow(&params, 100, &desc, 0, 0, 0, 0, 1, fxOwner, fxList);
     if (effect != NULL) {

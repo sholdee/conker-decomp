@@ -106,12 +106,12 @@ s32 particle_growFlickerParticle(FlickerParticle *effect) {
     return 1;
 }
 
-/* Shrinks width and height by shrinkRate; while lifetime < fadeStart, sets the alpha (unk44) to lifetime * fadeRate. */
+/* Shrinks width and height by shrinkRate; while lifetime < fadeStart, sets the alpha to lifetime * fadeRate. */
 s32 particle_shrinkFlickerParticle(FlickerParticle *effect) {
     effect->head.def.height -= effect->head.def.height * effect->params.shrinkRate;
     effect->head.def.width -= effect->head.def.width * effect->params.shrinkRate;
     if (effect->head.def.lifetime < effect->params.fadeStart) {
-        effect->head.def.unk44 = effect->head.def.lifetime * effect->params.fadeRate;
+        effect->head.def.alpha = effect->head.def.lifetime * effect->params.fadeRate;
     }
     return 1;
 }

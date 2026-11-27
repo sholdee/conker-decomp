@@ -371,11 +371,11 @@ void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 p
     spawn.pos.y = emitter->y;
     spawn.pos.z = emitter->z;
     spawn.flags = 0x01EC0009;
-    spawn.unk44 = 0xFF;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 0;
-    spawn.unk48 = zone;
+    spawn.alpha = 0xFF;
+    spawn.colorLevel = 0xFF;
+    spawn.primMode = 0;
+    spawn.envMode = 0;
+    spawn.zone = zone;
     spawn.viewportMask = 0xFF;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;

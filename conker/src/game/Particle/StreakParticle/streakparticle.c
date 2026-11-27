@@ -239,8 +239,8 @@ void particle_spawnStreakBurstEffect(desc, owner)
 
     particle.texture = desc->particleTexture;
     particle.renderMode = desc->particleRenderMode;
-    particle.unk4 = desc->particleUnk4;
-    particle.unk0 = desc->particleUnk0;
+    particle.clearGeometryMode = desc->particleUnk4;
+    particle.setGeometryMode = desc->particleUnk0;
     particle.frame = desc->particleFrame;
     particle.frameRate = desc->particleFrameRate;
     particle.r = desc->particleColor.red;

@@ -1269,7 +1269,7 @@ s32 flamethrower_fadeJetLine(SceneParticle *p) {
     p->head.def.height = p->head.def.height - (p->head.def.height * p->data.jet.shrinkRate);
     p->head.def.width = p->head.def.width - (p->head.def.width * p->data.jet.shrinkRate);
     if (life < p->data.jet.fadeStart) {
-        p->head.def.unk44 = life * p->data.jet.alphaPerLife;
+        p->head.def.alpha = life * p->data.jet.alphaPerLife;
     }
     return 1;
 }
@@ -1453,8 +1453,8 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         spawn.scale.x = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x40000001;
-        spawn.unk44 = 255;
-        spawn.unk45 = 255;
+        spawn.alpha = 255;
+        spawn.colorLevel = 255;
         spawn.height = (data.unkC + data.unk10) * 0.5f;
         data.unk18 = spawn.height;
         spawn.scale.y = 0.0f;
@@ -2341,8 +2341,8 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
 
             part.texture = 0x28;
             part.renderMode = 0x2203;
-            part.unk0 = 0x200005;
-            part.unk4 = 0x1F0600;
+            part.setGeometryMode = 0x200005;
+            part.clearGeometryMode = 0x1F0600;
             part.frame = 0;
             part.frameRate = 0;
             part.r = 0xFF;
@@ -2650,10 +2650,10 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
             spawn.scale.y = 0.0f;
             spawn.scale.z = 1.0f;
             spawn.flags = 0x40CC05E1;
-            spawn.unk45 = 0xFF;
-            spawn.unk46 = 0;
-            spawn.unk47 = 7;
-            spawn.unk48 = 0;
+            spawn.colorLevel = 0xFF;
+            spawn.primMode = 0;
+            spawn.envMode = 7;
+            spawn.zone = 0;
             a = &points[head];
             b = &points[next];
             do {
@@ -2688,7 +2688,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 spawn.rot.x = spawn.pos.x + dir.x;
                 spawn.rot.y = spawn.pos.y + dir.y;
                 spawn.rot.z = spawn.pos.z + dir.z;
-                spawn.unk44 = math_random() % (flame->line.alphaRange + 1) + flame->line.alphaMin;
+                spawn.alpha = math_random() % (flame->line.alphaRange + 1) + flame->line.alphaMin;
                 particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((math_random() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
@@ -3134,8 +3134,8 @@ s32 flamethrower_fadeFlameLine(SceneParticle *beam) {
     }
     if (beam->head.def.lifetime < p->fadeStart) {
         s32 alpha = beam->head.def.lifetime * p->alphaPerLife;
-        if (alpha < beam->head.def.unk44) {
-            beam->head.def.unk44 = alpha;
+        if (alpha < beam->head.def.alpha) {
+            beam->head.def.alpha = alpha;
         }
     }
     return 1;

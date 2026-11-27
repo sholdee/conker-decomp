@@ -169,8 +169,8 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     speed = (math_randomFloat() * 851.0f + 525.0f) * 0.001000000047f;
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4401;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x20000;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x20000;
     spawn.timer = (math_random() & 0xF) + 10;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -476,8 +476,8 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
         extra = 0.9108009934f;
         spawn.texture = 0x29;
         spawn.renderMode = 0xE03;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.fadeStart = 25;

@@ -152,7 +152,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                     def.rot.y = 0.0f;
                     def.rot.z = 0.0f;
                     def.flags = 0;
-                    def.unk45 = 0xFF;
+                    def.colorLevel = 0xFF;
                     def.scale.x = 1.0f;
                     def.scale.y = 1.0f;
                     def.scale.z = 1.0f;
@@ -165,7 +165,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                             head = head->next;
                         }
                         index = head - emitter->slots;
-                        def.unk44 = math_random() % 101U + 100;
+                        def.alpha = math_random() % 101U + 100;
                         def.width = 0.0f;
                         def.height = 0.0f;
                         motion.baseSize = newKind->baseSize;
@@ -376,14 +376,14 @@ s8 particle_fallDrip(DripParticle *drop) {
         if (collision_probeFloorSurfABSet0Cached(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {
             probe.y = motion->ground.height;
             if (motion->ground.source == 3) {
-                particle_spawnKindMark(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
+                particle_spawnKindMark(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.alpha,
                               &motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (math_random() & 1) {
-                particle_spawnKindEmitter(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
+                particle_spawnKindEmitter(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.alpha,
                               &motion->ground.tri, &probe, math_random() % 41U + 80, 1, 1, 0,
                               drop->head.header.owner, drop->head.header.kind);
             } else {
-                particle_spawnSquash(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,
+                particle_spawnSquash(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.alpha,
                               &probe, 1, drop->head.header.owner, drop->head.header.kind);
             }
             alive = 0;
@@ -400,8 +400,8 @@ s32 particle_fadeDrip(DripParticle *drop) {
     lifetime = drop->head.def.lifetime;
     if (lifetime < drop->motion.fadeStart) {
         alpha = lifetime * drop->motion.fadeRate;
-        if (alpha < drop->head.def.unk44) {
-            drop->head.def.unk44 = alpha;
+        if (alpha < drop->head.def.alpha) {
+            drop->head.def.alpha = alpha;
         }
     }
     return 1;

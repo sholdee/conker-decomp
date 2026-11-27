@@ -40,8 +40,8 @@ s32 particle_spawnYawColorSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 ar
 
     desc.texture = 41;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = (math_random() % 41U) + 50;
     desc.frame = 0;
     desc.frameRate = 0;

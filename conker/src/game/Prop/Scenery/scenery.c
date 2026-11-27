@@ -438,8 +438,8 @@ void func_150BFFE0(Actor *obj) {
     spawn.countRange = 7;
     spawn.texture = 0x6C;
     spawn.renderMode = 0x5103;
-    spawn.unk8 = 0x200005;
-    spawn.unkC = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timerBase = 0x28;
     spawn.timerRange = 0x14;
     spawn.frameRateBase = 0;
@@ -518,8 +518,8 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     spawn.countRange = 8;
     spawn.texture = 0x6C;
     spawn.renderMode = 0x5103;
-    spawn.unk8 = 0x200005;
-    spawn.unkC = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timerBase = 0x1E;
     spawn.timerRange = 0xF;
     spawn.frameRateBase = 0;
@@ -668,8 +668,8 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             spawn.countRange = 2;
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
-            spawn.unk8 = 0x200005;
-            spawn.unkC = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.timerBase = 0x1E;
             spawn.timerRange = 0x10;
             spawn.frameRateBase = 0;

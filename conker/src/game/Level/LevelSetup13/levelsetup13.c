@@ -61,10 +61,10 @@ void level_setup13(void) {
     packet.scale.y = 1.0f;
     packet.scale.z = 1.0f;
     packet.flags = 0xD2012;
-    packet.unk45 = 255;
-    packet.unk44 = 255;
-    packet.unk46 = 0;
-    packet.unk47 = 6;
+    packet.colorLevel = 255;
+    packet.alpha = 255;
+    packet.primMode = 0;
+    packet.envMode = 6;
 
     params.height1 = 175.5f;
     params.width1 = 175.5f;
@@ -228,11 +228,11 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             packet.scale.y = 1.0f;
             packet.scale.z = 1.0f;
             packet.flags = 0x40EC0000; // bit pattern of 7.375f
-            packet.unk44 = 0;
-            packet.unk45 = 255;
-            packet.unk46 = 0;
-            packet.unk47 = 7;
-            packet.unk48 = 0;
+            packet.alpha = 0;
+            packet.colorLevel = 255;
+            packet.primMode = 0;
+            packet.envMode = 7;
+            packet.zone = 0;
             controller->effect = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
                                                ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
             if (controller->effect != NULL) {

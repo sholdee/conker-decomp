@@ -290,8 +290,8 @@ void effect_advanceStage(StageObj *obj) {
         side = (state->mirror & 1) ? -1 : 1;
         flare.texture = 0x86;
         flare.renderMode = 0x4404;
-        flare.unk0 = 0x200005;
-        flare.unk4 = 0x9F0600;
+        flare.setGeometryMode = 0x200005;
+        flare.clearGeometryMode = 0x9F0600;
         flare.frame = 0;
         flare.frameRate = 0;
         flare.r = 0xFF;

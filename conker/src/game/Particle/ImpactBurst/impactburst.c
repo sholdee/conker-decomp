@@ -25,8 +25,8 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     spawn.scaleRate = ((math_randomFloat() * 18.0f) + 1016.0f) * 0.001f;
     spawn.texture = 22;
     spawn.renderMode = 0x2001;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.a = 0xFF;

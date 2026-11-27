@@ -45,8 +45,8 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
             spawn.frame = 0;
             spawn.flags = 0x401;
             spawn.lifetime = gBoneQuadLifetimes[type];
-            spawn.unk44 = 255;
-            spawn.unk45 = 255;
+            spawn.alpha = 255;
+            spawn.colorLevel = 255;
             // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
             spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
             spawn.rgba[3] = 200;
@@ -167,10 +167,10 @@ void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 
         spawn.texture = 0x17;
         spawn.frameSpeed = 0x243A;
         spawn.flags = 0x401;
-        spawn.unk44 = 255;
+        spawn.alpha = 255;
         spawn.frame = 0;
         spawn.lifetime = arg5;
-        spawn.unk45 = 255;
+        spawn.colorLevel = 255;
         // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
         spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
         spawn.rgba[3] = 200;

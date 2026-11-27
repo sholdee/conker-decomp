@@ -102,8 +102,8 @@ s32 effect_spawnJointSpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
     sinYaw = math_cosBinAngleMasked(yaw);
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = math_random() % 36U + 70;
     desc.frame = 0;
     desc.frameRate = 0;

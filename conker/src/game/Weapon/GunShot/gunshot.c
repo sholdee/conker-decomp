@@ -145,8 +145,8 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
 
     count = math_random() % 9U + 10;
     spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;

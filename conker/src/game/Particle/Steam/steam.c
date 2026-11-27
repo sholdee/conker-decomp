@@ -127,8 +127,8 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
     desc.texture = gKindParticleTexturePickers[kind]();
     desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r = 0;
@@ -493,14 +493,14 @@ SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s
             desc.fadeRate = 0xFF / lifetime;
         }
     }
-    desc.unk44 = arg3;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg3;
+    desc.colorLevel = 0xFF;
     desc.type = 0;
-    desc.unk46 = 4;
-    desc.unk47 = 5;
-    desc.unk48 = 0;
+    desc.primMode = 4;
+    desc.envMode = 5;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     rand1 = math_random();
     rand2 = math_random();
     rand3 = math_random();
@@ -717,8 +717,8 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
-    desc.unk44 = arg2;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.pos = *pos;
     desc.flags = (D_800AB330[kind] ? 0x40000000 : 0) | 0x0CDC0009;
 
@@ -732,16 +732,16 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.frameSpeed = 0;
     desc.height = size;
     desc.width = size;
-    desc.unk46 = 0;
-    desc.unk47 = 7;
+    desc.primMode = 0;
+    desc.envMode = 7;
     squash.phase = 0;
     squash.step = (math_random() % 3U) + 6;
     squash.amplitudeX = (math_randomFloat() * 0.2f) + 0.1f;
     squash.amplitudeY = (math_randomFloat() * 0.2f) + 0.1f;
     desc.type = 0;
-    desc.unk48 = 0;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     desc.fadeStart = 32;
     desc.fadeRate = 7;
     coinFlip = (math_random() & 1) ? 1 : 0;
@@ -957,8 +957,8 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     gEffectKindColorFuncs[(u8)kind](&desc);
     desc.texture = 0x6C;
     desc.renderMode = 0x5103;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x9F0600;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x9F0600;
     desc.timer = (lifetime == -1) ? 300 : lifetime;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -1140,14 +1140,14 @@ void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *
 
     desc.scale.x = arg2;
     desc.flags = 0x466C0001;
-    desc.unk44 = arg6;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg6;
+    desc.colorLevel = 0xFF;
     desc.type = 0;
-    desc.unk46 = 0;
-    desc.unk47 = 6;
-    desc.unk48 = 0;
+    desc.primMode = 0;
+    desc.envMode = 6;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.scale.y = 1.0f;
@@ -1169,8 +1169,8 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
 
     desc.texture = gKindPlainTextures[kind];
     desc.renderMode = 0x4403;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x9F0600;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x9F0600;
     desc.timer = lifetime;
     desc.frame = 0;
     desc.frameRate = 0;

@@ -150,8 +150,8 @@ void effect_spawnRisingParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Wat
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.r = desc.g = desc.b = desc.a = desc.r2 = desc.g2 = desc.b2 = 0;
     desc.frame = desc.frameRate = 0;
     desc.brightness = 0xFF;

@@ -191,14 +191,14 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             unkA8 = 0.9508649707f;
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
-            spawn.unk0 = 0x200005;
+            spawn.setGeometryMode = 0x200005;
             spawn.fadeStart = 20;
             spawn.fadeRate = 12;
             spawn.flags = 0x80D207;
             spawn.primColorMode = 8;
             spawn.envColorMode = 6;
             spawn.updateFunc = 0x10;
-            spawn.unk4 = 0;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.deathFunc = -1;
@@ -276,8 +276,8 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
     unkA8 = unkA8Value;
     spawn.texture = 0x6C;
     spawn.renderMode = 0x5103;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.fadeStart = 20;

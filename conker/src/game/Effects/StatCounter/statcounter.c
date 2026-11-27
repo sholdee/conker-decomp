@@ -334,8 +334,8 @@ void effect_spawnStatPickupBurst(Vec3f *pos) {
     second.countRange = 8;
     second.texture = 0x6C;
     second.renderMode = 0x5103;
-    second.unk8 = 0x200005;
-    second.unkC = 0;
+    second.setGeometryMode = 0x200005;
+    second.clearGeometryMode = 0;
     second.timerBase = 40;
     second.timerRange = 40;
     second.frameRateBase = 0;

@@ -80,8 +80,8 @@ void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.b2 = 0;
     desc.g2 = 0;
     desc.r2 = 0;
@@ -193,8 +193,8 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     extra.swayPerSpeed = 0.25f;
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.b2 = 0;
     desc.g2 = 0;
     desc.r2 = 0;

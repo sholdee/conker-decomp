@@ -155,8 +155,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
     spawn.rgba[3] = 0xFF;
-    spawn.unk44 = arg11;
-    spawn.unk45 = 0xFF;
+    spawn.alpha = arg11;
+    spawn.colorLevel = 0xFF;
     spawn.height = driftSpeed;
     spawn.width = arg8;
     spawn.pos = *origin;
@@ -167,8 +167,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.scale.y = 0.0f;
     spawn.scale.z = 0.0f;
     spawn.flags = 0xC04C0008;
-    spawn.unk46 = 0;
-    spawn.unk47 = 0;
+    spawn.primMode = 0;
+    spawn.envMode = 0;
     spawn.viewportMask = arg22;
     result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
@@ -329,7 +329,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x - nx;
     vertices->v.ob[1] = start.y - ny;
     vertices->v.ob[2] = start.z - nz;
-    vertices->v.cn[3] = trail->head.def.unk44;
+    vertices->v.cn[3] = trail->head.def.alpha;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x - nx;
@@ -347,7 +347,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x + nx;
     vertices->v.ob[1] = start.y + ny;
     vertices->v.ob[2] = start.z + nz;
-    vertices->v.cn[3] = trail->head.def.unk44;
+    vertices->v.cn[3] = trail->head.def.alpha;
     vertices->v.flag = 0;
     return result;
 }
@@ -532,8 +532,8 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle_spawnTrailBurst(&burst, arg1, arg2);
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
-    particle.unk0 = 0x200005;
-    particle.unk4 = 0x20000;
+    particle.setGeometryMode = 0x200005;
+    particle.clearGeometryMode = 0x20000;
     particle.timer = (math_random() % 7U) + 6;
     particle.frame = 0;
     particle.frameRate = 0;
@@ -641,8 +641,8 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
 
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
-    particle.unk0 = 0x200005;
-    particle.unk4 = 0x20000;
+    particle.setGeometryMode = 0x200005;
+    particle.clearGeometryMode = 0x20000;
     particle.timer = (math_random() % 5U) + 4;
     particle.frame = 0;
     particle.frameRate = 0;
@@ -777,11 +777,11 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.scale.y = 1.0f;
         spark.scale.z = 56.81999969f;
         spark.flags = (gIsMultiplayer ? 0x40000000 : 0) | 0x08DC0009;
-        spark.unk44 = (math_random() % 76U) + 0xB4;
-        spark.unk45 = 0xFF;
-        spark.unk46 = 0;
-        spark.unk47 = 7;
-        spark.unk48 = 0;
+        spark.alpha = (math_random() % 76U) + 0xB4;
+        spark.colorLevel = 0xFF;
+        spark.primMode = 0;
+        spark.envMode = 7;
+        spark.zone = 0;
         spark.viewportMask = sparkArg;
         spark.fadeStart = 8;
         spark.fadeRate = 0x1F;
@@ -798,8 +798,8 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.countRange = 15;
         smoke.texture = 0x6C;
         smoke.renderMode = 0x5103;
-        smoke.unk8 = 0x200005;
-        smoke.unkC = 0;
+        smoke.setGeometryMode = 0x200005;
+        smoke.clearGeometryMode = 0;
         smoke.timerBase = 0x14;
         smoke.timerRange = 0xF;
         smoke.frameRateBase = 0;

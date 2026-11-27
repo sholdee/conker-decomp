@@ -492,9 +492,9 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = config->flags | 0x08000000;
-    desc.unk45 = 0xFF;
-    desc.unk46 = config->unk46;
-    desc.unk47 = config->unk47;
+    desc.colorLevel = 0xFF;
+    desc.primMode = config->unk46;
+    desc.envMode = config->unk47;
     extra.unk10 = config->unk6C;
     if (math_getTriEdges(&config->triangle, &axis0, &axis1, &normal) != 0) {
         math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
@@ -518,7 +518,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
             desc.rot.x = math_randomFloat() * 360.0f;
             desc.rot.y = math_randomFloat() * 360.0f;
             desc.rot.z = math_randomFloat() * 360.0f;
-            desc.unk44 = (math_random() % (config->unk44Range + 1)) + config->unk44Base;
+            desc.alpha = (math_random() % (config->unk44Range + 1)) + config->unk44Base;
             extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -1073,8 +1073,8 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) 
     extra = config->extra;
     spawn.texture = config->texture;
     spawn.renderMode = config->renderMode;
-    spawn.unk4 = config->unkC;
-    spawn.unk0 = config->unk8;
+    spawn.clearGeometryMode = config->clearGeometryMode;
+    spawn.setGeometryMode = config->setGeometryMode;
     spawn.frame = 0;
     spawn.r = config->r;
     spawn.g = config->g;

@@ -480,8 +480,8 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
 
     spawn.texture = 0x27;
     spawn.renderMode = 0x1401;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timer = (math_random() % 5U) + 15;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -641,8 +641,8 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
         emitter->pending -= spawn.countBase;
         spawn.texture = 0x28;
         spawn.renderMode = 0xC01;
-        spawn.unk8 = 0x200005;
-        spawn.unkC = 0;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0;
         spawn.timerBase = 23;
         spawn.timerRange = 13;
         spawn.frameRateBase = 0;

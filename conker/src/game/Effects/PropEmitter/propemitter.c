@@ -154,7 +154,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
             f32 *d; // matching: the block-scoped pointer steers regalloc for the subtraction below
             args.texture = 0x29;
             args.renderMode = 0x4403;
-            args.unk0 = 0x200005;
+            args.setGeometryMode = 0x200005;
             args.fadeStart = 0x21;
             args.fadeRate = 7;
             args.flags = 0x1CE05;
@@ -162,7 +162,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
             args.envColorMode = 8;
             args.updateFunc = 0x10;
             args.deathFunc = -1;
-            args.unk4 = 0;
+            args.clearGeometryMode = 0;
             args.frame = 0;
             args.frameRate = 0;
             args.gravity = 0.0f;

@@ -1335,8 +1335,8 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
     if ((owner->cullMask & 0xF) != 0xF) {
         desc.texture = 0x29;
         desc.renderMode = 0xE03;
-        desc.unk0 = 0x200005;
-        desc.unk4 = 0;
+        desc.setGeometryMode = 0x200005;
+        desc.clearGeometryMode = 0;
         desc.frame = 0;
         desc.frameRate = 0;
         desc.gravity = ((math_randomFloat() * 251.0f) + 44.0f) * 0.001000000047f;
@@ -1482,11 +1482,11 @@ void effect_spawnBoneBurst(Actor *actor, u8 owner, s32 list) {
             sparkEffect.scale.y = 1.0f;
             sparkEffect.scale.z = 1.0f;
             sparkEffect.flags = 0x40EC0000;
-            sparkEffect.unk44 = 0;
-            sparkEffect.unk45 = 0xFF;
-            sparkEffect.unk46 = 0;
-            sparkEffect.unk47 = 7;
-            sparkEffect.unk48 = 0;
+            sparkEffect.alpha = 0;
+            sparkEffect.colorLevel = 0xFF;
+            sparkEffect.primMode = 0;
+            sparkEffect.envMode = 7;
+            sparkEffect.zone = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = particle_newQuadParticle(&sparkEffect, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
                     ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, list);
@@ -1552,11 +1552,11 @@ void effect_spawnBoneBurst(Actor *actor, u8 owner, s32 list) {
             glowEffect.scale.y = 1.0f;
             glowEffect.scale.z = 1.0f;
             glowEffect.flags = 0xCD2002;
-            glowEffect.unk44 = 0xFF;
-            glowEffect.unk45 = 0xFF;
-            glowEffect.unk46 = 0;
-            glowEffect.unk47 = 7;
-            glowEffect.unk48 = 0;
+            glowEffect.alpha = 0xFF;
+            glowEffect.colorLevel = 0xFF;
+            glowEffect.primMode = 0;
+            glowEffect.envMode = 7;
+            glowEffect.zone = 0;
             glowEffect.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
                 data->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, owner, list);
@@ -1740,7 +1740,7 @@ s32 effect_updateBurstSpark(BurstSpark *spark) {
         data->alphaTarget = math_randomFloat() * data->alphaRange + data->alphaBase;
     }
     data->alpha += (data->alphaTarget - data->alpha) * 0.4f;
-    spark->head.def.unk44 = data->alpha;
+    spark->head.def.alpha = data->alpha;
     data->beamWidth += (data->beamWidthTarget - data->beamWidth) * 0.65000004f;
     data->beamLength += (data->beamLengthTarget - data->beamLength) * 0.65000004f;
     return 1;

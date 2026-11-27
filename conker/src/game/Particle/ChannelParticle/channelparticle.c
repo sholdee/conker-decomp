@@ -17,10 +17,10 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
     if (arg2) {
         spawn.flags |= 0x01000000;
         collision_selectMap(0);
-        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
+        spawn.zone = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.flags &= ~0x01000000;
-        spawn.unk48 = 0;
+        spawn.zone = 0;
     }
 
     switch (kind) {
@@ -46,8 +46,8 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
     spawn.rgba[1] = emitter->color[1];
     spawn.rgba[2] = emitter->color[2];
     spawn.rgba[3] = emitter->color[3];
-    spawn.unk44 = emitter->unk2C;
-    spawn.unk45 = emitter->unk2D;
+    spawn.alpha = emitter->unk2C;
+    spawn.colorLevel = emitter->unk2D;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;

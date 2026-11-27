@@ -87,10 +87,10 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x026C0000;
-        spawn.unk45 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 6;
-        spawn.unk48 = 0;
+        spawn.colorLevel = 0xFF;
+        spawn.primMode = 0;
+        spawn.envMode = 6;
+        spawn.zone = 0;
         spawn.viewportMask = 0xFF;
         do {
             motion.life = 22.0f - emitter->elapsed;
@@ -108,7 +108,7 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
                 motion.amplitudeY = math_randomFloat() * 768.0f + 768.0f;
                 motion.phaseSpeedX = (math_randomFloat() * 80.0f + 50.0f) * 0.001f;
                 motion.phaseSpeedY = (math_randomFloat() * 80.0f + 50.0f) * 0.001f;
-                spawn.unk44 = motion.fadeScale * motion.life;
+                spawn.alpha = motion.fadeScale * motion.life;
                 spark = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->base.header.owner, obj->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&((RingSparkParticle *)spark)->motion, &motion, sizeof(motion));

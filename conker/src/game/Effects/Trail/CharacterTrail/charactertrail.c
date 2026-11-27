@@ -124,11 +124,11 @@ void trail_spawnCharacterTrail(Actor *owner, u8 fxOwner, s32 fxList) {
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0xCD2006;
-        desc.unk44 = 0xFF;
-        desc.unk45 = 0xFF;
-        desc.unk46 = 0;
-        desc.unk47 = 6;
-        desc.unk48 = 0;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
+        desc.primMode = 0;
+        desc.envMode = 6;
+        desc.zone = 0;
         desc.viewportMask = 0xFF;
         state->effects[0] = flare_spawnGlow(&params, 0x60, &desc, 0, 0, 0, 0, -1, fxOwner, fxList);
     }
@@ -181,11 +181,11 @@ void trail_spawnCharacterTrail(Actor *owner, u8 fxOwner, s32 fxList) {
         desc.pos = spawn.pos;
         desc.rot = end;
         desc.flags = 0xCD2006;
-        desc.unk44 = 0xFF;
-        desc.unk45 = 0xFF;
-        desc.unk46 = 0;
-        desc.unk47 = 7;
-        desc.unk48 = 0;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
+        desc.primMode = 0;
+        desc.envMode = 7;
+        desc.zone = 0;
         desc.viewportMask = 0xFF;
         desc.scale.x = 1.0f;
         desc.scale.y = 1.0f;
@@ -760,8 +760,8 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 owner, s32 li
 
     count = math_random() % 11U + 10;
     spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;

@@ -104,8 +104,8 @@ void particle_updateUnderwaterRiseEmitter(EmitterObject *obj) {
 
         desc.texture = 47;
         desc.renderMode = 0xC01;
-        desc.unk0 = 0x200005;
-        desc.unk4 = 0;
+        desc.setGeometryMode = 0x200005;
+        desc.clearGeometryMode = 0;
         desc.b2 = 0;
         desc.g2 = 0;
         desc.r2 = 0;

@@ -626,8 +626,8 @@ s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag
     data.fade.eventFunc = eventFunc;
     desc.texture = 39;
     desc.renderMode = 0x5203;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = timer;
     desc.frame = 0;
     desc.frameRate = 0;

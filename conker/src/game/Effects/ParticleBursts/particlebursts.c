@@ -685,9 +685,9 @@ void func_150BD070(u8 owner, s32 list) {
         Vec3f pos2;
 
         count = math_random() % 9U + 17;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.renderMode = 0x5103;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.r = 0xD4;

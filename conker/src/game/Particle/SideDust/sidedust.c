@@ -141,12 +141,12 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0x401C0000;
-        desc.unk44 = (math_random() % 51U) + 160;
-        desc.unk45 = 0xFF;
+        desc.alpha = (math_random() % 51U) + 160;
+        desc.colorLevel = 0xFF;
         growth.growTime = (math_random() & 3) + 7;
         growth.growRate = (((math_randomFloat() * 30.0f) + 30.0f) * desc.width) * 0.001f;
-        desc.unk46 = 0;
-        desc.unk47 = 6;
+        desc.primMode = 0;
+        desc.envMode = 6;
         angleOffset = (side == 1) ? -8 : 8;
         particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x17, 0, 0, (actor->langle >> 8) - angleOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
@@ -270,8 +270,8 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
 
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = (math_random() % 41U) + 40;
     desc.frame = 0;
     desc.frameRate = 0;

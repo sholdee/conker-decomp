@@ -56,7 +56,7 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
         wobble.drag = 0.9704700112f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.fadeStart = 70;
         spawn.fadeRate = 3;
         spawn.flags = 0x80DE07;
@@ -65,7 +65,7 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
         spawn.updateFunc = 0x16;
         wobble.phase[0] = 0;
         wobble.phase[1] = 0;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.deathFunc = -1;
@@ -431,8 +431,8 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         burst.countRange = 7;
         burst.texture = 0x6C;
         burst.renderMode = 0x5103;
-        burst.unk8 = 0x200005;
-        burst.unkC = 0;
+        burst.setGeometryMode = 0x200005;
+        burst.clearGeometryMode = 0;
         burst.timerBase = 30;
         burst.timerRange = 15;
         burst.frameRateBase = 0;

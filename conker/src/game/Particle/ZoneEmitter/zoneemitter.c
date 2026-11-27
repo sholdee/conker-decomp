@@ -19,15 +19,15 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     state->angle = math_wrapFloat(state->angle, 2048.0f, 0.0f);
     state->phase += state->phaseSpeed * gFrameTicks;
     state->alpha = math_cosBinAngleMasked(state->phase - 0x40) * 63.0f + 192.0f;
-    if (math_isZoneHiddenFromViews(obj->head.def.unk48) == 0) {
+    if (math_isZoneHiddenFromViews(obj->head.def.zone) == 0) {
         state->pending += (0.3930000067f + math_randomFloat() * 0.4370000064f) * gFrameDelta;
         if (state->pending > 1.0f) {
             ParticleDesc spawn;
 
             spawn.texture = 40;
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0x1F0600;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0x1F0600;
             spawn.r = 0xFF;
             spawn.g = 0xFF;
             spawn.b = 0xFF;

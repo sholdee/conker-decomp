@@ -209,7 +209,7 @@ typedef struct Game1DD500Motion {
     /* 0x26 */ u8 pad26[2];
 } Game1DD500Motion; // size 0x28
 
-/* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.unk44 the alpha. */
+/* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.alpha the alpha. */
 struct Game1DD500Particle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1DD500Motion motion;
@@ -429,8 +429,8 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                             head = head->next;
                         }
                         index = head - emitter->slots;
-                        desc.unk45 = math_random() % 101 + 100;
-                        desc.unk44 = math_random() % 101 + 155;
+                        desc.colorLevel = math_random() % 101 + 100;
+                        desc.alpha = math_random() % 101 + 155;
                         motion.phaseSpeedWidth = math_random() % 5 + 4;
                         motion.phaseSpeedHeight = math_random() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
@@ -507,10 +507,10 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (math_random() & 1) {
-                particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
+                particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.alpha, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
                               particle->head.header.owner, particle->head.header.kind);
             } else {
-                particle_spawnSquash(motion->unk25, size * 0.68f, particle->head.def.unk44, &splat, 1, particle->head.header.owner, particle->head.header.kind);
+                particle_spawnSquash(motion->unk25, size * 0.68f, particle->head.def.alpha, &splat, 1, particle->head.header.owner, particle->head.header.kind);
             }
             alive = FALSE;
         }
@@ -524,8 +524,8 @@ s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle) {
 
     if (particle->head.def.lifetime < 32) {
         fade = particle->head.def.lifetime * 8;
-        if (fade < particle->head.def.unk44) {
-            particle->head.def.unk44 = fade;
+        if (fade < particle->head.def.alpha) {
+            particle->head.def.alpha = fade;
         }
     }
     return 1;

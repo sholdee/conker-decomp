@@ -491,7 +491,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             extra.drag = 0.9156860113f;
             spawn.texture = 108;
             spawn.renderMode = 0x5103;
-            spawn.unk0 = 0x200005;
+            spawn.setGeometryMode = 0x200005;
             spawn.fadeStart = 70;
             spawn.fadeRate = 3;
             spawn.flags = 0x90DE07;
@@ -499,7 +499,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             spawn.envColorMode = 6;
             spawn.updateFunc = 32;
             spawn.deathFunc = -1;
-            spawn.unk4 = 0;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.drawFunc = -1;

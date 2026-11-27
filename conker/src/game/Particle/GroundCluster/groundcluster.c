@@ -396,10 +396,10 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0x400C0001;
-        desc.unk44 = math_random() % 101U + 100;
-        desc.unk45 = 0xFF;
-        desc.unk46 = 0;
-        desc.unk47 = 6;
+        desc.alpha = math_random() % 101U + 100;
+        desc.colorLevel = 0xFF;
+        desc.primMode = 0;
+        desc.envMode = 6;
         desc.rgba[0] = math_random() % 51U + 180;
         desc.rgba[1] = math_random() % 101U;
         desc.rgba[2] = math_random() % 1U;
@@ -433,8 +433,8 @@ s32 particle_growQuadAtRate(Particle177B50 *p) {
 
 /* Fades out over the last 16 frames of life: caps alpha at life * 16. */
 s32 particle_capQuadAlphaByLife(Particle177B50 *p) {
-    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < p->head.def.unk44) {
-        p->head.def.unk44 = p->head.def.lifetime * 16;
+    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < p->head.def.alpha) {
+        p->head.def.alpha = p->head.def.lifetime * 16;
     }
     return 1;
 }
@@ -499,11 +499,11 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
-    desc.unk44 = arg3;
-    desc.unk45 = 0xFF;
-    desc.unk46 = 0;
-    desc.unk47 = 7;
-    desc.unk48 = 0;
+    desc.alpha = arg3;
+    desc.colorLevel = 0xFF;
+    desc.primMode = 0;
+    desc.envMode = 7;
+    desc.zone = 0;
     desc.fadeStart = argD;
     desc.fadeRate = argE;
     if (math_random() & 1) {
