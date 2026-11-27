@@ -965,13 +965,13 @@ void cutscene_restoreControl(s32 scene) {
 
     player = camera_global_Cameras;
     gCamShot.mode = 1;
-    gCamShot.unk4 = scene;
+    gCamShot.scene = scene;
     gCamShot.eye.x = player->eye.x;
     gCamShot.eye.y = player->eye.y;
     gCamShot.eye.z = player->eye.z;
-    gCamShot.at.angles.sway = 0.0f;
-    gCamShot.at.angles.pitch = player->CameraPitch;
-    gCamShot.at.angles.yaw = player->CameraAngle;
+    gCamShot.at.aim.roll = 0.0f;
+    gCamShot.at.aim.pitch = player->CameraPitch;
+    gCamShot.at.aim.yaw = player->CameraAngle;
     if (gSpawnCutsceneActive == 0) {
         camera_queueMessage(player, 7, &gCamShot);
         if (gCutsceneCutbackAngle != 999.0f) {
@@ -1636,11 +1636,11 @@ void cutscene_applyTracks(s32 scene) {
                     }
                     state = ELEM(scene, track);
                     if (state->unk34 == -9999.0f) {
-                        gCamShot.unk8 = 0.0f;
+                        gCamShot.fovOffset = 0.0f;
                     } else {
                         state->unk34 = (state->unk34 < -20.0f) ? -20.0f : (state->unk34 > 40.0f) ? 40.0f : state->unk34;
                         state = ELEM(scene, track);
-                        gCamShot.unk8 = state->unk34;
+                        gCamShot.fovOffset = state->unk34;
                     }
                     if (state->unk3C == -9999.0f) {
                         tilt3C = 0.0f;
@@ -1652,25 +1652,25 @@ void cutscene_applyTracks(s32 scene) {
                     if (state->unk40 == -9999.0f) {
                         tilt40 = 0.0f;
                         while (0) { } // matching: orders the scene store after the ENT load
-                        gCamShot.unk4 = scene;
+                        gCamShot.scene = scene;
                     } else {
                         state->unk40 = (state->unk40 < -20.0f) ? -20.0f : (state->unk40 > 40.0f) ? 40.0f : state->unk40;
                         if (ENT(scene, track)) { } // matching: same, in this branch
                         state = ELEM(scene, track);
                         tilt40 = state->unk40;
-                        gCamShot.unk4 = scene;
+                        gCamShot.scene = scene;
                     }
                     gCamShot.eye.x = state->x;
                     gCamShot.eye.y = state->y;
                     gCamShot.eye.z = state->z;
                     if (ENT(scene, track)->targetId == 1) {
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
-                        gCamShot.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
-                        gCamShot.unk2C = -state->roll;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
+                        gCamShot.at.look.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
@@ -1679,12 +1679,12 @@ void cutscene_applyTracks(s32 scene) {
                             continue;
                         }
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = obj->xpos;
-                        gCamShot.at.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = obj->zpos;
-                        gCamShot.unk2C = -state->roll;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = obj->xpos;
+                        gCamShot.at.look.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = obj->zpos;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *focus;
 
@@ -1693,20 +1693,20 @@ void cutscene_applyTracks(s32 scene) {
                             continue;
                         }
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = focus->x;
-                        gCamShot.at.focus.y = (focus->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = focus->z;
-                        gCamShot.unk2C = -state->roll;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = focus->x;
+                        gCamShot.at.look.focus.y = (focus->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = focus->z;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 0) {
                         gCamShot.mode = 1;
-                        gCamShot.at.angles.sway = -state->roll;
-                        gCamShot.at.angles.pitch = state->pitch;
-                        gCamShot.at.angles.yaw = state->yaw;
+                        gCamShot.at.aim.roll = -state->roll;
+                        gCamShot.at.aim.pitch = state->pitch;
+                        gCamShot.at.aim.yaw = state->yaw;
                         gCamShot.eye.y += state->yOffset;
-                        gCamShot.unk2C = tilt3C;
-                        gCamShot.unk30 = tilt40;
+                        gCamShot.at.aim.fovX = tilt3C;
+                        gCamShot.at.aim.fovY = tilt40;
                     }
                     if (gSpawnCutsceneActive == 0) {
                         camera_queueMessage(player, 7, &gCamShot);

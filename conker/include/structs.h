@@ -1996,23 +1996,27 @@ typedef struct BloodProfile {
 /* A camera message payload (camera_queueMessage types 7, 8 and 10, applied by camera_processMessages in game/Camera/CameraMessages/cameramessages.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
-    /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
-    /* 0x04 */ s32 unk4;     /* index into gCutsceneStates (cutscene scene) */
-    /* 0x08 */ f32 unk8;     /* copied to gViewFovOffset, the FOV offset, when that scene is active */
-    /* 0x0C */ f32 yaw;      /* types 8 and 10: the end yaw; 999.0f = behind the player */
-    /* 0x10 */ s32 duration; /* type 10: transition length */
+    /* 0x00 */ s32 mode;      /* type 7: 0 or 2 = look at at.look.focus; otherwise aim by at.aim */
+    /* 0x04 */ s32 scene;     /* index into gCutsceneStates (cutscene scene) */
+    /* 0x08 */ f32 fovOffset; /* copied to gViewFovOffset, the FOV offset, when that scene is active */
+    /* 0x0C */ f32 yaw;       /* types 8 and 10: the end yaw; 999.0f = behind the player */
+    /* 0x10 */ s32 duration;  /* type 10: transition length */
     /* 0x14 */ Vec3f eye;
     /* 0x20 */ union {
-        Vec3f focus;
         struct {
-            f32 sway;
-            f32 pitch;
-            f32 yaw;
-        } angles;            /* degrees */
+            /* 0x20 */ Vec3f focus;
+            /* 0x2C */ f32 roll;
+            /* 0x30 */ f32 fovX;
+            /* 0x34 */ f32 fovY;
+        } look;               /* modes 0 and 2 */
+        struct {
+            /* 0x20 */ f32 roll;
+            /* 0x24 */ f32 pitch;
+            /* 0x28 */ f32 yaw;
+            /* 0x2C */ f32 fovX;
+            /* 0x30 */ f32 fovY;
+        } aim;                /* other modes; angles in degrees */
     } at;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
 } CamShot; // size 0x38 (gCutsceneActorLock follows)
 
 /* Zone types: TriggerZone.kind >> 2. Original names (Oct 2000 debugger table); the US spawn table
