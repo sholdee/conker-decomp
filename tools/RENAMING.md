@@ -19,8 +19,9 @@ still matches, they commit. If not, they restore everything. Never rename export
 
 ## Evidence order
 Use the first kind of evidence that exists:
-1. **Original names.** The field names of Rare's debug struct viewer (in the debug prototype ROM; see
-   `tools/SHARED.md`, section "Wave 3a"), the source paths in ROM strings, and the debugger's labels.
+1. **Original names.** The field names of Rare's debug struct viewer (recorded in
+   [docs/original-names](../docs/original-names/README.md); see also `tools/SHARED.md`, section
+   "Wave 3a"), the source paths in ROM strings, and the debugger's labels.
 2. **SDK names.** A function that is Rare's copy of a libultra function gets the SDK name.
 3. **Descriptive names.** Use these where the code makes the meaning clear.
 4. **The address name.** Keep it in all other cases.

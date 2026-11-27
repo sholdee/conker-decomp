@@ -68,8 +68,8 @@ their real names, tree-wide.
 **Original names come first.** Rare's struct browser in the debug prototype builds names about 480
 fields of our structs. An example is the October 2000 debug ROM (`conker.debug.yaml`): the browser is
 in its debugger segment, which starts at ROM 0x189840 (source name `rom_debug_struct.c`). The names
-are not in this repository, and the build does not extract them. To use them, read them from your own
-copy of that ROM. Each browser entry gives a field name and its offset in the Oct 2000 layout. Check
+are recorded in [docs/original-names](../docs/original-names/README.md), with each field mapped to its
+US struct and offset. Each browser entry gives a field name and its offset in the Oct 2000 layout. Check
 every offset against US code: some layouts shifted between Oct 2000 and US, and the viewer has bugs.
 Many original names are already in the headers.
 - **Keep original names exactly as Rare wrote them** (`stand_on_char`, `AimTargetOn`, `FCameraIndex`,
@@ -81,7 +81,7 @@ Many original names are already in the headers.
 - An original name beats our earlier guess, even when ours reads well. Keep our guess only where the
   original row is wrong for US (a layout shift); say so in a short comment.
 - The same debugger also names original enums (camera modes, zone types, task flags and ids, level
-  ids). They are Oct 2000 orderings: check each value against US code
+  ids; `docs/original-names/enums.txt`). They are Oct 2000 orderings: check each value against US code
   before you use it. Name the enumerators in UPPER_CASE, keeping Rare's words (`CAMERA_MODE_NORMAL`).
 - Struct type names stay ours (`Actor`, `Camera`, ...). Note the original viewer title in the struct's
   comment, for example `/* original: movement_move (rom_debug_struct.c) */`.
