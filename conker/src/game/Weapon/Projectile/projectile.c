@@ -28,9 +28,9 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
 
     if (obj != NULL) {
         if (gIsMultiplayer || (camera = obj->CameraPtr) == NULL) {
-            if (D_800B0DF0->music.song == 0x24 || D_800B0DF0->music.song == 0x13 ||
-                D_800B0DF0->music.song == 0x4D || D_800B0DF0->music.song == 0x85 ||
-                D_800B0DF0->music.song == 0x93) {
+            if (gLevelHeader->music.song == 0x24 || gLevelHeader->music.song == 0x13 ||
+                gLevelHeader->music.song == 0x4D || gLevelHeader->music.song == 0x85 ||
+                gLevelHeader->music.song == 0x93) {
                 sound_getPanVolumeAt(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
@@ -38,7 +38,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                 }
             }
         } else {
-            if (D_800B0DF0->music.song == 0x24 || D_800B0DF0->music.song == 0x13) {
+            if (gLevelHeader->music.song == 0x24 || gLevelHeader->music.song == 0x13) {
                 intensity = 255.0f - distance * 0.1000000015f;
                 if (intensity > 16.0f) {
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
@@ -387,7 +387,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     ext = &trail->trail;
     effect_spawnSurfaceSprite((math_randomFloat() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
                   (math_random() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
-    if (math_randomFloat() < 0.253000021f * D_800DCA24) {
+    if (math_randomFloat() < 0.253000021f * gLayoutDetailScale) {
         header.flags = 3;
         header.update = -1;
         header.lifetime = (math_random() % 7U) + 4;
@@ -401,8 +401,8 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
         {
             TrailBurst burst;
 
-            burst.countBase = 5 >> D_800DCA20;
-            burst.countRange = 4 >> D_800DCA20;
+            burst.countBase = 5 >> gLayoutDetailShift;
+            burst.countRange = 4 >> gLayoutDetailShift;
             burst.pos = ext->path.pos;
             burst.sizeBase = 8.25f;
             burst.sizeRange = 5.859999657f;

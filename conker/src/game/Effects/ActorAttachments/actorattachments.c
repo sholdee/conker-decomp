@@ -8,7 +8,7 @@ static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           func_1514E00C, func_1514E194, func_1514E31C, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     func_1514D64C,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, func_1514D564, func_1514DA38,
-    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInLevel20, func_1514DE88, func_1514DB98,
+    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
@@ -741,7 +741,7 @@ void effect_attachCharacterWatcher(Actor *obj) {
 void func_1514DB58(Actor *obj) {
 }
 
-void effect_spawnRopeTieInLevel20(Actor *obj) {
+void effect_spawnRopeTieInDinoArena(Actor *obj) {
     if (level == LEVEL_W1_DINO_ARENA) {
         rope_spawnTie(obj);
     }

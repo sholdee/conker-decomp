@@ -374,7 +374,7 @@ void collision_allocActorLights(Actor *obj) {
         if (obj->unk304[i - 1] != 0) {
             obj->unk301 = count;
         }
-        obj->unk314 = func_1515D440();
+        obj->unk314 = light_allocAmbients();
     }
 }
 
@@ -652,7 +652,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
     if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;
     }
-    obj->unk314 = func_1515D440();
+    obj->unk314 = light_allocAmbients();
     if (gCutsceneStates[0] == 1) {
         blocked = 1;
     } else {

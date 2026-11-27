@@ -38,7 +38,7 @@ EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment
         for (i = 0; i <= gScreenLayout; i++) {
             actor->attachment.handles[i] = light_allocGfxLights(attachment);
         }
-        actor->attachment.sharedHandle = func_1515D440();
+        actor->attachment.sharedHandle = light_allocAmbients();
     }
     return actor;
 }

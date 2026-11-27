@@ -115,11 +115,11 @@ s32 player_getStat(s16 player, s16 stat) {
 }
 
 /* Copies each object's health into the stats of the players (0..3) whose bit is set in `players`;
- * skipped while D_800D18A8 is set. */
+ * skipped while gRespawnPending is set. */
 void player_syncHealth(s16 players) {
     s32 i;
 
-    if (D_800D18A8 != 0) {
+    if (gRespawnPending != 0) {
         return;
     }
     for (i = 0; i < 4; i++) {

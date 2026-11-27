@@ -69,7 +69,7 @@ void gfx_removeObject(u32 index);
 s32 gfx_objectSoundCallback(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3);
 void gfx_playObjectSound(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags);
 void gfx_startObjectSound(WorldObject *obj, s32 arg1, s32 arg2);
-void func_15114F44(s32 arg0, s32 arg1, s32 arg2);
+void gfx_checkMapTriTables(s32 arg0, s32 arg1, s32 arg2);
 extern DrawEntry **gViewDrawListPtrs[4]; // per-view draw lists
 extern Mtx **gObjectMtxBuffers[2]; // per frame buffer: one Mtx per object
 extern DrawEntry *gViewDrawLists[4];

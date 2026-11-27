@@ -4,7 +4,7 @@
 u16 gEliminatedPlayers;
 u16 D_800D18A2;
 u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
-u8 D_800D18A8;
+u8 gRespawnPending;
 u8 gLastDeathKind;
 
 #include "functions.h"
@@ -251,7 +251,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     if (obj->lifting != 0) {
         saved = gCurrentActor;
         gCurrentActor = obj;
-        func_1504BAF0(obj);
+        actor_dropLiftedObject(obj);
         gCurrentActor = saved;
     }
     if (mode == 0 || mode == 3) {
@@ -313,7 +313,7 @@ void actor_respawn(Actor *obj) {
     }
     slot = obj - movement_obj;
     actor_remove(obj, 0);
-    D_800D18A8 = 1;
+    gRespawnPending = 1;
     collision_spawnObject(&gSpawnRecords[slot], slot, 0, 0, 0);
     obj->mv->lastSpawnIndex = saved1B0;
     obj->mv->unk1AF = saved1AF;
@@ -326,7 +326,7 @@ void actor_respawn(Actor *obj) {
     } else {
         player_moveToSpawn(obj, player, 0);
     }
-    D_800D18A8 = 0;
+    gRespawnPending = 0;
     obj->mv->death_State = 0;
     obj->mv->respawnReady = FALSE;
     obj->mv->deathTimer = 0;
@@ -373,7 +373,7 @@ void actor_finishDeath(s32 slot) {
             return;
         }
 
-        D_800D18A8 = 1;
+        gRespawnPending = 1;
         if (!(gTaskDoneBits[0x19] & 4) && gCurrentSaveSlot >= 0) {
             game_requestLevelChange(1, LEVEL_WFRONTEND_HELL, 0, 0, 0);
             return;
@@ -385,7 +385,7 @@ void actor_finishDeath(s32 slot) {
     if (gIsMultiplayer == 0) {
         gAutoSavePending = 1;
         script_autoSave();
-        D_800D18A8 = 1;
+        gRespawnPending = 1;
         player_setStat(slot, 5, gDefaultHealth);
         player_setStat(slot, 2, D_80087260);
         game_requestLevelChange(1, LEVEL_W5_THRONE_ROOM, 0, 0, 0);
@@ -647,7 +647,7 @@ void actor_applyPartHit(Actor *obj, s32 part) {
 }
 
 /* Looks up resource's position and facing via player_getSpawnPoint and calls cutscene_start(LEVEL_GENERIC_CUTSCENES, ...) from there. */
-void func_1507DFE4(s32 resource, s32 arg1) {
+void actor_startSpawnCutscene(s32 resource, s32 arg1) {
     s32 savedLevel;
     s16 pos[3];
     Vec3f vec;
@@ -680,7 +680,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
 }
 
 /* Returns 0, or 1 + the type player_getSpawnPoint reports for gCheckpointSpawn (after setting gNextLevel from gCheckpointLevel). */
-s32 func_1507E114(s32 *arg0) {
+s32 actor_resumeAtCheckpoint(s32 *arg0) {
     s32 type;
     s16 pos[3];
     Vec3f vec;
@@ -690,7 +690,7 @@ s32 func_1507E114(s32 *arg0) {
     s32 unk3C;
     s32 next;
 
-    if (D_800D18A8 == 0) {
+    if (gRespawnPending == 0) {
         return 0;
     }
     next = gNextLevel;

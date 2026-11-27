@@ -52,8 +52,8 @@ void game_initLevelSubsystems(s32 levelId) {
     effect_initQueue();
     level_resetSetupState();
 
-    if (D_800B0DF0->setupCallback) {
-        gLevelSetupFuncs[D_800B0DF0->setupCallback]();
+    if (gLevelHeader->setupCallback) {
+        gLevelSetupFuncs[gLevelHeader->setupCallback]();
     }
     light_initParticleSlots(levelId);
     light_buildLevelParticles();

@@ -4,7 +4,7 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 f32 (*gPointGroupMtx)[4]; // the current float matrix
 s32 gSegmentBases[16];   // segment base addresses
-u8 D_800D2C68;
+u8 gAddingObjectTris;
 
 #include "functions.h"
 #include "variables.h"

@@ -103,7 +103,7 @@ extern f32 gRotateRPYFDegToRad; // 0.01745329238474369f
 
 /* 800B0000 */
 
-extern LevelHeader *D_800B0DF0; // game/Level/LevelHeader/levelheader.c
+extern LevelHeader *gLevelHeader; // game/Level/LevelHeader/levelheader.c
 
 extern s32 D_800BE5D0;
 
@@ -115,7 +115,7 @@ extern f32 gFrustumSlopeX;
 extern f32 gCullVtxFlags; /* 0x800D35E4 == (&gCullVtxFlags)[-1]; it has no symbol of its own */
 extern u8 *gShadowFaceFlags; // per-face shadow flag table
 extern u8 *gShadowFaceFlagsEnd; // end of gShadowFaceFlags
-extern f32 D_800D3670;
+extern f32 gCullFarZ;
 extern s16 D_800D3674;
 extern u16 gSurfSetA[40]; // grid-query result: triangle indices (u16 list for collision_gatherPropGroundTris / collision_transformPropTris)
 extern u16 gSurfSetB[]; // second grid-query triangle index buffer

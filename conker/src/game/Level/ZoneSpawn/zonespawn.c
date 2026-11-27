@@ -565,10 +565,10 @@ static s32 (*gHandlerZoneSpawns[12])(TriggerZone *) = {
     NULL,
     func_1501407C,
     level_spawnZoneEffect,
-    func_15015300,
+    level_spawnBoltZone,
     NULL,
     NULL,
-    func_15015300,
+    level_spawnBoltZone,
     level_spawnStageZone,
     NULL,
     NULL,
@@ -1038,14 +1038,14 @@ s32 level_spawnBoltRainZone(TriggerZone *obj) {
     return 1;
 }
 
-/* Handlers of func_15015300, chosen by TriggerZone.data2. */
-static void (*D_80082F70[2])(TriggerZone *) = {
+/* Handlers of level_spawnBoltZone, chosen by TriggerZone.data2. */
+static void (*gBoltZoneSpawns[2])(TriggerZone *) = {
     level_spawnBoltArcZone,
     level_spawnBoltRingZone,
 };
 
-/** Runs the object's handler from D_80082F70, chosen by data2 (0 or 1). */
-s32 func_15015300(TriggerZone *obj) {
+/** Runs the object's handler from gBoltZoneSpawns, chosen by data2 (0 or 1). */
+s32 level_spawnBoltZone(TriggerZone *obj) {
     void (*handler)(TriggerZone *);
     s32 index = obj->data2;
 
@@ -1053,7 +1053,7 @@ s32 func_15015300(TriggerZone *obj) {
         return 1;
     }
 
-    handler = D_80082F70[index];
+    handler = gBoltZoneSpawns[index];
     if (handler != NULL) {
         handler(obj);
     }

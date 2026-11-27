@@ -815,11 +815,11 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
         gShadowVtxBudget = gShadowVtxBudgetMax;
         D_800DE028 *= 0.8f;
     } else {
-        if (D_800B0DF0->unk1E == 0) {
-            D_800B0DF0->unk1E = 400;
+        if (gLevelHeader->unk1E == 0) {
+            gLevelHeader->unk1E = 400;
         }
         if (gShadowVtxBudget < D_800DE020) {
-            D_800DE028 += ((f32)(u32)D_800B0DF0->unk1E - D_800DE028) * 0.95f;
+            D_800DE028 += ((f32)(u32)gLevelHeader->unk1E - D_800DE028) * 0.95f;
         }
         if (gShadowVtxBudget < gShadowVtxBudgetMin) {
             gShadowVtxBudget = gShadowVtxBudgetMin;

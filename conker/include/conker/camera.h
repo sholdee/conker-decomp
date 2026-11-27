@@ -405,7 +405,7 @@ extern Camera *gSavedCameras;
 /* game/Camera/CameraPoses/cameraposes.c */
 /* (Camera *cam, s32 arg1); declared without a prototype: game/Camera/CameraViews/cameraviews.c also passes the actor */
 void func_151298C0();
-void func_15129934(Camera *cam);
+void camera_updatePoseEye(Camera *cam);
 extern s16 gNumCameraPoses;
 extern CamPose *gCameraPoses;
 extern CamPose *gTargetCameraPose;

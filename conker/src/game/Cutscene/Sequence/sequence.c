@@ -244,7 +244,7 @@ void cutscene_loadMicrocodes(void) {
     s32 altOffset;
     UcodeRomEntry *alt;
 
-    ucode = D_800B0DF0->ucode;
+    ucode = gLevelHeader->ucode;
     if (ucode >= 2) {
         ucode -= 2;
         altOffset = 0;

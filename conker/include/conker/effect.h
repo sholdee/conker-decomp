@@ -990,7 +990,7 @@ void func_1514DA38(Actor *obj);
 void func_1514DAA4(Actor *obj);
 void effect_attachCharacterWatcher(Actor *obj);
 void func_1514DB58(Actor *obj);
-void effect_spawnRopeTieInLevel20(Actor *obj);
+void effect_spawnRopeTieInDinoArena(Actor *obj);
 void func_1514DB98(Actor *obj);
 void effect_attachBone2Light(Actor *obj);
 void func_1514DC38(Actor *obj);

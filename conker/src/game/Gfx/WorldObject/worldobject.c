@@ -22,7 +22,7 @@ Vtx *D_800DBF90; // its source vertices
 s32 *gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 s32 gGroupedObjectCount; // grouped objects, kept at the end of db_Object_array
 
-/* The arguments of the last func_15114F44 call. */
+/* The arguments of the last gfx_checkMapTriTables call. */
 static s32 D_800DBF9C;
 static s32 D_800DBFA0;
 static s32 D_800DBFA4;
@@ -696,7 +696,7 @@ void gfx_startObjectSound(WorldObject *obj, s32 arg1, s32 arg2) {
  * On LEVEL_W1_INSIDE_SAFE, LEVEL_W2_HARBOUR and LEVEL_W5_BANK only: checks both gMapTriTables lists (stops
  * with error 0xC00005A on a bad entry), then stores the three arguments in D_800DBF9C..D_800DBFA4.
  */
-void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
+void gfx_checkMapTriTables(s32 arg0, s32 arg1, s32 arg2) {
     s32 j;
     s32 i;
     u32 (*list)[3];

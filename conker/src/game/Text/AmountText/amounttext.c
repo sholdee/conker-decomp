@@ -14,7 +14,7 @@ typedef struct {
 
 /* Called when `character` touches a pulse object (game/Prop/PropUpdates/propupdates.c): spawns particle_spawnFollowDrift's particles on it
    while level is LEVEL_W1_VOLCANO_RACE or LEVEL_WMP_VOLCANO_RACE. */
-void func_151D6970(Actor *character, void *obj) {
+void text_spawnVolcanoRaceTouchDrift(Actor *character, void *obj) {
     if ((level == LEVEL_W1_VOLCANO_RACE) || (level == LEVEL_WMP_VOLCANO_RACE)) {
         particle_spawnFollowDrift(character, 0xFF, 1);
     }

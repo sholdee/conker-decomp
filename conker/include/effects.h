@@ -311,7 +311,7 @@ typedef struct ModelLink {
     /* 0x04 */ u8 unk4;                    /* light_pickLights's light count */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ PointLightGfx *handles[4];  /* light_allocGfxLights buffers, one per viewport, 0..gScreenLayout */
-    /* 0x18 */ Ambient *sharedHandle;      /* func_1515D440 buffer */
+    /* 0x18 */ Ambient *sharedHandle;      /* light_allocAmbients buffer */
     /* 0x1C */ s32 unk1C;                  /* light_pickLights's mask */
 } ModelLink; /* size 0x20 */
 

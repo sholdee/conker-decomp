@@ -21,7 +21,7 @@ void game_startMatch(s16 arg0, s16 arg1, s16 arg2) {
     mp_clearGame();
     func_15000090();
     gRumbleRedetect = 1;
-    D_800D18A8 = 0;
+    gRespawnPending = 0;
     gClearToWhite = 0;
 }
 
@@ -67,23 +67,23 @@ void game_loadLevel(void) {
     case LEVEL_W2_HARBOUR:
         value = 0xEB;
         if (!(gTaskDoneBits[0x11] & 4)) {
-            value = D_800B0DF0->unk11 + 0xEB;
+            value = gLevelHeader->unk11 + 0xEB;
         }
         break;
     default:
-        value = D_800B0DF0->unk11 + 0xEB;
+        value = gLevelHeader->unk11 + 0xEB;
         break;
     }
     libc_reinitPaging(value);
     gRumbleSuppressed = 0;
-    func_1500E738();
+    level_setEffectDetail();
     particle_resetModelList();
     gGlowCount = 0;
     gPendingTrailPairTask = NULL;
     effect_clearHomingEffects();
     gReleaseRawBanksPending = 1;
     resource = gPlayerSpawnPoints[0];
-    slot = func_1507E114(&resource);
+    slot = actor_resumeAtCheckpoint(&resource);
     if (gFrontEndState == 2) {
         resource = D_800E0BD1;
     }
@@ -183,7 +183,7 @@ void game_loadLevel(void) {
     script_runTasks(1);
     level_spawnZones();
     if (slot != 0) {
-        func_1507DFE4(resource, slot - 1);
+        actor_startSpawnCutscene(resource, slot - 1);
     }
     func_151E562C();
     if ((D_800E0B99 != 0) || (D_800DDE38 == 2)) {
@@ -207,8 +207,8 @@ void game_loadLevel(void) {
             zone_updateActor(&movement_obj[i]);
         }
     }
-    if ((D_800D18A8 != 0) && (level != LEVEL_WFRONTEND_HELL)) {
-        D_800D18A8 = 0;
+    if ((gRespawnPending != 0) && (level != LEVEL_WFRONTEND_HELL)) {
+        gRespawnPending = 0;
         effect_showStatCounter(0xFF, 1);
     }
     script_autoSave();

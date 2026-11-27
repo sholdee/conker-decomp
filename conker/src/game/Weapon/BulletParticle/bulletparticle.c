@@ -85,7 +85,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     desc.x = &bullet->head.pos.x;
     desc.y = &bullet->head.pos.y;
     desc.z = &bullet->head.pos.z;
-    desc.rate = 0.2074999958f * D_800DCA24;
+    desc.rate = 0.2074999958f * gLayoutDetailScale;
     desc.lifetime = 300;
     desc.flags = 0;
     desc.emitter = 3;

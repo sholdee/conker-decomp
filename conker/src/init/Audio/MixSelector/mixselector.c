@@ -49,7 +49,7 @@ static MainSelectorPair gMixDefaultFreqs = { { 11025.0f, 11025.0f } };
 
 /*
  * Per-frame audio mix update. Picks the active selector (override > fallback > one-shot request,
- * forced to 1 by camera_global_Cameras->SpecialFlags bit 0 unless D_800B0DF0 byte 0x2A bit 0), eases the volume, gain and frequency
+ * forced to 1 by camera_global_Cameras->SpecialFlags bit 0 unless gLevelHeader byte 0x2A bit 0), eases the volume, gain and frequency
  * targets for it, and sends any values that changed to the audio channels.
  */
 void audio_updateMix(void) {
@@ -61,7 +61,7 @@ void audio_updateMix(void) {
     f32 scale;
 
     selector = gMixRequest;
-    if ((camera_global_Cameras->SpecialFlags & 1) && !(D_800B0DF0->flags & 1)) {
+    if ((camera_global_Cameras->SpecialFlags & 1) && !(gLevelHeader->flags & 1)) {
         selector = 1;
     }
     if (gMixOverride != 0) {

@@ -304,7 +304,7 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
         for (i = 0; i <= gScreenLayout; i++) {
             particle->link.handles[i] = light_allocGfxLights(arg1);
         }
-        particle->link.sharedHandle = func_1515D440();
+        particle->link.sharedHandle = light_allocAmbients();
     }
     particle->flags &= ~0x200000;
     return particle;

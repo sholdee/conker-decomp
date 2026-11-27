@@ -92,7 +92,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 7:
         gCurrentActor = obj;
-        func_1504BAF0(gCurrentActor);
+        actor_dropLiftedObject(gCurrentActor);
         break;
     case 2:
         obj->task_attrib |= 8;
@@ -1450,7 +1450,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE3:
         return gLastDeathKind;
     case 0xE4:
-        return D_800D18A8;
+        return gRespawnPending;
     case 0xE5:
         return obj->touching_char;
     case 0xE6: {

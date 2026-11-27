@@ -22,7 +22,7 @@ ZoneLink *gDirectionalZones;
 #include "variables.h"
 
 /* Allocates a zeroed 0x10-byte block. */
-void *func_1515D440(void) {
+void *light_allocAmbients(void) {
     void *block;
 
     block = allocate_memory(0x10, 1, 2, 0);

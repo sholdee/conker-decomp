@@ -89,7 +89,7 @@ void boot_mainThread(void *arg) {
     size = (u32)&debugger_us_ROM_START - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
     rom_read(compressedRomAddr, compressed, size, 1);
-    boot_decompress(compressed, gLevelAssetLists, D_8003809C);
+    boot_decompress(compressed, gLevelAssetLists, gDecompressWork);
     heap_free(compressed);
 
     gPageDmaBuffer = (u8 *)ALIGN16(&gPageDmaBufferStorage);

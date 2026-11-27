@@ -272,8 +272,8 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151C7038(Func151C7038Arg *arg0);
 
 /* game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil) */
-extern u8 D_800DCA20;
-extern f32 D_800DCA24;
+extern u8 gLayoutDetailShift;
+extern f32 gLayoutDetailScale;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
 

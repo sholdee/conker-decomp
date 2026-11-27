@@ -8,7 +8,7 @@ void collision_clearUvWobbles(void) {
 }
 
 /**
- * Sets up the current map's background according to D_800B0DF0->skyMode:
+ * Sets up the current map's background according to gLevelHeader->skyMode:
  * mode 4 allocates two vertex buffers per view (gScreenLayout + 1 views), mode 2 builds a
  * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
  */
@@ -25,23 +25,23 @@ void collision_initMapBackground(s32 arg0) {
     s32 *buf;
     Vtx *vtx;
 
-    gBackgroundColour[0] = D_800B0DF0->backgroundRed;
-    gBackgroundColour[1] = D_800B0DF0->backgroundGreen;
-    gBackgroundColour[2] = D_800B0DF0->backgroundBlue;
-    if (gIsMultiplayer != 0 && D_800B0DF0->skyMode == 4) {
-        D_800B0DF0->skyMode = 2;
+    gBackgroundColour[0] = gLevelHeader->backgroundRed;
+    gBackgroundColour[1] = gLevelHeader->backgroundGreen;
+    gBackgroundColour[2] = gLevelHeader->backgroundBlue;
+    if (gIsMultiplayer != 0 && gLevelHeader->skyMode == 4) {
+        gLevelHeader->skyMode = 2;
     }
-    if (D_800B0DF0->skyMode == 4) {
+    if (gLevelHeader->skyMode == 4) {
         size = (gScreenLayout != 1) ? 0x130 : 0x1C0;
         for (i = 0; i <= gScreenLayout; i++) {
             vtx = allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
             gSkyQuadVtx[i][0] = vtx;
             gSkyQuadVtx[i][1] = gSkyQuadVtx[i][0] + size;
         }
-        rom_loadPathTo(&gSkyData, 2, 0xD, D_800B0DF0->skyTextureSet);
+        rom_loadPathTo(&gSkyData, 2, 0xD, gLevelHeader->skyTextureSet);
         if (gExpansionPak != 0) {
             for (i = 0; i < 360; i++) {
-                texture_getAddress(gSkyTextureSets[D_800B0DF0->skyTextureSet][0] + i, 0, 0x3F, 0);
+                texture_getAddress(gSkyTextureSets[gLevelHeader->skyTextureSet][0] + i, 0, 0x3F, 0);
             }
         }
         gSkyMatrices = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);
@@ -50,7 +50,7 @@ void collision_initMapBackground(s32 arg0) {
         } else {
             D_800DBEAB = 0;
         }
-    } else if (D_800B0DF0->skyMode == 2) {
+    } else if (gLevelHeader->skyMode == 2) {
         gSkyData = allocate_memory(0x1000, 1, 1, 0);
         buf = gSkyData;
         switch (level) {
@@ -252,7 +252,7 @@ void collision_initMapBackground(s32 arg0) {
                 gSkyQuadVtx[i][j][3].v.tc[0] = 0x2000;
             }
         }
-    } else if (D_800B0DF0->skyMode == 1) {
+    } else if (gLevelHeader->skyMode == 1) {
         env_initStars();
     }
     if (gTaskDoneBits[0x14] & 1) {

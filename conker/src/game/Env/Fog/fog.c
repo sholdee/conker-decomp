@@ -40,22 +40,22 @@ static FogPreset gFogPresets[9] = {
 
 /* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
 void env_initFog(s32 arg0) {
-    if (D_800B0DF0->unk3C == D_800B0DF0->unk40 && D_800B0DF0->unk3C == 0) {
-        D_800B0DF0->unk40 = 100;
+    if (gLevelHeader->unk3C == gLevelHeader->unk40 && gLevelHeader->unk3C == 0) {
+        gLevelHeader->unk40 = 100;
     }
-    gFogPresets[0].colour[0] = D_800B0DF0->fogColour[0];
-    gFogPresets[0].colour[1] = D_800B0DF0->fogColour[1];
-    gFogPresets[0].colour[2] = D_800B0DF0->fogColour[2];
-    gFogPresets[0].colour[3] = D_800B0DF0->fogColour[3];
-    gFogPresets[0].unk4 = D_800B0DF0->unk3A;
-    gFogPresets[0].unk6 = D_800B0DF0->unk3C;
-    gFogPresets[0].unk8 = D_800B0DF0->unk3E;
-    gFogPresets[0].unkA = D_800B0DF0->unk40;
-    gFogPresets[0].nearPlane = D_800B0DF0->nearPlane;
-    gFogPresets[0].farPlane = D_800B0DF0->farPlane;
-    if (D_800B0DF0->fogPreset != -1) {
+    gFogPresets[0].colour[0] = gLevelHeader->fogColour[0];
+    gFogPresets[0].colour[1] = gLevelHeader->fogColour[1];
+    gFogPresets[0].colour[2] = gLevelHeader->fogColour[2];
+    gFogPresets[0].colour[3] = gLevelHeader->fogColour[3];
+    gFogPresets[0].unk4 = gLevelHeader->unk3A;
+    gFogPresets[0].unk6 = gLevelHeader->unk3C;
+    gFogPresets[0].unk8 = gLevelHeader->unk3E;
+    gFogPresets[0].unkA = gLevelHeader->unk40;
+    gFogPresets[0].nearPlane = gLevelHeader->nearPlane;
+    gFogPresets[0].farPlane = gLevelHeader->farPlane;
+    if (gLevelHeader->fogPreset != -1) {
         gHasLevelFogPreset = 1;
-        env_blendFog(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
+        env_blendFog(gLevelHeader->fogPreset, gLevelHeader->fogPreset, arg0, 0, -1);
     } else {
         gHasLevelFogPreset = 0;
         env_blendFog(0, 0, arg0, 0, -1);
@@ -140,17 +140,17 @@ void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *out6 = (gFogPresets[to].unk6 - gFogPresets[from].unk6) * blend / 4096 + gFogPresets[from].unk6;
     *out8 = (gFogPresets[to].unk8 - gFogPresets[from].unk8) * blend / 4096 + gFogPresets[from].unk8;
     *outA = (gFogPresets[to].unkA - gFogPresets[from].unkA) * blend / 4096 + gFogPresets[from].unkA;
-    fromValue = (gFogPresets[from].nearPlane == -1) ? D_800B0DF0->nearPlane : gFogPresets[from].nearPlane;
-    toValue = (gFogPresets[to].nearPlane == -1) ? D_800B0DF0->nearPlane : gFogPresets[to].nearPlane;
+    fromValue = (gFogPresets[from].nearPlane == -1) ? gLevelHeader->nearPlane : gFogPresets[from].nearPlane;
+    toValue = (gFogPresets[to].nearPlane == -1) ? gLevelHeader->nearPlane : gFogPresets[to].nearPlane;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (gFogPresets[from].farPlane == -1) ? D_800B0DF0->farPlane : gFogPresets[from].farPlane;
-    toValue = (gFogPresets[to].farPlane == -1) ? D_800B0DF0->farPlane : gFogPresets[to].farPlane;
+    fromValue = (gFogPresets[from].farPlane == -1) ? gLevelHeader->farPlane : gFogPresets[from].farPlane;
+    toValue = (gFogPresets[to].farPlane == -1) ? gLevelHeader->farPlane : gFogPresets[to].farPlane;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
 /* With no level fog preset, re-applies preset 6 (if camera_global_Cameras->SpecialFlags bit 0 is set) or preset 0. */
 void env_reapplyFog(s32 arg0) {
-    if (D_800B0DF0->fogPreset == -1) {
+    if (gLevelHeader->fogPreset == -1) {
         if (camera_global_Cameras->SpecialFlags & 1) {
             env_blendFog(6, 6, arg0, 0, -1);
             gBackgroundColour[0] = gFogColour[0];
@@ -158,14 +158,14 @@ void env_reapplyFog(s32 arg0) {
             gBackgroundColour[2] = gFogColour[2];
         } else {
             env_blendFog(0, 0, arg0, 0, -1);
-            gBackgroundColour[0] = D_800B0DF0->backgroundRed;
-            gBackgroundColour[1] = D_800B0DF0->backgroundGreen;
-            gBackgroundColour[2] = D_800B0DF0->backgroundBlue;
+            gBackgroundColour[0] = gLevelHeader->backgroundRed;
+            gBackgroundColour[1] = gLevelHeader->backgroundGreen;
+            gBackgroundColour[2] = gLevelHeader->backgroundBlue;
         }
     }
 }
 
 /* Returns the level's fog preset index (-1 for none). */
 s8 env_getLevelFogPreset(s32 arg0) {
-    return D_800B0DF0->fogPreset;
+    return gLevelHeader->fogPreset;
 }

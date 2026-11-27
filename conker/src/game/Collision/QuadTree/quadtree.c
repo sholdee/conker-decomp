@@ -123,7 +123,7 @@ void collision_addDlTris(Gfx *dl) {
             addr = gfx->words.w1;
             if ((addr >> 24) & 0xF) {
                 // segmented address: rebase through the segment table
-                addr = gSegmentBases[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+                addr = gSegmentBases[(addr >> 24) & 0xF] + addr - (gAddingObjectTris << 24);
             }
             numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
             first = ((s32)gfx->words.w0 >> 1) & 0x7F;
@@ -835,7 +835,7 @@ s32 collision_xorScramble(s32 value) {
 }
 
 /**
- * Loads map `map`'s settings resource into D_800B0DF0 (fatal error if it is missing) and
+ * Loads map `map`'s settings resource into gLevelHeader (fatal error if it is missing) and
  * publishes its gLevelTaskCount/gLevelTaskIds table. If the cartridge word at 0xB0000A5C is not the
  * expected one, the table length unk12 is halved.
  */
@@ -848,12 +848,12 @@ void collision_loadMapSettings(s32 map) {
 
     res = rom_loadPathTable(&loaded, 0, &count, 2, 21, map);
     if (count != 0 && (res->unk4 << 8) != 0) {
-        D_800B0DF0 = res->header;
+        gLevelHeader = res->header;
         if (loaded == 0) {
             gDebugStatusCode = 0xC000037;
             debug_fatalTrap();
         }
-        if (D_800B0DF0 == NULL) {
+        if (gLevelHeader == NULL) {
             gDebugStatusCode = 0xC000037;
             debug_fatalTrap();
         }
@@ -862,11 +862,11 @@ void collision_loadMapSettings(s32 map) {
     osPiReadIo(collision_xorScramble(0x40F0FAAC), &romWord);
     romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
-        info = D_800B0DF0;
+        info = gLevelHeader;
         info->unk12 >>= 1;
     }
 
-    info = D_800B0DF0;
+    info = gLevelHeader;
     if (info->unk12 != 0) {
         gLevelTaskCount = info->unk12;
         gLevelTaskIds = res->idList;

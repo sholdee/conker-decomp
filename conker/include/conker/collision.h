@@ -169,7 +169,7 @@ void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 d
                    f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask);
 s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
                   f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
+void collision_applyShotPartHit(Actor *obj, u16 part, u8 skip);
 s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind);
 
 /* game/Collision/Spawn/spawn.c */

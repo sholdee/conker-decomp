@@ -229,7 +229,7 @@ typedef struct LevelMusic {
     /* 0xD */ u8  unkD;
 } LevelMusic; // size 0xE
 
-/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
+/* The current level's settings resource, gLevelHeader (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
     /* 0x00 */ u16 farPlane;        // fog (gFogPresets.farPlane), gDefaultFar
@@ -1305,7 +1305,7 @@ struct Actor {
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
     /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
-    /* 0x314 */ Ambient *unk314; // one per frame buffer (func_1515D440)
+    /* 0x314 */ Ambient *unk314; // one per frame buffer (light_allocAmbients)
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;

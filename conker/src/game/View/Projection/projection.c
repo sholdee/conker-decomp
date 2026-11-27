@@ -32,7 +32,7 @@ PointLight *gPickedLights[14];    // point lights light_pickLights picked this f
 void view_initDefaultProjection(s32 arg0) {
     gDefaultNear = gFogNear;
     gDefaultFar = gFogFar;
-    D_800D3670 = 100.0f - gDefaultFar;
+    gCullFarZ = 100.0f - gDefaultFar;
     func_151EF954(&gView0Projection, -gViews->halfWidth, gViews->halfWidth, -gViews->halfHeight,
                   gViews->halfHeight, 1.0f, 10000.0f, 1.0f);
 }

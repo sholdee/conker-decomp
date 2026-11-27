@@ -114,7 +114,7 @@ void light_cbLampParticle1(PointLight *light, s32 id);
 void light_cbSwingingLamps(PointLight *light, s32 id);
 void light_cbFlickerSound0(PointLight *light, s32 id);
 void func_150098D0(PointLight *light, s32 id);
-void func_150098F8(PointLight *light, s32 id);
+void light_cbColourCycle1(PointLight *light, s32 id);
 void light_cbJitter1(PointLight *light, s32 id);
 void light_cbObjectCycle(PointLight *light, s32 id);
 void func_15009A38(PointLight *light, s32 id);
@@ -130,7 +130,7 @@ void light_cbJitter4(PointLight *light, s32 id);
 void light_cbJitter5(PointLight *light, s32 id);
 void light_cbFlickerSound1(PointLight *light, s32 id);
 void light_cbPulse3(PointLight *light, s32 id);
-void func_15009EC8(PointLight *light, s32 id);
+void light_cbEmptyEffect(PointLight *light, s32 id);
 void light_cbFlickerSound3(PointLight *light, s32 id);
 void light_cbPulse4(PointLight *light, s32 id);
 void func_15009F74(PointLight *light, s32 id);
@@ -219,7 +219,7 @@ extern PointLight *gPointLights; // list of all point lights
 extern s32 gLightingEnabled;
 extern ZoneLink *gAmbientZones; // ambient colour TriggerZones
 extern ZoneLink *gDirectionalZones; // tint TriggerZones
-void *func_1515D440(void);
+void *light_allocAmbients(void);
 void *light_allocGfxLights(s32 count);
 void light_setAmbient(s32 r, s32 g, s32 b, u8 priority);
 PointLight *light_allocPointLight(void);
@@ -369,9 +369,9 @@ extern const f32 gLightJitterHighs[24];
 
 /* game_22D1B0.c (data only, owner unknown; linked after game/Effects/AttachedBurst/attachedburst): the colours that
  * light_setDaylight sets for levels 6 and 57 */
-extern u8 D_800886F0[3];
-extern u8 D_800886F4[3];
-extern u8 D_800886F8[3];
+extern u8 gDaylightOnAmbient[3];
+extern u8 gDaylightOnBackground[3];
+extern u8 gDaylightOffAmbient[3];
 
 /* game/Effects/ActorFlicker/actorflicker.c */
 void light_updateActorFlicker(LightEffect *effect);

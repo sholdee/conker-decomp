@@ -788,9 +788,9 @@ Gfx *hud_drawWaterSurface(Gfx *gfx) {
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
     if (gHudWaterStage.alpha < 255) {
-        gSPSegment(gfx++, 8, D_80083440);
+        gSPSegment(gfx++, 8, gModelXluNoZRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_800835C0);
+        gSPSegment(gfx++, 8, gModelOpaNoZRenderModes);
     }
     y = -11.0f + gHudWaterStage.unkA8;
     x = -1.0f - gHudWaterStage.unkA0;

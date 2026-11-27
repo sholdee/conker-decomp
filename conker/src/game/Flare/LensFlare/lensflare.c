@@ -30,7 +30,7 @@ static const u8 gFlareSpriteSizes[2][7] = {
  * the line from its screen position through the screen centre.
  */
 
-#define FLARE_SUN       1 /* position comes from gSunPositions[D_800B0DF0->sunPosition] */
+#define FLARE_SUN       1 /* position comes from gSunPositions[gLevelHeader->sunPosition] */
 #define FLARE_FLASH     2 /* also drives the screen flash level gScreenFlash */
 #define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
@@ -128,7 +128,7 @@ Gfx *flare_drawAll(Gfx *gfx, s32 arg1) {
                 if (gDaylight == 0) {
                     hidden = TRUE;
                 } else {
-                    sunPos = gSunPositions[D_800B0DF0->sunPosition];
+                    sunPos = gSunPositions[gLevelHeader->sunPosition];
                     if (flare_projectToScreen(sunPos[0], sunPos[1], sunPos[2], &flare->screenX, &flare->screenY) != 1) {
                         hidden = TRUE;
                     }

@@ -37,7 +37,7 @@ static void (*gLevelCameraSetups[])(Camera *) = {
 
 
 void camera_runLevelSetup(Camera *arg0, s32 arg1) {
-    if (D_800B0DF0->cameraSetupCallback != 0) {
-        gLevelCameraSetups[D_800B0DF0->cameraSetupCallback](arg0);
+    if (gLevelHeader->cameraSetupCallback != 0) {
+        gLevelCameraSetups[gLevelHeader->cameraSetupCallback](arg0);
     }
 }

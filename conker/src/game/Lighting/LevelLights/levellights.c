@@ -203,7 +203,7 @@ void func_150098D0(PointLight *light, s32 id) {
     func_15162034(light, 255, 1);
 }
 
-void func_150098F8(PointLight *light, s32 id) {
+void light_cbColourCycle1(PointLight *light, s32 id) {
     light_createColourCycle(light, 1, 22, 0, -1, 300, 255, 1);
 }
 
@@ -304,7 +304,7 @@ void light_cbPulse3(PointLight *light, s32 id) {
     light_createPulse(light, 3, 5, 300, 0, 0, 255, 1);
 }
 
-void func_15009EC8(PointLight *light, s32 id) {
+void light_cbEmptyEffect(PointLight *light, s32 id) {
     light_createEmptyEffect(light, 32, 255, 1);
 }
 
@@ -494,11 +494,11 @@ static void (*gLightCallbacks[89])(PointLight *light, s32 id) = {
     func_150096C4, func_150096C4, func_150096C4, func_150096C4,
     func_150096C4, func_15009740, light_cbFlicker0, func_150097A4,
     func_150097CC, light_cbLampParticle0, light_cbLampParticle1, light_cbSwingingLamps,
-    light_cbFlickerSound0, func_150098D0, func_150098F8, light_cbJitter1,
+    light_cbFlickerSound0, func_150098D0, light_cbColourCycle1, light_cbJitter1,
     light_cbObjectCycle, light_cbObjectCycle, light_cbObjectCycle, light_cbObjectCycle,
     light_cbLightning1, light_cbJitter2, light_cbJitter3, func_15009BD0,
     func_15009C7C, light_cbPulse1, light_cbPulse2, light_cbJitter4,
-    light_cbJitter5, light_cbFlickerSound1, light_cbPulse3, func_15009EC8,
+    light_cbJitter5, light_cbFlickerSound1, light_cbPulse3, light_cbEmptyEffect,
     light_cbFlickerSound3, light_cbPulse4, func_15009F74, light_cbPulse5,
     light_cbPulse6, light_cbJitter7, light_cbJitter9, light_cbJitter10,
     light_cbJitter11, light_cbFlickerSound4, light_cbPulse7, light_cbLampParticleById,

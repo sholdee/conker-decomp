@@ -116,8 +116,8 @@ void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
 s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
     s16 scale;
 
-    if (index >= (u32)(D_800B0DF0->maxParticles - 1)) {
-        return D_800B0DF0->maxParticles - 1;
+    if (index >= (u32)(gLevelHeader->maxParticles - 1)) {
+        return gLevelHeader->maxParticles - 1;
     }
 
     gLevelSprites[index].x = x;
@@ -383,7 +383,7 @@ void light_buildLevelParticles(void) {
     s32 kind;
 
     light_resetParticles();
-    if (D_800B0DF0->maxParticles == 0) {
+    if (gLevelHeader->maxParticles == 0) {
         return;
     }
     if ((level == LEVEL_THE_WINDMILL) && (gExpansionPak == 0)) {
@@ -397,7 +397,7 @@ void light_buildLevelParticles(void) {
         light_setupParticleSlot(i, gParticleSlotResources[i].id, gParticleSlotResources[i].flags);
     }
 
-    gLevelSprites = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
+    gLevelSprites = allocate_memory(gLevelHeader->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
     collision_selectMap(0);
 
     if (gMeshTriMaterials != NULL) {

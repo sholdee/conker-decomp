@@ -23,14 +23,14 @@ void env_initVtxColours(void) {
     Vtx *src;
 
     gVtxGroupBaseColours = NULL;
-    if (D_800B0DF0->vtxColorFlags != 0) {
+    if (gLevelHeader->vtxColorFlags != 0) {
         total = 0;
-        if (D_800B0DF0->vtxColorFlags & 1) {
+        if (gLevelHeader->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 total += gLevelVertexCounts[i];
             }
         }
-        if (D_800B0DF0->vtxColorFlags & 2) {
+        if (gLevelHeader->vtxColorFlags & 2) {
             for (i = 0; i < gWorldObjectCount; i++) {
                 total += db_Object_array[i].numVertices;
             }
@@ -42,7 +42,7 @@ void env_initVtxColours(void) {
         }
         gVtxColourCount = 0;
         gLevelEnvColourCount = 0;
-        if (D_800B0DF0->vtxColorFlags & 1) {
+        if (gLevelHeader->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 if (gLevelVertices[i] != NULL) {
                     gVtxBaseColours[i] = &gVtxBaseColours[0][gVtxColourCount];
@@ -52,7 +52,7 @@ void env_initVtxColours(void) {
                 }
             }
         }
-        if (D_800B0DF0->vtxColorFlags & 2) {
+        if (gLevelHeader->vtxColorFlags & 2) {
             gPropVtxColourStarts = allocate_memory(gWorldObjectCount * 2, 1, 0, 0);
             for (i = 0; i < gWorldObjectCount; i++) {
                 if (db_Object_array[i].numVertices != 0) {
@@ -63,7 +63,7 @@ void env_initVtxColours(void) {
                 }
             }
         }
-        if (D_800B0DF0->vtxColorFlags & 4) {
+        if (gLevelHeader->vtxColorFlags & 4) {
             gVtxGroupBaseColours = allocate_memory(gVtxColorSetCount * 4, 1, 0, 0);
             bzero(gVtxGroupBaseColours, gVtxColorSetCount * 4);
             for (i = 0; i < gVtxColorSetCount; i++) {

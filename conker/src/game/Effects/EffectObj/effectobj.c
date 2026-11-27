@@ -229,7 +229,7 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
         for (i = 0; i <= gScreenLayout; i++) {
             obj->head.model.handles[i] = light_allocGfxLights(arg6);
         }
-        obj->head.model.sharedHandle = func_1515D440();
+        obj->head.model.sharedHandle = light_allocAmbients();
     }
 
     obj->head.modelPos.x = 0.0f;

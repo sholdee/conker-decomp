@@ -866,7 +866,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         if (obj->unk304[i - 1] != 0) {
             obj->unk301 = 1;
         }
-        obj->unk314 = func_1515D440();
+        obj->unk314 = light_allocAmbients();
         switch (kind) {
         case 2:
             obj->vtilt = 260.0f;
@@ -3460,7 +3460,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
     if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;
     }
-    obj->unk314 = func_1515D440();
+    obj->unk314 = light_allocAmbients();
     effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
     return obj;
 }

@@ -22,7 +22,7 @@ void heap_initMemoryLayout(void);
 extern u32 gRdpOutputBuffer; // RDP output buffer address (u64 *), stored as an integer
 extern u32 gRdpOutputBufferEnd; // its end address
 extern u32 gHeapEnd;
-extern u32 D_8003809C;
+extern u32 gDecompressWork;
 
 /* init/Heap/HeapInit/heapinit.c */
 void heap_init(void);

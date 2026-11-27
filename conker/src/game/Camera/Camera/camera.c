@@ -1894,7 +1894,7 @@ void camera_runModeHandler(Camera *camera) {
         camera_placeOrbitEye(camera);
         break;
     case 0x40:
-        func_15129934(camera);
+        camera_updatePoseEye(camera);
         break;
     case 1:
         camera_followYaw(camera);

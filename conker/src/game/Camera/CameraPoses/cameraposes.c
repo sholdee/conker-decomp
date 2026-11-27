@@ -36,7 +36,7 @@ void func_151298C0(cam, arg1)
  * Eases the eye toward the point FTgetRadius short of target on the line from posePos
  * (snapping when Snap is set), then re-queries collision_findFloorInRange for it when needed.
  */
-void func_15129934(Camera *cam) {
+void camera_updatePoseEye(Camera *cam) {
     f32 x;
     Vec3f dir;
     f32 z;

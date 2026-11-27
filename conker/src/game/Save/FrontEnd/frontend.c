@@ -2449,7 +2449,7 @@ void save_startListSelection(void) {
     }
 
     D_80087270[0] = 0;
-    D_800D18A8 = 0;
+    gRespawnPending = 0;
     D_800E0BB1 = 1;
     save_checkCodeTamper();
     D_800D2E40 = 1;

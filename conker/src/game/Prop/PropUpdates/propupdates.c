@@ -1306,7 +1306,7 @@ void prop_playImpactSound(WorldObject *obj, Actor *character) {
 
 /*
  * Pulses the object's scale and wobbles it; when a character (filtered by the "filter" field)
- * touches it, plays the impact sound, notifies func_151D6970 and shrinks it away.
+ * touches it, plays the impact sound, notifies text_spawnVolcanoRaceTouchDrift and shrinks it away.
  */
 void prop_pulseUntilTouched(WorldObject *obj) {
     f32 dist;
@@ -1390,7 +1390,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
                     pulse->state = 3;
                     prop_playImpactSound(obj, character);
-                    func_151D6970(character, obj);
+                    text_spawnVolcanoRaceTouchDrift(character, obj);
                     break;
                 }
             }

@@ -793,7 +793,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.y = &obj->ypos;
         desc.z = &obj->zpos;
         desc.lifetime = 300;
-        desc.rate = 0.3033999801f * D_800DCA24;
+        desc.rate = 0.3033999801f * gLayoutDetailScale;
         desc.flags = 4;
         desc.emitter = 4;
         desc.unk18 = 1;

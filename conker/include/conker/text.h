@@ -114,7 +114,7 @@ TextBox *text_closeBoxAfterPage(TextBox *box);
 TextBox *text_closeBoxNow(TextBox *box);
 
 /* game/Text/AmountText/amounttext.c */
-void func_151D6970(Actor *character, void *obj);
+void text_spawnVolcanoRaceTouchDrift(Actor *character, void *obj);
 void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player);
 void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2);
 s32 text_updateCashModel(ModelEffect *fx);

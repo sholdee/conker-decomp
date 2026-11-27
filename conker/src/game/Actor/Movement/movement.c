@@ -181,8 +181,8 @@ void actor_updateAll(void) {
             if (gFloorMaterialClass >= 6) {
                 gFloorMaterialClass = 0;
             }
-            if (D_800B0DF0->preUpdateCallback != 0) {
-                gLevelPreUpdateFuncs[D_800B0DF0->preUpdateCallback](obj);
+            if (gLevelHeader->preUpdateCallback != 0) {
+                gLevelPreUpdateFuncs[gLevelHeader->preUpdateCallback](obj);
             }
             if (!(obj->task_attrib & 0x200)) {
                 if (gActorUpdateHandlers[obj->type] != NULL) {
@@ -192,7 +192,7 @@ void actor_updateAll(void) {
             if (obj->type != 0) {
                 face_update(obj);
                 actor_updateAttachedObject(obj, 0, 0);
-                if (i < gPlayerCount && D_800D18A8 == 0) {
+                if (i < gPlayerCount && gRespawnPending == 0) {
                     player_setStat(obj->playernumber, 5, obj->energy);
                 }
             }
@@ -210,8 +210,8 @@ void actor_updateAll(void) {
                 obj->old_zpos != obj->zpos) {
                 obj->unk300 = 1;
             }
-            if (D_800B0DF0->postUpdateCallback != 0) {
-                gLevelPostUpdateFuncs[D_800B0DF0->postUpdateCallback](obj);
+            if (gLevelHeader->postUpdateCallback != 0) {
+                gLevelPostUpdateFuncs[gLevelHeader->postUpdateCallback](obj);
             }
         }
     }
@@ -518,7 +518,7 @@ void func_1504BA38(Actor *obj) {
     }
 }
 
-void func_1504BAF0(Actor *obj) {
+void actor_dropLiftedObject(Actor *obj) {
     s16 index;
     Actor *other;
 
@@ -533,7 +533,7 @@ void func_1504BAF0(Actor *obj) {
     event_dropHeldObject();
 }
 
-void func_1504BB88(Actor *obj) {
+void actor_applyTaskAttrib(Actor *obj) {
     if (obj->task_attrib & 0x10) {
         obj->count5 = 0xFF;
         obj->norun = 0xFF;
@@ -545,7 +545,7 @@ void func_1504BB88(Actor *obj) {
 
     if (obj->task_attrib & 2) {
         if (obj->lifting != 0) {
-            func_1504BAF0(obj);
+            actor_dropLiftedObject(obj);
         }
         obj->task_attrib &= ~2;
     }
@@ -1061,7 +1061,7 @@ void actor_updatePlayer(Actor *actor) {
         D_800CC2BC |= 4;
     }
     anim_updateIdleTimer(actor);
-    func_1504BB88(actor);
+    actor_applyTaskAttrib(actor);
     func_1504BA38(actor);
     if ((actor->unk228 != 0) || (actor->unk2F8 & 0x10)) {
         gCurrentPad->stick_x = 0;
@@ -2797,7 +2797,7 @@ void actor_updateCommon(Actor *obj) {
 
     if ((gCutsceneStates[0] != 1) || ((gCutsceneUpdateUnboundActors[0] != 0) && (cutscene_isActorBound(obj) == 0))) {
         actor_stepScale(obj);
-        func_1504BB88(obj);
+        actor_applyTaskAttrib(obj);
         obj->count2 = 10;
 
         if (!obj->stunned) {

@@ -2148,7 +2148,7 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
         actor->shad = y - floorY;
         if (y <= floorY) {
             actor->mvmt_control |= 0x8000;
-            step = D_800B0DF0->unk13;
+            step = gLevelHeader->unk13;
             if (step != 0 && prevHeight != 0.0f) {
                 particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }
