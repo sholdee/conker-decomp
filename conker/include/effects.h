@@ -3093,7 +3093,7 @@ typedef struct DiscEmitter {
 } DiscEmitter; /* size 0x10 */
 
 /* Timed effect with a DiscEmitter as its data: the object of the expire callbacks particle_emitDiscParticle and
- * func_150C2C00 (game/Particle/DiscEmitter/discemitter.c) and of func_150C2898 (game/Particle/PuffSprays/puffsprays.c). */
+ * particle_updateOriginRingEmitter (game/Particle/DiscEmitter/discemitter.c) and of particle_emitKind6TrailSpray (game/Particle/PuffSprays/puffsprays.c). */
 typedef struct Struct150C29F0 {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiscEmitter unk28;

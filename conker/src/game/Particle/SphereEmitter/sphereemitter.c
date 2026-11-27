@@ -601,7 +601,7 @@ typedef struct {
 
 /* Fade event handlers (FadeEvent.eventFunc), called with the particle and its event time; declared
    without a prototype as the handlers take only the particle. */
-static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, func_151A3150 };
+static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, particle_spawnHeavyTrailBurstAtSprite };
 
 /* Spawns one particle_newOwnedSpriteParticle particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
 s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
@@ -846,7 +846,7 @@ void particle_spawnTrailBurstAtSprite(SpriteParticle *particle) {
 }
 
 /* gDragFadeEventFuncs[1]: a particle_spawnTrailBurst burst at the particle's position, sized by the particle. */
-void func_151A3150(SpriteParticle *particle) {
+void particle_spawnHeavyTrailBurstAtSprite(SpriteParticle *particle) {
     TrailBurst config;
 
     config.countBase = 10;

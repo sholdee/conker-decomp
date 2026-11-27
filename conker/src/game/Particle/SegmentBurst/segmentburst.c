@@ -86,7 +86,7 @@ void particle_attachBloodStrip(Actor *owner, s32 arg1, s32 arg2) {
 }
 
 /* Sets the emitter's velocity scale. */
-s32 func_151938E4(SegmentEmitter *emitter) {
+s32 particle_sampleSegmentPower(SegmentEmitter *emitter) {
     emitter->scale = 0.40200001f;
     return TRUE;
 }

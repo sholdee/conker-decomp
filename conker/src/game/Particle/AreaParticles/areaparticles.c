@@ -482,7 +482,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
 }
 
 /* Like particle_spawnAreaSprites with larger particle_newSpriteParticleWithFloor particles and random colour bytes. */
-void func_1500DE88(TriggerZone *region, f32 density) {
+void particle_spawnAreaLargeSprites(TriggerZone *region, f32 density) {
     f32 count;
 
     count = math_getZoneVolume(region) * density * 1.999999995e-06f;

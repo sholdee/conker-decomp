@@ -342,7 +342,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
-                func_150D65F0((CollisionTri *)hitTri, &hitPos, arg1, arg2);
+                particle_spawnRandomSurfaceMark((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             } else {
                 weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
@@ -406,7 +406,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
 }
 
 /* Impact effect on a type-0xE surface hit at pos (particle_spawnSurfaceMark with randomized parameters). */
-void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
+void particle_spawnRandomSurfaceMark(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     u32 rand3;
     u32 rand2;
     f32 rand1;

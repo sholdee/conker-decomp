@@ -62,10 +62,10 @@ void light_pushRegionNode(RegionNode **list, RegionNode *node) {
 
 typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
 
-/* TriggerZone handlers per zone->data1. Declared without a prototype: func_150AF2E0 reads the zone
+/* TriggerZone handlers per zone->data1. Declared without a prototype: particle_spawnZoneGroundFxNearCamera reads the zone
  * through its own view. */
 static void (*gHandlerZoneHandlers[12])() = {
-    func_1515F2B8, light_runAmbientZoneEffect, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
+    func_1515F2B8, light_runAmbientZoneEffect, func_1515FB70, particle_spawnZoneGroundFxNearCamera, func_151A6B68, func_1515FB94,
     light_killActorInZone, func_1515FC34, func_1515FBC4, effect_stageZoneHandler, NULL,          effect_setZoneFlag,
 };
 

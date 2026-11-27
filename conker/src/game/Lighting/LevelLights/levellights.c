@@ -445,7 +445,7 @@ void func_1500A6D8(PointLight *light, s32 id) {
     LightEffect *effect;
 
     variant = (level == LEVEL_THE_WINDMILL) ? 1 : 0;
-    if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
+    if (particle_initLightSwingOnObject(objects[variant][id - 73], &attachment, id) != 0) {
         header.flags = 0;
         header.update = 23;
         header.lifetime = 300;

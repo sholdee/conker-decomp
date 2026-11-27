@@ -142,7 +142,7 @@ void particle_updateSpinDebris(SpinDebrisParticle *particle) {
 }
 
 /* Identity hook used by particle_beginSpinDebrisDraw for object types 0xC and 0x59. */
-Gfx *func_1517A394(Gfx *gfx) {
+Gfx *particle_emptySpinDebrisDrawHook(Gfx *gfx) {
     return gfx;
 }
 
@@ -269,7 +269,7 @@ void particle_updateGroundChunk(SpinDebrisParticle *particle) {
 Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     gDebrisPrimAlpha = -1;
     if ((type == 0xC) || (type == 0x59)) {
-        gfx = func_1517A394(gfx);
+        gfx = particle_emptySpinDebrisDrawHook(gfx);
     }
     return gfx;
 }

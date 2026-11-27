@@ -48,7 +48,7 @@ static void (*gTimedEffectExpireFuncs[10])() = {
 static void (*gTimedEffectTickFuncs[98])() = {
     effect_updatePuffTimer, particle_updateSparkEmitterEffect, particle_updateGatherEmitter, particle_updateHoverEmitter, particle_updateSwellEmitter, trail_updateBoneEmitter, particle_updateRegionEmitter,
     particle_updateRandomBurstEffect, trail_updateStartTask, trail_updateTrailPairTask, trail_updateRetryTask, trail_updateSurfaceSpawner, particle_updateUnderwaterRiseEmitter, particle_retryDripEmitter,
-    effect_updateSparkEmitterTask, particle_updateSourceEmission, particle_updateScreenBurst, trail_updateBurstEmitter, func_150C2C00, effect_updateJointEmitterTask, particle_updateSideEmitter,
+    effect_updateSparkEmitterTask, particle_updateSourceEmission, particle_updateScreenBurst, trail_updateBurstEmitter, particle_updateOriginRingEmitter, effect_updateJointEmitterTask, particle_updateSideEmitter,
     particle_updateOwnerSideTask, rope_updateTie, particle_updateDriftBurstEmitter, particle_updateBoneSideEmitter, effect_updateDiskEmitter, particle_updateSegmentEmitter, particle_updateMatrixSegmentEmitter,
     particle_updatePointPairEmitter, particle_updateDustEmitter, light_updateColourCycle, effect_updatePropEmitter, particle_updateSmokeEmitter, trail_updateRandomPointEmitter, beam_updateEmitter,
     flamethrower_updateController, effect_updateOwnerSpark, beam_updateAreaEmitter, particle_updateAreaEmitter, particle_updateTwoSidedEmitter, particle_updateRandomEmitter, particle_updateRandomBurstEmitter,

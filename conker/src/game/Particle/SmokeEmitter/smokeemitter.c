@@ -37,7 +37,7 @@ void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {
 }
 
 /* Calls trail_spawnNearCamera(arg0, unk2 + unk8, unk2). */
-void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
+void particle_spawnZoneGroundFxNearCamera(void *arg0, Range150AF2E0 *range) {
     trail_spawnNearCamera(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
@@ -496,7 +496,7 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Looks up object `id` into out; on success also sets out's two constants and copies the
  * object's position. Returns 0 if there is no such object. */
-s32 func_150B060C(id, out)
+s32 particle_initLightSwingOnObject(id, out)
     u8 id;
     struct Obj150B060C *out;
 {

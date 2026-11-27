@@ -578,7 +578,7 @@ void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *p
                   (math_random() & 1) + ((math_random() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
-/* Effect points; func_150E81A8 uses 4-7. */
+/* Effect points; particle_spawnFlashAndJetSprayAtPoint uses 4-7. */
 static const Vec3f D_800A1290[8] = {
     { -780.8950195f, -32.0f, 2153.626953f },
     { -172.0f, -32.0f, 942.0f },
@@ -592,7 +592,7 @@ static const Vec3f D_800A1290[8] = {
 
 /* For points 4-7 of the D_800A1290 table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
  * 200 units above the point, plus an event. */
-void func_150E81A8(index, owner, kind)
+void particle_spawnFlashAndJetSprayAtPoint(index, owner, kind)
     u8 index;
     u8 owner;
     s32 kind;

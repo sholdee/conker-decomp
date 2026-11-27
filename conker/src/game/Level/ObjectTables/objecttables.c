@@ -98,7 +98,7 @@ ObjectBehavior gObjectBehaviors[89] = {
     /* 81 */ { prop_swingFlap, prop_triggerOnFreePlayer, 0 },
     /* 82 */ { prop_swayVertexGroups, NULL, 1 },
     /* 83 */ { prop_copyLinkedPos, NULL, 0 },
-    /* 84 */ { func_150F33B0, NULL, 0 },
+    /* 84 */ { particle_cullObjectByCameraZ, NULL, 0 },
     /* 85 */ { effect_fadeByCameraDistance, NULL, 0 },
     /* 86 */ { func_150C7D7C, NULL, 0 },
     /* 87 */ { NULL, NULL, 0 },

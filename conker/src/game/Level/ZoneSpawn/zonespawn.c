@@ -477,7 +477,7 @@ s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index) {
 
 /* Area effects of level_spawnAreaParticlesZone, chosen by TriggerZone.data1, with the density data2 / 1000. */
 static void (*gZoneAreaParticleHandlers[6])(TriggerZone *, f32) = {
-    particle_spawnAreaParticles, particle_spawnAreaSprites, particle_spawnAreaQuads, func_1500D3AC, func_1500D8C8, func_1500DE88,
+    particle_spawnAreaParticles, particle_spawnAreaSprites, particle_spawnAreaQuads, func_1500D3AC, func_1500D8C8, particle_spawnAreaLargeSprites,
 };
 
 /** Runs the object's handler from gZoneAreaParticleHandlers (chosen by data1) with data2 / 1000 as argument. */

@@ -769,7 +769,7 @@ particle_spawnAreaSprites	0x1500C8D0	1404	game	c		build/src/game/Particle/AreaPa
 particle_spawnAreaQuads	0x1500CE4C	1376	game	c		build/src/game/Particle/AreaParticles/areaparticles.c.o
 func_1500D3AC	0x1500D3AC	1308	game	c		build/src/game/Particle/AreaParticles/areaparticles.c.o
 func_1500D8C8	0x1500D8C8	1472	game	c		build/src/game/Particle/AreaParticles/areaparticles.c.o
-func_1500DE88	0x1500DE88	1512	game	c		build/src/game/Particle/AreaParticles/areaparticles.c.o
+particle_spawnAreaLargeSprites	0x1500DE88	1512	game	c		build/src/game/Particle/AreaParticles/areaparticles.c.o
 game_initLevelSubsystems	0x1500E470	336	game	c		build/src/game/Game/LevelInit/levelinit.c.o
 level_resetSetupState	0x1500E5C0	332	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 func_1500E70C	0x1500E70C	44	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
@@ -2687,7 +2687,7 @@ effect_attachedEffectMessage	0x150AEDF8	184	game	c		build/src/game/Effects/Attac
 trail_sprayFromRing	0x150AEEB0	784	game	c		build/src/game/Effects/Trail/TrailSpray/trailspray.c.o
 trail_fadeMotionTrail	0x150AF1C0	64	game	c		build/src/game/Effects/Trail/TrailSpray/trailspray.c.o
 particle_hitPlayerOnObjectContact	0x150AF200	224	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
-func_150AF2E0	0x150AF2E0	72	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
+particle_spawnZoneGroundFxNearCamera	0x150AF2E0	72	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_updateSmokeEmitter	0x150AF328	956	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_wobbleSmoke	0x150AF6E4	84	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_startGreyscaleScreen	0x150AF738	88	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
@@ -2703,7 +2703,7 @@ particle_freeProjectileTrail	0x150B02C0	48	game	c		build/src/game/Particle/Smoke
 particle_destroyTrailProjectile	0x150B02F0	44	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_freeTrailProjectile	0x150B031C	44	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_spawnObjDebrisBurst	0x150B0348	708	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
-func_150B060C	0x150B060C	164	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
+particle_initLightSwingOnObject	0x150B060C	164	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 effect_spawnActorImpactDebris	0x150B06B0	944	game	c		build/src/game/Effects/ActorImpact/actorimpact.c.o
 effect_pickPerimeterPoint	0x150B0A60	468	game	c		build/src/game/Effects/PerimeterEmitter/perimeteremitter.c.o
 effect_attachPerimeterEmitter	0x150B0C34	36	game	c		build/src/game/Effects/PerimeterEmitter/perimeteremitter.c.o
@@ -2863,12 +2863,12 @@ func_150C2424	0x150C2424	248	game	c		build/src/game/Particle/PuffSprays/puffspra
 particle_fadeMotionTrailByLife	0x150C251C	60	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 func_150C2558	0x150C2558	424	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 func_150C2700	0x150C2700	260	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
-func_150C2804	0x150C2804	148	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
-func_150C2898	0x150C2898	344	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
+particle_startKind6ShortTrail	0x150C2804	148	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
+particle_emitKind6TrailSpray	0x150C2898	344	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 particle_emitDiscParticle	0x150C29F0	528	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
-func_150C2C00	0x150C2C00	972	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
+particle_updateOriginRingEmitter	0x150C2C00	972	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 particle_shrinkBallisticChannelParticle	0x150C2FCC	192	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
-func_150C308C	0x150C308C	212	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
+particle_expireRingParticleOffBearing	0x150C308C	212	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 func_150C3160	0x150C3160	208	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3230	0x150C3230	836	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3574	0x150C3574	1056	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
@@ -3072,7 +3072,7 @@ particle_spawnBreakup	0x150D5A6C	2332	game	c		build/src/game/Particle/FollowEffe
 particle_spawnRandomGrowFade	0x150D6388	172	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnRandomSwell	0x150D6434	180	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 func_150D64E8	0x150D64E8	264	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
-func_150D65F0	0x150D65F0	180	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
+particle_spawnRandomSurfaceMark	0x150D65F0	180	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_flashScreenWhite	0x150D66A4	140	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnFollowDrift	0x150D6730	1384	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_getPointAboveObj	0x150D6C98	44	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
@@ -3219,7 +3219,7 @@ particle_spawnScreenEdgeSprite	0x150E76D0	708	game	c		build/src/game/Particle/Em
 particle_startScreenBurst	0x150E7994	776	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
 particle_updateScreenBurst	0x150E7C9C	848	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
 particle_spawnImpactMark	0x150E7FEC	444	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
-func_150E81A8	0x150E81A8	516	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
+particle_spawnFlashAndJetSprayAtPoint	0x150E81A8	516	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
 particle_startRandomEmitter	0x150E83AC	196	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
 particle_updateRandomEmitter	0x150E8470	948	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
 particle_wobbleRandomEmitterParticle	0x150E8824	48	game	c		build/src/game/Particle/EmissionSource/emissionsource.c.o
@@ -3334,7 +3334,7 @@ particle_onBoneBurstEmitterEvent	0x150F3194	64	game	c		build/src/game/Particle/B
 particle_onBoneBurstParticleEvent	0x150F31D4	64	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_updateBoneBurstParticle	0x150F3214	360	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_buildBoneBurstQuad	0x150F337C	52	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
-func_150F33B0	0x150F33B0	72	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
+particle_cullObjectByCameraZ	0x150F33B0	72	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
@@ -3421,7 +3421,7 @@ effect_updateFadeInSprite	0x150FB2E0	68	game	c		build/src/game_127060.c.o
 func_150FB324	0x150FB324	412	game	c		build/src/game_127060.c.o
 effect_drawStarField	0x150FB4C0	1024	game	hasm	b,e,h	build/src/game/Effects/StarField/starfield.s.o
 particle_spawnSideEffect	0x150FB8C0	2728	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
-func_150FC368	0x150FC368	208	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
+particle_spawnHitEffectsHideOwnerSparks	0x150FC368	208	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_spawnTwoSidedEmitter	0x150FC438	476	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_updateTwoSidedEmitter	0x150FC614	516	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_onTwoSidedEmitterMsg	0x150FC818	280	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
@@ -4711,7 +4711,7 @@ particle_scaleStyleVelX	0x1516F8EC	48	game	c		build/src/game/Particle/StyleParti
 particle_scaleStyleVelZ	0x1516F91C	48	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_scaleStyleVelXZ	0x1516F94C	56	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_scaleStyleVel	0x1516F984	64	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
-func_1516F9C4	0x1516F9C4	196	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
+particle_updateStyleDamped	0x1516F9C4	196	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 func_1516FA88	0x1516FA88	324	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_updateStyleTint	0x1516FBCC	388	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_updateStyleAccelY	0x1516FD50	204	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
@@ -4719,7 +4719,7 @@ func_1516FE1C	0x1516FE1C	536	game	c		build/src/game/Particle/StyleParticle/style
 particle_getRandomDirection	0x15170034	164	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_spawnQuadEdgeStyleParticles	0x151700D8	1064	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 func_15170500	0x15170500	736	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
-func_151707E0	0x151707E0	468	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
+particle_updateStyleSlide	0x151707E0	468	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 particle_spawnStyleBurst	0x151709B4	476	game	c		build/src/game/Particle/StyleParticle/styleparticle.c.o
 effect_spawnModelBurst	0x15170B90	820	game	c		build/src/game/Effects/ModelBurst/modelburst.c.o
 effect_spawnLevelModelBurst	0x15170EC4	136	game	c		build/src/game/Effects/ModelBurst/modelburst.c.o
@@ -4795,7 +4795,7 @@ effect_updateRainSplash	0x15179CB0	256	game	c		build/src/game/Effects/Rain/rain.
 swarm_bobWaveVertices	0x15179DB0	560	game	c		build/src/game/Swarm/WaveBob/wavebob.c.o
 particle_spawnSpinDebris	0x15179FE0	524	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 particle_updateSpinDebris	0x1517A1EC	424	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
-func_1517A394	0x1517A394	12	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
+particle_emptySpinDebrisDrawHook	0x1517A394	12	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 particle_drawSpinDebris	0x1517A3A0	676	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 particle_spawnGroundChunk	0x1517A644	520	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 particle_updateGroundChunk	0x1517A84C	268	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
@@ -4927,7 +4927,7 @@ trail_landSprayTrail	0x15189EBC	276	game	c		build/src/game/Effects/Trail/SprayEm
 trail_ignoreGroundHit	0x15189FD0	32	game	c		build/src/game/Effects/Trail/SprayEmitter/sprayemitter.c.o
 particle_spawnBoneGlow	0x15189FF0	164	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_followBoneGlow	0x1518A094	384	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
-func_1518A214	0x1518A214	212	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
+particle_setBoneGlowBySwapTexture	0x1518A214	212	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_hideBoneGlowWhileEyeClosed	0x1518A2E8	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_hideBoneGlowWithoutExpression	0x1518A324	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_onBoneGlowSwap	0x1518A360	96	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
@@ -5039,7 +5039,7 @@ effect_dropFallingObject	0x15193390	292	game	c		build/src/game/Effects/FallingOb
 effect_updateFallingObject	0x151934B4	428	game	c		build/src/game/Effects/FallingObject/fallingobject.c.o
 particle_spawnBoneModelBurst	0x15193660	404	game	c		build/src/game/Particle/SegmentBurst/segmentburst.c.o
 particle_attachBloodStrip	0x151937F4	240	game	c		build/src/game/Particle/SegmentBurst/segmentburst.c.o
-func_151938E4	0x151938E4	24	game	c		build/src/game/Particle/SegmentBurst/segmentburst.c.o
+particle_sampleSegmentPower	0x151938E4	24	game	c		build/src/game/Particle/SegmentBurst/segmentburst.c.o
 particle_emitOnSegment	0x151938FC	932	game	c		build/src/game/Particle/SegmentBurst/segmentburst.c.o
 effect_spawnHitSplash	0x15193CA0	1552	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactSplash	0x151942B0	56	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
@@ -5208,7 +5208,7 @@ particle_getBurstVelAlongDir	0x151A2B84	76	game	c		build/src/game/Particle/Spher
 particle_getBurstVelAtYawPitch	0x151A2BD0	84	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_spawnDragFadeBurst	0x151A2C24	744	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_spawnTrailBurstAtSprite	0x151A2F0C	580	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
-func_151A3150	0x151A3150	576	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
+particle_spawnHeavyTrailBurstAtSprite	0x151A3150	576	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 trail_spawnActorBoneTrail	0x151A3390	372	game	c		build/src/game/Effects/Trail/BoneTrail/bonetrail.c.o
 trail_createBoneTrailEffect	0x151A3504	280	game	c		build/src/game/Effects/Trail/BoneTrail/bonetrail.c.o
 trail_ageBoneTrail	0x151A361C	420	game	c		build/src/game/Effects/Trail/BoneTrail/bonetrail.c.o

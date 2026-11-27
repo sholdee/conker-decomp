@@ -257,7 +257,7 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
+void particle_startKind6ShortTrail(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     BloodTrailDesc params;
 
     params.radius = 10.3f;
@@ -273,7 +273,7 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     blood_spawnTrail(&params, 0, arg4, arg5);
 }
 
-void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
+void particle_emitKind6TrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
     Vec3f pos;
     Vec3f vel;
     f32 speed;

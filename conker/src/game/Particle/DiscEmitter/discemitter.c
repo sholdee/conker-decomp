@@ -55,7 +55,7 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     emitter->base.header.state = (math_random() % 51U) + 25;
 }
 
-void func_150C2C00(Struct150C29F0 *emitter) {
+void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
     f32 *timer;
     f32 *pos;
     f32 distSq;
@@ -128,7 +128,7 @@ s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle) {
     }
     return 1;
 }
-s32 func_150C308C(ChannelParticle *particle) {
+s32 particle_expireRingParticleOffBearing(ChannelParticle *particle) {
     u8 triggered;
     f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)
     Vec3f *pos;

@@ -7,7 +7,7 @@
 /* Emitter handlers run by particle_followBoneGlow before it follows the bone. Returning 0 ends the emitter's
  * update (particle_followBoneGlow returns 0); setting *follow to FALSE skips this frame's bone follow. */
 /* Declared without a prototype: func_151C9B64 takes its SightStatusObject. */
-static s32 (*gBoneGlowFollowFuncs[])() = { func_1518A214, particle_hideBoneGlowWhileEyeClosed, particle_hideBoneGlowWithoutExpression, func_151C9B64 };
+static s32 (*gBoneGlowFollowFuncs[])() = { particle_setBoneGlowBySwapTexture, particle_hideBoneGlowWhileEyeClosed, particle_hideBoneGlowWithoutExpression, func_151C9B64 };
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
 BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
@@ -70,7 +70,7 @@ s32 particle_followBoneGlow(BoneGlow *emitter) {
 }
 
 /* Handler: sets params unk18/unk1C and the color from the target's byte 0x68; 15 clears flag 2 and stops. */
-s32 func_1518A214(BoneGlow *emitter, u8 *follow) {
+s32 particle_setBoneGlowBySwapTexture(BoneGlow *emitter, u8 *follow) {
     GlowShape *params;
     f32 value;
 

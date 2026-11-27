@@ -119,8 +119,8 @@ void particle_newStyleParticle(x, y, z, texture, frame, r, g, b, alpha, envR, en
 /* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype: two of them
  * take other particle types. */
 static s32 (*gStyleUpdateFuncs[])() = {
-    particle_updateStyleColorRamp, particle_updateStylePulse, particle_updateStyleDrift, func_1516F9C4, particle_updateStyleTint,
-    particle_updateStyleAccelY, func_151707E0, particle_updateStyleBounce, func_150BF0F4,
+    particle_updateStyleColorRamp, particle_updateStylePulse, particle_updateStyleDrift, particle_updateStyleDamped, particle_updateStyleTint,
+    particle_updateStyleAccelY, particle_updateStyleSlide, particle_updateStyleBounce, func_150BF0F4,
 };
 
 void particle_updateStyleParticle(StyleParticle *particle) {
@@ -845,7 +845,7 @@ void particle_scaleStyleVel(StyleParticle *particle, s32 factor) {
     particle->velocityY = velocity >> 8;
 }
 
-s32 func_1516F9C4(StyleParticle *particle) {
+s32 particle_updateStyleDamped(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 scale;
@@ -1170,7 +1170,7 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
     }
 }
 
-s32 func_151707E0(StyleParticle *particle) {
+s32 particle_updateStyleSlide(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 velocityX;
