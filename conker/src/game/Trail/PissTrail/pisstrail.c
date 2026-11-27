@@ -27,7 +27,7 @@ void trail_spawnPissTrail(Actor *actor) {
     s32 variant;
 
     if (actor->mv != NULL) {
-        if (level == 10) {
+        if (level == LEVEL_W2_BOILERROOM) {
             music_playTune(10, 55, 0);
         }
 

@@ -244,7 +244,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             effect_spawnRaySurfaceImpact(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
-            if (level == 14) {
+            if (level == LEVEL_W2_TANK_FACTORY) {
                 f32 vc;
                 f32 front[3];
                 f32 back[3];
@@ -290,7 +290,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
     longShot = 0;
     sound = gProjectileHitValues[kind];
     if (kind == 7) {
-        if (level == 43) {
+        if (level == LEVEL_WMP_BEACH) {
             sound = 0x27;
         }
     }

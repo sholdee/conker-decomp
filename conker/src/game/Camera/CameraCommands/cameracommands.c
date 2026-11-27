@@ -183,16 +183,16 @@ void camera_runCommand(Camera *camera) {
                     gTargetCameraPose = gCameraPoses;
                     gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
                     camera->FTgetRadius = cmd->unk20;
-                    camera->unk288.x = gTargetCameraPose->x;
-                    camera->unk288.y = gTargetCameraPose->y;
-                    camera->unk288.z = gTargetCameraPose->z;
+                    camera->posePos.x = gTargetCameraPose->x;
+                    camera->posePos.y = gTargetCameraPose->y;
+                    camera->posePos.z = gTargetCameraPose->z;
                     camera->SpecialFlags |= 4;
-                    camera->eye.x = camera->unk288.x;
-                    camera->unk27C.x = camera->unk288.x;
-                    camera->eye.y = camera->unk288.y;
-                    camera->unk27C.y = camera->unk288.y;
-                    camera->eye.z = camera->unk288.z;
-                    camera->unk27C.z = camera->unk288.z;
+                    camera->eye.x = camera->posePos.x;
+                    camera->unk27C.x = camera->posePos.x;
+                    camera->eye.y = camera->posePos.y;
+                    camera->unk27C.y = camera->posePos.y;
+                    camera->eye.z = camera->posePos.z;
+                    camera->unk27C.z = camera->posePos.z;
                     camera_placeAtObject(camera, camera->CharPtr);
                     camera->Snap = 1;
                 }
@@ -200,9 +200,9 @@ void camera_runCommand(Camera *camera) {
                 camera->FCameraIndex = cmd->unk1C;
                 gTargetCameraPose = gCameraPoses;
                 gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
-                camera->unk288.x = gTargetCameraPose->x;
-                camera->unk288.y = gTargetCameraPose->y;
-                camera->unk288.z = gTargetCameraPose->z;
+                camera->posePos.x = gTargetCameraPose->x;
+                camera->posePos.y = gTargetCameraPose->y;
+                camera->posePos.z = gTargetCameraPose->z;
                 camera->FTgetRadius = cmd->unk20;
             }
             camera->FToFromStatus = cmd->unk8;

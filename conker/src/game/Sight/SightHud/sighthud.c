@@ -29,7 +29,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
             sight_spawnMultiplayerTint(player);
             break;
         case 27:
-            if (level == 0x27) {
+            if (level == LEVEL_W1_BEE_CAVERN) {
                 sight_spawnScopeSight(player, 1, -1, 0xFF, 1);
             } else {
                 if (gScreenLayout == 0) {
@@ -58,7 +58,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
     }
 }
 
-/* Effects for state 27 when level is 0x27 (see sight_startPlayerEffects). */
+/* Effects for state 27 when level is LEVEL_W1_BEE_CAVERN (see sight_startPlayerEffects). */
 void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     sight_spawnRing(player, 4, arg1, arg2, arg3);
     sight_spawnCrossBars(player, 0, 50, 0xFF, arg1, arg3);
@@ -66,7 +66,7 @@ void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) 
     sight_spawnScopeFrame(player, arg1, arg2, arg3);
     effect_newEmitterSpawner(player, arg3, arg4);
     sight_spawnSidePanel(player, 2, arg1, arg2, arg3);
-    if (level == 0x27) {
+    if (level == LEVEL_W1_BEE_CAVERN) {
         D_8008CD00 = 1;
     }
 }

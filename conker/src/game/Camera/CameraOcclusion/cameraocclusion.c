@@ -65,7 +65,7 @@ void camera_updateFloorHeights(Camera *arg0) {
                       arg0->eye.x, arg0->floorY, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
-    if (level == 0x28) {
+    if (level == LEVEL_W2_TANKTUNNEL) {
         arg0->zoneWaterY = -10000.0f;
         arg0->waterY = -10000.0f;
     }
@@ -170,13 +170,13 @@ void camera_updateFloorHeights(Camera *arg0) {
         arg0->unk354 = (arg0->unk354 < arg0->waterY + 50.0f) ? arg0->waterY + 50.0f : arg0->unk354;
         arg0->CharTrackingSpeedTarget = 0.0f;
         arg0->AvailableModes |= 0x10000000;
-        arg0->unk848 = 1;
+        arg0->ropeActive = 1;
     lbl1:; // matching: the label keeps as1 from filling the branch delay slot
-    } else if (arg0->unk848 != 0) {
+    } else if (arg0->ropeActive != 0) {
         arg0->CharTrackingSpeedTarget = 1.0f;
         arg0->AvailableModes &= ~0x10000000;
         arg0->RopeDirection = 0;
-        arg0->unk848 = 0;
+        arg0->ropeActive = 0;
     }
     if ((arg0->Mode != 0x100) && (arg0->CharPtr->unk137 == 0)) {
         if (arg0->eye.y < arg0->floorY + 40.0f) {
@@ -199,7 +199,7 @@ void camera_resetZScans(void) {
                 gZScanParams[i][j].halfWidth *= 0.5f;
                 gZScanParams[i][j].unk2 *= 0.5f;
             }
-            if ((level == 0x1B) || (level == 0x1E)) {
+            if ((level == LEVEL_W2_LIFTTUNNEL) || (level == LEVEL_W2_FLAMETUNNEL)) {
                 gZScanParams[i][j].halfWidth *= 0.75f;
                 gZScanParams[i][j].unk2 *= 0.75f;
             }
@@ -529,42 +529,42 @@ void camera_collide(Camera *arg0) {
         saved2 = gFloorProbeTypeEnabled[2];
         saved1 = gFloorProbeTypeEnabled[1];
         if (arg0->SpecialFlags & 0x800) {
-            arg0->unk94C = 20.0f;
-            arg0->unk950 = 40.0f;
+            arg0->wallProbeWidthTarget = 20.0f;
+            arg0->wallProbeHeightTarget = 40.0f;
         } else if (arg0->SpecialFlags & 0x10) {
-            arg0->unk94C = 20.0f;
-            arg0->unk950 = 72.0f;
+            arg0->wallProbeWidthTarget = 20.0f;
+            arg0->wallProbeHeightTarget = 72.0f;
         } else if (arg0->IdealTripodMagnitude > 580.0f) {
-            arg0->unk94C = 70.0f;
-            arg0->unk950 = 140.0f;
-        } else if ((level == 0x31) && (arg0->CharContext == 3)) {
+            arg0->wallProbeWidthTarget = 70.0f;
+            arg0->wallProbeHeightTarget = 140.0f;
+        } else if ((level == LEVEL_W1_ROCK_SOLID) && (arg0->CharContext == 3)) {
             flag = 1;
-            arg0->unk94C = 20.0f;
-            arg0->unk950 = 50.0f;
+            arg0->wallProbeWidthTarget = 20.0f;
+            arg0->wallProbeHeightTarget = 50.0f;
         } else {
             if (((arg0->DoingAim != 0) && (arg0->DoingAim != 1) && (arg0->DoingAim != 3)) ||
                 ((arg0->CharPtr->unk102 != 0) &&
                  ((arg0->CharPtr->xpos != arg0->lastPlayerPos.x) || (arg0->CharPtr->zpos != arg0->lastPlayerPos.z))) ||
                 (sub->unk1B3 != 0)) {
-                arg0->unk94C = 20.0f;
-                arg0->unk950 = 20.0f;
+                arg0->wallProbeWidthTarget = 20.0f;
+                arg0->wallProbeHeightTarget = 20.0f;
             } else if (arg0->CharPtr->unk102 != 0) {
                 flag = 1;
-                arg0->unk94C = 25.0f;
-                arg0->unk950 = 30.0f;
+                arg0->wallProbeWidthTarget = 25.0f;
+                arg0->wallProbeHeightTarget = 30.0f;
             } else {
-                arg0->unk94C = 30.0f;
-                arg0->unk950 = 60.0f;
+                arg0->wallProbeWidthTarget = 30.0f;
+                arg0->wallProbeHeightTarget = 60.0f;
             }
         }
         if (arg0->Snap != 0) {
-            arg0->unk954 = 0.0f;
-            arg0->unk95C = arg0->unk94C;
-            arg0->unk958 = 0.0f;
-            arg0->unk960 = arg0->unk950;
+            arg0->wallProbeWidthVel = 0.0f;
+            arg0->wallProbeWidth = arg0->wallProbeWidthTarget;
+            arg0->wallProbeHeightVel = 0.0f;
+            arg0->wallProbeHeight = arg0->wallProbeHeightTarget;
         } else {
-            math_springTo(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->SpringTime);
-            math_springTo(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->SpringTime);
+            math_springTo(&arg0->wallProbeWidth, arg0->wallProbeWidthTarget, &arg0->wallProbeWidthVel, 4.0f, 6.0f, arg0->SpringTime);
+            math_springTo(&arg0->wallProbeHeight, arg0->wallProbeHeightTarget, &arg0->wallProbeHeightVel, 4.0f, 6.0f, arg0->SpringTime);
         }
         probe.type = 0x2D;
         probe.CameraPtr = arg0;
@@ -580,7 +580,7 @@ void camera_collide(Camera *arg0) {
         probe.floorY = arg0->unk354;
         probe.yspd = 0.0f;
         probe.theta = arg0->CameraAngle;
-        if ((arg0->AvailableModes & 0x80000000) || (level == 0x37)) {
+        if ((arg0->AvailableModes & 0x80000000) || (level == LEVEL_W1_U_BEND)) {
             gFloorProbeTypeEnabled[2] = 0;
         }
         if (arg0->AvailableModes & 0x10000) {
@@ -621,7 +621,7 @@ void camera_collide(Camera *arg0) {
             }
         }
         arg0->eye.z = probe.zpos;
-        if ((level != 0x1B) && (hit != 0) && (arg0->Mode != 0x100)) {
+        if ((level != LEVEL_W2_LIFTTUNNEL) && (hit != 0) && (arg0->Mode != 0x100)) {
             collision_findFloorEx(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
                           arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
             if (arg0->eye.y < floorY + 40.0f) {

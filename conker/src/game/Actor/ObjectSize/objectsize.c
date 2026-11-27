@@ -50,8 +50,8 @@ void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
         width = depth = 60.0f;
         height = 180.0f;
     } else if (obj->type == 45) {
-        height = obj->CameraPtr->unk960;
-        width = depth = obj->CameraPtr->unk95C;
+        height = obj->CameraPtr->wallProbeHeight;
+        width = depth = obj->CameraPtr->wallProbeWidth;
     } else if (obj->type == 4) {
         height = obj->bodyHeight * 6.0f;
         width = depth = obj->bodyRadius * 3.0f;

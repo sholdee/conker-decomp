@@ -478,7 +478,7 @@ void camera_setAimDistance(Camera *camera) {
             camera->aim.distance = 350.0f;
             return;
         }
-        if ((zone == 0x3B) && ((level == 0x41) || (level == 0x3C))) {
+        if ((zone == 0x3B) && ((level == LEVEL_W3_HORROR_INTRO) || (level == LEVEL_W3_HAUNTED_HOUSE))) {
             camera->YOffsetTget = -12.0f;
             camera->sideOffsetTarget = -28.0f;
             camera->aim.distance = 106.0f;
@@ -491,7 +491,7 @@ void camera_setAimDistance(Camera *camera) {
             camera->sideOffsetTarget = 0.0f;
             return;
         }
-        if ((zone == 0x12) && (level == 0x3C)) {
+        if ((zone == 0x12) && (level == LEVEL_W3_HAUNTED_HOUSE)) {
             camera->YOffsetTget = 10.0f;
             camera->aim.distance = 180.0f;
             camera->sideOffsetTarget = 0.0f;

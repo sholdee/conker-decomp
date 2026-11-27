@@ -45,7 +45,7 @@ void collision_initMapBackground(s32 arg0) {
             }
         }
         gSkyMatrices = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);
-        if (level == 0x3C) {
+        if (level == LEVEL_W3_HAUNTED_HOUSE) {
             D_800DBEAB = 1;
         } else {
             D_800DBEAB = 0;
@@ -54,10 +54,10 @@ void collision_initMapBackground(s32 arg0) {
         gSkyData = allocate_memory(0x1000, 1, 1, 0);
         buf = gSkyData;
         switch (level) {
-            case 0:
-            case 41:
-            case 45:
-            case 48:
+            case LEVEL_W1_BULL_PADDOCK:
+            case LEVEL_W1_TRAINING:
+            case LEVEL_WMP_MAIN_WAR:
+            case LEVEL_WMP_BEACH_WAR:
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0xBF;
@@ -66,7 +66,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0xD5;
                 to[2] = 0xFF;
                 break;
-            case 43:
+            case LEVEL_WMP_BEACH:
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
@@ -75,7 +75,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0;
                 to[2] = 0x5D;
                 break;
-            case 36:
+            case LEVEL_WMP_TANK:
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
@@ -105,10 +105,10 @@ void collision_initMapBackground(s32 arg0) {
             buf[i * 4 + 0] = color;
         }
         switch (level) {
-            case 0:
-            case 41:
-            case 45:
-            case 48:
+            case LEVEL_W1_BULL_PADDOCK:
+            case LEVEL_W1_TRAINING:
+            case LEVEL_WMP_MAIN_WAR:
+            case LEVEL_WMP_BEACH_WAR:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
@@ -118,7 +118,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0x4E;
                 to[2] = 0x19;
                 break;
-            case 43:
+            case LEVEL_WMP_BEACH:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
@@ -128,7 +128,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0x15;
                 to[2] = 0x93;
                 break;
-            case 36:
+            case LEVEL_WMP_TANK:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
@@ -160,10 +160,10 @@ void collision_initMapBackground(s32 arg0) {
             buf[i * 4 + 0] = color;
         }
         switch (level) {
-            case 0:
-            case 41:
-            case 45:
-            case 48:
+            case LEVEL_W1_BULL_PADDOCK:
+            case LEVEL_W1_TRAINING:
+            case LEVEL_WMP_MAIN_WAR:
+            case LEVEL_WMP_BEACH_WAR:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
@@ -173,7 +173,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0xC7;
                 to[2] = 0;
                 break;
-            case 43:
+            case LEVEL_WMP_BEACH:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
@@ -183,7 +183,7 @@ void collision_initMapBackground(s32 arg0) {
                 to[1] = 0x22;
                 to[2] = 0xFF;
                 break;
-            case 36:
+            case LEVEL_WMP_TANK:
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];

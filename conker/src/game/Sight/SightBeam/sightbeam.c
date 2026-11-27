@@ -187,7 +187,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     spawn.height = 20.0f;
     spawn.pos = *start;
     spawn.rot = *end;
-    spawn.flags = (level == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
+    spawn.flags = (level == LEVEL_W5_BANK ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;

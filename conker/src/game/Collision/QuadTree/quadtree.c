@@ -22,7 +22,7 @@ static s32 gAllMapsTriCount;  /* triangles added for all maps */
 #include "piint.h"
 
 /* Size of the quadtree buffer of each level (collision_allocQuadTree). */
-static const s32 gQuadBufferSizes[69] = {
+static const s32 gQuadBufferSizes[LEVEL_COUNT] = {
     15000, 10000, 20000, 30000, 30000, 30000, 30000, 10000, 30000, 30000,
     15000, 10000, 20000, 30000, 20000, 30000, 20000, 30000, 10000, 30000,
     40000, 30000, 30000, 30000, 30000, 30000, 20000, 10000, 20000, 10000,
@@ -33,7 +33,7 @@ static const s32 gQuadBufferSizes[69] = {
 };
 
 /* Size of the triangle-data arena of each level (collision_initTriArena). */
-static const s32 gTriArenaSizes[69] = {
+static const s32 gTriArenaSizes[LEVEL_COUNT] = {
     45000, 60000, 100000, 100000, 70000, 100000, 125000, 50000, 100000, 100000,
     61000, 60000, 100000, 100000, 70000, 100000, 60000, 100000, 24000, 110000,
     50000, 100000, 100000, 110000, 30000, 100000, 70000, 70000, 110000, 40000,

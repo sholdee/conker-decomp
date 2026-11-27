@@ -1619,7 +1619,7 @@ struct Camera {
     /* 0x276 */ u8 pad276[0x2];
     /* 0x278 */ f32 FTgetRadius;
     /* 0x27C */ Vec3f unk27C;
-    /* 0x288 */ Vec3f unk288;
+    /* 0x288 */ Vec3f posePos;                         /* gCameraPoses[FCameraIndex], the fixed pose point (game/Camera/CameraCommands/cameracommands.c) */
     /* 0x294 */ f32 FixedVel;                         /* not accessed by US code */
     /* 0x298 */ s16 CharMoved;
     /* 0x29A */ u8 pad29A[0x2];
@@ -1751,7 +1751,9 @@ struct Camera {
     /* 0x73C */ s16 DoingAim;
     /* 0x73E */ u8 pad73E[0x2];
     /* 0x740 */ CamAim aim;
-    /* 0x7A8 */ u8 pad7A8[0x8];
+    /* 0x7A8 */ f32 BackOffAngle;                     /* not accessed by US code */
+    /* 0x7AC */ s8 DeBounceAimButton;                 /* not accessed by US code */
+    /* 0x7AD */ u8 pad7AD[0x3];
     /* 0x7B0 */ f32 WaterDx;
     /* 0x7B4 */ f32 SpringTime;                       /* frame time scale */
     /* 0x7B8 */ s32 ZoomCounter;
@@ -1773,7 +1775,7 @@ struct Camera {
     /* 0x7F0 */ f32 CameraRadiusAngleVel;             /* not accessed by US code */
     /* 0x7F4 */ CamTransition transition;
     /* 0x844 */ f32 LadderAngleVel;
-    /* 0x848 */ u8 unk848;
+    /* 0x848 */ u8 ropeActive;                        /* the rope camera (SpecialFlags 0x40) ran; cleared once it has been undone */
     /* 0x849 */ u8 pad849[0x1];
     /* 0x84A */ s16 AimTimeOuts;                      /* frames left before the aim swing gives up */
     /* 0x84C */ u8 AimTargetOn;                       /* sight_startPlayerEffects ran; sight_resetPlayerEffects undoes it */
@@ -1834,12 +1836,12 @@ struct Camera {
     /* 0x948 */ u8 avoidActive;
     /* 0x949 */ u8 unk949;
     /* 0x94A */ u8 pad94A[0x2];
-    /* 0x94C */ f32 unk94C;
-    /* 0x950 */ f32 unk950;
-    /* 0x954 */ f32 unk954;
-    /* 0x958 */ f32 unk958;
-    /* 0x95C */ f32 unk95C;
-    /* 0x960 */ f32 unk960;
+    /* 0x94C */ f32 wallProbeWidthTarget;             /* size of the camera's wall probe (type 0x2D, camera_collide) */
+    /* 0x950 */ f32 wallProbeHeightTarget;
+    /* 0x954 */ f32 wallProbeWidthVel;
+    /* 0x958 */ f32 wallProbeHeightVel;
+    /* 0x95C */ f32 wallProbeWidth;                   /* eased toward the target; objectsize.c reads it for type 0x2D */
+    /* 0x960 */ f32 wallProbeHeight;
     /* 0x964 */ f32 accelA;
     /* 0x968 */ f32 accelB;
     /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game/Camera/YawBehind/yawbehind.c) */

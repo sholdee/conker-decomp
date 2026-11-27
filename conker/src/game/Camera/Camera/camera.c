@@ -732,7 +732,7 @@ void camera_loadDistancePreset(Camera *camera) {
         camera->IdealTripodMagnitude = 150.0f;
     } else if (mode80) {
         camera->height = camera->eye.y - camera->unk354;
-    } else if (mode80 && (camera->CharPtr->unk102 == 0) && (level != 0x17)) {
+    } else if (mode80 && (camera->CharPtr->unk102 == 0) && (level != LEVEL_W1_DOG_FISH_NURSERY_PART1)) {
         camera->height = 40.0f;
         camera->unk34C = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;
@@ -2000,7 +2000,7 @@ void camera_reset(Camera *camera) {
     u8 index;
     s32 i;
 
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < CAMERA_MODE_COUNT; i++) {
         camera->FCache[i] = 0;
     }
 
