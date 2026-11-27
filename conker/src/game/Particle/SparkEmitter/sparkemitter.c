@@ -20,7 +20,7 @@ void particle_updateSparkSpawner(SparkEffect *obj) {
 }
 
 /* Spawns a spark emitter object with a random spin, rate and color. */
-void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
+void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 owner, s32 list) {
     RingSparkEmitter emitter;
     TimedEffect *object;
 
@@ -43,7 +43,7 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    object = effect_newTimedEffect(math_randomU8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
+    object = effect_newTimedEffect(math_randomU8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), owner, list);
     if (object != NULL) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }

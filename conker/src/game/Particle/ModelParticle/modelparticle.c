@@ -72,7 +72,7 @@ static s32 (*gModelParticleMatrixFuncs[])() = {
     particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, effect_setParticleIdentityMtx,
     light_getLampParticleMatrix, particle_buildOwnerMatrix,
 };
-static Gfx *(*gModelParticleDrawFuncs[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { particle_bindDataTexture, particle_bindFirstListTexture, particle_bindListTextures };
+static Gfx *(*gModelParticleDrawFuncs[])(Gfx *gfx, ModelParticle *particle, s16 view) = { particle_bindDataTexture, particle_bindFirstListTexture, particle_bindListTextures };
 static void (*gModelParticleDestroyVariants[])() = {
     particle_destroyModelParticleDefault, weapon_destroyBullet, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault,
     particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyTrailProjectile,
@@ -223,8 +223,8 @@ void particle_freeModelParticleLights(ModelParticle *particle) {
 
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
-void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
-                    s32 arg6) {
+void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 maxLights, s32 lightMask, CollisionHit *floor, s32 extraSize, u8 owner,
+                    s32 list) {
     ModelParticle *particle;
     ParticleNode *node;
     s32 i;
@@ -232,7 +232,7 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
     if (gModelParticleCount > 300) {
         return NULL;
     }
-    particle = effect_newObject((spawn->flags & 0x4000) ? 0x48 : 0x19, arg6, extraSize + 0x170, 1, arg5,
+    particle = effect_newObject((spawn->flags & 0x4000) ? 0x48 : 0x19, list, extraSize + 0x170, 1, owner,
                              (spawn->flags & 0x400000) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -310,15 +310,15 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
     }
     gModelParticleCount++;
     particle->link.lightCount = 0;
-    particle->link.maxLights = arg1;
-    particle->link.lightMask = arg2;
+    particle->link.maxLights = maxLights;
+    particle->link.lightMask = lightMask;
     for (i = 0; i < ARRAY_COUNT(particle->link.handles); i++) {
         particle->link.handles[i] = NULL;
     }
     particle->link.sharedHandle = NULL;
-    if (arg1 != 0) {
+    if (maxLights != 0) {
         for (i = 0; i <= gScreenLayout; i++) {
-            particle->link.handles[i] = light_allocGfxLights(arg1);
+            particle->link.handles[i] = light_allocGfxLights(maxLights);
         }
         particle->link.sharedHandle = light_allocAmbients();
     }
@@ -326,8 +326,8 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
     return particle;
 }
 
-void *particle_newModelParticle(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
-    return particle_newModelParticleWithFloor(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
+void *particle_newModelParticle(ParticleSpawn *spawn, s32 maxLights, s32 lightMask, s32 extraSize, u8 owner, s32 list) {
+    return particle_newModelParticleWithFloor(spawn, maxLights, lightMask, NULL, extraSize, owner, list);
 }
 
 /* Rebuild this frame's matrix through the matrixFn handler; flag 0x40000 says the particle is drawable.
@@ -368,11 +368,11 @@ void particle_buildModelParticleMatrix(ModelParticle *particle) {
 
 /* Draw a particle whose matrix particle_buildModelParticleMatrix built this frame: segment 8, render and geometry mode (lit when
  * flag 0x800), optional extra commands from drawFn, then the matrix and the model's display list. */
-Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
+Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *obj, s16 view) {
     ModelParticle *particle;
     u8 state;
 
-    particle = arg1; // matching: IDO allocates s0/s1 and the frame from this param copy
+    particle = obj; // matching: IDO allocates s0/s1 and the frame from this param copy
 
     if (!(particle->flags & 0x200000)) {
         return gfx;
@@ -391,7 +391,7 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
     }
     if (particle->flags & 0x10000) {
         if (particle->drawFn != -1) {
-            gfx = gModelParticleDrawFuncs[particle->drawFn](gfx, particle, arg2);
+            gfx = gModelParticleDrawFuncs[particle->drawFn](gfx, particle, view);
         }
     }
     gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, particle->alpha, &state);
@@ -401,7 +401,7 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
                         ((particle->flags & 0x800) ? 0 : G_LIGHTING) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
-        gfx = math_emitPointLights(gfx, &particle->link, particle->lightMode, particle->owner, particle->ownerId, arg2,
+        gfx = math_emitPointLights(gfx, &particle->link, particle->lightMode, particle->owner, particle->ownerId, view,
                             &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -804,10 +804,10 @@ void particle_onOwnerGone(ModelParticle *particle, ActorRef *data, u8 event) {
 
 /* Call effect_sendEventToTypes for both particle object kinds (0x19 and 0x48, see particle_newModelParticleWithFloor). */
 
-void particle_broadcastToModelParticles(s32 arg0, u8 arg1) {
+void particle_broadcastToModelParticles(s32 event, u8 eventType) {
     const s32 kinds[2] = { 0x19, 0x48 };
 
-    effect_sendEventToTypes(kinds, ARRAY_COUNT(kinds), arg0, arg1);
+    effect_sendEventToTypes(kinds, ARRAY_COUNT(kinds), event, eventType);
 }
 
 /* A texture to bind to a segment: gEffectTextures index, segment number, and texture_getAddress's third argument. */
@@ -826,14 +826,14 @@ typedef struct {
 } ParticleTextureList;
 
 /* Draw handler: bind the texture stored in the particle's data. */
-Gfx *particle_bindDataTexture(Gfx *gfx, ModelParticle *particle, s16 arg2) {
+Gfx *particle_bindDataTexture(Gfx *gfx, ModelParticle *particle, s16 view) {
     SegmentTexture *tex = (SegmentTexture *)MODEL_PARTICLE_DATA(particle);
 
     return particle_bindSegmentTexture(gfx, tex->index, tex->segment, tex->arg);
 }
 
 /* Draw handler: bind the first texture of the list stored in the particle's data. */
-Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 arg2) {
+Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 view) {
     SegmentTexture *tex = ((ParticleTextureList *)MODEL_PARTICLE_DATA(particle))->textures;
 
     return particle_bindSegmentTexture(gfx, tex->index, tex->segment, tex->arg);
@@ -841,27 +841,27 @@ Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 arg2) 
 
 
 /* Bind texture gEffectTextures[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
-Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
+Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 lifetime) {
     s32 data;
     u8 format;
-    u8 unkB;
+    u8 siz;
     TextureDesc *entry;
     s32 size;
 
     entry = &gEffectTextures[index];
     data = *(s32 *)entry->addr;
     format = entry->fmt;
-    unkB = entry->siz;
-    data = texture_getAddress(data, &size, arg3, 0);
+    siz = entry->siz;
+    data = texture_getAddress(data, &size, lifetime, 0);
     gSPSegment(gfx++, segment, data);
     if (format == 2) {
-        gSPSegment(gfx++, segment + 1, data + size - ((unkB == 1) ? 0x200 : 0x20));
+        gSPSegment(gfx++, segment + 1, data + size - ((siz == 1) ? 0x200 : 0x20));
     }
     return gfx;
 }
 
 /* Draw handler: bind every texture of the list stored in the particle's data. */
-Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 arg2) {
+Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 view) {
     u8 i;
     ParticleTextureList *list;
     SegmentTexture *tex;

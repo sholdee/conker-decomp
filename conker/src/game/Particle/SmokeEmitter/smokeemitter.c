@@ -38,8 +38,8 @@ void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {
 
 /* TriggerZone handler: trail_spawnNearCamera for obj, probing from the zone's top (y + ySize, unk2 + unk8) down to
  * its base (y, unk2). */
-void particle_spawnZoneGroundFxNearCamera(void *arg0, Range150AF2E0 *range) {
-    trail_spawnNearCamera(arg0, range->unk2 + range->unk8, range->unk2);
+void particle_spawnZoneGroundFxNearCamera(void *obj, Range150AF2E0 *range) {
+    trail_spawnNearCamera(obj, range->unk2 + range->unk8, range->unk2);
 }
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
@@ -110,7 +110,7 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
 }
 
 /* Update for particle_updateSmokeEmitter's particles: wobbles the offset and applies drag to the velocity. */
-s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
+s32 particle_wobbleSmoke(SpriteParticle *particle, Vec3f *prevPos) {
     WobbleData *wobble;
 
     wobble = &particle->data.wobble;
@@ -120,7 +120,7 @@ s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
 }
 
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
-void particle_startGreyscaleScreen(s16 lifetime, u8 arg1, s32 arg2) {
+void particle_startGreyscaleScreen(s16 lifetime, u8 owner, s32 list) {
     EffectDesc desc;
 
     desc.flags = 1;
@@ -128,11 +128,11 @@ void particle_startGreyscaleScreen(s16 lifetime, u8 arg1, s32 arg2) {
     desc.drawIndex = 2;
     desc.lifetime = lifetime;
     desc.messageIndex = 0;
-    colourfb_createScreenEffect(&desc, 0, arg1, arg2);
+    colourfb_createScreenEffect(&desc, 0, owner, list);
 }
 
-void particle_drawGreyscaleScreen(void *arg0, u8 *arg1) {
-    colourfb_toGreyscale(arg1, arg1 + 0x1ECC0);
+void particle_drawGreyscaleScreen(void *effect, u8 *framebuffer) {
+    colourfb_toGreyscale(framebuffer, framebuffer + 0x1ECC0);
 }
 
 typedef struct GameDC6B0SmokeMotion {
@@ -252,14 +252,14 @@ s32 particle_updateSineOscillator(Obj150AFBF4 *obj) {
 }
 
 /* Spawns a particle_newSpriteEmitter particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
-void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
+void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 owner, s32 list) {
     particle_newSpriteEmitter(1, 0, 0, 0xD,                 /* x, y, z, texture */
         0, 0, 0, 0, 0, 0, 0, 0,                 /* frame, rgba, env rgb */
         4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,        /* kind, velocity x/z high/low, unk32..34 */
         0xFF, 0, 1, 0, 0, 0, 0, 0xAA,           /* unk35..37, velocity randoms, scaleX */
         0xAA, 0xAA, 0xAA, timer, radiusXZ, 0,   /* scaleY, scale randoms, timer, radii */
         object, 0xF0, 0x50, 0x50, 1, 4, 0, 1,   /* object, lifetime, velocityY (+random), flags, interval, chance, burst */
-        0, 0, 0, bone, 0, arg4, arg5);          /* speed, startOffset, isAlt, bone, particleLink */
+        0, 0, 0, bone, 0, owner, list);          /* speed, startOffset, isAlt, bone, particleLink */
 }
 
 typedef struct Node150AFDB0 {
@@ -321,7 +321,7 @@ void particle_fireActorBoneTracer(s32 altBone) {
 }
 
 /* Runs particle_hitPlayerOnObjectContact on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
-void func_150B003C(s32 arg0) {
+void func_150B003C(s32 unused) {
     if (level == LEVEL_THE_WINDMILL) {
         effect_updateRain(0);
         particle_hitPlayerOnObjectContact(0xE2, 0xE1);
@@ -338,7 +338,7 @@ typedef struct GameDC6B0TrailArgs {
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
-void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
+void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list) {
     ParticleSpawn packet;
     Vec3f dir;
     f32 length;
@@ -383,12 +383,12 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         packet.fadeRate = 0xFF;
         packet.sound = 0;
         packet.gravity = 0.0f;
-        projectile = particle_newModelParticleWithFloor(&packet, 3, 0xFF, 0, 4, arg2, arg3);
+        projectile = particle_newModelParticleWithFloor(&packet, 3, 0xFF, 0, 4, owner, list);
         if (projectile != NULL) {
             trail = &projectile->trail;
             memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
             trailArgs.source = projectile;
-            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
+            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), owner, list);
         }
     }
 }
@@ -419,7 +419,7 @@ static const s32 gObjDebrisVariants[] = { 6, 6, 6, 82, 82 };
 static const f32 gObjDebrisScales[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
-void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnObjDebrisBurst(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -470,7 +470,7 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         burst.envColorMode = 6;
         burst.unk64 = 1;
         burst.extra = 0.938608f;
-        particle_spawnSpriteBurst(&burst, 0xFF, arg1, arg2);
+        particle_spawnSpriteBurst(&burst, 0xFF, owner, list);
     }
     {
         DebrisBurst debris;
@@ -491,7 +491,7 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
-        particle_spawnDebrisBurst(&debris, gObjDebrisVariants, gObjDebrisScales, 5, 65.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&debris, gObjDebrisVariants, gObjDebrisScales, 5, 65.0f, 0, owner, list);
     }
 }
 

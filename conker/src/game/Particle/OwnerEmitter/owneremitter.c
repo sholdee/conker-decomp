@@ -6,7 +6,7 @@
 #include "conker/sprite.h"
 
 /* Spawns an effect attached to `owner`. */
-void particle_attachOwnerEmitter(Actor *owner, u8 arg1, s32 arg2) {
+void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
     EffectE7970Data data;
     TimedEffect *effect;
 
@@ -14,7 +14,7 @@ void particle_attachOwnerEmitter(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = effect_newTimedEffect((math_random() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
+    effect = effect_newTimedEffect((math_random() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }
@@ -74,7 +74,7 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
     }
 }
 
-void particle_onOwnerEmitterEvent(EffectE7970 *effect, s32 arg1, u8 arg2) {
-    effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void particle_onOwnerEmitterEvent(EffectE7970 *effect, s32 event, u8 eventType) {
+    effect_handleTimedEffectOwnerEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 

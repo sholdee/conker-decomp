@@ -266,7 +266,7 @@ void particle_updateGroundChunk(SpinDebrisParticle *particle) {
 }
 
 /* Begin-draw hook: forgets the cached primitive alpha so the first particle drawn sets it again. */
-Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
+Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 list, s32 view) {
     gDebrisPrimAlpha = -1;
     if ((type == 0xC) || (type == 0x59)) {
         gfx = particle_emptySpinDebrisDrawHook(gfx);
@@ -310,6 +310,6 @@ void particle_spawnGroundChunks(f32 size, s32 x, s32 y, s32 z, s32 count) {
 }
 
 /* Draw callback for another object type in the same table; forwards to view_emitRspSetup. */
-Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 arg1, s16 player) {
+Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 type, s16 player) {
     return view_emitRspSetup(gfx, player);
 }

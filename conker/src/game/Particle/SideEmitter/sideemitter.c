@@ -104,7 +104,7 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
 }
 
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
-Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 arg2, s32 arg3) {
+Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list) {
     Effect1BFDD0 *effect;
     FixedEmitterData data;
 
@@ -116,7 +116,7 @@ Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 arg2, s
     data.objectId = object->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = effect_newTimedEffectNoDraw(type, -1, 0x18, 1, 0x16, 0xC, arg2, arg3);
+    effect = effect_newTimedEffectNoDraw(type, -1, 0x18, 1, 0x16, 0xC, owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

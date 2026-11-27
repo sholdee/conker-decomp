@@ -6,11 +6,11 @@
 
 
 
-void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
+void particle_spawnModelBurstWithBillboard(f32 x, f32 y, f32 z, u8 owner, s32 list) {
     s32 i;
-    ParticleSpawn78 sp;
+    ParticleSpawn78 spawn;
     s32 pad; // matching: unused stack slot
-    BillboardSpawn sp2;
+    BillboardSpawn billboard;
     f32 scale;
     f32 speed;
     f32 sinYaw;
@@ -21,30 +21,30 @@ void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3
     u8 yaw;
     u8 pitch;
 
-    sp.elasticity = 0.4f;
-    sp.model = 4;
-    sp.scale.x = 1.0f;
-    sp.scale.y = 1.0f;
-    sp.scale.z = 1.0f;
-    sp.rotVel.z = 0.0f;
-    sp.gravity = -1.3f;
-    sp.flags = 0x29E8;
-    sp.variant = 0;
-    sp.zone = 0;
-    sp.alpha = 0xFF;
-    sp.updateFn = 1;
-    sp.update2Fn = 0;
-    sp.floorHitFn = 0;
-    sp.floorType3Fn = 0;
-    sp.wallHitFn = 0;
-    sp.destroyFn = 0;
-    sp.squashFn = 0;
-    sp.matrixFn = 0;
-    sp.lightMode = 2;
-    sp.owner = 0;
-    sp.ownerId = 0;
-    sp.fadeStart = 0x4000;
-    sp.fadeRate = 0;
+    spawn.elasticity = 0.4f;
+    spawn.model = 4;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.rotVel.z = 0.0f;
+    spawn.gravity = -1.3f;
+    spawn.flags = 0x29E8;
+    spawn.variant = 0;
+    spawn.zone = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 1;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
+    spawn.lightMode = 2;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 0x4000;
+    spawn.fadeRate = 0;
 
     for (i = (math_random() % 8U) + 3; i > 0; i--) {
         scale = (math_randomFloat() * 0.7f) + 0.3f;
@@ -56,41 +56,41 @@ void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3
         sinPitch = math_cosBinAngleMasked(pitch - 0x40);
         cosPitch = math_cosBinAngleMasked(pitch);
         spread = math_randomFloat() * 20.0f;
-        sp.pos.x = (spread * sinYaw) + arg0;
-        sp.pos.y = arg1;
-        sp.pos.z = (spread * cosYaw) + arg2;
-        sp.vel.x = speed * cosPitch * sinYaw;
-        sp.vel.y = -speed * sinPitch;
-        sp.vel.z = speed * cosPitch * cosYaw;
-        sp.lifetime = (math_random() % 32U) + 0x14;
-        sp.radius = scale;
-        sp.sizeXZ = scale;
-        sp.sizeY = scale;
-        sp.rot.x = math_randomFloat() * 360.0f;
-        sp.rot.y = math_randomFloat() * 360.0f;
-        sp.rot.z = math_randomFloat() * 360.0f;
-        sp.rotVel.x = 25.0f - (math_randomFloat() * 50.0f);
-        sp.rotVel.y = 25.0f - (math_randomFloat() * 50.0f);
-        particle_newModelParticle(&sp, 3, 0xFF, 0, arg3, arg4);
+        spawn.pos.x = (spread * sinYaw) + x;
+        spawn.pos.y = y;
+        spawn.pos.z = (spread * cosYaw) + z;
+        spawn.vel.x = speed * cosPitch * sinYaw;
+        spawn.vel.y = -speed * sinPitch;
+        spawn.vel.z = speed * cosPitch * cosYaw;
+        spawn.lifetime = (math_random() % 32U) + 0x14;
+        spawn.radius = scale;
+        spawn.sizeXZ = scale;
+        spawn.sizeY = scale;
+        spawn.rot.x = math_randomFloat() * 360.0f;
+        spawn.rot.y = math_randomFloat() * 360.0f;
+        spawn.rot.z = math_randomFloat() * 360.0f;
+        spawn.rotVel.x = 25.0f - (math_randomFloat() * 50.0f);
+        spawn.rotVel.y = 25.0f - (math_randomFloat() * 50.0f);
+        particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, list);
     }
 
-    sp2.pos.x = arg0;
-    sp2.pos.y = arg1;
-    sp2.pos.z = arg2;
-    sp2.width = 0x1F4;
-    sp2.height = 0x1F4;
-    sp2.widthStep = (math_random() % 16U) + 0x32;
-    sp2.heightStep = (math_random() % 16U) + 0x32;
-    sp2.velX = 0;
-    sp2.velZ = 0;
-    sp2.velY = (math_random() % 201U) + 0x12C;
-    sp2.accelY = 0;
-    sp2.life = 0x258;
-    math_pickPaletteColour(1, &sp2.primColor[0], &sp2.primColor[1], &sp2.primColor[2]);
-    math_pickPaletteColour(1, &sp2.envColor[0], &sp2.envColor[1], &sp2.envColor[2]);
-    sp2.intensity = 0xFF;
-    sp2.alpha = 0xFF;
-    sp2.fadeStep = 0xA;
-    sp2.onExpire = 0;
-    particle_spawnGrowingBillboard(&sp2, 1);
+    billboard.pos.x = x;
+    billboard.pos.y = y;
+    billboard.pos.z = z;
+    billboard.width = 0x1F4;
+    billboard.height = 0x1F4;
+    billboard.widthStep = (math_random() % 16U) + 0x32;
+    billboard.heightStep = (math_random() % 16U) + 0x32;
+    billboard.velX = 0;
+    billboard.velZ = 0;
+    billboard.velY = (math_random() % 201U) + 0x12C;
+    billboard.accelY = 0;
+    billboard.life = 0x258;
+    math_pickPaletteColour(1, &billboard.primColor[0], &billboard.primColor[1], &billboard.primColor[2]);
+    math_pickPaletteColour(1, &billboard.envColor[0], &billboard.envColor[1], &billboard.envColor[2]);
+    billboard.intensity = 0xFF;
+    billboard.alpha = 0xFF;
+    billboard.fadeStep = 0xA;
+    billboard.onExpire = 0;
+    particle_spawnGrowingBillboard(&billboard, 1);
 }

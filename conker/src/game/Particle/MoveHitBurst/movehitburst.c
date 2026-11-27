@@ -13,7 +13,7 @@
  * sprite when math_isObjectHidden accepts the hit object). First runs an anti-tamper checksum over the code
  * from save_checkCodeTamper to save_spawnMenuCharacter (a mismatch breaks player 1's controller mapping). Nothing is spawned while zone_isInNeutralZone(2 or 1, position) reports anything.
  */
-void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
+void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 owner, s32 list) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
     u32 addr;
     u32 end;
@@ -70,7 +70,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
             sprite.fadeRate = 10;
             particle_spawnSurfaceQuadSprite(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
                           (math_randomFloat() * 20.0f) + 40.0f, (math_randomFloat() * 20.0f) + 40.0f, math_random() & 0xFF,
-                          ((math_random() & 1) * 2) + (math_random() & 1), 3, 0xFF, 0, arg3, arg4);
+                          ((math_random() & 1) * 2) + (math_random() & 1), 3, 0xFF, 0, owner, list);
         }
         burst.countBase = 15;
         burst.countRange = 10;
@@ -102,7 +102,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
         burst.speedRange = 0.0235f;
         burst.unk6C = 0.940404f;
         burst.spin = 1.084000111f;
-        particle_spawnSurfaceBurst(&burst, arg3, arg4);
+        particle_spawnSurfaceBurst(&burst, owner, list);
     }
 }
 

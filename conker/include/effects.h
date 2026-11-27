@@ -1541,8 +1541,8 @@ typedef struct SurfaceBurst {
     /* 0x5C */ u8 unk46;            /* ParticleDef.primMode */
     /* 0x5D */ u8 unk47;            /* ParticleDef.envMode */
     /* 0x5E */ u8 pad5E[2];
-    /* 0x60 */ s32 unk60;           /* particle_newQuadParticle's model argument */
-    /* 0x64 */ s32 unk64;           /* particle_newQuadParticle's arg8 */
+    /* 0x60 */ s32 unk60;           /* particle_newQuadParticle's maxLights argument */
+    /* 0x64 */ s32 unk64;           /* particle_newQuadParticle's lightMask argument */
     /* 0x68 */ s16 fadeStart;
     /* 0x6A */ s16 fadeRate;
     /* 0x6C */ f32 unk6C;           /* the particle's motion word at +0x120 */

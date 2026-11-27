@@ -28,7 +28,7 @@ s32 particle_getObjGroundPos(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3
 }
 
 /* Constant handler; always returns 9. */
-s32 particle_selectObjEffects(s32 arg0, s32 arg1) {
+s32 particle_selectObjEffects(s32 kind, Actor *actor) {
     return 9;
 }
 

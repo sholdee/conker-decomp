@@ -10,12 +10,12 @@
 static s32 (*gBoneGlowFollowFuncs[])() = { particle_setBoneGlowBySwapTexture, particle_hideBoneGlowWhileEyeClosed, particle_hideBoneGlowWithoutExpression, func_151C9B64 };
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
-BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
-                       u8 arg5, u8 arg6) {
+BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 updateFn1, u8 updateFn2,
+                       u8 expireFn, u8 flip) {
     BoneGlow *emitter;
 
     params->type = 0xB;
-    emitter = flare_spawnGlow(params, 0x80, spawn, arg3, arg4, arg5, arg6, -1, 0xFF, 1);
+    emitter = flare_spawnGlow(params, 0x80, spawn, updateFn1, updateFn2, expireFn, flip, -1, 0xFF, 1);
     if (emitter != NULL) {
         EmitterAttach *dst = &emitter->attach;
 

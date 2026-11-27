@@ -38,7 +38,7 @@ static CameraEmitterCondition gCameraEmitterConditions[] = { effect_consumeZoneF
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
 void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
-                   u8 owner, s32 kind) {
+                   u8 owner, s32 list) {
     ParticleSpawn spawn;
     Vec3f dir;
     Vec3f delta;
@@ -103,7 +103,7 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
         spawn.fadeStart = 1;
         spawn.fadeRate = 255;
         spawn.sound = sound;
-        obj = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, kind);
+        obj = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, list);
         if (obj != NULL) {
             memcpy(&obj->spiral, &spiral, sizeof(spiral));
         }
@@ -175,21 +175,21 @@ s32 particle_updateSpiralFadeSound(SpiralParticle *obj) {
     return 1;
 }
 
-/* Event handler: event 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
+/* Event handler: event type 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
  * effect_destroyObject. */
-void particle_onSpiralEvent(SpiralParticle *obj, s32 arg1, u8 event) {
+void particle_onSpiralEvent(SpiralParticle *obj, s32 event, u8 eventType) {
     SpiralState *spiral;
     spiral = &obj->spiral;
-    if (event == 0x4E) {
+    if (eventType == 0x4E) {
         obj->unk71 = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
-    } else if (event == 0x4F) {
+    } else if (eventType == 0x4F) {
         effect_destroyObject(&obj->header);
     }
 }
 
 /* Starts an emitter that spawns spirals around `camera` (see particle_updateCameraSpiralEmitter). */
-void particle_startCameraSpiralEmitter(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
+void particle_startCameraSpiralEmitter(Camera *camera, s8 condition, u8 variants, u8 owner, s32 list) {
     CameraEmitterData data;
     CameraEmitter *emitter;
 
@@ -198,7 +198,7 @@ void particle_startCameraSpiralEmitter(Camera *camera, s8 condition, u8 variants
     data.condition = condition;
     data.variants = variants;
 
-    emitter = effect_newTimedEffect(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, kind);
+    emitter = effect_newTimedEffect(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, list);
     if (emitter != NULL) {
         memcpy(&emitter->data, &data, sizeof(data));
     }

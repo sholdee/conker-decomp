@@ -104,7 +104,7 @@ void particle_updateSourceEmitter(EmitterEffect *effect) {
 
 /* Attaches a fog flash effect to obj: flashes it with fog colour (r, g, b, a) each frame,
  * for duration frames or, when duration is -1, until obj goes away. */
-void particle_attachFogFlash(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
+void particle_attachFogFlash(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 list) {
     FogFlashData data;
     EmitterEffect *effect;
 
@@ -117,15 +117,15 @@ void particle_attachFogFlash(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 du
     data.b = b;
 
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
-                                     0x45, sizeof(data), owner, kind);
+                                     0x45, sizeof(data), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
 /* Effect callback for the fog flash effect: hands effect_handleOwnerActorEvent the owner reference. */
-void particle_onFogFlashEvent(EmitterEffect *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
+void particle_onFogFlashEvent(EmitterEffect *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
@@ -141,9 +141,9 @@ void particle_updateFogFlash(EmitterEffect *effect) {
 }
 
 /* Runs sight_spawnFloorImpact on obj and flashes it green. */
-void particle_spawnFloorImpactGreenFlash(Actor *obj, u8 owner, s32 kind) {
-    sight_spawnFloorImpact(obj, owner, kind);
-    particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
+void particle_spawnFloorImpactGreenFlash(Actor *obj, u8 owner, s32 list) {
+    sight_spawnFloorImpact(obj, owner, list);
+    particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, list);
 }
 
 /* Current colour (r, g, b), its target and its easing velocity. */

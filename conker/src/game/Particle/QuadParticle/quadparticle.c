@@ -222,8 +222,8 @@ const VtxColor gWhiteVtxColors[4] = {
 };
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
-QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
-                         Vec3f *pos, s32 extraSize, u8 arg9, s32 argA) {
+QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 maxLights, s32 lightMask,
+                         Vec3f *pos, s32 extraSize, u8 owner, s32 list) {
     QuadSprite *sprite;
     u8 kind;
     s32 i;
@@ -236,7 +236,7 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
     } else {
         kind = 0x1B;
     }
-    sprite = effect_newObject(kind, argA, extraSize + sizeof(QuadSprite), 1, arg9, 1);
+    sprite = effect_newObject(kind, list, extraSize + sizeof(QuadSprite), 1, owner, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -245,18 +245,18 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
     particle_setQuadColors(sprite->vtx, colors);
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
-    sprite->link.maxLights = model;
+    sprite->link.maxLights = maxLights;
     sprite->active = 1;
     sprite->unk14 = 0;
-    sprite->link.lightMask = arg6;
+    sprite->link.lightMask = lightMask;
     for (i = 0; i < 4; i++) {
         sprite->link.handles[i] = NULL;
     }
 
     sprite->link.sharedHandle = NULL;
-    if (model) {
+    if (maxLights) {
         for (i = 0; i <= gScreenLayout; i++) {
-            sprite->link.handles[i] = light_allocGfxLights(model);
+            sprite->link.handles[i] = light_allocGfxLights(maxLights);
         }
         sprite->link.sharedHandle = light_allocAmbients();
     }
@@ -268,14 +268,14 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
 
 /* Spawns a flat (xz-plane) sprite at (x, y, z). */
 QuadSprite *particle_spawnFlatQuadSprite(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
-                         u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
+                         u8 angle, u8 flip, s32 maxLights, s32 lightMask, s32 extraSize, u8 owner, s32 list) {
     QuadSprite *sprite;
     Vec3f pos;
 
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, maxLights, lightMask, &pos, extraSize, owner, list);
     if (sprite == NULL) {
         return NULL;
     }
@@ -283,10 +283,10 @@ QuadSprite *particle_spawnFlatQuadSprite(void *def, const void *colors, u8 updat
     return sprite;
 }
 
-/* Spawns a flat (xz-plane) sprite without a model or stored position. */
+/* Spawns a flat (xz-plane) sprite without lights or a stored position. */
 QuadSprite *particle_spawnFlatQuadSpriteNoModel(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
-                         f32 length, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    QuadSprite *sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+                         f32 length, u8 angle, u8 flip, s32 extraSize, u8 owner, s32 list) {
+    QuadSprite *sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, owner, list);
 
     if (sprite == NULL) {
         return NULL;
@@ -297,7 +297,7 @@ QuadSprite *particle_spawnFlatQuadSpriteNoModel(void *def, const void *colors, u
 
 /* Spawns a sprite oriented by particle_layQuadSpriteOnSurface, with the default colours. */
 QuadSprite *particle_spawnSurfaceQuadSprite(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
-                         f32 height, u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
+                         f32 height, u8 angle, u8 flip, s32 maxLights, s32 lightMask, s32 extraSize, u8 owner, s32 list) {
     QuadSprite *sprite;
     Vec3f pos;
 
@@ -305,7 +305,7 @@ QuadSprite *particle_spawnSurfaceQuadSprite(void *def, u8 updateFn, u8 expireFn,
     pos.y = y;
     pos.z = z;
 
-    sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, maxLights, lightMask, &pos, extraSize, owner, list);
     if (sprite == NULL) {
         return NULL;
     }
@@ -317,10 +317,10 @@ QuadSprite *particle_spawnSurfaceQuadSprite(void *def, u8 updateFn, u8 expireFn,
     return sprite;
 }
 
-/* As particle_spawnSurfaceQuadSprite, without a model or stored position. */
+/* As particle_spawnSurfaceQuadSprite, without lights or a stored position. */
 QuadSprite *particle_spawnSurfaceQuadSpriteNoModel(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
-                         f32 height, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+                         f32 height, u8 angle, u8 flip, s32 extraSize, u8 owner, s32 list) {
+    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, owner, list);
 
     if (sprite == NULL) {
         return NULL;
@@ -335,8 +335,8 @@ QuadSprite *particle_spawnSurfaceQuadSpriteNoModel(void *def, u8 updateFn, u8 ex
 
 /* As particle_spawnSurfaceQuadSpriteNoModel; arg1 is unused and the default colours are used. */
 QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z,
-                         f32 width, f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
-    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
+                         f32 width, f32 height, u8 angle, u8 flip, s32 extraSize, u8 owner, s32 list) {
+    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, owner, list);
 
     if (sprite == NULL) {
         return NULL;
@@ -413,17 +413,17 @@ void particle_freeQuadParticleDefault(DefParticleHead *particle) {
 }
 
 /* Releases a particle's light buffers. */
-void particle_freeQuadParticleLights(DefParticleHead *arg0) {
+void particle_freeQuadParticleLights(DefParticleHead *particle) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
-        if (arg0->link.handles[i]) {
-            heap_setTag((void *)(s32)arg0->link.handles[i], 4);
+        if (particle->link.handles[i]) {
+            heap_setTag((void *)(s32)particle->link.handles[i], 4);
         }
     }
-    if (arg0->link.sharedHandle != NULL) {
-        heap_setTag((void *)(s32)arg0->link.sharedHandle, 4);
+    if (particle->link.sharedHandle != NULL) {
+        heap_setTag((void *)(s32)particle->link.sharedHandle, 4);
     }
 }
 
@@ -543,11 +543,11 @@ Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
     return gfx;
 }
 
-void particle_onQuadSpriteEvent(s32 arg0, s32 arg1, u8 arg2) {
-    gQuadSpriteEventFuncs[0](arg0, arg1, arg2);
+void particle_onQuadSpriteEvent(s32 obj, s32 event, u8 eventType) {
+    gQuadSpriteEventFuncs[0](obj, event, eventType);
 }
 
-void particle_ignoreQuadSpriteEvent(s32 arg0, s32 arg1, u8 arg2) {
+void particle_ignoreQuadSpriteEvent(s32 obj, s32 event, u8 eventType) {
 }
 
 
@@ -645,8 +645,8 @@ void particle_updateQuadParticle(DefParticleHead *particle) {
 }
 
 /* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
-void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
-                    s32 arg8, s32 motionSize, u8 argA, s32 argB) {
+void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 maxLights,
+                    s32 lightMask, s32 motionSize, u8 owner, s32 list) {
     DefParticleHead *particle;
     s32 flags;
     s32 kind;
@@ -660,7 +660,7 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
     } else {
         kind = 0x1C;
     }
-    particle = effect_newObject(kind, argB, motionSize + sizeof(DefParticleHead), 1, argA,
+    particle = effect_newObject(kind, list, motionSize + sizeof(DefParticleHead), 1, owner,
                              (flags & 0x80000000U) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -681,17 +681,17 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
     particle->ground.source = 0;
     particle->ground.flags = 0;
     particle->ground.material = 0;
-    particle->link.maxLights = model;
-    particle->link.lightMask = arg8;
+    particle->link.maxLights = maxLights;
+    particle->link.lightMask = lightMask;
     particle->link.lightCount = 0;
     for (i = 0; i < 4; i++) {
         particle->link.handles[i] = NULL;
     }
 
     particle->link.sharedHandle = NULL;
-    if (model) {
+    if (maxLights) {
         for (i = 0; i <= gScreenLayout; i++) {
-            particle->link.handles[i] = light_allocGfxLights(model);
+            particle->link.handles[i] = light_allocGfxLights(maxLights);
         }
         particle->link.sharedHandle = light_allocAmbients();
     }
@@ -699,29 +699,29 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
 }
 
 void *particle_newQuadParticleNoModel(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
-                    s32 motionSize, u8 arg8, s32 arg9) {
-    return particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
+                    s32 motionSize, u8 owner, s32 list) {
+    return particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, owner, list);
 }
 
 /* As particle_newQuadParticleNoModel with the default colours. */
 void *particle_newQuadParticleWhite(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
-                    u8 arg7, s32 arg8) {
-    return particle_newQuadParticle(def, &gWhiteVtxColors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
+                    u8 owner, s32 list) {
+    return particle_newQuadParticle(def, &gWhiteVtxColors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, owner, list);
 }
 
 /* Spawns a particle whose quad is spanned by two axes from particle_computeQuadAxes (vertex function 12). */
 void *particle_spawnAxisQuadParticle(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD,
-                    s32 motionSize, u8 argF, s32 arg10) {
+                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 maxLights, s32 lightMask, u8 onSlope,
+                    s32 motionSize, u8 owner, s32 list) {
     DefParticleHead *particle;
 
     if (colors == 0) {
         colors = &gWhiteVtxColors;
     }
-    particle = particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
-                             motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
+    particle = particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, 12, flip, maxLights, lightMask,
+                             motionSize + sizeof(PARTICLE_MOTION(particle)->axes), owner, list);
     if ((particle != NULL) &&
-        (particle_computeQuadAxes(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
+        (particle_computeQuadAxes(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, onSlope) == 0)) {
         effect_destroyObject(&particle->header);
         return NULL;
     }
@@ -729,10 +729,10 @@ void *particle_spawnAxisQuadParticle(void *def, const void *colors, u8 updateFn1
 }
 
 void *particle_spawnAxisQuadParticleNoModel(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
-                    f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD,
-                    s32 argE) {
+                    f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 onSlope, s32 motionSize, u8 owner,
+                    s32 list) {
     return particle_spawnAxisQuadParticle(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0,
-                         0, argB, motionSize, argD, argE);
+                         0, onSlope, motionSize, owner, list);
 }
 
 /*
@@ -944,7 +944,7 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
 
 
 /* Dispatches to the gQuadParticleEventFuncs handler for the particle's type. */
-void particle_onQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) {
+void particle_onQuadParticleEvent(DefParticleHead *particle, s32 event, u8 eventType) {
     s32 index;
 
     if (!(particle->def.flags & 0x400000)) {
@@ -990,10 +990,10 @@ void particle_onQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) 
                 break;
         }
     }
-    gQuadParticleEventFuncs[index](particle, arg1, arg2);
+    gQuadParticleEventFuncs[index](particle, event, eventType);
 }
 
-void particle_ignoreQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) {
+void particle_ignoreQuadParticleEvent(DefParticleHead *particle, s32 event, u8 eventType) {
 }
 
 /* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
@@ -1910,12 +1910,12 @@ Vtx *particle_buildRotatedRectQuad(DefParticleHead *particle, s16 viewport) {
 const s32 gQuadParticleTypes[4] = { 0x1C, 0x49, 0x56, 0x62 };
 static const s32 gQuadSpriteTypes[3] = { 0x1B, 0x61, 0x4A };
 
-void particle_broadcastToQuadParticles(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(gQuadParticleTypes, 4, arg0, arg1);
+void particle_broadcastToQuadParticles(s32 event, u8 eventType) {
+    effect_sendEventToTypes(gQuadParticleTypes, 4, event, eventType);
 }
 
-void particle_broadcastToQuadSprites(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(gQuadSpriteTypes, 3, arg0, arg1);
+void particle_broadcastToQuadSprites(s32 event, u8 eventType) {
+    effect_sendEventToTypes(gQuadSpriteTypes, 3, event, eventType);
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
@@ -1966,8 +1966,8 @@ Vtx *particle_buildQuadFromAxes(DefParticleHead *particle, Vec3f *axisU, Vec3f *
 /* Sort key: texture, then animation frame, so that particles sharing a texture load draw together. */
 #define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
-/* List callback: insertion-sorts draw list gObjectLists[group][list] by PARTICLE_SORT_KEY. */
-s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase) {
+/* List callback: insertion-sorts draw list gObjectLists[list][type] by PARTICLE_SORT_KEY (view 0 only). */
+s32 particle_sortDrawList(s32 gfx, s32 type, s32 list, s16 view) {
     DefParticleHead head;
     DefParticleHead **slot;
     DefParticleHead *cur;
@@ -1977,10 +1977,10 @@ s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase) {
     s32 key;
     s32 nodeKey;
 
-    if (phase != 0) {
-        return arg0;
+    if (view != 0) {
+        return gfx;
     }
-    slot = (DefParticleHead **)&gObjectLists[group][list];
+    slot = (DefParticleHead **)&gObjectLists[list][type];
     node = *slot;
     head.def.texture = 0;
     head.def.frame = 0;
@@ -2016,5 +2016,5 @@ s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase) {
     }
     *slot = (DefParticleHead *)head.header.next;
     head.header.next->prev = NULL;
-    return arg0;
+    return gfx;
 }

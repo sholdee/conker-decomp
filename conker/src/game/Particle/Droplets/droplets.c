@@ -171,16 +171,16 @@ s32 particle_fadeInAboveFloor(FloorParticle *particle) {
 }
 
 /* particle_spawnModelDroplets with model 4. */
-void particle_spawnDroplets(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
-    particle_spawnModelDroplets(pos, radius, size, count, 4, 0xFF, arg4);
+void particle_spawnDroplets(f32 *pos, f32 radius, f32 size, s32 count, u8 owner) {
+    particle_spawnModelDroplets(pos, radius, size, count, 4, 0xFF, owner);
 }
 
 /*
  * Spawns up to count droplets of the given model at random points within radius of pos. A droplet
  * is spawned only where collision_probeFloorSurfABSet0Cached finds a floor below the point, together with 1-4 smaller ones
- * above it; every droplet remembers that floor height (see particle_splashOnFloor). arg5 is unused.
+ * above it; every droplet remembers that floor height (see particle_splashOnFloor). `unused` is never read.
  */
-void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 unused, u8 owner) {
     ParticleSpawn spawn;
     CollisionHit floor;
     u8 angle;
@@ -239,7 +239,7 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
             spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
             if (collision_probeFloorSurfABSet0Cached(&spawn.pos, 0, -10000.0f, &floor) != 0) {
                 spawn.update2Fn = 2;
-                droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
+                droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), owner, 0);
                 if (droplet != NULL) {
                     droplet->floorY = floor.height;
                 }
@@ -261,7 +261,7 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
                     spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
                     spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
                     spawn.update2Fn = 3;
-                    droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
+                    droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), owner, 0);
                     if (droplet != NULL) {
                         droplet->floorY = floor.height;
                     }

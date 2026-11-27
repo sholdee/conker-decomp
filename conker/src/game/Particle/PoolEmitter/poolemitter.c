@@ -7,8 +7,8 @@
 
 
 /* Effect callback: hands effect_handleOwnerActorEvent the emitter's target reference. */
-void particle_onPoolEmitterEvent(PoolEmitter *emitter, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
+void particle_onPoolEmitterEvent(PoolEmitter *emitter, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
 
 /* Emitter destructors: free the live particles, then the emitter. */
@@ -33,7 +33,7 @@ void particle_freePoolParticles(PoolEmitter *emitter) {
 }
 
 /* Allocates an emitter from desc with desc->slotCount particle slots, all initially free. */
-PoolEmitter *particle_newPoolEmitter(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
+PoolEmitter *particle_newPoolEmitter(PoolEmitterDesc *desc, s32 owner, s32 list) {
     PoolEmitter *emitter;
     s32 size;
     s16 i;
@@ -48,7 +48,7 @@ PoolEmitter *particle_newPoolEmitter(PoolEmitterDesc *desc, s32 arg1, s32 arg2) 
         }
     }
 
-    emitter = effect_newObject(0x25, arg2, size, 1, (u8)arg1, 1);
+    emitter = effect_newObject(0x25, list, size, 1, (u8)owner, 1);
     if (emitter == NULL) {
         return NULL;
     }

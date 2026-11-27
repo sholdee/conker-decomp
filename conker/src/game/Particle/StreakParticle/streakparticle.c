@@ -19,7 +19,7 @@ Gfx gStreakParticleSetupDl[] = {
 };
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
-StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4) {
+StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 list) {
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
@@ -37,7 +37,7 @@ StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kin
             break;
     }
 
-    newParticle = effect_newObject(id, arg4, extraSize + sizeof(StreakParticle), 1, owner, 1);
+    newParticle = effect_newObject(id, list, extraSize + sizeof(StreakParticle), 1, owner, 1);
     if (newParticle == NULL) {
         return NULL;
     }
@@ -80,19 +80,19 @@ StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kin
     return particle;
 }
 
-/* particle_newOwnedStreakParticle with owner 0xFF and arg4 0. */
+/* particle_newOwnedStreakParticle with owner 0xFF and list 0. */
 void particle_newStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
     particle_newOwnedStreakParticle(desc, kind, extraSize, 0xFF, 0);
 }
 
 /* Per-frame update: count down the lifetime, move head and tail, fade out; frees the particle when expired. */
-void particle_updateStreakParticle(StreakParticle *arg0) {
+void particle_updateStreakParticle(StreakParticle *obj) {
     StreakParticle *particle;
     u8 expired;
     s16 fadedAlpha;
 
     // matching: copying the parameter to a local steers IDO's register choice
-    particle = arg0;
+    particle = obj;
     expired = FALSE;
     if (particle->flags & 1) {
         particle->lifetime -= gFrameTicks;

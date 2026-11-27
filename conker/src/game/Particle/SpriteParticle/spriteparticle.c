@@ -34,7 +34,7 @@ Gfx gSpriteParticleResetDl[] = {
 };
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-void *particle_newSpriteParticleWithFloor(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
+void *particle_newSpriteParticleWithFloor(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 owner, s32 list) {
     SpriteParticle *particle;
     s32 type;
 
@@ -53,7 +53,7 @@ void *particle_newSpriteParticleWithFloor(ParticleDesc *desc, u8 kind, Collision
         break;
     }
 
-    particle = effect_newObject(type, arg5, dataSize + 0xA8, 1, arg4, 1);
+    particle = effect_newObject(type, list, dataSize + 0xA8, 1, owner, 1);
     if (particle == NULL) {
         return NULL;
     }
@@ -69,8 +69,8 @@ void *particle_newSpriteParticleWithFloor(ParticleDesc *desc, u8 kind, Collision
     return particle;
 }
 
-void *particle_newOwnedSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
-    return particle_newSpriteParticleWithFloor(desc, kind, NULL, dataSize, arg3, arg4);
+void *particle_newOwnedSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize, u8 owner, s32 list) {
+    return particle_newSpriteParticleWithFloor(desc, kind, NULL, dataSize, owner, list);
 }
 
 void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
@@ -519,7 +519,7 @@ s32 particle_freeSpriteParticle(SpriteParticle *p) {
     return gSpriteFreeFuncs[set](p);
 }
 
-s32 particle_hideSpriteDraw(s32 arg0, s32 arg1) {
+s32 particle_hideSpriteDraw(SpriteParticle *particle, s32 view) {
     return 0;
 }
 
@@ -633,13 +633,13 @@ static void (*gSpriteEventFuncs[])() = {
 };
 
 /* Calls the particle's gSpriteEventFuncs handler, if it has one. */
-void particle_onSpriteEvent(SpriteParticle *p, s32 arg1, u8 arg2) {
+void particle_onSpriteEvent(SpriteParticle *p, s32 event, u8 eventType) {
     void (*handler)(SpriteParticle *, s32, u8);
 
     if (p->head.desc.flags & PARTICLE_HANDLERS) {
         handler = gSpriteEventFuncs[p->head.desc.handlerSet];
         if (handler != NULL) {
-            handler(p, arg1, arg2);
+            handler(p, event, eventType);
         }
     }
 }
@@ -656,11 +656,11 @@ void particle_wobblePair(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32
 static const IdList3 gSpriteParticleTypes = { { 0x2B, 0x47, 0x52 } };
 
 /* Calls effect_sendEventToTypes with the three particle object types. */
-void particle_broadcastToSprites(s32 arg0, u8 arg1) {
+void particle_broadcastToSprites(s32 event, u8 eventType) {
     IdList3 types;
 
     types = gSpriteParticleTypes;
-    effect_sendEventToTypes(types.ids, 3, arg0, arg1);
+    effect_sendEventToTypes(types.ids, 3, event, eventType);
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */
@@ -689,7 +689,7 @@ s32 particle_updateFlash(SpriteParticle *p, Vec3f *prevPos) {
 }
 
 /* Spawns a flash particle (see particle_updateFlash) at pos. */
-SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
+SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 owner, s32 list) {
     ParticleDesc desc;
     ParticleFlash flash;
     SpriteParticle *particle;
@@ -741,7 +741,7 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.height = 0.0f;
     desc.gravity = 0.0f;
 
-    particle = particle_newSpriteParticleWithFloor(&desc, 1, NULL, sizeof(flash), arg2, arg3);
+    particle = particle_newSpriteParticleWithFloor(&desc, 1, NULL, sizeof(flash), owner, list);
     if (particle != NULL) {
         memcpy(&particle->data.flash, &flash, sizeof(flash));
     }

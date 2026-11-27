@@ -7,7 +7,7 @@
 #include "conker/particle.h"
 
 /* Spawns a streak particle from start along dir; when checkHit is set, records where its path hits a surface. */
-void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
+void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 scale, f32 width, f32 height, u8 owner, s32 list, u8 checkHit, u8 alpha,
                     s16 life, s8 callback) {
     void *streak;
     ParticleDef info;
@@ -26,14 +26,14 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
     info.rgba[2] = 0;
     info.lifetime = life;
     info.rgba[3] = 0xFF;
-    info.alpha = arg8;
+    info.alpha = alpha;
     info.colorLevel = 0xFF;
-    info.width = arg3;
-    info.height = arg4;
+    info.width = width;
+    info.height = height;
     info.pos = *start;
     info.rot = *dir;
     info.scale.x = 0.0f;
-    info.scale.y = arg2;
+    info.scale.y = scale;
     info.scale.z = 0.0f;
     info.flags = 1;
     impact.flags = 0;
@@ -61,7 +61,7 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
     } else {
         randomBit0 = 0;
     }
-    streak = particle_newQuadParticleWhite(&info, 15, 21, 0, 15, randomBit0 | randomBit1, 0x30, arg5, arg6);
+    streak = particle_newQuadParticleWhite(&info, 15, 21, 0, 15, randomBit0 | randomBit1, 0x30, owner, list);
     if (streak != NULL) {
         memcpy(&((Streak *)streak)->impact, &impact, sizeof(impact));
     }

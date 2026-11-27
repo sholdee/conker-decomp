@@ -26,7 +26,7 @@ EmitterCallback D_8008AA00[28] = {
  * Stops early if the kind's callback returns 0.
  */
 void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
-                   u8 kind, s32 arg8, f32 arg9, void *data, u8 arg11) {
+                   u8 kind, s32 arg8, f32 arg9, void *data, u8 owner) {
     f32 dirX;
     f32 dirZ;
     f32 px;
@@ -45,7 +45,7 @@ void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 an
         callback = D_8008AA00[kind];
         if (callback != NULL &&
             callback(1, i, px, py, pz, x, y, z, angle, startAngle, radius, arg8, arg9, data,
-                     arg11) == 0) {
+                     owner) == 0) {
             return;
         }
     }
@@ -56,7 +56,7 @@ void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 an
  * points including both ends. Stops early if the kind's callback returns 0.
  */
 void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind,
-                   s32 arg8, f32 arg9, void *data, u8 arg11) {
+                   s32 arg8, f32 arg9, void *data, u8 owner) {
     f32 px;
     f32 py;
     f32 pz;
@@ -87,7 +87,7 @@ void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 cou
     do {
         if (D_8008AA00[kind] != NULL &&
             D_8008AA00[kind](0, i, px, py, pz, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, data,
-                             arg11) == 0) {
+                             owner) == 0) {
             return;
         }
         count -= 1.0f;
@@ -104,7 +104,7 @@ void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 cou
  * Stops early if the kind's callback returns 0.
  */
 void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind,
-                   s32 arg8, f32 arg9, void *data, u8 arg11) {
+                   s32 arg8, f32 arg9, void *data, u8 owner) {
     f32 dirX;
     f32 dirZ;
     f32 px;
@@ -133,7 +133,7 @@ void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s1
         callback = D_8008AA00[kind];
         if (callback != NULL &&
             callback(2, i, px, py, pz, x, y, z, angle, angleA, radius, arg8, arg9, data,
-                     arg11) == 0) {
+                     owner) == 0) {
             return;
         }
     }
@@ -145,7 +145,7 @@ void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s1
  * Stops early if the kind's callback returns 0.
  */
 void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count,
-                   u8 kind, s32 arg9, f32 arg10, void *data, u8 arg12) {
+                   u8 kind, s32 arg9, f32 arg10, void *data, u8 owner) {
     f32 yawX;
     f32 yawZ;
     f32 elevY;
@@ -176,7 +176,7 @@ void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angl
         pz = radius * yawZ * elevH + z;
         if (D_8008AA00[kind] != NULL &&
             D_8008AA00[kind](3, i, px, py, pz, x, y, z, angle, yaw, radius, arg9, arg10, data,
-                             arg12) == 0) {
+                             owner) == 0) {
             return;
         }
     }

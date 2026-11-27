@@ -6,7 +6,7 @@
 
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
-void particle_spawnGroundEffects(Actor *actor, u8 owner, s32 arg2) {
+void particle_spawnGroundEffects(Actor *actor, u8 owner, s32 list) {
     Vec3f pos;
 
     if (actor == NULL) {
@@ -29,12 +29,12 @@ void particle_spawnGroundEffects(Actor *actor, u8 owner, s32 arg2) {
 }
 
 /* Spawns a randomly sized purple/yellow particle (kind 1) at (x, y, z), launched along `yaw` at a random pitch. */
-s32 particle_spawnYawColorSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
-                  s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+s32 particle_spawnYawColorSprite(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 yaw, s32 baseAngle,
+                  f32 radius, s32 arg11, s32 arg12, void *data, u8 owner) {
     SpriteParticle *particle;
     ParticleDesc desc;
     f32 size;
-    f32 unkA8;
+    f32 drag;
     f32 speed;
     u32 random;
 
@@ -79,17 +79,17 @@ s32 particle_spawnYawColorSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 ar
     desc.fadeRate = 8;
     desc.scaleStart = 70;
     desc.scaleRate = 1.0196f;
-    unkA8 = 0.95091f;
-    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), arg14, 1);
+    drag = 0.95091f;
+    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), owner, 1);
     if (particle != NULL) {
-        memcpy(&particle->data.drag, &unkA8, sizeof(f32));
+        memcpy(&particle->data.drag, &drag, sizeof(f32));
     }
     return 1;
 }
 
 /* Spawns a spinning model-0x20 particle at (x, y, z), launched along `yaw` at a random pitch. */
-s32 particle_spawnYawSpinModel(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
-                  s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+s32 particle_spawnYawSpinModel(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 yaw, s32 baseAngle,
+                  f32 radius, s32 arg11, s32 arg12, void *data, u8 owner) {
     s32 pad; // matching: unused stack slot
     ParticleSpawn spawn;
     f32 speed;
@@ -134,6 +134,6 @@ s32 particle_spawnYawSpinModel(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     spawn.ownerId = 0;
     spawn.fadeStart = 32;
     spawn.fadeRate = 7;
-    particle_newModelParticle(&spawn, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, 0);
     return 1;
 }
