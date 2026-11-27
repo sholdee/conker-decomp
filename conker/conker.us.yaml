@@ -280,7 +280,7 @@ segments:
       - [0x2C850, .rodata, libultra/os/setintmask]
       - [0x2C8D0, .rodata, libultra/gu/sinf_init]
       - [0x2C920, .rodata, libultra/gu/libm_vals]
-      - [0x2C930, rodata]
+      - [0x2C930, .rodata, init/View/SetupDl/setupdl]
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
       - {start: 0x2D4B0, type: .bss, vram: 0x8002D4B0, name: init/Boot/BootMain/bootmain}
