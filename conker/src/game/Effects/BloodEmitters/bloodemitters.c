@@ -50,7 +50,7 @@ BloodDrip *blood_attachBleedDrip(Actor *actor, u8 owner, s32 list) {
     desc.lifetime = math_random() % 21U + 40;
     desc.emitter = 8;
     desc.callback = -1;
-    desc.unk2D = 7;
+    desc.handlerSet = 7;
 
     if (gBloodProfiles[profile].bloodKind == 1) {
         payload[0] = 1;
@@ -121,7 +121,7 @@ BloodDrip *func_151B4FE0(Actor *actor, u8 owner, s32 list) {
     desc.lifetime = 300;
     desc.emitter = 9;
     desc.callback = -1;
-    desc.unk2D = 8;
+    desc.handlerSet = 8;
     emitter = blood_spawnDrip(&desc, 0, owner, list); // matching: returning the call directly changes the stack frame
     return emitter;
 }

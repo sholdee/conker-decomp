@@ -93,7 +93,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     desc.lifetime = 300;
     desc.flags = 0;
     desc.emitter = 3;
-    desc.unk18 = 0;
+    desc.mode = 0;
     return blood_spawnTrail(&desc, 0, fxOwner, fxList);
 }
 

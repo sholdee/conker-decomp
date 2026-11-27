@@ -321,7 +321,7 @@ void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit) {
         desc.flags = 14;
         desc.emitter = 2;
         desc.callback = -1;
-        desc.unk2D = 0;
+        desc.handlerSet = 0;
         desc.owner = actor;
         blood_spawnDrip(&desc, 0, 0xFF, 0);
     }
@@ -765,7 +765,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     desc.flags = 10;
     desc.emitter = 3;
     desc.callback = 0;
-    desc.unk2D = 1;
+    desc.handlerSet = 1;
     desc.owner = actor;
     desc.radius = 25.0f;
     desc.rate = 0.2649700046f;

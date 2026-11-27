@@ -811,7 +811,7 @@ void func_151BC104(Actor *obj, u8 fxOwner, s32 fxList) {
         desc.rate = 0.3033999801f * gLayoutDetailScale;
         desc.flags = 4;
         desc.emitter = 4;
-        desc.unk18 = 1;
+        desc.mode = 1;
         desc.callback = 0;
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
@@ -916,7 +916,7 @@ void effect_bloodTrailOwnerMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgI
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            effect_destroyObject(&effect->header);
+            effect_destroyObject(&effect->trail.header);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {

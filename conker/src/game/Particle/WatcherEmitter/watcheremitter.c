@@ -97,7 +97,7 @@ WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emi
     desc.flags = 10;
     desc.emitter = 4;
     desc.callback = 1;
-    desc.unk2D = 2;
+    desc.handlerSet = 2;
     obj = blood_spawnDrip(&desc, 12, 0xFF, 0);
     if (obj != NULL) {
         memcpy(&obj->link, &link, sizeof(link));

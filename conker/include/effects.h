@@ -590,7 +590,7 @@ typedef struct BloodDripDesc {
     /* 0x2A */ u8 flags;
     /* 0x2B */ u8 emitter;
     /* 0x2C */ s8 callback;
-    /* 0x2D */ u8 unk2D;
+    /* 0x2D */ u8 handlerSet;
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
@@ -1872,7 +1872,7 @@ typedef struct BloodTrailDesc {
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 flags;
     /* 0x17 */ u8 emitter;          /* gBloodTrailEmitters index */
-    /* 0x18 */ u8 unk18;
+    /* 0x18 */ u8 mode;
     /* 0x19 */ s8 callback;
     /* 0x1A */ u8 pad1A[2];
 } BloodTrailDesc; /* size 0x1C */
@@ -1889,7 +1889,7 @@ typedef struct BloodTrail {
     /* 0x24 */ s16 lifetime;
     /* 0x26 */ u8 flags;
     /* 0x27 */ u8 emitter;
-    /* 0x28 */ u8 unk28;
+    /* 0x28 */ u8 mode;
     /* 0x29 */ s8 callback;
     /* 0x2A */ u8 pad2A[2];
     /* 0x2C */ Vec3f previous;

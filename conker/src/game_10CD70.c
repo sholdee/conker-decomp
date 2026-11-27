@@ -341,7 +341,7 @@ void effect_attachBloodDrip(Actor *actor, u8 arg1, s32 arg2) {
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
     desc.emitter = 11; /* gBloodDripEmitters[11] = effect_spawnDripDrop */
     desc.callback = -1; /* none */
-    desc.unk2D = 0;
+    desc.handlerSet = 0;
     desc.radius = 10.90000057f;
     desc.rate = 0.2312099934f;
     blood_spawnDrip(&desc, 0, arg1, arg2);

@@ -62,7 +62,7 @@ const s32 *gBloodModelLists[20] = {
 
 
 typedef struct {
-    s32 unk0[4];
+    s32 value[4];
 } Struct15136698Table;
 
 
@@ -353,7 +353,7 @@ void blood_freeDripDefault(EffectHeader *effect) {
 
 /* Calls the gBloodDripDestroyHandlers handler selected by drip->desc.unk2D (0 when out of range). */
 void blood_destroyDrip(BloodDrip *drip) {
-    s32 index = drip->desc.unk2D;
+    s32 index = drip->desc.handlerSet;
 
     if (index < 0) {
         index = 0;
@@ -366,7 +366,7 @@ void blood_destroyDrip(BloodDrip *drip) {
 
 /* Calls the gBloodDripFreeHandlers handler selected by drip->desc.unk2D (0 when out of range). */
 void blood_freeDrip(BloodDrip *drip) {
-    s32 index = drip->desc.unk2D;
+    s32 index = drip->desc.handlerSet;
 
     if (index < 0) {
         index = 0;
@@ -384,7 +384,7 @@ typedef struct {
     u8 pad19[0x3];
     Actor *owner;
     u8 pad20[0x1D];
-    u8 unk3D;
+    u8 handlerSet;
 } SubA_151347CC;
 
 /* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
@@ -397,7 +397,7 @@ void blood_handleDripMessage(void *obj, ActorMsg *msg, u8 message) {
             effect_destroyObject(&effect->header);
         }
     } else if (message == 0x11) {
-        if (effect->unk3D == 5) {
+        if (effect->handlerSet == 5) {
             if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
                 effect_destroyObject(&effect->header);
             }
@@ -516,7 +516,7 @@ void blood_updateTrail(BloodTrail *trail) {
 
 /* Message handler: forwards to effect_bloodTrailOwnerMessage while the effect's unk28 is 1. */
 void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
-    if (effect->unk28 == 1) {
+    if (effect->trail.mode == 1) {
         effect_bloodTrailOwnerMessage(effect, msg, msgId);
     }
 }
@@ -525,23 +525,24 @@ void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 void blood_emitNoTrailDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
 }
 
-/* Particle callback: accelerates and moves the particle and fades unk2E; returns 0 to kill it. */
+/* Screen sprite update (gScreenSpriteUpdates[1]): accelerates the sprite along y and grows its halfHeight while
+ * sprite.info.color1.alpha fades; returns 0 to kill it (past y 130, or faded out). */
 s32 func_15134CEC(Struct15134CEC *particle) {
     s32 fade;
 
-    particle->unk70 += 0.125f * gFrameDelta;
-    fade = particle->unk2E;
-    particle->unk74 += 0.07999999821f * gFrameDelta;
-    particle->unk14 += particle->unk70 * gFrameDelta;
-    particle->unk1C += particle->unk74 * gFrameDelta;
-    if (particle->unk14 > 130.0f) {
+    particle->speedY += 0.125f * gFrameDelta;
+    fade = particle->sprite.info.color1.alpha;
+    particle->halfHeightSpeed += 0.07999999821f * gFrameDelta;
+    particle->sprite.info.y += particle->speedY * gFrameDelta;
+    particle->sprite.info.halfHeight += particle->halfHeightSpeed * gFrameDelta;
+    if (particle->sprite.info.y > 130.0f) {
         return 0;
     }
     fade -= gFrameTicks * 2;
     if (fade < 0) {
         return 0;
     }
-    particle->unk2E = fade;
+    particle->sprite.info.color1.alpha = fade;
     return 1;
 }
 
@@ -1146,7 +1147,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
     s32 random0;
 
     extra = growth;
-    desc.texture = textures.unk0[math_random() & 3];
+    desc.texture = textures.value[math_random() & 3];
     if (arg7 != 0) {
         value = 2;
     } else {
@@ -1288,7 +1289,7 @@ void blood_startShortTrail(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 owner, s32 
     desc.lifetime = lifetime;
     desc.flags = BLOOD_TRAIL_LIFETIME | BLOOD_TRAIL_CALLBACK;
     desc.emitter = 5;
-    desc.unk18 = 2;
+    desc.mode = 2;
     desc.callback = -1;
     blood_spawnTrail(&desc, 0, owner, list);
 }
@@ -1968,7 +1969,7 @@ s32 blood_onChunkLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Colli
         chunk->spin.x = 0.0f;
         chunk->spin.y = 0.0f;
         chunk->spin.z = 0.0f;
-        chunk->unk5C = 0.0f;
+        chunk->gravity = 0.0f;
     }
     if (chunk->type != 2.0f) {
         pos.x = chunk->position.x;
@@ -1983,7 +1984,7 @@ s32 blood_onChunkLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Colli
         random = math_random();
         particle_spawnKindEmitter(flag, (randomF * 25.39999962f + 39.79999924f) * ((chunk->width + chunk->height) * 0.5f),
                       (random % 101U) + 100, surface, &pos, (math_random() % 101U) + 80, 1, 1, 0,
-                      chunk->unkC, chunk->unk1);
+                      chunk->header.owner, chunk->header.kind);
         chunk->unk2C = 0.0f;
     }
     return 1;
@@ -2269,7 +2270,7 @@ s32 blood_onGorePartLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Co
         chunk->spin.x = 0.0f;
         chunk->spin.y = 0.0f;
         chunk->spin.z = 0.0f;
-        chunk->unk5C = 0.0f;
+        chunk->gravity = 0.0f;
     }
     if (chunk->type != 2.0f) {
         pos.x = chunk->position.x;
@@ -2284,7 +2285,7 @@ s32 blood_onGorePartLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Co
         random = math_random();
         particle_spawnKindEmitter(flag, (randomF * 27.60000038f + 19.70000076f) * ((chunk->width + chunk->height) * 0.5f),
                       (random % 101U) + 100, surface, &pos, (math_random() % 144U) + 80, 1, 1, 0,
-                      chunk->unkC, chunk->unk1);
+                      chunk->header.owner, chunk->header.kind);
     }
     return 1;
 }

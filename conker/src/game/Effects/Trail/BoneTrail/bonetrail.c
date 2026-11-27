@@ -465,7 +465,7 @@ void trail_startBloodDrip(Actor *owner, u8 fxOwner) {
         params.flags = 10;
         params.emitter = 1;
         params.callback = -1;
-        params.unk2D = 0;
+        params.handlerSet = 0;
         params.owner = owner;
         blood_spawnDrip(&params, 0, fxOwner, 0);
     }

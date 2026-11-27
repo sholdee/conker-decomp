@@ -4,6 +4,7 @@
 #include <ultra64.h>
 #include "structs.h"
 #include "effects.h"
+#include "conker/sprite.h"
 
 /*
  * Subsystem "blood": prototypes of the non-static functions and declarations of the globals
@@ -17,17 +18,13 @@
  */
 
 
+/* A screen sprite of update kind 1 (gScreenSpriteUpdates[1] = func_15134CEC), with its extra data at 0x70. */
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[0x4];
-    f32 unk1C;
-    u8 pad20[0xE];
-    u8 unk2E;
-    u8 pad2F[0x41];
-    f32 unk70;
-    f32 unk74;
-} Struct15134CEC;
+    /* 0x00 */ ScreenSprite sprite;
+    /* 0x6C */ u8 pad6C[4];
+    /* 0x70 */ f32 speedY;          /* added to sprite.info.y each frame; grows by 0.125 per frame */
+    /* 0x74 */ f32 halfHeightSpeed; /* added to sprite.info.halfHeight each frame; grows by 0.08 per frame */
+} Struct15134CEC; /* size 0x78 */
 
 /* Motion state of a blood splat particle, kept at BloodSplat::motion. */
 typedef struct {
@@ -57,23 +54,19 @@ typedef struct {
 
 /* A bouncing chunk thrown by particle_newModelParticleWithFloor / particle_newModelParticle (from a ParticleSpawn desc at +0x10). */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
+    EffectHeader header;
     f32 radius;
     f32 bounce;             /* velocity factor kept on each bounce */
     f32 width;
     f32 height;
-    u8 pad20[0xC];
+    Vec3f rot;              /* ModelParticle.rot */
     f32 unk2C;
     f32 type;               /* 0, 1 or 2 (no decal), from the blood profile */
     f32 unk34;
     Vec3f position;
     Vec3f velocity;
     Vec3f spin;
-    f32 unk5C;
+    f32 gravity;
     s32 flags;
     u8 pad64[0x10C];
     s32 unk170;             /* counted down by message 0x45; first byte set by the spawner */
@@ -101,12 +94,10 @@ typedef struct {
     /* 0x170 */ DebrisData debris;
 } BloodDebrisParticle;
 
-/* An effect owned by an actor; effect_bloodTrailOwnerMessage handles its messages, blood_handleTrailMessage forwards them while unk28 is 1. */
+/* A BloodTrail owned by an actor (the ActorRef follows it); effect_bloodTrailOwnerMessage handles its messages, blood_handleTrailMessage
+ * forwards them while trail.mode is 1. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ u8 unk28;
-    /* 0x29 */ u8 pad29[0x17];
+    /* 0x00 */ BloodTrail trail;
     /* 0x40 */ ActorRef owner;
 } OwnedEffect40;
 

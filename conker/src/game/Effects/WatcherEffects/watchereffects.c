@@ -134,7 +134,7 @@ WatcherEmitter *effect_attachRisingEmitter(Actor *character, Watcher *watcher) {
     desc.flags = 10;        /* on a bone (2), no previous position yet (8) */
     desc.emitter = 5;
     desc.callback = 2;
-    desc.unk2D = 3;
+    desc.handlerSet = 3;
     emitter = blood_spawnDrip(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(WatcherEmitterLink));

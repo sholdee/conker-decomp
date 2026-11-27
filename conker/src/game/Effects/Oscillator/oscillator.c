@@ -177,7 +177,7 @@ void *effect_attachDriftEmitter(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxLi
     desc.flags = ((lifetime == -1) ? 0 : 4) | 0xA;
     desc.emitter = 7;
     desc.callback = -1;
-    desc.unk2D = 6;
+    desc.handlerSet = 6;
     return blood_spawnDrip(&desc, 0, 0xFF, 0);
 }
 

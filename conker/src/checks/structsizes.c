@@ -10,6 +10,7 @@
 #include <ultra64.h>
 #include <stddef.h>
 #include "conker/beam.h"
+#include "conker/blood.h"
 #include "conker/camera.h"
 #include "conker/cutscene.h"
 #include "conker/effect.h"
@@ -310,6 +311,10 @@ STATIC_ASSERT(sizeof(BoltChain) == 0x44, BoltChain_size);
 STATIC_ASSERT(sizeof(ParticleSettings) == 0x2C, ParticleSettings_size);
 STATIC_ASSERT(sizeof(WavyBeamData) == 0x5A8, WavyBeamData_size);
 
+/* conker/blood.h */
+STATIC_ASSERT(sizeof(Struct15134CEC) == 0x78, Struct15134CEC_size);
+STATIC_ASSERT(sizeof(OwnedEffect40) == 0x48, OwnedEffect40_size);
+
 /* conker/camera.h */
 STATIC_ASSERT(sizeof(CamWobble) == 0x68, CamWobble_size);
 STATIC_ASSERT(sizeof(CamWobbleEnvelope) == 0xA0, CamWobbleEnvelope_size);
@@ -391,6 +396,7 @@ STATIC_ASSERT(sizeof(ClipVtx) == 0x14, ClipVtx_size);
 STATIC_ASSERT(sizeof(ShadowVtx) == 0x14, ShadowVtx_size);
 
 /* conker/sprite.h */
+STATIC_ASSERT(sizeof(ScreenSprite) == 0x6C, ScreenSprite_size);
 STATIC_ASSERT(sizeof(Game1A89B0Position) == 0xE, Game1A89B0Position_size);
 
 /* conker/swarm.h */

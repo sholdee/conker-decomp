@@ -39,7 +39,7 @@ void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 owner, s32 list) {
     }
     desc.emitter = 6;
     desc.callback = -1; /* none */
-    desc.unk2D = 5;
+    desc.handlerSet = 5;
     effect = blood_spawnDrip(&desc, 0, owner, list);
     return effect;
 }
@@ -258,7 +258,7 @@ void *func_151AF270(Actor *actor, u8 owner, s32 list) {
     desc.lifetime = 320;
     desc.emitter = 10;
     desc.callback = -1;
-    desc.unk2D = 9;
+    desc.handlerSet = 9;
     result = blood_spawnDrip(&desc, 0, owner, list);
     return result;
 }

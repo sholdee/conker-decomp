@@ -268,7 +268,7 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     params.lifetime = delay;
     params.flags = 5;
     params.emitter = 6;
-    params.unk18 = 3;
+    params.mode = 3;
     params.callback = -1;
     blood_spawnTrail(&params, 0, arg4, arg5);
 }
