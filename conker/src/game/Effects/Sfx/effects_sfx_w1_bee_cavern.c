@@ -10,6 +10,10 @@
  * effect_updateRisingScreenSprite. The US build has no tunables: their values are literals.
  * The file is these four functions: the unit starts after alignment padding, and the next unit's
  * const tables follow this unit's float literals in .rodata.
+ * The ECTS tunables have Rare's names for the constants: MINIMUM_FRAMES_TIL_SCREENSPLAT,
+ * FRAMES_TIL_SCREENSPLAT_RANGE, POSITION_S_RANGE, POSITION_T, MINIMUM_WIDTH, WIDTH_RANGE, MINIMUM_HEIGHT,
+ * HEIGHT_RANGE, MINIMUM_ALPHA, ALPHA_RANGE, MINIMUM_SPEED, SPEED_RANGE (effect_updateEmitterSpawner) and
+ * BOTTOM_OF_SCREEN (effect_updateRisingScreenSprite).
  */
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
