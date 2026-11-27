@@ -18,7 +18,7 @@ const f32 gSpiralVariant1Scales[16] = {
     0.1f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f, 0.35f, 0.2f,
 };
 
-/* Spawn variants of the camera emitters (CameraEmitterData.variants); game_127060 uses entry 1. */
+/* Spawn variants of the camera emitters (CameraEmitterData.variants); game/Effects/DelayedBurst/delayedburst uses entry 1. */
 VariantList gSpiralVariantLists[2] = {
     { 3, gSpiralVariant0Ids, gSpiralVariant0Scales },
     { 16, gSpiralVariant1Ids, gSpiralVariant1Scales },

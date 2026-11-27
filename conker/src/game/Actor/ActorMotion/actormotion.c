@@ -4,7 +4,6 @@
 #include "conker/aim.h"
 #include "conker/anim.h"
 #include "conker/attach.h"
-#include "conker/beam.h"
 #include "conker/blood.h"
 #include "conker/bone.h"
 #include "conker/camera.h"

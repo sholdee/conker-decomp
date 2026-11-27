@@ -17,9 +17,10 @@
  *   game/Actor/MovementHit/movementhit.c
  *   game/Actor/ObjectSize/objectsize.c
  *   game/Actor/KillRespawn/killrespawn.c
- *   game_DE5A0.c
+ *   game/Actor/HoverUpdates/hoverupdates.c
  *   game/Effects/Greyscale/greyscale.s
  *   game/Actor/Follower/follower.c
+ *   game/Actor/SpinDown/spindown.c
  */
 
 
@@ -376,7 +377,7 @@ extern u8 gEliminatedSquareSizes[4]; // per player: half-size of the square, min
 extern u8 gRespawnPending;
 extern u8 gLastDeathKind;
 
-/* game_DE5A0.c */
+/* game/Actor/HoverUpdates/hoverupdates.c */
 void func_150B10F0(Actor *actor);
 void func_150B12FC(Actor *actor);
 void func_150B1484(Actor *actor);
@@ -388,5 +389,8 @@ void colourfb_toGreyscale(void *start, void *end);
 
 /* game/Actor/Follower/follower.c */
 void actor_updateFollower(Actor *self);
+
+/* game/Actor/SpinDown/spindown.c */
+void actor_updateSpinDown(Actor *arg0);
 
 #endif

@@ -42,8 +42,8 @@ struct fields and data symbols.
   the ROM and in prerelease builds. The other names are descriptive.
 - Naming is the main open work. Some functions, struct fields and data keep names made from their
   address or offset (`func_XXXXXXXX`, `D_XXXXXXXX`, `unk1C`), because no evidence shows yet what they do.
-  [tools/RENAMING.md](tools/RENAMING.md) gives the rules. Other open work is the C files that still have
-  address names (`conker/src/*.c`), a few known fake matches, and the assembly pieces that rest only on
+  [tools/RENAMING.md](tools/RENAMING.md) gives the rules. Other open work is the five data-only C files that
+  still have address names (`conker/src/*.c`), a few known fake matches, and the assembly pieces that rest only on
   search evidence. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to help.
 - Only the US version is decompiled. The EU, debug and ECTS versions have splat configurations (they
   split a ROM into code and data), but their builds are not verified.
@@ -112,7 +112,7 @@ gitignored and must never be committed.
 | `conker/src/debugger/` | The debugger segment |
 | `conker/src/libultra/` | libultra (SDK) files, some built from [ultralib](https://github.com/decompals/ultralib) source |
 | `conker/src/checks/` | Struct size checks (`structsizes.c`), compiled but not linked |
-| `conker/src/*.c` | A few files whose purpose is not clear yet. They keep address names |
+| `conker/src/*.c` | Five data-only files. No evidence shows yet which file defines their data, so they keep address names |
 | `conker/include/conker/<subsystem>.h` | One header for each subsystem: the declarations of its functions and globals |
 | `conker/include/` | Shared types and macros (`structs.h`, `effects.h`, `macros.h`) and the SDK 2.0L headers, with small libc headers (`libc/`) and assembler macros (`macro.inc`) |
 | `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |

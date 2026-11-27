@@ -1,5 +1,5 @@
 src/init/Boot/EntryPoint/entrypoint.s	boot	hand-written asm (subsystem from entry point)
-src/init_38E0.c	boot	early-boot helper pair (permuter-matched)
+src/init/Boot/HardwareCheck/hardwarecheck.c	boot	check of the hardware on the cartridge port (the debug build calls it at boot; not called in US)
 src/init/Boot/Paging/pagesetup.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/Paging/pagebitmap.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/Paging/pagefault.s	boot	hand-written asm (subsystem from its header group)
@@ -36,7 +36,7 @@ src/game/Camera/LevelCamSetup22/levelcamsetup22.c	camera	per-level camera hook (
 src/game/Camera/LevelCamSetup23/levelcamsetup23.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook with zone-dependent heights
 src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
-src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
+src/game/Sprite/LevelSpriteSetup/levelspritesetup.c	sprite	builds the level's sprites when a level loads: sprite type setup, placement on the level triangles, type textures
 src/game/Level/PipeBurstSetup/pipeburstsetup.c	level	per-level setup helper
 src/game/Player/HudBlockInit/hudblockinit.c	player	player stat limits and globals init
 src/game/Zone/CodeTree/codetree.s	zone	hand-written asm (subsystem from its header group)
@@ -87,12 +87,12 @@ src/game/Math/Distance2D/distance2d.s	collision	hand-written asm (subsystem from
 src/game/Math/Rand64/rand64.s	collision	hand-written asm (subsystem from its header group)
 src/game/Script/ScriptInterp/scriptinterp.s	collision	hand-written asm (subsystem from its header group)
 src/game/Script/TaskExit/taskexit.s	collision	hand-written asm (subsystem from its header group)
-src/game_DE5A0.c	actor	object hover/pairing behaviour (moves to height, sits on other actor)
+src/game/Actor/HoverUpdates/hoverupdates.c	actor	update handlers of actor types 7, 9, 10, 11 and 16: hover at a height, carry or sit on another actor
 src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-written asm)
-src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
+src/game/Effects/ObjBurst/objburst.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game/Camera/LevelHook07/levelhook07.c	camera	per-level camera setup from game-flag queries
 src/game/Camera/LevelHook05/levelhook05.c	camera	per-level camera flag hook
-src/game_EB6C0.c	effect	prop push, path mover and a debris burst (the file after effects_sfx_w1_bee_cavern.c)
+src/game/Effects/DebrisSplash/debrissplash.c	effect	debris and splash sprays at an actor's death (func_150BE494), path mover, pushed turner (the file after effects_sfx_w1_bee_cavern.c)
 src/game/Camera/LevelHook18/levelhook18.c	camera	per-level camera hook
 src/game/Camera/LevelHook03/levelhook03.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook10/levelhook10.c	camera	per-level camera flag hook
@@ -101,28 +101,28 @@ src/game/Camera/LevelHook06/levelhook06.c	camera	per-level camera flags and rang
 src/game/Actor/MountControl/mountcontrol.c	actor	mount control
 src/game/Camera/LevelHook13/levelhook13.c	camera	per-level camera preset hook
 src/game/Camera/LevelHook22/levelhook22.c	camera	per-level camera hook
-src/game_FE850.c	effect	spin-decay object with colour pulse
+src/game/Actor/SpinDown/spindown.c	actor	update handler of actor type 40: spins the actor down
 src/game/Effects/LevelHook14/levelhook14.c	effect	effect stub (empty)
 src/game/Camera/LevelHook09/levelhook09.c	camera	per-level camera hook (water)
-src/game_10CD70.c	effect	swing objects, bolt emitters, scrolling material textures
+src/game/Effects/MaterialScroll/materialscroll.c	effect	scrolling material textures (update hook 7, LEVEL_W2_HARBOUR), swing object, bolt emitter, blood drip, bone beam
 src/game/Camera/LevelHook33/levelhook33.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook35/levelhook35.c	camera	per-level camera hook
 src/game/Camera/LevelHook04/levelhook04.c	camera	per-level camera hook
 src/game/Camera/LevelHook32/levelhook32.c	camera	per-level camera flag hook
-src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
+src/game/Effects/ActorExplosion/actorexplosion.c	effect	bone pulse, tilt commands, texture swaps, death explosion, random level sounds (update hook 25, LEVEL_W2_WARBOSS)
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
 src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook
 src/game/Screen/StarSky/starsky.c	screen	black view fill with view-projection matrix
-src/game_127060.c	effect	impact bursts with sparks and glows
+src/game/Effects/DelayedBurst/delayedburst.c	effect	delayed spark burst on an actor, light switch events, line emitter, cash sprites
 src/game/Effects/StarField/starfield.s	effect	hand-written asm (subsystem from its header group)
 src/game/Camera/LevelHook19/levelhook19.c	camera	per-level camera preset hook
 src/game/Effects/LevelHook08/levelhook08.c	effect	effect stub (empty)
 src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
 src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
-src/game_193420.c	effect	effect stub (empty)
+src/game/Effects/LevelUpdateStub/levelupdatestub.c	effect	empty hook that effect_updateLevel calls each frame
 src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
-src/game_1CC420.c	effect	effect stub (empty)
+src/game/Effects/ActorEventStub/actoreventstub.c	effect	empty hook that a timed event calls with the current actor
 src/game/Audio/Mp3Player/mp3player.c	mp3	streaming music player (StreamVoice), set up by game/Audio/Mp3Voice/mp3voice.c
 src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctlong.s	mp3	hand-written asm (subsystem from its header group)
@@ -715,7 +715,7 @@ src/init/Os/DevMgr/devmgr.c	os	Rare's copy of __osDevMgrMain with PI-thread inte
 src/init/Rom/RomDma/romdma.c	rom	cartridge ROM reads: blocking/non-blocking PI DMA and uncached copies
 src/init/Sched/SchedInit/schedinit.c	sched	scheduler client helpers and thread stop
 src/init/Sched/Scheduler/scheduler.c	sched	scheduler thread: VI retrace, RSP/RDP completion, gfx task state machine
-src/game_FE8C0.c	effect	the second function of the spin-decay unit and its literal
+src/game/Effects/LevelActorHooks/levelactorhooks.c	effect	the callbacks before and after each actor's update (LEVEL_W1_RAPTOR_NEST) and an ambient colour pulse
 src/game/Particle/ParticleModelIds/particlemodelids.c	particle	particle model id table (data only)
 src/init/View/SetupDl/setupdl.c	view	the RDP setup display list (data only)
 src/debugger/Level/BaseSpawns/basespawns.c	level	the two base spawn tables that level_loadSpawnTable reads from ROM (data only)

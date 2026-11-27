@@ -10,7 +10,6 @@
  * Subsystem "light": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game/Lighting/LevelLights/levellights.c
- *   game_38050.c
  *   game/Lighting/PlayerLight/playerlight.c
  *   game/Effects/AmbientPulse/ambientpulse.c
  *   game/Effects/ColourWave/colourwave.c
@@ -168,21 +167,6 @@ void light_cbFlickerSoundById(PointLight *light, s32 id);
 void light_runCallback(PointLight *light, s32 id);
 void light_startColourWave(s32 unused);
 void light_runAmbientAction(s32 action);
-
-/* game_38050.c */
-void light_initParticleSlots(s32 arg0);
-void light_loadParticleTextures(void);
-void light_setupParticleSlot(s32 slot, s32 id, s32 flags);
-s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
-s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-void light_resetSpriteBuffers(s32 unused);
-void light_resetParticles(void);
-void light_buildLevelParticles(void);
 
 /* game/Lighting/PlayerLight/playerlight.c */
 void light_easePlayerLight(s32 player);
