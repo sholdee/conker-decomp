@@ -28,6 +28,7 @@ ASSET_DATA = {
     0x2AC84: "crash screen font",
     0x2C960: "audio microcode data",
     0x2293F0: "font texture",
+    0x259560: "debugger font",
     0x242F30: "resource manifest lists and names",
 }
 COLOURS = {"c": "#3fb950", "hasm": "#388bfd"}

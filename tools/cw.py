@@ -11,7 +11,7 @@ NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM b
 sha gate as mw.py, and the same environment variables (CONKER_WS, CONKER_CONTAINER, CONKER_REPO).
 The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
 """
-import argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
+import os, argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -358,6 +358,7 @@ def cmd_land(a):
             autos = {n: (MAIN / n).read_bytes() for n in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")}
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
+            (MAIN / f).parent.mkdir(parents=True, exist_ok=True)  # a new file may be in a new directory
             (MAIN / f).write_bytes(data)
         for f in deleted:
             backup.setdefault(f, (MAIN / f).read_bytes() if (MAIN / f).exists() else None)
@@ -387,7 +388,9 @@ def cmd_land(a):
         msg = f"{a.message.splitlines()[0]} [cw]" if a.message else f"cleanup: {m['file'] or m.get('tree')} [cw]"
         if a.message and len(a.message.splitlines()) > 1:
             msg += "\n\n" + "\n".join(a.message.splitlines()[1:]).strip()
-        git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+        # the commit trailer names the model that made the change: CONKER_COAUTHOR overrides the default
+        coauthor = os.environ.get("CONKER_COAUTHOR", "Claude Opus 5.5 <noreply@anthropic.com>")
+        git("commit", "-q", "-m", msg + f"\n\nCo-Authored-By: {coauthor}")
         # the merged files are now main's: make them the new merge base for further edits
         for f in files:
             (ws / "base" / f).parent.mkdir(parents=True, exist_ok=True)

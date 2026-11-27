@@ -18,6 +18,8 @@ The runbooks use these names. Commands run from the repository root unless they 
 - `$CONKER_REF`: optional. Your own clone of the independent decompilation
   (`git clone https://github.com/DevOldSchool/conkers-bfd-decomp "$CONKER_REF"`). Some runbooks use it
   as a read-only reference. Never run its scripts or build it.
+- `$CONKER_COAUTHOR`, default `Claude Opus 5.5 <noreply@anthropic.com>`: the `Co-Authored-By` trailer that
+  `cw.py land` writes. Set it to the model that made the change.
 
 ## Toolchain
 Builds run in the podman container `conker-tc`, made from `tools/toolchain/Containerfile` (Ubuntu
