@@ -239,17 +239,6 @@ void weapon_startHitRandomEmitter(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 
-typedef struct FollowFx {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-} FollowFx;
-
-typedef struct Bullet88 {
-    /* 0x000 */ u8 pad0[0x110];
-    /* 0x110 */ s32 unk110;
-} Bullet88;
-
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
 void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
     RayHit ray;
@@ -410,21 +399,21 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.y = pos.y;
             header2.z = pos.z;
             bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
-            bulletState->follow = (struct FollowFx *)weapon_spawnBulletSprite(obj);
+            bulletState->follow = weapon_spawnBulletSprite(obj);
             bulletState->sound = sound_addDynamicSound(math_random() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
-            bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
+            bulletState->particle = weapon_spawnBulletParticle(obj);
             if (gScreenLayout < 2 && gPlayerCount < 4) {
-                bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
+                bulletState->bloodTrail = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
-                bulletState->unk8C = NULL;
+                bulletState->bloodTrail = NULL;
             }
         } else {
             if (state.trail != NULL) {
                 effect_destroyObject(state.trail);
             }
             if (state.follow != NULL) {
-                effect_destroyObject(&state.follow->header);
+                effect_destroyObject(&state.follow->head.header);
             }
         }
         if (shooter->ob_matrix_ptr != NULL && (shooter->cullMask & 0xF) != 0xF) {
@@ -540,7 +529,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
         trail->light->z = bullet->head.pos.z;
     }
     if (state->follow != NULL) {
-        state->follow->pos = bullet->head.pos;
+        state->follow->head.desc.pos = bullet->head.pos;
     }
     return TRUE;
 }
@@ -554,16 +543,16 @@ void weapon_releaseBullet(Bullet *bullet) {
         effect_destroyObject(state->trail);
     }
     if (state->follow != NULL) {
-        effect_destroyObject(&state->follow->header);
+        effect_destroyObject(&state->follow->head.header);
     }
-    if (state->unk88 != NULL) {
+    if (state->particle != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs
-        s32 *flag = &state->unk88->unk110;
+        Bullet **ref = &state->particle->bullet;
 
-        *flag = 0;
+        *ref = NULL;
     }
-    if (state->unk8C != NULL) {
-        effect_destroyObject(state->unk8C);
+    if (state->bloodTrail != NULL) {
+        effect_destroyObject(state->bloodTrail);
     }
     sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }

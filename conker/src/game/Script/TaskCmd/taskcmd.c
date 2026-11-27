@@ -1,4 +1,10 @@
 #include <ultra64.h>
+
+/* This file's .bss, before the headers: after them, the .bss order would change with the number of declarations in them. */
+/* osGetCount() samples that command 12 takes (start and lap). */
+static s32 gTaskTimerLap;
+static s32 gTaskTimerStart;
+
 #include "conker/actor.h"
 #include "conker/boot.h"
 #include "conker/collision.h"
@@ -10,10 +16,6 @@
 #include "conker/script.h"
 #include "conker/text.h"
 #include "conker/view.h"
-
-/* osGetCount() samples that command 12 takes (start and lap). */
-static s32 gTaskTimerLap;
-static s32 gTaskTimerStart;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + gTaskDoneBits))

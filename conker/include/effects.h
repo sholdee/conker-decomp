@@ -382,10 +382,6 @@ typedef struct FloorParticle {
     /* 0x170 */ f32 floorY;
 } FloorParticle;
 
-/* game/Weapon/Bullet/bullet.c's views of the objects weapon_spawnBulletSprite and weapon_spawnBulletParticle return, defined there. */
-struct FollowFx;
-struct Bullet88;
-
 /* Per-bullet state, stored at Bullet.state (0xD0 bytes). */
 typedef struct BulletState {
     /* 0x000 */ RayHit ray;
@@ -394,9 +390,10 @@ typedef struct BulletState {
     /* 0x06C */ Actor *owner;
     /* 0x070 */ IgnoreList ignore;
     /* 0x080 */ LightEffect *trail;
-    /* 0x084 */ struct FollowFx *follow; /* weapon_spawnBulletSprite (game/Weapon/BulletParticle/bulletparticle.c) */
-    /* 0x088 */ struct Bullet88 *unk88;  /* weapon_spawnBulletParticle's particle (game/Weapon/BulletParticle/bulletparticle.c) */
-    /* 0x08C */ void *unk8C;
+    /* 0x084 */ struct SpriteParticle *follow;    /* weapon_spawnBulletSprite (game/Weapon/BulletParticle/bulletparticle.c) */
+    /* 0x088 */ struct BulletParticle *particle;  /* weapon_spawnBulletParticle's particle; it follows the bullet until
+                                                  * weapon_releaseBullet clears its bullet */
+    /* 0x08C */ struct BloodTrail *bloodTrail;    /* weapon_startBulletTrail, NULL on split screens */
     /* 0x090 */ u16 sound;
     /* 0x092 */ u8 impactType;
     /* 0x093 */ u8 pad93;

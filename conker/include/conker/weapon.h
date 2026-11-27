@@ -25,7 +25,7 @@
  */
 
 /* A particle spawned by weapon_spawnBulletParticle, which keeps its bullet at 0x110. */
-typedef struct {
+typedef struct BulletParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Bullet *bullet;
 } BulletParticle;
