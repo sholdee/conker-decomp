@@ -1668,8 +1668,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C6650, name: game/Aim/AimRemove/aimremove}
       - {start: 0x255880, type: .bss, vram: 0x800C6660, name: game/Model/ObjParts/objparts}
       - {start: 0x255880, type: .bss, vram: 0x800C67F0, name: game/Zone/ZoneTree/zonetree}
-      - {start: 0x255880, type: bss, vram: 0x800C6800, name: bss_800C6800}
-      - {start: 0x255880, type: .bss, vram: 0x800C6850, name: game/Debug/TaskMenu/taskmenu}
+      - {start: 0x255880, type: .bss, vram: 0x800C6800, name: game/Debug/TaskMenu/taskmenu}
       - {start: 0x255880, type: .bss, vram: 0x800C6860, name: game/Debug/DlCheck/dlcheck}
       - {start: 0x255880, type: .bss, vram: 0x800C68B0, name: game/Text/FontDraw/fontdraw}
       - {start: 0x255880, type: .bss, vram: 0x800CBD60, name: game/Text/TextQueue/textqueue}
