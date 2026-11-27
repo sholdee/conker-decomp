@@ -1815,7 +1815,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     if (obj->mv != NULL) {
                         obj->mv->actual_speed = obj->speed * 2.0f;
                     }
-                    obj->unk54 = 0.0f;
+                    obj->bodyLean = 0.0f;
                     obj->heightOffset = 0;
                     rescaled = 0;
                     gCurrentActorSlot = (target - movement_obj) + 1;
@@ -2512,7 +2512,7 @@ s32 cutscene_releasePlayer(s32 scene) {
             if (ctl != NULL) {
                 ctl->actual_speed = 0.0f;
             }
-            obj->unk54 = 0.0f;
+            obj->bodyLean = 0.0f;
             obj->heightOffset = 0;
             obj->doing_hit = 0;
 

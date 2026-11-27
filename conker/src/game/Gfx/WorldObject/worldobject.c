@@ -539,7 +539,7 @@ void gfx_carryActorOnObject(Actor *actor, s32 objIndex) {
     }
     gfx_carryPointWithObject(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
     actor->angle += db_Object_array[objIndex].spinY * 182.04444885f;
-    if (actor->unk137 != 0 && objIndex + 1 == gActorTouchedObject[actor - movement_obj]) {
+    if (actor->ledgeState != 0 && objIndex + 1 == gActorTouchedObject[actor - movement_obj]) {
         actor->langle = actor->angle;
     }
 }

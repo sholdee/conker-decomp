@@ -990,7 +990,7 @@ struct Actor {
     /* 0x048 */ f32 speedup;
     /* 0x04C */ f32 animsp;
     /* 0x050 */ f32 wantanimsp;   // not accessed in US code
-    /* 0x054 */ f32 unk54;
+    /* 0x054 */ f32 bodyLean;     // player lean in degrees, eased by mv->lean_last each update (actor_updatePlayer); drives lean_angle and the body bone commands
     /* 0x058 */ u8 *animBankTable; // ROM table [2][bank] of the animation bank (rom_findPath)
     /* 0x05C */ s32 basemtx;
     /* 0x060 */ s16 texScroll;
@@ -1047,7 +1047,7 @@ struct Actor {
     /* 0x0AB */ u8  unkAB;
     /* 0x0AC */ u8  modelLoadFlags;
     /* 0x0AD */ u8  inwater;
-    /* 0x0AE */ u8  unkAE;
+    /* 0x0AE */ u8  waterJumpTimer; // player updates left after the jump out of the water (12; actor_tickTimers): less deceleration
     /* 0x0AF */ u8  padAF;
     /* 0x0B0 */ s8  floatDepth;
     /* 0x0B1 */ u8  padB1;
@@ -1116,7 +1116,7 @@ struct Actor {
     /* 0x134 */ u8  morphTarget;
     /* 0x135 */ u8  morphDuration;
     /* 0x136 */ u8  spriteTexture;
-    /* 0x137 */ u8  unk137;
+    /* 0x137 */ u8  ledgeState;    // player: 0 none, 1 hanging from a ledge, 2 climbing up (actor_updatePlayer, actor_updatePlayerControls)
     /* 0x138 */ u8  speccnt;
     /* 0x139 */ u8  idleRequest;      // requested idle sequence (anim_pickIdleSequence)
     /* 0x13A */ u8  idleRequestTimer; // its countdown
