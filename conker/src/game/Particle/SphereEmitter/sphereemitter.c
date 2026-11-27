@@ -723,7 +723,7 @@ typedef struct {
     u8 rgb[4][3];
 } BurstColors;
 
-static BurstColors D_8008F8E8 = { { { 0, 0, 0 }, { 89, 0, 0 }, { 255, 255, 255 }, { 128, 128, 128 } } };
+static BurstColors gDragFadeBurstColors = { { { 0, 0, 0 }, { 89, 0, 0 }, { 255, 255, 255 }, { 128, 128, 128 } } };
 
 /* Spawns `count` particle_spawnDragFadeSprite particles around pos; size and speed change linearly over the burst. */
 void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
@@ -762,7 +762,7 @@ void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 s
         b = math_random();
         math_dirFromBinAngles(a & 0xFF, b & 0xFF, math_randomFloat() * spread, &offset);
         velocityFunc(dir, yaw, pitch, speed, t, &vel);
-        colors = D_8008F8E8;
+        colors = gDragFadeBurstColors;
         color = math_random() & 3;
         rand = math_randomFloat();
         a = math_random();

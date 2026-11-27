@@ -115,7 +115,7 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
 }
 
 void particle_broadcastToActorEmitters(s32 event, u8 eventType) {
-    IdList1 desc = D_800A74D4;
+    IdList1 desc = gActorEmitterTypes;
 
     effect_sendEventToTypes(desc.ids, 1, event, eventType);
 }

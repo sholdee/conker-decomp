@@ -2242,9 +2242,9 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2);
 
 /* The front-end .rodata of the unit that begins with game/Particle/ActorEmitter/actoremitter.c (0x24BF20), defined in that
  * file until the unit's files are merged (see the comment there). */
-extern const char D_800A7460[]; /* particle_chainAllOverFireToSmoke's string */
-extern const char D_800A749C[]; /* particle_chainTailFireToSmoke's string */
-extern const IdList1 D_800A74D4; /* { 0x21 }: the template of particle_broadcastToActorEmitters's local */
+extern const char gAllOverFireToSmokeName[]; /* particle_chainAllOverFireToSmoke's string */
+extern const char gTailFireToSmokeName[]; /* particle_chainTailFireToSmoke's string */
+extern const IdList1 gActorEmitterTypes; /* { 0x21 }: the template of particle_broadcastToActorEmitters's local */
 /* The anchor emitter templates, one array per kind (only variant 0 exists; gAnchorEmitterTemplates). */
 extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
 extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];

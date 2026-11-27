@@ -17,10 +17,10 @@
  * (IDO keeps vtx in a register where the ROM loads it again).
  */
 /* The effect names that particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke pass on. */
-const char D_800A7460[] = "effects_characterfire_conker_all_over_fire_to_smoke_death";
-const char D_800A749C[] = "effects_characterfire_conker_tail_fire_to_smoke_death";
+const char gAllOverFireToSmokeName[] = "effects_characterfire_conker_all_over_fire_to_smoke_death";
+const char gTailFireToSmokeName[] = "effects_characterfire_conker_tail_fire_to_smoke_death";
 /* The template of particle_broadcastToActorEmitters's local. */
-const IdList1 D_800A74D4 = { { 0x21 } };
+const IdList1 gActorEmitterTypes = { { 0x21 } };
 /*
  * The anchor emitter templates, one array per kind (gAnchorEmitterTemplates): { rate, rateRange, burstBase,
  * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, unk20, unk21Range, lifeMin, lifeRange, pad, maxCount,

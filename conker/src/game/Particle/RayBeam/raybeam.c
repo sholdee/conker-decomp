@@ -52,7 +52,7 @@ static const Vec3f gObjRayBeamTargets[7] = {
     { 0.0f, 36.0f, 130.0f },  { -6.0f, -25.0f, 208.0f }, { 0.0f, 66.0f, 274.0f }, { -6.0f, -25.0f, 208.0f },
     { 0.0f, -114.0f, 49.0f }, { 7.0f, -113.0f, 57.0f },  { 9.0f, -64.0f, 72.0f },
 };
-static const u8 D_800A2248[7] = { 12, 0, 12, 9, 9, 9, 9 };
+static const u8 gObjRayBeamBones[7] = { 12, 0, 12, 9, 9, 9, 9 };
 
 /*
  * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
@@ -1035,7 +1035,7 @@ EffectParticle *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 a
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], D_800A2248[kind], lifetime, r, g, 0,
+    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], gObjRayBeamBones[kind], lifetime, r, g, 0,
                          20.0f, 20, 4.0f, 0.08f, aimed, owner, list);
 }
 
