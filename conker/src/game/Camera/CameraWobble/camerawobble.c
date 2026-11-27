@@ -21,7 +21,7 @@ static f32 (*gWobbleScaleCallbacks[])() = { effect_getSprayAreaWobbleScale, came
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
- * player's unk3D0->mv->AimState is set or no effect could be allocated.
+ * player's CharPtr->mv->AimState is set or no effect could be allocated.
  */
 CamWobble *camera_createWobble(CamWobbleDef *def, s32 extraSize, u8 owner, s32 list) {
     CamWobble *wobble;

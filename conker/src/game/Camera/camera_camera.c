@@ -891,7 +891,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
     }
 }
 
-/* Pitch of the eye->target line (degrees and radians), plus the pitch offsets unk38C / unk3A8. */
+/* Pitch of the eye->target line (degrees and radians), plus the pitch offsets AddOnPitch / APitchAngle. */
 void camera_updatePitch(Camera *camera) {
     f32 dz;
     f32 dx;
@@ -992,7 +992,7 @@ void camera_attachToObject(Camera *camera, s32 index) {
     camera->CharTrackingSpeed = 0.0f;
 }
 
-/* Recomputes pitch, yaw, unk380 (yaw minus unk5E8, wrapped) and the view direction. */
+/* Recomputes pitch, yaw, TrueCameraAngle (yaw minus YawAngle, wrapped) and the view direction. */
 void camera_updateAngles(Camera *camera) {
     camera_updatePitch(camera);
     camera_updateYaw(camera);

@@ -10,10 +10,10 @@ static const struct {
 } D_800A08D0 = { 1.0f / 170.0f, 24.599998f };
 
 
-/* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (height/idealHeight/IdealTripodMagnitude/TgetFOVX/TgetFOVY)
- * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from script_query queries;
- * otherwise zeroes unk190/unk1A4/unk1A8 when camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds. On LEVEL_W1_VOLCANO_RACE, also mirrors
- * a script_query query into unk84 bit 0x1000. */
+/* Unless camera->Mode is 0x40: with SpecialFlags bit 0x80 set, scales distances (height/idealHeight/IdealTripodMagnitude/TgetFOVX/TgetFOVY)
+ * by the clamped xz speed (0..170, as a 0..1 fraction) and sets AvailableModes flags from script_query queries;
+ * otherwise zeroes YOffsetTget/TgetFOVX/TgetFOVY when camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds. On LEVEL_W1_VOLCANO_RACE, also mirrors
+ * a script_query query into AvailableModes bit 0x1000. */
 void camera_scaleBySpeed(Camera *camera) {
     if (camera->Mode == 0x40) {
         return;

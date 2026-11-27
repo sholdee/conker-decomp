@@ -616,7 +616,7 @@ typedef struct {
     /* 0x13C */ Vec3f aimEye;
     /* 0x148 */ Vec3f aimTarget;
     /* 0x154 */ u8  pad154[0xC];
-    /* 0x160 */ Vec3f savedCameraEye;                /* world position: Camera.eye saved on entering first-person aim (camera_updateFirstPersonAim), restored by camera_easeYawBehind */
+    /* 0x160 */ Vec3f savedCameraEye;                /* the first-person eye (Camera.eye just placed by camera_getAimEye) saved on entering first-person aim; restored on the next snap by camera_easeYawBehind */
     /* 0x16C */ f32 aimYaw;
     /* 0x170 */ f32 aimPitch;
     /* 0x174 */ f32 aimYawTarget;
@@ -1488,7 +1488,7 @@ typedef struct CamAim {
     /* 0x24 */ f32 savedTargetDistance;
     /* 0x28 */ f32 savedHeight;
     /* 0x2C */ f32 savedTightness;
-    /* 0x30 */ f32 savedBaseY;                       /* Camera.baseY on entering aim, restored on exit */
+    /* 0x30 */ f32 savedBaseY;                       /* Camera.baseY on entering aim (probeY after a snap); restored on exit when SpecialFlags & 0x40 or waterY != 0 */
     /* 0x34 */ f32 targetYaw;
     /* 0x38 */ f32 targetPitch;
     /* 0x3C */ f32 pitch;
@@ -1496,7 +1496,7 @@ typedef struct CamAim {
     /* 0x44 */ f32 distance;
     /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.TripodMagnitude passes this */
     /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
-    /* 0x4D */ u8 swing;                             /* the camera swings round to targetYaw (from the player's facing) on entering aim */
+    /* 0x4D */ u8 swing;                             /* the camera swings round to targetYaw (from the player's facing) on entering aim, and back to savedYaw on leaving it; 0: no swing */
     /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
     /* 0x4F */ u8 pad4F[0x1];
     /* 0x50 */ f32 overridePitch;
@@ -1646,7 +1646,7 @@ struct Camera {
     /* 0x310 */ u8 pad310[0x34];
     /* 0x344 */ f32 eyeHeight;                       /* height of the eye above baseY (eye.y - baseY), world units */
     /* 0x348 */ f32 height;
-    /* 0x34C */ f32 idealHeight;                     /* resting value of height (cameraocclusion.c resets height to it each frame) */
+    /* 0x34C */ f32 idealHeight;                     /* resting value of height (cameraocclusion.c resets height to it when no command height applies) */
     /* 0x350 */ u8 pad350[0x4];
     /* 0x354 */ f32 baseY;                           /* world y the camera heights are measured from (floor, water or player height; camera_updateFloorHeights) */
     /* 0x358 */ f32 unk358;

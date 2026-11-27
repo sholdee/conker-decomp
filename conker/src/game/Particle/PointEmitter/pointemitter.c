@@ -106,7 +106,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
     }
 }
 
-/* Sets camera distances (YOffsetTget, height/idealHeight/IdealTripodMagnitude) and flag bits in unk84/unk5F0 from game flags. */
+/* Sets camera distances (YOffsetTget, height/idealHeight/IdealTripodMagnitude) and flag bits in AvailableModes/SpecialFlags from game flags. */
 void particle_levelHook21(Camera *camera) {
     s32 flagBC;
     s32 flagBB;

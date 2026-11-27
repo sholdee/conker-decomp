@@ -8,7 +8,7 @@
 /* This file's .data. */
 static s32 gLevelHook06DefaultsApplied = 0; /* 1 once the query-0x5072 branch has restored the default camera; 0 again in the 0x5071-only branch */
 
-/* Updates camera flags and range fields (liftTarget/height/idealHeight/targetDistance) from script_query state queries 0x5071/0x5072. */
+/* Updates camera flags and range fields (YOffsetTget/height/idealHeight/IdealTripodMagnitude) from script_query state queries 0x5071/0x5072. */
 void camera_levelHook06(Camera *camera)
 {
   s32 queryBC;

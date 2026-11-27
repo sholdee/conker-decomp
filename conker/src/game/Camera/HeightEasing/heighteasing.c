@@ -13,7 +13,7 @@
 void camera_easeHeight(Camera *camera) {
     f32 targetHeight;
     f32 height;
-    s32 cappedByCeiling; // left unset when unk84 bit 4 is set or unk180 >= unk17C (as in the original)
+    s32 cappedByCeiling; // left unset when AvailableModes bit 4 is set or unk180 >= unk17C (as in the original)
     f32 ceiling;
 
     if (gSpawnCutsceneActive != 0) {

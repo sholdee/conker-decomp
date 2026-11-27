@@ -8,7 +8,7 @@
 #include "conker/math.h"
 #include "conker/view.h"
 
-/* Z-buffer scan parameters (gZScanParams[player][unk1B4], copied from gDefaultZScanParams by camera_resetZScans). */
+/* Z-buffer scan parameters (gZScanParams[player][DistIndex], copied from gDefaultZScanParams by camera_resetZScans). */
 typedef struct {
     s16 halfWidth; // pixels scanned on each side of the target
     s16 height;
@@ -40,8 +40,8 @@ static f32 gCameraTargetScreenDepth;
 static f32 gOcclusionEyeDrop;
 static ZScanParams gZScanParams[4][4]; // per player
 
-/* Updates the camera's floor heights (floorY, unk360; -10000 means none found) and the height it aims for
- * (baseY), with special cases for the camera modes and the tracked objects. */
+/* Updates the camera's floor heights (floorY, waterY; -10000 means none found) and the base y its heights are
+ * measured from (baseY), with special cases for the camera modes and the tracked objects. */
 void camera_updateFloorHeights(Camera *camera) {
     f32 unusedShad;
     s32 transport;
@@ -61,7 +61,7 @@ void camera_updateFloorHeights(Camera *camera) {
         actor_computeSize(camera->CharPtr, &height, &width, &depth);
         targetHeight = height;
     }
-    if (!camera->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
+    if (!camera->AvailableModes & 0x40) { // sic: (!AvailableModes) & 0x40 is always 0, but the original computes it
         camera->floorY = camera->baseY = camera->CharPtr->floorY;
         return;
     }
@@ -353,7 +353,7 @@ void camera_scanZRow(Camera *camera, s32 screenX, s32 screenY, s32 depth) {
 
 
 
-/* While the unk5FC countdown runs, clears the z-buffer row to the far value and returns 1. */
+/* While the SHitsOffLastFrame countdown runs, clears the z-buffer row to the far value and returns 1. */
 s32 camera_clearZRow(Camera *camera) {
     if (camera->SHitsOffLastFrame != 0) {
         s32 i;
