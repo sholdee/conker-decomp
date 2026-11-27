@@ -135,7 +135,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         } else {
             cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
         }
-        if (level == 0x34 || level == 0x26) {
+        if (level == LEVEL_WMP_TUNNELS || level == LEVEL_W2_MACHINEGUNNEST) {
             variant = 5;
         } else {
             variant = 4;

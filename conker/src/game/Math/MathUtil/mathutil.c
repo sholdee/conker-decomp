@@ -345,8 +345,8 @@ Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s3
         if (*needSync == 1) {
             *needSync = 0;
         }
-        if ((level == 0x18) || (level == 0x13) || (level == 6) || (level == 0x3B) ||
-            (level == 2) || (gIsMultiplayer != 0)) {
+        if ((level == LEVEL_W5_THRONE_ROOM) || (level == LEVEL_W2_HARBOUR) || (level == LEVEL_THE_WINDMILL) ||
+            (level == LEVEL_W1_WINDMILL_EXPLODED) || (level == LEVEL_W1_BRONTO_CAVERN) || (gIsMultiplayer != 0)) {
             assetArg = 3;
         }
         gfx = sprite_loadDescFrameAt(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
@@ -1572,7 +1572,7 @@ f32 math_circleHalfChord(f32 arg0, f32 scale, f32 arg2) {
 
 void func_15145A50(Actor *actor) {
     actor->drawtype = 3;
-    if (level != 51) {
+    if (level != LEVEL_WMP_VOLCANO_RACE) {
         if ((gIsMultiplayer != 0) || (actor->type == 5) || (actor->type == 1) ||
             (actor->type == 21)) {
             actor->type = 5;

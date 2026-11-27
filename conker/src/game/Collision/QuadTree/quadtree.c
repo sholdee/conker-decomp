@@ -875,8 +875,8 @@ void collision_loadMapSettings(s32 map) {
         gLevelTaskIds = NULL;
     }
 
-    if (gHumanCount >= 2 && info->unk8 == 4) {
-        info->unk8 = 2;
+    if (gHumanCount >= 2 && info->skyMode == 4) {
+        info->skyMode = 2;
     }
 }
 

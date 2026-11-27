@@ -504,7 +504,7 @@ Gfx *game_drawObjectGroup5Pass(Gfx *gfx, s32 player) {
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     gSPMatrix(gfx++, &gViews[player].projectionMtx[gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD);
-    if (level == 0x1D) {
+    if (level == LEVEL_FRONTEND) {
         gfx = actor_drawPass(gfx, 6, player);
     }
     gfx = effect_drawObjectGroup(gfx, 5, 0, 0);

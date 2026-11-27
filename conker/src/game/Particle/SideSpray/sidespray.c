@@ -87,7 +87,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     if (particle_getSpraySidePos(&pos, actor, &ground, side) == 0) {
         return;
     }
-    if (level == 20) {
+    if (level == LEVEL_W1_DINO_ARENA) {
         particle_getDepthTint(pos.z, &fr, &fg, &fb);
         r = fr;
         g = fg;

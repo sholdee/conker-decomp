@@ -42,29 +42,29 @@ void game_loadLevel(void) {
     heap_freeTaggedBlocks();
     collision_loadMapSettings(gNextLevel);
     switch (gNextLevel) {
-    case 0x1A:
-    case 0x24:
-    case 0x2B:
-    case 0x2D:
-    case 0x30:
-    case 0x33:
-    case 0x34:
-    case 0x3F:
+    case LEVEL_WMP_HEIST:
+    case LEVEL_WMP_TANK:
+    case LEVEL_WMP_BEACH:
+    case LEVEL_WMP_MAIN_WAR:
+    case LEVEL_WMP_BEACH_WAR:
+    case LEVEL_WMP_VOLCANO_RACE:
+    case LEVEL_WMP_TUNNELS:
+    case LEVEL_WMP_RAPTOR:
         value = 0x103;
-        if (gNextLevel == 0x24) {
+        if (gNextLevel == LEVEL_WMP_TANK) {
             value = 0xF3;
         }
-        if (gNextLevel == 0x33) {
+        if (gNextLevel == LEVEL_WMP_VOLCANO_RACE) {
             value -= 8;
         }
-        if (gNextLevel == 0x3F) {
+        if (gNextLevel == LEVEL_WMP_RAPTOR) {
             value -= 8;
         }
-        if (gNextLevel == 0x34) {
+        if (gNextLevel == LEVEL_WMP_TUNNELS) {
             value += 8;
         }
         break;
-    case 0x13:
+    case LEVEL_W2_HARBOUR:
         value = 0xEB;
         if (!(gTaskDoneBits[0x11] & 4)) {
             value = D_800B0DF0->unk11 + 0xEB;
@@ -155,7 +155,7 @@ void game_loadLevel(void) {
     collision_loadCylinderSets(level);
     light_applyZones();
     collision_initMapBackground(level);
-    if (level == 0x1D) {
+    if (level == LEVEL_FRONTEND) {
         save_clearMenuCharacters();
     }
     game_initLevelSubsystems(level);
@@ -207,7 +207,7 @@ void game_loadLevel(void) {
             zone_updateActor(&movement_obj[i]);
         }
     }
-    if ((D_800D18A8 != 0) && (level != 0x22)) {
+    if ((D_800D18A8 != 0) && (level != LEVEL_WFRONTEND_HELL)) {
         D_800D18A8 = 0;
         effect_showStatCounter(0xFF, 1);
     }

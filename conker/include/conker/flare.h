@@ -73,7 +73,7 @@ s32 flare_queueProbe(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5
 /* game/Flare/LensFlare/lensflare.c */
 extern u8 D_800DDD61;
 extern LensFlare *gLensFlares; /* head of the lens flare list */
-extern f32 *gSunPositions[2]; /* per LevelHeader.unk10: sun position (FLARE_SUN) */
+extern f32 *gSunPositions[2]; /* per LevelHeader.sunPosition: sun position (FLARE_SUN) */
 LensFlare *flare_add(s32 type, s32 alpha);
 void flare_remove(LensFlare *flare);
 void flare_sampleDepths(void);

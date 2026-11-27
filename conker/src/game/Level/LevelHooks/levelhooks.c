@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-level hooks, indexed by the level's hook number (D_800B0DF0->unkF; 0 = none). The handlers take
+/* Per-level hooks, indexed by the level's hook number (D_800B0DF0->hookCallback; 0 = none). The handlers take
  * different arguments, so the table has no prototype. */
 static void (*gLevelHooks[])() = {
     NULL, camera_levelHook01, effect_levelHook02, camera_levelHook03,
@@ -17,7 +17,7 @@ static void (*gLevelHooks[])() = {
 };
 
 void level_runHook(void *arg0, s32 arg1) {
-    if (D_800B0DF0->unkF) {
-        gLevelHooks[D_800B0DF0->unkF](arg0);
+    if (D_800B0DF0->hookCallback) {
+        gLevelHooks[D_800B0DF0->hookCallback](arg0);
     }
 }

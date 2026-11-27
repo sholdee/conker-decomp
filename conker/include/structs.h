@@ -232,21 +232,21 @@ typedef struct LevelMusic {
 /* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
-    /* 0x00 */ u16 unk0;            // fog (gFogPresets.farPlane), gDefaultFar
-    /* 0x02 */ u16 unk2;            // fog (gFogPresets.nearPlane), gDefaultNear, RenderView.unk67C
+    /* 0x00 */ u16 farPlane;        // fog (gFogPresets.farPlane), gDefaultFar
+    /* 0x02 */ u16 nearPlane;       // fog (gFogPresets.nearPlane), gDefaultNear, Camera.NearPlane
     /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  unk5;            // background colour (gBackgroundColour)
-    /* 0x06 */ u8  unk6;
-    /* 0x07 */ u8  unk7;
-    /* 0x08 */ u8  unk8;            // sky mode (gSkyDrawFuncs); 4 = textured sky
-    /* 0x09 */ u8  unk9;            // sky texture set (gSkyTextureSets)
-    /* 0x0A */ u8  unkA;            // callback, gLevelSetupFuncs
+    /* 0x05 */ u8  backgroundRed;   // background colour (gBackgroundColour)
+    /* 0x06 */ u8  backgroundGreen;
+    /* 0x07 */ u8  backgroundBlue;
+    /* 0x08 */ u8  skyMode;         // sky mode (gSkyDrawFuncs); 4 = textured sky
+    /* 0x09 */ u8  skyTextureSet;   // sky texture set (gSkyTextureSets)
+    /* 0x0A */ u8  setupCallback;   // gLevelSetupFuncs
     /* 0x0B */ u8  updateCallback;  // gLevelUpdateHooks
     /* 0x0C */ u8  drawCallback1;   // gLevelDrawHooks1
     /* 0x0D */ u8  drawCallback2;   // gLevelDrawHooks2
-    /* 0x0E */ u8  unkE;            // callback, gLevelCameraSetups
-    /* 0x0F */ u8  unkF;            // callback, gLevelHooks
-    /* 0x10 */ u8  unk10;           // sun position, index into gSunPositions
+    /* 0x0E */ u8  cameraSetupCallback; // gLevelCameraSetups
+    /* 0x0F */ u8  hookCallback;    // gLevelHooks
+    /* 0x10 */ u8  sunPosition;     // index into gSunPositions
     /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
     /* 0x12 */ u8  unk12;
     /* 0x13 */ u8  unk13;           // landing step (game/Actor/ActorMotion/actormotion)
@@ -254,13 +254,13 @@ typedef struct LevelHeader {
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
-    /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
+    /* 0x1A */ u16 bonePoolSize;    // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
     /* 0x20 */ u8  pad20;
     /* 0x21 */ u8  vtxColorFlags;   // game/Env/VtxColourFade/vtxcolourfade
     /* 0x22 */ u8  pad22[7];
-    /* 0x29 */ u8  unk29;
+    /* 0x29 */ u8  tintPreset;      // index into gTintPresets (level_initTintWaves)
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game/Cutscene/Sequence/sequence
     /* 0x2C */ LevelMusic music;
@@ -271,8 +271,8 @@ typedef struct LevelHeader {
     /* 0x42 */ u8  fogColour[4];
     /* 0x46 */ s8  fogPreset;       // fog preset (env_blendFog), -1 = none
     /* 0x47 */ u8  pad47[2];
-    /* 0x49 */ u8  unk49;           // callback, gLevelPreUpdateFuncs
-    /* 0x4A */ u8  unk4A;           // callback, gLevelPostUpdateFuncs
+    /* 0x49 */ u8  preUpdateCallback;  // gLevelPreUpdateFuncs
+    /* 0x4A */ u8  postUpdateCallback; // gLevelPostUpdateFuncs
     /* 0x4B */ u8  assetList;       // index into gLevelAssetLists, 0 = none
 } LevelHeader; // size 0x4C
 

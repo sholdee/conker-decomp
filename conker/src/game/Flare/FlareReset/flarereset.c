@@ -11,7 +11,7 @@ void flare_resetFlares(s32 arg0) {
     gLensFlares = NULL;
     D_800DDD61 = 0;
     gScreenFlash = 0;
-    if ((gDaylight != 0) && (gSunPositions[D_800B0DF0->unk10] != NULL)) {
+    if ((gDaylight != 0) && (gSunPositions[D_800B0DF0->sunPosition] != NULL)) {
         flare = flare_add(0, 0xFF);
         flare->flags = 3; // FLARE_SUN | FLARE_FLASH (game/Flare/LensFlare/lensflare.c)
     }

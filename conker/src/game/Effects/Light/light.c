@@ -1683,45 +1683,45 @@ void light_setDaylight(u8 enable) {
     gDaylight = enable;
     if (enable) {
         switch (level) {
-        case 11:
+        case LEVEL_W1_COG_LAND:
             env_setSky(4);
             break;
-        case 6:
+        case LEVEL_THE_WINDMILL:
             light_setGroupDisabled(10, 1);
             env_setSky(4);
             // fallthrough
-        case 57:
+        case LEVEL_W5_BANK_ENTRANCE:
             gAmbientColour[0] = D_800886F0[0];
             gAmbientColour[1] = D_800886F0[1];
             gAmbientColour[2] = D_800886F0[2];
-            D_800B0DF0->unk5 = D_800886F4[0];
-            D_800B0DF0->unk6 = D_800886F4[1];
-            D_800B0DF0->unk7 = D_800886F4[2];
+            D_800B0DF0->backgroundRed = D_800886F4[0];
+            D_800B0DF0->backgroundGreen = D_800886F4[1];
+            D_800B0DF0->backgroundBlue = D_800886F4[2];
             break;
-        case 7:
-        case 12:
+        case LEVEL_W1_DOG_FISH:
+        case LEVEL_W1_BARN_OUTSIDE:
             break;
         }
     } else {
         switch (level) {
-        case 6:
+        case LEVEL_THE_WINDMILL:
             light_setGroupDisabled(10, 0);
             // fallthrough
-        case 7:
-        case 12:
-        case 57:
+        case LEVEL_W1_DOG_FISH:
+        case LEVEL_W1_BARN_OUTSIDE:
+        case LEVEL_W5_BANK_ENTRANCE:
             env_setSky(6);
             gAmbientColour[0] = D_800886F8[0];
             gAmbientColour[1] = D_800886F8[1];
             gAmbientColour[2] = D_800886F8[2];
-            D_800B0DF0->unk5 = 0xFF;
-            D_800B0DF0->unk6 = 0xFF;
-            D_800B0DF0->unk7 = 0xFF;
+            D_800B0DF0->backgroundRed = 0xFF;
+            D_800B0DF0->backgroundGreen = 0xFF;
+            D_800B0DF0->backgroundBlue = 0xFF;
             break;
-        case 11:
+        case LEVEL_W1_COG_LAND:
             env_setSky(6);
             break;
-        case 41:
+        case LEVEL_W1_TRAINING:
             env_setSky(1);
             break;
         }

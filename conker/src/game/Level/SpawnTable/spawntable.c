@@ -56,14 +56,14 @@ void level_loadSpawnTable(s32 levelId) {
 
     actor_clearModelTables();
     switch (levelId) {
-    case 26:
-    case 36:
-    case 43:
-    case 45:
-    case 48:
-    case 51:
-    case 52:
-    case 63:
+    case LEVEL_WMP_HEIST:
+    case LEVEL_WMP_TANK:
+    case LEVEL_WMP_BEACH:
+    case LEVEL_WMP_MAIN_WAR:
+    case LEVEL_WMP_BEACH_WAR:
+    case LEVEL_WMP_VOLCANO_RACE:
+    case LEVEL_WMP_TUNNELS:
+    case LEVEL_WMP_RAPTOR:
         romStart = D_1A34E0;
         romEnd = compressed_ROM_START;
         break;
@@ -94,7 +94,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             gSpawnRecords[i].unk2 = 0;
             switch (type) {
             case 0:
-                if (level == 0x36 || level == 0x3A || level == 0x40) {
+                if (level == LEVEL_W5_BANK || level == LEVEL_W5_BANK_END || level == LEVEL_W5_END_ARENA) {
                     gSpawnRecords[i].type = 0x96;
                 } else {
                     gSpawnRecords[i].type = 0;
@@ -208,7 +208,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                 gSpawnRecords[i].objFlags |= 1;
                 break;
             }
-            if (level == 0x33 || level == 0x32) {
+            if (level == LEVEL_WMP_VOLCANO_RACE || level == LEVEL_W1_VOLCANO_RACE) {
                 gSpawnRecords[i].objFlags |= 0x4000000;
             }
             obj = movement_obj;

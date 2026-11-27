@@ -437,7 +437,7 @@ void func_1500A6D8(PointLight *light, s32 id) {
     u8 objects[2][3] = { { 7, 8, 9 }, { 8, 9, 10 } };
     LightEffect *effect;
 
-    variant = (level == 6) ? 1 : 0;
+    variant = (level == LEVEL_THE_WINDMILL) ? 1 : 0;
     if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
         header.flags = 0;
         header.update = 23;

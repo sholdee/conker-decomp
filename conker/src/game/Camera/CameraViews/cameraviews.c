@@ -74,7 +74,7 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     view->FCameraIndex = -1;
     view->UDHitsCounter = 1;
     view->TonyHitsClear = 1;
-    view->NearPlane = (u32)D_800B0DF0->unk2;
+    view->NearPlane = (u32)D_800B0DF0->nearPlane;
     view->lastPlayerPos.x = view->focus.x;
     view->lastPlayerPos.y = view->focus.y;
     view->lastPlayerPos.z = view->focus.z;

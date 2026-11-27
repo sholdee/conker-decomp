@@ -181,8 +181,8 @@ void actor_updateAll(void) {
             if (gFloorMaterialClass >= 6) {
                 gFloorMaterialClass = 0;
             }
-            if (D_800B0DF0->unk49 != 0) {
-                gLevelPreUpdateFuncs[D_800B0DF0->unk49](obj);
+            if (D_800B0DF0->preUpdateCallback != 0) {
+                gLevelPreUpdateFuncs[D_800B0DF0->preUpdateCallback](obj);
             }
             if (!(obj->task_attrib & 0x200)) {
                 if (gActorUpdateHandlers[obj->type] != NULL) {
@@ -210,8 +210,8 @@ void actor_updateAll(void) {
                 obj->old_zpos != obj->zpos) {
                 obj->unk300 = 1;
             }
-            if (D_800B0DF0->unk4A != 0) {
-                gLevelPostUpdateFuncs[D_800B0DF0->unk4A](obj);
+            if (D_800B0DF0->postUpdateCallback != 0) {
+                gLevelPostUpdateFuncs[D_800B0DF0->postUpdateCallback](obj);
             }
         }
     }

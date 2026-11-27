@@ -38,7 +38,7 @@ static void (*gEffectKindColorFuncs[13])(ParticleDesc *) = {
 
 /* Effect kind for the current context: gLevelEffectKind, or kind 10 when level is clear and zone_isActorOutsideId(0, 0x1C) fails. */
 s32 particle_getContextEffectKind(void) {
-    if ((level == 0) && (zone_isActorOutsideId(0, 0x1C) == 0)) {
+    if ((level == LEVEL_W1_BULL_PADDOCK) && (zone_isActorOutsideId(0, 0x1C) == 0)) {
         return 10;
     }
     return gLevelEffectKind;

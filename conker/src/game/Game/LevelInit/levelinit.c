@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-level setup routines, indexed by LevelHeader.unkA (0: none). */
+/* Per-level setup routines, indexed by LevelHeader.setupCallback (0: none). */
 static void (*gLevelSetupFuncs[])(void) = {
     NULL,
     level_setup01, level_setup02, level_emptySetup03,
@@ -52,8 +52,8 @@ void game_initLevelSubsystems(s32 levelId) {
     effect_initQueue();
     level_resetSetupState();
 
-    if (D_800B0DF0->unkA) {
-        gLevelSetupFuncs[D_800B0DF0->unkA]();
+    if (D_800B0DF0->setupCallback) {
+        gLevelSetupFuncs[D_800B0DF0->setupCallback]();
     }
     light_initParticleSlots(levelId);
     light_buildLevelParticles();

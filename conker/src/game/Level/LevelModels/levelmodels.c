@@ -708,8 +708,8 @@ void level_loadModels(s32 levelId) {
     s32 size;
     s32 id;
 
-    if (levelId >= 69) {
-        levelId = 0;
+    if (levelId >= LEVEL_COUNT) {
+        levelId = LEVEL_W1_BULL_PADDOCK;
     }
     models = rom_loadPathTable(&loaded, 0, &count, 2, 4, levelId);
     gLevelModels = models;
@@ -774,7 +774,7 @@ s32 level_resetTextureTable(void) {
     gTexAgeFirst = 0xFFFF;
     gTexAgeLast = -1;
 
-    if (level != 1 && level != 50) {
+    if (level != LEVEL_W1_BARN_INSIDE && level != LEVEL_W1_VOLCANO_RACE) {
         gTexAgeThrottle = 0;
     } else {
         gTexAgeThrottle = 1;

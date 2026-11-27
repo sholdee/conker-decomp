@@ -16,11 +16,11 @@ Mtx *gSkyMatrices;       // sky projection matrices, 2 per view
 
 
 
-/* A sky mode's draw routine (gSkyDrawFuncs is indexed by D_800B0DF0->unk8): camera position, angles and the sky
+/* A sky mode's draw routine (gSkyDrawFuncs is indexed by D_800B0DF0->skyMode): camera position, angles and the sky
  * extent from env_getSkyExtent. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-/* The textures of each textured sky set (D_800B0DF0->unk9), five per set. */
+/* The textures of each textured sky set (D_800B0DF0->skyTextureSet), five per set. */
 static s32 D_80089130[5] = { 0x17E1, 0x1829, 0x1799, 0x1871, 0x18B9 };
 static s32 D_80089144[5] = { 0x1679, 0x16C1, 0x162B, 0x1709, 0x1751 };
 static s32 D_80089158[5] = { 0x1CCB, 0x1D13, 0x1C83, 0x1D5B, 0x1DA3 };
@@ -31,7 +31,7 @@ static s32 D_800891A8[5] = { 0x1AB1, 0x1AF9, 0x1A69, 0x1B41, 0x1B89 };
 s32 *gSkyTextureSets[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
 
 /*
- * The draw routine of each sky mode (D_800B0DF0->unk8); most ignore some of the camera arguments.
+ * The draw routine of each sky mode (D_800B0DF0->skyMode); most ignore some of the camera arguments.
  * The table comes before env_drawSkybox: the address the last entry takes makes as1 treat that function's
  * entry label as address-taken, which its scheduling needs.
  */
@@ -129,7 +129,7 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     }
     visible = env_getSkyExtent(x, y, z, pitch, yaw);
     if (visible != 0) {
-        gfx = gSkyDrawFuncs[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
+        gfx = gSkyDrawFuncs[D_800B0DF0->skyMode](gfx, x, y, z, pitch, yaw, roll, visible);
     }
     gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
@@ -459,7 +459,7 @@ Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg
             if (view_getQuadViewDepth(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, tileW8, tileH8, 20000.0f) &&
                 (D_800DBEAB || rowIdx < limit)) {
                 texIndex = colIdx * nRows + firstTex + rowIdx;
-                if (D_800DBEAC && D_800B0DF0->unk9 == 1 && texSet == 2 && rowIdx >= 4 && rowIdx < 7 &&
+                if (D_800DBEAC && D_800B0DF0->skyTextureSet == 1 && texSet == 2 && rowIdx >= 4 && rowIdx < 7 &&
                     colIdx >= 2 && colIdx < 4) {
                     texIndex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
                 }
@@ -551,7 +551,7 @@ void env_setSky(s32 sky) {
     s32 i;
 
     if (sky == 1) {
-        D_800B0DF0->unk8 = 1;
+        D_800B0DF0->skyMode = 1;
         if (gSkyData != NULL) {
             void *data = gSkyData; // matching: the copy loads the pointer into v0 before the call
 
@@ -560,15 +560,15 @@ void env_setSky(s32 sky) {
         env_initStars();
         return;
     }
-    if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
+    if (sky != D_800B0DF0->skyTextureSet && D_800B0DF0->skyMode == 4) {
         if (gExpansionPak != 0) {
             for (i = 0; i != 360; i++) {
-                texture_releaseId(gSkyTextureSets[D_800B0DF0->unk9][0] + i);
+                texture_releaseId(gSkyTextureSets[D_800B0DF0->skyTextureSet][0] + i);
             }
         }
         heap_free(gSkyData);
-        D_800B0DF0->unk9 = sky;
-        rom_loadPathTo(&gSkyData, 2, 13, D_800B0DF0->unk9);
+        D_800B0DF0->skyTextureSet = sky;
+        rom_loadPathTo(&gSkyData, 2, 13, D_800B0DF0->skyTextureSet);
     }
 }
 
@@ -668,9 +668,9 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
         gfx = env_fillRect(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
                             RENDER_VIEWS[gCurrentView].right - 1.0f, RENDER_VIEWS[gCurrentView].bottom, 0, 0, 0);
     }
-    color[0] = D_800B0DF0->unk5;
-    color[1] = D_800B0DF0->unk6;
-    color[2] = D_800B0DF0->unk7;
+    color[0] = D_800B0DF0->backgroundRed;
+    color[1] = D_800B0DF0->backgroundGreen;
+    color[2] = D_800B0DF0->backgroundBlue;
     gDPPipeSync(gfx++);
     if (color[0] + color[1] + color[2] == 3 * 255) {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -694,7 +694,7 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
-    texList = gSkyTextureSets[D_800B0DF0->unk9];
+    texList = gSkyTextureSets[D_800B0DF0->skyTextureSet];
     vtxCount = 0;
     vtx = gSkyQuadVtx[gCurrentView][gDrawBufferIndex];
     vtxIdx = 0;

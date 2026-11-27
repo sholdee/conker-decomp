@@ -51,8 +51,8 @@ void env_initFog(s32 arg0) {
     gFogPresets[0].unk6 = D_800B0DF0->unk3C;
     gFogPresets[0].unk8 = D_800B0DF0->unk3E;
     gFogPresets[0].unkA = D_800B0DF0->unk40;
-    gFogPresets[0].nearPlane = D_800B0DF0->unk2;
-    gFogPresets[0].farPlane = D_800B0DF0->unk0;
+    gFogPresets[0].nearPlane = D_800B0DF0->nearPlane;
+    gFogPresets[0].farPlane = D_800B0DF0->farPlane;
     if (D_800B0DF0->fogPreset != -1) {
         gHasLevelFogPreset = 1;
         env_blendFog(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
@@ -140,11 +140,11 @@ void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *out6 = (gFogPresets[to].unk6 - gFogPresets[from].unk6) * blend / 4096 + gFogPresets[from].unk6;
     *out8 = (gFogPresets[to].unk8 - gFogPresets[from].unk8) * blend / 4096 + gFogPresets[from].unk8;
     *outA = (gFogPresets[to].unkA - gFogPresets[from].unkA) * blend / 4096 + gFogPresets[from].unkA;
-    fromValue = (gFogPresets[from].nearPlane == -1) ? D_800B0DF0->unk2 : gFogPresets[from].nearPlane;
-    toValue = (gFogPresets[to].nearPlane == -1) ? D_800B0DF0->unk2 : gFogPresets[to].nearPlane;
+    fromValue = (gFogPresets[from].nearPlane == -1) ? D_800B0DF0->nearPlane : gFogPresets[from].nearPlane;
+    toValue = (gFogPresets[to].nearPlane == -1) ? D_800B0DF0->nearPlane : gFogPresets[to].nearPlane;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (gFogPresets[from].farPlane == -1) ? D_800B0DF0->unk0 : gFogPresets[from].farPlane;
-    toValue = (gFogPresets[to].farPlane == -1) ? D_800B0DF0->unk0 : gFogPresets[to].farPlane;
+    fromValue = (gFogPresets[from].farPlane == -1) ? D_800B0DF0->farPlane : gFogPresets[from].farPlane;
+    toValue = (gFogPresets[to].farPlane == -1) ? D_800B0DF0->farPlane : gFogPresets[to].farPlane;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
@@ -158,9 +158,9 @@ void env_reapplyFog(s32 arg0) {
             gBackgroundColour[2] = gFogColour[2];
         } else {
             env_blendFog(0, 0, arg0, 0, -1);
-            gBackgroundColour[0] = D_800B0DF0->unk5;
-            gBackgroundColour[1] = D_800B0DF0->unk6;
-            gBackgroundColour[2] = D_800B0DF0->unk7;
+            gBackgroundColour[0] = D_800B0DF0->backgroundRed;
+            gBackgroundColour[1] = D_800B0DF0->backgroundGreen;
+            gBackgroundColour[2] = D_800B0DF0->backgroundBlue;
         }
     }
 }

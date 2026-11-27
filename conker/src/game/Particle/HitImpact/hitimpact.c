@@ -905,7 +905,7 @@ s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, v
         obj = &movement_obj[i];
         if (obj->type == 0) continue;
         if (obj->drawtype == 3) continue;
-        if (level != 0x23 && obj->character_type == 0xFF) continue;
+        if (level != LEVEL_W2_WARBOSS && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
         if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) continue;

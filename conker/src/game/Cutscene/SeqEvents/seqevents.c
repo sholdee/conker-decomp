@@ -935,7 +935,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 }
             }
         } else if (event->value == 0x62) {
-            D_800B0DF0->unk8 = 0;
+            D_800B0DF0->skyMode = 0;
         } else if (event->value == 0x7C) {
             gCutsceneHideSky = !event->unk4;
         } else if (event->value == 0x84) {

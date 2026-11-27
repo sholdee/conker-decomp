@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-level camera setup hooks, indexed by LevelHeader.unkE (0 = none). */
+/* Per-level camera setup hooks, indexed by LevelHeader.cameraSetupCallback (0 = none). */
 static void (*gLevelCameraSetups[])(Camera *) = {
     NULL,
     camera_levelSetup01,
@@ -37,7 +37,7 @@ static void (*gLevelCameraSetups[])(Camera *) = {
 
 
 void camera_runLevelSetup(Camera *arg0, s32 arg1) {
-    if (D_800B0DF0->unkE != 0) {
-        gLevelCameraSetups[D_800B0DF0->unkE](arg0);
+    if (D_800B0DF0->cameraSetupCallback != 0) {
+        gLevelCameraSetups[D_800B0DF0->cameraSetupCallback](arg0);
     }
 }
