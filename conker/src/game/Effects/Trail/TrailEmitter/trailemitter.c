@@ -287,7 +287,7 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
     return 1;
 }
 
-/* MotionTrail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
+/* MotionTrail fade: alpha (motion.alpha) follows 8 * head.tmpl.life, capped at 0xFF. */
 s32 trail_fadeEmittedTrail(MotionTrail *trail) {
     s32 alpha;
     TrailParams *params;

@@ -660,7 +660,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
     u8 prevTexCoord;
     u8 update;
     u8 mode;
-    u8 unk42High;
+    u8 renderModesHigh;
     StreamState *state;
     StreamPoint *records;
 
@@ -672,7 +672,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             update = 1;
             mode = state->renderModes & 0xF;
             sinYaw = gCameraAngleSines[view];
-            unk42High = (state->renderModes & 0xF0) >> 4;
+            renderModesHigh = (state->renderModes & 0xF0) >> 4;
             cosYaw = gCameraAngleCosines[view];
             if (state->texAxis == 2) {
                 tcAxis[0] = 1;
@@ -683,7 +683,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             }
             gfx = math_gfxLoadTextureFrame(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
             gfx = math_gfxSetEnvColor(gfx, state->colorLevel, state->colorLevel, state->colorLevel, 0xFF, &update);
-            gfx = particle_setCombineMode(gfx, unk42High, &update);
+            gfx = particle_setCombineMode(gfx, renderModesHigh, &update);
             gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
             gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &update);
             if (actor->head.tmpl.flags & 2) {

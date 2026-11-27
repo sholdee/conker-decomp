@@ -517,7 +517,7 @@ void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw,
     trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, owner, 1);
 }
 
-/* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
+/* Fades the trail in: alpha = 8 per tick of head.tmpl.life, capped at 255. */
 s32 trail_fadeIn(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life * 8;
