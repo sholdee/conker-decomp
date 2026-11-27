@@ -486,14 +486,14 @@ void script_setTurnStopScript(void) {
     gCurrentActor->turnStopScript = gScriptArg0;
 }
 
-/* Sets the flags given by the four argument bytes in unkF8. */
+/* Sets the flags given by the four argument bytes in noshove. */
 void script_setNoshoveFlags(void) {
     s32 flags = (gScriptArg0 << 24) | (gScriptArg1 << 16) | (gScriptArg2 << 8) | gScriptArg3;
 
     gCurrentActor->noshove |= flags;
 }
 
-/* Clears the flags given by the four argument bytes in unkF8. */
+/* Clears the flags given by the four argument bytes in noshove. */
 void script_clearNoshoveFlags(void) {
     s32 flags = (gScriptArg0 << 24) | (gScriptArg1 << 16) | (gScriptArg2 << 8) | gScriptArg3;
 
@@ -547,7 +547,7 @@ void script_jumpIfBehindTarget(void) {
 }
 
 /*
- * Picks the nearest object (flag 0x20 in unkF8) within arg0 * 8 units that lies inside the object's
+ * Picks the nearest object (flag 0x20 in noshove) within arg0 * 8 units that lies inside the object's
  * view cone, storing its index | 0x80 in unkA8. If one is found, the script jumps to label arg3 and,
  * for a nonzero arg2, the found object starts script arg2 targeting this object.
  */
@@ -793,8 +793,8 @@ void script_setAnimSpeedAndAccel(void) {
 }
 
 /*
- * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in unk246 (high bits) and
- * animSpeedFrac (low byte), clamping at 0 and setting bit 7 of unk246; otherwise sets unk246 to arg0.
+ * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in intel_animspd (high bits) and
+ * animSpeedFrac (low byte), clamping at 0 and setting bit 7 of intel_animspd; otherwise sets intel_animspd to arg0.
  */
 void func_15077404(void) {
     if (gScriptArg3 != 0) {
@@ -826,7 +826,7 @@ void script_jumpIfAtDestination(void) {
  * Steps the object along the path-node graph: picks the next node (arg0 == 1: a random neighbour
  * other than the previous node, otherwise the next node towards the goal pathGoal) and stores a point
  * near it, offset sideways by up to twice the node's unk8, as waypoint 0 of the object's path.
- * Sets flag 0x800 in unk25C when the goal is reached or no node is left.
+ * Sets flag 0x800 in task_attrib when the goal is reached or no node is left.
  */
 void script_stepPathGraph(void) {
     s32 next;
@@ -1261,7 +1261,7 @@ void script_placeWaypointNearTarget(void) {
     gSpawnPaths[gCurrentActor->listpos][gScriptArg0 + 1].z = z;
 }
 
-/* Jumps to arg0 when the target's anim->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
+/* Jumps to arg0 when the target's anim->frame[0] is below (arg2 == 0) or above (arg2 == 1) arg1. */
 void script_jumpIfTargetAnimFrame(void) {
     AnimInstance *data;
     f32 value;
@@ -1300,7 +1300,7 @@ void func_15078900(void) {
     }
 }
 
-/* Copies unk8 and unkC of the target's anim data into the object's own. */
+/* Copies frame[0] and frame[1] of the target's anim data into the object's own. */
 void script_copyTargetAnimFrame(void) {
     AnimInstance *dst;
     AnimInstance *src;
@@ -1777,8 +1777,8 @@ void func_15079F6C(void) {
 }
 
 /*
- * Follows object 0: when it is unlinked (unk65 == 0) or slower than 5, switches to script arg1;
- * otherwise starts a mode-3 move in its unk4C direction at its speed (times 0.7 unless chased).
+ * Follows object 0: when it is unlinked (attach_char == 0) or slower than 5, switches to script arg1;
+ * otherwise starts a mode-3 move in its mv->press_angle direction at its speed (times 0.7 unless chased).
  */
 void script_steerByPlayerStick(void) {
     s16 speed;
@@ -1937,7 +1937,7 @@ void script_changeWaypointDirection(void) {
 }
 
 /*
- * Jumps to arg0 when the angle (arg1: the object's unk78, else its facing relative to the
+ * Jumps to arg0 when the angle (arg1: the object's fangle, else its facing relative to the
  * direction to the target), in 1/256 turns, lies in [arg2, arg3).
  */
 void script_jumpIfAngleInRange(void) {
@@ -2016,7 +2016,7 @@ void script_jumpIfTargetType(void) {
     }
 }
 
-/* Links the object to the one found by collision_findObjectById(arg0) (unk65 = its index + 1), or unlinks it (arg0 == 0). */
+/* Links the object to the one found by collision_findObjectById(arg0) (attach_char = its index + 1), or unlinks it (arg0 == 0). */
 void script_attachToObject(void) {
     Actor *linked;
 
@@ -2111,7 +2111,7 @@ void script_clearMvmtControl(void) {
     gCurrentActor->mvmt_control &= ~script_getArgWord();
 }
 
-/* Splits (angle between unk78 and the facing unk7A) / arg0 into faceTurnRate (high byte) and faceTurnFrac (low byte). */
+/* Splits (angle between fangle and the facing langle) / arg0 into faceTurnRate (high byte) and faceTurnFrac (low byte). */
 void script_setFaceTurnTime(void) {
     s32 diff;
     s32 step;
@@ -2377,7 +2377,7 @@ void script_setFloatDepth(void) {
 }
 
 /*
- * Jumps to arg0 when unk6 of the path record arg3 past the current waypoint (of the linked object,
+ * Jumps to arg0 when the param of the path record arg3 past the current waypoint (of the linked object,
  * if any) is (arg2 == 0) or is not (arg2 == 1) arg1.
  */
 void script_jumpIfWaypointParam(void) {

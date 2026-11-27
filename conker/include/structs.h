@@ -696,7 +696,7 @@ typedef struct PathPoint {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
-} PathPoint;
+} PathPoint; // size 0x8
 
 /* Per-player stats, read and written through player_getStat / player_setStat (game/Player/PlayerStats/playerstats). */
 typedef struct PlayerStats {
@@ -2374,12 +2374,12 @@ typedef struct SwarmTargetCmd {
     /* 0x14 */ s32 yOffset;         /* op 1 */
 } SwarmTargetCmd;
 
-/* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
+/* One 5-byte command of an object script (Actor.scriptCmd, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
  * command table gObjScriptHandlers, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
-};
+}; // size 0x5
 
 /*
  * Light effect payloads (game/Effects/Light/light.c, "../Effects/Light/light.c"). Each is stored inline at
