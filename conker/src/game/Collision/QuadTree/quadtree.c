@@ -239,6 +239,7 @@ void collision_allocQuadTree(void) {
     }
 }
 
+/* Empty: its address ends the tamper checksum over collision_allocQuadTree in effect_spawnAttachedBursts. */
 void collision_allocQuadTreeChecksumEnd(void) {
 }
 
@@ -892,5 +893,6 @@ void collision_loadMapSettings(s32 map) {
     }
 }
 
+/* Empty: its address ends the tamper checksum over collision_loadMapSettings in particle_spawnSoundPulse. */
 void collision_loadMapSettingsChecksumEnd(void) {
 }
