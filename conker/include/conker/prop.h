@@ -131,6 +131,7 @@ void func_150BF760(WorldObject *obj);
 void prop_updateSinkingPlatform(WorldObject *platform);
 void prop_spawnDeathBurst(Actor *obj);
 struct Piece; /* game/Prop/Scenery/scenery.c */
+struct ModelParticle; /* effects.h */
 s32 prop_burstPieceOnFloor(struct ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
 void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list);
 s32 prop_onPieceFloorHit(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
