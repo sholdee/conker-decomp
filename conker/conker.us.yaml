@@ -1635,7 +1635,7 @@ segments:
 
       # BSS ?
       - {start: 0x255880, type: .bss, vram: 0x800B0DC0, name: game/Collision/QuadTree/quadtree}
-      - {start: 0x255880, type: bss, vram: 0x800B0DF0, name: bss_800B0DF0}
+      - {start: 0x255880, type: .bss, vram: 0x800B0DF0, name: game/Level/LevelHeader/levelheader}
       - {start: 0x255880, type: .bss, vram: 0x800B0E00, name: game/Level/LevelModels/levelmodels}
       - {start: 0x255880, type: .bss, vram: 0x800BE2A0, name: game/Level/LevelObjects/levelobjects}
       - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game/Camera/CameraViews/cameraviews}

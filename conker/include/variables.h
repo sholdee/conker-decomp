@@ -103,7 +103,7 @@ extern f32 gRotateRPYFDegToRad; // 0.01745329238474369f
 
 /* 800B0000 */
 
-extern LevelHeader *D_800B0DF0;
+extern LevelHeader *D_800B0DF0; // game/Level/LevelHeader/levelheader.c
 
 extern s32 D_800BE5D0;
 
