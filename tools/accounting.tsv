@@ -2820,10 +2820,10 @@ effect_newEmitterSpawner	0x150BDE90	124	game	c		build/src/game/Effects/Sfx/effec
 effect_updateEmitterSpawner	0x150BDF0C	580	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
 effect_emitterSpawnerMessage	0x150BE150	116	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
 effect_updateRisingScreenSprite	0x150BE1C4	76	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
-func_150BE210	0x150BE210	216	game	c		build/src/game/Effects/PathMover/pathmover.c.o
-effect_updatePathMover	0x150BE2E8	336	game	c		build/src/game/Effects/PathMover/pathmover.c.o
-func_150BE438	0x150BE438	92	game	c		build/src/game/Effects/PathMover/pathmover.c.o
-func_150BE494	0x150BE494	956	game	c		build/src/game/Effects/PathMover/pathmover.c.o
+func_150BE210	0x150BE210	216	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
+effect_updatePathMover	0x150BE2E8	336	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
+func_150BE438	0x150BE438	92	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
+func_150BE494	0x150BE494	956	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
 camera_levelHook18	0x150BE850	352	game	c		build/src/game/Camera/LevelHook18/levelhook18.c.o
 effect_getQuadrupedFootPos	0x150BE9B0	248	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 effect_selectQuadrupedFootEffect	0x150BEAA8	36	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o

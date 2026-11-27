@@ -24,7 +24,7 @@
  *   game/Effects/ParticleBursts/particlebursts.c
  *   game/Effects/SegmentTrail/segmenttrail.c
  *   game/Effects/Sfx/effects_sfx_w1_bee_cavern.c
- *   game/Effects/PathMover/pathmover.c
+ *   game/Effects/DebrisSplash/debrissplash.c
  *   game/Effects/BoneGroundFx/bonegroundfx.c
  *   game/Effects/BoneRing/bonering.c
  *   game/Effects/PulseEffect/pulseeffect.c
@@ -168,7 +168,7 @@ typedef struct {
 
 #define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
-/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game/Effects/PathMover/pathmover.c): the end points of its path. */
+/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game/Effects/DebrisSplash/debrissplash.c): the end points of its path. */
 typedef struct {
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
@@ -314,7 +314,7 @@ void effect_updateEmitterSpawner(EB340Obj *obj);
 void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
 s32 effect_updateRisingScreenSprite(EB340Rising *sprite);
 
-/* game/Effects/PathMover/pathmover.c */
+/* game/Effects/DebrisSplash/debrissplash.c */
 void func_150BE210(WorldObject *obj);
 void effect_updatePathMover(WorldObject *mover);
 GameCommand *func_150BE438(GameCommand *cmd, s32 id);

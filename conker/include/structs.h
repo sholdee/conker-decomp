@@ -1290,7 +1290,7 @@ struct Actor {
     /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
-    /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/PathMover/pathmover.c (func_150BE438) saves [0]/[1] as commands 0xE/0x68;
+    /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/DebrisSplash/debrissplash.c (func_150BE438) saves [0]/[1] as commands 0xE/0x68;
                                 // [2] is nonzero while the unk2D8 fade runs
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
