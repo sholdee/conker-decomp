@@ -401,22 +401,20 @@ s32 pipeexplode_fadeByLife(PipeExplodeActor *actor) {
     return 1;
 }
 
-/* Particle request for particle_spawnSurfaceQuadSpriteNoModel. */
+/* Particle request for particle_spawnSurfaceQuadSpriteNoModel: 0x00..0x27 is a SpriteDef view (it copies sizeof(SpriteDef)),
+ * and points is not copied. */
 typedef struct PipeExplodeParticle {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s8 kind;
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ s8 texture;      /* gEffectTextures index */
     /* 0x07 */ u8 pad07;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 alpha;
+    /* 0x11 */ u8 colorLevel;
+    /* 0x12 */ u8 rgba[4];
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
+    /* 0x18 */ s32 renderModes;
     /* 0x1C */ u8 pad1C[0xC];
     /* 0x28 */ PipeExplodePoint *points;
 } PipeExplodeParticle;
@@ -447,18 +445,18 @@ s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, 
         kinds = gPipeLandParticleKinds;
         state->unk20 = 4;
         size = math_randomFloat() * 50.0f + 50.0f;
-        particle.kind = *(kinds.kind + math_random() % 3U); // matching: kinds.kind[i] grows the frame by 8
-        particle.unk08 = 0;
-        particle.unk0C = 0;
-        particle.unk00 = 0x11;
-        particle.unk04 = 150;
-        particle.unk10 = state->alpha;
-        particle.unk11 = state->shade;
-        particle.unk12 = 0;
-        particle.unk13 = 0;
-        particle.unk14 = 0;
-        particle.unk15 = 0xFF;
-        particle.unk18 = 0x30002;
+        particle.texture = *(kinds.kind + math_random() % 3U); // matching: kinds.kind[i] grows the frame by 8
+        particle.frame = 0;
+        particle.frameSpeed = 0;
+        particle.flags = 0x11;
+        particle.lifetime = 150;
+        particle.alpha = state->alpha;
+        particle.colorLevel = state->shade;
+        particle.rgba[0] = 0;
+        particle.rgba[1] = 0;
+        particle.rgba[2] = 0;
+        particle.rgba[3] = 0xFF;
+        particle.renderModes = 0x30002;
 
         rand0 = math_random();
         rand1 = math_random();

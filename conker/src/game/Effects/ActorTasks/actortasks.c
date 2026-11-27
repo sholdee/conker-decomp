@@ -670,16 +670,16 @@ void effect_keepTaskFlicker(ActorTask *task) {
         part.texture = 0x38;
         part.flags = 0x60300;
         part.lifetime = 300;
-        part.unk10 = 150;
+        part.alpha = 150;
         part.frame = 0;
-        part.unk11 = 0xFF;
+        part.colorLevel = 0xFF;
         part.rgba[0] = gKindColors[color].r;
         part.rgba[1] = gKindColors[color].g;
         part.rgba[2] = gKindColors[color].b;
         part.rgba[3] = 0xFF;
         part.renderModes = 0x440001;
-        part.unk16 = 0;
-        part.unk17 = 6;
+        part.primMode = 0;
+        part.envMode = 6;
         fx->flicker = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
                                                  size, size, math_random() & 0xFF,
                                                  (math_random() & 1) + ((math_random() & 1) * 2), 0x20, 0xFF, 1);

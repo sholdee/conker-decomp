@@ -19,8 +19,8 @@ void *level_spawnFlatSprite(f32 x, f32 y, f32 z) {
     def.frameSpeed = (rand % 0x1000) + 0x4000;
     def.flags = 0x20014;
     def.lifetime = 1;
-    def.unk10 = 0xFF;
-    def.unk11 = 0xFF;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
     def.rgba[0] = 0;
     def.rgba[1] = 0;
     def.rgba[2] = 0;

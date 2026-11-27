@@ -503,16 +503,20 @@ s32 effect_moveBurstParticle(BurstParticle *particle) {
     return 1;
 }
 
+/* The first 0x1C bytes of a SpriteDef, for particle_spawnFlatQuadSpriteNoModel (which copies sizeof(SpriteDef)). */
 typedef struct {
-    s32 unk0;
-    s16 unk4;
-    u8 unk6;
-    u8 pad7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
-    u8 unk14, unk15, unk16, unk17;
-    s32 unk18;
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 texture;
+    /* 0x07 */ u8 pad7;
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 alpha;
+    /* 0x11 */ u8 colorLevel;
+    /* 0x12 */ u8 rgba[4];
+    /* 0x16 */ u8 primMode;
+    /* 0x17 */ u8 envMode;
+    /* 0x18 */ s32 renderModes;
 } Fx_150CA150;
 
 /*
@@ -592,20 +596,20 @@ void effect_spawnImpactRing(Actor *actor) {
             cosH = math_cosBinAngleMasked(heading);
             sinH = math_cosBinAngleMasked(heading - 0x40);
             size = extent = (math_randomFloat() * 96.0f + 352.0f) * 0.5f;
-            fx.unk0 = 0x701;
+            fx.flags = 0x701;
             math_random();
-            fx.unk4 = 0x408;
-            fx.unk8 = 0;
-            fx.unkC = 0;
-            fx.unk10 = math_random() % 41U + 0xB4;
-            fx.unk11 = 0xFF;
-            fx.unk12 = 0xFF;
-            fx.unk13 = 0xFF;
-            fx.unk16 = 0;
-            fx.unk14 = 0xFF;
-            fx.unk15 = 0xFF;
-            fx.unk18 = 0x260001;
-            fx.unk17 = 6;
+            fx.lifetime = 0x408;
+            fx.frame = 0;
+            fx.frameSpeed = 0;
+            fx.alpha = math_random() % 41U + 0xB4;
+            fx.colorLevel = 0xFF;
+            fx.rgba[0] = 0xFF;
+            fx.rgba[1] = 0xFF;
+            fx.primMode = 0;
+            fx.rgba[2] = 0xFF;
+            fx.rgba[3] = 0xFF;
+            fx.renderModes = 0x260001;
+            fx.envMode = 6;
             colors[0][3] = 0xFF;
             colors[0][4] = 0;
             colors[1][3] = 0xFF;
@@ -614,7 +618,7 @@ void effect_spawnImpactRing(Actor *actor) {
             colors[2][4] = 0;
             colors[3][3] = 0xFF;
             colors[3][4] = 0;
-            fx.unk6 = 0x51;
+            fx.texture = 0x51;
             colors[0][0] = red;
             colors[1][0] = red;
             colors[2][0] = red;
@@ -629,11 +633,11 @@ void effect_spawnImpactRing(Actor *actor) {
             colors[3][2] = blue;
             // matching: the corner offsets are written as (+/-1.0f * extent)
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, extent * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
-            fx.unk6 = 0x52;
+            fx.texture = 0x52;
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, extent * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
-            fx.unk6 = 0x53;
+            fx.texture = 0x53;
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
-            fx.unk6 = 0x54;
+            fx.texture = 0x54;
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             effect_emitGroundCircle(&pos);
             randomArg = math_random() % 21U + 10;
@@ -660,8 +664,8 @@ s32 effect_capQuadSpriteAlphaByLife(QuadSprite *sprite) {
 
     if (sprite->def.lifetime < 32) {
         maxAlpha = sprite->def.lifetime * 8;
-        if (maxAlpha < sprite->def.unk10) {
-            sprite->def.unk10 = maxAlpha;
+        if (maxAlpha < sprite->def.alpha) {
+            sprite->def.alpha = maxAlpha;
         }
     }
     return 1;

@@ -730,21 +730,21 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
 
         scale = (math_randomFloat() * 15.0f) + 15.0f;
         debris.texture = shade[type];
-        debris.unk7 = 0;
+        debris.handlerSet = 0;
         debris.flags = (gIsMultiplayer ? 0x20000 : 0) | 0xBF01;
         debris.lifetime = (math_random() % 61U) + 0x3C;
         debris.frame = 0;
         debris.frameSpeed = 0;
-        debris.unk10 = (math_random() % 56U) + 0xC8;
-        debris.unk11 = 0xFF;
+        debris.alpha = (math_random() % 56U) + 0xC8;
+        debris.colorLevel = 0xFF;
         debris.rgba[0] = 0;
         debris.rgba[1] = 0;
         debris.rgba[2] = 0;
         debris.rgba[3] = 0xFF;
         big = (type == 4);
         debris.renderModes = ((big ? 0x48 : 0x3B) << 16) + 2;
-        debris.unk16 = 0;
-        debris.unk17 = big ? 6 : 7;
+        debris.primMode = 0;
+        debris.envMode = big ? 6 : 7;
         debris.viewportMask = debrisArg;
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;

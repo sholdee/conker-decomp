@@ -168,14 +168,14 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+/* QuadSprite update: fades the sprite (def.alpha) out over the last 32 frames of its lifetime. */
 s32 particle_fadeSideDustSprite(QuadSprite *sprite) {
     s32 fade;
 
     if (sprite->def.lifetime < 32) {
         fade = sprite->def.lifetime * 8;
-        if (fade < sprite->def.unk10) {
-            sprite->def.unk10 = fade;
+        if (fade < sprite->def.alpha) {
+            sprite->def.alpha = fade;
         }
     }
     return 1;

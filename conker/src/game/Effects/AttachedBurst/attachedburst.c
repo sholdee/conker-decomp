@@ -274,10 +274,10 @@ s32 func_150AED9C(Particle150AED9C *particle) {
     return 1;
 }
 
-/* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
+/* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.alpha falls with it (lifetime * 8). */
 s32 effect_fadeQuadSpriteByLife(QuadSprite *sprite) {
     if (sprite->def.lifetime < 32) {
-        sprite->def.unk10 = sprite->def.lifetime * 8;
+        sprite->def.alpha = sprite->def.lifetime * 8;
     }
     return 1;
 }

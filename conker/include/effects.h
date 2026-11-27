@@ -106,7 +106,7 @@ typedef struct TextureChoices {
 /* Older revisions of the spawn descriptors. Some callers hold a shorter descriptor on the stack than the callee
  * copies: the fields at its end were added later (ParticleDesc drawFunc..maxSize, ParticleSpawn.sound,
  * ParticleDef unk48..fadeRate, PuffSpray.material, TrailMotion fadeStart/fadeRate, EffectTemplate.material,
- * BloodTrailDesc unk18/callback, SpriteParams.tex), and these callers were built against the older layout.
+ * BloodTrailDesc mode/callback, SpriteParams.tex), and these callers were built against the older layout.
  * The callee still copies (or writes) the full size. A full type on the stack changes their frame, so they
  * keep these views, and the IDO warning 709 at the call is the cost: no cast hides it. */
 
@@ -590,7 +590,7 @@ typedef struct BloodDripDesc {
     /* 0x2A */ u8 flags;
     /* 0x2B */ u8 emitter;
     /* 0x2C */ s8 callback;
-    /* 0x2D */ u8 handlerSet;
+    /* 0x2D */ u8 handlerSet; /* index into gBloodDripDestroyHandlers / gBloodDripFreeHandlers (0 when out of range) */
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
@@ -1623,19 +1623,19 @@ typedef struct SpriteDef {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
     /* 0x06 */ u8 texture;          /* gEffectTextures index, 0xFF = untextured */
-    /* 0x07 */ u8 unk7;
+    /* 0x07 */ u8 handlerSet;       /* index into gQuadSpriteDestroyFuncs / gQuadSpriteFreeFuncs */
     /* 0x08 */ s32 frame;           /* 16.16 animation frame */
     /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;            /* faded out with the lifetime (flag 0x8000) */
-    /* 0x11 */ u8 unk11;
+    /* 0x10 */ u8 alpha;            /* faded out with the lifetime (flag 0x8000) */
+    /* 0x11 */ u8 colorLevel;       /* weight of math_pickPrimColour / math_pickEnvColour */
     /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
+    /* 0x16 */ u8 primMode;         /* math_pickPrimColour's mode with flags & 0x100 (else 3) */
+    /* 0x17 */ u8 envMode;          /* math_pickEnvColour's mode with flags & 0x200 (else 4) */
     /* 0x18 */ u32 renderModes;     /* low byte: gEffectRenderModes index, high half: combiner index */
-    /* 0x1C */ s32 unk1C;
+    /* 0x1C */ s32 material;        /* math_emitPointLights's surface material, with flags & 0x4000 */
     /* 0x20 */ u8 viewportMask;
     /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 fadeStart;       /* lifetime below which unk10 / rgba[3] fade */
+    /* 0x22 */ s16 fadeStart;       /* lifetime below which alpha / rgba[3] fade */
     /* 0x24 */ s16 fadeRate;
     /* 0x26 */ u8 pad26[2];
 } SpriteDef; /* size 0x28 */
@@ -1645,16 +1645,16 @@ typedef struct SpriteDef2C {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
     /* 0x06 */ u8 texture;
-    /* 0x07 */ u8 unk7;
+    /* 0x07 */ u8 handlerSet;
     /* 0x08 */ s32 frame;
     /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
+    /* 0x10 */ u8 alpha;
+    /* 0x11 */ u8 colorLevel;
     /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
+    /* 0x16 */ u8 primMode;
+    /* 0x17 */ u8 envMode;
     /* 0x18 */ u32 renderModes;
-    /* 0x1C */ s32 unk1C;
+    /* 0x1C */ s32 material;
     /* 0x20 */ u8 viewportMask;
     /* 0x21 */ u8 pad21;
     /* 0x22 */ s16 fadeStart;
@@ -1872,7 +1872,7 @@ typedef struct BloodTrailDesc {
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 flags;
     /* 0x17 */ u8 emitter;          /* gBloodTrailEmitters index */
-    /* 0x18 */ u8 mode;
+    /* 0x18 */ u8 mode;             /* copied to BloodTrail.mode */
     /* 0x19 */ s8 callback;
     /* 0x1A */ u8 pad1A[2];
 } BloodTrailDesc; /* size 0x1C */
@@ -1889,7 +1889,7 @@ typedef struct BloodTrail {
     /* 0x24 */ s16 lifetime;
     /* 0x26 */ u8 flags;
     /* 0x27 */ u8 emitter;
-    /* 0x28 */ u8 mode;
+    /* 0x28 */ u8 mode; /* 1: blood_handleTrailMessage passes messages to effect_bloodTrailOwnerMessage */
     /* 0x29 */ s8 callback;
     /* 0x2A */ u8 pad2A[2];
     /* 0x2C */ Vec3f previous;
@@ -1897,7 +1897,7 @@ typedef struct BloodTrail {
     /* 0x3C */ f32 accumulator;
 } BloodTrail; /* size 0x40 */
 
-/* matching: BloodTrailDesc before unk18/callback (0x18 bytes; blood_spawnTrail copies 0x1C); see ParticleDesc64. */
+/* matching: BloodTrailDesc before mode/callback (0x18 bytes; blood_spawnTrail copies 0x1C); see ParticleDesc64. */
 typedef struct BloodTrailDesc18 {
     /* 0x00 */ f32 *x;
     /* 0x04 */ f32 *y;

@@ -58,21 +58,21 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 owner) {
     if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = math_randomFloat() * 200.0f + 200.0f;
         desc.texture = 0x2A;
-        desc.unk7 = 0;
+        desc.handlerSet = 0;
         desc.flags = 0x7340;
         desc.lifetime = 300;
         desc.frame = 0;
         desc.frameSpeed = math_random() % 2001U + 2000;
-        desc.unk10 = 0xFF;
-        desc.unk11 = 0xFF;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
         desc.rgba[0] = 0;
         desc.rgba[1] = 0;
         desc.rgba[2] = 0;
         desc.rgba[3] = 0xFF;
-        desc.unk16 = 0;
-        desc.unk17 = 0xD;
+        desc.primMode = 0;
+        desc.envMode = 0xD;
         desc.viewportMask = 0xFF;
-        desc.unk1C = 0;
+        desc.material = 0;
         desc.renderModes = 0x170002;
         decal = particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
                               math_random() & 0xFF, (math_random() & 1) * 2 + (math_random() & 1), 4, *(u8 *)&owner, 0);
@@ -178,8 +178,8 @@ s32 effect_updateFadeQuadSprite(FadeQuadSprite *sprite) {
 
     if (sprite->quad.def.lifetime < sprite->fadeStart) {
         alpha = sprite->quad.def.lifetime * sprite->fadeStep;
-        if (alpha < sprite->quad.def.unk10) {
-            sprite->quad.def.unk10 = alpha;
+        if (alpha < sprite->quad.def.alpha) {
+            sprite->quad.def.alpha = alpha;
         }
     }
     return 1;

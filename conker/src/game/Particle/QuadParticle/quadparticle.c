@@ -100,7 +100,7 @@ Gfx gQuadParticleEndDl[] = {
     gsSPEndDisplayList(),
 };
 
-/* Destroy and free handlers of a sprite (SpriteDef.unk7) and of a particle (ParticleDef.type). */
+/* Destroy and free handlers of a sprite (SpriteDef.handlerSet) and of a particle (ParticleDef.type). */
 static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadSpriteDefault, particle_destroyQuadSpriteDefault };
 static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
 static void (*gQuadParticleDestroyFuncs[])() = {
@@ -148,8 +148,8 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
     if ((sprite->def.flags & 0x8000) && !expired) {
         if (sprite->def.lifetime < sprite->def.fadeStart) {
             faded = sprite->def.lifetime * sprite->def.fadeRate;
-            if (faded < sprite->def.unk10) {
-                sprite->def.unk10 = faded;
+            if (faded < sprite->def.alpha) {
+                sprite->def.alpha = faded;
             }
         }
     }
@@ -157,7 +157,7 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
         if (!expired) {
             if (sprite->def.lifetime < sprite->def.fadeStart) {
                 faded = sprite->def.lifetime * sprite->def.fadeRate;
-                if (faded < sprite->def.unk10) {
+                if (faded < sprite->def.alpha) {
                     sprite->def.rgba[3] = faded;
                 }
             }
@@ -377,7 +377,7 @@ void particle_destroyQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
-        index = sprite->def.unk7;
+        index = sprite->def.handlerSet;
     } else {
         index = 0;
     }
@@ -388,7 +388,7 @@ void particle_freeQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
-        index = sprite->def.unk7;
+        index = sprite->def.handlerSet;
     } else {
         index = 0;
     }
@@ -508,13 +508,13 @@ Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         combiner = (sprite->def.renderModes & 0xFFFF0000) >> 16;
         cullFlags = sprite->def.flags & 0x30;
         gfx = math_emitPointLights(gfx, &sprite->link, 0, 0, 0, viewport, &sprite->pos, 2,
-                            (sprite->def.flags & 0x4000) ? sprite->def.unk1C : 0);
+                            (sprite->def.flags & 0x4000) ? sprite->def.material : 0);
         math_pickPrimColour(&primR, &primG, &primB, &primA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
-                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
-                      (sprite->def.flags & 0x100) ? sprite->def.unk16 : 3);
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.alpha, sprite->def.colorLevel,
+                      (sprite->def.flags & 0x100) ? sprite->def.primMode : 3);
         math_pickEnvColour(&envR, &envG, &envB, &envA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
-                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
-                      (sprite->def.flags & 0x200) ? sprite->def.unk17 : 4);
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.alpha, sprite->def.colorLevel,
+                      (sprite->def.flags & 0x200) ? sprite->def.envMode : 4);
         geometry = 0;
         if (cullFlags & 0x10) {
             geometry = G_CULL_FRONT;

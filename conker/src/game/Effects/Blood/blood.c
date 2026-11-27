@@ -231,7 +231,7 @@ static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
 static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, particle_updateWatcherLink, effect_isWatcherEmitterAlive };
-/* Teardown handlers of a drip (BloodDripDesc.unk2D). */
+/* Teardown handlers of a drip (BloodDripDesc.handlerSet). */
 static void (*gBloodDripDestroyHandlers[10])() = {
     blood_destroyDripDefault, effect_destroyLoopSound, particle_destroyWatcherLink, effect_destroyWatcherEmitter, blood_destroyDripDefault,
     blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault,
@@ -351,7 +351,7 @@ void blood_freeDripDefault(EffectHeader *effect) {
     effect_defaultFree(effect);
 }
 
-/* Calls the gBloodDripDestroyHandlers handler selected by drip->desc.unk2D (0 when out of range). */
+/* Calls the gBloodDripDestroyHandlers handler selected by drip->desc.handlerSet (0 when out of range). */
 void blood_destroyDrip(BloodDrip *drip) {
     s32 index = drip->desc.handlerSet;
 
@@ -364,7 +364,7 @@ void blood_destroyDrip(BloodDrip *drip) {
     gBloodDripDestroyHandlers[index]();
 }
 
-/* Calls the gBloodDripFreeHandlers handler selected by drip->desc.unk2D (0 when out of range). */
+/* Calls the gBloodDripFreeHandlers handler selected by drip->desc.handlerSet (0 when out of range). */
 void blood_freeDrip(BloodDrip *drip) {
     s32 index = drip->desc.handlerSet;
 
@@ -1213,52 +1213,31 @@ s32 blood_updateGrowingParticle(GrowingBloodParticle *particle) {
     return 1;
 }
 
-struct LocalDef15136918 {
-    s32 unk0;
-    s16 unk4;
-    s8  unk6;
-    s8  unk7;
-    s32 unk8;
-    s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    u8  unk14;
-    u8  unk15;
-    s8  unk16;
-    s8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-};
-
 /* Spawns a particle_spawnSurfaceQuadSpriteNoModel particle (type 0xD) of the given size at position. */
 void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
                    s32 list) {
-    struct LocalDef15136918 desc;
+    SpriteDef desc;
     f64 pad; // matching: an unused 8-byte stack slot
 
     pad = size;
-    desc.unk6 = 0x55;
-    desc.unk0 = 0x300;
-    desc.unk8 = 0;
-    desc.unkC = 0;
-    desc.unk10 = arg1;
-    desc.unk11 = arg2;
-    desc.unk12 = 0;
-    desc.unk13 = 0;
-    desc.unk14 = 0;
-    desc.unk15 = 0;
-    desc.unk18 = 0x280001;
-    desc.unk16 = 1;
-    desc.unk17 = 1;
+    desc.texture = 0x55;
+    desc.flags = 0x300;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
+    desc.alpha = arg1;
+    desc.colorLevel = arg2;
+    desc.rgba[0] = 0;
+    desc.rgba[1] = 0;
+    desc.rgba[2] = 0;
+    desc.rgba[3] = 0;
+    desc.renderModes = 0x280001;
+    desc.primMode = 1;
+    desc.envMode = 1;
     if (lifetime == -1) {
-        desc.unk4 = 300;
+        desc.lifetime = 300;
     } else {
-        desc.unk0 = 0x301;
-        desc.unk4 = lifetime + 32;
+        desc.flags = 0x301;
+        desc.lifetime = lifetime + 32;
     }
     particle_spawnSurfaceQuadSpriteNoModel(&desc, 0xD, 0, surface, position[0], position[1], position[2], size, size, angle, 0, 0, owner, list);
 }

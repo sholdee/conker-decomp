@@ -374,18 +374,18 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     }
     desc.frame = 0;
     desc.frameSpeed = 0;
-    desc.unk10 = arg2;
-    desc.unk11 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.rgba[2] = 0;
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
     desc.renderModes = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
-    desc.unk7 = 0;
-    desc.unk16 = 0;
-    desc.unk17 = 7;
+    desc.handlerSet = 0;
+    desc.primMode = 0;
+    desc.envMode = 7;
     desc.viewportMask = 0xFF;
-    desc.unk1C = 0;
+    desc.material = 0;
     if (particle_spawnSurfaceQuadSprite(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
                       math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
@@ -1095,20 +1095,20 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
     desc.flags = 0x67B02;
     desc.lifetime = 300;
     desc.frame = 0;
-    desc.unk10 = arg2;
-    desc.unk11 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.rgba[0] = gKindColors[kind].r;
     desc.rgba[1] = gKindColors[kind].g;
     desc.rgba[2] = gKindColors[kind].b;
     desc.rgba[3] = 0xFF;
     desc.renderModes = 0x440001;
-    desc.unk7 = 0;
-    desc.unk16 = 0;
-    desc.unk17 = 6;
+    desc.handlerSet = 0;
+    desc.primMode = 0;
+    desc.envMode = 6;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.viewportMask = 0xFF;
-    desc.unk1C = 0;
+    desc.material = 0;
     if (surface != NULL) {
         particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, surface, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
                       ((Vec3f *)pos)->z, size, size, math_random() & 0xFF,

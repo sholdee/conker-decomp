@@ -222,7 +222,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.fadeStart = 20;
     params.fadeRate = 12;
     params.texture = 0x38;
-    params.unk7 = 0;
+    params.handlerSet = 0;
     params.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
     if (duration == -1) {
         params.lifetime = 300;
@@ -235,15 +235,15 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     } else {
         params.frameSpeed = 0x140000 / (duration + 20);
     }
-    params.unk10 = arg1;
-    params.unk11 = 0xFF;
+    params.alpha = arg1;
+    params.colorLevel = 0xFF;
     params.rgba[0] = 0xFF;
     params.rgba[1] = 0x83;
     params.rgba[2] = 30;
     params.rgba[3] = 0xFF;
     params.renderModes = (arg6 ? 2 : 3) + 0x440000;
-    params.unk16 = 0;
-    params.unk17 = 6;
+    params.primMode = 0;
+    params.envMode = 6;
     params.viewportMask = 0xFF;
     return particle_spawnSurfaceQuadSprite(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
                          math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),

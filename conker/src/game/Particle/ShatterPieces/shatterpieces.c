@@ -317,7 +317,7 @@ s32 particle_fadeQuadSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {
-        sprite->def.unk10 = lifetime * 4;
+        sprite->def.alpha = lifetime * 4;
     }
     return 1;
 }
@@ -499,8 +499,8 @@ void particle_spawnFlatMark(Obj150B9D8C *obj) {
         def.frameSpeed = 0;
         def.flags = 0x11;
         def.lifetime = 100;
-        def.unk10 = 0xFF;
-        def.unk11 = obj->unk90;
+        def.alpha = 0xFF;
+        def.colorLevel = obj->unk90;
         def.rgba[0] = 0;
         def.rgba[1] = 0;
         def.rgba[2] = 0;

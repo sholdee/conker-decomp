@@ -52,20 +52,20 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
         }
         if (math_isObjectHidden(hitObject) != 0) {
             sprite.texture = 6;
-            sprite.unk7 = 0;
+            sprite.handlerSet = 0;
             sprite.flags = 0x9F01;
             sprite.lifetime = (math_random() % 51U) + 100;
             sprite.frame = 0;
             sprite.frameSpeed = 0;
-            sprite.unk10 = (math_random() % 101U) + 155;
-            sprite.unk11 = 0xFF;
+            sprite.alpha = (math_random() % 101U) + 155;
+            sprite.colorLevel = 0xFF;
             sprite.rgba[0] = 0xFF;
             sprite.rgba[1] = 0xFF;
             sprite.rgba[2] = 0xFF;
             sprite.rgba[3] = 0xFF;
             sprite.renderModes = 0x3B0002;
-            sprite.unk16 = 0;
-            sprite.unk17 = 7;
+            sprite.primMode = 0;
+            sprite.envMode = 7;
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
             particle_spawnSurfaceQuadSprite(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
@@ -106,12 +106,12 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
     }
 }
 
-/* Fades the sprite out over its last 64 frames (def.unk10 = 4 * lifetime). */
+/* Fades the sprite out over its last 64 frames (def.alpha = 4 * lifetime). */
 s32 particle_fadeMoveHitSprite(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {
-        sprite->def.unk10 = lifetime * 4;
+        sprite->def.alpha = lifetime * 4;
     }
     return 1;
 }

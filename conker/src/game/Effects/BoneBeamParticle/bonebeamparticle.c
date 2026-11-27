@@ -57,24 +57,24 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
         }
         break;
     }
-    arg.unk7 = 0;
+    arg.handlerSet = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x8000 | 0x20000;
     arg.lifetime = (duration == -1) ? 300 : duration;
     arg.frame = 0;
     arg.frameSpeed = 0;
     if (level == LEVEL_W5_BANK) {
-        arg.unk10 = arg1 >> 1;
+        arg.alpha = arg1 >> 1;
     } else {
-        arg.unk10 = arg1;
+        arg.alpha = arg1;
     }
-    arg.unk11 = 0xFF;
+    arg.colorLevel = 0xFF;
     arg.rgba[2] = 0;
     arg.rgba[1] = 0;
     arg.rgba[0] = 0;
     arg.rgba[3] = 0xFF;
     arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
-    arg.unk16 = 0;
-    arg.unk17 = 7;
+    arg.primMode = 0;
+    arg.envMode = 7;
     if (arg5 != 0) {
         argB = 3;
         argC = 0xFF;

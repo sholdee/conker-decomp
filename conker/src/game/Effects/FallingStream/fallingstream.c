@@ -401,8 +401,8 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     ring.frameSpeed = 0;
                     ring.flags = 1;
                     ring.lifetime = 100;
-                    ring.unk10 = 0xFF;
-                    ring.unk11 = 0xFF;
+                    ring.alpha = 0xFF;
+                    ring.colorLevel = 0xFF;
                     ring.rgba[0] = 0;
                     ring.rgba[1] = 0;
                     ring.rgba[2] = 0;

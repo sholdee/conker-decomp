@@ -553,20 +553,20 @@ void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *p
     arg.fadeStart = 20;
     arg.fadeRate = 12;
     arg.texture = 0x4F;
-    arg.unk7 = 0;
+    arg.handlerSet = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
     arg.lifetime = (duration == -1) ? 300 : duration + 20;
     arg.frame = 0;
     arg.frameSpeed = 0;
-    arg.unk10 = arg1;
-    arg.unk11 = 0xFF;
+    arg.alpha = arg1;
+    arg.colorLevel = 0xFF;
     arg.rgba[0] = arg7;
     arg.rgba[1] = arg8;
     arg.rgba[2] = arg9;
     arg.rgba[3] = 0xFF;
     arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
-    arg.unk16 = 0;
-    arg.unk17 = 6;
+    arg.primMode = 0;
+    arg.envMode = 6;
     if (arg5 != 0) {
         argB = 3;
         argC = 0xFF;
@@ -1103,20 +1103,20 @@ s32 particle_updateFallingDebris(Game113D60Debris *debris) {
             size = (math_randomFloat() * 20.0f) + 20.0f;
 
             splash.texture = 0xB;
-            splash.unk7 = 0;
+            splash.handlerSet = 0;
             splash.flags = 0x9701;
             splash.lifetime = 100;
             splash.frame = 0;
             splash.frameSpeed = 0;
-            splash.unk10 = 0xFF;
-            splash.unk11 = 0xFF;
+            splash.alpha = 0xFF;
+            splash.colorLevel = 0xFF;
             splash.rgba[0] = 0xFF;
             splash.rgba[1] = 0xFF;
             splash.rgba[2] = 0xFF;
             splash.rgba[3] = 0xFF;
             splash.renderModes = 0x3B0003;
-            splash.unk16 = 0;
-            splash.unk17 = 7;
+            splash.primMode = 0;
+            splash.envMode = 7;
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 
