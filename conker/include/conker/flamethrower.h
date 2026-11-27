@@ -74,7 +74,7 @@ typedef struct FlameLineParams {
     /* 0x3D */ u8 alphaRange;
     /* 0x3E */ u8 pad3E[2];
     /* 0x40 */ f32 shrinkRate;
-} FlameLineParams;
+} FlameLineParams; // size 0x44
 
 /* Parameters of the particles (trail_createMotionTrail) a flame scatters towards `target`; random values are min + range. */
 typedef struct FlameScatterParams {
@@ -96,7 +96,7 @@ typedef struct FlameScatterParams {
     /* 0x3E */ s16 alphaRange;
     /* 0x40 */ s16 fadeStart;
     /* 0x42 */ s16 fadeRate;
-} FlameScatterParams;
+} FlameScatterParams; // size 0x44
 
 /* Parameters of the particles (particle_newSpriteParticleWithFloor) a flame emits towards `target`; random values are min + range. */
 typedef struct FlameEmitParams {
@@ -116,7 +116,7 @@ typedef struct FlameEmitParams {
     /* 0x34 */ f32 gravityRange;
     /* 0x38 */ s16 fadeStart;
     /* 0x3A */ s16 fadeRate;
-} FlameEmitParams;
+} FlameEmitParams; // size 0x3C
 
 /* Spawn parameters for flamethrower_spawnFlame. */
 struct CharacterFlamethrowerSetup {

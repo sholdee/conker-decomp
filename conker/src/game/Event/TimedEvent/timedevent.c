@@ -223,7 +223,7 @@ static EventHandler *gTimedEventProcs[] = {
     func_15073F1C,
 };
 s32 D_80086690 = 0x0FA10CDF; /* not referenced */
-/* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game/Actor/ActorMotion/actormotion.c). Declared without a
+/* Hit-reaction handlers, indexed by HitReaction.handler (see game/Actor/ActorMotion/actormotion.c). Declared without a
    prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
 void (*gHitReactionProcs[])() = {
     event_emptyHitReaction0, event_emptyHitReaction1, effect_hitReactLavaBoulder, func_15074C00,
@@ -1250,7 +1250,7 @@ void event_resetBlink(void) {
 
 /*
  * face_requestExpression with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
- * scaled by 1 / anim->unk10.
+ * scaled by 1 / anim->speed[0].
  */
 void event_requestExpression(void) {
     Actor *obj = gCurrentActor;

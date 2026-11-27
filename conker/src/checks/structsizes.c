@@ -14,6 +14,7 @@
 #include "conker/cutscene.h"
 #include "conker/effect.h"
 #include "conker/face.h"
+#include "conker/flamethrower.h"
 #include "conker/level.h"
 #include "conker/libc.h"
 #include "conker/light.h"
@@ -403,3 +404,6 @@ STATIC_ASSERT(sizeof(SurfaceTrailPoint) == 0x24, SurfaceTrailPoint_size);
 
 /* conker/weapon.h */
 STATIC_ASSERT(sizeof(Game1EF500TrailExt) == 0xB0, Game1EF500TrailExt_size);
+STATIC_ASSERT(sizeof(FlameLineParams) == 0x44, FlameLineParams_size);
+STATIC_ASSERT(sizeof(FlameScatterParams) == 0x44, FlameScatterParams_size);
+STATIC_ASSERT(sizeof(FlameEmitParams) == 0x3C, FlameEmitParams_size);
