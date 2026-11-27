@@ -6,7 +6,7 @@
 #include "conker/texture.h"
 
 typedef struct {
-    u8 unk0[5];
+    u8 lightIds[5];
 } Struct15100340;
 
 /* This file's .data: the light ids of the five gFlagLightStates flags. */
@@ -28,10 +28,10 @@ void effect_levelUpdateFlagLights(s32 arg0) {
             chance = (*flag != 0) ? 70 : 35;
             if (math_random() % 1000U < chance) {
                 if ((*flag ^= 1) != 0) {
-                    light_sendEvent(ids.unk0[i], 0x18, 0);
+                    light_sendEvent(ids.lightIds[i], 0x18, 0);
                 } else {
-                    light_sendEvent(ids.unk0[i], 0x1C, 0);
-                    light_sendEvent(ids.unk0[i], 0x17, 0);
+                    light_sendEvent(ids.lightIds[i], 0x1C, 0);
+                    light_sendEvent(ids.lightIds[i], 0x17, 0);
                 }
             }
         }

@@ -2087,10 +2087,10 @@ typedef struct {
     /* 0x08 */ u8 stage;
     /* 0x09 */ u8 pad9[3];
     /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
+    /* 0x2C */ f32 kindSpriteAccum; /* fractional count of particle_spawnKindSprite sprites still to spawn */
+    /* 0x30 */ f32 flareAccum;      /* the same for the flare sprites */
+    /* 0x34 */ f32 debrisAccum;     /* for the debris pieces */
+    /* 0x38 */ f32 burstAccum;      /* for the weapon_spawnImpactBurst bursts */
     /* 0x3C */ s16 eventTimer;
     /* 0x3E */ u8 pad3E[2];
     /* 0x40 */ f32 centerX; /* from the type-3 zone 0x15 of the same set */

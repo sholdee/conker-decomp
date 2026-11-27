@@ -206,8 +206,8 @@ void effect_advanceStage(StageObj *obj) {
         state->eventTimer = math_random() % 151U + 150;
     }
 
-    state->unk38 += (0.02000000142f + math_randomFloat() * 0.025f) * (gFrameDelta * count);
-    if (state->unk38 > 1.0f) {
+    state->burstAccum += (0.02000000142f + math_randomFloat() * 0.025f) * (gFrameDelta * count);
+    if (state->burstAccum > 1.0f) {
         s16 side;
         Vec3f pos;
         side = (state->mirror & 1) ? -1 : 1;
@@ -217,12 +217,12 @@ void effect_advanceStage(StageObj *obj) {
             pos.x += state->centerX;
             pos.z += state->centerZ;
             weapon_spawnImpactBurst(&pos, obj->header.owner, obj->header.kind);
-            state->unk38 -= 1.0f;
-        } while (state->unk38 > 1.0f);
+            state->burstAccum -= 1.0f;
+        } while (state->burstAccum > 1.0f);
     }
 
-    state->unk34 += (0.02000000142f + math_randomFloat() * 0.06000000238f) * (gFrameDelta * count);
-    if (state->unk34 > 1.0f) {
+    state->debrisAccum += (0.02000000142f + math_randomFloat() * 0.06000000238f) * (gFrameDelta * count);
+    if (state->debrisAccum > 1.0f) {
         s16 pieces;
         s16 side;
         ParticleSpawn spawn;
@@ -275,12 +275,12 @@ void effect_advanceStage(StageObj *obj) {
                 spawn.gravity = math_randomFloat() * 0.337f + -1.177f;
                 particle_newModelParticleWithFloor(&spawn, 3, 1, 0, 0, 0xFF, 1);
             }
-            state->unk34 -= 1.0f;
-        } while (state->unk34 > 1.0f);
+            state->debrisAccum -= 1.0f;
+        } while (state->debrisAccum > 1.0f);
     }
 
-    state->unk30 += (0.05500000343f + math_randomFloat() * 0.05f) * (gFrameDelta * count);
-    if (state->unk30 > 1.0f) {
+    state->flareAccum += (0.05500000343f + math_randomFloat() * 0.05f) * (gFrameDelta * count);
+    if (state->flareAccum > 1.0f) {
         s16 side;
         s32 flares;
         ParticleDesc flare;
@@ -338,12 +338,12 @@ void effect_advanceStage(StageObj *obj) {
                 flare.gravity = math_randomFloat() * 0.268f + -0.3870000243f;
                 particle_newSpriteParticleWithFloor(&flare, 1, 0, 0, 0xFF, 1);
             }
-            state->unk30 -= 1.0f;
-        } while (state->unk30 > 1.0f);
+            state->flareAccum -= 1.0f;
+        } while (state->flareAccum > 1.0f);
     }
 
-    state->unk2C += (0.3360000253f + math_randomFloat() * 0.126f) * (gFrameDelta * count);
-    if (state->unk2C > 1.0f) {
+    state->kindSpriteAccum += (0.3360000253f + math_randomFloat() * 0.126f) * (gFrameDelta * count);
+    if (state->kindSpriteAccum > 1.0f) {
         s16 side;
         Vec3f pos;
         Vec3f vel;
@@ -361,8 +361,8 @@ void effect_advanceStage(StageObj *obj) {
             particle_spawnKindSprite(8, &pos.x, &vel.x, math_randomFloat() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
                           math_randomFloat() * 0.2070000172f + -0.1690000147f, math_random() % 21U + 35,
                           math_random() % 121U + 100, 50, 5, 0, 0xFF, 1);
-            state->unk2C -= 1.0f;
-        } while (state->unk2C > 1.0f);
+            state->kindSpriteAccum -= 1.0f;
+        } while (state->kindSpriteAccum > 1.0f);
     }
 }
 

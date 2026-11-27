@@ -205,7 +205,7 @@ typedef struct Game1DD500Motion {
     /* 0x1C */ f32 swingWidth;
     /* 0x20 */ f32 swingHeight;
     /* 0x24 */ u8 checkGround;   /* splat when it reaches the ground */
-    /* 0x25 */ u8 unk25;
+    /* 0x25 */ u8 kind;
     /* 0x26 */ u8 pad26[2];
 } Game1DD500Motion; // size 0x28
 
@@ -410,7 +410,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     desc.rot.x = 0.0f;
                     desc.rot.y = 0.0f;
                     desc.rot.z = 0.0f;
-                    motion.unk25 = emitter->profileFlag;
+                    motion.kind = emitter->profileFlag;
                     motion.checkGround = math_random() & 1;
                     desc.width = 0.0f;
                     desc.height = 0.0f;
@@ -507,10 +507,10 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (math_random() & 1) {
-                particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.alpha, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
+                particle_spawnKindEmitter(motion->kind, size * 1.7f, particle->head.def.alpha, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
                               particle->head.header.owner, particle->head.header.kind);
             } else {
-                particle_spawnSquash(motion->unk25, size * 0.68f, particle->head.def.alpha, &splat, 1, particle->head.header.owner, particle->head.header.kind);
+                particle_spawnSquash(motion->kind, size * 0.68f, particle->head.def.alpha, &splat, 1, particle->head.header.owner, particle->head.header.kind);
             }
             alive = FALSE;
         }

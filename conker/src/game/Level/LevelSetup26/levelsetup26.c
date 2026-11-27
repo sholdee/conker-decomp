@@ -37,10 +37,10 @@ s32 level_spawnStageZone(TriggerZone *zone) {
             tmp.parts[i] = gfx_findObjectById(gStagePartObjectIds[i][tmp.set]);
         }
         tmp.eventTimer = 0;
-        tmp.unk2C = 0.0f;
-        tmp.unk30 = 0.0f;
-        tmp.unk34 = 0.0f;
-        tmp.unk38 = 0.0f;
+        tmp.kindSpriteAccum = 0.0f;
+        tmp.flareAccum = 0.0f;
+        tmp.debrisAccum = 0.0f;
+        tmp.burstAccum = 0.0f;
     }
     key.kind = 3;
     key.subTypeData = 0x15;

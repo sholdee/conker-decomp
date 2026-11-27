@@ -548,14 +548,8 @@ struct EffectMotionParticle {
     } motion;
 };
 
-/* Second argument of the particle update callbacks; only unk4 is read here. */
-struct ParticleUpdateArg {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ f32 unk4;
-};
-
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
+u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, Vec3f *prevPos) {
     u8 alive;
     s32 found;
 
@@ -565,7 +559,7 @@ u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUp
             Vec3f pos;
 
             pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-            pos.y = prevPos->unk4;
+            pos.y = prevPos->y;
             pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
             if (math_isInWorldBounds(&pos) == 0) {
                 return 0;
@@ -587,7 +581,7 @@ u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUp
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
+s32 effect_updateRiseParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -835,7 +829,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
+s32 effect_updateOscillateParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -950,7 +944,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
+s32 effect_updateDriftParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     ParticleDriftMotion *drift;
     s32 i;
 
@@ -974,7 +968,7 @@ s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
+u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
@@ -986,7 +980,7 @@ u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpd
         return 1;
     }
     pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-    pos.y = prevPos->unk4;
+    pos.y = prevPos->y;
     pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
         if (math_isInWorldBounds(&pos) == 0) {
@@ -1030,8 +1024,8 @@ typedef struct {
     /* 0x04 */ f32 rateRandom;
     /* 0x08 */ f32 sizeBase;
     /* 0x0C */ f32 sizeRandom;
-    /* 0x10 */ f32 unk54Base;
-    /* 0x14 */ f32 unk54Random;
+    /* 0x10 */ f32 gravityBase;
+    /* 0x14 */ f32 gravityRandom;
     /* 0x18 */ f32 maxRiseSpeed;
     /* 0x1C */ f32 swayPerSpeed;
     /* 0x20 */ u8 alphaBase;
@@ -1201,7 +1195,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
             rise.swayPhaseStepZ = (math_random() % 5U) + 4;
             rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
             rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            spawn.gravity = (math_randomFloat() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
+            spawn.gravity = (math_randomFloat() * emitter->settings.gravityRandom) + emitter->settings.gravityBase;
             spawn.alpha = (math_random() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
             flipX = (math_random() & 1) ? 0x40 : 0;
             flipY = (math_random() & 1) ? 0x80 : 0;

@@ -558,7 +558,7 @@ void effect_updateSpriteFx(SpriteFx *fx) {
     }
 }
 typedef struct {
-    s32 unk0;
+    s32 needSync;
     s32 unk4;
 } PaddedFlag;
 /* Type 3 draw: the current animation frame as a billboard. */
@@ -571,7 +571,7 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 view) {
     s16 frame;
 
     if (view) {} // matching: references the otherwise unused view
-    update.unk0 = 1;
+    update.needSync = 1;
     frame = fx->frame;
     anim = fx->anim;
     gfx = math_gfxLoadTextureFrame(gdl, anim, frame << 8, 2, 0x100, 0x100,
