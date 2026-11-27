@@ -18,9 +18,9 @@ s16 gFogFar;
 /* One entry of the fog preset table gFogPresets[0]. */
 typedef struct {
     u8 colour[4];
-    u16 unk4;
+    u16 fogStart; /* 0 (near plane) .. 1000 (far plane), in inverse depth: where the fog on objects starts (actor_getFogAlpha) */
     u16 unk6;
-    u16 unk8;
+    u16 fogEnd; /* the same scale: objects at or beyond it are fully fogged */
     u16 unkA;
     s16 nearPlane; /* -1: use the level header's unk2 (gDefaultNear) */
     s16 farPlane; /* -1: use the level header's unk0 (gDefaultFar) */
@@ -48,9 +48,9 @@ void env_initFog(s32 levelId) {
     gFogPresets[0].colour[1] = gLevelHeader->fogColour[1];
     gFogPresets[0].colour[2] = gLevelHeader->fogColour[2];
     gFogPresets[0].colour[3] = gLevelHeader->fogColour[3];
-    gFogPresets[0].unk4 = gLevelHeader->unk3A;
+    gFogPresets[0].fogStart = gLevelHeader->fogStart;
     gFogPresets[0].unk6 = gLevelHeader->unk3C;
-    gFogPresets[0].unk8 = gLevelHeader->unk3E;
+    gFogPresets[0].fogEnd = gLevelHeader->fogEnd;
     gFogPresets[0].unkA = gLevelHeader->unk40;
     gFogPresets[0].nearPlane = gLevelHeader->nearPlane;
     gFogPresets[0].farPlane = gLevelHeader->farPlane;
@@ -104,9 +104,9 @@ void env_blendFog(s32 from, s32 to, s32 levelId, s32 blend, s32 dest) {
     } else {
         preset = &gFogPresets[dest];
         outColour = preset->colour;
-        out4 = &preset->unk4;
+        out4 = &preset->fogStart;
         out6 = &preset->unk6;
-        out8 = &preset->unk8;
+        out8 = &preset->fogEnd;
         outA = &preset->unkA;
         outC = &preset->nearPlane;
         outE = &preset->farPlane;
@@ -137,9 +137,9 @@ void env_blendFog(s32 from, s32 to, s32 levelId, s32 blend, s32 dest) {
         toByte = gFogPresets[to].colour[i];
         outColour[i] = (toByte - fromByte) * blend / 4096 + fromByte;
     }
-    *out4 = (gFogPresets[to].unk4 - gFogPresets[from].unk4) * blend / 4096 + gFogPresets[from].unk4;
+    *out4 = (gFogPresets[to].fogStart - gFogPresets[from].fogStart) * blend / 4096 + gFogPresets[from].fogStart;
     *out6 = (gFogPresets[to].unk6 - gFogPresets[from].unk6) * blend / 4096 + gFogPresets[from].unk6;
-    *out8 = (gFogPresets[to].unk8 - gFogPresets[from].unk8) * blend / 4096 + gFogPresets[from].unk8;
+    *out8 = (gFogPresets[to].fogEnd - gFogPresets[from].fogEnd) * blend / 4096 + gFogPresets[from].fogEnd;
     *outA = (gFogPresets[to].unkA - gFogPresets[from].unkA) * blend / 4096 + gFogPresets[from].unkA;
     fromValue = (gFogPresets[from].nearPlane == -1) ? gLevelHeader->nearPlane : gFogPresets[from].nearPlane;
     toValue = (gFogPresets[to].nearPlane == -1) ? gLevelHeader->nearPlane : gFogPresets[to].nearPlane;

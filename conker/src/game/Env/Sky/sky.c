@@ -589,8 +589,8 @@ typedef struct Star {
     u16 x;
     u16 y;
     u16 z;
-    u8 unk6; // 0..4
-    u8 unk7; // 64..254
+    u8 colourIndex; // 0..4, index into the star field's colours
+    u8 brightness; // 64..254, the alpha
 } Star;
 
 #define NUM_STARS 8000
@@ -627,8 +627,8 @@ void env_initStars(void) {
         stars[i].x = *(u16 *)&bits;
         bits = (s32)(math_cos(longitude) * ringRadius);
         stars[i].z = *(u16 *)&bits;
-        stars[i].unk7 = (math_random() % 191U) + 64;
-        stars[i].unk6 = math_random() % 5U;
+        stars[i].brightness = (math_random() % 191U) + 64;
+        stars[i].colourIndex = math_random() % 5U;
     }
 }
 

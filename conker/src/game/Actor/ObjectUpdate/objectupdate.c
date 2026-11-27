@@ -487,7 +487,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         collision_getLodModelId(actor, &lod);
     }
     func_1502D54C(index, colour);
-    if (gLevelHeader->unk3E != 0) {
+    if (gLevelHeader->fogEnd != 0) {
         actor_getFogAlpha(actor, colour, player);
     } else {
         colour[3] = 0xFF;
@@ -604,7 +604,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
         gSPSetGeometryMode(gdl++, G_CULL_BACK);
     }
     lit = TRUE;
-    levelFog = gLevelHeader->unk3E;
+    levelFog = gLevelHeader->fogEnd;
     if ((actor->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);

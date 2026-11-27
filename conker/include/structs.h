@@ -264,9 +264,9 @@ typedef struct LevelHeader {
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game/Cutscene/Sequence/sequence
     /* 0x2C */ LevelMusic music;
-    /* 0x3A */ s16 unk3A;           // fog (gFogPresets.unk4..unkA)
+    /* 0x3A */ s16 fogStart;        // copied to gFogPresets[0].fogStart
     /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;           // nonzero: level fog on objects
+    /* 0x3E */ s16 fogEnd;          // copied to gFogPresets[0].fogEnd; nonzero: level fog on objects
     /* 0x40 */ s16 unk40;
     /* 0x42 */ u8  fogColour[4];
     /* 0x46 */ s8  fogPreset;       // fog preset (env_blendFog), -1 = none
