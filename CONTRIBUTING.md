@@ -77,8 +77,8 @@ commit it.
   have. Each is marked `/* matching: */`. Natural C that matches in their place is welcome:
   - `objectsize.c`: dead blocks that call stand-in functions (`dbg3`, `dbgp`, `dbgu`, `dbgx`) that
     exist nowhere.
-  - `levelobjects.c`: it does not include the umbrella headers, so that it can declare its own view
-    of `allocate_memory` (a `u32` tag).
+  - `levelobjects.c`: it leaves out `conker/heap.h`, so that it can declare its own view of
+    `allocate_memory`, with a `u32` tag where the header has `s32`.
 - **One declaration for each symbol.** A function or global that other files use is declared once,
   in the subsystem header of the file that owns it (`conker/include/conker/<subsystem>.h`). IDO
   rejects a second declaration that does not agree. A local declaration in a C file is allowed only
