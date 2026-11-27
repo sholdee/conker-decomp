@@ -35,9 +35,11 @@ typedef struct {
     s32 unk4;
 } Pair1506AA48;
 
+/* Hit-handler argument of func_1506AB7C / func_1506ABC4 (the same layout as actoractions.c's ThrowPacket and
+   sprayobjects.c's Struct150C3230). */
 typedef struct {
-    /* 0x00 */ Actor *unk0;
-    /* 0x04 */ Vec3f unk4;
+    /* 0x00 */ Actor *source; // the thrower (actor_throwGrenade) or the spray object's owner (sprayobjects.c)
+    /* 0x04 */ Vec3f pos;     // where the blast happens
     /* 0x10 */ s32 unk10;
 } Arg1506AB7C;
 
@@ -107,17 +109,17 @@ extern u8 gBoneMatricesFlushed;
 /* game/Actor/Movement/movement.c */
 void actor_updateAll(void);
 void actor_hideTanksInSniperView(void);
-s32 actor_resolveAttachId(s32 arg0, s32 *arg1);
+s32 actor_resolveAttachId(s32 id, s32 *index);
 void actor_updateAttachedObject(Actor *obj, s32 force, s32 release);
-f32 actor_updateSwim(Actor *obj, f32 arg1);
+f32 actor_updateSwim(Actor *obj, f32 surfaceDelta);
 void func_1504BA38(Actor *obj);
 void actor_dropLiftedObject(Actor *obj);
 void actor_applyTaskAttrib(Actor *obj);
 void actor_tickTimers(Actor *obj);
-void actor_updatePissed(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3);
+void actor_updatePissed(Actor *obj, u16 *moveAngle, f32 *moveSpeed, s8 *arg3);
 s32 actor_updateIdleAnim(void);
 s32 actor_getDuckWalkAnim(void);
-void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2);
+void actor_updateWalkAnim(Actor *obj, s32 pushAnim, f32 moveSpeed);
 void actor_updateButtonTimers(Actor *obj);
 s32 actor_interleaveUpdate(Actor *obj);
 void actor_stepAimPitch(Actor *obj, s8 target, u8 mode);
@@ -136,10 +138,10 @@ void actor_updateCommon(Actor *obj);
 void actor_leanIntoTurn(Actor *obj, s16 prevAngle);
 void actor_updatePathFollower(Actor *obj);
 void func_15052EF0(Actor *obj);
-Actor *actor_setIntelWalk(s32 index, s32 arg1);
+Actor *actor_setIntelWalk(s32 index, s32 walk);
 /* void actor_seatRider(Actor *, f32 height, ...) is declared in the files that call it:
    game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void actor_startRiderJump(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
+void actor_startRiderJump(Actor *mount, f32 yVelocity, f32 gravity, s32 mountWalk, s32 mtxIndex);
 s32 actor_handleDeath(Actor *obj);
 s32 actor_checkDeath(Actor *obj);
 void actor_fadeOutAndRemove(Actor *obj);
@@ -305,43 +307,43 @@ extern const u16 D_80099428[2];
 extern const s32 gEyeCodeFrames[3];
 
 /* game/Actor/ActorActions/actoractions.c */
-s16 actor_getAngleToLinked(Actor *arg0);
-void func_15063404(Actor *arg0);
-void func_150634E4(Actor *arg0);
-void func_15063570(Actor *arg0);
-void actor_castAimRay(Actor *arg0, f32 arg1);
-void actor_markRayTargetSniped(Actor *arg0);
+s16 actor_getAngleToLinked(Actor *actor);
+void func_15063404(Actor *actor);
+void func_150634E4(Actor *actor);
+void func_15063570(Actor *actor);
+void actor_castAimRay(Actor *actor, f32 maxDist);
+void actor_markRayTargetSniped(Actor *actor);
 void actor_runPending(void);
-s32 actor_getWaistOffsetToLinked(Actor *arg0);
-s32 actor_turnWaist(Actor *arg0, s32 buttons, s32 mask);
-void actor_throwGrenade(Actor *arg0);
-Actor *actor_findLinked(Actor *arg0, s32 id);
-s32 actor_tryStartBAction(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons);
-void actor_fireShot(Actor *arg0, s32 kind);
-u16 actor_pickRandomAnim(Actor *arg0, u16 animA, u16 animB, u16 animC);
-void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB);
+s32 actor_getWaistOffsetToLinked(Actor *actor);
+s32 actor_turnWaist(Actor *actor, s32 buttons, s32 mask);
+void actor_throwGrenade(Actor *actor);
+Actor *actor_findLinked(Actor *actor, s32 id);
+s32 actor_tryStartBAction(Actor *actor, u16 anim, u16 flags, s32 action, s32 buttons);
+void actor_fireShot(Actor *actor, s32 kind);
+u16 actor_pickRandomAnim(Actor *obj, u16 animA, u16 animB, u16 animC);
+void func_150642AC(Actor *actor, s32 buttons, f32 height, s32 noPlay, s32 lockB);
 void actor_copyAnimPosition(s32 srcIndex, s32 dstIndex);
-void actor_syncAnimToLinked(Actor *arg0);
-s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4);
-s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7,
-                  s32 arg8);
+void actor_syncAnimToLinked(Actor *actor);
+s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 moveSpeed);
+s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height, s32 nested, s32 act, s32 isStunned,
+                  s32 expired, s32 noPlay);
 
 /* game/Actor/MovementHit/movementhit.c */
-void actor_hitBurstDebris(Actor *obj, s32 arg1);
-void actor_hitAttachBloodDrip(Actor *obj, s32 arg1);
-void actor_hitShotImpact(Actor *obj, s32 arg1);
-void actor_hitMidpointImpact(Actor *obj, s32 arg1);
-void func_1506A79C(Actor *obj, s32 arg1);
-void func_1506A83C(Actor *obj, s32 arg1);
-void actor_hitSpawnFlash(Actor *obj, s32 arg1);
-void func_1506A968(Actor *obj, s32 arg1);
-void actor_hitSpawnTrails(Actor *obj, s32 arg1);
+void actor_hitBurstDebris(Actor *obj, s32 arg);
+void actor_hitAttachBloodDrip(Actor *obj, s32 arg);
+void actor_hitShotImpact(Actor *obj, s32 arg);
+void actor_hitMidpointImpact(Actor *obj, s32 arg);
+void func_1506A79C(Actor *obj, s32 arg);
+void func_1506A83C(Actor *obj, s32 arg);
+void actor_hitSpawnFlash(Actor *obj, s32 arg);
+void func_1506A968(Actor *obj, s32 arg);
+void actor_hitSpawnTrails(Actor *obj, s32 arg);
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg);
-void actor_hitBloodImpacts(Actor *obj, s32 arg1);
+void actor_hitBloodImpacts(Actor *obj, s32 arg);
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg);
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg);
-void actor_hitSpawnRibbon(Actor *obj, s32 arg1);
-void actor_hitSpawnWaveTrail(Actor *obj, s32 arg1);
+void actor_hitSpawnRibbon(Actor *obj, s32 arg);
+void actor_hitSpawnWaveTrail(Actor *obj, s32 arg);
 void actor_runHitHandler(Actor *obj, s32 type, void *arg);
 
 /* game/Actor/ObjectSize/objectsize.c */

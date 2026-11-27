@@ -38,8 +38,8 @@
 #include "conker/zone.h"
 
 /* matching: not in actor.h, as game/Effects/TintedObject/tintedobject.c was compiled with an s32 return (definition: game/Actor/Movement/movement.c) */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Screen fade colours for screen_startViewFade, picked by sequence events (black, white). */
 Color24 gCutsceneFadeColours[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };

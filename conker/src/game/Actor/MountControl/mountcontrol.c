@@ -8,13 +8,14 @@
 #include "conker/screen.h"
 
 /* matching: not in actor.h, as game/Effects/TintedObject/tintedobject.c was compiled with an s32 return (definition: game/Actor/Movement/movement.c) */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Action (intelwalk) started by a jump (1) or run (2) press; +2 when gIsMultiplayer is set, +4 for id 0x21. */
-static const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
-/* Three 2-entry tables indexed by isType21 (at 0, 2 and 4); the last two bytes are not read here. */
-static const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
+static const u8 gMountActionWalks[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
+/* Three 2-entry tables indexed by isType21: at 0 the mount's riding intelwalk, at 2 the mountWalk and at 4 the
+   baseMtx / mtxIndex for actor_seatRider and actor_startRiderJump; the last two bytes are not read here. */
+static const u8 gMountSeatParams[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
 
 /*
  * Per-frame control update: picks an action (unk232) from the button word gActorPressedButtons, sets the
@@ -22,7 +23,7 @@ static const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE
  * with id 0x21 use their own tables and a random wandering heading.
  */
 void actor_updateMount(Actor *obj) {
-    ActorCtl *owner;
+    ActorCtl *ctl;
     u16 heading;
     u16 prevFacing;
     u8 isType21;
@@ -64,7 +65,7 @@ void actor_updateMount(Actor *obj) {
             action += 2;
         }
         obj->norun = 180;
-        obj->intelwalk = D_800A0810[action - 1];
+        obj->intelwalk = gMountActionWalks[action - 1];
         obj->scriptCmd = NULL;
         if ((obj->intelwalk == 0x22) && (obj->taskint[0] == 0)) {
             obj->mv->shotsfired++;
@@ -126,7 +127,7 @@ control_done:
     if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= gPlayerCount) || (obj->mv->death_State == 0)) {
         actor_updateCommon(obj);
     }
-    if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != D_800A0818[isType21]) || (obj->stunned != 0))) {
+    if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != gMountSeatParams[isType21]) || (obj->stunned != 0))) {
         movement_obj[0].mv->jump_on_char = 0;
         movement_obj[0].norun = 0;
         movement_obj[0].count5 = 0;
@@ -134,13 +135,13 @@ control_done:
         obj->intelwalk = 0x11;
     }
     if (gIsMultiplayer == 0) {
-        /* D_800A0818 holds three 2-entry tables indexed by isType21 */
+        /* gMountSeatParams holds three 2-entry tables indexed by isType21 */
         // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
-        if (obj->intelwalk == D_800A0818[isType21]) {
-            actor_seatRider(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
+        if (obj->intelwalk == gMountSeatParams[isType21]) {
+            actor_seatRider(obj, 156.0f, (&gMountSeatParams[isType21])[4], 4, 0, (&gMountSeatParams[isType21])[2], 0xFF, 0, 0, 0);
         } else if ((gCollidedActors & 1) && (movement_obj[obj->owner].attach_char == 0) && (obj->task_attrib & 0x400)) {
             obj->owner = 0;
-            actor_startRiderJump(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
+            actor_startRiderJump(obj, 50.0f, 3.0f, gMountSeatParams[isType21], (&gMountSeatParams[isType21])[4]);
         }
     }
     turn = 0;
@@ -162,8 +163,8 @@ control_done:
         obj->taskint[1] += (-turn - obj->taskint[1]) / 8;
     }
     if ((gIsMultiplayer != 0) && (gCollidedActors != 0)) {
-        owner = obj->mv;
-        if ((owner != NULL) && (owner->on_fire != 0)) {
+        ctl = obj->mv;
+        if ((ctl != NULL) && (ctl->on_fire != 0)) {
             actor_igniteTouching(obj);
         }
     }

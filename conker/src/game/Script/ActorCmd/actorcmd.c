@@ -28,8 +28,8 @@
 #include "conker/zone.h"
 
 /* matching: no header declares actor_seatRider (movement.c): tintedobject.c was compiled with an s32 return */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 struct C4DC0_arg1 {
     u8 pad0[4];

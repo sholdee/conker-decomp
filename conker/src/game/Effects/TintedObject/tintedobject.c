@@ -11,8 +11,8 @@
 #include "conker/texture.h"
 
 /* matching: movement.c defines actor_seatRider as void, but this file was compiled with an s32 return and tests it */
-s32 actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                  s32 force, s32 arg9);
+s32 actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                  s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
 struct TintedObject {

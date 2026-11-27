@@ -292,8 +292,8 @@ void actor_hideTanksInSniperView(void) {
     }
 }
 
-s32 actor_resolveAttachId(s32 arg0, s32 *arg1) {
-    if (arg0 == 0) {
+s32 actor_resolveAttachId(s32 id, s32 *index) {
+    if (id == 0) {
         return 0;
     }
     return 0;
@@ -335,7 +335,7 @@ void actor_updateAttachedObject(Actor *obj, s32 force, s32 release) {
 }
 
 
-f32 actor_updateSwim(Actor *obj, f32 arg1) {
+f32 actor_updateSwim(Actor *obj, f32 surfaceDelta) {
     s32 belowLevel;
     f32 targetPitch;
     f32 delta;
@@ -343,11 +343,11 @@ f32 actor_updateSwim(Actor *obj, f32 arg1) {
     s8 stickX;
     s32 stickY;
     f32 step;
-    f32 out0;
-    f32 out1;
-    f32 out2;
-    f32 out3;
-    f32 out4;
+    f32 normalX;
+    f32 normalZ;
+    f32 unused;
+    f32 roll;
+    f32 pitch;
     f32 excess;
 
     result = 0.0f;
@@ -401,7 +401,7 @@ f32 actor_updateSwim(Actor *obj, f32 arg1) {
             if (delta > 300.0f) {
                 delta = 300.0f;
             }
-            obj->ypos += delta * arg1 * 0.002997f;
+            obj->ypos += delta * surfaceDelta * 0.002997f;
         }
     } else if ((obj->ygrav < 0.0f && obj->yspd > 0.0f) || (obj->ygrav > 0.0f && obj->yspd < 0.0f)) {
         obj->ygrav = 0.0f;
@@ -469,10 +469,10 @@ f32 actor_updateSwim(Actor *obj, f32 arg1) {
             targetPitch = -20.0f;
         }
         if (obj->shad < 40.0f) {
-            collision_getTriSlope(obj->floorTriVerts, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
-            out3 = actor_slopeToAngles(obj, out3, out4, &out4, 180.0f);
-            if (out4 < obj->vtilt) {
-                obj->vtilt += (out4 - obj->vtilt) * 0.2f;
+            collision_getTriSlope(obj->floorTriVerts, obj->floorTri.v, &normalX, &normalZ, &unused, &roll, &pitch);
+            roll = actor_slopeToAngles(obj, roll, pitch, &pitch, 180.0f);
+            if (pitch < obj->vtilt) {
+                obj->vtilt += (pitch - obj->vtilt) * 0.2f;
             }
         }
         obj->unkBC = targetPitch - obj->vtilt;
@@ -648,7 +648,7 @@ void actor_tickTimers(Actor *obj) {
     }
 }
 
-void actor_updatePissed(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
+void actor_updatePissed(Actor *obj, u16 *moveAngle, f32 *moveSpeed, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
@@ -662,14 +662,14 @@ void actor_updatePissed(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
         obj->mv->pissed_walk = 0xA6;
     }
     obj->mv->turn = 5;
-    if (arg1) { // matching: this and the empty if below keep arg1 live in a1 across the calls
+    if (moveAngle) { // matching: this and the empty if below keep moveAngle live in a1 across the calls
     }
-    if (*arg2 > 4.0f && obj->animseq.uh == 0xAA) {
+    if (*moveSpeed > 4.0f && obj->animseq.uh == 0xAA) {
         obj->mv->turn = 1;
-        obj->mv->pissed_angle = *arg1;
+        obj->mv->pissed_angle = *moveAngle;
     }
     math_sin(angle);
-    if (arg1) {
+    if (moveAngle) {
     }
     obj->mv->pissed_cycle += 2;
     if (obj->mv->pissed_hangover != 0) {
@@ -712,7 +712,7 @@ s32 actor_getDuckWalkAnim(void) {
     return 27;
 }
 
-void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
+void actor_updateWalkAnim(Actor *obj, s32 pushAnim, f32 moveSpeed) {
     f32 blend;
     f32 start;
     f32 vel;
@@ -748,12 +748,12 @@ void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
             speed = 1.0f;
             start = 0.0f;
             blend = 4.0f;
-            vel = obj->speed * 0.4000000060f + arg2 * 0.6000000238f;
+            vel = obj->speed * 0.4000000060f + moveSpeed * 0.6000000238f;
             ext = obj->mv;
-            if (ext->bitten > 0 || ext->transport != 0 || obj->lifting >= 100 || arg1 != 0 ||
+            if (ext->bitten > 0 || ext->transport != 0 || obj->lifting >= 100 || pushAnim != 0 ||
                 (ext->walk_attrib & 3) || ext->rt_context_b != 0 || ext->injured != 0 ||
                 ext->pissed_up > 0 || ext->env_suit != 0) {
-                if (actor_updateMoveAnim(obj, vel, vel, arg1, arg2) != 0) {
+                if (actor_updateMoveAnim(obj, vel, vel, pushAnim, moveSpeed) != 0) {
                     return;
                 }
                 ext = obj->mv;
@@ -766,7 +766,7 @@ void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
                 }
                 pressed = ext->transport; // matching: reusing pressed for this value sets the register allocation
                 if ((ext->transport == 1 || pressed == 0x81) && vel > 1.0f) {
-                    arg2 = 10.0f;
+                    moveSpeed = 10.0f;
                     anim = 0x302;
                     speed = obj->speed / 7.0f + 0.2000000030f;
                     if (obj->speed > 23.0f) {
@@ -787,7 +787,7 @@ void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
                 } else if (vel > 14.0f) {
                     anim = (level != LEVEL_W2_OUTSIDE_MOLEHOLE) ? 2 : 0x1B2;
                     speed = vel / 23.0f + 0.8000000119f;
-                } else if (vel > 6.0f || (arg2 < 1.0f && obj->speed > 1.0f)) {
+                } else if (vel > 6.0f || (moveSpeed < 1.0f && obj->speed > 1.0f)) {
                     anim = 1;
                     speed = vel * 0.125f + 0.3000000119f;
                 } else if (vel > 1.0f) {
@@ -802,7 +802,7 @@ void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
                     anim = 0x38;
                     obj->unk100 |= 0x10;
                 }
-                if (obj->speed > 18.0f && obj->mv->weapon_status != 1 && obj->mv->weapon_status != 3 && arg2 == 0.0f &&
+                if (obj->speed > 18.0f && obj->mv->weapon_status != 1 && obj->mv->weapon_status != 3 && moveSpeed == 0.0f &&
                     obj->shad == 0.0f && gFloorMaterialClass == 0) {
                     speed = 0.5f;
                     anim = 0x21;
@@ -3026,134 +3026,138 @@ void func_15052EF0(Actor *obj) {
     actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-/* Resets object `index` (unk13C, unk218) and sets its unk232; returns the object. */
-Actor *actor_setIntelWalk(s32 index, s32 arg1) {
+/* Clears object `index`'s lifting and scriptCmd and sets its intelwalk to `walk`; returns the object. */
+Actor *actor_setIntelWalk(s32 index, s32 walk) {
     Actor *obj;
 
     obj = &movement_obj[index];
     obj->lifting = 0;
     obj->scriptCmd = NULL;
-    obj->intelwalk = arg1;
+    obj->intelwalk = walk;
     return obj;
 }
 
 /*
- * When the object linked by arg0->unk124 is falling below arg0's top (y + height * scale_y), or always if
- * `force` is set: records it on arg0 (unk13C), copies arg0's facing angle to it and resets its state; with
- * arg0 in type 0x20 it is also stopped and turned to face arg0's way.
+ * When the rider (object mount->owner) is falling below mount's top (y + height * scale_y), or always if
+ * `force` is set: records it on mount (lifting), copies mount's facing angle to it and resets its state; with
+ * mount in type 0x20 it is also stopped and turned to face mount's way. Otherwise the rider gets baseMtx and
+ * attachFlags (a type-0x20 mount with id 0x48 takes them itself). mountWalk becomes the mount's intelwalk,
+ * hitRoute the rider's intelhitroute; hideRider makes the rider invisible, and a nonzero soundCmd is played
+ * through gEventParam.
  */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9) {
-    Actor *obj;
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune, s32 hitRoute,
+                   s32 force, s32 soundCmd) {
+    Actor *rider;
     s32 anim;
-    s32 callF28;
+    s32 removeMount;
     ModelAttachment *info;
     u16 pad; // matching: unused stack slot
     s32 state;
 
-    callF28 = FALSE;
+    removeMount = FALSE;
     anim = -1;
-    if (arg0->character_type == 0x48) {
-        info = attach_getFirst(arg0);
+    if (mount->character_type == 0x48) {
+        info = attach_getFirst(mount);
         if (info != NULL) {
             anim = info->setId;
         }
     }
-    obj = &movement_obj[arg0->owner];
-    if (force || ((obj->ypos < arg0->ypos + height * arg0->scale_y) && (obj->yspd < 0.0f))) {
-        arg0->lifting = arg0->owner + 100;
-        if (arg9 != 0) {
-            gEventParam = arg9;
+    rider = &movement_obj[mount->owner];
+    if (force || ((rider->ypos < mount->ypos + height * mount->scale_y) && (rider->yspd < 0.0f))) {
+        mount->lifting = mount->owner + 100;
+        if (soundCmd != 0) {
+            gEventParam = soundCmd;
             event_playSound2Range1800();
         }
-        obj->unk1CC = obj->ypos;
-        obj->angle = arg0->langle;
-        obj->mv->gpoint = 0;
-        if (arg0->type == 0x20) {
-            obj->yspd = 0.0f;
+        rider->unk1CC = rider->ypos;
+        rider->angle = mount->langle;
+        rider->mv->gpoint = 0;
+        if (mount->type == 0x20) {
+            rider->yspd = 0.0f;
             state = 2;
-            arg0->yspd = 0.0f;
-            if (arg0->character_type == 0x48) {
+            mount->yspd = 0.0f;
+            if (mount->character_type == 0x48) {
                 if (anim == 0x7A) {
-                    arg0->attach_char = arg0->owner + 1;
-                    arg0->basemtx = arg2;
-                    arg0->unk101 |= arg3;
-                    actor_playAnim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
-                    collision_createPartSet(obj, 0x79, 1.0f, 0);
-                    callF28 = TRUE;
+                    mount->attach_char = mount->owner + 1;
+                    mount->basemtx = baseMtx;
+                    mount->unk101 |= attachFlags;
+                    actor_playAnim(rider, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+                    collision_createPartSet(rider, 0x79, 1.0f, 0);
+                    removeMount = TRUE;
                 }
             } else {
-                arg0->scale_y = 0.75f;
-                obj->ypos = arg0->ypos;
+                mount->scale_y = 0.75f;
+                rider->ypos = mount->ypos;
                 state = 1;
                 if (level == LEVEL_THE_WINDMILL) {
                     state = 0x81;
                 }
             }
-            obj->angle = arg0->langle;
-            obj->fangle = obj->angle;
-            obj->langle = obj->angle;
-            obj->theta = (s16)(obj->angle + 0x4000) * 0.005493164f; // binary angle to degrees
-            obj->mv->transport = state;
-            obj->count5 = 0;
-            obj->norun = 0;
+            rider->angle = mount->langle;
+            rider->fangle = rider->angle;
+            rider->langle = rider->angle;
+            rider->theta = (s16)(rider->angle + 0x4000) * 0.005493164f; // binary angle to degrees
+            rider->mv->transport = state;
+            rider->count5 = 0;
+            rider->norun = 0;
         // matching: an empty label here makes IDO fill the branch delay slot as the original
         end_hold:;
         } else {
-            obj->attach_char = dc_glbl_CharNum + 1;
-            obj->basemtx = arg2;
-            obj->unk101 |= arg3;
-            obj->norun = 0;
+            rider->attach_char = dc_glbl_CharNum + 1;
+            rider->basemtx = baseMtx;
+            rider->unk101 |= attachFlags;
+            rider->norun = 0;
         }
-        obj->imune = immune;
-        obj->intelhitroute = arg7;
-        obj->mv->jump_on_char = 0;
-        arg0->intelwalk = arg5;
-        arg0->scriptCmd = NULL;
-        if (arg4 != 0) {
-            actor_fadeCommand(obj, 1, 0, 0, 0);
-            obj->unk101 |= 0x40;
+        rider->imune = immune;
+        rider->intelhitroute = hitRoute;
+        rider->mv->jump_on_char = 0;
+        mount->intelwalk = mountWalk;
+        mount->scriptCmd = NULL;
+        if (hideRider != 0) {
+            actor_fadeCommand(rider, 1, 0, 0, 0);
+            rider->unk101 |= 0x40;
         }
     }
-    if (callF28) {
-        actor_remove(arg0, 0);
+    if (removeMount) {
+        actor_remove(mount, 0);
     }
 }
 
 /*
- * Launches the object linked by arg0->unk124 (velocity/gravity given), starts animation 50 and sets its
- * mv target x/z to arg0's position, or to the translation of matrix `mtxIndex` of arg0->ob_matrix_ptr.
+ * Launches the rider (object mount->owner) with the given velocity and gravity, starts animation 50 and sets its
+ * mv target x/z to mount's position, or to the translation of matrix `mtxIndex` of mount->ob_matrix_ptr.
+ * mountWalk becomes the mount's intelwalk.
  */
-void actor_startRiderJump(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex) {
+void actor_startRiderJump(Actor *mount, f32 yVelocity, f32 gravity, s32 mountWalk, s32 mtxIndex) {
     s32 pad[2]; // matching: frame keeps 8 unused bytes above pos
     Vec3f pos;
-    Actor *obj;
+    Actor *rider;
 
-    obj = &movement_obj[arg0->owner];
-    if ((obj->norun == 0) && (obj->stunned == 0)) {
-        if ((obj->mv != NULL) && (obj->mv->unk6B != 0)) {
+    rider = &movement_obj[mount->owner];
+    if ((rider->norun == 0) && (rider->stunned == 0)) {
+        if ((rider->mv != NULL) && (rider->mv->unk6B != 0)) {
             return;
         }
-        obj->imune = 0xFF;
-        obj->yspd = yVelocity;
-        obj->ygrav = gravity;
-        obj->count5 = 0xFF;
-        obj->norun = 0xFF;
-        obj->angle = arg0->langle;
-        arg0->intelwalk = arg3;
-        arg0->scriptCmd = NULL;
-        actor_playAnim(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
-        movement_obj[arg0->owner].mv->gpoint = 70;
-        movement_obj[arg0->owner].mv->swing_xvel = arg0->xpos;
-        movement_obj[arg0->owner].mv->swing_zvel = arg0->zpos;
-        if ((arg0->ob_matrix_ptr != NULL) && (mtxIndex != -1)) {
+        rider->imune = 0xFF;
+        rider->yspd = yVelocity;
+        rider->ygrav = gravity;
+        rider->count5 = 0xFF;
+        rider->norun = 0xFF;
+        rider->angle = mount->langle;
+        mount->intelwalk = mountWalk;
+        mount->scriptCmd = NULL;
+        actor_playAnim(rider, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
+        movement_obj[mount->owner].mv->gpoint = 70;
+        movement_obj[mount->owner].mv->swing_xvel = mount->xpos;
+        movement_obj[mount->owner].mv->swing_zvel = mount->zpos;
+        if ((mount->ob_matrix_ptr != NULL) && (mtxIndex != -1)) {
         // matching: an unused label keeps IDO from sinking the index shift below the -1 test
         joint:
-            math_mtxGetTranslation(&pos, &((Mtx *)arg0->ob_matrix_ptr)[mtxIndex]);
-            movement_obj[arg0->owner].mv->swing_xvel = pos.x;
-            movement_obj[arg0->owner].mv->swing_zvel = pos.z;
+            math_mtxGetTranslation(&pos, &((Mtx *)mount->ob_matrix_ptr)[mtxIndex]);
+            movement_obj[mount->owner].mv->swing_xvel = pos.x;
+            movement_obj[mount->owner].mv->swing_zvel = pos.z;
         }
-        movement_obj[arg0->owner].mv->jump_on_char = 1;
+        movement_obj[mount->owner].mv->jump_on_char = 1;
     }
 }
 
