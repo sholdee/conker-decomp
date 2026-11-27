@@ -327,14 +327,14 @@ s32 particle_dampSparkXZ(SparkParticle *particle, Vec3f *prevPos) {
 }
 
 /* Advances the particle one frame step under constant vertical acceleration. */
-s32 particle_moveBallisticConstAccel(BallisticParticle *particle) {
-    particle->pos[0] += particle->vel[0] * gFrameDelta;
-    particle->pos[1] += (particle->vel[1] * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
-    particle->pos[2] += particle->vel[2] * gFrameDelta;
-    particle->vel[1] += particle->gravity * gFrameDelta;
-    particle->unk20[0] += particle->unk50[0] * gFrameDelta;
-    particle->unk20[1] += particle->unk50[1] * gFrameDelta;
-    particle->unk20[2] += particle->unk50[2] * gFrameDelta;
+s32 particle_moveBallisticConstAccel(ModelParticle *particle) {
+    particle->pos.x += particle->vel.x * gFrameDelta;
+    particle->pos.y += (particle->vel.y * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
+    particle->pos.z += particle->vel.z * gFrameDelta;
+    particle->vel.y += particle->gravity * gFrameDelta;
+    particle->rot.x += particle->rotVel.x * gFrameDelta;
+    particle->rot.y += particle->rotVel.y * gFrameDelta;
+    particle->rot.z += particle->rotVel.z * gFrameDelta;
     return 1;
 }
 

@@ -454,18 +454,6 @@ typedef struct {
     /* 0x128 */ DustGrowth growth;
 } DustPuff;
 
-/* Particle moved by particle_moveBallisticConstAccel. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x10];
-    /* 0x20 */ f32 unk20[3]; // integrated from unk50
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 pos[3];
-    /* 0x44 */ f32 vel[3];
-    /* 0x50 */ f32 unk50[3];
-    /* 0x5C */ f32 gravity;  // added to vel[1]
-} BallisticParticle;
-
 /* Particle handled by particle_startDustFadeOut. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -485,7 +473,7 @@ s32 particle_updateDustPuff(DustPuff *dust);
 s32 particle_spawnYawSpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 angle, s32 baseAngle, f32 radius,
                   s32 argB, s32 argC, void *data, u8 owner);
 s32 particle_dampSparkXZ(SparkParticle *particle, Vec3f *prevPos);
-s32 particle_moveBallisticConstAccel(BallisticParticle *particle);
+s32 particle_moveBallisticConstAccel(ModelParticle *particle);
 void particle_startDustFadeOut(FadeoutParticle *particle);
 extern struct Queue *gEffectQueue;
 
@@ -2699,33 +2687,13 @@ typedef struct {
     /* 0x98 */ EffectPayload *payload;
 } SampleTrail;
 
-/* A camera-facing quad particle drawn from double-buffered vertices. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 height;
-    /* 0x034 */ f32 x;
-    /* 0x038 */ f32 y;
-    /* 0x03C */ f32 z;
-    /* 0x040 */ u8 pad40[0xC];
-    /* 0x04C */ f32 unk4C;
-    /* 0x050 */ f32 unk50;
-    /* 0x054 */ u8 pad54[8];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ Vtx template[4];
-    /* 0x100 */ Vtx *buffers[1];
-} QuadParticle;
-
 s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 typedef struct FxSpawnPayload FxSpawnPayload; /* defined in conker/effect.h */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
                   s32 baseYaw, f32 radius, s32 kind, f32 arg12, FxSpawnPayload *payload, u8 fxOwner);
-Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view);
-s32 particle_growQuadParticle(QuadParticle *particle);
-s32 particle_fadeQuadParticleByLife(QuadParticle *particle);
+Vtx *particle_buildQuadParticleBillboard(DefParticleHead *particle, s16 view);
+s32 particle_growQuadParticle(DefParticleHead *particle);
+s32 particle_fadeQuadParticleByLife(DefParticleHead *particle);
 
 /* game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope) */
 /* The drip data of game/Particle/Drips/drips.c. */

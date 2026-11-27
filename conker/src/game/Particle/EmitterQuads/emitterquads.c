@@ -64,7 +64,7 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
  * when freshly allocated), placed at the particle's position and rotated by the view's
  * gCameraAngleSines/gCameraAngleCosines factors; NULL if no buffer is available.
  */
-Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
+Vtx *particle_buildQuadParticleBillboard(DefParticleHead *particle, s16 view) {
     Vtx *vtx;
     Vtx *result;
     f32 width;
@@ -73,19 +73,19 @@ Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
     f32 offsetX;
     u8 fresh;
 
-    particle_getViewBuffer(particle->buffers, view, 0x40, &vtx, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, view, 0x40, &vtx, &fresh);
     result = vtx;
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(particle->buffers[view], particle->template, 0x40);
-            memcpy(particle->buffers[view] + 4, particle->template, 0x40);
+            memcpy(particle->vtxBuffers[view], particle->vtxTemplate, 0x40);
+            memcpy(particle->vtxBuffers[view] + 4, particle->vtxTemplate, 0x40);
         }
     } else {
         return NULL;
     }
 
-    width = particle->width * particle->unk4C;
-    height = particle->height * particle->unk50;
+    width = particle->def.width * particle->def.scale.x;
+    height = particle->def.height * particle->def.scale.y;
     offsetZ = gCameraAngleSines[view] * width;
     offsetX = gCameraAngleCosines[view] * width;
 
@@ -93,34 +93,34 @@ Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->x + offsetX;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->z - offsetZ;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->x - offsetX;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->y + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->z + offsetZ;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->def.pos.x + offsetX;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->def.pos.z - offsetZ;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->def.pos.x - offsetX;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->def.pos.z + offsetZ;
 
     return result;
 }
 
-/* Grows the quad's width and height by unk4C per second (gFrameDelta = frame time). */
-s32 particle_growQuadParticle(QuadParticle *particle) {
-    f32 growth = particle->unk4C * gFrameDelta;
+/* Grows the quad's width and height by def.scale.x per second (gFrameDelta = frame time). */
+s32 particle_growQuadParticle(DefParticleHead *particle) {
+    f32 growth = particle->def.scale.x * gFrameDelta;
 
-    particle->width += growth;
-    particle->height += growth;
+    particle->def.width += growth;
+    particle->def.height += growth;
     return 1;
 }
 
-/* Caps unk5C at unk1C * 16 once unk1C drops below 16. */
-s32 particle_fadeQuadParticleByLife(QuadParticle *particle) {
+/* Caps def.alpha at def.lifetime * 16 once the lifetime drops below 16. */
+s32 particle_fadeQuadParticleByLife(DefParticleHead *particle) {
     s16 limit = 255;
 
-    if (particle->unk1C < 16) {
-        limit = particle->unk1C * 16;
+    if (particle->def.lifetime < 16) {
+        limit = particle->def.lifetime * 16;
     }
-    if (limit < particle->unk5C) {
-        particle->unk5C = limit;
+    if (limit < particle->def.alpha) {
+        particle->def.alpha = limit;
     }
     return 1;
 }
