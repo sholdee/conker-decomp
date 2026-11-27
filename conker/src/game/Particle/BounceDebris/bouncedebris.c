@@ -162,7 +162,7 @@ void particle_updateDropToSplash(DropParticle *drop) {
             splash.scaleY = dim;
             splash.unk15 = intensity;
             splash.callback = 3; /* gObjectCallbacks[3] = particle_updateSplashFx */
-            effect_spawnSpriteFx(&splash, drop->owner, drop->list);
+            effect_spawnSpriteFx(&splash, drop->header.owner, drop->header.kind);
         }
     } else {
         drop->velX *= 0.9800000191f;
@@ -181,7 +181,7 @@ void particle_updateSplashFx(SplashFx *fx) {
         intensity = fx->size;
         angle = math_random() % 360;
         particle_spawnFloorSprite(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
-                      (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
+                      (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->header.owner, fx->header.kind);
     }
 }
 

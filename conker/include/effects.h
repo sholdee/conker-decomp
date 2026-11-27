@@ -356,7 +356,8 @@ typedef struct ModelParticle {
     /* 0x081 */ u8 pad81;
     /* 0x082 */ s16 fadeStart;
     /* 0x084 */ s16 fadeRate;
-    /* 0x086 */ u8 pad86[6];
+    /* 0x086 */ u8 pad86[2];
+    /* 0x088 */ s32 sound; /* ParticleSpawn.sound */
     /* 0x08C */ struct ParticleNode *node;
     /* 0x090 */ Mtx mtx[2];
     /* 0x110 */ CollisionHit floor;
@@ -3096,7 +3097,10 @@ typedef struct DiscEmitter {
  * particle_updateOriginRingEmitter (game/Particle/DiscEmitter/discemitter.c) and of particle_emitKind6TrailSpray (game/Particle/PuffSprays/puffsprays.c). */
 typedef struct Struct150C29F0 {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DiscEmitter unk28;
+    /* 0x28 */ union {
+        DiscEmitter disc;
+        f32 accum;
+    } data;
 } Struct150C29F0; /* size 0x38 */
 
 /* Sight beams (laser tripwires) and sight sprites, game/Effects/Sight/SightBeam/sightbeam.c and game/Effects/Sight/effects_sight.c. They are here and

@@ -349,7 +349,7 @@ TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 t
     data.spawnRate = spawnRate;
     data.tickFunc = tickFunc;
     data.emitFunc = emitFunc;
-    data.unk0 = object;
+    data.object = object;
 
     effect = effect_newTimedEffect(lifetime, -1, 0x1B, -1, timed, 0x1B,
                                            (extraSize + sizeof(data)), owner, list);
@@ -361,7 +361,7 @@ TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 t
 
 /*
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
- * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.unk0.
+ * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.object.
  */
 void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
     MatrixEmitterData *data;
@@ -384,7 +384,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
             f32 y;
             f32 z;
 
-            gfx_getObjectModelMtx(mtx, data->unk0);
+            gfx_getObjectModelMtx(mtx, data->object);
             r = math_randomFloat() * gSegmentEmitterWeights[6];
             for (i = 0; gSegmentEmitterWeights[i] < r; i++) {
                 r -= gSegmentEmitterWeights[i];

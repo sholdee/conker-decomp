@@ -9,7 +9,7 @@
 #include "libc/string.h"
 
 /* matching: no header declares particle_spawnJitterParticle (groundcluster.c): areaemitter.c was compiled with another view */
-void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 alpha, const Vec3f *velocity, f32 gravity, f32 drag,
+void *particle_spawnJitterParticle(Vec3f *pos, ParticleSize *scale, s16 life, u8 alpha, const Vec3f *velocity, f32 gravity, f32 drag,
                     f32 easeFactor, u8 updateFn1, u8 updateFn2, u8 expireFn, s32 texture, u8 flags, s16 fadeStart, s16 fadeRate, s32 extraSize, u8 owner,
                     s32 list);
 
@@ -230,7 +230,7 @@ void particle_emitAnchorBurst(AnchorEmitter *emitter) {
 void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
     Actor *owner;
-    Struct1514B8E4Size size;
+    ParticleSize size;
     Vec3f pos;
     BoneAnchor *anchor;
     s32 set;
@@ -247,8 +247,8 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
                     anchor = &gAnchorSets[set][math_random() % gAnchorCounts[set]];
-                    size.unk0 = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
-                    size.unk4 = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
+                    size.width = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
+                    size.height = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     math_transformOffset(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
                     frameRand = math_random();
                     if (math_random() & 1) {

@@ -22,7 +22,7 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     angle = math_random() & 0xFF;
     cosine = math_cosBinAngleMasked(angle - 0x40);
     sine = math_cosBinAngleMasked(angle);
-    pos = &emitter->unk28;
+    pos = &emitter->data.disc;
     radius = math_randomFloat() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
     particle.color[0] = 0;
@@ -68,7 +68,7 @@ void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
     f32 scaleB;
     ChannelParticle *created;
 
-    timer = &emitter->unk28.x;
+    timer = &emitter->data.accum;
     *timer += math_randomFloat() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2

@@ -443,7 +443,7 @@ s32 particle_capQuadAlphaByLife(Particle177B50 *p) {
  * Spawns a particle at `pos` through particle_newQuadParticle and stores its initial particle_updateJitter state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 alpha, const Vec3f *velocity,
+void *particle_spawnJitterParticle(Vec3f *pos, ParticleSize *scale, s16 life, u8 alpha, const Vec3f *velocity,
                     f32 gravity, f32 drag, f32 easeFactor, u8 updateFn1, u8 updateFn2, u8 expireFn, s32 texture, u8 flags,
                     s16 fadeStart, s16 fadeRate, s32 extraSize, u8 owner, s32 list) {
     void *particle;
@@ -469,14 +469,14 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     state.easeFactor = easeFactor;
     state.speedBase = 6733.0f;
     state.speedRange = 18404.0f;
-    state.widthBase = scale->unk0 * 15.045272f;
-    state.widthRange = scale->unk0 * 5.8676558f;
-    state.widthTarget = scale->unk0 * 12.111444f;
+    state.widthBase = scale->width * 15.045272f;
+    state.widthRange = scale->width * 5.8676558f;
+    state.widthTarget = scale->width * 12.111444f;
     desc.width = 0.0f;
-    state.heightBase = scale->unk4 * 0.396174f;
-    state.heightRangeA = scale->unk4 * 0.1042563f;
-    state.heightRangeB = scale->unk4 * 0.5197371f;
-    state.heightTarget = scale->unk4 * 0.34404588f;
+    state.heightBase = scale->height * 0.396174f;
+    state.heightRangeA = scale->height * 0.1042563f;
+    state.heightRangeB = scale->height * 0.5197371f;
+    state.heightTarget = scale->height * 0.34404588f;
     desc.height = 0.0f;
     desc.texture = texture;
     desc.type = 0;

@@ -279,11 +279,7 @@ typedef struct Game1D3420Target {
 } Game1D3420Target;
 
 struct Game1D3420Listener {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1D3420Target target;
 };
 
@@ -310,7 +306,7 @@ void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *dat
     }
     if (found && target->emitter->ready == 1) {
         particle_fireRegionEmitter(target->emitter, target->zone, target->flags & 1, target->flags & 2,
-                      listener->unkC, listener->unk1);
+                      listener->base.header.owner, listener->base.header.kind);
         target->emitter->ready = 0;
         target->value = msg->value;
     }

@@ -660,10 +660,8 @@ typedef struct SparkMotion {
 } SparkMotion;
 
 typedef struct RingSparkParticle {
-    u8 pad0[0x5C];
-    u8 unk5C; // fades out with the remaining life
-    u8 pad5D[0xB3];
-    SparkMotion motion;
+    /* 0x000 */ DefParticleHead head; /* head.def.alpha fades out with the remaining life */
+    /* 0x110 */ SparkMotion motion;
 } RingSparkParticle;
 
 typedef struct GameFFBA0Beam {
@@ -1270,7 +1268,7 @@ typedef struct {
 
 /* Data of effect 0x1B (particle_startMatrixSegmentEmitter / particle_updateMatrixSegmentEmitter). */
 typedef struct {
-    /* 0x00 */ void *unk0; /* passed to gfx_getObjectModelMtx to build the emitter's matrix */
+    /* 0x00 */ WorldObject *object; /* gfx_getObjectModelMtx builds the emitter's matrix from it */
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ f32 spawnRate;
     /* 0x0C */ s8 tickFunc; /* index into gSegmentEmitterTickFuncs, -1: none */
@@ -1540,11 +1538,6 @@ typedef struct {
     /* 0x110 */ u8 pad110[0x40];
     /* 0x150 */ f32 shrinkFraction; /* width and height lose this fraction every call (particle_shrinkBallisticQuad) */
 } Particle177B50;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-} Struct1514B8E4Size;
 
 void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam);
 void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange, f32 heightBase,
@@ -1879,11 +1872,8 @@ typedef struct {
 
 /* Partial view of a type 5 billboard Particle (game/Effects/ObjectList/objectlist.c) as its falling-drop callback uses it. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[7];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[4];
     /* 0x14 */ s32 floorY;      /* floor height last found under the drop */
     /* 0x18 */ u8 pad18[8];
     /* 0x20 */ s16 x;
@@ -1900,11 +1890,8 @@ typedef struct {
 
 /* Partial view of a type 3 SpriteFx (game/Effects/ObjectList/objectlist.c); unk25 is SpriteFxTemplate.unk15. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[7];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[4];
     /* 0x14 */ s16 frame;       /* 8.8 fixed point */
     /* 0x16 */ u8 pad16[2];
     /* 0x18 */ s16 x;
@@ -2652,11 +2639,7 @@ typedef struct {
 } Words3;
 
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Words3 pos;
     /* 0x34 */ f32 radius;
     /* 0x38 */ f32 spawnRate;

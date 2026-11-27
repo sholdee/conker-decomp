@@ -262,7 +262,7 @@ void particle_startGatherEmitter(EffectSpawner *spawner) {
     data.size = spawner->size;
     data.sizeRange = spawner->sizeRange;
 
-    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 3, 1, 0, 0x20, spawner->base.header.owner, spawner->base.header.kind);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -419,7 +419,7 @@ void particle_startHoverEmitter(EffectSpawner *spawner) {
     data.growRate = spawner->growRate;
     data.growRateRange = spawner->growRateRange;
 
-    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 4, 1, 0, 0x24, spawner->base.header.owner, spawner->base.header.kind);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }

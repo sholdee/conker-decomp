@@ -214,7 +214,7 @@ s32 particle_swaySpark(RingSparkParticle *particle) {
     motion->posX = sinf(motion->phaseX) * motion->amplitudeX + motion->baseX;
     motion->posY = sinf(motion->phaseY) * motion->amplitudeY + motion->baseY;
     motion->life -= gFrameDelta;
-    particle->unk5C = motion->fadeScale * motion->life;
+    particle->head.def.alpha = motion->fadeScale * motion->life;
     if (motion->life > 0.0f) {
         return 1;
     }
