@@ -2490,8 +2490,8 @@ func_150A4EF4	0x150A4EF4	104	game	hasm	d,e,h	build/src/game/Collision/ActorHitMe
 func_150A4F5C	0x150A4F5C	68	game	hasm	d,e,h	build/src/game/Collision/ActorHitMesh/actorhitmesh.s.o
 collision_gatherActorGroundTris	0x150A4FA0	208	game	hasm	c,d	build/src/game/Collision/ActorGround/actorground.s.o
 D_150A5070	0x150A5070	80	game	hasm	d	build/src/game/Collision/ActorGround/actorground.s.o
-gfx_copyDlCulled	0x150A50C0	156	game	hasm	d	build/src/game/Gfx/CullDl/culldl.s.o
-func_150A515C	0x150A515C	24	game	hasm	b,c,g	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
+gfx_copyDlCulled	0x150A50C0	156	game	hasm	b,d	build/src/game/Gfx/CullDl/culldl.s.o
+func_150A515C	0x150A515C	24	game	hasm	b,c,d	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 func_150A5174	0x150A5174	36	game	hasm	b,d	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 func_150A5198	0x150A5198	348	game	hasm	b,d	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 func_150A52F4	0x150A52F4	132	game	hasm	b,d	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
@@ -2550,7 +2550,7 @@ libc_fillBytes	0x150A7770	32	game	hasm	b	build/src/game/Libc/FillBytes/fillbytes
 guMtxF2L	0x150A7790	464	game	hasm	e	build/src/libultra/gu/guMtxF2L.s.o
 math_transformPoint	0x150A7960	160	game	hasm	s	build/src/game/Math/TransformPoint/transformpoint.s.o
 math_transformPointW	0x150A7A00	20	game	hasm	d	build/src/game/Math/TransformPointW/transformpointw.s.o
-math_storeTransformW	0x150A7A14	52	game	hasm	c	build/src/game/Math/TransformW/transformw.s.o
+math_storeTransformW	0x150A7A14	52	game	hasm	c,d	build/src/game/Math/TransformW/transformw.s.o
 math_mtxMulF	0x150A7A48	312	game	hasm	f,h	build/src/game/Math/MtxMulF/mtxmulf.s.o
 math_mtxIdentity	0x150A7B80	64	game	hasm	b	build/src/game/Math/MtxIdentity/mtxidentity.s.o
 guMtxIdentF	0x150A7BC0	80	game	hasm	s	build/src/libultra/gu/guMtxIdentF.s.o
