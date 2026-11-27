@@ -138,19 +138,12 @@ typedef struct {
     f32 *alpha;
 } LinkedQuad;
 
-/* Quad particle created by particle_newQuadParticleWhite (a DefParticleHead view) with this file's motion after it. */
+/* Quad particle created by particle_newQuadParticleWhite with this file's motion after it. Its head.def.width and
+ * head.def.height are the half width and half height of the quad, head.def.rot its direction; each of head.vtxBuffers
+ * holds two copies of the 4-vertex quad. */
 typedef struct {
-    u8  pad0[0x2C];
-    f32 halfWidth;
-    f32 halfHeight;
-    Vec3f pos;
-    Vec3f dir;
-    u8  pad4C[0x10];
-    u8  alpha;
-    u8  pad5D[0x63];
-    Vtx_t template[4];
-    Vtx_t *buffers[4];  /* each holds two copies of the 4-vertex quad */
-    union {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ union {
         BeamMotion beam;
         LinkedQuad linked;
     } u;
@@ -544,20 +537,10 @@ typedef struct Game1BBFC0Motion {
     /* 0x4C */ f32 blend;
 } Game1BBFC0Motion;
 
+/* A quad particle drawn as a beam from head.def.pos (its start) toward head.def.rot (its end): head.def.width is its
+ * width and head.def.height the fraction of the way to the end that is drawn (its progress). */
 typedef struct Game1BBFC0Beam {
-    /* 0x000 */ u8 unknown0[0x1C];
-    /* 0x01C */ s16 lifetime;
-    /* 0x01E */ u8 unknown1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 progress;
-    /* 0x034 */ Vec3f start;
-    /* 0x040 */ Vec3f end;
-    /* 0x04C */ u8 unknown4C[0x10];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 unknown5D[0x63];
-    /* 0x0C0 */ Vtx vertexTemplate[4]; /* copied into a camera buffer when it is fresh */
-    /* 0x100 */ Vtx *buffers[1]; /* one per camera, indexed by camera id */
-    /* 0x104 */ u8 unknown104[0xC];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1BBFC0Motion motion;
 } Game1BBFC0Beam;
 
