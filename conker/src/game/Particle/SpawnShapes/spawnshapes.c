@@ -6,7 +6,7 @@
 #include "conker/trail.h"
 
 /* The particle spawn callback of each kind (EmitterCallback; the callbacks take their own parameter types,
- * so each entry gives IDO warning 709, as the other handler tables do). */
+ * so most entries give IDO warning 709, as in the other handler tables). */
 EmitterCallback gParticleKindCallbacks[28] = {
     effect_emitStompPuff, func_150C2558, trail_spawnKind2Trail,
     func_150C2700, particle_spawnFastSpark, effect_spawnJointSpark,

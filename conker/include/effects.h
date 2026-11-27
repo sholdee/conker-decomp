@@ -2612,7 +2612,7 @@ typedef struct ParticleChannels {
 
 /* The particle particle_spawnChannelParticle (game/Particle/ChannelParticle/channelparticle.c) spawns through particle_newQuadParticleWhite. */
 typedef struct ChannelParticle {
-    /* 0x000 */ DefParticleHead head; /* head.def.scale.x: accelY, head.def.scale.y: velY, head.unk74: growFlags */
+    /* 0x000 */ DefParticleHead head; /* head.def.scale.x: accelY, head.def.scale.y: velY */
     /* 0x110 */ ParticleChannels motion;
     /* 0x160 */ f32 extra; /* the caller's emitter->extraSize bytes; game/Particle/DiscEmitter/discemitter.c keeps a yaw angle here */
 } ChannelParticle;

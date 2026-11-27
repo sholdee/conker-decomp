@@ -1801,7 +1801,7 @@ typedef struct {
     /* 0x3B */ u8 size;
 } DropParticle;
 
-/* Partial view of a type 3 SpriteFx (game/Effects/ObjectList/objectlist.c); unk25 is SpriteFxTemplate.unk15. */
+/* Partial view of a type 3 SpriteFx (game/Effects/ObjectList/objectlist.c); size is SpriteFxTemplate.unk15. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[4];
@@ -2467,8 +2467,6 @@ void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType);
 void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType);
 
 /* game/Particle/SegmentBurst/segmentburst.c */
-/* Particle emitter that particle_sampleSegmentPower initialises and particle_emitOnSegment spawns from. */
-
 void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list);
 void particle_attachBloodStrip(Actor *owner, s32 fxOwner, s32 fxList);
 s32 particle_sampleSegmentPower(BloodStrip *emitter);
