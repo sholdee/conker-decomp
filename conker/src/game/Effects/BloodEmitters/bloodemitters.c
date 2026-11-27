@@ -15,7 +15,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
 /* Attaches emitter 8 (blood_emitBleedDrop) to bone 2 of `actor` for 40-60 frames, unless its blood profile
  * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
-BloodDrip *blood_attachBleedDrip(Actor *actor, u8 arg1, s32 arg2) {
+BloodDrip *blood_attachBleedDrip(Actor *actor, u8 owner, s32 list) {
     BloodDrip *emitter;
     BloodDripDesc desc;
     u8 payload[1];
@@ -58,7 +58,7 @@ BloodDrip *blood_attachBleedDrip(Actor *actor, u8 arg1, s32 arg2) {
         payload[0] = 0;
     }
 
-    emitter = blood_spawnDrip(&desc, 1, arg1, arg2);
+    emitter = blood_spawnDrip(&desc, 1, owner, list);
     if (emitter != NULL) {
         memcpy(emitter->payload, payload, 1);
     }
@@ -76,7 +76,7 @@ void blood_emitBleedDrop(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Bloo
 }
 
 /* Spawns a randomized particle_spawnSteamParticle particle at `position`, moving against (dirX, dirY, dirZ). */
-void blood_spawnBleedDrop(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
+void blood_spawnBleedDrop(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 kind, u8 owner) {
     f32 speed;
     Vec3f velocity;
     s32 coin;
@@ -95,12 +95,12 @@ void blood_spawnBleedDrop(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4
     randB = math_random();
     fracB = math_randomFloat();
     coin = math_random() & 1;
-    particle_spawnSteamParticle(position, &velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
-                  fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
+    particle_spawnSteamParticle(position, &velocity, kind, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
+                  fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, owner, 1);
 }
 
 /* Attaches emitter 9 (func_151B50A4) to bone 2 of `actor`. */
-BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
+BloodDrip *func_151B4FE0(Actor *actor, u8 owner, s32 list) {
     BloodDrip *emitter;
     BloodDripDesc desc;
 
@@ -122,7 +122,7 @@ BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
     desc.emitter = 9;
     desc.callback = -1;
     desc.unk2D = 8;
-    emitter = blood_spawnDrip(&desc, 0, arg1, arg2); // matching: returning the call directly changes the stack frame
+    emitter = blood_spawnDrip(&desc, 0, owner, list); // matching: returning the call directly changes the stack frame
     return emitter;
 }
 
@@ -137,7 +137,7 @@ void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip 
 }
 
 /* Spawns a randomized particle_spawnSteamParticle particle at `position`, moving against (dirX, dirY, dirZ). */
-void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
+void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 owner) {
     f32 speed;
     Vec3f velocity;
     u8 coin;
@@ -161,5 +161,5 @@ void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     randB = math_random();
     scaledB = math_randomFloat() * 202.0f + 142.0f;
     particle_spawnSteamParticle(position, &velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
-                  coin, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
+                  coin, 1.7f, 1.7f, 0, 0, 1, 0, owner, 1);
 }

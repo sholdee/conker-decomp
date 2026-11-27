@@ -60,7 +60,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
                                TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue,
                                u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks,
                                u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle,
-                               f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+                               f32 pulseSpeed, u8 keepEnabled, u8 owner, s32 list);
 void *sight_buildBeamQuad(SightBeamObject *obj, s16 view);
 s32 sight_updateBeam(SightBeamObject *obj);
 void sight_notifyActorMoved(Actor *actor, TriggerZone *source);
@@ -69,24 +69,24 @@ s32 sight_onBeamSound(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32
 s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj);
 void sight_breakBeam(Actor *actor, SightBeamObject *obj);
 SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue,
-                              ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9);
+                              ZoneNode *zone, u8 zoneMasked, u8 fxOwner, s32 fxList);
 void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone,
-                   u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
+                   u8 altColors, u8 zoneMasked, u8 owner, s32 list);
 void sight_destroyBeam(SightBeamObject *obj);
 void sight_freeBeam(SightBeamObject *obj);
-s32 sight_isExtensionOn(SightExtension *effect, s32 arg1);
+s32 sight_isExtensionOn(SightExtension *effect, s32 view);
 void sight_sendBeamCommand(s32 command, TriggerZone *source);
-void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2);
-void sight_spawnFloorImpact(Actor *actor, u8 arg1, s32 arg2);
+void sight_explodeAtActor(Actor *actor, u8 owner, s32 list);
+void sight_spawnFloorImpact(Actor *actor, u8 owner, s32 list);
 s32 sight_updateStatusLight(LightEffect *obj);
 s32 func_151C9B64(SightStatusObject *obj, u8 *visible);
 extern const s32 gSightBeamBreakHits[];
 
 /* game/Effects/Sight/effects_sight.c */
 void sight_startPlayerEffects(Camera *player, s32 state);
-void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
+void sight_spawnScopeSight(Camera *player, u8 hideInCutscene, s8 sourceIndex, u8 owner, s32 list);
 void sight_resetPlayerEffects(Camera *player);
-void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
+void sight_spawnRing(Camera *player, u8 type, u8 hideInCutscene, s8 sourceIndex, u8 owner);
 void sight_spawnBasicSight(Camera *player, u8 big);
 void sight_handleSpriteMessage(SightSprite *sprite, void **msg, u8 msgId);
 void sight_spawnDotSight(Camera *player, u8 big);
@@ -94,7 +94,7 @@ void sight_spawnZoomSight(Camera *player, u8 big);
 void sight_drawLens(SightLensObject *obj, u16 *framebuffer);
 void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId);
 s32 sight_updateZTriggerFade(SightSprite *sprite);
-void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
+void sight_spawnSidePanel(Camera *player, u8 kind, u8 hideInCutscene, s8 sourceIndex, u8 owner);
 void sight_handlePanelMessage(SightSprite *sprite, void *msg, u8 msgId);
 s32 sight_updateSidePanel(SightSprite *sprite);
 void sight_handleTintMessage(SightOwnedEffect *effect, void **msg, u8 msgId);
@@ -103,12 +103,12 @@ s32 sight_updateRingGauge(SightSprite *sprite);
 f32 sight_getSpriteValue(SightSprite *sprite);
 void sight_flashSprites(Camera *player);
 void sight_startSpriteFlash(SightSprite *sprite, void *msg, u8 msgId);
-void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
+void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 hideInCutscene, u8 owner);
 s32 sight_updateCrossBar(SightSprite *sprite);
-void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
+void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 hideInCutscene, u8 owner);
 void sight_spawnLargeRing(Camera *player, u8 red, u8 green, u8 blue);
 void sight_spawnMultiplayerTint(Camera *player);
-void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3);
+void sight_spawnScopeFrame(Camera *player, u8 hideInCutscene, s8 sourceIndex, u8 owner);
 s32 sight_updateScopeStrip(SightSprite *sprite);
 extern const SightColor gSightRingFlashColour;
 extern const SightColor gSightRingColours[];

@@ -75,13 +75,13 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
 }
 
 /* Effects for state 27 when level is LEVEL_W1_BEE_CAVERN (see sight_startPlayerEffects). */
-void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
-    sight_spawnRing(player, 4, arg1, arg2, arg3);
-    sight_spawnCrossBars(player, 0, 50, 0xFF, arg1, arg3);
-    sight_spawnCrossSight(player, 0, 50, 0xFF, arg1, arg3);
-    sight_spawnScopeFrame(player, arg1, arg2, arg3);
-    effect_newEmitterSpawner(player, arg3, arg4);
-    sight_spawnSidePanel(player, 2, arg1, arg2, arg3);
+void sight_spawnScopeSight(Camera *player, u8 hideInCutscene, s8 sourceIndex, u8 owner, s32 list) {
+    sight_spawnRing(player, 4, hideInCutscene, sourceIndex, owner);
+    sight_spawnCrossBars(player, 0, 50, 0xFF, hideInCutscene, owner);
+    sight_spawnCrossSight(player, 0, 50, 0xFF, hideInCutscene, owner);
+    sight_spawnScopeFrame(player, hideInCutscene, sourceIndex, owner);
+    effect_newEmitterSpawner(player, owner, list);
+    sight_spawnSidePanel(player, 2, hideInCutscene, sourceIndex, owner);
     if (level == LEVEL_W1_BEE_CAVERN) {
         D_8008CD00 = 1;
     }
@@ -138,7 +138,7 @@ const f32 gSightValueRangeScales[][2] = {
 };
 
 /* Spawns the two layers of sight ring `type` (colour/size tables indexed by type) for `player`. */
-void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
+void sight_spawnRing(Camera *player, u8 type, u8 hideInCutscene, s8 sourceIndex, u8 owner) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -150,8 +150,8 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     payload.kind = 0;
     payload.targetAlpha = 130.0f;
     payload.player = player;
-    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
-    payload.sourceIndex = arg3;
+    payload.flags = (s32)((sourceIndex == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
+    payload.sourceIndex = sourceIndex;
     desc.timer = 300;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
@@ -174,7 +174,7 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.halfWidth = gSightRingHalfWidths[type];
     desc.halfHeight = gSightRingHalfHeights[type];
     desc.texture = 0xFF;
-    desc.flags = (1 << (player->CNumber + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
+    desc.flags = (1 << (player->CNumber + 11)) | ((hideInCutscene ? 0x40 : 0) | 0x10);
     desc.combineMode = 8;
     desc.unk34 = 0x54;
     payload.rangeMax = 0.0f;
@@ -187,7 +187,7 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.color1.green = gSightRingColours[type].g;
     desc.color1.blue = gSightRingColours[type].b;
     desc.color1.alpha = gSightRingColours[type].a;
-    sprite = sprite_newScreenSprite(&desc, 8, 0, 0, sizeof(SightSpritePayload), arg4, 1);
+    sprite = sprite_newScreenSprite(&desc, 8, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -199,7 +199,7 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.color1.green = gSightRingOutlineColours[type].g;
     desc.color1.blue = gSightRingOutlineColours[type].b;
     desc.color1.alpha = gSightRingOutlineColours[type].a;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -604,7 +604,7 @@ s32 sight_updateZTriggerFade(SightSprite *sprite) {
 }
 
 /* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
-void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
+void sight_spawnSidePanel(Camera *player, u8 kind, u8 hideInCutscene, s8 sourceIndex, u8 owner) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -613,14 +613,14 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.targetAlpha = 255.0f;
     payload.kind = kind;
     payload.player = player;
-    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see sight_spawnRing
-    payload.sourceIndex = arg3;
+    payload.flags = (s32)((sourceIndex == -1) ? 0 : 4); // matching: see sight_spawnRing
+    payload.sourceIndex = sourceIndex;
     payload.fade = 255.0f;
     desc.timer = 300;
     desc.halfWidth = 49.0f;
     payload.bouncePhase = 0.0f;
     desc.halfHeight = 18.0f;
-    desc.flags = (1 << (player->CNumber + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
+    desc.flags = (1 << (player->CNumber + 11)) | ((hideInCutscene ? 0x40 : 0) | 0x32);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -650,13 +650,13 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.y = 91.0f;
     payload.rangeMin = gSightValueRangeMins[3][gScreenLayout == 1];
     payload.rangeScale = gSightValueRangeScales[3][gScreenLayout == 1];
-    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), owner, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     desc.color1.alpha = 0;
     desc.texture = 0x7C;
-    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), owner, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -666,13 +666,13 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.side = 1;
     desc.x = -88.0f;
     desc.y = 91.0f;
-    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), owner, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     desc.color1.alpha = 0;
     desc.texture = 0x7C;
-    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), owner, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -846,8 +846,8 @@ void sight_startSpriteFlash(SightSprite *sprite, void *msg, u8 msgId) {
     }
 }
 
-/* Spawns the two bars of the sight's cross (colour arg1..arg3) for `player`. */
-void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
+/* Spawns the two bars of the sight's cross (colour red, green, blue) for `player`. */
+void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 hideInCutscene, u8 owner) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -861,7 +861,7 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     desc.offsetS = 0.0f;
     desc.offsetT = 0.0f;
     desc.timer = 300;
-    desc.flags = (1 << (player->CNumber + 11)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
+    desc.flags = (1 << (player->CNumber + 11)) | ((hideInCutscene ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -891,7 +891,7 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     desc.y = -37.0f;
     desc.texture = 0x9A;
     desc.x = 0.0f;
-    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -903,7 +903,7 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     desc.halfWidth = 4.199999809f;
     desc.halfHeight = 28.0f;
     desc.x = -37.0f;
-    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -944,7 +944,7 @@ s32 sight_updateCrossBar(SightSprite *sprite) {
 }
 
 /* Spawns the centre dot, side ticks and diagonal corners of the cross sight for `player`. */
-void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
+void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 hideInCutscene, u8 owner) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -956,7 +956,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     payload.targetAlpha = 130.0f;
 
     desc.timer = 300;
-    desc.flags = (1 << (player->CNumber + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
+    desc.flags = (1 << (player->CNumber + 11)) | ((hideInCutscene ? 0x40 : 0) | 0x10);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -984,7 +984,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.texture = 0x64;
     desc.halfHeight = 12.0f;
     desc.halfWidth = 12.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -996,7 +996,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.halfWidth = 7.0f;
     desc.x = 55.0f;
     desc.y = 0.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1005,7 +1005,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 2;
     desc.x = -55.0f;
     desc.y = 0.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1015,7 +1015,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 4;
     desc.x = 0.0f;
     desc.y = 55.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1024,7 +1024,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 0;
     desc.x = 0.0f;
     desc.y = -55.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1036,7 +1036,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.halfWidth = 6.0f;
     desc.x = 44.0f;
     desc.y = 44.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1045,7 +1045,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 4;
     desc.x = -44.0f;
     desc.y = 44.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1054,7 +1054,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 0;
     desc.x = -44.0f;
     desc.y = -44.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1063,7 +1063,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 2;
     desc.x = 44.0f;
     desc.y = -44.0f;
-    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), owner, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1133,7 +1133,7 @@ void sight_spawnMultiplayerTint(Camera *player) {
 }
 
 /* Spawns the two rows of four texture strips (top and bottom) of the scope frame for `player`. */
-void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
+void sight_spawnScopeFrame(Camera *player, u8 hideInCutscene, s8 sourceIndex, u8 owner) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -1146,11 +1146,11 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     payload.rangeMin = gSightValueRangeMins[4][gScreenLayout == 1];
     payload.rangeScale = gSightValueRangeScales[4][gScreenLayout == 1];
     payload.targetAlpha = 130.0f;
-    payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see sight_spawnRing
-    payload.sourceIndex = arg2;
+    payload.flags = (s32)((sourceIndex == -1) ? 0 : 4); // matching: see sight_spawnRing
+    payload.sourceIndex = sourceIndex;
 
     desc.timer = 300;
-    desc.flags = (arg1 ? 0x40 : 0) | 0x20 | 0x10;
+    desc.flags = (hideInCutscene ? 0x40 : 0) | 0x20 | 0x10;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -1189,7 +1189,7 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
         for (i = 0; i < 4; i++) {
             desc.x = ((i * 71.5f) + 35.75f) - 143.0f;
             desc.texture = textures[i];
-            sprite = sprite_newScreenSprite(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), arg3, 1);
+            sprite = sprite_newScreenSprite(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), owner, 1);
             if (sprite != NULL) {
                 memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
             }

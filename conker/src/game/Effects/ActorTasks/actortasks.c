@@ -257,7 +257,7 @@ void effect_watcherLeaveDeepWater(ActorTask *task) {
 }
 
 /* Empty callback. */
-void effect_watcherNoAction(s32 arg0) {
+void effect_watcherNoAction(s32 task) {
 }
 
 typedef struct {
@@ -334,7 +334,7 @@ struct Task151AA30C {
 };
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task) {
     Vec3f pos;
     Vec3f vel;
     Actor *actor;
@@ -416,7 +416,7 @@ struct Obj151AA6D8 {
 };
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
@@ -783,7 +783,7 @@ struct Obj151AB3A4 {
 };
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
-void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
+void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Obj151AB3A4 *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;

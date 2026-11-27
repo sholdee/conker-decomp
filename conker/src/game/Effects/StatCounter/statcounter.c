@@ -110,25 +110,25 @@ struct S151BEB20 {
 };
 
 /* Rebuilds this frame's matrix: rotation by `rotY`, translation to `pos`, axes scaled by 0.923. */
-s32 effect_buildStatPickupMatrix(struct S151BEB20 *arg0) {
+s32 effect_buildStatPickupMatrix(struct S151BEB20 *fx) {
     f32 scale;
 
-    math_mtxRotateRPYF(arg0->mtx[gDrawBufferIndex], 0.0f, arg0->rotY, 0.0f);
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, fx->rotY, 0.0f);
 
     scale = 0.9230000377f;
-    arg0->mtx[gDrawBufferIndex][3][0] = arg0->pos.x;
-    arg0->mtx[gDrawBufferIndex][3][1] = arg0->pos.y;
-    arg0->mtx[gDrawBufferIndex][3][2] = arg0->pos.z;
+    fx->mtx[gDrawBufferIndex][3][0] = fx->pos.x;
+    fx->mtx[gDrawBufferIndex][3][1] = fx->pos.y;
+    fx->mtx[gDrawBufferIndex][3][2] = fx->pos.z;
 
-    arg0->mtx[gDrawBufferIndex][0][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][0][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][0][2] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][2] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][2] *= scale;
+    fx->mtx[gDrawBufferIndex][0][0] *= scale;
+    fx->mtx[gDrawBufferIndex][0][1] *= scale;
+    fx->mtx[gDrawBufferIndex][0][2] *= scale;
+    fx->mtx[gDrawBufferIndex][1][0] *= scale;
+    fx->mtx[gDrawBufferIndex][1][1] *= scale;
+    fx->mtx[gDrawBufferIndex][1][2] *= scale;
+    fx->mtx[gDrawBufferIndex][2][0] *= scale;
+    fx->mtx[gDrawBufferIndex][2][1] *= scale;
+    fx->mtx[gDrawBufferIndex][2][2] *= scale;
 
     return 1;
 }
@@ -171,7 +171,7 @@ struct S151BECB8 {
  * params.pos, plays sound 0x511 and runs effect_showStatCounter/effect_spawnStatPickupBurst/func_151BEEE0.
  * Returns 0 if any object was in range, else 1.
  */
-s32 effect_updateStatPickup(S151BECB8 *arg0) {
+s32 effect_updateStatPickup(S151BECB8 *fx) {
     s32 untouched = 1;
 
     {
@@ -188,7 +188,7 @@ s32 effect_updateStatPickup(S151BECB8 *arg0) {
             if (effect_isPlayerActor(obj) != 0) {
                 f32 dist;
 
-                params = &arg0->params;
+                params = &fx->params;
                 sprite_getActorBounds(obj, &objPos, &radius, &height);
                 diff.x = objPos.x - params->pos.x;
                 diff.y = objPos.y - params->pos.y;
@@ -196,14 +196,14 @@ s32 effect_updateStatPickup(S151BECB8 *arg0) {
                 dist = math_vec3Length(&diff);
                 if (dist - radius < range) {
                     s32 mode;
-                    s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
+                    s32 kind; // matching: switching on fx->unk48 directly changes the frame size
 
                     player_setStat(obj->playernumber, 3, params->unk10);
                     untouched = 0;
                     sound_play(0x511, 0x7D00, 0x40, 0, 0);
-                    effect_showStatCounter(arg0->unkC, arg0->unk1);
+                    effect_showStatCounter(fx->unkC, fx->unk1);
                     effect_spawnStatPickupBurst(&params->pos);
-                    kind = arg0->unk48;
+                    kind = fx->unk48;
                     switch (kind) {
                         case 1:
                             mode = 1;
@@ -217,8 +217,8 @@ s32 effect_updateStatPickup(S151BECB8 *arg0) {
                             mode = 0;
                             break;
                     }
-                    func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, mode, arg0->unk10 & 0x10,
-                                  arg0->zone, arg0->unkC, arg0->unk1);
+                    func_151BEEE0(params->unk0, &fx->unk54, fx->unkFC, fx->unk11B, mode, fx->unk10 & 0x10,
+                                  fx->zone, fx->unkC, fx->unk1);
                 }
             }
             obj++;
@@ -228,14 +228,14 @@ s32 effect_updateStatPickup(S151BECB8 *arg0) {
 }
 
 /* An object counts as active when it has a player slot, an interaction state and a valid id. */
-s32 effect_isPlayerActor(Actor *arg0) {
-    if (arg0->playernumber == 0xFF) {
+s32 effect_isPlayerActor(Actor *obj) {
+    if (obj->playernumber == 0xFF) {
         return 0;
     }
-    if (arg0->type == 0) {
+    if (obj->type == 0) {
         return 0;
     }
-    if (arg0->character_type == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return 0;
     }
     return 1;
@@ -243,7 +243,7 @@ s32 effect_isPlayerActor(Actor *arg0) {
 
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 owner, s32 list) {
     ModelParticle *particle;
     u8 variantIds[3] = { 4, 2, 3 };
 
@@ -295,7 +295,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
-        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, arg7, arg8);
+        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, owner, list);
         if (particle != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&particle->mtx[i], particle);

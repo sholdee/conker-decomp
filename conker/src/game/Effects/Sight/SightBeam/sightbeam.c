@@ -98,7 +98,7 @@ typedef struct {
 } SightCommandMsg;
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 owner, s32 list) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
@@ -142,8 +142,8 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
         ndir.x = -spawn.scale.x;
         ndir.y = -spawn.scale.y;
         ndir.z = -spawn.scale.z;
-        sight_spawnEmitter(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
-        sight_spawnEmitter(state.emitter1, end, endTri, &spawn.scale, state.zone1, red < blue, zoneMasked, arg16, 0);
+        sight_spawnEmitter(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, owner, 0);
+        sight_spawnEmitter(state.emitter1, end, endTri, &spawn.scale, state.zone1, red < blue, zoneMasked, owner, 0);
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
@@ -180,7 +180,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
         hdr.update = 2;
         hdr.lifetime = 300;
         hdr.lightType = 0;
-        state.midEffect = light_createJitterAt(&hdr, &pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
+        state.midEffect = light_createJitterAt(&hdr, &pos, red, green, blue, 0xFF, 0, 0, 0x10, owner, list);
     } else {
         state.midEffect = NULL;
     }
@@ -203,7 +203,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
-    obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
+    obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, owner, list);
     if (obj != NULL) {
         SightBeamState *objState;
 
@@ -232,8 +232,8 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
                 q1.x = q0.x - dir.x * 500.0f;
                 q1.y = q0.y - dir.y * 500.0f;
                 q1.z = q0.z - dir.z * 500.0f;
-                objState->endEffect0 = sight_spawnExtension(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
-                objState->endEffect1 = sight_spawnExtension(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
+                objState->endEffect0 = sight_spawnExtension(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, owner, list);
+                objState->endEffect1 = sight_spawnExtension(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, owner, list);
             } else {
                 objState->endEffect0 = NULL;
                 objState->endEffect1 = NULL;
@@ -598,7 +598,7 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
 }
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
-SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, ZoneNode *zone, u8 zoneMasked, u8 fxOwner, s32 fxList) {
     SightExtension *effect;
     GlowShape params;
     ParticleDef desc;
@@ -641,7 +641,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
     params.type = 0;
     desc.unk48 = zone;
     params.fadeRate = 9.999999975e-07f;
-    effect = flare_spawnGlow(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
+    effect = flare_spawnGlow(&params, 100, &desc, 0, 0, 0, 0, 1, fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&effect->owner, &ownerCopy, sizeof(ownerCopy));
     }
@@ -649,7 +649,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
 }
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
-void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone, u8 altColors, u8 zoneMasked, u8 owner, s32 list) {
     Vec3f edge0;
     Vec3f edge1;
     Vec3f normal;
@@ -697,7 +697,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         desc.fadeStart = 1;
         desc.fadeRate = 0xFF;
         desc.drawFn = -1;
-        emitters[0] = particle_newModelParticle(&desc, 3, 0xFF, 0, arg7, arg8);
+        emitters[0] = particle_newModelParticle(&desc, 3, 0xFF, 0, owner, list);
         if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&emitters[0]->head.mtx[i], &emitters[0]->head);
@@ -718,7 +718,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         }
         desc.model = 0x37;
         desc.matrixFn = 0;
-        emitters[1] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[1] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, owner, list);
         if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&emitters[1]->head.mtx[i], &emitters[1]->head);
@@ -733,7 +733,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
             anim.unk4 = 0x8D;
             anim.unkC = 0x8E;
         }
-        emitters[2] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[2] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, owner, list);
         if (emitters[2] != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&emitters[2]->head.mtx[i], &emitters[2]->head);
@@ -840,7 +840,7 @@ void sight_freeBeam(SightBeamObject *obj) {
 }
 
 /* Returns whether the beam that owns this extension effect is switched on. */
-s32 sight_isExtensionOn(SightExtension *effect, s32 arg1) {
+s32 sight_isExtensionOn(SightExtension *effect, s32 view) {
     SightBeamState *state;
 
     state = &effect->owner->state;
@@ -862,7 +862,7 @@ void sight_sendBeamCommand(s32 command, TriggerZone *source) {
 }
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
-void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
+void sight_explodeAtActor(Actor *actor, u8 owner, s32 list) {
     Vec3f origin;
     Vec3f impact;
     u8 hit;
@@ -889,28 +889,28 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
             impact.y = collision.height;
             impact.z = query.z;
             particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, (math_random() % 101U + 155) & 0xFF,
-                          &collision.tri, &impact, math_random() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+                          &collision.tri, &impact, math_random() % 302U + 500, 0, 1, 0, 0, 0, owner, 0);
         }
     }
-    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
-    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
-    particle_spawnBlastSpray(&origin, arg1, arg2);
-    particle_spawnLightFlash(&origin, arg1, arg2);
-    particle_startRandomEmitter(hit ? &impact : &origin, math_random() % 62U + 120, arg1, arg2);
+    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, owner, list);
+    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, owner, list);
+    particle_spawnBlastSpray(&origin, owner, list);
+    particle_spawnLightFlash(&origin, owner, list);
+    particle_startRandomEmitter(hit ? &impact : &origin, math_random() % 62U + 120, owner, list);
     particle_spawnGrowFade(&origin, 2.0f * math_randomFloat() + 8.0f, 2.4641099f,
-        math_random() % 56U + 200, 0.0f, arg1, arg2);
+        math_random() % 56U + 200, 0.0f, owner, list);
     if (!airborne) {
-        blood_spawnHitEffects(actor, 0, 0, 1, 0, 0, arg1, arg2);
+        blood_spawnHitEffects(actor, 0, 0, 1, 0, 0, owner, list);
     }
     sound_playAt(0x60D, 0x7D00, 0, 0, 0, origin.x,
         origin.y, origin.z, 500, 1000);
     if (airborne) {
-        sight_spawnFloorImpact(actor, arg1, arg2);
+        sight_spawnFloorImpact(actor, owner, list);
     }
 }
 
 /* Spawns effect_spawnImpact's effect (type 2) just above the actor's floor height. */
-void sight_spawnFloorImpact(Actor *actor, u8 arg1, s32 arg2) {
+void sight_spawnFloorImpact(Actor *actor, u8 owner, s32 list) {
     Vec3f pos;
     CollisionHit collision;
 
@@ -918,7 +918,7 @@ void sight_spawnFloorImpact(Actor *actor, u8 arg1, s32 arg2) {
     pos.y = actor->floorY + 2.0f;
     pos.z = actor->zpos;
     collision_initHitFromObject(&collision, actor);
-    effect_spawnImpact(&pos, &collision, 2, arg1, arg2);
+    effect_spawnImpact(&pos, &collision, 2, owner, list);
 }
 
 /* Light effect update: turns the light off while its status block's unk6F is set. */

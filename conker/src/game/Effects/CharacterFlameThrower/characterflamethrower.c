@@ -665,7 +665,7 @@ const CharacterFlamethrowerJetTemplate gJetTemplates[] = {
 };
 
 /* Spawns a jet effect from preset gJetTemplates[preset], attached to a bone of `owner`. */
-CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 fxOwner, s32 fxList) {
     EffectTemplate spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
@@ -734,7 +734,7 @@ CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 a
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
     jet.timeCarry = 0.0f;
-    actor = effect_newEffectObj(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
+    actor = effect_newEffectObj(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, fxOwner, fxList);
     if (actor != NULL) {
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
@@ -855,7 +855,7 @@ s32 flamethrower_updateJet(CharacterFlamethrowerActor *actor) {
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
  * emitAccum particles interpolated between last frame's and this frame's points (and sparks/smoke).
  */
-s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
+s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 dead) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     Vec3f end;
@@ -890,7 +890,7 @@ s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
         return 0;
     }
     if (jet->speedFn != -1) {
-        jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, arg1);
+        jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, dead);
     }
     matrix = &jet->owner->ob_matrix_ptr[jet->bone];
     math_transformOffset(&jet->startOffset, &actor->head.tmpl.pos, matrix);
@@ -1955,7 +1955,7 @@ void (*gFlameSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopFl
 s32 (*gFlameUpdateProcs[])(void *) = { (s32 (*)(void *))flamethrower_checkOwnerAlive };
 
 /* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
-CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 fxOwner, s32 fxList) {
     CharacterFlamethrowerActor *result;
     EffectTemplate spawn;
     CharacterFlamethrowerFlame initial;
@@ -2007,7 +2007,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
         initial.sparkTimer = 0;
         initial.timer151 = 0;
         result = effect_newEffectObj(&spawn, extraSize + 0x158, sizeof(FlamePoint), 0xC,
-                               0xC, 0xC, 0, 0, 0, arg2, arg3);
+                               0xC, 0xC, 0, 0, 0, fxOwner, fxList);
         if (result != NULL) {
             state = result->state;
             memcpy(state, &initial, sizeof(CharacterFlamethrowerFlame));
@@ -2021,7 +2021,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
             }
             if (setup->flags & 1) {
                 state->light = flamethrower_createFlameLight(result, &spawn.pos, setup->red, setup->green, setup->blue,
-                                         setup->alpha, arg2, arg3);
+                                         setup->alpha, fxOwner, fxList);
             } else {
                 state->light = NULL;
             }
@@ -3030,11 +3030,11 @@ typedef struct FlameLightData {
 } FlameLightData;
 
 /* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
-LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
-                         s32 arg7) {
+LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 fxOwner,
+                         s32 fxList) {
     LightEffect *light;
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
     CharacterFlamethrowerActor *owner;
     LightJitter params;
 
@@ -3051,11 +3051,11 @@ LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Ve
     params.interval = 7.0f;
     params.smoothing = 0.2488999963f;
     params.level = 127.0f;
-    header2.x = pos->x;
-    header2.y = pos->y;
-    header2.z = pos->z;
+    position.x = pos->x;
+    position.y = pos->y;
+    position.z = pos->z;
 
-    light = light_createWithEffect(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
+    light = light_createWithEffect(&header, &position, red, green, blue, alpha, 0xFF, 0, 0x24, fxOwner, fxList);
     if (light != NULL) {
         memcpy(&light->data.jitter, &params, sizeof(params));
         memcpy(&((FlameLightData *)&light->data)->flame, &owner, sizeof(owner));

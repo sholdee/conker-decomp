@@ -11,7 +11,7 @@
  * each followed by a BloodTrail. mode picks the launch velocity: 0 = horizontal speed along the yaw
  * plus a separate vertical speed, 1 = speed along the spawn direction, 2 = dir, 3 = dir * speed.
  */
-void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
+void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 owner, s32 list) {
     s16 count;
     ParticleSpawn spawn;
     s32 pad; // matching: unused stack slot
@@ -107,7 +107,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         spawn.gravity = math_randomFloat() * emitter->gravityRange + emitter->gravityBase;
         spawn.rotVel.x = math_randomFloat() * emitter->spinRange + emitter->spinBase;
         spawn.rotVel.z = math_randomFloat() * emitter->spinRange + emitter->spinBase;
-        particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
+        particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), owner, list);
         if (particle != NULL) {
             BloodTrailDesc18 trailDesc;
             DebrisData *data;
@@ -123,7 +123,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             trailDesc.emitter = 1;
             trailDesc.rate = 0.3580000103f;
             data->trail = NULL;
-            trail = blood_spawnTrail(&trailDesc, sizeof(f32), arg2, arg3);
+            trail = blood_spawnTrail(&trailDesc, sizeof(f32), owner, list);
             data->trail = trail;
             if (trail != NULL) {
                 memcpy(&trail->size, &size, sizeof(f32));

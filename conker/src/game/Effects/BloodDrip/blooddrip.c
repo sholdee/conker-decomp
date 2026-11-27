@@ -11,7 +11,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
                              u8 argE, s32 argF);
 
 /* Attaches emitter 6 to bone 1 of `actor`; a nonzero `lifetime` ends it after that many frames. */
-void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
+void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 owner, s32 list) {
     void *effect; // matching: the named result keeps IDO's 80-byte frame (direct return: 72)
     BloodDripDesc desc;
 
@@ -40,13 +40,13 @@ void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
     desc.emitter = 6;
     desc.callback = -1; /* none */
     desc.unk2D = 5;
-    effect = blood_spawnDrip(&desc, 0, arg3, arg4);
+    effect = blood_spawnDrip(&desc, 0, owner, list);
     return effect;
 }
 
 /* Randomly spawns a particle at (x, y, z): 15% nothing, 10% a random-direction one (func_151AEAB4),
- * 75% one moving against (dirX, dirY, dirZ) (func_151AE984). arg6[0xC] is passed through. */
-void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
+ * 75% one moving against (dirX, dirY, dirZ) (func_151AE984). emitter[0xC] (EffectHeader.owner) is passed through. */
+void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *emitter) {
     Vec3f pos;
     f32 roll;
 
@@ -62,18 +62,18 @@ void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
 
         roll = math_randomFloat();
         flag = (roll > 0.0f) ? 1 : 0; // matching: a plain `roll > 0.0f` compiles differently
-        func_151AEAB4(&pos, flag, arg6[0xC]);
+        func_151AEAB4(&pos, flag, emitter[0xC]);
     } else {
         s32 flag;
 
         roll = math_randomFloat();
         flag = (roll > 0.8050000668f) ? 1 : 0;
-        func_151AE984(&pos, dirX, dirY, dirZ, flag, arg6[0xC]);
+        func_151AE984(&pos, dirX, dirY, dirZ, flag, emitter[0xC]);
     }
 }
 
 /* Spawns a particle at pos moving against (dirX, dirY, dirZ), with randomized parameters. */
-void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) {
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 owner) {
     f32 scale;
     Vec3f velocity;
     f32 shade;
@@ -91,12 +91,12 @@ void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) 
     shade = math_randomFloat() * 219.0f + 77.0f;
     // matching: the rodata holds -1.045f, so this is an add of a negative literal, not a sub
     particle_spawnSteamParticle(pos, &velocity, 0, rand0 * 0.6020000577f + -1.045000076f, rand1 % 31 + 60, rand2 % 101 + 155,
-                  shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
+                  shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, owner, 1);
 }
 
 /* Spawns a particle at pos moving in a random direction at a random speed, with randomized parameters.
  * math_cosBinAngleMasked is cos() over a 256-step circle, so cos(a - 0x40) is sin(a). */
-void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
+void func_151AEAB4(Vec3f *pos, u8 flag, u8 owner) {
     u32 phase; // matching: passing yaw - 0x40 through a u32 temp is needed for identical bytes
     Vec3f velocity;
     u8 yaw;
@@ -132,13 +132,13 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
         rand3 = math_randomFloat();
         particle_spawnSplash(pos, &velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
                       rand3 * 4.0f + 3.100000143f, math_random() % 5 + 3, flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
-                      arg2, 1);
+                      owner, 1);
     }
 }
 
 /* Spawns a ground burst effect around obj: one particle_spawnSplashSprayAtAngles burst, 7-12 scattered
  * particle_spawnKindEmitter / particle_spawnSquash particles on the ground, and a blood_spawnGrowingParticle effect under obj. */
-void blood_spawnGroundBurst(Actor *obj, u8 arg1, s32 arg2) {
+void blood_spawnGroundBurst(Actor *obj, u8 owner, s32 list) {
     CollisionHit ground;
     SplashSpraySpec burst;
     s32 count;
@@ -205,10 +205,10 @@ lbC:
         pos[1] += 10.0f;
         if (math_random() & 1) {
             particle_spawnKindEmitter(0, (math_randomFloat() * 4.5f) + 15.0f, (math_randomFloat() * 100.0f) + 155.0f,
-                          &ground.tri, (Vec3f *)pos, 100, 0, 1, 0, arg1, arg2);
+                          &ground.tri, (Vec3f *)pos, 100, 0, 1, 0, owner, list);
         } else {
             particle_spawnSquash(0, (math_randomFloat() * 5.900000095f) + 6.099999905f, (math_randomFloat() * 100) + 155, // matching: int 100/155 here, float literals change allocation
-                          (Vec3f *)pos, 1, arg1, arg2);
+                          (Vec3f *)pos, 1, owner, list);
         }
         count--;
     }
@@ -231,12 +231,12 @@ lbB:
     blood_spawnGrowingParticle(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
                   ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
                   (randA % 101) + 155, (randB % 101) + 100,
-                  (math_random() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, arg1, arg2);
+                  (math_random() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, owner, list);
 lbl:;
 }
 
 /* Attaches emitter 10 (func_151AF338) to bone 1 of `actor` for 320 frames. */
-void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {
+void *func_151AF270(Actor *actor, u8 owner, s32 list) {
     void *result;
     BloodDripDesc desc;
 
@@ -259,7 +259,7 @@ void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {
     desc.emitter = 10;
     desc.callback = -1;
     desc.unk2D = 9;
-    result = blood_spawnDrip(&desc, 0, arg1, arg2);
+    result = blood_spawnDrip(&desc, 0, owner, list);
     return result;
 }
 

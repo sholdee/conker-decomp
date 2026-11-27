@@ -10,35 +10,35 @@
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
    checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
-void effect_levelHook02(Camera *arg0) {
+void effect_levelHook02(Camera *camera) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
-            if (camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
-                arg0->AvailableModes |= 0x1000000;
-                camera_attachToObject(arg0, movement_obj[0].attach_char - 1);
+            if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
+                camera->AvailableModes |= 0x1000000;
+                camera_attachToObject(camera, movement_obj[0].attach_char - 1);
             }
-        } else if (camera_popMode(arg0, CAMERA_MODE_PICKED_UP) != 0) {
-            camera_attachToObject(arg0, 0);
+        } else if (camera_popMode(camera, CAMERA_MODE_PICKED_UP) != 0) {
+            camera_attachToObject(camera, 0);
         }
     }
-    arg0->AvailableModes &= ~0x4000;
+    camera->AvailableModes &= ~0x4000;
     if (!(gTaskDoneBits[0x1] & 4)) {
         if (script_query(1, 0x2000, 0x95, script_query(0, 0x2014, 0xB7) | 0x2000) != 0) {
-            arg0->AvailableModes |= 0x1000000;
-            if ((arg0->Mode & 1) && camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
-                arg0->DistIndex = 3;
-                arg0->AvailableModes &= ~4;
-                camera_loadDistancePreset(arg0);
+            camera->AvailableModes |= 0x1000000;
+            if ((camera->Mode & 1) && camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_NORMAL) != 0) {
+                camera->DistIndex = 3;
+                camera->AvailableModes &= ~4;
+                camera_loadDistancePreset(camera);
             }
-        } else if (camera_popMode(arg0, CAMERA_MODE_NORMAL) != 0) {
-            camera_loadDistancePreset(arg0);
-            arg0->AvailableModes &= ~0x1000000;
+        } else if (camera_popMode(camera, CAMERA_MODE_NORMAL) != 0) {
+            camera_loadDistancePreset(camera);
+            camera->AvailableModes &= ~0x1000000;
         }
     }
     if (script_query(1, 0x4082, 6, 0x9000) != 0) {
-        arg0->AvailableModes |= 0x10000;
+        camera->AvailableModes |= 0x10000;
     } else {
-        arg0->AvailableModes &= ~0x10000;
+        camera->AvailableModes &= ~0x10000;
     }
 }
 
@@ -224,15 +224,15 @@ void effect_spawnAttachedBursts(Actor *actor) {
 
 /* Accelerates unk96 by unk94 per elapsed frame (capped at 0x1400), moves unk9E down by unk96 / 256,
    and counts unkA4 up to 25. */
-void func_150AECCC(struct42 *arg0) {
-    arg0->unk96 += arg0->unk94 * gFrameTicks;
-    if (arg0->unk96 > 0x1400) {
-        arg0->unk96 = 0x1400;
+void func_150AECCC(struct42 *particle) {
+    particle->unk96 += particle->unk94 * gFrameTicks;
+    if (particle->unk96 > 0x1400) {
+        particle->unk96 = 0x1400;
     }
-    arg0->unk9E -= arg0->unk96 >> 8;
-    arg0->unkA4 += gFrameTicks;
-    if (arg0->unkA4 > 25) {
-        arg0->unkA4 = 25;
+    particle->unk9E -= particle->unk96 >> 8;
+    particle->unkA4 += gFrameTicks;
+    if (particle->unkA4 > 25) {
+        particle->unkA4 = 25;
     }
 }
 
