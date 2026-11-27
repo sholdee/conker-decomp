@@ -50,11 +50,11 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
     math_dirFromBinAngles(yaw, (math_random() % (config->pitchRange + 1)) + config->pitch,
                   math_randomFloat() * config->speedRange + config->speed, &velocity);
     particle_spawnSteamParticle(&position, &velocity, emitter->unk8,
-                  math_randomFloat() * config->unk20Range + config->unk20,
-                  (math_random() % (config->unk10Range + 1)) + config->unk10,
-                  (math_random() % (config->unk14Range + 1)) + config->unk14,
-                  math_randomFloat() * config->unk18Range + config->unk18,
-                  math_randomFloat() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, fxOwner,
+                  math_randomFloat() * config->gravityRange + config->gravity,
+                  (math_random() % (config->lifetimeRange + 1)) + config->lifetime,
+                  (math_random() % (config->alphaRange + 1)) + config->alpha,
+                  math_randomFloat() * config->sizeRange + config->size,
+                  math_randomFloat() < config->floorHitChance, scale, scale, 1, emitter->ground, 1, 0, fxOwner,
                   emitter->unk4);
     return 1;
 }

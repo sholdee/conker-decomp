@@ -239,8 +239,8 @@ void particle_spawnStreakBurstEffect(desc, owner)
 
     particle.texture = desc->particleTexture;
     particle.renderMode = desc->particleRenderMode;
-    particle.clearGeometryMode = desc->particleUnk4;
-    particle.setGeometryMode = desc->particleUnk0;
+    particle.clearGeometryMode = desc->particleClearGeometryMode;
+    particle.setGeometryMode = desc->particleSetGeometryMode;
     particle.frame = desc->particleFrame;
     particle.frameRate = desc->particleFrameRate;
     particle.r = desc->particleColor.red;
@@ -332,8 +332,8 @@ void particle_spawnPipeBurst(f32 *pos, u8 owner) {
     desc.kind = 0;
     desc.particleTexture = 43;
     desc.particleRenderMode = 0x1A01;
-    desc.particleUnk0 = 0x200005;
-    desc.particleUnk4 = 0;
+    desc.particleSetGeometryMode = 0x200005;
+    desc.particleClearGeometryMode = 0;
     desc.tailSpeedRange = desc.tailSpeedBase = 1.6899999f;
     desc.headSpeedBase = 6.97f;
     desc.headSpeedRange = 3.37f;

@@ -90,7 +90,7 @@ void func_150C1F60(u8 owner) {
     params2.spray.alphaRange = 0x64;
     params2.spray.unk30 = 1;
     params2.spray.kind = 6;
-    params2.spray.unk34 = 0.0f;
+    params2.spray.floorHitChance = 0.0f;
     params2.spray.wobbles = 1;
     params2.spray.bounceChance = 0.0f;
     params2.spray.speedBase = 40.0f;
@@ -244,7 +244,7 @@ s32 func_150C2700(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     params.spray.sizeRange = 0.0f;
     params.spray.unk30 = 1;
     params.spray.kind = 6;
-    params.spray.unk34 = 0.0f;
+    params.spray.floorHitChance = 0.0f;
     params.spray.wobbles = 1;
     params.spray.bounceChance = 0.0f;
     params.spray.pos.z = z;

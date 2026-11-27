@@ -670,7 +670,7 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
     particle->updateFn2 = updateFn2;
     particle->expireFn = expireFn;
     particle->vertexFn = vertexFn;
-    particle->unk74 = 0;
+    particle->growFlags = 0;
     bzero(particle->vtxBuffers, sizeof(particle->vtxBuffers));
     particle_setQuadTexCoords(particle->vtxTemplate, particle->def.texture, flip);
     particle_setQuadColors(particle->vtxTemplate, colors);

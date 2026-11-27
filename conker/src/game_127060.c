@@ -353,7 +353,7 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.spray.gravityRange = 0.4660000205f;
             second.spray.sizeBase = 123.0f;
             second.spray.sizeRange = 104.0f;
-            second.spray.unk34 = 1.0f;
+            second.spray.floorHitChance = 1.0f;
             second.spray.bounceChance = 0.3f;
             particle_spawnDropSprayAtAngles(&second.angles, &second.spray, &ground, owner, kind);
         }

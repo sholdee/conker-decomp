@@ -399,8 +399,8 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 alpha, void *tri, Vec3f *po
             drip.timer = 0;
             drip.size = size * 4.5f;
             drip.pos = *pos;
-            drip.unk14 = alpha;
-            drip.unk15 = lit;
+            drip.alpha = alpha;
+            drip.lit = lit;
             drip.kind = kind;
             effect = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
                                    sizeof(drip), owner, list);
@@ -423,7 +423,7 @@ void particle_updateDripEffect(DripEffect *effect) {
         rand = math_randomFloat();
         lifeRand = math_random();
         particle_spawnSteamParticle(&drip->pos, &gZeroVec3f, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
-                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
+                      drip->alpha, drip->size, 0, 1.0f, 1.0f, drip->lit, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
         drip->timer = (math_random() % 111U) + 30;
     }
 }
@@ -1270,7 +1270,7 @@ void particle_spawnSplashAndDrops(pos, ground, kind, owner, list)
         drops.spray.sizeBase = 123.0f;
         drops.spray.sizeRange = 134.0f;
         drops.spray.wobbles = 1;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 0.0f;
         particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, owner, list);
     }
@@ -1335,7 +1335,7 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, owner, list)
         drops.spray.gravityRange = 0.47500002f;
         drops.spray.kind = kind;
         drops.spray.wobbles = 1;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 0.0f;
         particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, owner, list);
     }

@@ -68,12 +68,12 @@ s32 particle_flickerSize(FlickerParticle *effect) {
     }
     effect->head.def.width += (params->widthTarget - effect->head.def.width) * 0.186f;
 
-    params->unk24Timer -= gFrameTicks;
-    if (params->unk24Timer < 0) {
-        params->unk24Timer = math_random() % 15U;
-        params->unk24Target = math_randomFloat() * (params->unk24Max - params->unk24Min) + params->unk24Min;
+    params->frameSpeedTimer -= gFrameTicks;
+    if (params->frameSpeedTimer < 0) {
+        params->frameSpeedTimer = math_random() % 15U;
+        params->frameSpeedTarget = math_randomFloat() * (params->frameSpeedMax - params->frameSpeedMin) + params->frameSpeedMin;
     }
-    effect->head.def.frameSpeed += (s32)((params->unk24Target - effect->head.def.frameSpeed) * 0.231f);
+    effect->head.def.frameSpeed += (s32)((params->frameSpeedTarget - effect->head.def.frameSpeed) * 0.231f);
     return 1;
 }
 
@@ -84,18 +84,18 @@ s32 particle_growFlickerParticle(FlickerParticle *effect) {
 
     done = TRUE;
     params = &effect->params;
-    if (!(effect->head.unk74 & EFFECT_WIDTH_GROWN)) {
+    if (!(effect->head.growFlags & EFFECT_WIDTH_GROWN)) {
         effect->head.def.width += (params->widthTarget - effect->head.def.width) * 0.7f;
         if (params->widthTarget * 0.95f < effect->head.def.width) {
-            effect->head.unk74 |= EFFECT_WIDTH_GROWN;
+            effect->head.growFlags |= EFFECT_WIDTH_GROWN;
         } else {
             done = FALSE;
         }
     }
-    if (!(effect->head.unk74 & EFFECT_HEIGHT_GROWN)) {
+    if (!(effect->head.growFlags & EFFECT_HEIGHT_GROWN)) {
         effect->head.def.height += (params->heightTarget - effect->head.def.height) * 0.7f;
         if (params->heightTarget * 0.95f < effect->head.def.height) {
-            effect->head.unk74 |= EFFECT_HEIGHT_GROWN;
+            effect->head.growFlags |= EFFECT_HEIGHT_GROWN;
         } else {
             done = FALSE;
         }

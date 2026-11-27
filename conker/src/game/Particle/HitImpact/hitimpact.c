@@ -17,7 +17,7 @@
 #include "conker/weapon.h"
 #include "libc/string.h"
 
-/* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
+/* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.posFuncArg is
  * their second argument). */
 static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
     weapon_getSide0JointPos, weapon_getSide1JointPos, effect_getBonePointPos, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
@@ -232,17 +232,17 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
     }
 }
 
-/* Particle update: bob unk20.y around unk50.y while the wobble timer runs, then settle on unk50. */
+/* Particle update: bob rot.y around restRot.y while the wobble timer runs, then settle on restRot. */
 s32 particle_settleWobble(WobbleParticle *particle) {
     BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
         wobble->phase += wobble->phaseSpeed * gFrameDelta;
         wobble->phase = math_wrapRadians(wobble->phase);
-        particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
+        particle->rot.y = particle->restRot.y + sinf(wobble->phase) * wobble->amplitude;
         wobble->timer -= gFrameTicks;
     } else {
-        particle->unk20 = particle->unk50;
+        particle->rot = particle->restRot;
     }
     return 1;
 }
@@ -350,12 +350,12 @@ void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri
 
 /* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
 struct S151D4408Temps {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
+    f32 x;
+    f32 y;
+    f32 z;
     s32 pad18; // matching: keeps the stack layout of the original temporaries
 };
 
@@ -365,8 +365,8 @@ void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *own
     struct S151D4408Temps unused;
     f32 speed;
 
-    model_decomposeBoneMatrix(mtx, &unused.unk0C, &unused.unk10, &unused.unk14, &p.rot.x, &p.rot.y, &p.rot.z,
-                  &unused.unk00, &unused.unk04, &unused.unk08);
+    model_decomposeBoneMatrix(mtx, &unused.x, &unused.y, &unused.z, &p.rot.x, &p.rot.y, &p.rot.z,
+                  &unused.scaleX, &unused.scaleY, &unused.scaleZ);
     p.rot.x += 180.0f;
 block_151D4408: // matching: an unused label ends the basic block, keeping the store above out of the jal delay slot
     speed = math_randomFloat();
@@ -435,16 +435,16 @@ void particle_attachPointEmitter(obj, posFunc, lifetime, owner, list)
     emitter.uniqueId = obj->unique_id;
     emitter.posFunc = posFunc;
     emitter.spawnTimer = 0.0f;
-    emitter.unk6 = -1;
+    emitter.posFuncArg = -1;
     emitter.flags = 0;
 
     if (emitter.posFunc == 6) {
-        emitter.unk6 = 0x82;
+        emitter.posFuncArg = 0x82;
     }
 
     if (obj->ob_matrix_ptr != NULL) {
         if ((obj->cullMask & 0xF) != 0xF) {
-            gEmitterPointFuncs[posFunc](obj, emitter.unk6, &emitter.pos);
+            gEmitterPointFuncs[posFunc](obj, emitter.posFuncArg, &emitter.pos);
             emitter.flags |= 1;
         }
     }
@@ -472,7 +472,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         return;
     }
     if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
-        gEmitterPointFuncs[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
+        gEmitterPointFuncs[emitter->posFunc](obj, emitter->posFuncArg, &emitter->pos);
         emitter->flags |= 1;
     }
     if (wasValid) {
@@ -722,9 +722,9 @@ void particle_startPlayerCameraWobbles(Vec3f *pos, f32 radius, f32 fadeRange, f3
 /* User data of the effects particle_startPlayerRumbles creates. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x0C */ f32 innerRadius;
+    /* 0x10 */ f32 falloffRange;
+    /* 0x14 */ f32 falloffScale;
     /* 0x18 */ u8 index;
     /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
 } Params151D5404;
@@ -737,9 +737,9 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invF
     s32 i;
 
     params.pos = *pos;
-    params.unkC = radius;
-    params.unk10 = fadeRange;
-    params.unk14 = invFadeRange;
+    params.innerRadius = radius;
+    params.falloffRange = fadeRange;
+    params.falloffScale = invFadeRange;
     header.flags = 1;
     header.duration = (math_random() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;

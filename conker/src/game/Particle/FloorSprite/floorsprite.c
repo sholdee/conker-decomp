@@ -396,7 +396,7 @@ s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, 
     struct FloorHit {
         void *tri;
         f32 floorY;
-        u32 unk8;
+        u32 flags;
         s32 unkC;
     };
     f32 sinT;
@@ -407,7 +407,7 @@ s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, 
     sinT = sinf((angle - 90.0f) * 0.01745329238f);
     x += dist * sinT;
     z += dist * cosT;
-    collision_findFloor(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
+    collision_findFloor(&floor.tri, 0, &floor.floorY, 0, &floor.flags, 0, x, y, z, y, 0, 0);
     if (floor.tri == NULL) {
         return 0;
     }

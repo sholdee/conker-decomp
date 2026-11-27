@@ -79,7 +79,7 @@ void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player) {
         second.spray.alphaRange = 0x37;
         second.spray.unk30 = 1;
         second.spray.kind = 9;
-        second.spray.unk34 = 1.0f;
+        second.spray.floorHitChance = 1.0f;
         second.spray.wobbles = 0;
         second.spray.bounceChance = 1.0f;
         second.spray.speedBase = 10.0f;

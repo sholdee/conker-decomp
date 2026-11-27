@@ -993,7 +993,7 @@ void particle_levelHook17(Camera *obj);
 typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 prevUnk222; // target->targetIndex seen last frame
+    /* 0x05 */ u8 prevTargetIndex; // target->targetIndex seen last frame
     /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
     /* 0x0C */ s8 count;      // particles left in the current burst
 } BoneBurstState;
@@ -1065,7 +1065,7 @@ typedef struct {
     /* 0x050 */ Vec3f spin;
     /* 0x05C */ u8 pad5C[0x14];
     /* 0x070 */ u8 alpha;
-    /* 0x071 */ u8 unk71;
+    /* 0x071 */ u8 updateFn;
     /* 0x072 */ u8 pad72[0x16];
     /* 0x088 */ u32 sound; /* sound id in the low half, playing handle in the high half */
     /* 0x08C */ u8 pad8C[0xE4];
@@ -1109,15 +1109,15 @@ typedef struct {
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 spawnTimer;
     /* 0x0C */ u8 side;
-    /* 0x0D */ u8 unkD;
+    /* 0x0D */ u8 skipTarget;
     /* 0x0E */ u8 padE[2];
     /* 0x10 */ CamWobble *wobble; /* the other actor's camera wobble (camera_createWobble), or NULL */
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
+    /* 0x14 */ s16 rumbleTimer;
+    /* 0x16 */ s8 otherCamera; // the other actor's camera number (CNumber), or -1
     /* 0x17 */ u8 pad17;
     /* 0x18 */ Actor *other;
     /* 0x1C */ u8 otherUniqueId;
-    /* 0x1D */ u8 unk1D;
+    /* 0x1D */ u8 ownerAnimSeq;
     /* 0x1E */ u8 pad1E[2];
 } TwoSidedEmitterState; // size 0x20
 
@@ -1499,10 +1499,10 @@ typedef struct {
     /* 0x2C */ f32 gravity;
     /* 0x30 */ f32 damping;
     /* 0x34 */ f32 shrinkRate;
-    /* 0x38 */ f32 unk24Max;
-    /* 0x3C */ f32 unk24Min;
-    /* 0x40 */ f32 unk24Target;
-    /* 0x44 */ s16 unk24Timer;
+    /* 0x38 */ f32 frameSpeedMax;
+    /* 0x3C */ f32 frameSpeedMin;
+    /* 0x40 */ f32 frameSpeedTarget;
+    /* 0x44 */ s16 frameSpeedTimer;
     /* 0x46 */ s16 fadeStart; /* while def.lifetime is below it, alpha = lifetime * fadeRate */
     /* 0x48 */ s16 fadeRate;
 } FlickerParams;
@@ -1724,8 +1724,8 @@ typedef struct {
     /* 0x47 */ u8 particleTexture;
     /* 0x48 */ u16 particleRenderMode;
     /* 0x4A */ u8 pad4A[2];
-    /* 0x4C */ s32 particleUnk0;
-    /* 0x50 */ s32 particleUnk4;
+    /* 0x4C */ s32 particleSetGeometryMode;
+    /* 0x50 */ s32 particleClearGeometryMode;
     /* 0x54 */ s16 particleTimer;
     /* 0x56 */ u8 pad56[2];
     /* 0x58 */ s32 particleFrame;
@@ -1891,11 +1891,11 @@ typedef struct {
     /* 0x24 */ s16 z;
     /* 0x26 */ s16 velX;
     /* 0x28 */ s16 velZ;
-    /* 0x2A */ s16 unk2A;       /* added to y for the floor test */
+    /* 0x2A */ s16 floorOffset; /* added to y for the floor test */
     /* 0x2C */ u8 pad2C[0xC];
     /* 0x38 */ s16 life;
     /* 0x3A */ u8 pad3A;
-    /* 0x3B */ u8 unk3B;
+    /* 0x3B */ u8 size;
 } DropParticle;
 
 /* Partial view of a type 3 SpriteFx (game/Effects/ObjectList/objectlist.c); unk25 is SpriteFxTemplate.unk15. */
@@ -1911,7 +1911,7 @@ typedef struct {
     /* 0x1A */ s16 y;
     /* 0x1C */ s16 z;
     /* 0x1E */ u8 pad1E[7];
-    /* 0x25 */ u8 unk25;
+    /* 0x25 */ u8 size;
 } SplashFx;
 
 void particle_updateBounceDebris(Debris *debris);
@@ -2257,29 +2257,29 @@ extern const u8 D_800A7B00[4], D_800A7B04[4], D_800A7B08[4], D_800A7B0C[4], D_80
 /* game/Particle/ActorEmitter/actoremitter.c */
 /* Particle template, referenced by an EmitterInfo. */
 typedef struct ParticleTemplate {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
+    /* 0x00 */ f32 widthHi;
+    /* 0x04 */ f32 widthLo;
+    /* 0x08 */ f32 heightHi;
+    /* 0x0C */ f32 heightLo;
+    /* 0x10 */ f32 heightPeak;
+    /* 0x14 */ f32 frameSpeedHi;
+    /* 0x18 */ f32 frameSpeedLo;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ f32 drag;
+    /* 0x24 */ f32 shrinkRate;
+    /* 0x28 */ s16 fadeStart;
+    /* 0x2A */ s16 fadeRate;
+    /* 0x2C */ f32 blend;
+    /* 0x30 */ f32 stretch;
     /* 0x34 */ s16 lifeMin;   // lifetime given to a particle when its slot releases it
     /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 unk3D;
-    /* 0x3E */ u8 unk3E;
+    /* 0x38 */ u8 updateFn1;
+    /* 0x39 */ u8 updateFn2;
+    /* 0x3A */ u8 vertexFn;
+    /* 0x3B */ u8 releaseUpdateFn1;
+    /* 0x3C */ u8 releaseUpdateFn2;
+    /* 0x3D */ u8 releaseExpireFn;
+    /* 0x3E */ u8 releaseVertexFn;
     /* 0x3F */ u8 spawnCb; // index into gActorEmitterSpawnFuncs
 } ParticleTemplate; /* 0x40 */
 
@@ -2379,10 +2379,10 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite);
 void particle_broadcastToActorEmitters(s32 event, u8 eventType);
 void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 eventType);
 /* returns the AnchorEmitter, followed by arg7 bytes of the caller's data (PeriodicObject) */
-void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 extraSize,
+void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 expireFunc, s8 childKind, u8 messageFunc, s32 extraSize,
                     u8 fxOwner, s32 fxList);
-AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                             s8 childKind, u8 unk5A, s32 extraSize, u8 fxOwner, s32 fxList);
+AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 expireFunc,
+                             s8 childKind, u8 messageFunc, s32 extraSize, u8 fxOwner, s32 fxList);
 s32 particle_updateAnchorEmitter(AnchorEmitter *emitter);
 void particle_runAnchorEmitterExpire(AnchorEmitter *emitter);
 void particle_emitAnchorBurst(AnchorEmitter *emitter);
@@ -2657,16 +2657,16 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ Words3 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
+    /* 0x28 */ Words3 pos;
+    /* 0x34 */ f32 radius;
+    /* 0x38 */ f32 spawnRate;
+    /* 0x3C */ s16 lifetime;
+    /* 0x3E */ s16 frameStep;
+    /* 0x40 */ s16 frameStepRange;
+    /* 0x42 */ s16 size;
+    /* 0x44 */ s16 sizeRange;
+    /* 0x46 */ s16 growRate;
+    /* 0x48 */ s16 growRateRange;
 } EffectSpawner;
 
 void func_151A0E40(f32 x, f32 y, f32 z, u8 arg3, s32 arg4);
@@ -2831,9 +2831,9 @@ s32 particle_dampSprayXZ(SparkParticle *spark, Vec3f *prevPos);
 /* game/Particle/OwnerSideEmitter/ownersideemitter.c */
 /* Per-task data kept at offset 0x28 of the task created by particle_startOwnerSideTask. */
 typedef struct {
-    Actor *owner;
-    u8 ownerUnk3B;
-    f32 timer;
+    /* 0x0 */ Actor *owner;
+    /* 0x4 */ u8 ownerId;
+    /* 0x8 */ f32 timer;
 } Data151B1AB0;
 
 typedef struct {
@@ -3039,9 +3039,9 @@ typedef struct {
 /* A debris particle as seen by its update callback. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x20];
-    /* 0x020 */ Vec3f unk20;
+    /* 0x020 */ Vec3f rot;
     /* 0x02C */ u8 pad2C[0x50 - 0x2C];
-    /* 0x050 */ Vec3f unk50;
+    /* 0x050 */ Vec3f restRot;
     /* 0x05C */ u8 pad5C[0x170 - 0x5C];
     /* 0x170 */ BobMotion wobble;
 } WobbleParticle;
@@ -3050,7 +3050,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ Actor *obj;
     /* 0x04 */ u8 uniqueId;
-    /* 0x06 */ s16 unk6;
+    /* 0x06 */ s16 posFuncArg;
     /* 0x08 */ u8 posFunc;
     /* 0x0C */ f32 spawnTimer;
     /* 0x10 */ u8 flags; /* bit 0: pos is valid */
@@ -3127,8 +3127,8 @@ typedef struct {
     s16 timer;
     f32 size;
     Vec3f pos;
-    u8 unk14;
-    u8 unk15;
+    u8 alpha;
+    u8 lit;
     u8 kind;
 } DripData; /* 0x18 */
 

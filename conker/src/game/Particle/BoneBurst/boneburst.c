@@ -72,7 +72,7 @@ void particle_spawnBoneBurstEmitter(Actor *target) {
 
     state.target = target;
     state.targetId = target->unique_id;
-    state.prevUnk222 = 0;
+    state.prevTargetIndex = 0;
     state.timer = 0.0f;
     state.count = 0;
 
@@ -100,11 +100,11 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
         emitter->base.header.state = -1;
         return;
     }
-    if (state->prevUnk222 != target->targetIndex && target->targetIndex != 0) {
+    if (state->prevTargetIndex != target->targetIndex && target->targetIndex != 0) {
         state->count = 3;
         state->timer = 0.0f;
     }
-    state->prevUnk222 = target->targetIndex;
+    state->prevTargetIndex = target->targetIndex;
     if (target->targetIndex != 0) {
         actor_flashFog(&movement_obj[target->targetIndex], 0xFF, 0, 0, 0x50, 0, 0xF);
     }

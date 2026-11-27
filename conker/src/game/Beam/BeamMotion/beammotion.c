@@ -151,12 +151,12 @@ s32 beam_updateMotion(Game1BBFC0Beam *beam) {
     return 1;
 }
 
-/* Shrinks the beam's width and progress; sets unk5C from unk1C while unk1C < unk48. */
+/* Shrinks the beam's width and progress; sets alpha from lifetime while lifetime < motion.fadeStart. */
 s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
     beam->progress -= beam->progress * beam->motion.shrinkRate;
     beam->width -= beam->width * beam->motion.shrinkRate;
-    if (beam->unk1C < beam->motion.unk48) {
-        beam->unk5C = beam->unk1C * beam->motion.unk4A;
+    if (beam->lifetime < beam->motion.fadeStart) {
+        beam->alpha = beam->lifetime * beam->motion.fadeRate;
     }
     return 1;
 }
@@ -164,8 +164,8 @@ s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
 /* Like beam_shrinkMotion, but shrinks only the beam's progress. */
 s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam) {
     beam->progress -= beam->progress * beam->motion.shrinkRate;
-    if (beam->unk1C < beam->motion.unk48) {
-        beam->unk5C = beam->unk1C * beam->motion.unk4A;
+    if (beam->lifetime < beam->motion.fadeStart) {
+        beam->alpha = beam->lifetime * beam->motion.fadeRate;
     }
     return 1;
 }

@@ -9,7 +9,7 @@
 /* Live particle returned by particle_newOwnedSpriteParticle; its extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 unkA8;
+    /* 0xA8 */ f32 drag;
 } Particle1DEF60;
 
 
@@ -21,7 +21,7 @@ void particle_startOwnerSideTask(Actor *owner) {
     // matching: an integer test (not != NULL) makes IDO reload owner from its arg slot for each use
     if ((s32)owner != 0) {
         data.owner = owner;
-        data.ownerUnk3B = owner->unique_id;
+        data.ownerId = owner->unique_id;
         data.timer = 0.0f;
 
         task = effect_newTimedEffectNoDraw(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
@@ -111,7 +111,7 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
                 }
                 particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);
                 if (particle != NULL) {
-                    memcpy(&particle->unkA8, &extra, sizeof(extra));
+                    memcpy(&particle->drag, &extra, sizeof(extra));
                 }
                 data->timer -= 1.0f;
             } while (data->timer > 1.0f);
@@ -130,18 +130,18 @@ void particle_onOwnerSideTaskMsg(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
     if (kind == 0x2D) {
         if (data->owner == msg->swap.actorA) {
             data->owner = msg->swap.actorB;
-            data->ownerUnk3B = msg->swap.idB;
+            data->ownerId = msg->swap.idB;
         } else if (data->owner == msg->swap.actorB) {
             // matching: the copy keeps IDO from moving the byte store into the branch delay slot
             Data151B1AB0 *dst = data;
 
             dst->owner = msg->swap.actorA;
-            dst->ownerUnk3B = msg->swap.idA;
+            dst->ownerId = msg->swap.idA;
         }
     } else if (kind == 0) {
         Actor *owner = msg->ref.actor;
 
-        if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
+        if (owner == data->owner || msg->ref.uniqueId == data->ownerId) {
             effect_destroyObject(&task->base.header);
         }
     }

@@ -241,8 +241,8 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
-                    burst.unk74 = particle->link.maxLights;
-                    burst.unk78 = particle->link.lightMask;
+                    burst.maxLights = particle->link.maxLights;
+                    burst.lightMask = particle->link.lightMask;
                     burst.render.otherModeH = 0;
                     burst.render.setGeometryMode = 0x220005;
                     burst.render.clearGeometryMode = 0x1D0600;
@@ -252,9 +252,9 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.render.alphaDither = 0x20;
                     burst.render.primMode = 0;
                     burst.render.envMode = 7;
-                    burst.unk9C = 10;
-                    burst.unk9E = 25;
-                    burst.unkA0 = particle->floor.material;
+                    burst.fadeStart = 10;
+                    burst.fadeRate = 25;
+                    burst.material = particle->floor.material;
                     particle_spawnSurfacePuffSpray(&burst, particle->header.owner, particle->header.kind);
                 }
             }

@@ -23,8 +23,9 @@ const char gTailFireToSmokeName[] = "effects_characterfire_conker_tail_fire_to_s
 const IdList1 gActorEmitterTypes = { { 0x21 } };
 /*
  * The anchor emitter templates, one array per kind (gAnchorEmitterTemplates): { rate, rateRange, burstBase,
- * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, unk20, unk21Range, lifeMin, lifeRange, pad, maxCount,
- * velocityScale, unk30, unk34Range, unk38, unk3C, unk3E, unk40, unk42Range, anchorSet, flags, pad, unk4C }.
+ * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, alpha, alphaRange, lifeMin, lifeRange, pad, maxCount,
+ * velocityScale, gravity, gravityRange, drag, fadeStart, fadeRate, launchLifeMin, launchLifeRange, anchorSet, flags,
+ * pad, easeFactor }.
  */
 const AnchorEmitterTemplate D_800A74D8[] = {
     { 0.504f, 0.517f, 20.0f, 10.0f, 0.46100003f, 0.574f, 0.404f, 0.41200003f, 80, 100, 20, 60, { 0 }, 30,
@@ -401,8 +402,8 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                             data->vel.z = -10.0f;
                         }
                         data->vel.y = 0.0f;
-                        particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
-                                      data->tmpl->unk3E);
+                        particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->releaseUpdateFn1, data->tmpl->releaseUpdateFn2, data->tmpl->releaseExpireFn,
+                                      data->tmpl->releaseVertexFn);
                         slot->particle->head.def.lifetime =
                             math_random() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->head.def.flags |= 1;
@@ -434,24 +435,24 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                     ok = 1;
                     prevFree->next = freeSlot;
                     spawn.frame = 0;
-                    data.unk20 = tmpl->unk14;
-                    data.unk24 = tmpl->unk18;
+                    data.unk20 = tmpl->frameSpeedHi;
+                    data.unk24 = tmpl->frameSpeedLo;
                     data.unk2C = 0;
-                    spawn.frameSpeed = (tmpl->unk14 + tmpl->unk18) * 0.5f;
-                    data.unk3C = tmpl->unk1C;
-                    data.unk40 = tmpl->unk20;
-                    data.unk44 = tmpl->unk24;
-                    data.unk4C = tmpl->unk2C;
-                    data.stretch = tmpl->unk30;
-                    data.unk48 = tmpl->unk28;
-                    data.unk4A = tmpl->unk2A;
-                    data.unk0 = tmpl->unk0 * self->scale;
-                    data.unk4 = tmpl->unk4 * self->scale;
+                    spawn.frameSpeed = (tmpl->frameSpeedHi + tmpl->frameSpeedLo) * 0.5f;
+                    data.gravity = tmpl->gravity;
+                    data.drag = tmpl->drag;
+                    data.shrinkRate = tmpl->shrinkRate;
+                    data.blend = tmpl->blend;
+                    data.stretch = tmpl->stretch;
+                    data.fadeStart = tmpl->fadeStart;
+                    data.fadeRate = tmpl->fadeRate;
+                    data.unk0 = tmpl->widthHi * self->scale;
+                    data.unk4 = tmpl->widthLo * self->scale;
                     data.unk1C = 0;
                     data.unk8 = spawn.width = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
-                    data.unkC = tmpl->unk8 * self->scale;
-                    data.unk10 = tmpl->unkC * self->scale;
-                    data.unk14 = tmpl->unk10 * self->scale;
+                    data.unkC = tmpl->heightHi * self->scale;
+                    data.unk10 = tmpl->heightLo * self->scale;
+                    data.unk14 = tmpl->heightPeak * self->scale;
                     data.unk1E = 0;
                     data.unk18 = spawn.height = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
                     data.tmpl = tmpl;
@@ -471,7 +472,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         }
                         gActorEmitterSpawnFuncs[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
                                                   &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
-                        freeSlot->particle = particle_newQuadParticleWhite(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
+                        freeSlot->particle = particle_newQuadParticleWhite(&spawn, tmpl->updateFn1, tmpl->updateFn2, 0, tmpl->vertexFn,
                                                            spawnFlag, sizeof(ActorEmitterParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
                             memcpy(&freeSlot->particle->data, &data, sizeof(ActorEmitterParticleData));

@@ -46,8 +46,8 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
     spawn.rgba[1] = emitter->color[1];
     spawn.rgba[2] = emitter->color[2];
     spawn.rgba[3] = emitter->color[3];
-    spawn.alpha = emitter->unk2C;
-    spawn.colorLevel = emitter->unk2D;
+    spawn.alpha = emitter->alpha;
+    spawn.colorLevel = emitter->colorLevel;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
@@ -88,7 +88,7 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
     } else {
         flip = 0;
     }
-    particle = particle_newQuadParticleWhite(&spawn, emitter->unk2E, 0xE, emitter->unk2F, vertexFn, flip | 2,
+    particle = particle_newQuadParticleWhite(&spawn, emitter->updateFn1, 0xE, emitter->expireFn, vertexFn, flip | 2,
                              emitter->extraSize + sizeof(ParticleChannels), owner, list);
     if (particle != NULL) {
         memcpy(&particle->motion, &motion, sizeof(motion));
@@ -138,22 +138,22 @@ s32 particle_flickerChannelParticle(ChannelParticle *particle) {
  * particle to effect 0xD. Returns 1 (keep alive). */
 s32 particle_growChannelParticle(ChannelParticle *particle) {
     ParticleChannels *motion = &particle->motion;
-    s32 flags = particle->head.unk74;
+    s32 flags = particle->head.growFlags;
     s32 grown = TRUE;
 
     if (!(flags & 2)) {
         particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->growRate;
         if (motion->targetA * 0.95f < particle->head.def.width) {
-            flags = particle->head.unk74 |= 2;
+            flags = particle->head.growFlags |= 2;
         } else {
             grown = FALSE;
-            flags = particle->head.unk74;
+            flags = particle->head.growFlags;
         }
     }
     if (!(flags & 8)) {
         particle->head.def.height += (motion->targetB - particle->head.def.height) * motion->growRate;
         if (motion->targetB * 0.95f < particle->head.def.height) {
-            particle->head.unk74 |= 8;
+            particle->head.growFlags |= 8;
         } else {
             grown = FALSE;
         }

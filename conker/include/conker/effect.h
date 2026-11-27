@@ -1541,15 +1541,15 @@ typedef struct EmitterConfig {
     /* 0x06 */ u16 pitchRange;
     /* 0x08 */ f32 speed;
     /* 0x0C */ f32 speedRange;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ u16 unk10Range;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk14Range;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk18Range;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ f32 unk28Chance;
+    /* 0x10 */ s16 lifetime;
+    /* 0x12 */ u16 lifetimeRange;
+    /* 0x14 */ u8 alpha;
+    /* 0x15 */ u8 alphaRange;
+    /* 0x18 */ f32 size;
+    /* 0x1C */ f32 sizeRange;
+    /* 0x20 */ f32 gravity;
+    /* 0x24 */ f32 gravityRange;
+    /* 0x28 */ f32 floorHitChance;
 } EmitterConfig; // size 0x2C
 
 extern const FxImpactSet gImpactSets[];

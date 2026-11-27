@@ -33,7 +33,7 @@ void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 list) {
         drops.spray.gravityRange = 0.37f;
         drops.spray.sizeBase = 280.0f;
         drops.spray.sizeRange = 390.0f;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 1.0f;
         particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, 0, owner, list);
     }

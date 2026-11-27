@@ -265,10 +265,10 @@ void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radius
 typedef struct Node150AFDB0 {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x2F];
-    /* 0x3F */ u8 unk3F;
+    /* 0x3F */ u8 object;
 } Node150AFDB0;
 
-/* Releases (effect_destroyObject) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
+/* Releases (effect_destroyObject) every node of object list 0 of type 17 whose object is dc_glbl_CharNum. Each
  * node's successor is saved on the gObjectWalkNext iteration stack first, so releasing it is safe. */
 void particle_freeCharSpriteEmitters(void) {
     Node150AFDB0 *node;
@@ -276,7 +276,7 @@ void particle_freeCharSpriteEmitters(void) {
     gObjectWalkDepth++;
     for (node = (Node150AFDB0 *)gObjectLists[0][17]; node != NULL; node = gObjectWalkNext[gObjectWalkDepth]) {
         gObjectWalkNext[gObjectWalkDepth] = node->header.next;
-        if (node->unk3F == dc_glbl_CharNum) {
+        if (node->object == dc_glbl_CharNum) {
             effect_destroyObject(&node->header);
         }
     }

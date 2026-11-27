@@ -43,7 +43,7 @@ Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
     return gdl;
 }
 typedef struct {
-    Actor *unk0;
+    Actor *source;
     f32 pos[3];
     s32 targetIndex;
 } Struct150C3230;
@@ -120,7 +120,7 @@ void func_150C3230(Actor *obj) {
             eventData.pos[0] = obj->xpos;
             eventData.pos[1] = obj->ypos;
             eventData.pos[2] = obj->zpos;
-            eventData.unk0 = &movement_obj[obj->owner - 1];
+            eventData.source = &movement_obj[obj->owner - 1];
             eventData.targetIndex = obj->attach_char;
             if (target != NULL) {
                 target->imune = target->stunned = 0;

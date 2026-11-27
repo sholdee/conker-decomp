@@ -962,8 +962,8 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         data.stream.position.y = emitter->position[1];
         data.stream.position.z = emitter->position[2];
         data.speed = emitter->speed;
-        data.unk3C = emitter->unk30;
-        data.unk40 = emitter->unk34;
+        data.distScale = emitter->distScale;
+        data.defaultRemaining = emitter->defaultRemaining;
 
         effect = effect_newTimedEffect((math_random() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);

@@ -175,13 +175,13 @@ s32 particle_updateSpiralFadeSound(SpiralParticle *obj) {
     return 1;
 }
 
-/* Event handler: event type 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
+/* Event handler: event type 0x4E clears updateFn and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
  * effect_destroyObject. */
 void particle_onSpiralEvent(SpiralParticle *obj, s32 event, u8 eventType) {
     SpiralState *spiral;
     spiral = &obj->spiral;
     if (eventType == 0x4E) {
-        obj->unk71 = 0;
+        obj->updateFn = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
     } else if (eventType == 0x4F) {
         effect_destroyObject(&obj->header);

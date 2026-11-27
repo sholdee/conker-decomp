@@ -31,10 +31,10 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list) {
         burst.lifetimeBase = 40;
         burst.lifetimeRange = 35;
         burst.model = 0xA0;
-        burst.unk38 = 0x13;
-        burst.unk3C = 0;
-        burst.unk40 = 0.0f;
-        burst.unk44 = 1.960000038f;
+        burst.bank = 0x13;
+        burst.anim = 0;
+        burst.animSpeedBase = 0.0f;
+        burst.animSpeedRange = 1.960000038f;
         burst.scaleBase = 0.3070000112f;
         burst.scaleRange = 0.0f;
         burst.rotVelBase.x = burst.rotVelBase.z = -12.85999966f;

@@ -40,9 +40,9 @@ typedef struct {
     /* 0x08 */ Vec3f offset;
     /* 0x14 */ u8 bone;
     /* 0x16 */ s16 duration;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 updateFn;
+    /* 0x1A */ u8 expireFn;
     /* 0x1C */ void *sprite;
     /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
@@ -63,7 +63,7 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
     D_800A7708, D_800A7758, D_800A77A8, D_800A77F8, D_800A7848, D_800A7898, D_800A78E8,
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
 };
-/* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
+/* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, expireFunc); the callbacks take the emitter as
    their own view (effect_updateBurnDamage and effect_clearOnFire, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
 static s32 (*gAnchorEmitterUpdateFuncs[])() = { effect_updateBurnDamage };
 static void (*gAnchorEmitterExpireFuncs[])() = { effect_clearOnFire };
@@ -135,7 +135,7 @@ void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 e
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id, with extraSize bytes of the caller's data after it. */
-void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 extraSize,
+void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 expireFunc, s8 childKind, u8 messageFunc, s32 extraSize,
                     u8 fxOwner, s32 fxList) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -146,13 +146,13 @@ void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updat
     if (particle_getEmitterKindForObj(owner, &kind, index) == 0) {
         return NULL;
     }
-    return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, unk59Func,
-                         childKind, unk5A, extraSize, fxOwner, fxList);
+    return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, expireFunc,
+                         childKind, messageFunc, extraSize, fxOwner, fxList);
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                       s8 childKind, u8 unk5A, s32 extraSize, u8 fxOwner, s32 fxList) {
+AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 expireFunc,
+                       s8 childKind, u8 messageFunc, s32 extraSize, u8 fxOwner, s32 fxList) {
     FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
     AnchorEmitterParams params;
@@ -164,8 +164,8 @@ AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTempla
     params.tmpl = *tmpl;
     params.updateFunc = updateFunc;
     desc.owner = owner;
-    params.unk59Func = unk59Func;
-    params.unk5A = unk5A;
+    params.expireFunc = expireFunc;
+    params.messageFunc = messageFunc;
     desc.ownerId = owner->unique_id;
     if (duration == -1) {
         desc.duration = 300;
@@ -212,8 +212,8 @@ s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
 void particle_runAnchorEmitterExpire(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
-    if (emitter->params.unk59Func != -1) {
-        gAnchorEmitterExpireFuncs[params->unk59Func](emitter);
+    if (emitter->params.expireFunc != -1) {
+        gAnchorEmitterExpireFuncs[params->expireFunc](emitter);
     }
 }
 
@@ -257,8 +257,8 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         kind = 0x14;
                     }
                     sprite = particle_spawnJitterParticle(&pos, &size, -1,
-                                           frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                           &gZeroVec3f, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           frameRand % (params->tmpl.alphaRange + 1) + params->tmpl.alpha,
+                                           &gZeroVec3f, 0.0f, 1.0f, params->tmpl.easeFactor, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->group.header.owner, emitter->group.header.kind);
                     if (sprite != NULL) {
                         desc.owner = owner;
@@ -266,13 +266,13 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         desc.offset = anchor->offset;
                         desc.bone = anchor->bone;
                         desc.duration = math_random() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
-                        desc.unk18 = 1;
+                        desc.flags = 1;
                         if (params->tmpl.flags & 1) {
-                            desc.unk19 = 1;
+                            desc.updateFn = 1;
                         } else {
-                            desc.unk19 = 0;
+                            desc.updateFn = 0;
                         }
-                        desc.unk1A = 0;
+                        desc.expireFn = 0;
                         desc.parent = emitter;
                         desc.sprite = sprite;
                         effect_spawnBoneFollower(&desc, &pos, 0, emitter->group.header.owner, emitter->group.header.kind);
@@ -324,11 +324,11 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest) {
     sprite->jitter.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->jitter;
-    motion->gravity = math_randomFloat() * params->tmpl.unk34Range + params->tmpl.unk30;
-    motion->drag = params->tmpl.unk38;
-    sprite->head.def.fadeStart = params->tmpl.unk3C;
-    sprite->head.def.fadeRate = params->tmpl.unk3E;
-    sprite->head.def.lifetime = math_random() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    motion->gravity = math_randomFloat() * params->tmpl.gravityRange + params->tmpl.gravity;
+    motion->drag = params->tmpl.drag;
+    sprite->head.def.fadeStart = params->tmpl.fadeStart;
+    sprite->head.def.fadeRate = params->tmpl.fadeRate;
+    sprite->head.def.lifetime = math_random() % (params->tmpl.launchLifeRange + 1) + params->tmpl.launchLifeMin;
     if (params->tmpl.flags & 1) {
         sprite->head.updateFn1 = 0x21;
     } else {

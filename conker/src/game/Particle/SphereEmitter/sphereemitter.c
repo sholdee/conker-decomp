@@ -237,14 +237,14 @@ void particle_updateGatherParticle(BillboardParticle *particle) {
 
 /* Data copied to 0x28 of the effect created by particle_startGatherEmitter. */
 typedef struct {
-    /* 0x00 */ Words3 unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
+    /* 0x00 */ Words3 pos;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 spawnAccum;
+    /* 0x14 */ f32 spawnRate;
+    /* 0x18 */ s16 frameStep;
+    /* 0x1A */ s16 frameStepRange;
+    /* 0x1C */ s16 size;
+    /* 0x1E */ s16 sizeRange;
 } EffectData151A18DC;
 
 /* Creates a type 3 effect_newTimedEffectNoDraw effect from the spawner's settings. */
@@ -253,16 +253,16 @@ void particle_startGatherEmitter(EffectSpawner *spawner) {
     EffectData151A18DC data;
     TimedEffect *effect;
 
-    data.unk0 = spawner->unk28;
-    data.unkC = spawner->unk34;
-    data.unk10 = 0.0f;
-    data.unk14 = spawner->unk38;
-    data.unk18 = spawner->unk3E;
-    data.unk1A = spawner->unk40;
-    data.unk1C = spawner->unk42;
-    data.unk1E = spawner->unk44;
+    data.pos = spawner->pos;
+    data.radius = spawner->radius;
+    data.spawnAccum = 0.0f;
+    data.spawnRate = spawner->spawnRate;
+    data.frameStep = spawner->frameStep;
+    data.frameStepRange = spawner->frameStepRange;
+    data.size = spawner->size;
+    data.sizeRange = spawner->sizeRange;
 
-    effect = effect_newTimedEffectNoDraw(spawner->unk3C, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -390,16 +390,16 @@ void particle_updateHoverParticle(BillboardParticle *particle) {
 
 /* Data copied to 0x28 of the effect created by particle_startHoverEmitter. */
 typedef struct {
-    /* 0x00 */ Words3 unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
+    /* 0x00 */ Words3 pos;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 spawnAccum;
+    /* 0x14 */ f32 spawnRate;
+    /* 0x18 */ s16 frameStep;
+    /* 0x1A */ s16 frameStepRange;
+    /* 0x1C */ s16 size;
+    /* 0x1E */ s16 sizeRange;
+    /* 0x20 */ s16 growRate;
+    /* 0x22 */ s16 growRateRange;
 } EffectData151A1EE8;
 
 /* Creates a type 4 effect_newTimedEffectNoDraw effect from the spawner's settings. */
@@ -408,18 +408,18 @@ void particle_startHoverEmitter(EffectSpawner *spawner) {
     EffectData151A1EE8 data;
     TimedEffect *effect;
 
-    data.unk0 = spawner->unk28;
-    data.unkC = spawner->unk34;
-    data.unk10 = 0.0f;
-    data.unk14 = spawner->unk38;
-    data.unk18 = spawner->unk3E;
-    data.unk1A = spawner->unk40;
-    data.unk1C = spawner->unk42;
-    data.unk1E = spawner->unk44;
-    data.unk20 = spawner->unk46;
-    data.unk22 = spawner->unk48;
+    data.pos = spawner->pos;
+    data.radius = spawner->radius;
+    data.spawnAccum = 0.0f;
+    data.spawnRate = spawner->spawnRate;
+    data.frameStep = spawner->frameStep;
+    data.frameStepRange = spawner->frameStepRange;
+    data.size = spawner->size;
+    data.sizeRange = spawner->sizeRange;
+    data.growRate = spawner->growRate;
+    data.growRateRange = spawner->growRateRange;
 
-    effect = effect_newTimedEffectNoDraw(spawner->unk3C, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->lifetime, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }

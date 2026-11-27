@@ -27,22 +27,22 @@ typedef struct {
     /* 0x04 */ f32 rate;
     /* 0x08 */ f32 scale;
     /* 0x0C */ f32 pending; // particles owed; one is spawned per whole unit
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 maxHeight;
     /* 0x14 */ f32 xScaleBase;
     /* 0x18 */ f32 xScaleRange;
     /* 0x1C */ f32 yScaleBase;
     /* 0x20 */ f32 yScaleRange;
-    /* 0x24 */ s16 unk24Base;
-    /* 0x26 */ s16 unk24Range;
-    /* 0x28 */ f32 unk38Base;
-    /* 0x2C */ f32 unk38Range;
-    /* 0x30 */ f32 unk40Base;
-    /* 0x34 */ f32 unk40Range;
-    /* 0x38 */ f32 unk44Base;
-    /* 0x3C */ f32 unk44Range;
+    /* 0x24 */ s16 lifeBase;
+    /* 0x26 */ s16 lifeRange;
+    /* 0x28 */ f32 scaleBase;
+    /* 0x2C */ f32 scaleRange;
+    /* 0x30 */ f32 shrinkRateBase;
+    /* 0x34 */ f32 shrinkRateRange;
+    /* 0x38 */ f32 growRateBase;
+    /* 0x3C */ f32 growRateRange;
     /* 0x40 */ u8 useGround;
-    /* 0x41 */ u8 unk2CBase;
-    /* 0x42 */ u8 unk2CRange;
+    /* 0x41 */ u8 alphaBase;
+    /* 0x42 */ u8 alphaRange;
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
     /* 0x6C */ ZoneNode *zone;
@@ -81,12 +81,12 @@ void particle_updateRegionEmitter(u8 *effect) {
         particle.color[2] = 0;
         particle.color[3] = 0xFF;
         particle.flags = 1;
-        particle.unk2D = 0xFF;
+        particle.colorLevel = 0xFF;
         particle.extraSize = 0;
-        particle.unk2E = 0;
-        particle.unk2F = 0;
+        particle.updateFn1 = 0;
+        particle.expireFn = 0;
         particle.effect = 0x10;
-        particle.maxHeight = emitter->unk10;
+        particle.maxHeight = emitter->maxHeight;
         do {
             switch (emitter->region->flags & 3) {
             case 2: {
@@ -164,11 +164,11 @@ void particle_updateRegionEmitter(u8 *effect) {
             particle.maxB = 57.969f * yScale;
             particle.minB = 42.714f * yScale;
             particle.altB = 118.763f * yScale;
-            particle.life = math_random() % (emitter->unk24Range + 1) + emitter->unk24Base;
-            particle.scale = math_randomFloat() * emitter->unk38Range + emitter->unk38Base;
-            particle.shrinkRate = math_randomFloat() * emitter->unk40Range + emitter->unk40Base;
-            particle.growRate = math_randomFloat() * emitter->unk44Range + emitter->unk44Base;
-            particle.unk2C = math_random() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
+            particle.life = math_random() % (emitter->lifeRange + 1) + emitter->lifeBase;
+            particle.scale = math_randomFloat() * emitter->scaleRange + emitter->scaleBase;
+            particle.shrinkRate = math_randomFloat() * emitter->shrinkRateRange + emitter->shrinkRateBase;
+            particle.growRate = math_randomFloat() * emitter->growRateRange + emitter->growRateBase;
+            particle.alpha = math_random() % (emitter->alphaRange + 1) + emitter->alphaBase;
             particle_spawnChannelParticle(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);

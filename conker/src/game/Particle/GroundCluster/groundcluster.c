@@ -134,14 +134,14 @@ void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count
         particle.color[2] = 0;
         particle.color[3] = 0xFF;
         particle.flags = 1;
-        particle.unk2C = 0xFF;
-        particle.unk2D = 0xFF;
-        particle.unk2F = expireFn;
+        particle.alpha = 0xFF;
+        particle.colorLevel = 0xFF;
+        particle.expireFn = expireFn;
         particle.scale = 0.0f;
         particle.shrinkRate = 0.045f;
         particle.growRate = 0.7f;
         particle.extraSize = 0;
-        particle.unk2E = 0;
+        particle.updateFn1 = 0;
         particle.effect = 15;
         particle.pos.y = y;
 
@@ -179,9 +179,9 @@ void particle_spawnRandomChannelParticle(Vec3f *pos, u8 owner, s32 list) {
     particle.color[1] = 0;
     particle.color[2] = 0;
     particle.color[3] = 0xFF;
-    particle.unk2D = 0xFF;
-    particle.unk2E = 0;
-    particle.unk2F = 1;
+    particle.colorLevel = 0xFF;
+    particle.updateFn1 = 0;
+    particle.expireFn = 1;
     particle.extraSize = 0;
     particle.flags = 1;
     particle.effect = 28;
@@ -198,7 +198,7 @@ void particle_spawnRandomChannelParticle(Vec3f *pos, u8 owner, s32 list) {
     particle.altB = 118.763f * height;
     particle.life = math_random() % 17U + 16;
     particle.scale = (math_randomFloat() * 347.0f + 50.0f) * 0.001f;
-    particle.unk2C = math_random() % 156U + 100;
+    particle.alpha = math_random() % 156U + 100;
     particle_spawnChannelParticle(&particle, 10, 0, 0, owner, list);
 }
 
@@ -234,9 +234,9 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 owner, s32 list) {
         particle.color[1] = 0;
         particle.color[2] = 0;
         particle.color[3] = 0xFF;
-        particle.unk2D = 0xFF;
-        particle.unk2E = 0;
-        particle.unk2F = 1;
+        particle.colorLevel = 0xFF;
+        particle.updateFn1 = 0;
+        particle.expireFn = 1;
         particle.extraSize = 0;
         particle.flags = 1;
         particle.effect = 28;
@@ -257,7 +257,7 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 owner, s32 list) {
             particle.altB = 118.763f * height;
             particle.life = math_random() % 31U + 20;
             particle.scale = math_randomFloat() * 497.0f * 0.001f;
-            particle.unk2C = math_random() % 156U + 100;
+            particle.alpha = math_random() % 156U + 100;
             particle_spawnChannelParticle(&particle, 10, 0, 0, owner, list);
             count -= 1.0f;
         } while (count > 1.0f);

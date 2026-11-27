@@ -260,14 +260,14 @@ void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3)
     state.ownerUniqueId = owner->unique_id;
     state.spawnTimer = 0.0f;
     state.side = 0;
-    state.unkD = arg2;
+    state.skipTarget = arg2;
     state.wobble = NULL;
-    state.unk14 = 0;
-    state.unk1D = arg3;
+    state.rumbleTimer = 0;
+    state.ownerAnimSeq = arg3;
     if (other != NULL && other->CameraPtr != NULL) {
-        state.unk16 = other->CameraPtr->CNumber;
+        state.otherCamera = other->CameraPtr->CNumber;
     } else {
-        state.unk16 = -1;
+        state.otherCamera = -1;
     }
     state.other = other;
     if (other != NULL) {
@@ -317,14 +317,14 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
         obj->base.header.state = -1;
         return;
     }
-    if (owner->animseq.uh != state->unk1D) {
+    if (owner->animseq.uh != state->ownerAnimSeq) {
         obj->base.header.state = -1;
         return;
     }
 
     state->spawnTimer -= gFrameDelta;
     while (state->spawnTimer < 0.0f) {
-        particle_spawnSideEffect(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
+        particle_spawnSideEffect(owner, state->side, -state->spawnTimer, state->skipTarget, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->mv != NULL) {
@@ -334,20 +334,20 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
         state->spawnTimer += 4.0f + (math_randomFloat() * 4.0f);
     }
 
-    if (state->unk16 == -1) {
+    if (state->otherCamera == -1) {
         return;
     }
-    state->unk14 -= gFrameTicks;
-    if (state->unk14 < 0) {
+    state->rumbleTimer -= gFrameTicks;
+    if (state->rumbleTimer < 0) {
         spark.flags = 1;
         math_random();
         spark.duration = 30;
-        spark.playerMask = 1 << state->unk16;
+        spark.playerMask = 1 << state->otherCamera;
         spark.strength = (math_random() % 6U) + 3;
         spark.updateKind = -1;
         cont_spawnRumble(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         math_random();
-        state->unk14 = 250;
+        state->rumbleTimer = 250;
     }
 }
 

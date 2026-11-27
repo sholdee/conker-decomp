@@ -11,8 +11,8 @@ typedef struct {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 bone;
     /* 0x04 */ Vec3f offset; /* bone-local spawn point */
-    /* 0x10 */ u8 unk10Min;
-    /* 0x11 */ u8 unk10Range;
+    /* 0x10 */ u8 alphaMin;
+    /* 0x11 */ u8 alphaRange;
     /* 0x12 */ s16 growDelayMin; /* subtracted from the lifetime */
     /* 0x14 */ s16 growDelayRange;
     /* 0x18 */ f32 sizeMin;
@@ -120,7 +120,7 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x1C0001;
-        spawn.alpha = (math_random() % (def->unk10Range + 1)) + def->unk10Min;
+        spawn.alpha = (math_random() % (def->alphaRange + 1)) + def->alphaMin;
         spawn.colorLevel = 0xFF;
         spawn.primMode = 0;
         spawn.envMode = 6;

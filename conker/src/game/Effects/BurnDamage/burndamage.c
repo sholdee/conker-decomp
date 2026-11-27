@@ -18,7 +18,7 @@ void effect_anchorEmitterMessage(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
     if (event == 0x2A) {
         effect_handleFollowerGroupActorGone(&obj->group, msg);
     }
-    handler = gAnchorEmitterMessageFuncs[obj->params.unk5A];
+    handler = gAnchorEmitterMessageFuncs[obj->params.messageFunc];
     if (handler != NULL) {
         handler(obj, msg, event);
     }

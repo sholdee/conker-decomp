@@ -29,12 +29,12 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     particle.color[1] = 0;
     particle.color[2] = 0;
     particle.color[3] = 0xFF;
-    particle.unk2C = 0xFF;
-    particle.unk2D = 0xFF;
+    particle.alpha = 0xFF;
+    particle.colorLevel = 0xFF;
     particle.extraSize = 0;
     particle.flags = 1;
-    particle.unk2E = 0;
-    particle.unk2F = 1;
+    particle.updateFn1 = 0;
+    particle.expireFn = 1;
     particle.life = (math_random() % 201U) + 100;
     particle.effect = 0xF;
     particle.scale = 0.0f;
@@ -83,9 +83,9 @@ void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
                 particle.color[1] = 0;
                 particle.color[2] = 0;
                 particle.color[3] = 0xFF;
-                particle.unk2D = 0xFF;
-                particle.unk2E = 20;
-                particle.unk2F = 1;
+                particle.colorLevel = 0xFF;
+                particle.updateFn1 = 20;
+                particle.expireFn = 1;
                 particle.extraSize = 4;
                 particle.flags = 1;
                 particle.effect = 25;
@@ -105,7 +105,7 @@ void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
                         particle.altB = 118.763f * scaleB;
                         particle.life = (math_random() % 151U) + 50;
                         particle.scale = (math_randomFloat() * 500.0f) * 0.001f;
-                        particle.unk2C = (math_random() % 156U) + 100;
+                        particle.alpha = (math_random() % 156U) + 100;
                         created = particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->extra, &angle, sizeof(angle));

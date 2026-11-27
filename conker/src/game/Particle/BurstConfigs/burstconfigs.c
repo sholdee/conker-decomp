@@ -178,7 +178,7 @@ void particle_spawnDropSpray(ConeBasis *cone, DropSpray *config, CollisionHit *g
                           (math_random() % (config->lifeRange + 1)) + config->lifeBase,
                           (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                           (math_randomFloat() * config->sizeRange) + config->sizeBase,
-                          math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
+                          math_randomFloat() < config->floorHitChance, 1.4f, 1.4f, 1, ground, config->wobbles,
                           math_randomFloat() < config->bounceChance, owner, list);
             count--;
         }
@@ -201,7 +201,7 @@ void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, Coll
                       (math_random() % (config->lifeRange + 1)) + config->lifeBase,
                       (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,
-                      math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
+                      math_randomFloat() < config->floorHitChance, 1.4f, 1.4f, 1, ground, config->wobbles,
                       math_randomFloat() < config->bounceChance, owner, list);
         count--;
     }
@@ -451,8 +451,8 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 altDisplayList, u8 owner, s
 /* Copied into the spawned object at +0x110. */
 typedef struct {
     Vec3f velocity;
-    f32 unkC;
-    f32 unk10;
+    f32 gravity;
+    f32 drag;
     Vec3f spin;
 } Local151511FCExtra;
 
@@ -493,9 +493,9 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
     desc.scale.z = 1.0f;
     desc.flags = config->flags | 0x08000000;
     desc.colorLevel = 0xFF;
-    desc.primMode = config->unk46;
-    desc.envMode = config->unk47;
-    extra.unk10 = config->unk6C;
+    desc.primMode = config->primMode;
+    desc.envMode = config->envMode;
+    extra.drag = config->drag;
     if (math_getTriEdges(&config->triangle, &axis0, &axis1, &normal) != 0) {
         math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
         math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
@@ -518,16 +518,16 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
             desc.rot.x = math_randomFloat() * 360.0f;
             desc.rot.y = math_randomFloat() * 360.0f;
             desc.rot.z = math_randomFloat() * 360.0f;
-            desc.alpha = (math_random() % (config->unk44Range + 1)) + config->unk44Base;
+            desc.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
             extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
-            extra.unkC = (math_randomFloat() * config->unk50) + config->unk4C;
+            extra.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
             extra.spin.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             extra.spin.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             // matching: the comma expression makes IDO load &gWhiteVtxColors inside the loop's register plan
             object = particle_newQuadParticle(&desc, (0, &gWhiteVtxColors), 25, 0, 0, 23, ((math_random() & 1) * 2) + (math_random() & 1),
-                                   config->unk60, config->unk64, 32, owner, list);
+                                   config->maxLights, config->lightMask, 32, owner, list);
             if (object != NULL) {
                 memcpy((u8 *)object + 0x110, &extra, sizeof(extra));
             }
@@ -572,10 +572,10 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 owner, s32 list
         motion.texture = config->green;
         motion.shade = config->blue;
         motion.flags = config->red;
-        motion.fadeStart = config->unk9C;
-        motion.fadeRate = config->unk9E;
+        motion.fadeStart = config->fadeStart;
+        motion.fadeRate = config->fadeRate;
         spawn.pos = config->pos;
-        spawn.material = config->unkA0;
+        spawn.material = config->material;
         count = math_random() % (config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = math_random();
@@ -591,7 +591,7 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 owner, s32 list
             motion.velocity.z = (axis0.z * first + axis1.z * second + normal.z) * speed;
             trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1],
                           config->handlers[2], config->handlers[3], config->handlers[4],
-                          config->handlers[5], config->unk74, config->unk78,
+                          config->handlers[5], config->maxLights, config->lightMask,
                           &config->render, 0, ownerCopy, list);
             count--;
         }
@@ -805,7 +805,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 owner, s32 list) {
     params.preDrawFunc = -1;
     params.postDrawFunc = -1;
     params.model = config->model;
-    params.bank = config->unk38;
+    params.bank = config->bank;
     params.render.colorDither = 0x80;
     params.render.alphaDither = 0x20;
     params.render.otherModeH = 0;
@@ -840,7 +840,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 owner, s32 list) {
         motion.rotVel.y = (math_randomFloat() * config->rotVelRange.y) + config->rotVelBase.y;
         motion.rotVel.z = (math_randomFloat() * config->rotVelRange.z) + config->rotVelBase.z;
         motion.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
-        effect_newMovingModelEffect(&params, &motion, config->unk3C, (math_randomFloat() * config->unk44) + config->unk40, 0, 0, 0, owner, list);
+        effect_newMovingModelEffect(&params, &motion, config->anim, (math_randomFloat() * config->animSpeedRange) + config->animSpeedBase, 0, 0, 0, owner, list);
         count--;
     }
 }

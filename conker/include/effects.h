@@ -945,7 +945,7 @@ typedef struct DropSpray {
     /* 0x30 */ s8 unk30;            /* not read by the spray functions */
     /* 0x31 */ u8 kind;
     /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ f32 unk34;           /* probability of particle_spawnSteamParticle's hitsFloor */
+    /* 0x34 */ f32 floorHitChance;  /* probability of particle_spawnSteamParticle's hitsFloor */
     /* 0x38 */ u8 wobbles;
     /* 0x39 */ u8 pad39[3];
     /* 0x3C */ f32 bounceChance;
@@ -1136,12 +1136,12 @@ typedef struct SurfacePuffSpray {
     /* 0x71 */ u8 alphaBase;
     /* 0x72 */ u8 alphaRange;
     /* 0x73 */ u8 pad73;
-    /* 0x74 */ s32 unk74;           /* trail_createMotionTrail's arg9 */
-    /* 0x78 */ s32 unk78;           /* trail_createMotionTrail's arg10 */
+    /* 0x74 */ s32 maxLights;       /* trail_createMotionTrail's maxLights */
+    /* 0x78 */ s32 lightMask;       /* trail_createMotionTrail's lightMask */
     /* 0x7C */ TrailRender render;
-    /* 0x9C */ s16 unk9C;           /* copied to the motion block's 0x1C */
-    /* 0x9E */ s16 unk9E;           /* copied to the motion block's 0x1E */
-    /* 0xA0 */ s32 unkA0;           /* EffectTemplate.material */
+    /* 0x9C */ s16 fadeStart;       /* TrailMotion.fadeStart */
+    /* 0x9E */ s16 fadeRate;        /* TrailMotion.fadeRate */
+    /* 0xA0 */ s32 material;        /* EffectTemplate.material */
 } SurfacePuffSpray; /* size 0xA4 */
 
 /* particle_spawnSpriteBurst (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) sprite particles (particle_newSpriteParticleWithFloor) at pos,
@@ -1531,21 +1531,21 @@ typedef struct SurfaceBurst {
     /* 0x3C */ f32 scaleBase;       /* ParticleDef.width = height */
     /* 0x40 */ f32 scaleRange;
     /* 0x44 */ s32 flags;           /* ParticleDef.flags (0x08000000 is always added) */
-    /* 0x48 */ u8 unk44Base;        /* ParticleDef.alpha */
-    /* 0x49 */ u8 unk44Range;
+    /* 0x48 */ u8 alphaBase;        /* ParticleDef.alpha */
+    /* 0x49 */ u8 alphaRange;
     /* 0x4A */ u8 pad4A[2];
-    /* 0x4C */ f32 unk4C;           /* base and range of the particle's motion word at +0x11C */
-    /* 0x50 */ f32 unk50;
+    /* 0x4C */ f32 gravityBase;     /* base and range of the particle's ballistic gravity (DefParticleMotion, +0x11C) */
+    /* 0x50 */ f32 gravityRange;
     /* 0x54 */ f32 speedBase;
     /* 0x58 */ f32 speedRange;
-    /* 0x5C */ u8 unk46;            /* ParticleDef.primMode */
-    /* 0x5D */ u8 unk47;            /* ParticleDef.envMode */
+    /* 0x5C */ u8 primMode;         /* ParticleDef.primMode */
+    /* 0x5D */ u8 envMode;          /* ParticleDef.envMode */
     /* 0x5E */ u8 pad5E[2];
-    /* 0x60 */ s32 unk60;           /* particle_newQuadParticle's maxLights argument */
-    /* 0x64 */ s32 unk64;           /* particle_newQuadParticle's lightMask argument */
+    /* 0x60 */ s32 maxLights;       /* particle_newQuadParticle's maxLights argument */
+    /* 0x64 */ s32 lightMask;       /* particle_newQuadParticle's lightMask argument */
     /* 0x68 */ s16 fadeStart;
     /* 0x6A */ s16 fadeRate;
-    /* 0x6C */ f32 unk6C;           /* the particle's motion word at +0x120 */
+    /* 0x6C */ f32 drag;            /* the particle's ballistic drag (DefParticleMotion, +0x120) */
     /* 0x70 */ f32 spin;            /* spin.x / spin.z are random in [-spin, spin] */
 } SurfaceBurst; /* size 0x74 */
 
@@ -1734,24 +1734,24 @@ typedef struct AnchorEmitterTemplate {
     /* 0x14 */ f32 sizeY;
     /* 0x18 */ f32 sizeXRange;
     /* 0x1C */ f32 sizeYRange;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21Range;
+    /* 0x20 */ u8 alpha;
+    /* 0x21 */ u8 alphaRange;
     /* 0x22 */ s16 lifeMin;
     /* 0x24 */ s16 lifeRange;
     /* 0x26 */ u8 pad26[2];
     /* 0x28 */ s32 maxCount;
     /* 0x2C */ f32 velocityScale;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34Range;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42Range;
+    /* 0x30 */ f32 gravity;
+    /* 0x34 */ f32 gravityRange;
+    /* 0x38 */ f32 drag;
+    /* 0x3C */ s16 fadeStart;
+    /* 0x3E */ s16 fadeRate;
+    /* 0x40 */ s16 launchLifeMin;
+    /* 0x42 */ s16 launchLifeRange;
     /* 0x44 */ s32 anchorSet;
     /* 0x48 */ u8 flags;
     /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 unk4C;
+    /* 0x4C */ f32 easeFactor;
 } AnchorEmitterTemplate; /* size 0x50 */
 
 typedef struct AnchorEmitterParams {
@@ -1759,8 +1759,8 @@ typedef struct AnchorEmitterParams {
     /* 0x04 */ AnchorEmitterTemplate tmpl;
     /* 0x54 */ LightEffect *child;
     /* 0x58 */ s8 updateFunc;
-    /* 0x59 */ s8 unk59Func;
-    /* 0x5A */ u8 unk5A;
+    /* 0x59 */ s8 expireFunc;
+    /* 0x5A */ u8 messageFunc;
     /* 0x5B */ u8 pad5B;
 } AnchorEmitterParams; /* size 0x5C */
 
@@ -1922,10 +1922,10 @@ typedef struct ParticleEmitterDesc {
     /* 0x24 */ s16 life;
     /* 0x26 */ u8 color[4];
     /* 0x2A */ u16 flags;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
+    /* 0x2C */ u8 alpha;
+    /* 0x2D */ u8 colorLevel;
+    /* 0x2E */ u8 updateFn1;
+    /* 0x2F */ u8 expireFn;
     /* 0x30 */ s32 extraSize;
     /* 0x34 */ u8 effect;
     /* 0x35 */ u8 pad35[3];
@@ -2054,10 +2054,10 @@ typedef struct ModelBurst {
     /* 0x30 */ s16 lifetimeBase;    /* EffectParams.lifetime */
     /* 0x32 */ s16 lifetimeRange;
     /* 0x34 */ s32 model;           /* EffectParams.model */
-    /* 0x38 */ s32 unk38;           /* EffectParams.unkC */
-    /* 0x3C */ s32 unk3C;           /* effect_newMovingModelEffect's 3rd argument (anim_play's 3rd) */
-    /* 0x40 */ f32 unk40;           /* base and range of effect_newMovingModelEffect's 4th argument */
-    /* 0x44 */ f32 unk44;
+    /* 0x38 */ s32 bank;            /* EffectParams.bank */
+    /* 0x3C */ s32 anim;            /* effect_newMovingModelEffect's anim (anim_play's 3rd argument) */
+    /* 0x40 */ f32 animSpeedBase;   /* base and range of effect_newMovingModelEffect's speed (anim_play's playback speed) */
+    /* 0x44 */ f32 animSpeedRange;
     /* 0x48 */ f32 scaleBase;
     /* 0x4C */ f32 scaleRange;
     /* 0x50 */ Vec3f rotVelBase;
@@ -2081,7 +2081,7 @@ typedef struct DefParticleHead {
     /* 0x071 */ u8 updateFn2;            /* gQuadParticleUpdate2Funcs index, 0 = none */
     /* 0x072 */ u8 expireFn;             /* gQuadParticleExpireFuncs index, 0 = none */
     /* 0x073 */ u8 vertexFn;             /* gQuadParticleVertexFuncs index */
-    /* 0x074 */ u8 unk74;
+    /* 0x074 */ u8 growFlags;
     /* 0x075 */ u8 pad75[3];
     /* 0x078 */ CollisionHit ground;      /* cleared at spawn (height -10000); filled by a ground probe */
     /* 0x09C */ ModelLink link;
@@ -2373,8 +2373,8 @@ typedef struct ParticleStream {
 typedef struct ProjectileStream {
     /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 speed;         /* weapon_spawnProjectile's speed */
-    /* 0x3C */ f32 unk3C;         /* its arg7 */
-    /* 0x40 */ f32 unk40;         /* its arg10 */
+    /* 0x3C */ f32 distScale;     /* its arg7 (weapon_setupProjectileRay's distScale) */
+    /* 0x40 */ f32 defaultRemaining; /* its arg10 */
 } ProjectileStream; /* size 0x44 */
 
 /* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, weapon_updateStreamEmitter, game/Weapon/Projectile/projectile.c; spawned by
@@ -2392,9 +2392,9 @@ typedef struct StreamEmitter {
     /* 0x20 */ f32 angleY;
     /* 0x24 */ f32 spread;        /* max wobble amplitude */
     /* 0x28 */ f32 wobbleSpeed;   /* phase speed of the wobble */
-    /* 0x2C */ f32 speed;         /* copied to ProjectileStream.speed, unk3C, unk40 */
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
+    /* 0x2C */ f32 speed;         /* copied to ProjectileStream.speed, distScale, defaultRemaining */
+    /* 0x30 */ f32 distScale;
+    /* 0x34 */ f32 defaultRemaining;
 } StreamEmitter; /* size 0x38 */
 
 /* Spray description that trail_createSprayEmitter (game/Effects/Trail/SprayEmitter/sprayemitter.c) copies into a new SprayEmitter (0x50 bytes).
@@ -2705,12 +2705,12 @@ typedef struct ActorEmitterParticleData {
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ Vec3f vel;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 unk4C;
+    /* 0x3C */ f32 gravity;
+    /* 0x40 */ f32 drag;
+    /* 0x44 */ f32 shrinkRate;
+    /* 0x48 */ s16 fadeStart;
+    /* 0x4A */ s16 fadeRate;
+    /* 0x4C */ f32 blend;
     /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (particle_buildActorEmitterQuad, game/Particle/ActorEmitterHandlers/actoremitterhandlers.c) */
     /* 0x54 */ struct ParticleTemplate *tmpl;
 } ActorEmitterParticleData; /* size 0x58 */
