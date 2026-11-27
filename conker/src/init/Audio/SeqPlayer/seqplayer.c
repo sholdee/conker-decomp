@@ -213,7 +213,7 @@ void audio_setChannelMask(u8 player, s32 mask, s32 enable) {
 }
 
 u8 func_10008A4C(u8 player, u8 chan) {
-    return gSeqPlayers[player]->chanState[chan].unkD;
+    return gSeqPlayers[player]->chanState[chan].fadeVol;
 }
 
 /* func_10017E4C for every channel in `mask`. */

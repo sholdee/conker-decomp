@@ -678,7 +678,7 @@ src/init/Audio/AudioMgr/audiomgr.c	audio	audio manager: synthesis driver setup, 
 src/libultra/audio/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
 src/init/Audio/DynamicSound/dynamicsound.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
 src/libultra/audio/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
-src/libultra/audio/n_event.c	audio	the event queue (SDK event.c, with Rare's priority argument)
+src/libultra/audio/n_event.c	audio	the event queue (SDK event.c; n_alEvtqPostEvent has a fourth argument of Rare's)
 src/libultra/audio/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
 src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (override/fallback/one-shot)
 src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers

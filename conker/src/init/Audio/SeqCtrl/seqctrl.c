@@ -45,23 +45,23 @@ void audio_ctrlSendMesg(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3
 
 /* Controller 0x20: the bank of the channel's next program change (program = bank * 128 + number). */
 void audio_ctrlBank(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    seqp->chanState[chan].unk8 = arg3;
+    seqp->chanState[chan].bank = arg3;
 }
 
-/* Sends the channel's low-pass settings to its voices: the gain (unk14), and, when the gain is not 0, the
- * cutoff, 440 Hz moved by the note's key (plus unk15 - 64 semitones) and the pitch bend. */
+/* Sends the channel's low-pass settings to its voices: the gain (lowPassGain), and, when the gain is not 0, the
+ * cutoff, 440 Hz moved by the note's key (plus lowPassKey - 64 semitones) and the pitch bend. */
 void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
     N_ALVoiceState *vs;
     s16 gain;
     s8 keyoff;
     f32 pb;
 
-    keyoff = (s8)seqp->chanState[chan].unk15 - 0x40; // matching: this file reads the byte signed
+    keyoff = (s8)seqp->chanState[chan].lowPassKey - 0x40; // matching: this file reads the byte signed
     pb = seqp->chanState[chan].pitchBend;
 
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if (vs->channel == chan) {
-            gain = seqp->chanState[chan].unk14;
+            gain = seqp->chanState[chan].lowPassGain;
             func_1001CB40(&vs->voice, gain);
             if (gain != 0) {
                 func_1001CA90(&vs->voice,
@@ -73,13 +73,13 @@ void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
 
 /* Controller 0x21: the gain of the channel's low-pass (0 turns it off). */
 void audio_ctrlLowPassGain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    seqp->chanState[chan].unk14 = arg3;
+    seqp->chanState[chan].lowPassGain = arg3;
     audio_applyChannelLowPass(seqp, chan);
 }
 
 /* Controller 0x22: the key offset of the low-pass cutoff (64 is no offset). */
 void audio_ctrlLowPassKey(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    seqp->chanState[chan].unk15 = arg3;
+    seqp->chanState[chan].lowPassKey = arg3;
     audio_applyChannelLowPass(seqp, chan);
 }
 
@@ -148,7 +148,7 @@ void audio_ctrlFxMix(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
 /* Controller 0x5C: the aux bus of the channel's new voices. */
 void audio_ctrlFxBus(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if ((u32)arg3 < n_syn->maxAuxBusses) {
-        seqp->chanState[chan].unkB = arg3;
+        seqp->chanState[chan].fxBus = arg3;
     }
 }
 
@@ -173,22 +173,22 @@ void audio_applyChannelVolume(N_ALCSPlayer *seqp, u8 chan) {
         }
     }
 }
-/* Controller 0xFF: starts a fade of the channel's fade volume (unkD) to the value, in the number of steps
+/* Controller 0xFF: starts a fade of the channel's fade volume (fadeVol) to the value, in the number of steps
  * that controller 0xFD set. */
 void audio_ctrlFadeTo(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     f32 delta;
 
-    if (seqp->chanState[chan].unkF == 0) {
-        seqp->chanState[chan].unkF = 0x88;
+    if (seqp->chanState[chan].fadeSteps == 0) {
+        seqp->chanState[chan].fadeSteps = 0x88;
     }
-    if (seqp->chanState[chan].unkE != arg3) {
-        delta = arg3 - seqp->chanState[chan].unkD;
-        seqp->chanState[chan].unk10 = delta / (seqp->chanState[chan].unkF & 0x7F);
-        seqp->chanState[chan].unk10 = fabsf(seqp->chanState[chan].unk10);
-        if (seqp->chanState[chan].unkE == seqp->chanState[chan].unkD) {
-            seqp->chanState[chan].unkE = arg3;
+    if (seqp->chanState[chan].fadeTarget != arg3) {
+        delta = arg3 - seqp->chanState[chan].fadeVol;
+        seqp->chanState[chan].fadeStep = delta / (seqp->chanState[chan].fadeSteps & 0x7F);
+        seqp->chanState[chan].fadeStep = fabsf(seqp->chanState[chan].fadeStep);
+        if (seqp->chanState[chan].fadeTarget == seqp->chanState[chan].fadeVol) {
+            seqp->chanState[chan].fadeTarget = arg3;
         } else {
-            seqp->chanState[chan].unkE = arg3;
+            seqp->chanState[chan].fadeTarget = arg3;
             return;
         }
         goto call_block;
@@ -200,7 +200,7 @@ call_block:
 }
 
 /* Controller 0xFE: one step of the fade. It posts itself again until the fade volume reaches the target
- * (unkE), and it takes a channel with fade volume 0 out of the channel mask. */
+ * (fadeTarget), and it takes a channel with fade volume 0 out of the channel mask. */
 void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     u8 sp2F;
     u8 sp2E;
@@ -209,12 +209,12 @@ void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3
     f32 sp20;
     f32 sp1C;
 
-    sp2F = seqp->chanState[chan].unkD;
-    sp2E = seqp->chanState[chan].unkE;
-    sp20 = seqp->chanState[chan].unk10;
+    sp2F = seqp->chanState[chan].fadeVol;
+    sp2E = seqp->chanState[chan].fadeTarget;
+    sp20 = seqp->chanState[chan].fadeStep;
     sp28 = sp2E - sp2F;
     if (sp28 > 0) {
-        if (seqp->chanState[chan].unkF & 0x80) {
+        if (seqp->chanState[chan].fadeSteps & 0x80) {
             sp20 = sp20 * 2.0f;
         }
         sp24 = sp20;
@@ -241,7 +241,7 @@ void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3
         }
     }
     sp2F = sp28 + sp2F;
-    seqp->chanState[chan].unkD = sp2F;
+    seqp->chanState[chan].fadeVol = sp2F;
     if (sp2F != sp2E) {
         n_alEvtqPostEvent(&seqp->evtq, event, seqp->uspt * 100 * sp1C, 2);
     }
@@ -255,13 +255,13 @@ void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3
 
 /* Controller 0xFD: the number of steps of the next fade (bit 7: a rising fade is twice as fast). */
 void audio_ctrlFadeTime(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    seqp->chanState[chan].unkF = arg3;
+    seqp->chanState[chan].fadeSteps = arg3;
 }
 
 /* Controller 0xFC: sets the fade volume and its target at once (0 mutes the channel). */
 void audio_ctrlFadeSet(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    seqp->chanState[chan].unkD = arg3;
-    seqp->chanState[chan].unkE = arg3;
+    seqp->chanState[chan].fadeVol = arg3;
+    seqp->chanState[chan].fadeTarget = arg3;
     if (arg3 == 0) {
         seqp->chanMask &= (1 << chan) ^ 0xFFFF; // disable
     } else {

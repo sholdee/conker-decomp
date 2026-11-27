@@ -665,20 +665,20 @@ typedef struct {
     // /* 0x06 */  ALFxId              fxId;           /* type of fx assigned to this chan */
     /* 0x06 */  ALPan               pan;            /* overall pan for this chan        */
     /* 0x07 */  u8                  priority;       /* priority for this chan           */
-    /* 0x08 */  u8                  unk8;
+    /* 0x08 */  u8                  bank;           /* Conker: controller 0x20; a program change loads instrument bank * 128 + number */
     /* 0x09 */  u8                  vol;            /* current volume for this chan     */
     /* 0x0A */  u8                  fxmix;          /* current fx mix for this chan     */
-    /* 0x0B */  u8                  unkB;
+    /* 0x0B */  u8                  fxBus;          /* Conker: controller 0x5C; the aux bus of the channel's new voices (ALVoiceConfig.fxBus) */
     /* 0x0C */  u8                  sustain;        /* current sustain pedal state      */
 /* RARE EXTRAS */
-    /* 0x0D */  u8                  unkD;
-    /* 0x0E */  u8                  unkE;
-    /* 0x0F */  u8                  unkF;
-    /* 0x10 */  f32                 unk10;
-    /* 0x14 */  u8                  unk14;
-    /* 0x15 */  u8                  unk15;
-    /* 0x16 */  u8                  unk16;
-    /* 0x17 */  u8                  unk17;
+    /* 0x0D */  u8                  fadeVol;        /* the fade volume: __n_vsVol scales the voice volume by it (255 is full); 0 takes the channel out of chanMask */
+    /* 0x0E */  u8                  fadeTarget;     /* controller 0xFF: the volume that fadeVol moves to */
+    /* 0x0F */  u8                  fadeSteps;      /* controller 0xFD: the number of steps of a fade (low 7 bits); bit 7 doubles the step of a rising fade */
+    /* 0x10 */  f32                 fadeStep;       /* the change of fadeVol in each step: |target - fadeVol| / steps */
+    /* 0x14 */  u8                  lowPassGain;    /* controller 0x21: the gain of the voice low-pass (filter type 18); 0 is off */
+    /* 0x15 */  u8                  lowPassKey;     /* controller 0x22: the key offset of the low-pass cutoff, plus 64 (filter type 19) */
+    /* 0x16 */  u8                  unk16;          /* controller 0x23: the value of filter type 17 for the channel's voices */
+    /* 0x17 */  u8                  noteMesg;       /* bit 0: a note on sends a message to the player's queue, bit 1: a note off does; the message has the value >> 2 */
     /* 0x18 */  f32                 pitchBend;  /* current pitch bend val in cents  */
     /* 0x1C */  ALMicroTime         attackTime;     /* per-channel envelope, used instead of */
     /* 0x20 */  ALMicroTime         decayTime;      /* the sound's envelope when useEnv is set */

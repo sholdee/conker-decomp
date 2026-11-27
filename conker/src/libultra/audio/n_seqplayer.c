@@ -213,8 +213,8 @@ s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp) {
     t1 = (vs->tremelo * vs->velocity * vs->envGain) >> 6;
     t2 = (vs->sound->sampleVolume * seqp->vol * seqp->chanState[vs->channel].vol) >> 14;
 
-    if (seqp->chanState[vs->channel].unkD != 0xFF) {
-        t2 = ((seqp->chanState[vs->channel].unkD * t2) + 1) >> 8;
+    if (seqp->chanState[vs->channel].fadeVol != 0xFF) {
+        t2 = ((seqp->chanState[vs->channel].fadeVol * t2) + 1) >> 8;
     }
 
     t1 *= t2;
@@ -296,15 +296,15 @@ void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
     seqp->chanState[chan].sustain = 0;
     seqp->chanState[chan].bendRange = 200;
     seqp->chanState[chan].pitchBend = 1.0f;
-    seqp->chanState[chan].unk17 = 0;
-    seqp->chanState[chan].unkD = 255;
-    seqp->chanState[chan].unkE = 255;
-    seqp->chanState[chan].unkF = 0;
-    seqp->chanState[chan].unkB = 0;
+    seqp->chanState[chan].noteMesg = 0;
+    seqp->chanState[chan].fadeVol = 255;
+    seqp->chanState[chan].fadeTarget = 255;
+    seqp->chanState[chan].fadeSteps = 0;
+    seqp->chanState[chan].fxBus = 0;
     seqp->chanState[chan].unk16 = 0;
-    seqp->chanState[chan].unk15 = 0;
-    seqp->chanState[chan].unk14 = 0;
-    seqp->chanState[chan].unk8 = 0;
+    seqp->chanState[chan].lowPassKey = 0;
+    seqp->chanState[chan].lowPassGain = 0;
+    seqp->chanState[chan].bank = 0;
 }
 
 

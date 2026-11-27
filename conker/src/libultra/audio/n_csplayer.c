@@ -167,9 +167,9 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 vs->vibrato = oscValue;
                 n_alSynSetPitch(&vs->voice, vs->pitch * vs->vibrato
                                 * seqp->chanState[chan].pitchBend);
-                if (seqp->chanState[chan].unk14) {
+                if (seqp->chanState[chan].lowPassGain) {
                     func_1001CA90(&vs->voice,
-                        440.0f * func_1001CEA4(seqp->chanState[chan].unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                        440.0f * func_1001CEA4(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                         * seqp->chanState[chan].pitchBend * vs->vibrato);
                 }
                 evt.type = 24;
@@ -280,8 +280,8 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                             __n_seqpReleaseVoice((N_ALSeqPlayer*)seqp, &vs->voice, KILL_TIME);
                     }
                     for (chan = 0; chan < 16; chan++) {
-                        seqp->chanState[chan].unkD = seqp->chanState[chan].unkE;
-                        if (seqp->chanState[chan].unkD == 0) {
+                        seqp->chanState[chan].fadeVol = seqp->chanState[chan].fadeTarget;
+                        if (seqp->chanState[chan].fadeVol == 0) {
                             seqp->chanMask &= (0xFFFF ^ (1 << chan));
                         } else {
                             seqp->chanMask |= (1 << chan);
@@ -431,7 +431,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                              ERR_ALSEQP_NO_SOUND);
 
                 config.priority = cs->priority;
-                config.fxBus    = cs->unkB;
+                config.fxBus    = cs->fxBus;
                 config.unityPitch = 0;
                 config.unk8 = 0;
 
@@ -540,9 +540,9 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                  */
                 pitch = vs->pitch * cs->pitchBend * vs->vibrato;
                 fxmix = audio_getVoiceFxMix(vs, seqp);
-                unk7A = cs->unk14;
+                unk7A = cs->lowPassGain;
                 if (unk7A) {
-                    unk70 = func_1001CEA4(cents / 100 + cs->unk15 - 0x40) * 440.0f * cs->pitchBend;
+                    unk70 = func_1001CEA4(cents / 100 + cs->lowPassKey - 0x40) * 440.0f * cs->pitchBend;
                 } else {
                     unk70 = 127.0f;
                 }
@@ -577,8 +577,8 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     D_80042810[chan] = deltaTime;
                     n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                 }
-                if ((cs->unk17 & 1) && seqp->msgQueue) {
-                    osSendMesg(seqp->msgQueue, (OSMesg)((D_80042810[chan] & ~0xFF) | (cs->unk17 >> 2)), OS_MESG_NOBLOCK);
+                if ((cs->noteMesg & 1) && seqp->msgQueue) {
+                    osSendMesg(seqp->msgQueue, (OSMesg)((D_80042810[chan] & ~0xFF) | (cs->noteMesg >> 2)), OS_MESG_NOBLOCK);
                 }
                 break;
             }
@@ -606,8 +606,8 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                                          vs->sound->envelope->releaseTime);
                 }
             }
-            if ((cs->unk17 & 2) && seqp->msgQueue) {
-                osSendMesg(seqp->msgQueue, (OSMesg)((key << 16) | 8 | (cs->unk17 >> 2)), OS_MESG_NOBLOCK);
+            if ((cs->noteMesg & 2) && seqp->msgQueue) {
+                osSendMesg(seqp->msgQueue, (OSMesg)((key << 16) | 8 | (cs->noteMesg >> 2)), OS_MESG_NOBLOCK);
             }
             break;
 
@@ -659,7 +659,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
             break;
 
         case (AL_MIDI_ProgramChange):
-            tmp = (seqp->chanState[chan].unk8 << 7) + key;
+            tmp = (seqp->chanState[chan].bank << 7) + key;
             if (tmp < seqp->bank->instCount) {
                 if (audio_loadChannelProgram((N_ALSeqPlayer *)seqp, tmp, chan)) {
                     evt.type = AL_SEQP_MIDI_EVT;
@@ -695,9 +695,9 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     if (vs->channel == chan) {
                         n_alSynSetPitch(&vs->voice,
                                         vs->pitch * bendRatio * vs->vibrato);
-                        if (seqp->chanState[chan].unk14) {
+                        if (seqp->chanState[chan].lowPassGain) {
                             func_1001CA90(&vs->voice,
-                                440.0f * func_1001CEA4(seqp->chanState[chan].unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                                440.0f * func_1001CEA4(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                                 * bendRatio * vs->vibrato);
                         }
                     }

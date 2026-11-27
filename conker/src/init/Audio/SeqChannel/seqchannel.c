@@ -7,7 +7,7 @@ void func_10017AF0(N_ALCSPlayer *seqp, OSMesgQueue *queue) {
 }
 
 void func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2) {
-    seqp->chanState[chan].unk17 = arg2;
+    seqp->chanState[chan].noteMesg = arg2;
 }
 
 void func_10017B30(N_ALCSPlayer *seqp) {
@@ -16,8 +16,8 @@ void func_10017B30(N_ALCSPlayer *seqp) {
     seqp->chanMask = 0xFFFF;
     for (chan = 0; chan < seqp->maxChannels; chan++)
     {
-        seqp->chanState[chan].unkE = 0xFF;
-        seqp->chanState[chan].unkD = 0xFF;
+        seqp->chanState[chan].fadeTarget = 0xFF;
+        seqp->chanState[chan].fadeVol = 0xFF;
     }
 }
 
