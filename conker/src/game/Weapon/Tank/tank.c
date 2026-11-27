@@ -630,7 +630,8 @@ void weapon_releaseTankCamera(Actor *obj) {
 }
 
 
-/* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
+/* Update handler 35: on its first run hides `obj` (drawtype 3: not drawn, skipped by ray casts) with no body radius and
+ * immune, then runs the common object update every frame. */
 void weapon_updateHidden(Actor *obj) {
     if (obj->drawtype != 3) {
         func_151045E0(obj, 15, 250.0f);

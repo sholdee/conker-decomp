@@ -281,7 +281,8 @@ typedef struct {
     /* 0x170 */ u8 unk170; /* start of the per-type state block */
 } SpawnedEffect;
 
-/* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
+/* Spawns model particle 15 on `owner` when it starts the hover (anim 0xE9, actor_updatePlayerControls); its update
+ * weapon_updateHoverModel keeps it while the hover lasts. */
 void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
     ParticleSpawn spawn;
     struct {
@@ -331,7 +332,8 @@ void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-/* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
+/* Model particle update 23: returns 0 (the particle dies) once the owner's anim is no longer 0xE9 (the hover); otherwise
+ * mirrors func_15142A5C(owner) in flag 0x20000 and sets the alpha (unk70) to the owner's animation speed scaled to 0-255. */
 s32 weapon_updateHoverModel(Func151C7038Arg *arg0) {
     Actor *owner;
     f32 speed;

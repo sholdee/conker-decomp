@@ -195,7 +195,8 @@ struct S150D88AC {
     u8 *unk18;
 };
 
-/* Sets unk14[9] to whether unk18[0x6F] is clear. */
+/* Light attach callback 2 (gLightAttachCallbacks): unk14 is the LightEffect's light and unk18 its actor; sets the
+ * light's disabled byte (PointLight 0x09) while the actor's expression (0x6F) is 0 and clears it otherwise. */
 s32 attach_disableLightWithoutExpression(struct S150D88AC *arg0) {
     if (arg0->unk18[0x6F] != 0) {
         arg0->unk14[9] = 0;

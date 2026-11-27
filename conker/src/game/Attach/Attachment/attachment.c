@@ -2673,7 +2673,7 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
     return 1;
 }
 
-/* Hook: removes the attachment once its owner's unk5 becomes 3. */
+/* Hook: removes the attachment once its owner's drawtype becomes 3 (hidden). */
 s32 attach_hookRemoveWhenHidden(ModelAttachment *att, Actor *owner) {
     if (owner->drawtype == 3) {
         return 1;
