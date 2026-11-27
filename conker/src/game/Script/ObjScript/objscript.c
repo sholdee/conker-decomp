@@ -37,7 +37,7 @@ f32 gScriptSpeedups[2];
  * one-byte jump labels.
  * The handlers below act on the current object, gCurrentActor (index dc_glbl_CharNum in movement_obj);
  * their comments call the four argument bytes arg0..arg3. An object's "target" is the object
- * movement_obj[targetIndex], its current waypoint is waypoint of its path gSpawnPaths[unk13F].
+ * movement_obj[targetIndex], its current waypoint is waypoint of its path gSpawnPaths[listpos].
  */
 
 
