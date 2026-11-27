@@ -9,9 +9,9 @@
 #include "conker/weapon.h"
 
 /* matching: no header declares particle_spawnSteamParticle (steam.c): modelbeam.c and blood.c were compiled with other views */
-SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
-                             u8 argE, s32 argF);
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 alpha, f32 size, s32 hitsFloor,
+                             f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 owner, s32 list);
 
 /* Model-space points: weapon_fireSegmentShot transforms gSegmentShotStart and gSegmentShotEnd through model part 0x46 into
  * world space; weapon_spawnSegmentBeam passes gSegmentShotStart and gSegmentShotBeamEnd to effect_spawnBoneBeamParticle. */

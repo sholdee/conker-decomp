@@ -39,8 +39,8 @@ const ModelBurstPiece gBurstPieces[6] = {
 
 /* Defined in game/Particle/StyleParticle/styleparticle.c with a u8 style. This file was compiled with a view that takes an s32 style (no
    narrowing at the call). */
-void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
-                   s32 arg9);
+void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 owner,
+                   s32 list);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
 void effect_spawnModelBurst(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {

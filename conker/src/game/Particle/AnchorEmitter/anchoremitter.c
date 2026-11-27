@@ -9,9 +9,9 @@
 #include "libc/string.h"
 
 /* matching: no header declares particle_spawnJitterParticle (groundcluster.c): areaemitter.c was compiled with another view */
-void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
-                    f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
-                    s32 arg11);
+void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 alpha, const Vec3f *velocity, f32 gravity, f32 drag,
+                    f32 easeFactor, u8 updateFn1, u8 updateFn2, u8 expireFn, s32 texture, u8 flags, s16 fadeStart, s16 fadeRate, s32 extraSize, u8 owner,
+                    s32 list);
 
 /* What effect_newFollowerGroup (game/Effects/BoneFollower/bonefollower.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
@@ -114,16 +114,16 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     return 1;
 }
 
-void particle_broadcastToActorEmitters(s32 arg0, u8 arg1) {
+void particle_broadcastToActorEmitters(s32 event, u8 eventType) {
     IdList1 desc = D_800A74D4;
 
-    effect_sendEventToTypes(desc.ids, 1, arg0, arg1);
+    effect_sendEventToTypes(desc.ids, 1, event, eventType);
 }
 
 /* Message handler of the actor emitter process (type 0x21): message 0x49 names an actor; the emitter dies with it. */
-void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
-    effect_handleOwnerActorEvent((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
-    if (arg2 == 0x49) {
+void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 eventType) {
+    effect_handleOwnerActorEvent((s32)other, eventType, &self->params.owner, &self->params.ownerId, self);
+    if (eventType == 0x49) {
         Actor *selfActor = self->params.owner;
         Actor *otherActor = other->actor;
         u8 selfTag = self->params.ownerId;
@@ -134,9 +134,9 @@ void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 a
     }
 }
 
-/* Creates emitter `index` of the kind matching `owner`'s object id, with arg7 bytes of the caller's data after it. */
-void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 arg7,
-                    u8 arg8, s32 arg9) {
+/* Creates emitter `index` of the kind matching `owner`'s object id, with extraSize bytes of the caller's data after it. */
+void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 extraSize,
+                    u8 fxOwner, s32 fxList) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
 
@@ -147,12 +147,12 @@ void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updat
         return NULL;
     }
     return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, unk59Func,
-                         childKind, unk5A, arg7, arg8, arg9);
+                         childKind, unk5A, extraSize, fxOwner, fxList);
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
 AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                       s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
+                       s8 childKind, u8 unk5A, s32 extraSize, u8 fxOwner, s32 fxList) {
     FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
     AnchorEmitterParams params;
@@ -180,12 +180,12 @@ AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTempla
     desc.expireFn = 0;
     desc.kind = 1;
 
-    emitter = effect_newFollowerGroup(&desc, arg7 + 0x60, arg8, arg9);
+    emitter = effect_newFollowerGroup(&desc, extraSize + 0x60, fxOwner, fxList);
     if (emitter != NULL) {
         dest = &emitter->params;
         memcpy(dest, &params, sizeof(AnchorEmitterParams));
         if (childKind != -1) {
-            dest->child = particle_spawnAnchorEmitterSprite(emitter, owner, childKind, duration, arg8, arg9);
+            dest->child = particle_spawnAnchorEmitterSprite(emitter, owner, childKind, duration, fxOwner, fxList);
         } else {
             dest->child = NULL;
         }
@@ -576,7 +576,7 @@ const u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the gLightJitterMids/6760/6820 tables. */
-LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 fxOwner, s32 fxList) {
     ChildDesc desc;
     Vec3i pos;
     LightEffect *child;
@@ -611,7 +611,7 @@ LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *ow
     pos.y = owner->ypos;
     pos.z = owner->zpos;
 
-    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
+    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, fxOwner, fxList);
     if (child != NULL) {
         memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
         memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));

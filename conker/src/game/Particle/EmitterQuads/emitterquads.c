@@ -6,9 +6,9 @@
 #include "libc/string.h"
 
 /* matching: no header declares particle_spawnSteamParticle (steam.c): modelbeam.c and blood.c were compiled with other views */
-SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
-                             u8 argE, s32 argF);
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 alpha, f32 size, s32 hitsFloor,
+                             f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 owner, s32 list);
 
 /* Calls particle_spawnKindMark at the current sample's (x, z) at the given height, then sets the payload's
  * unk20 to 4. */
@@ -32,7 +32,7 @@ s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 he
  */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 yaw, s32 baseYaw, f32 radius, s32 kind, f32 arg12,
-                  EmitterOwner *owner, u8 arg14) {
+                  EmitterOwner *owner, u8 fxOwner) {
     EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
     const s8 *entry;
@@ -54,7 +54,7 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
                   (math_random() % (config->unk10Range + 1)) + config->unk10,
                   (math_random() % (config->unk14Range + 1)) + config->unk14,
                   math_randomFloat() * config->unk18Range + config->unk18,
-                  math_randomFloat() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, arg14,
+                  math_randomFloat() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, fxOwner,
                   emitter->unk4);
     return 1;
 }

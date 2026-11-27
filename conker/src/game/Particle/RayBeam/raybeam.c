@@ -43,7 +43,7 @@ typedef struct {
 } ChildData;
 
 /* This unit's .rodata front-end data: the effect tables of particle_startObjRayBeam. Per effect kind: the two points
- * (vec1, vec2) given to particle_spawnRayBeam, and its arg3. */
+ * (vec1, vec2) given to particle_spawnRayBeam, and its bone. */
 static const Vec3f gObjRayBeamStarts[7] = {
     { 0.0f, 36.0f, 76.0f },  { -6.0f, -25.0f, 119.0f }, { 0.0f, 66.0f, 74.0f },  { -6.0f, -25.0f, 119.0f },
     { 0.0f, -79.0f, 49.0f }, { 7.0f, -54.0f, 57.0f },   { 9.0f, -51.0f, 65.0f },
@@ -59,8 +59,8 @@ static const u8 D_800A2248[7] = { 12, 0, 12, 9, 9, 9, 9 };
  * a flash, a glow and two particle_newOwnedSpriteParticle particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
-EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
-                              u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
+EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 bone, s16 lifetime, u8 r,
+                              u8 g, u8 b, f32 arg8, f32 scrollBase, f32 scrollRange, f32 argB, u8 aimed, u8 fxOwner, s32 fxList) {
     EffectParticle *particle;
     ParticleDef def;
     EffectParticleState data;
@@ -81,14 +81,14 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
     }
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    data.unk20 = arg3;
-    data.unk23 = (s32)(argC ? 2 : 0); // matching: the (s32) cast changes IDO's register choice
+    data.unk20 = bone;
+    data.unk23 = (s32)(aimed ? 2 : 0); // matching: the (s32) cast changes IDO's register choice
     data.unk8 = *vec1;
     data.unk14 = *vec2;
     data.unk3C = arg8;
     data.unk40 = 0.1019999981f;
-    data.unk48 = arg9;
-    data.unk4C = argA;
+    data.unk48 = scrollBase;
+    data.unk4C = scrollRange;
     data.unk54 = argB;
     data.unk58 = -32768.0f;
     data.unk64 = 250.0f;
@@ -137,7 +137,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
     def.colorLevel = 0xFF;
     def.primMode = 0;
     def.envMode = 6;
-    particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
+    particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), fxOwner, fxList);
     if (particle != NULL) {
         state = &particle->state;
         memcpy(state, &data, sizeof(EffectParticleState));
@@ -181,7 +181,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 subDef.primMode = 0;
                 subDef.envMode = 6;
                 if ((state->subParticle = particle_newQuadParticleNoModel(&subDef, &gWhiteVtxColors, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
-                                                   argD, argE)) != NULL) {
+                                                   fxOwner, fxList)) != NULL) {
                     memcpy(state->subParticle + 0x110, &subData, sizeof(SubParticleData));
                 }
                 flashPos.x = 0;
@@ -193,7 +193,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 flashHeader.lifetime = lifetime;
                 flashHeader.lightType = 7;
                 if ((state->flash = light_createWithEffect(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
-                                                  argD, argE)) != NULL) {
+                                                  fxOwner, fxList)) != NULL) {
                     memcpy(&state->flash->data.object, &flashData, sizeof(flashData));
                 }
                 particleAData.unk2C = 0;
@@ -250,7 +250,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 descA.deathFunc = -1;
                 descA.drawFunc = 0;
                 descA.handlerSet = 1;
-                if ((state->particleA = particle_newOwnedSpriteParticle(&descA, 1, sizeof(ParticleAData), argD, argE)) != NULL) {
+                if ((state->particleA = particle_newOwnedSpriteParticle(&descA, 1, sizeof(ParticleAData), fxOwner, fxList)) != NULL) {
                     memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
                 }
                 {
@@ -302,7 +302,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                     glowParams.offset0 = 0.5f;
                     glowParams.alpha1 = 0.3000000119f;
                     glowParams.fadeRate = 9.999999975e-07f;
-                    if ((state->glow = flare_spawnGlow(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, argD, argE)) != NULL) {
+                    if ((state->glow = flare_spawnGlow(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, fxOwner, fxList)) != NULL) {
                         memcpy(state->glow + 0x170, &glowData, sizeof(ChildData));
                     }
                     {
@@ -353,7 +353,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                         descB.deathFunc = -1;
                         descB.drawFunc = 1;
                         descB.handlerSet = 5;
-                        if ((state->particleB = particle_newOwnedSpriteParticle(&descB, 1, sizeof(ChildData), argD, argE)) != NULL) {
+                        if ((state->particleB = particle_newOwnedSpriteParticle(&descB, 1, sizeof(ChildData), fxOwner, fxList)) != NULL) {
                             memcpy(state->particleB + 0xA8, &particleBData, sizeof(ChildData));
                         }
                     }
@@ -984,7 +984,7 @@ struct Owner151025F4 {
 };
 
 /* Per-frame update of the owner's wobble offset. */
-s32 particle_updateWobbleOffset(Owner151025F4 *obj, s32 arg1) {
+s32 particle_updateWobbleOffset(Owner151025F4 *obj, Vec3f *prevPos) {
     Wobble151025F4 *wobble = &obj->wobble;
     s32 pad; // matching: unused stack slot in the original frame
     f32 sinX;
@@ -1002,9 +1002,9 @@ s32 particle_updateWobbleOffset(Owner151025F4 *obj, s32 arg1) {
 }
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
-    s32 unk5;
-    s32 unk6;
+EffectParticle *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 aimed, u8 owner, s32 list) {
+    s32 r;
+    s32 g;
 
     if (obj == NULL) {
         return NULL;
@@ -1013,30 +1013,30 @@ EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3,
         case 0x58:
         case 0x5B:
         case 0x80:
-            unk5 = 0x32;
-            unk6 = 0xFF;
+            r = 0x32;
+            g = 0xFF;
             break;
         case 0x5A:
         case 0x5F:
         case 0x74:
         case 0x75:
         case 0x7A:
-            unk5 = 0xFF;
-            unk6 = 0;
+            r = 0xFF;
+            g = 0;
             break;
         default:
             if (obj->mv->rt_context_b == 0x3B) {
-                unk5 = 0xFF;
-                unk6 = 0;
+                r = 0xFF;
+                g = 0;
             } else {
-                unk5 = 0x32;
-                unk6 = 0xFF;
+                r = 0x32;
+                g = 0xFF;
             }
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
-                         20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
+    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], D_800A2248[kind], lifetime, r, g, 0,
+                         20.0f, 20, 4.0f, 0.08f, aimed, owner, list);
 }
 
 /* Sends message 0x1A for `actor` (stops the effect started by particle_startObjRayBeam). */
@@ -1093,7 +1093,7 @@ struct Obj15102884 {
 };
 
 /* Returns bit 0 of obj->unkAC. */
-s32 func_15102884(Obj15102884 *obj, s32 arg1) {
+s32 func_15102884(Obj15102884 *obj, s32 view) {
     if (!(obj->unkAC & 1)) {
         return 0;
     }

@@ -52,7 +52,7 @@ void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8
 }
 
 /* Empty in this build; func_151A0E40, func_151A0F28 and func_151A1010 call it with full parameter lists. */
-void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
+void func_151A11CC(f32 x, f32 y, f32 z, f32 arg3,
                   f32 arg4, s32 arg5, s32 arg6, s32 arg7,
                   s32 arg8, s32 arg9, f32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, s32 arg14, s32 arg15,
@@ -606,7 +606,7 @@ static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, par
 /* Spawns one particle_newOwnedSpriteParticle particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
 s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
-                  u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
+                  u8 r, u8 g, u8 b, u8 owner, s32 list) {
     ParticleData151A26EC data;
     SpriteParticle *particle;
     ParticleDesc desc;
@@ -657,7 +657,7 @@ s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag
     desc.deathFunc = -1;
     desc.drawFunc = -1;
     desc.handlerSet = 2;
-    particle = particle_newOwnedSpriteParticle(&desc, 1, 0x10, argF, arg10);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, 0x10, owner, list);
     if (particle != NULL) {
         // matching: the target copies 8 bytes from data.drag, overlapping the second copy
         memcpy(&particle->data.dragFade.drag, &data.drag, 8);
@@ -685,19 +685,19 @@ s32 particle_updateDragFade(SpriteParticle *particle, Vec3f *prevPos) {
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
 void particle_burstAtYawPitch(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
-                   s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18,
-                   s32 arg19) {
+                   s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 owner,
+                   s32 list) {
     particle_spawnDragFadeBurst(pos, NULL, yaw, pitch, speed, sizeBase, sizeSlope, count, spread, drag, gravityBase,
                   gravityRange, delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc,
-                  arg18, arg19, 1);
+                  owner, list, 1);
 }
 
 /* Bursts `count` particles from pos moving along dir, scaled down over the burst. */
 void particle_burstAlongDir(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
                    f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
-                   s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17) {
+                   s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 owner, s32 list) {
     particle_spawnDragFadeBurst(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
-                  delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc, arg16, arg17,
+                  delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc, owner, list,
                   0);
 }
 
@@ -729,7 +729,7 @@ static BurstColors D_8008F8E8 = { { { 0, 0, 0 }, { 89, 0, 0 }, { 255, 255, 255 }
 void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
-                   s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles) {
+                   s8 eventFunc, u8 owner, s32 list, u8 useAngles) {
     s16 minFade;
     s16 delay;
     f32 t;
@@ -774,7 +774,7 @@ void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 s
         particle_spawnDragFadeSprite(pos, &offset, &vel, drag, rand * gravityRange + gravityBase,
                       sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
                       fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
-                      colors.rgb[color][2], arg13, arg14);
+                      colors.rgb[color][2], owner, list);
         t += step;
         count--;
     }

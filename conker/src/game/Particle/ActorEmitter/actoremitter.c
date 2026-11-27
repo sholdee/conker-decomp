@@ -136,8 +136,8 @@ static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16
 static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { particle_chainAllOverFireToSmoke, particle_chainTailFireToSmoke };
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
-                       const char *arg6) {
+ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 fxOwner, u8 fxList,
+                       const char *callerName) {
     ActorEmitterParams params;
     s32 i;
 
@@ -168,109 +168,109 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 11:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 0;
         params.table = 1;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 12:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 1:
         params.lifetime = 500;
         params.flags = 1;
         params.expireCb = 0;
         params.table = 1;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 2:
         params.lifetime = 3000;
         params.flags = 1;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 3:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 8;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 4:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 9;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 5:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 2;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 6:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 3;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 7:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 4;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 8:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 5;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 9:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 6;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 13:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 10;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 14:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 11;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 15:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 12;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 16:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 13;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 17:
         params.lifetime = 300;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 14;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 18:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 15;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     }
     return NULL;
 }
@@ -588,13 +588,13 @@ void particle_setActorEmitterTable(ActorEmitterProcess *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 arg1) {
+ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 owner) {
     ActorEmitterProcess *emitter;
 
     if (params->owner->character_type == 150) {
         return NULL;
     }
-    emitter = effect_newObject(0x21, 1, 0x9EC, 1, arg1, 1);
+    emitter = effect_newObject(0x21, 1, 0x9EC, 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
     }

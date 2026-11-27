@@ -70,15 +70,15 @@ void particle_tickStyleEmitterTimers(void) {
 // matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
 void particle_newStyleParticle(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
     velocityXLow, velocityZHigh, velocityZLow, xFraction, zFraction, unk2C, unk2D, unk2E, unk2F, scaleX, scaleY,
-    lifetime, velocityY, isAlt, linkArg, unkC, unk1)
+    lifetime, velocityY, isAlt, linkArg, owner, list)
     s16 x; s16 y; s16 z; u8 texture; u8 frame; u8 r; u8 g; u8 b; u8 alpha; u8 envR; u8 envG; u8 envB;
     u8 kind; u8 velocityXHigh; u8 velocityXLow; u8 velocityZHigh; u8 velocityZLow; u8 xFraction; u8 zFraction;
     u8 unk2C; u8 unk2D; u8 unk2E; u8 unk2F; s16 scaleX; s16 scaleY; u8 lifetime; s16 velocityY;
-    s32 isAlt; s32 linkArg; u8 unkC; s32 unk1;
+    s32 isAlt; s32 linkArg; u8 owner; s32 list;
 {
     StyleParticle *particle;
 
-    particle = effect_newObject(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(StyleParticle), 0, unkC, 1);
+    particle = effect_newObject(isAlt != 0 ? 0x67 : 0x12, list, sizeof(StyleParticle), 0, owner, 1);
     if (particle != NULL) {
         particle->x = x;
         particle->y = y;
@@ -152,7 +152,7 @@ void particle_updateStyleParticle(StyleParticle *particle) {
 }
 
 
-Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
+Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 view) {
     SpriteParams sprite; // math_gfxLoadTextureFrame points it at the texture, sprite_drawWorld draws it
     s32 pad; // matching: unused stack slot in the original frame
     TextureDesc *texture;
@@ -225,19 +225,19 @@ void particle_newSpriteEmitter(x, y, z, texture, frame, r, g, b, alpha, envR, en
     velocityXLow, velocityZHigh, velocityZLow, unk32, unk33, unk34, unk35, unk36, unk37,
     velocityXHighRandom, velocityXLowRandom, velocityZHighRandom, velocityZLowRandom, scaleX, scaleY,
     scaleXRandom, scaleYRandom, timer, radiusXZ, radiusY, object, particleLifetime, velocityY,
-    velocityYRandom, flags, interval, chance, burst, speed, startOffset, isAlt, bone, particleLink, unkC,
-    unk1)
+    velocityYRandom, flags, interval, chance, burst, speed, startOffset, isAlt, bone, particleLink, owner,
+    list)
     s16 x; s16 y; s16 z; u8 texture; u8 frame; u8 r; u8 g; u8 b; u8 alpha; u8 envR; u8 envG; u8 envB;
     u8 kind; u8 velocityXHigh; u8 velocityXLow; u8 velocityZHigh; u8 velocityZLow; u8 unk32; u8 unk33;
     u8 unk34; u8 unk35; u8 unk36; u8 unk37; u8 velocityXHighRandom; u8 velocityXLowRandom;
     u8 velocityZHighRandom; u8 velocityZLowRandom; s16 scaleX; s16 scaleY; s16 scaleXRandom;
     s16 scaleYRandom; u16 timer; u8 radiusXZ; u8 radiusY; u8 object; u8 particleLifetime; s16 velocityY;
     u16 velocityYRandom; u16 flags; u8 interval; u8 chance; u8 burst; u8 speed; u8 startOffset;
-    s32 isAlt; u8 bone; u8 particleLink; u8 unkC; s32 unk1;
+    s32 isAlt; u8 bone; u8 particleLink; u8 owner; s32 list;
 {
     SpriteEmitter *emitter;
 
-    emitter = effect_newObject(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(SpriteEmitter), 0, unkC, 1);
+    emitter = effect_newObject(isAlt != 0 ? 0x66 : 0x11, list, sizeof(SpriteEmitter), 0, owner, 1);
     if (emitter != NULL) {
         emitter->x = x;
         emitter->y = y;
@@ -296,7 +296,7 @@ void particle_newSpriteEmitter(x, y, z, texture, frame, r, g, b, alpha, envR, en
 
 
 
-void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
+void particle_updateSpriteEmitter(SpriteEmitter *obj) {
     SpriteEmitter *emitter; // matching: IDO keeps this copy of the argument in its own register
     s32 i;
     s16 scaleX;
@@ -338,7 +338,7 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
     s32 isAlt;
     s32 countdown;
 
-    emitter = arg0;
+    emitter = obj;
     if (emitter->type == 0x11) {
         isAlt = 0;
     } else {
@@ -525,12 +525,12 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
 }
 
 /* Emitter that follows the f32 position vector at `position` (flags 0x20). */
-void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
+void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 owner, s32 list) {
     particle_newSpriteEmitter((u32)position >> 16, (u32)position & 0xFFFF, 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
         8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
-        0, 0, 0, 0, 0, arg3, arg4);
+        0, 0, 0, 0, 0, owner, list);
 }
 
 s32 particle_updateStyleColorRamp(StyleParticle *particle) {
@@ -638,7 +638,7 @@ s32 particle_updateStylePulse(StyleParticle *particle) {
 }
 
 
-void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
+void func_1516ED68(s32 object, s32 duration, u8 owner, s32 list) {
     u8 id;
 
     id = movement_obj[object].character_type;
@@ -651,10 +651,10 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
         0, 0, 0, 0, 0, 0, 0, 0x124,
         0x124, 0, 0, duration, 0, 0, object, 0xC,
         0, 0, 0x81, 2, 0, 1, 0, 0,
-        0, 5, 0, arg2, arg3);
+        0, 5, 0, owner, list);
 }
 
-void particle_spawnThrottledEmitter(s32 object, s32 threshold, u8 arg2, s32 arg3) {
+void particle_spawnThrottledEmitter(s32 object, s32 threshold, u8 owner, s32 list) {
     if (object < 4 && gStyleEmitterTimers[object] >= threshold) {
         gStyleEmitterTimers[object] = 0;
         particle_newSpriteEmitter(0, 0, 0, 4,
@@ -663,7 +663,7 @@ void particle_spawnThrottledEmitter(s32 object, s32 threshold, u8 arg2, s32 arg3
             0, 0, 0, 0, 0, 0, 0, 0x200,
             0x200, 0, 0, 0x1E, 0, 0, object, 0x14,
             0, 0, 0x81, 8, 0, 1, 0, 0,
-            0, 0xC, 0, arg2, arg3);
+            0, 0xC, 0, owner, list);
     }
 }
 
@@ -720,23 +720,23 @@ s32 particle_updateStyleDrift(StyleParticle *particle) {
 }
 
 
-void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3) {
+void func_1516F1C0(s32 object, s32 duration, u8 owner, s32 list) {
     particle_newSpriteEmitter(2, 0, 0, 0x2D,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, duration, 0xA, 0xA, object, 0x3C,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 4, 2, arg2, arg3);
+        0, 4, 2, owner, list);
 }
 
-void func_1516F2F8(object, duration, particleLifetime, speed, arg4, arg5)
+void func_1516F2F8(object, duration, particleLifetime, speed, owner, list)
     u8 object;
     s32 duration;
     s32 particleLifetime;
     s32 speed;
-    u8 arg4;
-    s32 arg5;
+    u8 owner;
+    s32 list;
 {
     particle_newSpriteEmitter(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
@@ -744,41 +744,41 @@ void func_1516F2F8(object, duration, particleLifetime, speed, arg4, arg5)
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, duration, 4, 4, object, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 1, 0, arg4, arg5);
+        0, 1, 0, owner, list);
     particle_newSpriteEmitter(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, 7, 4, 4, object, particleLifetime,
         0, 0, 0x81, 5, 0, 1, 0, 0,
-        0, 1, speed, arg4, arg5);
+        0, 1, speed, owner, list);
 }
 
 /* Spawns two emitters at (x, y, z) that differ only in their particles' style (style0,
- * style1) and the second one's spawn interval, then plays sound 7 there with arg3 as
+ * style1) and the second one's spawn interval, then plays sound 7 there with duration as
  * its user data. */
 void func_1516F548(
-    s32 x, s32 y, s32 z, s32 arg3,
+    s32 x, s32 y, s32 z, s32 duration,
     s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
     s32 scaleRandom, s32 radius, s32 style0, s32 style1,
-    s32 arg12, s32 arg13, s32 arg14, u8 arg15,
-    s32 arg16) {
+    s32 arg12, s32 arg13, s32 arg14, u8 owner,
+    s32 list) {
     particle_newSpriteEmitter(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
-        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)duration, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
-        0, 0, 0, arg15, arg16);
+        0, 0, 0, owner, list);
     particle_newSpriteEmitter(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
-        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)duration, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
-        0, 0, 0, arg15, arg16);
+        0, 0, 0, owner, list);
     sound_addDynamicSound(7, x, y, z, 0x36B0, 0x3E8, 0x64,
-        (SoundRecordCallback)sound_fadeOutCallback, (void *)arg3, 0, 0, 0);
+        (SoundRecordCallback)sound_fadeOutCallback, (void *)duration, 0, 0, 0);
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */
@@ -884,14 +884,14 @@ s32 particle_updateStyleDamped(StyleParticle *particle) {
     return 0;
 }
 
-void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5) {
+void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 owner, s32 list) {
     particle_newSpriteEmitter(x, y, z, 0x1B,
         0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF,
         3, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0x400,
         0x400, 0, 0, 2, 0, 0, 0xFF, 0xF,
         0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5,
-        isAlt, 0, 0, arg4, arg5);
+        isAlt, 0, 0, owner, list);
 }
 
 s32 particle_updateStyleTint(StyleParticle *particle) {
@@ -989,7 +989,7 @@ s32 particle_updateStyleAccelY(StyleParticle *particle) {
     return 0;
 }
 
-void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
+void func_1516FE1C(s32 object, s32 duration, u8 owner, s32 list) {
     s32 bone;
     s16 posHigh;
     s16 posLow;
@@ -1020,7 +1020,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
         }
         particle_newSpriteEmitter(posHigh, posLow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, velocityXHigh, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)duration, 0x1E, 0, (u8)object, 0x1E, 0x168,
-                      0x18, (u16)flags, 4, 0, 1, 0, 0, 0, bone, 0, arg2, arg3);
+                      0x18, (u16)flags, 4, 0, 1, 0, 0, 0, bone, 0, owner, list);
     }
 }
 
@@ -1047,7 +1047,7 @@ void particle_getRandomDirection(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
 struct Vec3fTable { f32 v[3]; };
 struct RGBTable { u8 c[3][3]; };
 
-void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8, s32 arg9) {
+void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 owner, s32 list) {
     s32 i;
     s32 j;
     s32 next;
@@ -1111,7 +1111,7 @@ void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 styl
                 (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
                 0, 0, particleStyle, 0, 0, 0,
                 (s16)size, (s16)size, lifetime, velocityY,
-                0, 0, arg8, arg9);
+                0, 0, owner, list);
         }
         p0 += 3;
     }
@@ -1120,14 +1120,14 @@ void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 styl
 
 /* Spawns a single particle (isParticle) or an emitter heading off along `angle`, which
  * defaults to object 0's facing angle. */
-void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
+void func_15170500(x, y, z, angle, isParticle, owner, list)
     s16 x;
     s16 y;
     s16 z;
     s32 angle;
     s32 isParticle;
-    u8 arg5;
-    s32 arg6;
+    u8 owner;
+    s32 list;
 {
     f32 dirX;
     f32 rise;
@@ -1158,7 +1158,7 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
         velocityY = dirY * 256.0f;
         particle_newStyleParticle(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
-            velocityY - 50, 0, 0, arg5, arg6);
+            velocityY - 50, 0, 0, owner, list);
     } else {
         velocityX = dirX * 256.0f;
         velocityZ = dirZ * 256.0f;
@@ -1166,7 +1166,7 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
         particle_newSpriteEmitter(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
             0, 0, 0x14, 0, 0, 0xFF, 0xFF, velocityY - 50, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
-            arg5, arg6);
+            owner, list);
     }
 }
 
@@ -1222,7 +1222,7 @@ s32 particle_updateStyleSlide(StyleParticle *particle) {
 }
 
 /* Spawns `count` particles flying off at `speed` in random directions from particle_getRandomDirection. */
-void particle_spawnStyleBurst(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6) {
+void particle_spawnStyleBurst(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 owner, s32 list) {
     s32 i;
     f32 dirX;
     f32 dirY;
@@ -1242,6 +1242,6 @@ void particle_spawnStyleBurst(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5
         velocityY = dirY;
         particle_newStyleParticle(x, y, z, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
-            velocityY, 0, 0, arg5, arg6);
+            velocityY, 0, 0, owner, list);
     }
 }

@@ -27,7 +27,7 @@ const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &gSecondGunMuzzle };
 u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &gSecondGunMuzzleBone };
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
-void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
+void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 owner, s32 list) {
     Vec3f hitPos;
     CollisionTri hitSurface;
     u8 hit;
@@ -153,7 +153,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         sparks.shapeFn = 0;
         sparks.unk72 = -1;
         sparks.unk73 = -1;
-        particle_spawnTrailBurst(&sparks, arg4, arg5);
+        particle_spawnTrailBurst(&sparks, owner, list);
     }
     if (particleType != 0 && gScreenLayout < 2) {
         ParticleSpawn p;
@@ -186,11 +186,11 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         p.fadeRate = 21;
         if (big) {
             Vec3f unitDir;
-            f32 unkOut1;
-            f32 unkOut2;
+            f32 length;
+            f32 invLength;
             f32 speed;
 
-            if (math_vec3Normalize(dir, &unitDir, &unkOut1, &unkOut2)) {
+            if (math_vec3Normalize(dir, &unitDir, &length, &invLength)) {
                 speed = math_randomFloat() * 12.0f + 3.0f;
                 p.lifetime = (math_random() % 11U) + 30;
                 p.vel.x = -unitDir.x * speed;
@@ -202,7 +202,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
                 p.gravity = (math_randomFloat() * 449.0f + -744.0f) * 0.001000000047f;
                 p.flags = 0x39E8;
                 p.updateFn = 8;
-                particle_newModelParticle(&p, 3, 255, 0, arg4, arg5);
+                particle_newModelParticle(&p, 3, 255, 0, owner, list);
             }
         } else {
             BobMotion wobble;
@@ -221,14 +221,14 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             p.flags = 0x3980;
             p.updateFn = 12;
             p.gravity = 0;
-            obj = particle_newModelParticle(&p, 3, 255, sizeof(BobMotion), arg4, arg5);
+            obj = particle_newModelParticle(&p, 3, 255, sizeof(BobMotion), owner, list);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0x170, &wobble, sizeof(BobMotion));
             }
         }
     }
     if (hit && solid) {
-        effect_spawnSurfaceSprite(math_randomFloat() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
+        effect_spawnSurfaceSprite(math_randomFloat() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, owner, list);
     }
 }
 
@@ -260,7 +260,7 @@ void particle_getBonePoint(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bon
 }
 
 /* Calls actor_runAttackAt at the midpoint of a and b, with obj's movement angle relative to its mv. */
-void particle_runAttackAtMidpoint(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
+void particle_runAttackAtMidpoint(Actor *obj, Vec3f *a, Vec3f *b, s32 attackId) {
     f32 x = (a->x + b->x) * 0.5f;
     f32 y = (a->y + b->y) * 0.5f;
     f32 z = (a->z + b->z) * 0.5f;
@@ -273,46 +273,46 @@ void particle_runAttackAtMidpoint(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
         } else {
             angle = obj->angle;
         }
-        actor_runAttackAt(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
+        actor_runAttackAt(x, y, z, attackId, obj - movement_obj, angle, 0, 0);
     }
 }
 
-void particle_spawnShortLightFlash(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnShortLightFlash(Vec3f *pos, u8 owner, s32 list) {
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
 
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() % 3U) + 4;
     header.lightType = 0;
 
-    header2.x = pos->x;
-    header2.y = pos->y;
-    header2.z = pos->z;
+    position.x = pos->x;
+    position.y = pos->y;
+    position.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (math_random() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &position, (math_random() % 13U) + 20, 255, 232, 171, 255, 0, 0, owner, list);
 }
 
-void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnLightFlash(const Vec3f *pos, u8 owner, s32 list) {
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
 
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() % 11U) + 20;
     header.lightType = 0;
 
-    header2.x = pos->x;
-    header2.y = pos->y;
-    header2.z = pos->z;
+    position.x = pos->x;
+    position.y = pos->y;
+    position.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (math_random() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &position, (math_random() % 24U) + 34, 255, 161, 162, 255, 0, 0, owner, list);
 }
 
-/* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
+/* Calls actor_runAttackAt twice (with firstAttackId and secondAttackId) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
-                   s32 arg7) {
+void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 firstAttackId, s32 secondAttackId,
+                   s32 losSkipSlot) {
     u16 angle;
     Vec3f point;
     s16 height;
@@ -331,11 +331,11 @@ void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target,
         }
         angle = 0;
     }
-    actor_runAttackAt(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
-    actor_runAttackAt(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, firstAttackId, obj - movement_obj, angle, losSkipSlot, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, secondAttackId, obj - movement_obj, angle, losSkipSlot, (s32)&point);
 }
 
-void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
+void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 attackId) {
     f32 yaw;
     u16 angle;
 
@@ -345,7 +345,7 @@ void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri
     } else {
         angle = 0;
     }
-    actor_runAttackAt(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
+    actor_runAttackAt(pos->x, pos->y, pos->z, attackId, obj - movement_obj, angle, 0, 0);
 }
 
 /* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
@@ -360,7 +360,7 @@ struct S151D4408Temps {
 };
 
 /* Spawns one particle at pos flying along dir, oriented by matrix mtx and attached to owner. */
-void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6) {
+void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 fxOwner, s32 fxList) {
     ParticleSpawn p;
     struct S151D4408Temps unused;
     f32 speed;
@@ -408,7 +408,7 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.ownerId = owner->unique_id;
     p.fadeStart = 6;
     p.fadeRate = 42;
-    particle_newModelParticle(&p, 3, 255, 0, arg5, arg6);
+    particle_newModelParticle(&p, 3, 255, 0, fxOwner, fxList);
 }
 
 /* Sends message 0x3C (handled by particle_onPointEmitterMsg) for obj's attached effects. */
@@ -421,12 +421,12 @@ void particle_detachObjEmitters(Actor *obj) {
 }
 
 /* Creates an effect that follows the point gEmitterPointFuncs[posFunc] computes on obj. */
-void particle_attachPointEmitter(obj, posFunc, arg2, arg3, arg4)
+void particle_attachPointEmitter(obj, posFunc, lifetime, owner, list)
     Actor *obj;
     u8 posFunc;
-    s16 arg2;
-    u8 arg3;
-    s32 arg4;
+    s16 lifetime;
+    u8 owner;
+    s32 list;
 {
     ObjEmitter emitter;
     TimedEffect *effect;
@@ -449,7 +449,7 @@ void particle_attachPointEmitter(obj, posFunc, arg2, arg3, arg4)
         }
     }
 
-    effect = effect_newTimedEffect(arg2, -1, 0x41, -1, 1, 0x35, 0x20, arg3, arg4);
+    effect = effect_newTimedEffect(lifetime, -1, 0x41, -1, 1, 0x35, 0x20, owner, list);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &emitter, sizeof(ObjEmitter));
     }
@@ -572,7 +572,7 @@ void particle_onPointEmitterMsg(ObjEmitterEffect *effect, ActorRef *handle, u8 m
 }
 
 /* Puff update callback. */
-s32 particle_updatePointPuff(SpriteParticle *puff, s32 arg1) {
+s32 particle_updatePointPuff(SpriteParticle *puff, Vec3f *prevPos) {
     WobbleData *extra;
 
     extra = &puff->data.wobble;
@@ -590,8 +590,8 @@ void particle_attachTwinEmitters(Actor *obj) {
 
 
 /* Applies a hit from attacker to victim travelling along dir. */
-s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
-                  s32 arg8) {
+s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 owner,
+                  s32 list) {
     s32 alreadyDead;
     s32 health;
     s32 hp;
@@ -632,7 +632,7 @@ s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to
         }
     }
 
-    blood_spawnActorImpact(victim, from, to, dir, arg7, arg8);
+    blood_spawnActorImpact(victim, from, to, dir, owner, list);
 
     if (!alreadyDead) {
         angle = math_atan2(dir->x, dir->z) * 10430.37793f;
@@ -651,10 +651,10 @@ void particle_countShot(Actor *obj) {
 }
 
 /* If obj's mv is in state 2 (or bot is set): intersects the line through mv->aimEye along
-   unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal math_vec3Cross derives
-   from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
+   unk31C->unk130 with the plane through endpoint (or position without it) whose normal math_vec3Cross derives
+   from direction, axis0 and axis1. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
-void particle_intersectAimPlane(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
+void particle_intersectAimPlane(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *endpoint) {
     Vec3f *origin;
     Vec3f temp;
     Vec3f normal;
@@ -666,16 +666,16 @@ void particle_intersectAimPlane(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg
     if (obj->ob_matrix_ptr != NULL) {
         if (obj->mv != NULL && (obj->mv->AimState == 2 || obj->mv->bot != 0)) {
             origin = &obj->mv->aimEye;
-            math_vec3Cross(arg2, arg3, &temp);
-            math_vec3Cross(&temp, arg4, &normal);
-            if (arg9 != NULL) {
-                dx = arg9->x - origin->x;
-                dy = arg9->y - origin->y;
-                dz = arg9->z - origin->z;
+            math_vec3Cross(direction, axis0, &temp);
+            math_vec3Cross(&temp, axis1, &normal);
+            if (endpoint != NULL) {
+                dx = endpoint->x - origin->x;
+                dy = endpoint->y - origin->y;
+                dz = endpoint->z - origin->z;
             } else {
-                dx = arg1->x - origin->x;
-                dy = arg1->y - origin->y;
-                dz = arg1->z - origin->z;
+                dx = position->x - origin->x;
+                dy = position->y - origin->y;
+                dz = position->z - origin->z;
             }
             t = normal.x * dx + normal.y * dy + normal.z * dz;
             t /= normal.x * obj->mv->aimDir.x + normal.y * obj->mv->aimDir.y +
@@ -704,18 +704,18 @@ typedef struct {
 } Params151D5334;
 
 /* Calls camera_startWobblePreset once for each i in 0..gScreenLayout with the same parameters. */
-void particle_startPlayerCameraWobbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+void particle_startPlayerCameraWobbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invFadeRange, u8 presetIndex, u8 owner, s32 list) {
     s32 i;
     Params151D5334 params;
 
     params.pos = *pos;
-    params.unkC = arg1;
-    params.unk10 = arg2;
-    params.unk14 = arg3;
+    params.unkC = radius;
+    params.unk10 = fadeRange;
+    params.unk14 = invFadeRange;
 
     for (i = 0; i < gScreenLayout + 1; i++) {
         // matching: &params goes through an int (a plain pointer changes the register allocation)
-        camera_startWobblePreset(arg4, i, (void *)(s32)&params, arg5, arg6);
+        camera_startWobblePreset(presetIndex, i, (void *)(s32)&params, owner, list);
     }
 }
 
@@ -730,16 +730,16 @@ typedef struct {
 } Params151D5404;
 
 /* Creates one cont_spawnRumble effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
-void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
+void particle_startPlayerRumbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invFadeRange, s32 base, s32 range, s32 owner, s32 list) {
     Params151D5404 params;
     RumbleParams header;
     void *effect;
     s32 i;
 
     params.pos = *pos;
-    params.unkC = arg1;
-    params.unk10 = arg2;
-    params.unk14 = arg3;
+    params.unkC = radius;
+    params.unk10 = fadeRange;
+    params.unk14 = invFadeRange;
     header.flags = 1;
     header.duration = (math_random() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;
@@ -755,7 +755,7 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 b
     }
 }
 
-void particle_spawnBlastSpray(const Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnBlastSpray(const Vec3f *pos, u8 owner, s32 list) {
     JetSpraySpec spawn;
 
     spawn.angles.yawBase = 0;
@@ -784,24 +784,24 @@ void particle_spawnBlastSpray(const Vec3f *pos, u8 arg1, s32 arg2) {
     spawn.spray.fadeStart = 12;
     spawn.spray.fadeOutStart = 20;
     spawn.spray.eventFunc = 0;
-    particle_spawnJetSprayBursts(&spawn, arg1, arg2);
+    particle_spawnJetSprayBursts(&spawn, owner, list);
 }
 
 /* Combined effect at pos: particle_spawnBlastSpray, particle_spawnLightFlash and particle_spawnGrowFade. */
-void particle_spawnBlast(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnBlast(Vec3f *pos, u8 owner, s32 list) {
     u32 randU;
     f32 randF;
 
-    particle_spawnBlastSpray(pos, arg1, arg2);
-    particle_spawnLightFlash(pos, arg1, arg2);
+    particle_spawnBlastSpray(pos, owner, list);
+    particle_spawnLightFlash(pos, owner, list);
     randF = math_randomFloat();
     randU = math_random();
     particle_spawnGrowFade(pos, randF * 4.0f + 12.0f, 1.640999913f,
-                  (randU % 56U) + 200, 0.0f, arg1, arg2);
+                  (randU % 56U) + 200, 0.0f, owner, list);
 }
 
 /* Spawns a particle_spawnBoneDirParticle particle on bone `bone` of obj, from local point from towards local point to. */
-void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 owner, s32 list) {
     Vec3f start;
     Vec3f dir;
     MtxF *mtx;
@@ -820,8 +820,8 @@ void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3
             dir.y -= start.y;
             dir.z -= start.z;
             { // matching: a block holding a declaration changes how as1 schedules the call setup
-void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
-                particle_spawnBoneDirParticle(&start, &dir, mtx, obj, scale, arg5, arg6);
+void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 fxOwner, s32 fxList);
+                particle_spawnBoneDirParticle(&start, &dir, mtx, obj, scale, owner, list);
             }
         }
     }

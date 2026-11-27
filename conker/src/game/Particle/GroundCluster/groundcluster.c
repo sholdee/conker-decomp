@@ -117,7 +117,7 @@ void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
 
 /* Spawns `count` particles at random points within `radius` of (x, y, z). */
 void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
-                   f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11) {
+                   f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 expireFn) {
     ParticleEmitterDesc particle;
     u8 angle;
     f32 sin;
@@ -136,7 +136,7 @@ void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count
         particle.flags = 1;
         particle.unk2C = 0xFF;
         particle.unk2D = 0xFF;
-        particle.unk2F = arg11;
+        particle.unk2F = expireFn;
         particle.scale = 0.0f;
         particle.shrinkRate = 0.045f;
         particle.growRate = 0.7f;
@@ -168,7 +168,7 @@ void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count
 }
 
 /* Spawns one particle at `pos` with randomized size, lifetime and fade. */
-void particle_spawnRandomChannelParticle(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomChannelParticle(Vec3f *pos, u8 owner, s32 list) {
     ParticleEmitterDesc particle;
     f32 size;
     f32 height;
@@ -199,7 +199,7 @@ void particle_spawnRandomChannelParticle(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.life = math_random() % 17U + 16;
     particle.scale = (math_randomFloat() * 347.0f + 50.0f) * 0.001f;
     particle.unk2C = math_random() % 156U + 100;
-    particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
+    particle_spawnChannelParticle(&particle, 10, 0, 0, owner, list);
 }
 
 /*
@@ -218,7 +218,7 @@ s32 particle_shrinkBallisticQuad(Particle177B50 *p) {
 }
 
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
-void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 owner, s32 list) {
     f32 count;
     ParticleEmitterDesc particle;
     s32 angle;
@@ -258,7 +258,7 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
             particle.life = math_random() % 31U + 20;
             particle.scale = math_randomFloat() * 497.0f * 0.001f;
             particle.unk2C = math_random() % 156U + 100;
-            particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
+            particle_spawnChannelParticle(&particle, 10, 0, 0, owner, list);
             count -= 1.0f;
         } while (count > 1.0f);
     }
@@ -266,7 +266,7 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
 
 
 /* If collision_probeFloorSurfABSet0Cached finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
+void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 owner, s32 list) {
     Vec3f pos;
 
     pos = *position;
@@ -335,7 +335,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         spawn.unk72 = -1;
         spawn.unk73 = -1;
         spawn.pos = pos;
-        particle_spawnTrailBurst(&spawn, arg2, arg3);
+        particle_spawnTrailBurst(&spawn, owner, list);
     }
     {
         SimplePuffSpray emit;
@@ -369,7 +369,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         emit.alpha = math_random() % 101U + 155;
         particle_spawnSimplePuffSpray(&emit, 0xFF);
     }
-    particle_scatterChannelParticlesInDisc(&pos, arg2, arg3);
+    particle_scatterChannelParticlesInDisc(&pos, owner, list);
 
     {
         ParticleDef desc;
@@ -408,7 +408,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         randC = math_random();
         sum = (randB & 1) + (randA & 1);
         particle_spawnAxisQuadParticleNoModel(&desc, 0, 18, 29, 0, sum, (u8)randC,
-                      100.0f, 100.0f, NULL, &ground->tri, 0, 0, arg2, arg3);
+                      100.0f, 100.0f, NULL, &ground->tri, 0, 0, owner, list);
     }
 }
 
@@ -443,9 +443,9 @@ s32 particle_capQuadAlphaByLife(Particle177B50 *p) {
  * Spawns a particle at `pos` through particle_newQuadParticle and stores its initial particle_updateJitter state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity,
-                    f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
-                    s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
+void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 alpha, const Vec3f *velocity,
+                    f32 gravity, f32 drag, f32 easeFactor, u8 updateFn1, u8 updateFn2, u8 expireFn, s32 texture, u8 flags,
+                    s16 fadeStart, s16 fadeRate, s32 extraSize, u8 owner, s32 list) {
     void *particle;
     ParticleDef desc;
     ParticleJitter state;
@@ -466,7 +466,7 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     state.speed = 15935.0f;
     state.speedTarget = 15935.0f;
     state.drag = drag;
-    state.easeFactor = arg7;
+    state.easeFactor = easeFactor;
     state.speedBase = 6733.0f;
     state.speedRange = 18404.0f;
     state.widthBase = scale->unk0 * 15.045272f;
@@ -478,7 +478,7 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     state.heightRangeB = scale->unk4 * 0.5197371f;
     state.heightTarget = scale->unk4 * 0.34404588f;
     desc.height = 0.0f;
-    desc.texture = argB;
+    desc.texture = texture;
     desc.type = 0;
     desc.renderModes = 0x2203;
     if (life == -1) {
@@ -499,19 +499,19 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
-    desc.alpha = arg3;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.primMode = 0;
     desc.envMode = 7;
     desc.zone = 0;
-    desc.fadeStart = argD;
-    desc.fadeRate = argE;
+    desc.fadeStart = fadeStart;
+    desc.fadeRate = fadeRate;
     if (math_random() & 1) {
         flag = 1;
     } else {
         flag = 0;
     }
-    particle = particle_newQuadParticle(&desc, &gWhiteVtxColors, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
+    particle = particle_newQuadParticle(&desc, &gWhiteVtxColors, updateFn1, updateFn2, expireFn, 28, flag | 2, 0, 0, extraSize + 80, owner, list);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0x110, &state, sizeof(state));
     }

@@ -1088,7 +1088,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 }
 
 /* matching: an s8 texture, as the call passes event->unk5 without narrowing (definition: game/Particle/StyleParticle/styleparticle.c, u8) */
-void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
+void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 owner, s32 list);
 
 /*
  * Second cutscene event handler: types 0xB (mp3_startTrack / func_151F2xxx) and

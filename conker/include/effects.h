@@ -909,13 +909,13 @@ typedef struct SplashSpray {
     /* 0x2A */ s16 itemCountRange;
     /* 0x2C */ s16 lifeBase;
     /* 0x2E */ s16 lifeRange;
-    /* 0x30 */ s16 alphaBase;       /* TrailMotion.alpha of each splash (particle_spawnSplash's arg4) */
+    /* 0x30 */ s16 alphaBase;       /* TrailMotion.alpha of each splash (particle_spawnSplash's alpha) */
     /* 0x32 */ s16 alphaRange;      /* its range */
     /* 0x34 */ u8 kind;
     /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 burstChance;     /* probability of particle_spawnSplash's arg7: burst and spray hit handlers on landing */
-    /* 0x3C */ s16 fadeStart;       /* TrailMotion.fadeStart (particle_spawnSplash's argD) */
-    /* 0x3E */ s16 fadeRate;        /* TrailMotion.fadeRate (particle_spawnSplash's argE) */
+    /* 0x38 */ f32 burstChance;     /* probability of particle_spawnSplash's hitsFloor: burst and spray hit handlers on landing */
+    /* 0x3C */ s16 fadeStart;       /* TrailMotion.fadeStart (particle_spawnSplash's fadeStart) */
+    /* 0x3E */ s16 fadeRate;        /* TrailMotion.fadeRate (particle_spawnSplash's fadeRate) */
     /* 0x40 */ s32 material;        /* particle_spawnSplash's material (EffectTemplate.material) */
 } SplashSpray; /* size 0x44 */
 
@@ -937,7 +937,7 @@ typedef struct DropSpray {
     /* 0x1A */ s16 lifeRange;
     /* 0x1C */ f32 gravityBase;
     /* 0x20 */ f32 gravityRange;
-    /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha of each drop (particle_spawnSteamParticle's arg5) */
+    /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha of each drop (particle_spawnSteamParticle's alpha) */
     /* 0x25 */ u8 alphaRange;       /* its range */
     /* 0x26 */ u8 pad26[2];
     /* 0x28 */ f32 sizeBase;
@@ -945,7 +945,7 @@ typedef struct DropSpray {
     /* 0x30 */ s8 unk30;            /* not read by the spray functions */
     /* 0x31 */ u8 kind;
     /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ f32 unk34;           /* probability of particle_spawnSteamParticle's arg7 */
+    /* 0x34 */ f32 unk34;           /* probability of particle_spawnSteamParticle's hitsFloor */
     /* 0x38 */ u8 wobbles;
     /* 0x39 */ u8 pad39[3];
     /* 0x3C */ f32 bounceChance;
@@ -1252,7 +1252,7 @@ typedef struct DecalSpray {
     /* 0x1C */ f32 maxDistance;
     /* 0x20 */ f32 sizeBase;
     /* 0x24 */ f32 sizeRange;
-    /* 0x28 */ s16 alphaBase;       /* SpriteDef.alpha of each emitter (particle_spawnKindEmitter's arg2) */
+    /* 0x28 */ s16 alphaBase;       /* SpriteDef.alpha of each emitter (particle_spawnKindEmitter's alpha) */
     /* 0x2A */ s16 alphaRange;      /* its range */
     /* 0x2C */ u8 kind;
     /* 0x2D */ u8 pad2D[3];

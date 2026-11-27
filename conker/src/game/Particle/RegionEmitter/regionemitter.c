@@ -182,25 +182,25 @@ typedef struct {
 } EffectSoundState;
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultDestroyTimedEffect. */
-void particle_destroyRegionEmitter(TimedEffect *arg0) {
-    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+void particle_destroyRegionEmitter(TimedEffect *effect) {
+    EffectSoundState *state = (EffectSoundState *)((u8 *)effect + 0x58);
 
-    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
-    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+    // matching: the test reads through effect and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)effect + 0x6C) != 0) {
         particle_stopEffectSound(state->soundHandle);
     }
-    effect_defaultDestroyTimedEffect(arg0);
+    effect_defaultDestroyTimedEffect(effect);
 }
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultFreeTimedEffect. */
-void particle_freeRegionEmitter(TimedEffect *arg0) {
-    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+void particle_freeRegionEmitter(TimedEffect *effect) {
+    EffectSoundState *state = (EffectSoundState *)((u8 *)effect + 0x58);
 
-    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
-    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+    // matching: the test reads through effect and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)effect + 0x6C) != 0) {
         particle_stopEffectSound(state->soundHandle);
     }
-    effect_defaultFreeTimedEffect(arg0);
+    effect_defaultFreeTimedEffect(effect);
 }
 
 /* Releases a sound handle. */
@@ -212,8 +212,8 @@ void particle_stopEffectSound(u16 soundHandle) {
  * Spawns an effect via particle_spawnSurfaceQuadSprite at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
-                          u8 arg7, s32 arg8) {
+QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, s16 duration, u8 lit, u8 arg6,
+                          u8 owner, s32 list) {
     SpriteDef2C params;
 
     if (duration <= 0) {
@@ -223,7 +223,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.fadeRate = 12;
     params.texture = 0x38;
     params.handlerSet = 0;
-    params.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
+    params.flags = ((duration == -1) ? 0 : 1) | (lit ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
     if (duration == -1) {
         params.lifetime = 300;
     } else {
@@ -235,7 +235,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     } else {
         params.frameSpeed = 0x140000 / (duration + 20);
     }
-    params.alpha = arg1;
+    params.alpha = alpha;
     params.colorLevel = 0xFF;
     params.rgba[0] = 0xFF;
     params.rgba[1] = 0x83;
@@ -247,7 +247,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.viewportMask = 0xFF;
     return particle_spawnSurfaceQuadSprite(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
                          math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
-                         arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
+                         lit ? 3 : 0, lit ? 0xFF : 0, 0, owner, list);
 }
 
 /* An object that can trigger a one-shot effect at its position. */
@@ -337,7 +337,7 @@ typedef struct Game1D3420Effect {
 
 /* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
-void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
+void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list) {
     ParticleDef spawn;
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
@@ -383,7 +383,7 @@ void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 p
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    effect = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
+    effect = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), owner, list);
     if (effect != NULL) {
         state = &effect->state;
         memcpy(state, &init, sizeof(init));
@@ -395,7 +395,7 @@ void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 p
             header.update = 2;
             header.lifetime = 300;
             header.lightType = 6;
-            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
+            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, owner, list);
         }
     }
     if (playSound) {
