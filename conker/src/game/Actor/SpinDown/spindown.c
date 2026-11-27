@@ -2,7 +2,7 @@
 #include "conker/actor.h"
 
 /* Spins the actor down: tilt and lean advance by their rates, which decay with the speed. */
-void effect_spinDownActor(Actor *arg0) {
+void actor_updateSpinDown(Actor *arg0) {
     arg0->vtilt += arg0->unkBC;
     arg0->unkBC *= 0.99f;
     arg0->speed *= 0.97f;

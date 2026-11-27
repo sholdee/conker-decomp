@@ -391,6 +391,6 @@ void colourfb_toGreyscale(void *start, void *end);
 void actor_updateFollower(Actor *self);
 
 /* game/Actor/SpinDown/spindown.c */
-void effect_spinDownActor(Actor *arg0);
+void actor_updateSpinDown(Actor *arg0);
 
 #endif
