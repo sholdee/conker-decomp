@@ -174,6 +174,19 @@ unused `pad`) to get the scope. A dummy usually stands for a real local of that 
 - If no real local fits, keep the existing device with its `/* matching: */` comment. Do not replace one
   device with another.
 
+## Scheduling facts that are easy to get wrong (measured on 120,000+ IDO outputs)
+- With `-g3`, `as1` schedules each lexical block that declares something on its own. An instruction order
+  that one block cannot produce can still come from several blocks.
+- The source line layout changes the schedule: stores written on one line can come out in another order
+  than the same stores on separate lines. Vary the line layout before you call an order impossible.
+- `as1` is not a fixed point: re-assembling IDO's own output can change it.
+- IDO can leave values in `$t0`–`$t5` without touching `$t6`–`$t9` (for example a fifth argument kept in
+  `$t0` at `-O3`), move float arguments into `$f8`/`$f10`, and keep values in `$f4`–`$f10` across statements.
+- `-g3` fills the `jr ra` delay slot when the `return` is inside `while (1)`.
+- `as1 -O2` deletes code that `.livereg` marks dead.
+- At `-O1`, `register` locals go to `$a1`–`$a3`, then `$t0` upward, and the function always has a stack frame.
+So none of these is evidence that code is hand-written (see ACCOUNTING.md).
+
 ## Diagnosing a FALSE non-zero score
 - A switch that matches byte-for-byte but scores non-zero may be ONLY compiler-jtbl
   rodata refs (anonymous LOCAL `.rodata` vs a NAMED jtbl symbol). Re-run with
