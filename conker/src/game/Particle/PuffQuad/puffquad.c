@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* The three quads of a puff, drawn on each quad's matrix (particle_drawPuffQuad). */
 static Vtx gPuffQuadVerts[] = {

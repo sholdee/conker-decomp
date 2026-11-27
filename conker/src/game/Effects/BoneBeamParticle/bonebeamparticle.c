@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 #include "libc/string.h"
 
 /* This file's .data: the four textures effect_spawnFlashParticle picks one of. */

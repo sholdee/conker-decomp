@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/light.h"
+#include "conker/script.h"
 
 void light_updateAmbientRedDrift(AmbientPulse *arg0) {
     f32 *p = &arg0->red;

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/effect.h"
 
 /*
  * Subsystem "hud": prototypes of the non-static functions and declarations of the globals

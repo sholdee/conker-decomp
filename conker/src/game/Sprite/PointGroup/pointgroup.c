@@ -6,8 +6,9 @@ f32 (*gPointGroupMtx)[4]; // the current float matrix
 s32 gSegmentBases[16];   // segment base addresses
 u8 gAddingObjectTris;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/sprite.h"
 
 /* Transforms the group's points by the matrix gPointGroupMtx into out[slot] (16 slots; empty slots are skipped). */
 void sprite_transformPointGroup(PointGroup *group, f32 (*out)[3]) {

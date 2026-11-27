@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
 
 /* The two display lists (indices into gEffectActorDisplayLists) that a piece picks from, and the alternative pair. */
 static s32 gTumblePieceDls[2] = { 0, 1 };

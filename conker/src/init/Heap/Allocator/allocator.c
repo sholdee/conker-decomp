@@ -13,8 +13,10 @@ static s32 gHeapLastAllocAlign;
 static s32 gHeapLastAllocFromEnd;
 static s32 gHeapLastAllocMode;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/heap.h"
+#include "conker/text.h"
 
 /*
  * Heap globals:

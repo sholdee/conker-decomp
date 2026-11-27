@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/prop.h"
 
 /* Registers a TexScroll on res's display list (game/Effects/CharacterFlameThrower/characterflamethrower.c). */
 /* Height of the prop surface below (x, y, z), or -10000 (game/Collision/Floor/floor.c). */

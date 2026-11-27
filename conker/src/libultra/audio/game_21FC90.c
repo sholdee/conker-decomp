@@ -10,7 +10,11 @@ void *D_800E0E24;
 void *D_800E0E28;       /* the Huffman table data */
 u8 D_800E0E2C;          /* nonzero: the decoder tables are loaded */
 
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/mp3.h"
+#include "conker/rom.h"
 
 extern s32  _getRate(f32 ivol, f32 tvol, s32 count, u16 *ratel);
 

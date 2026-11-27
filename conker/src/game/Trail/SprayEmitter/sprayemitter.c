@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 /* Trail types (see game/Trail/MotionTrail/motiontrail.c). */
 

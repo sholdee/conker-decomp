@@ -2,7 +2,7 @@
 
 /*
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
- * before it, so it is defined before functions.h and variables.h.
+ * before it, so it is defined before the subsystem headers.
  */
 f32 gLedgeZ; // ledge probe results (collision_resolveMapWalls family in game/Collision/WallCollide/wallcollide.s)
 f32 gLedgeAngle1;
@@ -20,8 +20,16 @@ f32 gLedgeHeight2;
 f32 gLedgeX;
 struct TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/save.h"
 
 /* A Latin-1 accented letter: its string, its code and the index of its upper/lower case pair. */
 typedef struct {

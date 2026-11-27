@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/screen.h"
 
 /* Spawns a flash particle, a burst of 12-18 drops, the particle_spawnShortLightFlash effect and a white screen
  * flash at `pos`. */

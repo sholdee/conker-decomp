@@ -1,6 +1,18 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 /* This file's .data. */

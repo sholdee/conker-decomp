@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 #include "libc/string.h"
 
 /* matching: no header declares particle_spawnJitterParticle (groundcluster.c): areaemitter.c was compiled with another view */

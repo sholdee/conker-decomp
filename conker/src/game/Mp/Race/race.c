@@ -13,8 +13,21 @@ f32 gRaceTargetZ;
 s8 gRaceDirection;  // race direction: 0 = towards higher node params
 s8 gRacersUpdated;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/path.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* This file's .data. */
 Racer *gRacers = NULL; // per-racer state of the race mode

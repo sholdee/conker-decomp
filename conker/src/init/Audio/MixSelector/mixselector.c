@@ -11,8 +11,12 @@ static f32 gMixSentVolume;      /* volume last sent */
 static f32 D_80042794;
 static f32 gMixWobblePhase;      /* phase of the frequency wobble */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/audio.h"
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/sound.h"
 
 /* Requests an audio-mix selector for the next update (cleared after each audio_updateMix). */
 void audio_requestMixSelector(s32 selector) {

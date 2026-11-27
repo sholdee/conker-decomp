@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/sprite.h"
+#include "conker/view.h"
 
 /* A sky draw routine (gSkyDrawFuncs): draws the current view's sky quad (gSkyQuadVtx) with the 4x256 RGBA32 gradient
  * texture gSkyData, rolled by `roll` and with its t window (rows top..bottom, chosen by level) scrolled by the

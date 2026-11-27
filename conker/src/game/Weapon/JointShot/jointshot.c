@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that math_transformOffsets transforms by it. */

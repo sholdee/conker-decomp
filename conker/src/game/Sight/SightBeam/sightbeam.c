@@ -1,6 +1,17 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
 
 
 /* Neutral zone handler 8 (gEffectZoneSpawnHandlers): the zone is a sight beam placement. It casts rays both ways from the

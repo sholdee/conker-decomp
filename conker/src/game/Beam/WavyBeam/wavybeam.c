@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
 WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {

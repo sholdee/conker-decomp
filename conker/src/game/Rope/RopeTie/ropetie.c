@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Rope end offsets in bone space. */
 static const Vec3f D_800AA320 = { 77.0f, 20.0f, 67.0f };

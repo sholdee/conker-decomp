@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
 
 
 /* Zone handler gNeutralZoneSpawnHandlers[...]: spawns timed effect 89 for the zone at its x/z. */

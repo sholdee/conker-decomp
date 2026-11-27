@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/particle.h"
+#include "conker/screen.h"
 
 
 void screen_resetKickableTargets(void) {

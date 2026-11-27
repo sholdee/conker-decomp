@@ -40,4 +40,7 @@ extern AllocatorBlock *gHeapFirstBlock;     // first heap block (all blocks, add
 extern AllocatorFreeBlock *gHeapFreeHead; // free list head (address order)
 extern AllocatorFreeBlock *gHeapFreeTail; // free list tail
 
+/* past the end of the game .bss (undefined_syms.us.txt) */
+extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
+
 #endif

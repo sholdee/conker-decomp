@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
 
 /*
  * A data-only unit after game/Prop/Clock/clock in the link. Its .rodata (0x247180) follows game/Prop/Clock/clock's literals and

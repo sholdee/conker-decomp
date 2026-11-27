@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/cutscene.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/zone.h"
 
 /* A command/query message: an 8-byte header followed by word parameters. */
 struct Msg_CD860 {

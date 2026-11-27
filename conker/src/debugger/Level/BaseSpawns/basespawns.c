@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "structs.h"
 
 /*
  * A data-only unit: the two base spawn tables. They are not data of the debugger. The ROM has them after

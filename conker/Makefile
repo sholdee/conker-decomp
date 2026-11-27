@@ -241,7 +241,7 @@ $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES) undefi
 	$(LD) $(LDFLAGS) -o $@
 
 ifndef PERMUTER
-$(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/variables.h include/structs.h include/functions.h
+$(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/structs.h
 	@cpp -MM -MP -MT $@ -MF $@.d -nostdinc $(filter -I% -D% -U%,$(subst -I ,-I,$(CFLAGS))) -D_LANGUAGE_C -D__sgi $< 2>/dev/null || rm -f $@.d
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< > $(BUILD_DIR)/$<
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<

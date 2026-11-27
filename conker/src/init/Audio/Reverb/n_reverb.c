@@ -1,15 +1,12 @@
 #include <ultra64.h>
 
 #include "n_libaudio.h"
-#include "variables.h"
+#include "conker/audio.h"
 #include "n_abi.h"
 #include "libultra/audio/n_synthInternals.h"
 
 /* Conker's variant of the libultra reverb/chorus effect (n_reverb.c): the FX pull,
  * its parameter handler, and the delay-line load/save/filter/modulation helpers.
- *
- * This TU deliberately does NOT include "functions.h": functions.h and n_libaudio.h
- * give n_alInit/n_alClose incompatible prototypes, so they cannot both be included.
  *
  * D_800428C4[bus] is the bus's stereo-routing flag (0: one delay line, 1: a second
  * line for the other channel); D_800428C6[bus] inverts the feed coefficients and

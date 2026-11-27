@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/beam.h"
+#include "conker/level.h"
 
 
 void level_spawnZoneAreaEmitter(s32 arg0, s32 arg1) {

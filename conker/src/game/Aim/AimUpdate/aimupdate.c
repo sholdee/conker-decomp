@@ -1,5 +1,5 @@
 #include <ultra64.h>
-// This file's .bss, defined before functions.h and variables.h declare the globals (conker/aim.h): IDO lays
+// This file's .bss, defined before the headers that declare the globals (conker/aim.h): IDO lays
 // out .bss in the order it first sees each name, and gAimTarget is static.
 f32 gAimLookPoint[3];
 u8 gAimHasOverride;
@@ -9,8 +9,19 @@ static f32 gAimTarget[3]; /* current aim target */
 s16 gAimFixedPoint[3];
 u8 gAimPass; /* aim pass / slot counter */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/model.h"
 
 /*
  * Per group (gNoAimAnimGroups[character_type] - 1): the animations during which an object does not aim

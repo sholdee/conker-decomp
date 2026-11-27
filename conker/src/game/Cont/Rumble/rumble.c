@@ -3,8 +3,12 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/cont.h describes it. */
 u8 gRumbleSuppressed; /* set by cont_killAllRumble; game/Cont/PadRead/padread keeps the motors off while it is set */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/view.h"
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
 

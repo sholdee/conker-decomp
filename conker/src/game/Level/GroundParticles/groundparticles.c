@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/level.h"
+#include "conker/particle.h"
 
 static const Vec3f D_80096550 = { -21.0f, 1631.0f, -1535.0f };
 

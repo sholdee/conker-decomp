@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 static const Vec3f D_8009FBC0 = { 58.0f, -30.0f, 0.0f }; // a point in bone space
 

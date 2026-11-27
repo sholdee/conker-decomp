@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/effect.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
 
 /* Bursts three debris pieces from the object's position. */
 void actor_hitBurstDebris(Actor *obj, s32 arg1) {

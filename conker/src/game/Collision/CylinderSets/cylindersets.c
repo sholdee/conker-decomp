@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/face.h"
+#include "conker/rom.h"
 
 /* Loads the level's cylinder-set table (gCylinderSets) and relocates each set's cylinder offset to a pointer. */
 void collision_loadCylinderSets(s32 arg0) {

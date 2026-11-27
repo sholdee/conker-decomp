@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
 
 /* Spawns a ring of 25 kind-2 particles (trail_spawnKind2Trail) of radius 80 around (x, y, z). */
 void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3) {

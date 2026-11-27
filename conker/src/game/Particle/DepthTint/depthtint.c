@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/particle.h"
 
 /*
  * Computes an RGB tint (0-255 per channel) from a z coordinate: white for z > 0, fading to

@@ -1,7 +1,11 @@
 /* game/Level/LevelSetup23/levelsetup23.c -- level_setup23: the level's six floating models, three of them with a light. */
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 // fat struct to decipher
 

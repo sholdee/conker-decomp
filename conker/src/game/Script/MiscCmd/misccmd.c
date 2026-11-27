@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/hud.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/text.h"
 
 /* Five spring-eased script values (math_springTo / math_springAngleTo). */
 static f32 gScriptSpringVelocities[5]; // velocity

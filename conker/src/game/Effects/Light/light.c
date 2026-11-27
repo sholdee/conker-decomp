@@ -4,8 +4,23 @@
 /* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gDaylight;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
 #include "libc/string.h"
 
 /* Update callbacks per LightEffect.update; 0 ends the effect. Declared without a prototype: the

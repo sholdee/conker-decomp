@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 #include "libc/string.h"
 
 /* One sample in the trail's ring buffer. */

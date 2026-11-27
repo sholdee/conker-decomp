@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/script.h"
 
 
 /* 12-byte slot record. The first word is a bitfield: golden reads it whole (`lw` + `srl 31`)

@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
 
 /* Per-effect data (at 0x28) of the spark effect that follows an object. */
 typedef struct {

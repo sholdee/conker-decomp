@@ -61,7 +61,7 @@ extern __osExceptionVector __osExceptionPreamble[];
 
 /*
  * osResetType and osAppNMIBuffer under the names of their fixed addresses. The game code's
- * declarations of the same two symbols are in include/variables.h.
+ * declarations of the same two symbols are in include/conker/os.h.
  */
 extern s32 D_8000030C;
 extern s32 D_8000031C[16];

@@ -11,12 +11,11 @@
 #include "conker/texture.h"
 
 /*
- * This file does not include functions.h or variables.h. It saw allocate_memory with a u32 tag, not the s32 tag
- * of conker/heap.h, so it includes only the subsystem headers that it needs and declares the rest here.
+ * This file saw allocate_memory with a u32 tag, not the s32 tag of conker/heap.h, so it does not include
+ * conker/heap.h and declares allocate_memory here.
  */
 /* matching: this file saw a u32 tag (see level_spawnObjects: the hoisted 1 it passes is shared with the 1U compare) */
 void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode); /* init/Heap/Allocator/allocator.c */
-extern u16 gSurfSetA[40]; /* variables.h: grid-query result, triangle indices */
 
 static u16 gCullRadiusTooSmallCount; // objects whose preset radius is too small (level_setObjectCullRadius)
 static u16 gCullRadiusComputedCount; // objects whose radius was computed

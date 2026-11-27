@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/heap.h"
+#include "conker/rom.h"
+#include "conker/text.h"
 
 /* ROM extent of one font's packed glyph data. */
 typedef struct {

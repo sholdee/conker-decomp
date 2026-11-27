@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/screen.h"
+#include "conker/texture.h"
 
 /* Spawns an overlay for the given id. */
 ScreenOverlay *screen_spawnOverlay(s16 id) {

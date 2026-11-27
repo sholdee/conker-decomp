@@ -1,7 +1,10 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/debug.h"
+#include "conker/game.h"
+#include "conker/level.h"
 
 /* Display-list checker state. */
 static s32 gDlCheckSegments[16]; // segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)

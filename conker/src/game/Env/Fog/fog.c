@@ -11,8 +11,9 @@ s16 gFogBlend;
 s16 gFogNear;
 s16 gFogFar;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/env.h"
+#include "conker/level.h"
 
 /* One entry of the fog preset table gFogPresets[0]. */
 typedef struct {

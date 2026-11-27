@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
 
 // matching: a 0.01745329238f literal changes the frame layout and a const f32[1] the multiply's operand
 // order; the factor is a const struct in .rodata

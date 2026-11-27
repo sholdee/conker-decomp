@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Render setup display list of the quad effects; the effect type's entry in the object type table
  * D_8008B4D4 points to it. */

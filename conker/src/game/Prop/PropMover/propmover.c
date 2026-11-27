@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/boot.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/prop.h"
+#include "conker/rom.h"
 
 /*
  * Behaviour handlers for scenery objects (WorldObject) that move, spin or animate their vertices toward a

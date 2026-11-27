@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/mp.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 /* Script operand value meaning "leave this field unchanged". */
 #define ARG_KEEP 0x7FFFFFFF

@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
+#include "conker/math.h"
 
 #define PI 3.1415927410125732f
 

@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/particle.h"
 
 /*
  * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (TimedEffects with their own data

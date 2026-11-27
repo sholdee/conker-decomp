@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/model.h"
 
 
 typedef struct Game48B10Vertex {

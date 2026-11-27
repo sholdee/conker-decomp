@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
 
 /* gObjectFilters object filter: rejects objects with id 0x12, 0x23, 0x73 or 0x8A. */
 s32 effect_filterExcludedTargets(Actor *obj, s32 arg1, s32 arg2) {

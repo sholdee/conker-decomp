@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/math.h"
 
 /**
  * Unless flag 4 is set, recomputes the heading (unk37C, degrees; unk39C in radians)

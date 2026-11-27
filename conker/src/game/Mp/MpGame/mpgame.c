@@ -1,6 +1,23 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/path.h"
+#include "conker/player.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)gViews)

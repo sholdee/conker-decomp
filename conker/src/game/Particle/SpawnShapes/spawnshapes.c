@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/pipeexplode.h"
+#include "conker/trail.h"
 
 /* The particle spawn callback of each kind (EmitterCallback; the callbacks take their own parameter types,
  * so each entry gives IDO warning 709, as the other handler tables do). */

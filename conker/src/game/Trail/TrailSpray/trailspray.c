@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/trail.h"
 
 /* Sprays up to 30 trails from a ring around obj; stops early when a trail can't be created. */
 void trail_sprayFromRing(Actor *obj, u8 owner) {

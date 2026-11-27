@@ -1,6 +1,20 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 
 /*
  * A trail effect attached to a character (Actor): a ring buffer of points that is drawn as a

@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/script.h"
 
 static s32 D_80088710 = 999; /* queued flag query (0x900x), 999 for none */
 

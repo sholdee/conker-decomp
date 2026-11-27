@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
 #include "libc/math.h"
 
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */

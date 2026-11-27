@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/gfx.h"
+#include "conker/prop.h"
 
 void func_150CF0A0(WorldObject *arg0) {
     WorldObject *temp;

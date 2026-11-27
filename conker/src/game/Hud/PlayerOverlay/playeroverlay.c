@@ -27,8 +27,28 @@ Mtx gHudBlockMtx[6][2];      // per block: its matrix per frame buffer
 f32 gHudBlockStackWobbleVel[3];         // the stack's wobble velocity
 static u8 D_800D28A0[0x380]; /* not referenced */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/path.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* This file's .rodata: the block positions and the stack's base, then the race time formats. */
 static const s16 gHudBlockOffsets[6][3] = {

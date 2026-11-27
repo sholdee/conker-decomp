@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 typedef struct {
     f32 x; /* sin of the segment angle */

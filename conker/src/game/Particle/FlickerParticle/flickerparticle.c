@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 #define EFFECT_WIDTH_GROWN  2
 #define EFFECT_HEIGHT_GROWN 8

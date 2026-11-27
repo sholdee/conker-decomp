@@ -4,8 +4,11 @@
 f32 gScreenScaleX; // screen width / 292
 f32 gScreenScaleY; // screen height / 216
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/os.h"
+#include "conker/view.h"
 #include "vimodes.h"
 
 /* NTSC: a 292-pixel, 16-bit, anti-aliased mode without gamma correction (it keeps the LPN1 type id). */

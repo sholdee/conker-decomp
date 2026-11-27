@@ -1,7 +1,10 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/level.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
 
 
 void level_setup28(void) {

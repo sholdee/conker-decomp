@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/player.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/view.h"
 
 
 /* Argument block of a command; the arguments start at 0x8. */

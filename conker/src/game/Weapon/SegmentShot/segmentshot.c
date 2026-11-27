@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* matching: no header declares particle_spawnSteamParticle (steam.c): modelbeam.c and blood.c were compiled with other views */
 SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,

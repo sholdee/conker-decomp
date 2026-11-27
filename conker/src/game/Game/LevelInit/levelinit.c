@@ -1,7 +1,18 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/aim.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/os.h"
+#include "conker/particle.h"
+#include "conker/script.h"
+#include "conker/shadow.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 
 /* Per-level setup routines, indexed by LevelHeader.setupCallback (0: none). */
 static void (*gLevelSetupFuncs[])(void) = {

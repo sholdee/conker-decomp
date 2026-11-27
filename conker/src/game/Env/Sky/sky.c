@@ -8,8 +8,19 @@ u8 D_800DBEAB;
 u8 D_800DBEAC;
 Mtx *gSkyMatrices;       // sky projection matrices, 2 per view
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/rom.h"
+#include "conker/screen.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)gViews)

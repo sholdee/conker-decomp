@@ -3,8 +3,7 @@
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
 u8 gExpansionPak; // an Expansion Pak is present (8MB of RDRAM)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/heap.h"
 
 
 void heap_clearExpansionPak(void) {

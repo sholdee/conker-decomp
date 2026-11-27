@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/screen.h"
 
 /*
  * Subsystem "sight": prototypes of the non-static functions and declarations of the globals

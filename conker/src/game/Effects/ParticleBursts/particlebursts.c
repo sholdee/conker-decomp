@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 
 /* Actor id 0x20 with a ob_matrix_ptr model: spawns one 0x29E9 particle near it with the actor as owner. */

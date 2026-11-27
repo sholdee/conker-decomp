@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/cutscene.h"
+#include "conker/event.h"
+#include "conker/game.h"
 
 /*
  * Tables of the actor code: the binary-angle cosine and angle tables, the hit routes and the

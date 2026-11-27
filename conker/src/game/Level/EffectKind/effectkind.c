@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/level.h"
 
 
 u8 level_getEffectKind(void) {

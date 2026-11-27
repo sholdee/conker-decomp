@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/light.h"
+#include "conker/sight.h"
+#include "conker/zone.h"
 
 void effect_turnBeamsOff(void) {
     u8 i;

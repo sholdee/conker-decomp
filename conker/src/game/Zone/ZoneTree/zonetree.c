@@ -1,14 +1,15 @@
 #include <ultra64.h>
 
 /*
- * This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss
+ * This file's .bss, defined before the headers that declare the globals: IDO lays out .bss
  * in the order it first sees each name (see init/Sched/SchedInit/schedinit.c).
  */
 u8 gZoneCursorEnabled; // nonzero: zone_advanceObjectCursor cycles the zone-object cursor
 u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..24)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/zone.h"
 
 /* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies
    in a leaf zone and every zone on the way has `bit` set in views; otherwise 1. */

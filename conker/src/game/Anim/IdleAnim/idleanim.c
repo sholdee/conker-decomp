@@ -4,8 +4,19 @@
 u8 gIdleRequestFlags;
 static s32 gIdleTune;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 /*
  * Idle animations: while an actor stands still it plays short "sequences" (lists of frames

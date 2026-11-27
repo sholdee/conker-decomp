@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
 

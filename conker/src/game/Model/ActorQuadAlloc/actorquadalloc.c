@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/heap.h"
+#include "conker/model.h"
+#include "conker/view.h"
 
 
 void model_allocActorQuadVtx(void) { 

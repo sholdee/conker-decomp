@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 void particle_freeAnchorEmitterSprite(LightEffect *obj) {
     effect_unlinkAnchorLight(obj);

@@ -35,8 +35,15 @@ f32 gFloorQueryY;                 // last floor query: y
 f32 gFloorQueryZ;                 // last floor query: z
 f32 gRayProbeBottom;                 // last ray probe: bottom
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/model.h"
+#include "conker/particle.h"
+#include "conker/shadow.h"
 
 /* Per collision set: 1 = enabled. */
 u8 gFloorProbeTypeEnabled[4] = { 1, 1, 1, 1 };

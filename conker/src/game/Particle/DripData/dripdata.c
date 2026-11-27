@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/particle.h"
 
 /*
  * A data-only unit after game/Rope/SwingRope/swingrope in the link. Its .rodata (0x24DD60) starts on a 16-byte boundary after

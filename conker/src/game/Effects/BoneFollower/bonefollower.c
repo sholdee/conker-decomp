@@ -6,8 +6,12 @@ u8 gAnchorRefCounts[20];                 /* reference count per shared anchor re
 u16 gAnchorCounts[20];                /* anchor count of each loaded set */
 struct BoneAnchor *gAnchorSets[20]; /* the loaded anchor set of each resource (type in game/Particle/AnchorEmitter/anchoremitter) */
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/particle.h"
+#include "conker/rom.h"
 
 /* The ROM table ids of the shared anchor resources. */
 static const u16 gAnchorResourceIds[20] = {

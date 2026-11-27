@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 
 /* Level hooks, installed by the per-level setup (game_3DB60.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
 s32 (*gBulletHitTest)(Vec3f *start, Vec3f *delta, Vec3f *hit);

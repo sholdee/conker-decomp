@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/screen.h"
+#include "conker/trail.h"
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 struct ObjBurstEffect {

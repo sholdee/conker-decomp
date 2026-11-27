@@ -16,8 +16,14 @@ u8 gPageInflateWork[0x1410];                // init/Boot/Paging/pagefault.s: wor
 u8 *gPageDmaBuffer;                       // gPageDmaBufferStorage, aligned to 16 bytes
 s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, aligned to 16 bytes)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/libc.h"
+#include "conker/music.h"
+#include "conker/os.h"
+#include "conker/rom.h"
+#include "conker/sched.h"
 #include "macros.h"
 
 /* ROM range of the compressed game code (game/Prop/PropMover/propmover.c reads it). */

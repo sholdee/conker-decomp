@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 /* Data of the swinging-light effect, stored at LightEffect.data by light_spawnLampParticle. */
 typedef struct {

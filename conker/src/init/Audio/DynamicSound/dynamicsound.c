@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-// SoundRecordCallback (functions.h) is called each update for a record with flag 0x10, with the values
+// SoundRecordCallback (structs.h) is called each update for a record with flag 0x10, with the values
 // sound_updateRecords is about to apply. Each callback gives callback_param1/2 its own meaning.
 
 // SoundRecord.flags, as sound_updateRecords reads them:
@@ -37,7 +37,7 @@ typedef struct {
 } SoundVariant;
 
 /*
- * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * This file's .bss. It is defined before the subsystem headers: IDO places a variable that an
  * extern declared earlier (conker/sound.h) after the others.
  */
 static SoundQueueEntry gSoundStopQueue[16];
@@ -55,8 +55,14 @@ static SoundRecord dynamicSounds[32];
 static SoundSlot gVoiceSlots[32];  /* sound_resetVoices clears all 32; a handle's low 4 bits pick one of the first 16 */
 static s32 gDynamicSoundCount;            /* records in use in dynamicSounds */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/audio.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/sound.h"
+#include "conker/view.h"
 
 // The variants of each effect (sound_pickEffectVariant), indexed [effect][variant].
 static const SoundVariant gEffectSoundVariants[20][5] = {

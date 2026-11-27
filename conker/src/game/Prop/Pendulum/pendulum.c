@@ -2,12 +2,18 @@
 #include "structs.h"
 
 // This file's .bss (0x800D98C0-0x800D98DF). gLevelSprayEffects has its extern in conker/prop.h, so it is
-// defined here, before functions.h (see init/Sched/SchedInit/schedinit.c).
+// defined here, before the subsystem headers (see init/Sched/SchedInit/schedinit.c).
 u8 D_800D98C0[16]; /* not referenced */
 EffectHeader *gLevelSprayEffects[4];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the two behaviours here: the pendulum's push phase

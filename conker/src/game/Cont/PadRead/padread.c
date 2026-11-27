@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined in address order before functions.h and variables.h declare the globals: IDO
+/* This file's .bss, defined in address order before the headers that declare the globals: IDO
  * lays out .bss in the order it first sees each name, and that order also depends on how many types and
  * variables are declared before it (see init/Sched/SchedInit/schedinit.c). */
 OSTimer gContReadTimer;             // the timer that starts the next controller read
@@ -30,8 +30,12 @@ f32 gRumbleOffTime[MAXCONTROLLERS]; // per channel: the off time of the rumble c
 f32 gRumblePeriod[MAXCONTROLLERS]; // per channel: the length of the rumble cycle
 OSMesg gSiMesg;              // the message received from gSiMesgQueue
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/os.h"
+#include "conker/save.h"
+#include "conker/sched.h"
 
 u8 gPlayerChannels[4] = { 0, 1, 2, 3 }; // the controller channel of each player; 4 or more: none
 u8 gContReadDone = 1;                 // a controller read has finished: cont_startReadTimer arms the timer for the next

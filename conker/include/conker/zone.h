@@ -79,4 +79,7 @@ extern u64 gActorZoneBits[16][3];
 extern TriggerZone **gCharFlagZones;
 extern s32 gCharFlagZoneCount;
 
+/* game/Zone/CodeTree/codetree.s */
+extern s32 D_800BE5D0;
+
 #endif

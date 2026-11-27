@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/script.h"
+#include "conker/sight.h"
 #include "libc/string.h"
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */

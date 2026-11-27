@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/trail.h"
 
 
 /* Spawns a flat sprite (texture 0x38) of 110 x 110 at (x, y, z). */

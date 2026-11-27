@@ -9,8 +9,19 @@ u8 gFlareRenderStateSet; /* flare render state has been set up this frame */
 u8 D_800DDD61;
 LensFlare *gLensFlares; /* head of the lens flare list */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/env.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* The sun position of the levels whose LevelHeader.sunPosition is 1. */
 static f32 gSunPosition[3] = { -73.0f, 80.0f, -95.0f };

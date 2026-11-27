@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/bone.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/model.h"
 
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */
 void bone_buildCommands(GameCommand *commands, s32 index) {

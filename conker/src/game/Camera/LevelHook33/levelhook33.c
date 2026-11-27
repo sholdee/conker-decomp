@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/script.h"
 
 void camera_levelHook33(Camera *arg0) {
     if (script_query(1, 0x403E, 6, 0x2000) != 0) {

@@ -17,8 +17,17 @@ f32 gSavedDirLightAmount;
 f32 gSavedDirLightAmbientAmount;
 RegionNode *gDustRegions;
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 /* A node of a list of spawn regions with their cached volume and area. */
 RegionNode *light_newRegionNode(region)

@@ -4,8 +4,10 @@
 /* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 CamOffset gCameraOffsets[4];
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
 
 /*
  * Camera wobble effects: up to six sine waves (position xyz, rotation xyz) that are summed into a

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/level.h"
+#include "conker/prop.h"
 
 
 void level_resetWaveDeformers(void) {

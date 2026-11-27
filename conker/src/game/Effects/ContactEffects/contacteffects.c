@@ -1,6 +1,17 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/weapon.h"
+#include "conker/zone.h"
 
 // Spawns one of several effects at the point gHitPointX, picked by obj's id.
 void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {

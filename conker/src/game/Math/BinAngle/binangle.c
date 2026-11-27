@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/anim.h"
+#include "conker/math.h"
 
 /*
  * Angles here are u8 binary angles: 256 steps per full turn, so 64 is a right angle.

@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 #include "libc/string.h"
 
 /*

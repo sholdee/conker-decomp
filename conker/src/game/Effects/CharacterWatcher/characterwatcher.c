@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
 
 /*
  * Split from game/Effects/EffectActor/effectactor.c at effect_newCharacterWatcher (16-aligned): game/Effects/EffectActor/effectactor's .rodata (the 1/255 literal at

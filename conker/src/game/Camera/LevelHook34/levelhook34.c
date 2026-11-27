@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/prop.h"
+#include "conker/script.h"
 
 /* Camera hook: sets bit 31 of the camera's AvailableModes while query 0x401C holds, clears it otherwise. */
 void camera_levelHook34(Camera *camera) {

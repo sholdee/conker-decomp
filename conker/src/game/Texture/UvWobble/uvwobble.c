@@ -4,8 +4,11 @@
 struct UvWobble *gUvWobbles[1]; // the registered UV wobbles; only one fits
 u8 gUvWobbleCount;                  // number of registered UV wobbles
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/texture.h"
 
 
 /* The opcode byte of a display-list command, read signed (G_ENDDL is -0x21). */

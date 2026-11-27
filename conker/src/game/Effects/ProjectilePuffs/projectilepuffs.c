@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/weapon.h"
 
 
 /* Per-object state of the projectile spawned by effect_spawnProjectile (updated by effect_updateProjectile). */

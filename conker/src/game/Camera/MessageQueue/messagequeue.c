@@ -4,8 +4,7 @@
 /* This file's .bss. */
 CamMsgQueue *gCameraMsgQueues; // one per camera (allocated by game/Camera/CameraViews/cameraviews.c)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
 
 
 

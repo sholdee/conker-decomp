@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
 
 
 // ???

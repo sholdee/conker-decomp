@@ -1,6 +1,19 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/model.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/trail.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 /* Scale factors passed to blood_spawnProfileBurst (all 1.0f). */

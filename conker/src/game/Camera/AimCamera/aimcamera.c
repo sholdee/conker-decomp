@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/sight.h"
+#include "conker/text.h"
 
 /*
  * Aim camera: the camera mode that swings behind the player (camera_enterAim enters it, camera_updateAim

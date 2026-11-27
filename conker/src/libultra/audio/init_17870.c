@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before functions.h: its externs would change the order. */
+/* This file's .bss, defined before the subsystem headers: their externs would change the order. */
 u8 D_800428C0;
 u8 D_800428C1;
 u8 D_800428C2;
@@ -8,8 +8,7 @@ u8 D_800428C4[2]; /* per bus */
 u8 D_800428C6[2]; /* per bus */
 static u8 D_800428C8[2]; /* per bus: the mode last set */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
 
 
 void func_10017870(u8 arg0) {

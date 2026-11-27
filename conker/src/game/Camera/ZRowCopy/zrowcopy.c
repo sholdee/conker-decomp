@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/view.h"
 
 /* The z-buffer decompression table: depth = (mantissa << shift) + base, by the 3-bit exponent. The camera's
  * z-buffer scans (game/Camera/CameraOcclusion/cameraocclusion.c) decode the rows that camera_copyZRow copies with it. */

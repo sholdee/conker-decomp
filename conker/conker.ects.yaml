@@ -11,8 +11,7 @@ options:
   - "-D_FINALROM"
   generated_c_preamble: |
     #include <ultra64.h>
-    #include "functions.h"
-    #include "variables.h"
+    #include "structs.h"
   create_detected_syms: yes
   undefined_syms_path: undefined_syms.ects.txt
   symbol_addrs_path:   symbol_addrs.ects.txt

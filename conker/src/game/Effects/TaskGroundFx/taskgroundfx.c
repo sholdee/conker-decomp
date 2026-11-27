@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/sound.h"
 
 /* ActorTask callback (see game/Effects/ActorTasks/actortasks.c; only the task's CharacterWatcher is read here): ground effect 5
  * under the task's actor, with sound 0x5208. */

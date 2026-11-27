@@ -3,8 +3,8 @@
 #include "structs.h"
 
 /*
- * This file's .bss, linked at 0x800BE9A0..0x800BEAD0 in this order. Defined before functions.h and
- * variables.h declare the globals (conker/game.h): IDO lays out .bss in the order it first sees each
+ * This file's .bss, linked at 0x800BE9A0..0x800BEAD0 in this order. Defined before the headers that declare
+ * the globals (conker/game.h): IDO lays out .bss in the order it first sees each
  * name, and an earlier extern would count. The order also depends on how many types and variables
  * are declared before it (see init/Sched/SchedInit/schedinit.c).
  */
@@ -46,8 +46,10 @@ u8 gPauseRequested;
 u8 gPauseCooldown;
 u8 gRumbleStopRequest;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/player.h"
 
 
 void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {

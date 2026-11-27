@@ -1,8 +1,16 @@
 #include <ultra64.h>
-/* functions.h has placeholder prototypes for these (void returns, no args); hide them while it is
- * included and declare the real ones below. */
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 #include "libc/string.h"
 
 

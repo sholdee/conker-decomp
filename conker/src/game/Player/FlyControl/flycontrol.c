@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/view.h"
 
 
 /* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */

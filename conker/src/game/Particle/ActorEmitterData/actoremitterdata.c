@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/particle.h"
 
 /*
  * A data-only unit after the game/Particle/ActorEmitter/actoremitter..game/Effects/BurnDamage/burndamage unit in the link. Its .data (0x232150) starts on a 16-byte

@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/view.h"
 
 /*
  * A data-only unit, linked after libultra. Its .rodata (0x2C930) follows that of libultra/gu/libm_vals, the

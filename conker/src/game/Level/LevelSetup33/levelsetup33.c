@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/flamethrower.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 
 struct TexScroll **gSetup33TexScrolls; /* four texture scrolls */
 

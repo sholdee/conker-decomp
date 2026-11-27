@@ -6,8 +6,13 @@ CamOffset *gCameraShakeTables[4]; // camera shake tables: one CamOffset delta pe
 s32 gCameraShakeLengths[4];        // their lengths in frames
 Mtx *gViewMtxBuffers[2];       // per framebuffer: one view matrix per view
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/rom.h"
+#include "conker/view.h"
 
 #define VIEW_MTX(player) (&gViewMtxBuffers[gDrawBufferIndex][player])
 

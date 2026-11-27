@@ -3,7 +3,7 @@
 
 /*
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
- * before it, so it is defined before functions.h and variables.h.
+ * before it, so it is defined before the subsystem headers.
  */
 u8 gFont0Bitmaps[95][0xE0]; // font 0: glyph bitmaps (I4, unpacked by text_unpackGlyph), one per charset entry
 FontGlyph gFont0Glyphs[95]; // font 0: glyph metrics
@@ -22,8 +22,15 @@ static u8 gTextFlashPhase; // flash phase
 static u8 gTextWaveOn; // waving text on
 static u8 gTextWavePhase; // wave phase
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/boot.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* The font charset: glyph i shows character gFontCharset[i] (uppercase only; text_findGlyph folds case). */
 static u8 gFontCharset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&\\^:,$\"=!.>#{([<-%+?})];/~'\304\344\326\366\334\374\337\300\340\302\342\307\347\311\351\310\353\312\352\313\352\316\356\317\357\324\364\333\364\331\372@";

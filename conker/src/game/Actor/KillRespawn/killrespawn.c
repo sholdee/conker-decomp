@@ -7,8 +7,30 @@ u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
 u8 gRespawnPending;
 u8 gLastDeathKind;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/prop.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 /* Puts obj into state 2 with the given timer. */
 void actor_startDeathCountdown(Actor *obj, s32 timer) {

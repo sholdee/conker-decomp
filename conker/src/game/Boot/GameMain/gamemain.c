@@ -1,7 +1,20 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/hud.h"
+#include "conker/level.h"
+#include "conker/music.h"
+#include "conker/player.h"
+#include "conker/save.h"
+#include "conker/sched.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
 
 
 /*

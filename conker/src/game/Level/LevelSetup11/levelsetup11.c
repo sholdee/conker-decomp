@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/rope.h"
 
 /* The five ropes of the level (higher end first). */
 static const RopeEnds gSetup11Rope1Ends = { { -2544.0f, 2426.0f, 2213.0f }, { -2544.0f, 1144.0f, 2213.0f } };

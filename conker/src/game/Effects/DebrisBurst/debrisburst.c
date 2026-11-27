@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 
 /* Spawns a debris burst plus the follow-up effects at the object's position. */

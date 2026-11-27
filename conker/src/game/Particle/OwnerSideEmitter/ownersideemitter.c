@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 #include "libc/string.h"
 
 /* Live particle returned by particle_newOwnedSpriteParticle; its extra data starts at 0xA8. */

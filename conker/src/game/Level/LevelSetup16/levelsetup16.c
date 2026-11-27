@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 
 void level_setup16(void) {

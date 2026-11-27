@@ -3,9 +3,13 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/particle.h describes it. */
 u8 gLevelEffectKind; /* the effect kind of the current context (particle_getContextEffectKind); game/Game/LevelInit/levelinit sets it */
 
-// functions.h declares these three with other return types; this file uses the s32 versions below.
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
+#include "conker/zone.h"
 
 // particle_spawnKindSprite (game/Particle/Steam/steam.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
 // different view of it.

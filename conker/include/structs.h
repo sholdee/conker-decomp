@@ -8,7 +8,7 @@ struct Rope;
 struct BoneChain;
 typedef struct ObjScriptCmd ObjScriptCmd;
 typedef struct BlockDebris BlockDebris;
-/* Effect objects (include/effects.h), named here for the prototypes in functions.h. */
+/* Effect objects (include/effects.h), named here for the prototypes in the subsystem headers. */
 struct DefParticleHead;
 struct ParticleDesc;
 struct QuadSprite;

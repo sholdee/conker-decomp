@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 
 f32 expf(f32 arg0) {

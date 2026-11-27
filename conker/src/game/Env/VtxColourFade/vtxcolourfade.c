@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
 
 // Byte 0x21 of *gLevelHeader: bit 0 enables fades on the level mesh, bit 1 on props, and bit 2 enables
 // both and takes the base colors from gVtxGroupBaseColours instead of gVtxBaseColours.

@@ -1,7 +1,16 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/view.h"
 
 static u16 *gCameraZRowBuffers[4]; // per camera: a row buffer of gScreenWidth u16 (HitsZBufferHoriDataPtr)
 

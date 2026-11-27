@@ -7,8 +7,10 @@ s8 gSpawnGrenadeCount;
 s16 gCarriedUnderwaterTime;
 MatchState gMatchState;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/player.h"
+#include "conker/save.h"
 
 /* This file's .data: the match defaults that game/Player/StatsInit/statsinit and game/Actor/KillRespawn/killrespawn pass to player_setStat. */
 s8 D_80087260 = 100;   // stat 2 (unk8)

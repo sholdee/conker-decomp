@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/colourfb.h"
+#include "conker/effect.h"
+#include "conker/screen.h"
+#include "conker/view.h"
 
 
 /* Starts a mosaic effect over owner for lifetime frames. */

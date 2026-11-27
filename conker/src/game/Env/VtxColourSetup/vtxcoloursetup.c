@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 u8 (*gVtxBaseColours[4])[3]; // [0]: base RGB of every level vertex, then the props'; [i]: level model i's first vertex
@@ -11,8 +11,11 @@ static u8 gLevelEnvColours[30]; // RGB of each G_SETENVCOLOR of the level's firs
 static s16 gLevelEnvColourCmds[10]; // its command index
 static u8 gLevelEnvColourCount;     // count of gLevelEnvColours entries
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/env.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/level.h"
 
 void env_initVtxColours(void) {
     s32 total;

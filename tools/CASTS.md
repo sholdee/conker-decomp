@@ -47,6 +47,6 @@ Land small and often. Other agents change the same headers at the same time.
 - **Do not rename `func_` or `D_` symbols.** Do not change the yaml, the Makefile or `tools/`.
 - **The .bss order.** IDO lays out the `.bss` of a file in an order that depends on the number of types
   and variables declared before it. A new type in a header can move the `.bss` of another file. Read
-  the comment at the top of `src/init_50A0.c`. Use the pattern that other files use: they define their
-  `.bss` before `#include "functions.h"`.
+  the comment at the top of `src/init/Sched/SchedInit/schedinit.c`. Use the pattern that other files use: they define their
+  `.bss` before its subsystem includes.
 - If something cannot be done cleanly, stop and write the reason in the `notes.md` of the workspace.

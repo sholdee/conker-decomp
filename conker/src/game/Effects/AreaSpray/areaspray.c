@@ -4,8 +4,18 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from (level_registerSprayAreaZone registers them)
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 /* This file's .rodata: the burst angle ranges per area, then the four vertex colours of the beam particle. */

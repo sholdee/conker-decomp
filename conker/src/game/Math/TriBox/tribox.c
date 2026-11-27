@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 f32 gTriPlaneNormalX; // plane of the last triangle (math_computeTriPlane): normal x
@@ -17,8 +17,8 @@ f32 gTestBoxHeightRatio; // height / width
 f32 gTestBoxDepthRatio; // depth / width
 f32 D_800CC240[4]; // not referenced
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/math.h"
 
 /* Tests a triangle against the box set up by math_setTestBox. */
 s32 math_testTriBox(Tri3f tri) {

@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
+#include "conker/zone.h"
 
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {

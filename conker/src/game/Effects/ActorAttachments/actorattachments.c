@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/script.h"
+#include "conker/sprite.h"
+#include "conker/trail.h"
 #include "libc/string.h"
 
 /* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */

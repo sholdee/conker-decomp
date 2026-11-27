@@ -6,8 +6,8 @@ static u8 gEepromWriteBlock;
 static u8 *gEepromWriteSource;
 static s32 gEepromWriteLeft;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
+#include "conker/save.h"
 #include "controller.h"
 
 s32 save_writeEeprom(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) {

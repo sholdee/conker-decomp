@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/game.h"
 
 /* Sends message 0x48 (effect_sendEventToTimedEffects) for `owner`; effects it owns destroy themselves on it. */
 void effect_sendOwnerGone(Actor *owner) {

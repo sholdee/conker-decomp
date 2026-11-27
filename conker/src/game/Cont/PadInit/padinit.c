@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/save.h"
 
 static OSContStatus gContStatus[MAXCONTROLLERS];
 static OSMesg gSiMesgBuf[8]; // message buffer of the SI event queue gSiMesgQueue

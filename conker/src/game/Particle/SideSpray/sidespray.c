@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* Emission point offsets in the bone space of side 2 (bone 25) and side 1 (bone 32). */
 static const Vec3f gSpraySide2Offset = { -19.0f, 0.0f, 25.0f };

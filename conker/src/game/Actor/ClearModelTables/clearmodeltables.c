@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/event.h"
+#include "conker/model.h"
 
 
 void actor_clearModelTables(void) {

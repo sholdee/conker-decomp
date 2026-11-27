@@ -4,8 +4,15 @@
 u8 gBoneChainResetMask;            /* one bit per object: reset its chain once it has bones again */
 static f32 gChainAnchor[3]; /* chain anchor position */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/bone.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
 
 /* The bone chain tables (bone_updateChain). */
 static const f32 gChainLinkLengths[4] = { 52.26f, 55.3f, 50.0f, 26.0f }; /* link lengths */

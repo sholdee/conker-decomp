@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
 #include "libc/string.h"
 
 /* Bounds points in the model's root space: centre, base and side (effect_spawnBreakUp). */

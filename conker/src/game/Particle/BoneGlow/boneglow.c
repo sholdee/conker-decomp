@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/flare.h"
+#include "conker/particle.h"
+#include "conker/sight.h"
 
 /* Emitter handlers run by particle_followBoneGlow before it follows the bone. Returning 0 ends the emitter's
  * update (particle_followBoneGlow returns 0); setting *follow to FALSE skips this frame's bone follow. */

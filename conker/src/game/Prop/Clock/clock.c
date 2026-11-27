@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/prop.h"
+#include "conker/save.h"
 
 
 /* Behaviour scratch state (WorldObject.touch) of the swinging object. */

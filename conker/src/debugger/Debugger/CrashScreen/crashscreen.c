@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/debugger.h"
+#include "conker/sched.h"
 
 /* Extra bits debugger_run ORs into the held-button mask for the analog stick. */
 #define STICK_LEFT  0x10000

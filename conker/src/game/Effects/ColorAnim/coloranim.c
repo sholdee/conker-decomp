@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
 
 /*
  * Animated RGB colours: each slot blends between a "from" and a "to" colour by a factor in [0, 1].

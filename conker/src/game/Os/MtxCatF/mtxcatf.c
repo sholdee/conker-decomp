@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
 
 // Game copy of ultralib gu/mtxcatf.c, built at -O3 like the rest of libultra gu/
 // (see the Makefile). -O3 emits the functions in reverse source order, so guMtxCatF

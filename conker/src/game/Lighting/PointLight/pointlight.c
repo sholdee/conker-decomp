@@ -18,8 +18,14 @@ s32 gLightingEnabled;
 ZoneLink *gAmbientZones;
 ZoneLink *gDirectionalZones;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* Allocates a zeroed 0x10-byte block. */
 void *light_allocAmbients(void) {

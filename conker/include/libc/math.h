@@ -11,4 +11,7 @@ double cos(double);
 
 float sqrtf(float);
 
+float fabsf(float);
+#pragma intrinsic (fabsf)
+
 #endif

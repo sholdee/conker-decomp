@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/heap.h"
+#include "conker/libc.h"
 #include "libc/stdlib.h"
 #include "libc/string.h"
 

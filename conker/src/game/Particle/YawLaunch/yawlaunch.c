@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */

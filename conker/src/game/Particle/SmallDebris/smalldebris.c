@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/particle.h"
 
 /* The debris variant: model id and scale. */
 static const s32 D_800AB550[1] = { 0x10 };

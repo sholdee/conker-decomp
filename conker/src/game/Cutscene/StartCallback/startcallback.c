@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
 
 
 /* Cutscene start callback 1 (gCutsceneStartCallbacks): when LEVEL_W1_COG_LAND starts cutscene 2, track 5 targets the

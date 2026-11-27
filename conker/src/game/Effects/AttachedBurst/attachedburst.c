@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/script.h"
+#include "conker/trail.h"
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
    checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */

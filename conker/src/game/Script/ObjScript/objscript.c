@@ -7,8 +7,26 @@ u8 gScriptArg2;
 u8 gScriptArg3;
 f32 gScriptSpeedups[2];
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/path.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 /*
  * Object script interpreter commands.

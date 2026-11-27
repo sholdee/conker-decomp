@@ -109,7 +109,7 @@ extern u8 D_8002C960[]; /* data of the audio microcode */
 
 /* init/Audio/SeqVoice/seqvoice.c to init/Audio/Resample/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
- * (n_libaudio.h, n_synthInternals.h) and by their own files, which do not include functions.h. */
+ * (n_libaudio.h, n_synthInternals.h) and by their own files. */
 
 /* init/Audio/MixSelector/mixselector.c */
 void audio_requestMixSelector(s32 selector);
@@ -130,5 +130,15 @@ extern u8 D_800428C6[2];
 
 /* init/Audio/Env/n_env.c */
 extern s16 n_eqpower[128]; /* n_eqpower: equal-power pan curve */
+
+/* libultra/audio/init_15550.c */
+s32  func_100173C4(SndState **arg0);
+SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7);
+void func_10017594(SndState *arg0);
+void func_100176C4(void);
+void func_100176EC(void);
+void func_10017714(SndState *state, s16 type, s32 arg);
+void func_10017780(u8 arg0, u16 arg1);
+
 
 #endif

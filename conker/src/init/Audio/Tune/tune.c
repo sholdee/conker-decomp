@@ -35,7 +35,7 @@ struct MusicTrack {
 }; /* size 0x64 */
 
 /*
- * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * This file's .bss. It is defined before the subsystem headers: IDO places a variable that an
  * extern declared earlier (conker/music.h) after the others. The order also rotates with the number of
  * types and externs declared before it; a typedef for struct VolumeRamp here would move D_80041F0C first.
  */
@@ -56,8 +56,18 @@ s32 gMusicEventFlags;
 s32 D_80041F08;
 s32 D_80041F0C;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/audio.h"
+#include "conker/camera.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 /* Per-frame update hook of a music sequence: takes and returns its private state word. */
 typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);

@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/prop.h"
+#include "conker/texture.h"
 
 /**
  * Scans a display list up to its G_ENDDL for the first two G_SETTIMG commands.

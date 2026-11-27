@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/blood.h"
+#include "conker/effect.h"
 
 /* When actor 0x53 spawns a 0x16 actor, attaches an emitter (func_151B4FE0) to it. */
 void func_151B5BA0(spawner, spawned)

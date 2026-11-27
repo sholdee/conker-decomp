@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 /* This file's .data: the particle render setup and reset display lists (the particle object types point to

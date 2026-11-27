@@ -1,6 +1,17 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 static const Vec3f gBoneBurstStartOffset = { 0.0f, 24.0f, 11.0f };
 static const Vec3f gBoneBurstDirOffset = { 0.0f, 71.0f, 9.0f };

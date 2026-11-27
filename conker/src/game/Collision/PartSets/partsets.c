@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/weapon.h"
 
 /*
  * A data-only unit after game/Collision/Spawn/spawn in the link: its .rodata (0x241890) holds front-end data after the

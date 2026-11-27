@@ -31,8 +31,20 @@ MtxF gShadowLightViewMtxs[8];
 Mtx gShadowProjMtxs[8][2];
 f32 gShadowLightDist; /* light-to-object distance */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/shadow.h"
+#include "conker/view.h"
 
 static s32 gShadowVtxBudget = 0; /* shadow vertex budget for this frame */
 /* The viewport of the 64x64 shadow texture. */

@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/pipeexplode.h"
+#include "conker/sound.h"
+#include "conker/trail.h"
 #include "libc/string.h"
 
 typedef struct PipeIds {

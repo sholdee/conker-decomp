@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 #include "libc/string.h"
 
 /* not referenced: four s16 channel masks per row (all on, each channel off in turn, all off) */

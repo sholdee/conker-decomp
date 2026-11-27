@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/colourfb.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/trail.h"
 #include "libc/string.h"
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on

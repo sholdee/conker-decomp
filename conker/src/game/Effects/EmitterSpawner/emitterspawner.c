@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/sprite.h"
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
 void effect_newEmitterSpawner(Camera *owner, u8 arg1, s32 arg2) {

@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/particle.h"
+#include "conker/swarm.h"
 
 /* Indices of the wave vertices in each buffer. */
 static const u8 gWaveVertIndices[7] = { 4, 9, 13, 14, 15, 17, 19 };

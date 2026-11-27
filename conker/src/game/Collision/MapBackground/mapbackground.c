@@ -1,7 +1,14 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/rom.h"
+#include "conker/script.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 void collision_clearUvWobbles(void) {
     gUvWobbleCount = 0;

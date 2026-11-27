@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/prop.h"
 
 /*
  * The ROM shows one compilation unit from game/Prop/ShakeSink/shakesink.c to game/Prop/PropMotions/propmotions.c: their .rodata and .data

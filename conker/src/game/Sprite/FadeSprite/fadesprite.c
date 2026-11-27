@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Shows a sprite that fades in over `fadeIn` frames, holds for `hold` frames and
  * fades out over `fadeOut` frames. */

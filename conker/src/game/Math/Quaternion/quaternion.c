@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/math.h"
 
 
 void math_quatAlign(f32 *arg0, f32 *arg1) {

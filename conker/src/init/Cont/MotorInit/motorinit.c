@@ -4,8 +4,7 @@
 static u8 _motorstopbuf[32]; // the motor data block that stops the motor (all 0)
 static u8 _motorstartbuf[32]; // the motor data block that starts the motor (all 1)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
 #include "controller.h"
 
 void _MakeMotorData(s32 channel, u16 address, u8 *data, u8 *command);

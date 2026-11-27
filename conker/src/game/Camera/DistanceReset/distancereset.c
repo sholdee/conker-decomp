@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
 
 
 // Resets four distance parameters to their defaults, then calls camera_placeAtObject when the target

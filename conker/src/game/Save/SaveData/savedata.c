@@ -16,8 +16,16 @@ s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
 u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
 SaveSlotInfo gSaveSlots[3]; // the three save slots
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/os.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/sched.h"
+#include "conker/script.h"
+#include "conker/zone.h"
 
 /*
  * EEPROM save data. The EEPROM is addressed in 8-byte blocks:

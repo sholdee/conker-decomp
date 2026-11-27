@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 void effect_levelUpdateSoundCooldowns(s32 arg0) {
     sound_updateCooldowns();

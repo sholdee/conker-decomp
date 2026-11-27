@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 
 f32 math_catmullRom(f32 *p, s32 i, f32 t) {

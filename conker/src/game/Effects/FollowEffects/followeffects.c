@@ -1,6 +1,21 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 

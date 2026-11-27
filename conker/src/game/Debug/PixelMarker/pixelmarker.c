@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/debug.h"
+#include "conker/game.h"
+#include "conker/view.h"
 
 /* This file's .data: 16 zero bytes between game/Debug/DlCheck/dlcheck's .data and game/Text/FixedFont/fixedfont's. */
 static s32 D_800848C0[4] = { 0, 0, 0, 0 }; /* not referenced */

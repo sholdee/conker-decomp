@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/particle.h"
 #include "libc/math.h"
 
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */

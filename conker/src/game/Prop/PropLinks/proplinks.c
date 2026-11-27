@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/prop.h"
 
 typedef struct PropLink {
     /* 0x00 */ WorldObject *prop;

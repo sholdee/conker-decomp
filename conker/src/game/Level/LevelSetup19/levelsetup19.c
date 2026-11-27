@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/flamethrower.h"
+#include "conker/level.h"
+#include "conker/rope.h"
+#include "conker/texture.h"
 
 /* The six ropes of the level (higher end first). */
 static const RopeEnds gSetup19RopeEnds[6] = {

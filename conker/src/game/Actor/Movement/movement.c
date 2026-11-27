@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss (0x800CC250-0x800D155F), defined in address order before functions.h and variables.h
+/* This file's .bss (0x800CC250-0x800D155F), defined in address order before the subsystem headers
    declare the globals: IDO lays out .bss in the order it first sees each name, and that order also
    depends on how many types and variables are declared before it (see init/Sched/SchedInit/schedinit.c). */
 s32 gActorClock;
@@ -41,8 +41,33 @@ s32 gActorFrameCount;
 Actor *gCurrentActor; // the actor being updated
 f32 gActorTimeStep; // frame time step
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/rope.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/sound.h"
+#include "conker/text.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
+#include "conker/zone.h"
 
 /* Per-mode tables indexed by gFloorMaterialClass (D_800990C0 and D_800990E0 are read by actor_updateSlopeTilt). */
 static const f32 D_800990C0[8] = { 0.0f, 0.6000000238f, 0.1800000072f, 0.3000000119f, 0.0f, 2.0f, 2.0f, 4.0f };

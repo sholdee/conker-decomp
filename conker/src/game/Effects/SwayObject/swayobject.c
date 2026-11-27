@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/script.h"
+#include "conker/weapon.h"
 
 
 static const Vec3f gLegBonePointOffset = { 0.0f, -45.0f, 0.0f };

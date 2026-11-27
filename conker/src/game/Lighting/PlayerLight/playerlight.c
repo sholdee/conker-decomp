@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/math.h"
 
 static f32 gPlayerLightPitch[4]; // per-player smoothed light pitch (degrees, -180..180)
 static f32 gPlayerLightYaw[4]; // per-player smoothed light yaw (degrees, 0..360)

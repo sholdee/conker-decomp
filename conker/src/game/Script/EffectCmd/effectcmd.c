@@ -27,8 +27,23 @@ typedef struct ResourceSlot {
 u8 D_800D2FA0[0x10]; /* not referenced */
 static ResourceSlot *gResourceTable;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/rom.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/trail.h"
+#include "conker/weapon.h"
 
 
 #define RESOURCE_STATE_LOADED 3

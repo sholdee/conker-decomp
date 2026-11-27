@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
 
 // matching: pi read from a const struct; as a plain literal (or a one-element array) IDO gives the
 // function a larger frame (or another schedule)

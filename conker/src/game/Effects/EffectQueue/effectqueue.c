@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* A fixed-capacity FIFO of values with optional per-value release callbacks. */
 

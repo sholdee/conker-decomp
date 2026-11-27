@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/cont.h"
+#include "conker/debug.h"
+#include "conker/game.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 #include "libc/string.h"
 
 s16 D_80084480 = 0; // the first word of this file's .data; read by game/Camera/Camera/camera.c and game/Game/MainLoop/mainloop.c

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 /**
  * Transforms the point (x, y, z) by the view matrix `mf` and tests whether a box of half-size

@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 /* Attaches a FollowEffect (particle_updateFollowEffect) to obj. */

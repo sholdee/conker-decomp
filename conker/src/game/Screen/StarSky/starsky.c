@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/screen.h"
+#include "conker/view.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)gViews) // matching: the no-op cast changes the code; plain gViews mismatches

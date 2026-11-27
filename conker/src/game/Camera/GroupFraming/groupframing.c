@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/save.h"
 
 /**
  * Frames the first gPlayerCount objects of movement_obj: the camera looks at their max X, mean Y (+150) and

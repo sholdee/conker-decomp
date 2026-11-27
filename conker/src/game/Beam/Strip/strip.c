@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* Update handlers of a strip (StripObj.updateIdx); 0 removes the strip. */
 static s32 (*gStripUpdateHandlers[])(StripObj *) = { beam_stripFollowTarget, beam_stripFollowTargetBone };

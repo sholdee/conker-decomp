@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* Hit effects at pos plus a burst of debris particles. */
 void effect_spawnRayHitDebris(Vec3f *pos, u8 fxOwner, s32 fxList) {

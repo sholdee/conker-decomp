@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/weapon.h"
 
 
 void level_setup06(void) {

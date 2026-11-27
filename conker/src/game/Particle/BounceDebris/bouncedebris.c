@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
 
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */

@@ -9,8 +9,11 @@ static u8 gPathBandCount;      /* number of used height bands */
 static f32 gPathBandTops[7];  /* upper y bound of each used band */
 static u8 gPathBandLayers[6];   /* layer index of each used band */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/mp.h"
+#include "conker/path.h"
+#include "conker/rom.h"
+#include "conker/zone.h"
 
 /* This file's .data. */
 s16 gPathNodeCount = 0;     /* node count */

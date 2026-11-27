@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
 
 /* Writes to *out the world position of a fixed offset from one of the actor's bones, chosen by
  * point (3..6). */

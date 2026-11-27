@@ -1,6 +1,27 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 ModelAttachment *gAttachments; // head of the model attachment list
 

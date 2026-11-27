@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/math.h"
+#include "conker/model.h"
 
 /* asinf rational approximation coefficients: numerator P[1..5], denominator Q[0..4] (Q[4] = 1) */
 static const f32 gAsinP[] = { 0.0f, 3.619550943f, -6.466859818f, 3.510708094f, -0.5643919706f, 0.005872000009f };

@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/text.h"
 
 /* This file's .data: the update functions and message handlers of the text box styles (TextLines.updateFn, .msgFn). */
 static s32 (*gTextBoxUpdateFuncs[])(TextObj *) = { effect_updateFadeTextBox, effect_updatePromptTextBox, effect_updateSlowFadeTextBox, text_updateAmount };

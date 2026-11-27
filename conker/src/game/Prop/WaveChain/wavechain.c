@@ -7,8 +7,13 @@ u8 gWaveChainPresetIds[4];
 s32 D_800DDE58; /* not referenced */
 WaveSample *gWaveChainSamples[8];
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
 
 /* The static parameters of each wave chain (game/Prop/WaveChainStart/wavechainstart starts a chain with one of them); scale is 1 / minZ. */
 WavePreset gWaveChainPresets[4] = {

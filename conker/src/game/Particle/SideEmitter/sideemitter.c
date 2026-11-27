@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of particle_attachBoneSideEmitter):

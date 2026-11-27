@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
 
 
 /* Behaviour scratch state (WorldObject.touch) of the two behaviours below. */

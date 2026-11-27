@@ -143,10 +143,10 @@ jobs:
             git -C test diff --exit-code -- tools/accounting.tsv
           fi
 
-      - name: Check the IDO warning count (trusted limit)
+      - name: Check the IDO warning count (trusted limit) and the includes
         run: |
           if [ -f trusted/tools/warncheck.py ] && [ -f trusted/tools/warnings_max.txt ]; then
-            python3 -I trusted/tools/warncheck.py test/build-inner.log trusted/tools/warnings_max.txt
+            python3 -I trusted/tools/warncheck.py test/build-inner.log trusted/tools/warnings_max.txt test/conker
           else
             echo "::notice::The base branch has no warning limit yet; this check starts after it merges."
           fi

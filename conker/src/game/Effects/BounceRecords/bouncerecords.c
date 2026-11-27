@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 
 /* gBounceRecords: ten BounceRecords (allocated and seeded by level_initBounceRecords). */
 #define RECORD_COUNT 10

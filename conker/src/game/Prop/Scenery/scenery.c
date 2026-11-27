@@ -1,6 +1,19 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/texture.h"
 
 /* not referenced: four points (x, y, z) with a radius */
 const s16 D_800A00E0[4][4] = {

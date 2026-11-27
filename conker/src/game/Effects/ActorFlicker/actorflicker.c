@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/light.h"
 
 /* Update for a flickering light tied to an actor (payload: actor reference, then jitter state). */
 void light_updateActorFlicker(LightEffect *effect) {

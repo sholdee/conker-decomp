@@ -22,8 +22,15 @@ f32 gPoseSavedTargetY; // actor->unk2C0 saved while a command runs
 C3E20Command gPoseCommands[3];
 s32 gPoseCommandScales[4]; // per actor: the running command's scale
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/script.h"
+#include "conker/view.h"
 
 /* Clears all command slots. */
 void script_clearPoseCommands(void) {

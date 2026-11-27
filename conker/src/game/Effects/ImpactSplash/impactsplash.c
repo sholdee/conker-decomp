@@ -1,5 +1,8 @@
 #include <ultra64.h>
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 /* matching: no header declares particle_spawnImpactMark (emissionsource.c): followeffects.c and sightbeam.c were compiled with other views */
 void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,

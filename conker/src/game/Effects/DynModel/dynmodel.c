@@ -1,7 +1,15 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/rom.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 #include <libc/stddef.h>
 
 /* User data of the model spawned by effect_spawnWarpModel. */

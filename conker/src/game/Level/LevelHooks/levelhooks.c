@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 /* Per-level hooks, indexed by the level's hook number (gLevelHeader->hookCallback; 0 = none). The handlers take
  * different arguments, so the table has no prototype. */

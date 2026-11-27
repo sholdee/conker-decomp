@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 /* This file's .bss. */
 u8 gRandomSoundTimer; /* frames until the next random zone sound (game_11EEB0.c runs the same countdown) */

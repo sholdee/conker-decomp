@@ -3,14 +3,18 @@
 
 // This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
 // a header declares after the ones the .c file declares first, so these are declared only here, before
-// functions.h: the order also depends on how many types and variables come before them (see init/Sched/SchedInit/schedinit.c).
+// the subsystem headers: the order also depends on how many types and variables come before them (see init/Sched/SchedInit/schedinit.c).
 u8 gSpriteQueuedCmd; // queued command for sprite_runQueuedCommand
 EffectHeader *gSpriteTintEffect;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in sprite_resetSlots
 static struct Sprite2D *gSpriteSlots[10];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/screen.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 
 /* Runs the command queued in gSpriteQueuedCmd (each handler resets it to 3). */

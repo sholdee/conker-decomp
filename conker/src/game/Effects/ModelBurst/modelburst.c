@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/trail.h"
 
 /* One piece of the effect_throwBurstPieces burst. */
 struct ModelBurstPiece {

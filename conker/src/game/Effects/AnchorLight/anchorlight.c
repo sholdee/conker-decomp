@@ -1,5 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/light.h"
 
 /* An effect bound to an actor. */
 struct BoundEffect {

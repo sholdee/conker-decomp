@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 
 void func_151A0E40(f32 x, f32 y, f32 z, u8 arg3, s32 arg4) {
     func_151A11CC(x, y, z, 163.0f, 2.019000053f, 160, 75, 1055, 1270,

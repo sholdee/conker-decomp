@@ -6,8 +6,15 @@ MtxS16 *gBoneTrailMtxs;
 u8 gAfterimageAlpha;
 BoneTrail *gBoneTrailLists[2];
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/model.h"
+#include "conker/trail.h"
 
 static void (*gBoneTrailUpdateProcs[])(BoneTrail *) = { trail_shiftActorHistory, trail_shiftObjectHistory }; /* per-type update: capture a history frame */
 static void (*gBoneTrailFreeProcs[])(BoneTrail *) = { trail_freeActorAfterimage, trail_freeObjectAfterimage }; /* per-type free */

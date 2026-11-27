@@ -1,7 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-// matching: callers here treat the random number as u32 (functions.h declares it u8)
-#include "variables.h"
+#include "effects.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 /* This file's .rodata: the one debris variant func_15108120 throws (model id and scale). */
 static const s32 D_800A2430[] = { 0xE2 };

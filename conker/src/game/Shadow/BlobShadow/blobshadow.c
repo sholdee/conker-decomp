@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/shadow.h"
+#include "conker/texture.h"
 
 /* Render setup of the blob shadows (an I 8-bit 64x64 texture times the primitive alpha, decal blending); the
  * shadow type's entry in the object type table D_8008B4D4 points to it. */

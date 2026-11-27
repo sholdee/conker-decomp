@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/particle.h"
+#include "conker/script.h"
+#include "conker/view.h"
 
 /* Data of the effect effect_spawnPropEmitter spawns and effect_updatePropEmitter updates. */
 typedef struct {

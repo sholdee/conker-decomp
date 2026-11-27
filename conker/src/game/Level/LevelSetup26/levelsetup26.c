@@ -1,7 +1,11 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/sound.h"
+#include "conker/zone.h"
 
 void level_setup26(void) {
     sound_clearCooldowns();

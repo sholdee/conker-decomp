@@ -4,7 +4,7 @@
 
 /*
  * Text queue state, this file's .bss. IDO lays out .bss in an order that depends on the declarations
- * before it, so it is defined before functions.h and variables.h. All of it applies to the next queued
+ * before it, so it is defined before the subsystem headers. All of it applies to the next queued
  * nodes; drawing resets it.
  */
 static u8 gQueuedTextRed; // red
@@ -24,8 +24,14 @@ static Actor *gQueuedTextAnchor; // anchor actor
 static s16 gQueuedTextAnchorHeight;    // height above the anchor
 static f32 gQueuedTextScale;    // scale
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/libc.h"
+#include "conker/save.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */

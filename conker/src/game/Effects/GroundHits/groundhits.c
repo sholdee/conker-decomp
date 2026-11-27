@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
 
 /* Integer world position chosen by effect_pickGroundHitCentre as the centre of effect_scatterGroundHits's scatter. */
 static Vec3s gGroundHitCentre;

@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/sound.h"
 
 static f32 gTurretPlayerDistSq; // turret's squared distance to the player
 

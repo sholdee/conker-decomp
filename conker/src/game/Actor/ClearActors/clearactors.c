@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/face.h"
+#include "conker/player.h"
 
 
 void actor_clearAll(void) {

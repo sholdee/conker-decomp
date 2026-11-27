@@ -9,8 +9,7 @@ options:
   hasm_in_src_path: True
   generated_c_preamble: |
     #include <ultra64.h>
-    #include "functions.h"
-    #include "variables.h"
+    #include "structs.h"
   symbol_addrs_path:   symbol_addrs.us.txt
 
   auto_link_sections: []

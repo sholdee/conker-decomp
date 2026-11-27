@@ -13,8 +13,14 @@ s32 gLayoutViewHeights[6];           // the view height of each screen layout
 s16 gLayoutViewCentres[4][5][2];     // the centre (x, y) of each view, by screen layout
 f32 gTwoPlayerWidthScale;              // the width scale of the two-player layout
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/view.h"
 
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast

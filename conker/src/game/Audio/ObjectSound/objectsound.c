@@ -1,7 +1,9 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/sound.h"
 
 /* This file's .bss: per-slot cooldowns of sound_playWithCooldown, in ticks. */
 static u16 gSoundCooldowns[4];

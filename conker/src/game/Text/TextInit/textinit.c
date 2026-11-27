@@ -1,12 +1,13 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 u8 gAvailableTexts[9]; // bit set over the 0x43 text ids (text_initAvailable clears only the first 8 bytes)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/rom.h"
+#include "conker/text.h"
 
 void text_resetContextText(void) {
     gContextTextId = 0;

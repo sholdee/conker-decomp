@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
 
 /* Builds this frame buffer's part matrices from the current animation frame, then advances the animation. */
 void anim_updateInstance(AnimInstance *anim) {

@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/screen.h"
+#include "conker/sight.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* The two sprite lists sprite_overlapsScreenSprite searches. */
 typedef struct {

@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/player.h"
+#include "conker/script.h"
 
 void camera_levelHook25(Camera *arg0) {
     if (player_getStat(arg0->CharPtr->playernumber, 1) == 9) {

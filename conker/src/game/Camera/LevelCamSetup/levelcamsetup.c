@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/level.h"
 
 /* Per-level camera setup hooks, indexed by LevelHeader.cameraSetupCallback (0 = none). */
 static void (*gLevelCameraSetups[])(Camera *) = {

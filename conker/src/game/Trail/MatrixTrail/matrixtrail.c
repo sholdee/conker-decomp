@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 
 /*
  * Ribbon trails attached to a point of an object (a game object's matrix plus an offset).
