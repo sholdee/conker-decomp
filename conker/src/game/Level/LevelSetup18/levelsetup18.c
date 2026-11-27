@@ -48,9 +48,9 @@ dummy_label_15010880:
 //     prop_createWaveDeformer(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
 //     gBulletImpactHook = effect_onBulletImpactZones;
     
-//     tmp.unk0 = 0;
-//     tmp.unk4 = *((s32*) &zones) + 0xEA0;
-//     tmp.unk8 = *((s32*) &zones) + 0xED4;
+//     tmp.timer = 0;
+//     tmp.source = *((s32*) &zones) + 0xEA0;
+//     tmp.target = *((s32*) &zones) + 0xED4;
 
 //     temp_v0 = effect_newTimedEffect(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {

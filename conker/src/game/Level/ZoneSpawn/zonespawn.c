@@ -58,39 +58,6 @@ static s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /* 25 */ NULL,
 };
 
-typedef struct {
-    TriggerZone *unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 pad43;
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 pad4C[0x14];
-    s32 unk60;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[2];
-    s32 unk68;
-    ZoneNode *zone;
-} Struct150139ACLocal;
 
 
 
@@ -118,14 +85,13 @@ start:
     }
 }
 
-
+/* GlowOrbit as level_spawnPointGlowZone fills it: the object whose t and v rotations GlowOrbit.angles
+ * points at (its first field, so object = angles). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    WorldObject *unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
+    /* 0x00 */ f32 distance;
+    /* 0x04 */ f32 spread;
+    /* 0x08 */ WorldObject *object;
+    /* 0x0C */ f32 pivot[3];
 } Payload18_150130B4;
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
@@ -196,16 +162,16 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     spawn.flags = 0x2006 | (((obj->data3 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
     switch (kind) {
     case 8: {
-        f32 extra[4];
-        void *particle;
+        GlowPulse pulse;
+        GlowObj *particle;
 
-        extra[0] = 0.9750000238f;
-        extra[1] = 0.3249999881f;
-        extra[2] = 0.0f;
-        extra[3] = 0.05959999934f;
+        pulse.base = 0.9750000238f;
+        pulse.amplitude = 0.3249999881f;
+        pulse.phase = 0.0f;
+        pulse.speed = 0.05959999934f;
         particle = flare_spawnGlow(&emit, 0x70, &spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
-            memcpy((u8 *)particle + 0x170, extra, sizeof(extra));
+            memcpy(&particle->params.anim.pulse, &pulse, sizeof(pulse));
         }
         break;
     }
@@ -244,23 +210,23 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     case 16:
     case 17:
     case 18: {
-        void *particle;
-        Payload18_150130B4 extra;
+        GlowObj *particle;
+        Payload18_150130B4 orbit;
         u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
 
-        extra.unk8 = gfx_findObjectById(ids[kind - 13]);
-        if (extra.unk8 == NULL) {
+        orbit.object = gfx_findObjectById(ids[kind - 13]);
+        if (orbit.object == NULL) {
             return 1;
         }
-        extra.unk0 = -80.0f;
-        extra.unk4 = fabsf(-0.01250000019f);
-        extra.unkC = extra.unk8->x;
-        extra.unk10 = extra.unk8->y;
-        extra.unk14 = extra.unk8->z;
+        orbit.distance = -80.0f;
+        orbit.spread = fabsf(-0.01250000019f);
+        orbit.pivot[0] = orbit.object->x;
+        orbit.pivot[1] = orbit.object->y;
+        orbit.pivot[2] = orbit.object->z;
         emit.type = 0;
         particle = flare_spawnGlow(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
-            memcpy((u8 *)particle + 0x170, &extra, sizeof(extra));
+            memcpy(&particle->params.anim.orbit, &orbit, sizeof(orbit));
         }
         break;
     }
@@ -282,7 +248,7 @@ const s32 gPointGlowTextures[5] = { 3, 0x15, 0x68, 0x69, 0x7E };
 const s32 gPointGlowRenderModes[5] = { 0x3400, 0x3400, 0x2200, 0x3400, 0x3400 };
 const s32 gPointGlowEmitterTypes[8] = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
-/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. */
+/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. */
 static s32 (*gEffectZoneSpawnHandlers[11])(TriggerZone *zone) = {
     NULL,
     NULL,
@@ -297,7 +263,7 @@ static s32 (*gEffectZoneSpawnHandlers[11])(TriggerZone *zone) = {
     level_spawnStreamZone,
 };
 
-/** Runs the object's handler from gEffectZoneSpawnHandlers, chosen by unk17. */
+/** Runs the object's handler from gEffectZoneSpawnHandlers, chosen by subTypeData. */
 s32 level_spawnEffectZone(TriggerZone *obj) {
     u8 index = obj->subTypeData;
     s32 (*handler)(TriggerZone *) = gEffectZoneSpawnHandlers[index];
@@ -363,7 +329,7 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
     return 1;
 }
 
-/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. Declared without a
+/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. Declared without a
  * prototype: level_spawnZoneAreaEffect takes an extra argument and level_addDustRegionZone none. */
 static s32 (*gNeutralZoneSpawnHandlers[23])() = {
     NULL,
@@ -391,7 +357,7 @@ static s32 (*gNeutralZoneSpawnHandlers[23])() = {
     level_spawnZoneSpray,
 };
 
-/** Runs the object's handler from gNeutralZoneSpawnHandlers, chosen by unk17. */
+/** Runs the object's handler from gNeutralZoneSpawnHandlers, chosen by subTypeData. */
 s32 level_spawnNeutralZone(TriggerZone *obj) {
     u8 index = obj->subTypeData;
     s32 (*handler)() = gNeutralZoneSpawnHandlers[index];
@@ -405,67 +371,67 @@ s32 level_spawnNeutralZone(TriggerZone *obj) {
 /** Spawns the area effect described by entry data1 of gAreaEffectDefs over the object's footprint. */
 // matching: index lives in the (unused) second argument register
 s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index) {
-    Struct150139ACLocal data;
-    const Struct150139ACEntry *entry;
+    RegionEmitterState data;
+    const AreaEffectDef *entry;
     TimedEffect *effect;
 
     index = obj->data1;
     obj->flags |= 4;
-    data.unk0 = obj;
-    data.unkC = 0.0f;
+    data.region = obj;
+    data.pending = 0.0f;
 
     switch (ZONE_AREA_TYPE(obj)) {
     default:
-        data.unk4 = 1.0f;
-        data.unk10 = 1000.0f;
+        data.rate = 1.0f;
+        data.maxHeight = 1000.0f;
         break;
     case ZONE_AREA_BOX:
         /* box: area of the footprint */
-        data.unk4 = (obj->xSize * obj->zSize) * 4.0f;
-        data.unk10 = obj->y + obj->ySize;
+        data.rate = (obj->xSize * obj->zSize) * 4.0f;
+        data.maxHeight = obj->y + obj->ySize;
         break;
     case ZONE_AREA_CYLINDER:
     case ZONE_AREA_SPHERE:
         /* cylinder: area of the circle */
-        data.unk4 = (obj->xSize * obj->xSize) * 3.141592741f;
-        data.unk10 = obj->y + obj->ySize;
+        data.rate = (obj->xSize * obj->xSize) * 3.141592741f;
+        data.maxHeight = obj->y + obj->ySize;
         break;
     }
 
     entry = &gAreaEffectDefs[index];
-    data.unk14 = entry->unk4;
-    data.unk18 = entry->unk8;
-    data.unk1C = entry->unkC;
-    data.unk20 = entry->unk10;
-    data.unk28 = entry->unk18;
-    data.unk2C = entry->unk1C;
-    data.unk60 = 0;
-    data.unk64 = 0;
-    data.unk65 = 0;
-    data.unk68 = 0;
-    data.unk24 = entry->unk14;
-    data.unk26 = entry->unk16;
-    data.unk30 = entry->unk20;
-    data.unk34 = entry->unk24;
-    data.unk38 = entry->unk28;
-    data.unk3C = entry->unk2C;
-    data.unk8 = entry->unk0;
-    data.unk40 = entry->unk30;
-    data.unk41 = entry->unk31;
-    data.unk42 = entry->unk32;
-    data.unk48 = -10000.0f;
+    data.xScaleBase = entry->xScaleBase;
+    data.xScaleRange = entry->xScaleRange;
+    data.yScaleBase = entry->yScaleBase;
+    data.yScaleRange = entry->yScaleRange;
+    data.scaleBase = entry->scaleBase;
+    data.scaleRange = entry->scaleRange;
+    data.ground.material = 0;
+    data.ground.flags = 0;
+    data.ground.source = 0;
+    data.ground.surface = 0;
+    data.lifeBase = entry->lifeBase;
+    data.lifeRange = entry->lifeRange;
+    data.shrinkRateBase = entry->shrinkRateBase;
+    data.shrinkRateRange = entry->shrinkRateRange;
+    data.growRateBase = entry->growRateBase;
+    data.growRateRange = entry->growRateRange;
+    data.scale = entry->density;
+    data.useGround = entry->useGround;
+    data.alphaBase = entry->alphaBase;
+    data.alphaRange = entry->alphaRange;
+    data.ground.height = -10000.0f;
 
-    if (entry->unk34 != 0) {
+    if (entry->useZone != 0) {
         collision_selectMap(0);
         data.zone = collision_findZoneLeaf(obj->x, obj->z);
     } else {
         data.zone = NULL;
     }
 
-    if (entry->unk33 != 0) {
-        data.unk44 = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
+    if (entry->hasSound != 0) {
+        data.soundHandle = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
     } else {
-        data.unk44 = 0;
+        data.soundHandle = 0;
     }
 
     effect = effect_newTimedEffectNoDraw(300, -1, 6, 0, 10, sizeof(data), 0xFF, 0);

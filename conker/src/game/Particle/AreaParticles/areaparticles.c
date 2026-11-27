@@ -9,7 +9,7 @@
 #include "libc/string.h"
 
 /* The area effects of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c), indexed by the zone's data1. */
-const Struct150139ACEntry gAreaEffectDefs[6] = {
+const AreaEffectDef gAreaEffectDefs[6] = {
     { 6.50000004e-07f, 2.180000067f, 1.230000019f, 1.610000014f, 4.829999924f,
       252, 50,
       0.3999999762f, 0.09999999404f, 0.01620000042f, 0.005299999844f, 0.8600000143f, 0.5940000415f,

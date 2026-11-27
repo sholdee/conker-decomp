@@ -111,29 +111,29 @@ void particle_resetStyleEmitterTimers(void);
 
 /* game/Particle/AreaParticles/areaparticles.c */
 /* An area effect of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c): the particles spawned over a zone. */
-typedef struct Struct150139ACEntry {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 pad35[3];
-} Struct150139ACEntry;
+typedef struct AreaEffectDef {
+    /* 0x00 */ f32 density;         // particles per frame per unit of footprint area (RegionEmitterState.scale)
+    /* 0x04 */ f32 xScaleBase;      // the rest is copied to the RegionEmitterState fields of the same names
+    /* 0x08 */ f32 xScaleRange;
+    /* 0x0C */ f32 yScaleBase;
+    /* 0x10 */ f32 yScaleRange;
+    /* 0x14 */ s16 lifeBase;
+    /* 0x16 */ s16 lifeRange;
+    /* 0x18 */ f32 scaleBase;
+    /* 0x1C */ f32 scaleRange;
+    /* 0x20 */ f32 shrinkRateBase;
+    /* 0x24 */ f32 shrinkRateRange;
+    /* 0x28 */ f32 growRateBase;
+    /* 0x2C */ f32 growRateRange;
+    /* 0x30 */ u8 useGround;
+    /* 0x31 */ u8 alphaBase;
+    /* 0x32 */ u8 alphaRange;
+    /* 0x33 */ u8 hasSound;         // nonzero: a dynamic sound (0x4D) at the zone
+    /* 0x34 */ u8 useZone;          // nonzero: skip frames while the zone's leaf is hidden from every view
+    /* 0x35 */ u8 pad35[3];
+} AreaEffectDef;
 
-extern const Struct150139ACEntry gAreaEffectDefs[6];
+extern const AreaEffectDef gAreaEffectDefs[6];
 
 void particle_resetModelList(void);
 void particle_spawnAreaParticles(TriggerZone *region, f32 density);
@@ -2570,6 +2570,36 @@ void particle_spawnTrailBurstAtSprite(SpriteParticle *particle);
 void particle_spawnHeavyTrailBurstAtSprite(SpriteParticle *particle);
 
 /* game/Particle/RegionEmitter/regionemitter.c */
+/* Particle emitter state over a TriggerZone, embedded at offset 0x28 of the effect object (spawned by
+ * level_spawnZoneAreaEffect, game/Level/ZoneSpawn/zonespawn.c). */
+typedef struct RegionEmitterState {
+    /* 0x00 */ TriggerZone *region;
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ f32 scale;
+    /* 0x0C */ f32 pending; // particles owed; one is spawned per whole unit
+    /* 0x10 */ f32 maxHeight;
+    /* 0x14 */ f32 xScaleBase;
+    /* 0x18 */ f32 xScaleRange;
+    /* 0x1C */ f32 yScaleBase;
+    /* 0x20 */ f32 yScaleRange;
+    /* 0x24 */ s16 lifeBase;
+    /* 0x26 */ s16 lifeRange;
+    /* 0x28 */ f32 scaleBase;
+    /* 0x2C */ f32 scaleRange;
+    /* 0x30 */ f32 shrinkRateBase;
+    /* 0x34 */ f32 shrinkRateRange;
+    /* 0x38 */ f32 growRateBase;
+    /* 0x3C */ f32 growRateRange;
+    /* 0x40 */ u8 useGround;
+    /* 0x41 */ u8 alphaBase;
+    /* 0x42 */ u8 alphaRange;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ u16 soundHandle; // 0 = none (particle_destroyRegionEmitter / particle_freeRegionEmitter stop it)
+    /* 0x46 */ u8 pad46[2];
+    /* 0x48 */ CollisionHit ground;
+    /* 0x6C */ ZoneNode *zone;
+} RegionEmitterState; // size 0x70
+
 typedef struct Game1D3420Listener Game1D3420Listener;
 typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
 typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;

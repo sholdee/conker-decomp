@@ -381,6 +381,8 @@ STATIC_ASSERT(sizeof(DripData) == 0x18, DripData_size);
 STATIC_ASSERT(sizeof(SplashBurst) == 0xC, SplashBurst_size);
 STATIC_ASSERT(sizeof(SquashData) == 0xC, SquashData_size);
 STATIC_ASSERT(sizeof(ColorEmitterData) == 0x14, ColorEmitterData_size);
+STATIC_ASSERT(sizeof(AreaEffectDef) == 0x38, AreaEffectDef_size);
+STATIC_ASSERT(sizeof(RegionEmitterState) == 0x70, RegionEmitterState_size);
 
 /* conker/rope.h */
 STATIC_ASSERT(sizeof(HoltenRopeDesc) == 0x38, HoltenRopeDesc_size);

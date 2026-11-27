@@ -7,48 +7,6 @@
 #include "conker/particle.h"
 #include "conker/sound.h"
 
-/* Spawn region an emitter scatters its particles over. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; // degrees
-    /* 0x14 */ u8 state;
-    /* 0x15 */ u8 flags; // bits 0-1: region shape
-} EmitterRegion;
-
-/* Particle emitter state, embedded at offset 0x28 of the effect object. */
-typedef struct {
-    /* 0x00 */ EmitterRegion *region;
-    /* 0x04 */ f32 rate;
-    /* 0x08 */ f32 scale;
-    /* 0x0C */ f32 pending; // particles owed; one is spawned per whole unit
-    /* 0x10 */ f32 maxHeight;
-    /* 0x14 */ f32 xScaleBase;
-    /* 0x18 */ f32 xScaleRange;
-    /* 0x1C */ f32 yScaleBase;
-    /* 0x20 */ f32 yScaleRange;
-    /* 0x24 */ s16 lifeBase;
-    /* 0x26 */ s16 lifeRange;
-    /* 0x28 */ f32 scaleBase;
-    /* 0x2C */ f32 scaleRange;
-    /* 0x30 */ f32 shrinkRateBase;
-    /* 0x34 */ f32 shrinkRateRange;
-    /* 0x38 */ f32 growRateBase;
-    /* 0x3C */ f32 growRateRange;
-    /* 0x40 */ u8 useGround;
-    /* 0x41 */ u8 alphaBase;
-    /* 0x42 */ u8 alphaRange;
-    /* 0x43 */ u8 pad43[5];
-    /* 0x48 */ CollisionHit ground;
-    /* 0x6C */ ZoneNode *zone;
-} RegionEmitterState;
-
-
 /*
  * Per-frame update of a particle emitter effect: accumulates rate * scale * gFrameDelta and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
@@ -66,7 +24,7 @@ void particle_updateRegionEmitter(u8 *effect) {
         *(s16 *)(effect + 0xE) = -1;
         return;
     }
-    if (emitter->region->state == 1) {
+    if (emitter->region->inactive == 1) {
         return;
     }
     if (emitter->zone != NULL && math_isZoneHiddenFromViews(emitter->zone) != 0) {
@@ -88,7 +46,7 @@ void particle_updateRegionEmitter(u8 *effect) {
         particle.effect = 0x10;
         particle.maxHeight = emitter->maxHeight;
         do {
-            switch (emitter->region->flags & 3) {
+            switch (ZONE_AREA_TYPE(emitter->region)) {
             case 2: {
                 u8 angle;
                 f32 cosine;
@@ -96,15 +54,15 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 x;
                 f32 z;
 
-                angle = emitter->region->rotation * 0.7111111f;
+                angle = emitter->region->yaw * 0.7111111f;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = math_randomFloat() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
-                z = math_randomFloat() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
+                x = math_randomFloat() * (2.0f * emitter->region->xSize) + -emitter->region->xSize;
+                z = math_randomFloat() * (2.0f * emitter->region->zSize) + -emitter->region->zSize;
                 particle.pos.x = emitter->region->x + (x * sine + z * cosine);
                 particle.pos.z = emitter->region->z + (z * sine - x * cosine);
-                high = emitter->region->y + emitter->region->height;
-                low = emitter->region->y - emitter->region->height;
+                high = emitter->region->y + emitter->region->ySize;
+                low = emitter->region->y - emitter->region->ySize;
             } break;
             case 0: {
                 u8 angle;
@@ -115,10 +73,10 @@ void particle_updateRegionEmitter(u8 *effect) {
                 angle = math_random() & 0xFF;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = math_randomFloat() * emitter->region->radiusX;
+                x = math_randomFloat() * emitter->region->xSize;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;
-                high = emitter->region->y + emitter->region->height;
+                high = emitter->region->y + emitter->region->ySize;
                 low = emitter->region->y;
             } break;
             case 1: {
@@ -130,17 +88,17 @@ void particle_updateRegionEmitter(u8 *effect) {
                 angle = math_random() & 0xFF;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = math_randomFloat() * emitter->region->radiusX;
+                x = math_randomFloat() * emitter->region->xSize;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;
-                high = emitter->region->y + emitter->region->height;
-                low = emitter->region->y - emitter->region->height;
+                high = emitter->region->y + emitter->region->ySize;
+                low = emitter->region->y - emitter->region->ySize;
             } break;
             default:
                 particle.pos.x = emitter->region->x;
                 particle.pos.z = emitter->region->z;
-                high = emitter->region->y + emitter->region->height;
-                low = emitter->region->y - emitter->region->height;
+                high = emitter->region->y + emitter->region->ySize;
+                low = emitter->region->y - emitter->region->ySize;
                 break;
             }
             if (emitter->useGround != 0) {
