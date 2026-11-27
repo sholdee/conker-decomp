@@ -19,7 +19,7 @@
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
 static void (*D_8008FBD0[])() = {
-    weapon_onProjectileExpire, func_150E4010, func_150E411C, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
+    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
 typedef struct {

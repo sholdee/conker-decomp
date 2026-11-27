@@ -54,7 +54,7 @@ static void (*gTimedEffectTickFuncs[98])() = {
     flamethrower_updateController, effect_updateOwnerSpark, beam_updateAreaEmitter, particle_updateAreaEmitter, particle_updateTwoSidedEmitter, particle_updateRandomEmitter, particle_updateRandomBurstEmitter,
     weapon_updateStreamEmitter, particle_updateWobbleStream, effect_spawnGroundFlashes, light_updateColourWave, effect_updateRaySpinner, screen_updateStrobe, screen_updateStrobeSpawner,
     particle_updateSparkSpawner, particle_updateSparkEmitter, particle_updateDustRegionSpawner, particle_updateFallingDustSpawner, particle_updateShakeTimer, particle_updateDebrisRegionSpawner, particle_updateFallingDebrisSpawner,
-    particle_updateFollowEffect, screen_updateFlash, effect_updateActorEmitter, func_150CF530, beam_updateBoltRain, beam_updateBoltArc, beam_updateBoltChain,
+    particle_updateFollowEffect, screen_updateFlash, effect_updateActorEmitter, effect_spawnGroundFxNearPlayer, beam_updateBoltRain, beam_updateBoltArc, beam_updateBoltChain,
     effect_updateRiseEmitter, effect_updateBoneBurst, particle_updatePointSmoke, trail_updateAnchoredEmitter, beam_updateCastBeam, beam_updateSparkZone, effect_updateObjBurst,
     effect_updateBoltRing, light_updateAmbientRedDrift, effect_updateAmbientPulse, particle_updatePointEmitter, particle_updateDripEffect, particle_updateSmokeSource, beam_updateTrailEmitter,
     effect_updateDelayedBurst, effect_updateOwnerEffect, effect_updateEmitterSpawner, effect_updateBoltEmitter, beam_updateBoneSparks, particle_updateOwnerEmitter, effect_updatePulseEffect,

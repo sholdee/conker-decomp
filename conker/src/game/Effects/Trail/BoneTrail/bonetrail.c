@@ -565,7 +565,7 @@ s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1) {
 }
 
 /* Like trail_updateBurstParticle, but always sets unk2C from the age. */
-s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
+s32 trail_updateBurstParticleTint(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 

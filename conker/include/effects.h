@@ -2624,7 +2624,7 @@ typedef struct ChannelParticle {
     /* 0x160 */ f32 extra; /* the caller's emitter->extraSize bytes; game/Particle/DiscEmitter/discemitter.c keeps a yaw angle here */
 } ChannelParticle;
 
-/* Per-particle data of the age-driven fade (trail_updateBurstParticle / func_151A4900 for DescParticleHead particles,
+/* Per-particle data of the age-driven fade (trail_updateBurstParticle / trail_updateBurstParticleTint for DescParticleHead particles,
  * game/Effects/Trail/BoneTrail/bonetrail.c; billboard callbacks 0x14 / 0x15, game/Effects/BloodDebris/blooddebris.c). Each *Start is a remaining-life value:
  * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
 typedef struct AgeFadeParams {
@@ -2674,7 +2674,7 @@ typedef struct SpriteParticle {
         ParticlePulse pulse;
         ParticleFlash flash;
         WobbleData wobble;      /* update func 22 (particle_wobbleSmoke, game/Particle/SmokeEmitter/smokeemitter.c) and the like */
-        AgeFadeParams ageFade;  /* update funcs 0 and 1 (trail_updateBurstParticle / func_151A4900, game/Effects/Trail/BoneTrail/bonetrail.c) */
+        AgeFadeParams ageFade;  /* update funcs 0 and 1 (trail_updateBurstParticle / trail_updateBurstParticleTint, game/Effects/Trail/BoneTrail/bonetrail.c) */
         struct {
             f32 drag;
             u8 pad4[4];
@@ -2781,7 +2781,7 @@ typedef struct CharacterWatcher {
     /* 0x2D */ u8 state1; /* effect_watcherIsDeepWater */
     /* 0x2E */ u8 state2; /* effect_watcherIsNearWaterSurface */
     /* 0x2F */ u8 moveState; /* effect_getWatcherMoveState */
-    /* 0x30 */ u8 surfaceState; /* func_151592B8 */
+    /* 0x30 */ u8 surfaceState; /* effect_getWatcherSurfaceState */
     /* 0x31 */ u8 flags; /* 1: run state-change actions */
     /* 0x32 */ u8 pad32[2];
     /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */

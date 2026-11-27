@@ -17,8 +17,8 @@ static const Vec3f D_800A1FE0 = { 0.0f, -210.0f, 27.0f };
 u8 D_80088B90 = 9;
 static u8 D_80088B94 = 9;
 
-/* Runs the func_150FE49C effects for `obj`, then spawns a weapon_spawnProjectile effect from the result. */
-Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
+/* Runs the effect_spawnBonePointShotFx effects for `obj`, then spawns a weapon_spawnProjectile effect from the result. */
+Game1EF500Trail *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f axis0;
     Vec3f position;
@@ -33,7 +33,7 @@ Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     }
 
     math_getActorAim(obj, &direction, &axis0, NULL, 0.0f);
-    func_150FE49C(obj, arg1, arg2, &position, &origin);
+    effect_spawnBonePointShotFx(obj, arg1, arg2, &position, &origin);
 
     random0 = math_randomFloat();
     random1 = math_randomFloat();
@@ -50,7 +50,7 @@ Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
  * Computes the effect position and origin of `obj` (its bone points D_800A1FC8 / D_800A1FD4, or 70 units
  * above it when it has no bone matrices), runs the effects there and copies both to the non-NULL outputs.
  */
-void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin) {
+void effect_spawnBonePointShotFx(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin) {
     Vec3f position;
     Vec3f origin;
     const Vec3f *src[2];
@@ -71,8 +71,8 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
         }
         particle_runAttackAtMidpoint(obj, &position, &origin, 0x23);
         particle_spawnShortLightFlash(&position, arg1, arg2);
-        func_150FE604(obj, &position, arg1, arg2);
-        func_150FE7D4(obj);
+        effect_spawnBonePointBeam(obj, &position, arg1, arg2);
+        effect_spawnActorRumble(obj);
         if (outPosition != NULL) {
             *outPosition = position;
         }
@@ -86,7 +86,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
  * Spawns a effect_spawnBoneBeamParticle effect for `obj` between its bone points D_800A1FC8 and D_800A1FE0, from `position`;
  * when the object has bone matrices and cullMask's low nibble isn't 0xF.
  */
-void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
+void effect_spawnBonePointBeam(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
     ParticleSize motion;
     u8 mask;
     s32 pad; // matching: unused stack slot
@@ -121,7 +121,7 @@ void effect_getBonePointPos(Actor *obj, s16 arg1, Vec3f *out) {
 
 
 /* Sends a cont_spawnRumble event (kind 1, 20-32 long) to `obj`'s camera, if it has one. */
-void func_150FE7D4(Actor *obj) {
+void effect_spawnActorRumble(Actor *obj) {
     RumbleParams event;
 
     if (obj->CameraPtr != NULL) {

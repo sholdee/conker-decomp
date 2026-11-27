@@ -228,7 +228,7 @@ s32 D_80086690 = 0x0FA10CDF; /* not referenced */
 void (*gHitReactionProcs[])() = {
     event_emptyHitReaction0, event_emptyHitReaction1, effect_hitReactLavaBoulder, func_15074C00,
     event_hitReactProjectile, effect_hitReactFireImp, event_hitReactSetTaskInt1, event_hitReactSetUpSmoke,
-    func_15194588, func_15074E80, effect_hitReactBloodSpray, func_15194810,
+    func_15194588, func_15074E80, effect_hitReactBloodSpray, effect_hitReactSprayAndRumble,
     func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
     effect_hitReactNone, event_hitReactHop, effect_hitReactKill, effect_hitReactSetOnFireDamaging,
     effect_hitReactHeadShot, effect_hitReactImpactDebris, func_15194B94, effect_hitReactFlashAndKill,
@@ -2208,7 +2208,7 @@ void event_queueTrailPair(s32 cmd) {
 }
 
 void func_1506FC9C(s32 cmd) {
-    func_150B3AB0(gCurrentActor, 0xFF);
+    effect_spawnBone25StreakBurst(gCurrentActor, 0xFF);
 }
 
 void event_spawnJetPreset6(s32 cmd) {
@@ -2461,11 +2461,11 @@ void event_runLauncherMuzzle(s32 cmd) {
 }
 
 void func_15070830(s32 cmd) {
-    func_150FE320(gCurrentActor, 0xFF, 1);
+    effect_fireBonePointProjectile(gCurrentActor, 0xFF, 1);
 }
 
 void func_15070860(s32 cmd) {
-    func_150FE49C(gCurrentActor, 0xFF, 1, 0, 0);
+    effect_spawnBonePointShotFx(gCurrentActor, 0xFF, 1, 0, 0);
 }
 
 void event_spawnBone9Flame(s32 cmd) {

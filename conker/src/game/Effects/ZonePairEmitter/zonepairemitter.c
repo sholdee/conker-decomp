@@ -40,7 +40,7 @@ void effect_onBulletImpactZones(s32 arg0, s32 arg1, s32 arg2) {
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
  * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
  * until inactive; kind 0xC props also get two assets of D_80090204 row touch.i.a passed to texture_addBinding. */
-void func_150DE458(WorldObject *prop) {
+void effect_updateTumblingProp(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
     f32 frames;
@@ -110,7 +110,7 @@ void func_150DE458(WorldObject *prop) {
 
 /* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by math_sinBinAngle of its own
  * phase (touch.i.a/b/c, in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
-void func_150DE6D8(WorldObject *prop) {
+void effect_bobAndRockProp(WorldObject *prop) {
     prop->y = math_sinBinAngle(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
     prop->t = math_sinBinAngle(prop->touch.i.b >> 3) * 1.100000024f;
     prop->v = math_sinBinAngle(prop->touch.i.c >> 3) * 1.100000024f;

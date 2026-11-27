@@ -29,7 +29,7 @@ struct struct_EA11C_arg5 {
 };
 
 /* Creates a blood_spawnStrip object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+OscillatorObject *effect_attachBone8SegmentStrip(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
     OscillatorObject *obj;
     FrameOscillator oscillator;
@@ -156,7 +156,7 @@ f32 effect_stepOscillator(OscillatorObject *obj) {
 }
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
+void *effect_attachDriftEmitter(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;

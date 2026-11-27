@@ -57,11 +57,11 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc gMotionTrailHitFns[8] = {
-    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
+    NULL,          trail_dropPointsOnGroundHit, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
 static TrailHitFunc gMotionTrailHitKind3Fns[5] = {
-    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, func_15189FD0, particle_splashSpray,
+    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, trail_ignoreGroundHit, particle_splashSpray,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
@@ -456,7 +456,7 @@ s32 trail_dropNewestPoint(MotionTrail *trail) {
 }
 
 /* Handler: switches the trail to state 4. */
-s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
+s32 trail_dropPointsOnGroundHit(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
     TrailParams *params = trail->params;
 
     params->state = 4;

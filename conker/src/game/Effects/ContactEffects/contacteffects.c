@@ -203,7 +203,7 @@ void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *arg2) {
                     burst.spray.kind = 0;
                 }
                 particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
-                func_151B4CD0(other, 0xFF, 1);
+                blood_attachBleedDrip(other, 0xFF, 1);
             }
         }
     }
@@ -224,7 +224,7 @@ void func_15194794(Actor *self, Actor *other, u8 *arg2) {
 }
 
 // For ids 0-4 and 0x53, spawns a burst of effects above other and calls cont_spawnRumble.
-void func_15194810(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSprayAndRumble(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     SplashSpraySpec burst;
     CollisionHit ground;

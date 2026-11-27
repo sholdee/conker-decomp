@@ -13,9 +13,9 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
 #define BLOOD_PROFILE_NONE 99
 
-/* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor` for 40-60 frames, unless its blood profile
+/* Attaches emitter 8 (blood_emitBleedDrop) to bone 2 of `actor` for 40-60 frames, unless its blood profile
  * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
-BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
+BloodDrip *blood_attachBleedDrip(Actor *actor, u8 arg1, s32 arg2) {
     BloodDrip *emitter;
     BloodDripDesc desc;
     u8 payload[1];
@@ -66,17 +66,17 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Emitter 8 callback (gBloodDripEmitters): spawns one particle at (x, y, z). */
-void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
+void blood_emitBleedDrop(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
     Vec3f position;
 
     position.x = x;
     position.y = y;
     position.z = z;
-    func_151B4EA4(&position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
+    blood_spawnBleedDrop(&position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
 }
 
 /* Spawns a randomized particle_spawnSteamParticle particle at `position`, moving against (dirX, dirY, dirZ). */
-void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
+void blood_spawnBleedDrop(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
     f32 speed;
     Vec3f velocity;
     s32 coin;

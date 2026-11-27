@@ -69,7 +69,7 @@ struct ActorTask {
 };
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
-void func_151A99D0(ActorTask *task) {
+void effect_watcherStepIntoShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -89,8 +89,8 @@ void func_151A99D0(ActorTask *task) {
     }
 }
 
-/* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
-void func_151A9AA4(ActorTask *task) {
+/* Ground effect 3 under the actor (with sound 0x5208), then effect_stopActorDripEmitters. */
+void effect_watcherStepIntoDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -111,11 +111,11 @@ void func_151A9AA4(ActorTask *task) {
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151ABE00(actor);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
-void func_151A9BA0(ActorTask *task) {
+void effect_watcherFallIntoShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -139,8 +139,8 @@ void func_151A9BA0(ActorTask *task) {
 }
 
 
-/* Unless the actor's mv->ladder is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
-void func_151A9CA0(ActorTask *task) {
+/* Unless the actor's mv->ladder is set: ground effect 1 (sound 0x6978), effect_attachFallingDriftIfSolid, effect_stopActorDripEmitters. */
+void effect_watcherFallIntoDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
     Vec3f pos;
 
@@ -160,8 +160,8 @@ void func_151A9CA0(ActorTask *task) {
         effect_spawnImpact(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
     }
-    func_151AA264(actor, &task->watcher.hit);
-    func_151ABE00(actor);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
@@ -188,7 +188,7 @@ void func_151A9DC0(ActorTask *task) {
     }
 }
 
-/* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
+/* Ground effect 2 (sound 0x6978), then effect_attachFallingDriftIfSolid and effect_stopActorDripEmitters. */
 void func_151A9EC0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
@@ -210,12 +210,12 @@ void func_151A9EC0(ActorTask *task) {
             sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->watcher.hit);
-    func_151ABE00(actor);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 4 under the actor. */
-void func_151A9FC8(ActorTask *task) {
+void effect_watcherLeaveShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -236,7 +236,7 @@ void func_151A9FC8(ActorTask *task) {
 }
 
 /* Ground effect 4 under the actor. */
-void func_151AA09C(ActorTask *task) {
+void effect_watcherLeaveDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -304,7 +304,7 @@ void effect_watcherStartSurfaceTrails2(SurfaceTrailOwner *owner) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a blood_spawnDrip effect on the actor. */
-void func_151AA264(Actor *actor, CollisionHit *hit) {
+void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit) {
     BloodDripDesc desc;
 
     if (hit->flags & 1) {
@@ -719,8 +719,8 @@ s32 effect_detachTaskFlicker(FlickerSprite *fx) {
     return 0;
 }
 
-/* Ground effect 3 (sound 0x5208), then func_151AA264. */
-void func_151AB1C4(ActorTask *task) {
+/* Ground effect 3 (sound 0x5208), then effect_attachFallingDriftIfSolid. */
+void effect_watcherSubmerge(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -741,7 +741,7 @@ void func_151AB1C4(ActorTask *task) {
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->watcher.hit);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
@@ -896,7 +896,7 @@ void effect_freeLoopSound(LoopSoundFx *fx) {
 }
 
 /* effect_tryAttachActorEffect(actor, 0, 4). */
-void func_151AB828(ActorTask *task) {
+void effect_watcherStartFootSplashes(ActorTask *task) {
     effect_tryAttachActorEffect(task->watcher.character, 0, 4);
 }
 
@@ -1054,7 +1054,7 @@ typedef struct {
 } Msg151ABE00;
 
 /* Broadcasts message 0x20 ({actor, unique_id}) via effect_sendEventToType. */
-void func_151ABE00(Actor *actor) {
+void effect_stopActorDripEmitters(Actor *actor) {
     Msg151ABE00 msg;
 
     msg.actor = actor;

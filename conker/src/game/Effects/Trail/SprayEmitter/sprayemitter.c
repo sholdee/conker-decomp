@@ -163,7 +163,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
 }
 
 /* Empty handler with four arguments. */
-s32 func_15189FD0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+s32 trail_ignoreGroundHit(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     (void)&arg0; // matching: taking an argument's address makes IDO home all four argument registers
     return 1;
 }

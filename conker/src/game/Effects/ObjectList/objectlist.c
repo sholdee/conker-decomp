@@ -223,7 +223,7 @@ static void (*gParticleCallbacks[])() = {
     NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
     effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
     particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
-    func_151A77C0, func_151A787C,
+    blood_billboardFadeGrowThenTint, blood_billboardFadeGrowTint,
 };
 
 /* Object callbacks (SpriteFx and ModelFx callback, BillboardTemplate onDeath, Sprite2D behavior),

@@ -399,7 +399,7 @@ void func_150E4010(Obj4010 *obj) {
     }
 }
 
-void func_150E411C(Game1EF500Trail *trail) {
+void effect_spawnHitEffectsOnExpire(Game1EF500Trail *trail) {
     weapon_spawnHitEffects(trail, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 

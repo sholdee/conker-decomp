@@ -842,7 +842,7 @@ s32 trail_moveAndAppendPoint(MotionTrail *trail);
 s32 trail_movePoints(MotionTrail *trail);
 s32 trail_movePointsGroundTest(MotionTrail *trail);
 s32 trail_dropNewestPoint(MotionTrail *trail);
-s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3);
+s32 trail_dropPointsOnGroundHit(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3);
 void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8, f32 halfWidth, f32 gravity, u8 arg11);
 s32 trail_fadeIn(MotionTrail *trail);
 void trail_destroyEffectObj(EffectObj *obj);
@@ -881,7 +881,7 @@ void func_151898C0(Actor *object, s32 value);
 void trail_createSprayEmitter(SprayDesc *desc, u8 arg1);
 void trail_updateSprayEmitter(SprayEmitter *emitter);
 s32 trail_landSprayTrail(SprayTrail *trail);
-s32 func_15189FD0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 trail_ignoreGroundHit(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game/Effects/Trail/TrailEmitter/trailemitter.c */
 TrailEmitter *trail_getActorEmitter(Actor *actor, u8 owner, s32 list);
@@ -945,7 +945,7 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view);
 void trail_startBloodDrip(Actor *owner, u8 arg1);
 void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent);
 s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1);
-s32 func_151A4900(SpriteParticle *particle, u8 arg1);
+s32 trail_updateBurstParticleTint(SpriteParticle *particle, u8 arg1);
 void trail_startBoneEmitter(Actor *owner, u8 arg1);
 void trail_updateBoneEmitter(BoneEmitterTask *task);
 void trail_onBoneTrailMessage(BoneTrailEffect *effect, ActorMsg *msg, u8 type);

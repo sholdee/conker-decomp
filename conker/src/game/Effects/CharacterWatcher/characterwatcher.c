@@ -219,10 +219,10 @@ static const s8 gWatcherMode4Actions[28] = {
 /* Character-watcher actions (indices of the action tables). Declared without a prototype: each takes
    its own task view of the watcher. */
 static void (*gWatcherActions[])() = {
-    func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
-    func_151A9FC8, func_151AA09C, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
-    effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
-    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, func_151AE6B0,
+    effect_watcherStepIntoShallowWater, effect_watcherStepIntoDeepWater, effect_watcherFallIntoShallowWater, effect_watcherFallIntoDeepWater, func_151A9DC0, func_151A9EC0,
+    effect_watcherLeaveShallowWater, effect_watcherLeaveDeepWater, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
+    effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, effect_watcherSubmerge, effect_watcherStartFootSplashes, particle_keepFlickerSprite,
+    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, effect_watcherEnterWater,
 };
 
 /* The action table of each watcher mode. */
@@ -267,7 +267,7 @@ void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
     watcher->lastPosition.x = watcher->character->xpos;
     watcher->lastPosition.y = watcher->character->ypos;
     watcher->lastPosition.z = watcher->character->zpos;
-    watcher->surfaceState = func_151592B8(watcher->character, watcher->mode);
+    watcher->surfaceState = effect_getWatcherSurfaceState(watcher->character, watcher->mode);
 
     if (watcher->flags & 1) {
         newBits = STATE_BITS(watcher->state0, watcher->state1, watcher->state2, watcher->moveState,
@@ -383,7 +383,7 @@ s32 effect_getWatcherMoveState(Actor *chr, Vec3f *lastPosition, u8 prevState) {
 }
 
 /* Returns 3 on one of two animation ids (mode 0 only), 2 in water, 1 if unk28 is set, else 4. */
-s32 func_151592B8(Actor *chr, u8 mode) {
+s32 effect_getWatcherSurfaceState(Actor *chr, u8 mode) {
     s32 i;
     s32 found;
 

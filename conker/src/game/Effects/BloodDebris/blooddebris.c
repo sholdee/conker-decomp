@@ -239,7 +239,7 @@ void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBlo
 }
 
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
-void func_151A77C0(BillboardParticle *particle) {
+void blood_billboardFadeGrowThenTint(BillboardParticle *particle) {
     AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
     if (particle->tmpl.life < data->fadeStart) {
@@ -259,8 +259,8 @@ void func_151A77C0(BillboardParticle *particle) {
     }
 }
 
-/* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
-void func_151A787C(BillboardParticle *particle) {
+/* Callback 0x15: blood_billboardFadeGrowThenTint after the switch, with the env colour following life. */
+void blood_billboardFadeGrowTint(BillboardParticle *particle) {
     AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
     if (particle->tmpl.life < data->fadeStart) {

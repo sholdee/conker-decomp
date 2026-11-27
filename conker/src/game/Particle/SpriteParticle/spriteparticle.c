@@ -79,7 +79,7 @@ void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
 static s32 (*gSpriteUpdateFuncs[])() = {
-    trail_updateBurstParticle, func_151A4900, effect_dampJointSparkXZ, effect_updateRiseParticleToCeiling,
+    trail_updateBurstParticle, trail_updateBurstParticleTint, effect_dampJointSparkXZ, effect_updateRiseParticleToCeiling,
     effect_updateRiseParticle, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
     particle_dampYawSpriteXZ, effect_dampParticleVelocityXZ, particle_updateDragXZ, particle_updateWobbleOffset,
     effect_updateOscillateParticle, particle_pulseDust, particle_landDust, particle_updateDustParticle,

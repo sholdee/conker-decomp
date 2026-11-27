@@ -227,7 +227,7 @@ void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
     blood_emitNoDripDrop, trail_emitBurst, effect_emitFallingDriftParticle, effect_emitDriftRiseParticle, particle_spawnWatcherParticle, effect_spawnRisingParticle,
-    func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
+    func_151AE890, effect_spawnDriftParticle, blood_emitBleedDrop, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
 static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, particle_updateWatcherLink, effect_isWatcherEmitterAlive };

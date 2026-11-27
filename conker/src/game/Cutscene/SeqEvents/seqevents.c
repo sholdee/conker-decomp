@@ -1601,7 +1601,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150E9FE0(obj, duration, sceneTag, 0);
+                effect_attachBone8SegmentStrip(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x51) {
             s32 duration;
@@ -1609,7 +1609,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150EA500(obj, duration, sceneTag, 0);
+                effect_attachDriftEmitter(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x48) {
             Vec2f offset;
@@ -2135,7 +2135,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             particle_spawnModelDroplets(pos, dist, speed, n, 0x1E, 0x64, sceneTag);
         } else if (event->value == 0x28) {
             if (actor != NULL) {
-                func_15171600(actor, sceneTag, 0);
+                effect_spawnObjectRectangleParticles(actor, sceneTag, 0);
             } else if (obj != NULL) {
                 func_15171BF4(obj, sceneTag);
             }

@@ -16,7 +16,7 @@ s32 gTile0ScrollT = 0;
 s32 gTile1ScrollS = 0;
 s32 gTile1ScrollT = 0;
 
-void func_150CF530(s32 arg0) {
+void effect_spawnGroundFxNearPlayer(s32 arg0) {
     trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 

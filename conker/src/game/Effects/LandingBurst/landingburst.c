@@ -26,7 +26,7 @@ static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
     ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : blood_getProfile(actor)) : 4)
 
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
-s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
+s32 effect_spawnPitchYawSplash(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
                   s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     Vec3f pos;
     Vec3f dir;

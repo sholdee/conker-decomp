@@ -110,7 +110,7 @@ struct S151BEB20 {
 };
 
 /* Rebuilds this frame's matrix: rotation by `rotY`, translation to `pos`, axes scaled by 0.923. */
-s32 func_151BEB20(struct S151BEB20 *arg0) {
+s32 effect_buildStatPickupMatrix(struct S151BEB20 *arg0) {
     f32 scale;
 
     math_mtxRotateRPYF(arg0->mtx[gDrawBufferIndex], 0.0f, arg0->rotY, 0.0f);
@@ -168,10 +168,10 @@ struct S151BECB8 {
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of
- * params.pos, plays sound 0x511 and runs effect_showStatCounter/func_151BF0C8/func_151BEEE0.
+ * params.pos, plays sound 0x511 and runs effect_showStatCounter/effect_spawnStatPickupBurst/func_151BEEE0.
  * Returns 0 if any object was in range, else 1.
  */
-s32 func_151BECB8(S151BECB8 *arg0) {
+s32 effect_updateStatPickup(S151BECB8 *arg0) {
     s32 untouched = 1;
 
     {
@@ -185,7 +185,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 
         obj = movement_obj;
         do {
-            if (func_151BEE94(obj) != 0) {
+            if (effect_isPlayerActor(obj) != 0) {
                 f32 dist;
 
                 params = &arg0->params;
@@ -202,7 +202,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                     untouched = 0;
                     sound_play(0x511, 0x7D00, 0x40, 0, 0);
                     effect_showStatCounter(arg0->unkC, arg0->unk1);
-                    func_151BF0C8(&params->pos);
+                    effect_spawnStatPickupBurst(&params->pos);
                     kind = arg0->unk48;
                     switch (kind) {
                         case 1:
@@ -228,7 +228,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 }
 
 /* An object counts as active when it has a player slot, an interaction state and a valid id. */
-s32 func_151BEE94(Actor *arg0) {
+s32 effect_isPlayerActor(Actor *arg0) {
     if (arg0->playernumber == 0xFF) {
         return 0;
     }
@@ -306,7 +306,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
 }
 
 /* Spawns two particle bursts at pos: one through particle_spawnPieceSpray, one through particle_spawnSpriteBurst. */
-void func_151BF0C8(Vec3f *pos) {
+void effect_spawnStatPickupBurst(Vec3f *pos) {
     PieceSpray first;
     SpriteBurst second;
 

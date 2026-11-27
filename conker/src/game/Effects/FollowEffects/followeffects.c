@@ -574,7 +574,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
         if (collision_castRayWorld(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
             if (math_isObjectHidden(hitInfo) != 0) {
-                func_151BBFBC(&surf, &hit, arg3 & 0xFF, arg4);
+                effect_spawnRandomImpactMark(&surf, &hit, arg3 & 0xFF, arg4);
             }
             if (math_getTriEdges(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
@@ -699,7 +699,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
-            func_151BBFBC(&floor.tri, &hit, arg3, arg4);
+            effect_spawnRandomImpactMark(&floor.tri, &hit, arg3, arg4);
             if (math_getTriEdges(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
@@ -750,7 +750,7 @@ void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
 /* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 /* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
-void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void effect_spawnRandomImpactMark(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;

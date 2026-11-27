@@ -295,8 +295,8 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3);
 s32 blood_dropDebrisTrail(BloodDebrisParticle *particle);
 s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY);
 void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail);
-void func_151A77C0(BillboardParticle *particle);
-void func_151A787C(BillboardParticle *particle);
+void blood_billboardFadeGrowThenTint(BillboardParticle *particle);
+void blood_billboardFadeGrowTint(BillboardParticle *particle);
 void blood_destroyDebris(BloodDebrisParticle *particle);
 
 /* game/Effects/BloodDrip/blooddrip.c */
@@ -313,9 +313,9 @@ void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 void blood_sprayFromBone(Actor *, u8, u8, s32);
 
 /* game/Effects/BloodEmitters/bloodemitters.c */
-BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2);
-void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
-void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
+BloodDrip *blood_attachBleedDrip(Actor *actor, u8 arg1, s32 arg2);
+void blood_emitBleedDrop(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
+void blood_spawnBleedDrop(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
 BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2);
 void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
 void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4);

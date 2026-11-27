@@ -33,9 +33,9 @@ Gfx gModelEffectRenderTeardownDl[] = {
 
 /* Update callbacks (EffectParams.updateFunc, .updateFunc2, the third set): each returns 0 when the effect
    is done. Declared without a prototype where the entries take their own effect views. */
-s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, func_151BECB8, particle_bobEffect, effect_updateFadeInEffect };
+s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, effect_updateStatPickup, particle_bobEffect, effect_updateFadeInEffect };
 s32 (*gModelEffectUpdate2Funcs[])(ModelEffect *) = { effect_resetModelEffectRoot, effect_setModelEffectRootRotScale };
-s32 (*gModelEffectUpdate2FuncsTail[])() = { func_151BEB20, text_updateCashModel, effect_placeScreenCashModel, effect_setModelEffectRootFromExtra, func_150C52CC };
+s32 (*gModelEffectUpdate2FuncsTail[])() = { effect_buildStatPickupMatrix, text_updateCashModel, effect_placeScreenCashModel, effect_setModelEffectRootFromExtra, func_150C52CC };
 
 /* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
 Gfx *(*gModelEffectPreDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
