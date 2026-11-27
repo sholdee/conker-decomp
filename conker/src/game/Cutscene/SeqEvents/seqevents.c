@@ -358,7 +358,7 @@ void cutscene_dispatchEvents(s32 mode, s32 scene) {
         cutscene_flushEventQueue(queued, scene);
         gCutsceneActorLock = 1;
         if (mode == 0) {
-            D_800C35C0[scene] = 1;
+            gCutsceneEventsDispatched[scene] = 1;
         }
     }
 }
@@ -896,11 +896,11 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 audio_setMixOverride(0);
             }
         } else if (event->value == 0x54) {
-            D_800C3660[scene] = ~event->unk4;
+            gCutsceneUseCullDistance[scene] = ~event->unk4;
         } else if (event->value == 0x55) {
             effect_randomizeBounceRecordSpeeds(event->unk4);
         } else if (event->value == 0x59) {
-            D_800C3C8B = 1;
+            gCutsceneFadeInAtEnd = 1;
         } else if (event->value == 0x5A) {
             dc_glbl_CharNum = obj - movement_obj;
             if (obj->character_type == 0x53) {
@@ -1045,7 +1045,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 obj->rootOffsetY = gModelDefs[obj->character_type]->unk6;
             }
         } else if (event->value == 0x78) {
-            D_800C3C8D = 1;
+            gCutsceneNoSkipFadeIn = 1;
         } else if (event->value == 0x79) {
             if (actor != NULL) {
                 FS32(actor, 0x84) = 0;
@@ -1054,7 +1054,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
         } else if (event->value == 0x7B) {
             if (level == LEVEL_FRONTEND) {
-                D_800C3680 = 1;
+                gCutsceneKeepCamera = 1;
             }
         } else if (event->value == 0x7D) {
             if (obj != NULL && event->unk4 == 0) {
@@ -2367,12 +2367,12 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     duration = 0;
                 }
                 screen_startViewFade(gCutsceneFadeColours[event->unk5].r, gCutsceneFadeColours[event->unk5].g, gCutsceneFadeColours[event->unk5].b, duration, !event->unk6, 0);
-                D_800C3C8A = !event->unk6;
+                gCutsceneFadeToColor = !event->unk6;
             } else if (skipping != 0) {
                 cutscene_findEventsAround(&prev, &found, NULL, &prevTime, track, event->type, 1, event->value, 1, 0, gCutsceneTimes[scene], scene);
                 if (prev != NULL) {
                     screen_startViewFade(gCutsceneFadeColours[prev->unk5].r, gCutsceneFadeColours[prev->unk5].g, gCutsceneFadeColours[prev->unk5].b, 0, !prev->unk6, 0);
-                    D_800C3C8A = !prev->unk6;
+                    gCutsceneFadeToColor = !prev->unk6;
                 }
             }
         } else if (event->value == 4) {

@@ -1137,7 +1137,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             } else {
                 actor->mv->rt_context_b = 0;
             }
-            if (D_800C3A58 != 0) {
+            if (gCutsceneExitCountdown != 0) {
                 if ((actor->mv->weapon_status == 1) || (actor->mv->weapon_status == 2U)) {
                     anim = gContextStepAnims[idx][1];
                     actor->count5 = 0xFF;
@@ -1462,7 +1462,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
         }
         break;
     case 0x9:
-        if (D_800C3A58 != 0) {
+        if (gCutsceneExitCountdown != 0) {
             if ((actor->mv->weapon_status == 1) || (actor->mv->weapon_status == 2)) {
                 func_15063404(actor);
             } else {
@@ -2255,7 +2255,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
         {
             s32 held;
 
-            if (D_800C3A58 != 0) {
+            if (gCutsceneExitCountdown != 0) {
                 if (act == actor->mv->rt_context_b) {
                     collision_createPartSet(actor, 0x89, 1.0f, 0);
                     actor->mv->weapon_status = 2;
@@ -2609,7 +2609,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                     obj->intelwalk = animHold;
                     obj->scriptCmd = NULL;
                     actor->mv->shotCount = 1;
-                    if ((animGrab != obj->animseq.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
+                    if ((animGrab != obj->animseq.uh) || ((gCutsceneExitCountdown != 0) && (animSpecial != 0))) {
                         particle_spawnTwoSidedEmitter(obj, actor, 0, animGrab);
                         sound_stopActorSound1(obj);
                         if ((actor->character_type == 0x80) && !(math_random() & 3)) {
@@ -2622,7 +2622,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                         next = animRelease;
                         sound_stopActorSound2(obj);
                     }
-                } else if ((D_800C3A58 != 0) && (animSpecial != obj->intelwalk) && (animSpecial != 0)) {
+                } else if ((gCutsceneExitCountdown != 0) && (animSpecial != obj->intelwalk) && (animSpecial != 0)) {
                     obj->intelwalk = animSpecial;
                     obj->scriptCmd = NULL;
                 } else if (actor->mv->shotCount == 1) {

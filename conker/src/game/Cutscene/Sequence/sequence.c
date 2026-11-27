@@ -51,7 +51,7 @@ OSScTask *gCurGfxTask;
 OSScTask gGfxTasks[2];
 s32 D_800BEB98;
 u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
-u8 D_800BEBA0;
+u8 gStartWithMainUcode;
 s32 gDisplayListLimit;
 s32 D_800BEBA8[2]; /* not referenced */
 u64 gAltUcodeText[0x496];
@@ -66,15 +66,15 @@ s16 gNextCutsceneAnchorPos[3];
 f32 gNextCutsceneAnchorHeading;
 f32 gCutsceneAnchorTurn;
 u8 gLastCutsceneLevel;
-u8 D_800C35A9;
+u8 gCutsceneChangesLevel;
 u8 gCutsceneKeepPlayer;
 s32 gCutsceneTimes[2]; // per scene: current time
 s32 gCutscenePrevTimes[2]; /* time at the previous update */
-u8 D_800C35C0[2];
+u8 gCutsceneEventsDispatched[2];
 u8 gNextCutscene;
 u8 gNextCutsceneMap;
 u8 gPendingCutscene;
-u8 D_800C35C5;
+u8 gPendingCutsceneFromIdle;
 u16 *gSeqPathKeyCounts[2];
 u16 *gSeqChannelKeyCounts[2];
 u16 *gSeqTrackEventCounts[2]; /* each track's event count */
@@ -96,7 +96,7 @@ u8 gCutsceneShowUnboundObjects[2];
 u8 gCutsceneKeepSpawnedActors[2];
 u8 D_800C365C[2];
 u8 gCutsceneRunTimedEvents[2];
-u8 D_800C3660[2];
+u8 gCutsceneUseCullDistance[2];
 u8 gCutsceneHideWorld;
 u8 gCutsceneAnchorSet;
 SeqFileEntry *gCutsceneFiles[2];
@@ -106,7 +106,7 @@ u8 gCutsceneSkipped;
 f32 gCutsceneCutbackAngle;
 f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 s32 gCutsceneEndTransitionTime;
-u8 D_800C3680;
+u8 gCutsceneKeepCamera;
 u8 gCutsceneHideSky;
 u8 gCutsceneSolidSky;
 u8 gCutsceneNoPause;
@@ -116,14 +116,14 @@ SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
 SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
 u8 *gSeqActiveEvents[2][30];
 SeqTrackPath *gSeqTrackPaths[2];
-u8 D_800C3A58;
+u8 gCutsceneExitCountdown;
 s64 gPlayedCutscenes[69];
 u8 gCutsceneSkipState;
 u8 gCutsceneSkipFadeTimer;
-s8 D_800C3C8A;
-u8 D_800C3C8B;
+s8 gCutsceneFadeToColor;
+u8 gCutsceneFadeInAtEnd;
 u8 gCutsceneHoldEnd;
-u8 D_800C3C8D;
+u8 gCutsceneNoSkipFadeIn;
 u16 gCutsceneStartTime;
 u8 gCutsceneCallback;
 s32 gCutsceneCallbackArg;
@@ -207,7 +207,7 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
     gCurGfxTask->list.t.flags = OS_TASK_LOADABLE;
     gCurGfxTask->list.t.ucode_boot = (u64 *)rspbootTextStart;
     gCurGfxTask->list.t.ucode_boot_size = (s32)rspbootTextEnd - (s32)rspbootTextStart;
-    if (D_800BEBA0 != 0) {
+    if (gStartWithMainUcode != 0) {
         gCurGfxTask->list.t.ucode = gUcodeText;
         gCurGfxTask->list.t.ucode_data = gUcodeData;
     } else {
@@ -215,7 +215,7 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
         gCurGfxTask->list.t.ucode_data = gAltUcodeData;
     }
     gCurGfxTask->list.t.ucode_data_size = 0x800;
-    gCurGfxTask->list.t.dram_stack = D_800CBE10;
+    gCurGfxTask->list.t.dram_stack = gRspDramStack;
     gCurGfxTask->list.t.dram_stack_size = SP_DRAM_STACK_SIZE8;
     gCurGfxTask->list.t.output_buff = (u64 *)gRdpOutputBuffer;
     gCurGfxTask->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
@@ -379,7 +379,7 @@ s32 cutscene_countEvents(s32 scene) {
 void cutscene_resetScene(s32 scene) {
     gCutscenePrevTimes[scene] = -100;
     gCutsceneTimes[scene] = 0;
-    D_800C35C0[scene] = 0;
+    gCutsceneEventsDispatched[scene] = 0;
     gCutsceneStartTime = 0;
     gSeqTrackCounts[scene] = 0;
     gCutsceneStates[scene] = 0;
@@ -394,20 +394,20 @@ void cutscene_resetScene(s32 scene) {
     gCutsceneKeepSpawnedActors[scene] = 0;
     D_800C365C[scene] = 0;
     gCutsceneRunTimedEvents[scene] = 0;
-    D_800C3660[scene] = 0;
+    gCutsceneUseCullDistance[scene] = 0;
     gCutsceneActorLock = 0;
     gCutsceneHideWorld = 0;
     gCutsceneHoldEnd = 0;
-    D_800C3C8D = 0;
+    gCutsceneNoSkipFadeIn = 0;
     gNextCutscene = 0;
-    D_800C3A58 = 0;
+    gCutsceneExitCountdown = 0;
     gCutsceneAnchorTurn = 0.0f;
-    D_800C3C8A = -1;
-    D_800C3C8B = 0;
+    gCutsceneFadeToColor = -1;
+    gCutsceneFadeInAtEnd = 0;
     gCutsceneCutbackAngle = 999.0f;
     gCutsceneEndTransitionYaw = 999.0f;
     gCutsceneEndTransitionTime = 0;
-    D_800C3680 = 0;
+    gCutsceneKeepCamera = 0;
     gCutsceneSkipped = 0;
     gCutsceneChainBobScale = 100;
     gCutsceneCashOffset = -1;
@@ -472,10 +472,10 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
             gPendingCutscene = cutscene + 1;
             game_requestLevelChange(1, map, 0, 0, 0);
             if (gCutsceneStates[scene] != 0) {
-                D_800C35C5 = 0;
+                gPendingCutsceneFromIdle = 0;
                 return;
             }
-            D_800C35C5 = 1;
+            gPendingCutsceneFromIdle = 1;
             return;
         }
         gCutsceneIds[scene] = cutscene;
@@ -579,7 +579,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
 
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
-   flags gCutsceneChained, gCutsceneNoSkip, gCutsceneKeepPlayer, D_800C35A9) and 0x77 (start time gCutsceneStartTime), and start
+   flags gCutsceneChained, gCutsceneNoSkip, gCutsceneKeepPlayer, gCutsceneChangesLevel) and 0x77 (start time gCutsceneStartTime), and start
    the screen fade (screen_startViewFade) to the gCutsceneFadeColours colour named by the earliest type-1 value-1 event. */
 void cutscene_prescanEvents(s32 scene) {
     s32 i;
@@ -589,7 +589,7 @@ void cutscene_prescanEvents(s32 scene) {
     SeqEvent *events;
 
     gCutsceneChained = 0;
-    D_800C35A9 = 0;
+    gCutsceneChangesLevel = 0;
     gCutsceneNoSkip = 0;
     gCutsceneKeepPlayer = 0;
     gCutsceneStartTime = 0;
@@ -619,7 +619,7 @@ void cutscene_prescanEvents(s32 scene) {
             found = NULL;
             cutscene_findEvent(&events[3], 5, i, &found, 1, 0x44, 0, 0, 0, 0, scene);
             if (found != NULL) {
-                D_800C35A9 = 1;
+                gCutsceneChangesLevel = 1;
             }
 
             found = NULL;
@@ -698,7 +698,7 @@ void cutscene_skip(s32 scene) {
             } while ((chained != 0) && (gPendingCutscene == 0));
         }
     }
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) {
+    if (gCutsceneChangesLevel == 0 && gCutsceneFadeToColor != 1 && gCutsceneNoSkipFadeIn == 0) {
         screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
     }
     for (i = 0; i < 25; i++) {
@@ -812,8 +812,8 @@ void cutscene_checkEnd(s32 scene) {
 
 /* Advance the scene clock gCutsceneTimes by this frame's ticks, clamped to the end time. */
 void cutscene_advanceTime(s32 scene) {
-    if (D_800C3A58 != 0) {
-        D_800C3A58 -= 1;
+    if (gCutsceneExitCountdown != 0) {
+        gCutsceneExitCountdown -= 1;
     }
     gCutscenePrevTimes[scene] = gCutsceneTimes[scene];
     if (gCutsceneStates[scene] == 1) {
@@ -821,7 +821,7 @@ void cutscene_advanceTime(s32 scene) {
         if ((scene != 0) || (gPaused == 0)) {
             gCutsceneTimes[scene] += gRawFrameTicks;
         }
-        if ((D_800C35C0[scene] == 0) &&
+        if ((gCutsceneEventsDispatched[scene] == 0) &&
             (gCutsceneStartTime == gCutscenePrevTimes[scene]) &&
             (gCutsceneStartTime != gCutsceneTimes[scene])) {
             gCutscenePrevTimes[scene] = -1;
@@ -947,7 +947,7 @@ void cutscene_finish(s32 skipped, s32 scene) {
             }
             return;
         }
-        if (D_800C3C8B != 0) {
+        if (gCutsceneFadeInAtEnd != 0) {
             screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
         }
         D_8008FD84[0] = 0;
@@ -985,10 +985,10 @@ void cutscene_restoreControl(s32 scene) {
         }
     }
     if (gNextCutscene == 0 && gSpawnCutsceneActive == 0) {
-        if (D_800C3680 == 0) {
+        if (gCutsceneKeepCamera == 0) {
             camera_queueMessage(player, 6, (void *)scene);
         } else {
-            D_800C3680 = 0;
+            gCutsceneKeepCamera = 0;
         }
     }
     if (gCutsceneKeepSpawnedActors[scene] == 0) {
@@ -1003,7 +1003,7 @@ void cutscene_restoreControl(s32 scene) {
         }
     }
     if (gNextCutscene == 0) {
-        D_800C3A58 = 2;
+        gCutsceneExitCountdown = 2;
         gCutsceneAnchorSet = 0;
         gCutsceneAnchorHeading = gNextCutsceneAnchorHeading;
         gCutsceneAnchorPos[0] = gNextCutsceneAnchorPos[0];

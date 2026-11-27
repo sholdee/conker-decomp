@@ -147,16 +147,16 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen);
 s32 cutscene_releasePlayer(s32 scene);
 void cutscene_updateActors(void);
 extern u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
-extern u8 D_800BEBA0;
+extern u8 gStartWithMainUcode;
 extern s32 gDisplayListLimit;
 extern u64 gUcodeText[0x496]; // RSP ucode text buffer
 extern s32 gCutsceneTimes[2]; // per scene: current time
 extern s32 gCutscenePrevTimes[2]; /*time at the previous update */
-extern u8 D_800C35C0[2];
+extern u8 gCutsceneEventsDispatched[2];
 extern u8 gNextCutscene;
 extern u8 gNextCutsceneMap;
 extern u8 gPendingCutscene;
-extern u8 D_800C35C5;
+extern u8 gPendingCutsceneFromIdle;
 extern u16 *gSeqTrackEventCounts[2]; /*each track's event count */
 extern u8 **gSeqTextLists[2]; // per scene: text lists
 extern u8 gCutsceneIds[2]; // per scene: changes with each run of the scene
@@ -176,7 +176,7 @@ extern u8 gCutsceneShowUnboundObjects[2];
 extern u8 gCutsceneKeepSpawnedActors[2];
 extern u8 D_800C365C[2];
 extern u8 gCutsceneRunTimedEvents[2];
-extern u8 D_800C3660[2];
+extern u8 gCutsceneUseCullDistance[2];
 extern u8 gCutsceneHideWorld;
 extern u8 gCutsceneAnchorSet;
 extern u8 gCutsceneIgnorePlayed;
@@ -185,7 +185,7 @@ extern u8 gCutsceneSkipped;
 extern f32 gCutsceneCutbackAngle;
 extern f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 extern s32 gCutsceneEndTransitionTime;
-extern u8 D_800C3680;
+extern u8 gCutsceneKeepCamera;
 extern u8 gCutsceneHideSky;
 extern u8 gCutsceneSolidSky;
 extern u8 gCutsceneNoPause;
@@ -193,14 +193,14 @@ extern SeqEvent *gSeqEventTracks[2][30]; // cutscene script event tracks per sce
 extern SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
 extern SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
 extern u8 *gSeqActiveEvents[2][30];
-extern u8 D_800C3A58;
+extern u8 gCutsceneExitCountdown;
 extern s64 gPlayedCutscenes[69];
 extern u8 gCutsceneSkipState;
 extern u8 gCutsceneSkipFadeTimer;
-extern s8 D_800C3C8A;
-extern u8 D_800C3C8B;
+extern s8 gCutsceneFadeToColor;
+extern u8 gCutsceneFadeInAtEnd;
 extern u8 gCutsceneHoldEnd;
-extern u8 D_800C3C8D;
+extern u8 gCutsceneNoSkipFadeIn;
 extern u16 gCutsceneStartTime;
 extern u8 gCutsceneCallback;
 extern s32 gCutsceneCallbackArg;
@@ -216,7 +216,7 @@ extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSi
 extern u8 ucode_ROM_START[];                 /* ROM start of the RSP microcodes (linker-defined, undefined_syms.us.txt) */
 
 /* game_data_800CBE10.c (data only, owner unknown; linked after game/Collision/Probe/probe) */
-extern u64 D_800CBE10[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
+extern u64 gRspDramStack[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
 
 /* game/Cutscene/StartCallback/startcallback.c */
 void cutscene_startCallback1(s32 map, s32 cutscene, s32 scene, s32 actorPath);

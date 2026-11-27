@@ -150,7 +150,7 @@ s32 game_processMessage(void) {
                         game_prepareView(gCurrentView);
                         gDisplayListHead = game_drawWorldPass(gDisplayListHead, gCurrentView);
                     }
-                    if (D_800BEBA0 == 0) {
+                    if (gStartWithMainUcode == 0) {
                         DL_LOAD_UCODE(gUcodeText, gUcodeData);
                         DL_APPEND(0xD9C2F9FA, 0);        // gSPClearGeometryMode(0x3D0605)
                         DL_APPEND(0xD9FFFFFF, 0x220005); // gSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LIGHTING | G_SHADING_SMOOTH)
