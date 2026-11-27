@@ -234,8 +234,8 @@ static const F32x1 gImpactDebrisScales = { { 0.1f } };
 
 /* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
-void beam_spawnImpactEffects(ImpactObj *obj) {
-    ImpactHit *hit;
+void beam_spawnImpactEffects(Game1EF500Trail *obj) {
+    Game1EF500TrailExt *hit;
     u32 surfaceFlags;
     // matching: one struct keeps IDO's stack order (scales, ids, desc) above the spilled locals
     struct {
@@ -247,31 +247,31 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
     u32 random;
     f32 fraction;
 
-    hit = &obj->hit;
+    hit = &obj->trail;
     fraction = math_randomFloat();
     random = math_random();
     lifetime = math_random() % 81U + 50;
-    effect_spawnSurfaceSprite(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
-                  lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
-    surfaceFlags = hit->surfaceFlags;
+    effect_spawnSurfaceSprite(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->path.tri, &hit->path.pos,
+                  lifetime, 1, 1, hit->path.material, obj->head.header.owner, obj->head.header.kind);
+    surfaceFlags = hit->path.material;
     if ((surfaceFlags & 0x1F) == 9) {
         if (math_randomFloat() < 0.400000006f) {
-            weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
+            weapon_spawnImpactBurst(&hit->path.pos, obj->head.header.owner, obj->head.header.kind);
         }
     } else {
         if (math_randomFloat() < 0.1000000015f) {
-            weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
+            weapon_spawnImpactBurst(&hit->path.pos, obj->head.header.owner, obj->head.header.kind);
         }
         if (math_randomFloat() < 0.400000006f) {
             debris.variantIds = gImpactDebrisIds;
             debris.variantScales = gImpactDebrisScales;
             debris.desc.countBase = 1;
             debris.desc.countRange = 3;
-            debris.desc.pos = hit->position;
-            debris.desc.source.normal.x = -hit->velocity.x;
-            debris.desc.source.normal.y = -hit->velocity.y;
-            debris.desc.source.normal.z = -hit->velocity.z;
-            debris.desc.source.triangle = hit->triangle;
+            debris.desc.pos = hit->path.pos;
+            debris.desc.source.normal.x = -hit->path.dir.x;
+            debris.desc.source.normal.y = -hit->path.dir.y;
+            debris.desc.source.normal.z = -hit->path.dir.z;
+            debris.desc.source.triangle = hit->path.tri;
             debris.desc.source.spread = 614.0f;
             debris.desc.speedBase = 0.009000000544f;
             debris.desc.lifeBase = 15;
@@ -282,8 +282,8 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
             debris.desc.scaleBase = 0.06000000238f;
             debris.desc.scaleRange = 0.1420000046f;
             debris.desc.spin = 25.77700043f;
-            particle_spawnSurfaceDebrisBurst(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
-                          obj->base.header.kind);
+            particle_spawnSurfaceDebrisBurst(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->head.header.owner,
+                          obj->head.header.kind);
         }
     }
 }

@@ -218,33 +218,9 @@ typedef struct {
     s16 ids[3];
 } SpriteChoices;
 
-
-/* Spawn descriptor passed to particle_spawnSurfaceQuadSprite. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-} SpriteSpawn;
-
 /* Spawn hook 0: a sprite of random size (50 to 100) using one of three images, at pos. */
 void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
-    SpriteSpawn spawn;
+    SpriteDef2C spawn;
     f32 size;
     SpriteChoices choices = { 15, 16, 17 };
     u32 pick;
@@ -254,21 +230,21 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     size = math_randomFloat() * 50.0f + 50.0f;
     pick = math_random() % 3;
 
-    spawn.unk6 = choices.ids[pick];
-    spawn.unk7 = 0;
-    spawn.unk16 = 0;
-    spawn.unk17 = 7;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
+    spawn.texture = choices.ids[pick];
+    spawn.handlerSet = 0;
+    spawn.primMode = 0;
+    spawn.envMode = 7;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
     spawn.flags = 0x1701;
     spawn.lifetime = 60;
-    spawn.unk10 = 0xA0;
-    spawn.unk11 = 0xFF;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0;
-    spawn.unk14 = 0;
-    spawn.unk15 = 0xFF;
-    spawn.unk18 = 0x3B0002;
+    spawn.alpha = 0xA0;
+    spawn.colorLevel = 0xFF;
+    spawn.rgba[0] = 0;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x3B0002;
 
     rand1 = math_random();
     rand2 = math_random();

@@ -1663,7 +1663,8 @@ typedef struct SpriteDef {
     /* 0x26 */ u8 pad26[2];
 } SpriteDef; /* size 0x28 */
 
-/* matching: a 0x2C stack copy of SpriteDef (game/Particle/ShatterPieces/shatterpieces.c); the extra word keeps particle_spawnFlatMark's frame layout. */
+/* matching: a 0x2C stack copy of SpriteDef (game/Particle/ShatterPieces/shatterpieces.c, game/Particle/RegionEmitter/regionemitter.c,
+ * game/Beam/AreaEmitter/areaemitter.c); in shatterpieces.c the extra word keeps particle_spawnFlatMark's frame layout. */
 typedef struct SpriteDef2C {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;

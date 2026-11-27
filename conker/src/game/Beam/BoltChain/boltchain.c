@@ -108,7 +108,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 fxOwner, s32 fxList) {
 void beam_updateBolt(BoltObj *bolt) {
     s32 (*update)(BoltObj *, u8 *);
     u8 moved;
-    BoltFlare *flare;
+    SpriteParticle *flare;
 
     moved = FALSE;
     if (bolt->desc.updateKind != -1) {
@@ -137,12 +137,12 @@ void beam_updateBolt(BoltObj *bolt) {
 
     flare = bolt->flares[0];
     if (flare != NULL) {
-        flare->pos = bolt->desc.ctrl[0];
+        flare->head.desc.pos = bolt->desc.ctrl[0];
     }
 
     flare = bolt->flares[1];
     if (flare != NULL) {
-        flare->pos = bolt->desc.ctrl[3];
+        flare->head.desc.pos = bolt->desc.ctrl[3];
     }
 }
 
@@ -393,7 +393,7 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
 /* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
 void beam_releaseBolt(BoltObj *bolt) {
     void (*cleanup)(BoltObj *);
-    BoltFlare *flare;
+    SpriteParticle *flare;
 
     cleanup = gBoltCleanupHandlers[bolt->desc.kind];
     if (cleanup != NULL) {
@@ -401,11 +401,11 @@ void beam_releaseBolt(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        effect_destroyObject(&flare->header);
+        effect_destroyObject(&flare->head.header);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        effect_destroyObject(&flare->header);
+        effect_destroyObject(&flare->head.header);
     }
     particle_freeViewBuffers(bolt->vtxBuf);
 }

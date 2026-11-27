@@ -988,7 +988,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
     f32 dy;
     f32 dz;
     ParticleDesc spawn;
-    TrailParticleLink ext;
+    WobbleData ext;
     AttachedSpriteParticle *particle;
     s32 flipY;
 
@@ -1009,7 +1009,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
     if (link->accum > 1.0f) {
         s32 pad; // matching: unused stack slot
 
-        ext.unkC = 0.986371994f;
+        ext.drag = 0.986371994f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
         spawn.setGeometryMode = 0x200005;
@@ -1049,12 +1049,12 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
             spawn.vel.x = dx * gFrameDeltaInv * 0.3330000043f;
             spawn.vel.y = dy * gFrameDeltaInv * 0.3330000043f;
             spawn.vel.z = dz * gFrameDeltaInv * 0.3330000043f;
-            ext.unk0 = math_random();
-            ext.unk1 = (s16)math_random(); // matching: the s16 cast keeps the value in its own temp
-            ext.unk2 = (math_random() % 5U) + 4;
-            ext.unk3 = (math_random() % 5U) + 4;
-            ext.unk4 = math_randomFloat() * 39.0f;
-            ext.unk8 = math_randomFloat() * 39.0f;
+            ext.phase[0] = math_random();
+            ext.phase[1] = (s16)math_random(); // matching: the s16 cast keeps the value in its own temp
+            ext.phaseStep[0] = (math_random() % 5U) + 4;
+            ext.phaseStep[1] = (math_random() % 5U) + 4;
+            ext.amplitude[0] = math_randomFloat() * 39.0f;
+            ext.amplitude[1] = math_randomFloat() * 39.0f;
             spawn.gravity = math_randomFloat() * 0.5139999986f + 0.6560000181f;
             spawn.flags &= ~0xC0;
             flipY = (math_random() & 1) ? 0x80 : 0;
@@ -1091,15 +1091,15 @@ void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type) {
     }
 }
 
-/* Message handler of an object bound to an actor: released by message 0x43 for that actor. */
-void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type) {
-    ActorRef *ref = &self->ref;
+/* Event handler of a light bound to an actor (gLightActorEventHandlers[1]): released by message 0x43 for that actor. */
+void beam_actorBoundMessage(LightEffect *self, ActorMsg *msg, u8 type) {
+    LightActorRef *ref = &self->data.actorRef;
     Actor *msgActor;
 
     if (type == 0x43) {
         msgActor = msg->ref.actor;
-        if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
-            effect_destroyObject(&self->header);
+        if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->actorId)) {
+            effect_destroyObject(self);
         }
     }
 }

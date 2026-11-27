@@ -270,22 +270,11 @@ typedef struct {
     /* 0x08 */ f32 phase[3];
 } ActorParticleLink;
 
-/* State a trail particle (see beam_updateTrailEmitter) carries at +0xA8. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s8 unk2;
-    s8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} TrailParticleLink;
-
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         ActorParticleLink actor;
-        TrailParticleLink trail;
+        WobbleData trail; /* a trail particle (beam_updateTrailEmitter; update func 32, particle_updatePointPuff) */
     } link;
 } AttachedSpriteParticle;
 
@@ -301,12 +290,6 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorTrailLink link;
 } ActorTrailEmitter;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ ActorRef ref;
-} ActorBound;
 
 /* Data of the spark effect spawned by beam_spawnBoneSparks and run by beam_updateBoneSparks (sparks along a
  * segment of the owner's bone 5). */
@@ -374,20 +357,12 @@ struct ModelBeamEffect {
     ModelBeamData data;
 };
 
-/* A sprite spawned by particle_newSpriteParticleWithFloor that marks one end of the beam. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-    /* 0x4C */ u8 pad4C[0x74 - 0x4C];
-    /* 0x74 */ s8 mode; /* 3 or -1 (see beam_updateCastBeam) */
-} BeamEnd;
-
 /* Per-object state of a beam (0x78 bytes, copied in by beam_spawnCastBeam). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
-    /* 0x08 */ BeamEnd *ends[2];
+    /* 0x08 */ SpriteParticle *ends[2]; /* sprites at the beam's ends (particle_newSpriteParticleWithFloor); beam_updateCastBeam sets their
+                                         * head.desc.drawFunc to 3 (particle_hideSpriteDraw) to hide one, or -1 to draw it */
     /* 0x10 */ RayHit ray;
     /* 0x74 */ u8 flags;
 } BeamState;
@@ -515,23 +490,6 @@ typedef struct BoltRainObj {
     /* 0x28 */ BoltRainState state;
 } BoltRainObj;
 
-/* The surface hit an impact effect object was spawned for. */
-typedef struct ImpactHit {
-    /* 0x00 */ u8 pad0[0x30];
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ u8 pad3C[0x24];
-    /* 0x60 */ Vec3f velocity;
-    /* 0x6C */ CollisionTri triangle;
-    /* 0x7E */ u8 pad7E[0xA];
-    /* 0x88 */ s32 surfaceFlags;   /* bits 0-4: surface type */
-} ImpactHit;
-
-typedef struct ImpactObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x028 */ u8 pad28[0xE8];
-    /* 0x110 */ ImpactHit hit;
-} ImpactObj;
-
 /* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
 typedef struct BoltSample {
     /* 0x00 */ f32 t;
@@ -540,12 +498,6 @@ typedef struct BoltSample {
     /* 0x1C */ Vec3f normal;
     /* 0x28 */ Vec3f binormal;
 } BoltSample; /* size 0x34 */
-
-typedef struct BoltFlare {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-} BoltFlare;
 
 /*
  * A bolt object. It is followed in memory by desc.segments BoltSamples (beam_getBoltSamples),
@@ -558,7 +510,7 @@ typedef struct BoltObj {
     /* 0x64 */ f32 step;           /* Bezier parameter step, 1 / (segments + 1) */
     /* 0x68 */ s16 rejitterTimer;
     /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ BoltFlare *flares[2];
+    /* 0x6C */ SpriteParticle *flares[2]; /* sprites at the first and last control points (particle_newSpriteParticleWithFloor) */
     /* 0x74 */ u8 vtxBuf[0x10];
     /* 0x84 */ s32 vtxBufSize;
 } BoltObj; /* size 0x88 */
@@ -771,7 +723,7 @@ void beam_followParticleMessage(AttachedSpriteParticle *particle, s32 data, u8 t
 void beam_attachTrailEmitter(Actor *actor);
 void beam_updateTrailEmitter(ActorTrailEmitter *emitter);
 void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type);
-void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type);
+void beam_actorBoundMessage(LightEffect *self, ActorMsg *msg, u8 type);
 void beam_spawnMuzzleBurst(Actor *actor, u8 slot, u8 variant, u8 fxOwner, s32 fxList); /* K&R definition: the callers' view */
 
 /* game/Beam/ModelBeam/modelbeam.c */
@@ -817,7 +769,7 @@ void beam_boltRainMessage(BoltRainObj *obj, s32 data, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
 void beam_destroyOnMessage4B(EffectHeader *obj, s32 data, u8 msg);
 void beam_boltArcMessage(BoltArcObj *obj, struct Actor **data, u8 msg);
-void beam_spawnImpactEffects(ImpactObj *obj);
+void beam_spawnImpactEffects(struct Game1EF500Trail *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 data, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);
 void beam_updateSparkZone(SparkObj *obj);
