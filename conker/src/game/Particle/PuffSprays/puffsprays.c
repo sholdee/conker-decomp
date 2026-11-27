@@ -44,8 +44,8 @@ void func_150C1F60(u8 arg0) {
     params.blue = 0xFF;
     params.alphaBase = 0xFF;
     params.alphaRange = 0;
-    params.unk58 = 3;
-    params.unk5C = 0xFF;
+    params.maxLights = 3;
+    params.lightMask = 0xFF;
     params.render.otherModeH = 0;
     params.render.setGeometryMode = 0x220005;
     params.render.clearGeometryMode = 0x1D0600;
@@ -55,8 +55,8 @@ void func_150C1F60(u8 arg0) {
     params.render.alphaDither = 0x20;
     params.render.primMode = 0;
     params.render.envMode = 7;
-    params.unk80 = 0xC;
-    params.unk82 = 0x15;
+    params.fadeStart = 0xC;
+    params.fadeRate = 0x15;
     particle_spawnPuffSpray(&params, arg0, 1);
     params.speedBase = 100.0f;
     params.speedRange = 57.5f;
@@ -86,8 +86,8 @@ void func_150C1F60(u8 arg0) {
     params2.angles.pitchRange = 0x26;
     params2.spray.lifeBase = 0x19;
     params2.spray.lifeRange = 0x19;
-    params2.spray.unk24 = 0x9B;
-    params2.spray.unk25 = 0x64;
+    params2.spray.alphaBase = 0x9B;
+    params2.spray.alphaRange = 0x64;
     params2.spray.unk30 = 1;
     params2.spray.kind = 6;
     params2.spray.unk34 = 0.0f;
@@ -137,8 +137,8 @@ void func_150C2290(u8 arg0) {
     params.blue = 0xFF;
     params.alphaBase = 0xFF;
     params.alphaRange = 0;
-    params.unk58 = 3;
-    params.unk5C = 0xFF;
+    params.maxLights = 3;
+    params.lightMask = 0xFF;
     params.render.otherModeH = 0;
     params.render.setGeometryMode = 0x220005;
     params.render.clearGeometryMode = 0x1D0600;
@@ -148,8 +148,8 @@ void func_150C2290(u8 arg0) {
     params.render.alphaDither = 0x20;
     params.render.primMode = 0;
     params.render.envMode = 7;
-    params.unk80 = 0xC;
-    params.unk82 = 0x15;
+    params.fadeStart = 0xC;
+    params.fadeRate = 0x15;
     particle_spawnPuffSpray(&params, arg0, 1);
 }
 
@@ -209,8 +209,8 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.blue = 0xFF;
     params.alphaBase = 0xFF;
     params.alphaRange = 0;
-    params.unk58 = 3;
-    params.unk5C = 0xFF;
+    params.maxLights = 3;
+    params.lightMask = 0xFF;
     params.render.otherModeH = 0;
     params.render.setGeometryMode = 0x220005;
     params.render.clearGeometryMode = 0x1D0600;
@@ -220,8 +220,8 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.render.alphaDither = 0x20;
     params.render.primMode = 0;
     params.render.envMode = 7;
-    params.unk80 = 0xC;
-    params.unk82 = 0x15;
+    params.fadeStart = 0xC;
+    params.fadeRate = 0x15;
     particle_spawnPuffSpray(&params, argE, 1);
     return 1;
 }
@@ -239,8 +239,8 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.angles.pitchRange = 0x2E;
     params.spray.lifeBase = 0x64;
     params.spray.lifeRange = 0;
-    params.spray.unk24 = 0x9B;
-    params.spray.unk25 = 0x64;
+    params.spray.alphaBase = 0x9B;
+    params.spray.alphaRange = 0x64;
     params.spray.sizeRange = 0.0f;
     params.spray.unk30 = 1;
     params.spray.kind = 6;

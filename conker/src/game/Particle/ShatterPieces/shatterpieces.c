@@ -103,8 +103,8 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
                 burst.pos.z = z;
                 burst.growthBase = 0.661f;
                 burst.growthRange = 0; // matching: 0.0f would keep the float zero above live in $f20 across the calls
-                burst.unk58 = particle->link.model;
-                burst.unk5C = particle->link.unk1C;
+                burst.maxLights = particle->link.model;
+                burst.lightMask = particle->link.unk1C;
                 burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
@@ -114,9 +114,9 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
                 burst.render.alphaDither = 0x20;
                 burst.render.primMode = 0;
                 burst.render.envMode = 7;
-                burst.unk80 = 10;
-                burst.unk82 = 25;
-                burst.unk84 = particle->floor.material;
+                burst.fadeStart = 10;
+                burst.fadeRate = 25;
+                burst.material = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             sound_playAt(gShatterSounds[math_random() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
@@ -443,8 +443,8 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.growthRange = 0.31f;
                 burst.speedBase = 5.0f;
                 burst.speedRange = 7.0f;
-                burst.unk58 = particle->link.model;
-                burst.unk5C = particle->link.unk1C;
+                burst.maxLights = particle->link.model;
+                burst.lightMask = particle->link.unk1C;
                 burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
@@ -454,9 +454,9 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.render.alphaDither = 0x20;
                 burst.render.primMode = 0;
                 burst.render.envMode = 7;
-                burst.unk80 = 10;
-                burst.unk82 = 25;
-                burst.unk84 = particle->floor.material;
+                burst.fadeStart = 10;
+                burst.fadeRate = 25;
+                burst.material = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             sound_playAt(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);

@@ -81,8 +81,8 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
         floorY = emitter->floorY;
         spawn.kind = 1;
         spawn.flags = 5;
-        motion.unk1C = 16;
-        motion.unk1E = 15;
+        motion.fadeStart = 16;
+        motion.fadeRate = 15;
         motion.unk14 = -10000.0f;
         motion.flags = 0x48;
         motion.texture = 3;
@@ -127,8 +127,8 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
             motion.gravity = (math_randomFloat() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.alpha = (math_random() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.life = (math_random() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            motion.alpha = (math_random() % (emitter->desc.alphaRange + 1)) + emitter->desc.alpha;
+            spawn.life = (math_random() % (emitter->desc.lifeRange + 1)) + emitter->desc.life;
             trail = trail_createMotionTrail(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {

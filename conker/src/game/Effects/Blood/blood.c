@@ -1358,8 +1358,8 @@ void blood_spawnHitEffects(Actor *actor, u8 doDecalSpray, u8 doGroundDecals, u8 
         spray.angles.yawRange = 255;
         spray.angles.pitchBase = -64;
         spray.angles.pitchRange = 69;
-        spray.unk28 = 150;
-        spray.unk2A = 100;
+        spray.alphaBase = 150;
+        spray.alphaRange = 100;
         spray.maxDistance = 998.0f;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;
@@ -1832,12 +1832,12 @@ void blood_spawnBurst(Vec3f *position, s32 kind, void *hit, u8 owner, s32 list) 
         burst.spray.itemCountRange = 3;
         burst.spray.lifeBase = 20;
         burst.spray.lifeRange = 30;
-        burst.spray.unk30 = 155;
-        burst.spray.unk32 = 100;
-        burst.spray.unk3C = 16;
-        burst.spray.unk3E = 15;
-        burst.spray.unk40 = 0;
-        burst.spray.unk38 = 0.3000000119f;
+        burst.spray.alphaBase = 155;
+        burst.spray.alphaRange = 100;
+        burst.spray.fadeStart = 16;
+        burst.spray.fadeRate = 15;
+        burst.spray.material = 0;
+        burst.spray.burstChance = 0.3000000119f;
         if (type == 1) {
             burst.spray.kind = 1;
         } else {

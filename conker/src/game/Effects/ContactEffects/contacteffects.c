@@ -134,18 +134,18 @@ void func_15194408(Actor *self, Actor *other) {
     burst.spray.itemCountRange = 2;
     burst.spray.lifeBase = 30;
     burst.spray.lifeRange = 30;
-    burst.spray.unk30 = 100;
-    burst.spray.unk32 = 100;
-    burst.spray.unk3C = 16;
-    burst.spray.unk3E = 15;
-    burst.spray.unk40 = 0;
+    burst.spray.alphaBase = 100;
+    burst.spray.alphaRange = 100;
+    burst.spray.fadeStart = 16;
+    burst.spray.fadeRate = 15;
+    burst.spray.material = 0;
     burst.spray.kind = 0;
     burst.spray.scaleRange = 3.0f;
     burst.spray.sizeBase = 0.21f;
     burst.spray.sizeRange = 0.406f;
     burst.spray.speedBase = 13.0f;
     burst.spray.speedRange = 8.0f;
-    burst.spray.unk38 = 0.3f;
+    burst.spray.burstChance = 0.3f;
     particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
@@ -190,13 +190,13 @@ void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *result) {
                 burst.spray.itemCountRange = 1;
                 burst.spray.lifeBase = 31;
                 burst.spray.lifeRange = 19;
-                burst.spray.unk30 = 155;
-                burst.spray.unk32 = 100;
-                burst.spray.unk3C = 16;
-                burst.spray.unk3E = 15;
-                burst.spray.unk40 = 0;
+                burst.spray.alphaBase = 155;
+                burst.spray.alphaRange = 100;
+                burst.spray.fadeStart = 16;
+                burst.spray.fadeRate = 15;
+                burst.spray.material = 0;
                 burst.spray.speedRange = 5.300000191f;
-                burst.spray.unk38 = 0.5f;
+                burst.spray.burstChance = 0.5f;
                 if (profile == 1) {
                     burst.spray.kind = 1;
                 } else {
@@ -254,18 +254,18 @@ void effect_hitReactSprayAndRumble(Actor *self, Actor *other, u8 *result) {
         burst.spray.itemCountRange = 2;
         burst.spray.lifeBase = 70;
         burst.spray.lifeRange = 22;
-        burst.spray.unk30 = 155;
-        burst.spray.unk32 = 100;
-        burst.spray.unk3C = 16;
-        burst.spray.unk3E = 15;
-        burst.spray.unk40 = 0;
+        burst.spray.alphaBase = 155;
+        burst.spray.alphaRange = 100;
+        burst.spray.fadeStart = 16;
+        burst.spray.fadeRate = 15;
+        burst.spray.material = 0;
         burst.spray.kind = 0;
         burst.spray.scaleRange = 5.0f;
         burst.spray.sizeBase = 0.6750000119f;
         burst.spray.sizeRange = 0.2310000062f;
         burst.spray.speedBase = 5.0f;
         burst.spray.speedRange = 25.10000038f;
-        burst.spray.unk38 = 0.5f;
+        burst.spray.burstChance = 0.5f;
         particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.flags = 1;
         params.duration = (math_random() % 11U) + 20;

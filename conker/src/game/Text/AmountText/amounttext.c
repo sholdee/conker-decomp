@@ -48,18 +48,18 @@ void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player) {
     first.spray.itemCountRange = 2;
     first.spray.lifeBase = 0x28;
     first.spray.lifeRange = 0x14;
-    first.spray.unk30 = 0x9B;
-    first.spray.unk32 = 0x64;
-    first.spray.unk3C = 0x10;
-    first.spray.unk3E = 0xF;
-    first.spray.unk40 = 0;
+    first.spray.alphaBase = 0x9B;
+    first.spray.alphaRange = 0x64;
+    first.spray.fadeStart = 0x10;
+    first.spray.fadeRate = 0xF;
+    first.spray.material = 0;
     first.spray.kind = 9;
     first.spray.scaleRange = 2.029999971f;
     first.spray.sizeBase = 0.6080000401f;
     first.spray.sizeRange = 0.2569999993f;
     first.spray.speedBase = 17.0f;
     first.spray.speedRange = 3.5f;
-    first.spray.unk38 = 0.400000006f;
+    first.spray.burstChance = 0.400000006f;
     particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, 0xFF, 1);
     {
         DropSpraySpec second;
@@ -75,8 +75,8 @@ void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player) {
         second.angles.pitchRange = 0xC;
         second.spray.lifeBase = 0x3C;
         second.spray.lifeRange = 0x2D;
-        second.spray.unk24 = 0xC8;
-        second.spray.unk25 = 0x37;
+        second.spray.alphaBase = 0xC8;
+        second.spray.alphaRange = 0x37;
         second.spray.unk30 = 1;
         second.spray.kind = 9;
         second.spray.unk34 = 1.0f;

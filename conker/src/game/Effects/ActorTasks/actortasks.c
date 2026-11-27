@@ -596,13 +596,13 @@ void effect_spawnBoneGroundMark(Actor *actor, u8 index) {
                 c.spray.itemCountRange = 1;
                 c.spray.lifeBase = 0x1E;
                 c.spray.lifeRange = 0x14;
-                c.spray.unk30 = 0x9B;
-                c.spray.unk32 = 0x64;
+                c.spray.alphaBase = 0x9B;
+                c.spray.alphaRange = 0x64;
                 c.spray.kind = color;
-                c.spray.unk3C = 0x10;
-                c.spray.unk3E = 0xF;
-                c.spray.unk40 = 0;
-                c.spray.unk38 = 0.0f;
+                c.spray.fadeStart = 0x10;
+                c.spray.fadeRate = 0xF;
+                c.spray.material = 0;
+                c.spray.burstChance = 0.0f;
                 particle_spawnSplashSprayAtAngles(&c.angles, &c.spray, &floor, 0xFF, 1);
             }
         }

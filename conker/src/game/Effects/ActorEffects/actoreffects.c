@@ -351,12 +351,12 @@ void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scal
     params.spray.itemCountRange = 1;
     params.spray.lifeBase = 9;
     params.spray.lifeRange = 15;
-    params.spray.unk30 = 180;
-    params.spray.unk32 = 75;
-    params.spray.unk38 = 0.0f;
-    params.spray.unk3C = 12;
-    params.spray.unk3E = 21;
-    params.spray.unk40 = arg2;
+    params.spray.alphaBase = 180;
+    params.spray.alphaRange = 75;
+    params.spray.burstChance = 0.0f;
+    params.spray.fadeStart = 12;
+    params.spray.fadeRate = 21;
+    params.spray.material = arg2;
     params.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&params.angles, &params.spray, 0, 0xFF, 1);
 }

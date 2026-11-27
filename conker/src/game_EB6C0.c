@@ -156,12 +156,12 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
             particles.spray.itemCountRange = 3;
             particles.spray.lifeBase = 0x1E;
             particles.spray.lifeRange = 0x14;
-            particles.spray.unk30 = 0x9B;
-            particles.spray.unk32 = 0x64;
-            particles.spray.unk3C = 0x10;
-            particles.spray.unk3E = 0xF;
-            particles.spray.unk40 = 0;
-            particles.spray.unk38 = 0.5f;
+            particles.spray.alphaBase = 0x9B;
+            particles.spray.alphaRange = 0x64;
+            particles.spray.fadeStart = 0x10;
+            particles.spray.fadeRate = 0xF;
+            particles.spray.material = 0;
+            particles.spray.burstChance = 0.5f;
             particles.spray.kind = 0;
             particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 2;

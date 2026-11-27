@@ -69,22 +69,22 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.itemCountRange = 2;
                 impact.spray.lifeBase = 30;
                 impact.spray.lifeRange = 40;
-                impact.spray.unk30 = 155;
-                impact.spray.unk32 = 100;
+                impact.spray.alphaBase = 155;
+                impact.spray.alphaRange = 100;
                 impact.spray.scaleRange = 3.04f;
                 impact.spray.sizeBase = 0.810000062f;
                 impact.spray.sizeRange = 0.405000031f;
                 impact.spray.speedBase = 6.0f;
                 impact.spray.speedRange = 13.90000057f;
-                impact.spray.unk38 = 0.5f;
+                impact.spray.burstChance = 0.5f;
                 if (gBloodProfiles[profile].bloodKind == 1) {
                     impact.spray.kind = 1;
                 } else {
                     impact.spray.kind = 0;
                 }
-                impact.spray.unk3C = 16;
-                impact.spray.unk3E = 15;
-                impact.spray.unk40 = 0;
+                impact.spray.fadeStart = 16;
+                impact.spray.fadeRate = 15;
+                impact.spray.material = 0;
                 particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
             }
         }
@@ -118,18 +118,18 @@ void effect_spawnLandingBurst(Actor *actor, u8 owner, s32 list) {
         impact.spray.itemCountRange = 2;
         impact.spray.lifeBase = 40;
         impact.spray.lifeRange = 20;
-        impact.spray.unk30 = 155;
-        impact.spray.unk32 = 100;
+        impact.spray.alphaBase = 155;
+        impact.spray.alphaRange = 100;
         impact.spray.kind = 0;
-        impact.spray.unk3C = 16;
-        impact.spray.unk3E = 15;
-        impact.spray.unk40 = 0;
+        impact.spray.fadeStart = 16;
+        impact.spray.fadeRate = 15;
+        impact.spray.material = 0;
         impact.spray.scaleRange = 3.02f;
         impact.spray.sizeBase = 0.807000041f;
         impact.spray.sizeRange = 0.701000035f;
         impact.spray.speedBase = 18.0f;
         impact.spray.speedRange = 11.8f;
-        impact.spray.unk38 = 0.5f;
+        impact.spray.burstChance = 0.5f;
         particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = math_random() % 6 + 12;

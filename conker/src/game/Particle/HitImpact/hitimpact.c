@@ -141,7 +141,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         sparks.colorLevelBase = 255;
         sparks.colorLevelRange = 0;
         sparks.renderMode = 1;
-        sparks.unk21 = 36;
+        sparks.combiner = 36;
         sparks.setGeometryMode = 0x200005;
         sparks.clearGeometryMode = 0x60600;
         sparks.fadeStart = 10;
@@ -149,8 +149,8 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         sparks.shrinkStart = 1;
         sparks.shrinkPaused = 0;
         sparks.shrinkFactor = 1.0f;
-        sparks.unk38 = -1;
-        sparks.unk39 = 0;
+        sparks.moveFn = -1;
+        sparks.shapeFn = 0;
         sparks.unk72 = -1;
         sparks.unk73 = -1;
         particle_spawnTrailBurst(&sparks, arg4, arg5);

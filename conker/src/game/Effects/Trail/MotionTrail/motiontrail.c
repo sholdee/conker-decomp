@@ -26,7 +26,7 @@ void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 ex
     params = trail->params;
     memcpy(&params->motion, motion, sizeof(TrailMotion));
     params->state = state;
-    params->unk21 = updateFn;
+    params->updateFn = updateFn;
     params->finishFn = finishFn;
     params->hitFn = hitFn;
     params->hitKind3Fn = hitKind3Fn;
@@ -40,7 +40,7 @@ void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 ex
  * handlers are declared without a prototype: each trail kind keeps its own view of the object.
  */
 typedef s32 (*TrailFunc)();
-/* Update handlers (TrailParams.state, then .unk21); 0 ends the trail. */
+/* Update handlers (TrailParams.state, then .updateFn); 0 ends the trail. */
 static TrailFunc gMotionTrailStateProcs[6] = {
     NULL, trail_moveAndAppendPoint, trail_movePoints, trail_movePointsGroundTest, trail_dropNewestPoint, trail_updateEmittedTrail,
 };
@@ -81,15 +81,15 @@ s8 trail_updateMotionTrail(MotionTrail *trail) {
             done = 1;
         }
     }
-    if (params->unk21 != 0 && !done) {
-        if (gMotionTrailUpdateProcs[params->unk21]() == 0) {
+    if (params->updateFn != 0 && !done) {
+        if (gMotionTrailUpdateProcs[params->updateFn]() == 0) {
             done = 1;
         }
     }
     if ((params->motion.flags & 0x40) && !done) {
         unk1C = trail->head.tmpl.life;
-        if (unk1C < params->motion.unk1C) {
-            fade = unk1C * params->motion.unk1E;
+        if (unk1C < params->motion.fadeStart) {
+            fade = unk1C * params->motion.fadeRate;
             if (fade < params->motion.alpha) {
                 params->motion.alpha = fade;
             }

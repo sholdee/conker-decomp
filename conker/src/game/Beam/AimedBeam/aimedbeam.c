@@ -441,7 +441,7 @@ void beam_updateEmitter(BeamEmitter *emitter) {
             part.color2.alpha = 0;
             part.colorLevel = 0xFF;
             part.renderMode = 3;
-            part.unk21 = 0x24;
+            part.combiner = 0x24;
             part.setGeometryMode = 0x200005;
             part.clearGeometryMode = 0x60600;
             part.fadeStart = 12;
@@ -449,8 +449,8 @@ void beam_updateEmitter(BeamEmitter *emitter) {
             part.shrinkStart = 1;
             part.shrinkPaused = 0;
             part.shrinkFactor = 1.0f;
-            part.unk38 = -1;
-            part.unk39 = 0;
+            part.moveFn = -1;
+            part.shapeFn = 0;
             do {
                 spawn.itemCount = math_random() % 3U + 3;
                 spawn.life = (math_random() & 0xF) + 40;
@@ -823,7 +823,7 @@ void beam_spawnMuzzleParticles(Vec3f *pos) {
     packet.colorLevelBase = 0xFF;
     packet.colorLevelRange = 0;
     packet.renderMode = 3;
-    packet.unk21 = 0x24;
+    packet.combiner = 0x24;
     packet.setGeometryMode = 0x200005;
     packet.clearGeometryMode = 0x60600;
     packet.fadeStart = 8;
@@ -831,8 +831,8 @@ void beam_spawnMuzzleParticles(Vec3f *pos) {
     packet.shrinkStart = 1;
     packet.shrinkPaused = 0;
     packet.shrinkFactor = 1.0f;
-    packet.unk38 = -1;
-    packet.unk39 = 0;
+    packet.moveFn = -1;
+    packet.shapeFn = 0;
     packet.unk72 = -1;
     packet.unk73 = -1;
     particle_spawnTrailBurst(&packet, 0xFF, 1, pos);

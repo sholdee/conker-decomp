@@ -2300,8 +2300,8 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             motion.texture = 0xA;
             motion.shade = 0xFF;
             motion.unk14 = -10000.0f;
-            motion.unk1C = flame->scatter.fadeStart;
-            motion.unk1E = flame->scatter.fadeRate;
+            motion.fadeStart = flame->scatter.fadeStart;
+            motion.fadeRate = flame->scatter.fadeRate;
             do {
                 spawn.itemCount = (math_random() % (flame->scatter.itemCountRange + 1)) + flame->scatter.itemCountMin;
                 spawn.life = (math_random() % (flame->scatter.lifeRange + 1)) + flame->scatter.lifeMin;

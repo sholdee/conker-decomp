@@ -24,7 +24,7 @@ FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, Tra
 }
 
 typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
-/* Handlers per TrailBurstParams.unk38 and unk39; each returns 0 when the trail fails. */
+/* Handlers per TrailBurstParams.moveFn and shapeFn; each returns 0 when the trail fails. */
 static TrailHandler gFallingTrailMoveProcs[] = { NULL };
 static TrailHandler gFallingTrailShapeProcs[] = { trail_growFallingTrail, trail_shrinkFallingTrail };
 
@@ -54,8 +54,8 @@ s32 trail_moveFallingTrail(FallingTrail *trail) {
             }
         }
     }
-    if (data->unk38 != -1) {
-        failed = gFallingTrailMoveProcs[data->unk38](trail, data) == 0;
+    if (data->moveFn != -1) {
+        failed = gFallingTrailMoveProcs[data->moveFn](trail, data) == 0;
     }
     if (trail->head.count > 0) {
         trail->head.modelPos = points[trail->head.start].pos;
@@ -70,7 +70,7 @@ s32 trail_moveFallingTrail(FallingTrail *trail) {
     return 1;
 }
 
-/* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
+/* Runs the shapeFn handler, then fades the alpha and shrinks the width as the trail's life runs out. */
 s32 trail_fadeFallingTrail(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
@@ -78,8 +78,8 @@ s32 trail_fadeFallingTrail(FallingTrail *trail) {
 
     data = trail->data;
     failed = FALSE;
-    if (data->unk39 != -1) {
-        failed = gFallingTrailShapeProcs[data->unk39](trail, data) == 0;
+    if (data->shapeFn != -1) {
+        failed = gFallingTrailShapeProcs[data->shapeFn](trail, data) == 0;
     }
     if (!failed) {
         if ((data->flags & TRAIL_BURST_FADE) && trail->head.tmpl.life < data->fadeStart) {
@@ -150,7 +150,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
             math_pickEnvColour(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
             gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
-            gfx = particle_setCombineMode(gfx, data->unk21, &update);
+            gfx = particle_setCombineMode(gfx, data->combiner, &update);
             gfx = math_gfxUpdateGeometryMode(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
             gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
@@ -290,7 +290,7 @@ s32 trail_growFallingTrail(FallingTrail *trail, TrailBurstParams *data) {
             trail->head.end = 0;
         }
     } else {
-        data->unk39 = -1;
+        data->shapeFn = -1;
     }
     return 1;
 }
@@ -417,7 +417,7 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.colorLevelBase = 255;
         burst.colorLevelRange = 0;
         burst.renderMode = 1;
-        burst.unk21 = 0x24;
+        burst.combiner = 0x24;
         burst.setGeometryMode = G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH;
         burst.clearGeometryMode = G_CULL_BOTH | G_LIGHTING | G_TEXTURE_GEN;
         burst.fadeStart = preset->fadeStart;
@@ -425,8 +425,8 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.shrinkStart = preset->shrinkStart;
         burst.shrinkPaused = FALSE;
         burst.shrinkFactor = preset->shrinkFactor;
-        burst.unk38 = -1;
-        burst.unk39 = 0;
+        burst.moveFn = -1;
+        burst.shapeFn = 0;
         yaw = math_random();
         pitch = math_random();
         math_dirFromBinAngles(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);

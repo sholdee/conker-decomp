@@ -322,7 +322,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         spawn.colorLevelBase = 0xFF;
         spawn.colorLevelRange = 0;
         spawn.renderMode = 1;
-        spawn.unk21 = 36;
+        spawn.combiner = 36;
         spawn.setGeometryMode = 0x200005;
         spawn.clearGeometryMode = 0x60600;
         spawn.fadeStart = 20;
@@ -330,8 +330,8 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         spawn.shrinkStart = 1;
         spawn.shrinkPaused = 0;
         spawn.shrinkFactor = 1.0; // matching: a double literal; 1.0f loads differently
-        spawn.unk38 = -1;
-        spawn.unk39 = 0;
+        spawn.moveFn = -1;
+        spawn.shapeFn = 0;
         spawn.unk72 = -1;
         spawn.unk73 = -1;
         spawn.pos = pos;

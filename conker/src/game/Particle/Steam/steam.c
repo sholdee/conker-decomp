@@ -620,8 +620,8 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     motion.texture = gKindSplashTextures[kind];
     motion.shade = 0xFF;
     motion.alpha = arg4;
-    motion.unk1C = argD;
-    motion.unk1E = argE;
+    motion.fadeStart = argD;
+    motion.fadeRate = argE;
     if (arg7 != 0) {
         motion.flags |= 3;
         a = 7;
@@ -1043,7 +1043,7 @@ void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.itemCountRange = 2;
     splash.spray.lifeBase = 30;
     splash.spray.lifeRange = 30;
-    splash.spray.unk30 = 155;
+    splash.spray.alphaBase = 155;
     splash.spray.scaleBase = 5.5f;
 
     splash.spray.scaleRange = 2.9399998f;
@@ -1052,11 +1052,11 @@ void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedBase = 10.0f;
     splash.spray.speedRange = 10.2f;
 
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
-    splash.spray.unk38 = 0.5f;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
+    splash.spray.burstChance = 0.5f;
 
     splash.spray.kind = kind;
 
@@ -1233,17 +1233,17 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.itemCountRange = 1;
     splash.spray.lifeBase = 60;
     splash.spray.lifeRange = 40;
-    splash.spray.unk30 = 100;
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
+    splash.spray.alphaBase = 100;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
     splash.spray.scaleRange = 4.0f;
     splash.spray.sizeBase = 0.80700004f;
     splash.spray.sizeRange = 0.51000005f;
     splash.spray.speedBase = 12.0f;
     splash.spray.speedRange = 11.0f;
-    splash.spray.unk38 = 1.0f;
+    splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
 
@@ -1260,8 +1260,8 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.angles.pitchRange = 36;
         drops.spray.lifeBase = 35;
         drops.spray.lifeRange = 15;
-        drops.spray.unk24 = 155;
-        drops.spray.unk25 = 100;
+        drops.spray.alphaBase = 155;
+        drops.spray.alphaRange = 100;
         drops.spray.speedRange = 8.0f;
         drops.spray.unk30 = 1;
         drops.spray.gravityBase = -1.266f;
@@ -1298,17 +1298,17 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.itemCountRange = 0;
     splash.spray.lifeBase = 60;
     splash.spray.lifeRange = 40;
-    splash.spray.unk30 = 100;
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
+    splash.spray.alphaBase = 100;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
     splash.spray.scaleRange = 2.0f;
     splash.spray.sizeBase = 0.642f;
     splash.spray.sizeRange = 0.314f;
     splash.spray.speedBase = 8.0f;
     splash.spray.speedRange = 5.0f;
-    splash.spray.unk38 = 1.0f;
+    splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
 
@@ -1324,8 +1324,8 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.angles.pitchRange = 26;
         drops.spray.lifeBase = 35;
         drops.spray.lifeRange = 15;
-        drops.spray.unk24 = 155;
-        drops.spray.unk25 = 100;
+        drops.spray.alphaBase = 155;
+        drops.spray.alphaRange = 100;
         drops.spray.sizeBase = 59.0f;
         drops.spray.sizeRange = 59.0f;
         drops.spray.unk30 = 1;

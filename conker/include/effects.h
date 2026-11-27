@@ -105,7 +105,7 @@ typedef struct TextureChoices {
 
 /* Older revisions of the spawn descriptors. Some callers hold a shorter descriptor on the stack than the callee
  * copies: the fields at its end were added later (ParticleDesc drawFunc..maxSize, ParticleSpawn.sound,
- * ParticleDef unk48..fadeRate, PuffSpray.unk84, TrailMotion unk1C/unk1E, EffectTemplate.material,
+ * ParticleDef unk48..fadeRate, PuffSpray.material, TrailMotion fadeStart/fadeRate, EffectTemplate.material,
  * BloodTrailDesc unk18/callback, SpriteParams.tex), and these callers were built against the older layout.
  * The callee still copies (or writes) the full size. A full type on the stack changes their frame, so they
  * keep these views, and the IDO warning 709 at the call is the cost: no cast hides it. */
@@ -834,7 +834,7 @@ typedef struct TrailBurstParams {
     /* 0x1B */ Color8 color2;
     /* 0x1F */ u8 colorLevel;
     /* 0x20 */ u8 renderMode; /* index into gEffectRenderModes */
-    /* 0x21 */ u8 unk21;
+    /* 0x21 */ u8 combiner;
     /* 0x22 */ u8 pad22[2];
     /* 0x24 */ s32 setGeometryMode;
     /* 0x28 */ s32 clearGeometryMode;
@@ -844,8 +844,8 @@ typedef struct TrailBurstParams {
     /* 0x32 */ u8 shrinkPaused;
     /* 0x33 */ u8 pad33;
     /* 0x34 */ f32 shrinkFactor; /* width multiplier per frame */
-    /* 0x38 */ s8 unk38;      /* index into gFallingTrailMoveProcs, -1: none */
-    /* 0x39 */ s8 unk39;      /* index into gFallingTrailShapeProcs, -1: none */
+    /* 0x38 */ s8 moveFn;     /* index into gFallingTrailMoveProcs, -1: none */
+    /* 0x39 */ s8 shapeFn;    /* index into gFallingTrailShapeProcs, -1: none */
     /* 0x3A */ u8 pad3A[2];
 } TrailBurstParams; /* size 0x3C */
 
@@ -877,7 +877,7 @@ typedef struct TrailBurst {
     /* 0x55 */ u8 colorLevelBase;
     /* 0x56 */ u8 colorLevelRange;
     /* 0x57 */ u8 renderMode;
-    /* 0x58 */ u8 unk21;           /* TrailBurstParams.unk21 */
+    /* 0x58 */ u8 combiner;        /* TrailBurstParams.combiner */
     /* 0x59 */ u8 pad59[3];
     /* 0x5C */ s32 setGeometryMode;
     /* 0x60 */ s32 clearGeometryMode;
@@ -887,8 +887,8 @@ typedef struct TrailBurst {
     /* 0x6A */ u8 shrinkPaused;
     /* 0x6B */ u8 pad6B;
     /* 0x6C */ f32 shrinkFactor;
-    /* 0x70 */ s8 unk38;           /* TrailBurstParams.unk38 */
-    /* 0x71 */ s8 unk39;           /* TrailBurstParams.unk39 */
+    /* 0x70 */ s8 moveFn;          /* TrailBurstParams.moveFn */
+    /* 0x71 */ s8 shapeFn;         /* TrailBurstParams.shapeFn */
     /* 0x72 */ s8 unk72;           /* not read by particle_spawnTrailBurst; callers store -1 */
     /* 0x73 */ s8 unk73;
 } TrailBurst; /* size 0x74 */
@@ -909,14 +909,14 @@ typedef struct SplashSpray {
     /* 0x2A */ s16 itemCountRange;
     /* 0x2C */ s16 lifeBase;
     /* 0x2E */ s16 lifeRange;
-    /* 0x30 */ s16 unk30;           /* base of particle_spawnSplash's arg4 */
-    /* 0x32 */ s16 unk32;           /* its range */
+    /* 0x30 */ s16 alphaBase;       /* TrailMotion.alpha of each splash (particle_spawnSplash's arg4) */
+    /* 0x32 */ s16 alphaRange;      /* its range */
     /* 0x34 */ u8 kind;
     /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 unk38;           /* probability of particle_spawnSplash's arg7 */
-    /* 0x3C */ s16 unk3C;           /* particle_spawnSplash's argD */
-    /* 0x3E */ s16 unk3E;           /* particle_spawnSplash's argE */
-    /* 0x40 */ s32 unk40;           /* particle_spawnSplash's material (EffectTemplate.material) */
+    /* 0x38 */ f32 burstChance;     /* probability of particle_spawnSplash's arg7: burst and spray hit handlers on landing */
+    /* 0x3C */ s16 fadeStart;       /* TrailMotion.fadeStart (particle_spawnSplash's argD) */
+    /* 0x3E */ s16 fadeRate;        /* TrailMotion.fadeRate (particle_spawnSplash's argE) */
+    /* 0x40 */ s32 material;        /* particle_spawnSplash's material (EffectTemplate.material) */
 } SplashSpray; /* size 0x44 */
 
 /* What the callers of particle_spawnSplashSprayAtAngles build: the direction ranges followed by the spray. */
@@ -937,8 +937,8 @@ typedef struct DropSpray {
     /* 0x1A */ s16 lifeRange;
     /* 0x1C */ f32 gravityBase;
     /* 0x20 */ f32 gravityRange;
-    /* 0x24 */ u8 unk24;            /* base of particle_spawnSteamParticle's arg5 */
-    /* 0x25 */ u8 unk25;            /* its range */
+    /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha of each drop (particle_spawnSteamParticle's arg5) */
+    /* 0x25 */ u8 alphaRange;       /* its range */
     /* 0x26 */ u8 pad26[2];
     /* 0x28 */ f32 sizeBase;
     /* 0x2C */ f32 sizeRange;
@@ -1070,15 +1070,15 @@ typedef struct PuffSpray {
     /* 0x55 */ u8 alphaBase;
     /* 0x56 */ u8 alphaRange;
     /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 unk58;           /* trail_createMotionTrail's arg9 */
-    /* 0x5C */ s32 unk5C;           /* trail_createMotionTrail's arg10 */
+    /* 0x58 */ s32 maxLights;       /* trail_createMotionTrail's arg9 (ModelLink.maxLights) */
+    /* 0x5C */ s32 lightMask;       /* trail_createMotionTrail's arg10 (ModelLink.lightMask) */
     /* 0x60 */ TrailRender render;
-    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
-    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
-    /* 0x84 */ s32 unk84;           /* EffectTemplate.material */
+    /* 0x80 */ s16 fadeStart;       /* TrailMotion.fadeStart */
+    /* 0x82 */ s16 fadeRate;        /* TrailMotion.fadeRate */
+    /* 0x84 */ s32 material;        /* EffectTemplate.material */
 } PuffSpray; /* size 0x88 */
 
-/* matching: PuffSpray before unk84 (0x84 bytes; particle_spawnPuffSpray reads unk84); see ParticleDesc64. */
+/* matching: PuffSpray before material (0x84 bytes; particle_spawnPuffSpray reads material); see ParticleDesc64. */
 typedef struct PuffSpray84 {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 sizeBase;
@@ -1103,11 +1103,11 @@ typedef struct PuffSpray84 {
     /* 0x55 */ u8 alphaBase;
     /* 0x56 */ u8 alphaRange;
     /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 unk58;           /* trail_createMotionTrail's arg9 */
-    /* 0x5C */ s32 unk5C;           /* trail_createMotionTrail's arg10 */
+    /* 0x58 */ s32 maxLights;       /* trail_createMotionTrail's arg9 (ModelLink.maxLights) */
+    /* 0x5C */ s32 lightMask;       /* trail_createMotionTrail's arg10 (ModelLink.lightMask) */
     /* 0x60 */ TrailRender render;
-    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
-    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
+    /* 0x80 */ s16 fadeStart;       /* TrailMotion.fadeStart */
+    /* 0x82 */ s16 fadeRate;        /* TrailMotion.fadeRate */
 } PuffSpray84;
 
 /* particle_spawnSurfacePuffSpray (game/Particle/BurstConfigs/burstconfigs.c): like PuffSpray, but each puff moves in a random direction inside the cone
@@ -1252,8 +1252,8 @@ typedef struct DecalSpray {
     /* 0x1C */ f32 maxDistance;
     /* 0x20 */ f32 sizeBase;
     /* 0x24 */ f32 sizeRange;
-    /* 0x28 */ s16 unk28;           /* base of particle_spawnKindEmitter's arg2 */
-    /* 0x2A */ s16 unk2A;           /* its range */
+    /* 0x28 */ s16 alphaBase;       /* SpriteDef.alpha of each emitter (particle_spawnKindEmitter's arg2) */
+    /* 0x2A */ s16 alphaRange;      /* its range */
     /* 0x2C */ u8 kind;
     /* 0x2D */ u8 pad2D[3];
 } DecalSpray; /* size 0x30 */
@@ -1804,8 +1804,8 @@ typedef struct TrailMotion {
     /* 0x19 */ u8 texture;          /* index into D_80091564 */
     /* 0x1A */ u8 shade;            /* passed with alpha to math_pickPrimColour / math_pickEnvColour */
     /* 0x1B */ u8 alpha;            /* faded by trail_fadeKind2Trail */
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
+    /* 0x1C */ s16 fadeStart;       /* (flags & 0x40) once the trail's life is below this, alpha = min(alpha, life * fadeRate) */
+    /* 0x1E */ s16 fadeRate;
 } TrailMotion; /* size 0x20 */
 
 /* Preset of a burst of trail_createMotionTrail particles thrown out around a point: radius and launch speed, then the
@@ -1826,7 +1826,7 @@ typedef struct ScatterPreset {
     /* 0x22 */ s16 itemCountRange;
 } ScatterPreset; /* size 0x24 */
 
-/* matching: TrailMotion before unk1C/unk1E (0x1C bytes; trail_createMotionTrail copies 0x20); see ParticleDesc64. */
+/* matching: TrailMotion before fadeStart/fadeRate (0x1C bytes; trail_createMotionTrail copies 0x20); see ParticleDesc64. */
 typedef struct TrailMotion1C {
     /* 0x00 */ f32 halfWidth;
     /* 0x04 */ Vec3f velocity;
@@ -1842,7 +1842,7 @@ typedef struct TrailMotion1C {
 typedef struct TrailParams {
     /* 0x00 */ TrailMotion motion;
     /* 0x20 */ u8 state;            /* handler index into gMotionTrailStateProcs */
-    /* 0x21 */ u8 unk21;            /* handler index into gMotionTrailUpdateProcs */
+    /* 0x21 */ u8 updateFn;         /* handler index into gMotionTrailUpdateProcs */
     /* 0x22 */ u8 finishFn;         /* handler index into gMotionTrailFinishProcs */
     /* 0x23 */ u8 hitFn;            /* handler index into gMotionTrailHitFns */
     /* 0x24 */ u8 hitKind3Fn;       /* handler index into gMotionTrailHitKind3Fns */
@@ -2412,12 +2412,12 @@ typedef struct SprayDesc {
     /* 0x2C */ f32 rateRange;
     /* 0x30 */ f32 halfWidth;
     /* 0x34 */ f32 halfWidthRange;
-    /* 0x38 */ s16 unk1B; /* TrailMotion.alpha */
-    /* 0x3A */ s16 unk1BRange;
+    /* 0x38 */ s16 alpha; /* TrailMotion.alpha */
+    /* 0x3A */ s16 alphaRange;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 gravityRange;
-    /* 0x44 */ s16 unkC; /* EffectTemplate.life */
-    /* 0x46 */ s16 unkCRange;
+    /* 0x44 */ s16 life; /* EffectTemplate.life */
+    /* 0x46 */ s16 lifeRange;
     /* 0x48 */ s32 pointCount;
     /* 0x4C */ s32 pointCountRange;
 } SprayDesc; /* size 0x50 */

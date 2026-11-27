@@ -92,7 +92,7 @@ void effect_hitReactLightBurst(s32 self, Actor *obj, s32 result) {
         spawn.colorLevelBase = 0xFF;
         spawn.colorLevelRange = 0;
         spawn.renderMode = 3;
-        spawn.unk21 = 0x24;
+        spawn.combiner = 0x24;
         spawn.setGeometryMode = 0x200005;
         spawn.clearGeometryMode = 0x60600;
         spawn.fadeStart = 8;
@@ -100,8 +100,8 @@ void effect_hitReactLightBurst(s32 self, Actor *obj, s32 result) {
         spawn.shrinkStart = 1;
         spawn.shrinkPaused = 0;
         spawn.shrinkFactor = 1.0f;
-        spawn.unk38 = -1;
-        spawn.unk39 = 0;
+        spawn.moveFn = -1;
+        spawn.shapeFn = 0;
         spawn.unk72 = -1;
         spawn.unk73 = -1;
         particle_spawnTrailBurst(&spawn, 0xFF, 1);

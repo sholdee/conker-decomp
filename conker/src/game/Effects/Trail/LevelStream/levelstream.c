@@ -1185,8 +1185,8 @@ void trail_breakApart(Actor *obj, u8 owner, s32 list) {
             cfg.blue = 0;
             cfg.alphaBase = 150;
             cfg.alphaRange = 105;
-            cfg.unk58 = 3;
-            cfg.unk5C = 0xFF;
+            cfg.maxLights = 3;
+            cfg.lightMask = 0xFF;
             cfg.render.otherModeH = 0;
             cfg.render.setGeometryMode = 0x220005;
             cfg.render.clearGeometryMode = 0x1D0600;
@@ -1196,8 +1196,8 @@ void trail_breakApart(Actor *obj, u8 owner, s32 list) {
             cfg.render.alphaDither = 0x20;
             cfg.render.primMode = 0;
             cfg.render.envMode = 7;
-            cfg.unk80 = 10;
-            cfg.unk82 = 25;
+            cfg.fadeStart = 10;
+            cfg.fadeRate = 25;
             particle_spawnPuffSpray(&cfg, owner, list);
         }
         {
@@ -1213,8 +1213,8 @@ void trail_breakApart(Actor *obj, u8 owner, s32 list) {
             cfg2.maxDistance = 375.0f;
             cfg2.sizeBase = 20.0f;
             cfg2.sizeRange = 40.0f;
-            cfg2.unk28 = 120;
-            cfg2.unk2A = 120;
+            cfg2.alphaBase = 120;
+            cfg2.alphaRange = 120;
             cfg2.kind = 2;
             particle_spawnDecalSpray(&cfg2, owner, list);
         }
@@ -1493,8 +1493,8 @@ void trail_emitLineBursts(Actor *obj, u8 owner, s32 list) {
             emitA.lifeRange = 30;
             emitA.gravityBase = -1.467000127f;
             emitA.gravityRange = 0.756000042f;
-            emitA.unk24 = 155;
-            emitA.unk25 = 100;
+            emitA.alphaBase = 155;
+            emitA.alphaRange = 100;
             emitA.sizeBase = 403.0f;
             emitA.sizeRange = 455.0f;
             emitA.unk30 = 1;
@@ -1521,12 +1521,12 @@ void trail_emitLineBursts(Actor *obj, u8 owner, s32 list) {
             emitB.itemCountRange = 2;
             emitB.lifeBase = 30;
             emitB.lifeRange = 25;
-            emitB.unk30 = 155;
-            emitB.unk32 = 100;
-            emitB.unk38 = 0.0f;
-            emitB.unk3C = 16;
-            emitB.unk3E = 15;
-            emitB.unk40 = 0;
+            emitB.alphaBase = 155;
+            emitB.alphaRange = 100;
+            emitB.burstChance = 0.0f;
+            emitB.fadeStart = 16;
+            emitB.fadeRate = 15;
+            emitB.material = 0;
             emitB.kind = 2;
             shape.spread = 750.0f;
             particle_spawnSplashSpray(&shape, &emitB, &floor, owner, list);

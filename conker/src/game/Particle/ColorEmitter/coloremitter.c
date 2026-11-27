@@ -22,8 +22,8 @@ void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
         drops.angles.pitchRange = 60;
         drops.spray.lifeBase = 36;
         drops.spray.lifeRange = 60;
-        drops.spray.unk24 = 200;
-        drops.spray.unk25 = 55;
+        drops.spray.alphaBase = 200;
+        drops.spray.alphaRange = 55;
         drops.spray.unk30 = 0;
         drops.spray.kind = 12;
         drops.spray.wobbles = 1;

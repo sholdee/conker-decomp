@@ -16,10 +16,10 @@ s32 level_spawnZoneSpray(TriggerZone *zone) {
     descriptor.rateRange = 0.0f;
     descriptor.pointCount = 4;
     descriptor.pointCountRange = 2;
-    descriptor.unk1B = 100;
-    descriptor.unk1BRange = 100;
-    descriptor.unkC = 40;
-    descriptor.unkCRange = 20;
+    descriptor.alpha = 100;
+    descriptor.alphaRange = 100;
+    descriptor.life = 40;
+    descriptor.lifeRange = 20;
     descriptor.halfWidth = 7.0f;
     descriptor.halfWidthRange = 6.0f;
     descriptor.speed = 20.1f;

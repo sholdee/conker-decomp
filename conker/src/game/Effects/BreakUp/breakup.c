@@ -199,8 +199,8 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
             burst.blue = 0;
             burst.alphaBase = 0x9B;
             burst.alphaRange = 0x64;
-            burst.unk58 = 3;
-            burst.unk5C = 0xFF;
+            burst.maxLights = 3;
+            burst.lightMask = 0xFF;
             burst.render.otherModeH = 0;
             burst.render.setGeometryMode = 0x220005;
             burst.render.clearGeometryMode = 0x1D0600;
@@ -210,9 +210,9 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
             burst.render.alphaDither = 0x20;
             burst.render.primMode = 0;
             burst.render.envMode = 7;
-            burst.unk80 = 10;
-            burst.unk82 = 25;
-            burst.unk84 = obj->floorMaterial;
+            burst.fadeStart = 10;
+            burst.fadeRate = 25;
+            burst.material = obj->floorMaterial;
             particle_spawnPuffSpray(&burst, arg1, arg2);
         }
     }

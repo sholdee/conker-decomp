@@ -92,7 +92,7 @@ void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2) {
             params.handlers[0] = 1;
             params.alphaBase = 200;
             params.alphaRange = 55;
-            params.unk58 = 3;
+            params.maxLights = 3;
             params.angles.yawBase = 0;
             params.green = 0;
             params.handlers[1] = 0;
@@ -101,7 +101,7 @@ void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2) {
             params.handlers[4] = 0;
             params.handlers[5] = 0;
             params.blue = 0;
-            params.unk5C = 0xFF;
+            params.lightMask = 0xFF;
             params.render.otherModeH = 0;
             params.render.setGeometryMode = 0x220005;
             params.render.clearGeometryMode = 0x1D0600;
@@ -111,8 +111,8 @@ void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2) {
             params.render.alphaDither = 32;
             params.render.primMode = 0;
             params.render.envMode = 7;
-            params.unk80 = 12;
-            params.unk82 = 21;
+            params.fadeStart = 12;
+            params.fadeRate = 21;
             particle_spawnPuffSpray(&params, arg1, arg2);
         }
     }

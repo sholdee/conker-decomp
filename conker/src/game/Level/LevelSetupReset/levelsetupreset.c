@@ -139,10 +139,10 @@ void level_setup01(void) {
         descriptor.yawSpread = 0x12;
         descriptor.pitch = -0x28;
         descriptor.pitchRange = 0xF;
-        descriptor.unk1B = 155;
-        descriptor.unk1BRange = 100;
-        descriptor.unkC = 41;
-        descriptor.unkCRange = 41;
+        descriptor.alpha = 155;
+        descriptor.alphaRange = 100;
+        descriptor.life = 41;
+        descriptor.lifeRange = 41;
         descriptor.origin.z = 400.0f;
         descriptor.extent.x = 0.0f;
         descriptor.extent.y = 0.0f;

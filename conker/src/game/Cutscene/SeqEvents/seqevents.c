@@ -2021,13 +2021,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             splash.spray.itemCountRange = 4;
             splash.spray.lifeBase = 0x28;
             splash.spray.lifeRange = 0x1E;
-            splash.spray.unk30 = 0x64;
-            splash.spray.unk32 = 0x64;
+            splash.spray.alphaBase = 0x64;
+            splash.spray.alphaRange = 0x64;
             splash.spray.kind = 0;
-            splash.spray.unk3C = 0x10;
-            splash.spray.unk3E = 0xF;
-            splash.spray.unk40 = 0;
-            splash.spray.unk38 = 0.5f;
+            splash.spray.fadeStart = 0x10;
+            splash.spray.fadeRate = 0xF;
+            splash.spray.material = 0;
+            splash.spray.burstChance = 0.5f;
             particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             Vec3f p;

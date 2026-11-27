@@ -248,7 +248,7 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     emitter.colorLevelBase = 0xFF;
     emitter.colorLevelRange = 0;
     emitter.renderMode = 3;
-    emitter.unk21 = 0x24;
+    emitter.combiner = 0x24;
     emitter.setGeometryMode = 0x200005;
     emitter.clearGeometryMode = 0x60600;
     emitter.fadeStart = 10;
@@ -256,8 +256,8 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     emitter.shrinkStart = 1;
     emitter.shrinkPaused = 0;
     emitter.shrinkFactor = 1.0f;
-    emitter.unk38 = -1;
-    emitter.unk39 = 0;
+    emitter.moveFn = -1;
+    emitter.shapeFn = 0;
     emitter.unk72 = -1;
     emitter.unk73 = -1;
     particle_spawnTrailBurst(&emitter, effect->base.header.owner, effect->base.header.kind);

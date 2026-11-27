@@ -174,18 +174,18 @@ lbD:
     burst.spray.itemCountRange = 2;
     burst.spray.lifeBase = 40;
     burst.spray.lifeRange = 20;
-    burst.spray.unk30 = 155;
-    burst.spray.unk32 = 100;
-    burst.spray.unk3C = 16;
-    burst.spray.unk3E = 15;
-    burst.spray.unk40 = 0;
+    burst.spray.alphaBase = 155;
+    burst.spray.alphaRange = 100;
+    burst.spray.fadeStart = 16;
+    burst.spray.fadeRate = 15;
+    burst.spray.material = 0;
     burst.spray.kind = 0;
     burst.spray.scaleRange = 3.019999981f;
     burst.spray.sizeBase = 0.807000041f;
     burst.spray.sizeRange = 0.7010000348f;
     burst.spray.speedBase = 18.0f;
     burst.spray.speedRange = 11.80000019f;
-    burst.spray.unk38 = 0.5f;
+    burst.spray.burstChance = 0.5f;
     particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
     count = (math_random() % 6) + 7;

@@ -66,10 +66,10 @@ void level_setup08(void) {
         descriptor.yawSpread = 0x12;
         descriptor.pitch = -0x15;
         descriptor.pitchRange = 0xF;
-        descriptor.unk1B = 0x9B;
-        descriptor.unk1BRange = 0x64;
-        descriptor.unkC = 0x29;
-        descriptor.unkCRange = 0x29;
+        descriptor.alpha = 0x9B;
+        descriptor.alphaRange = 0x64;
+        descriptor.life = 0x29;
+        descriptor.lifeRange = 0x29;
         descriptor.origin.x = 2686.0f;
         descriptor.origin.y = -1667.0f;
         descriptor.origin.z = 2063.0f;

@@ -316,18 +316,18 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
             first.spray.itemCountRange = 1;
             first.spray.lifeBase = 0x1E;
             first.spray.lifeRange = 0x32;
-            first.spray.unk30 = 0x64;
-            first.spray.unk32 = 0x64;
-            first.spray.unk3C = 0x10;
-            first.spray.unk3E = 0xF;
-            first.spray.unk40 = 0;
+            first.spray.alphaBase = 0x64;
+            first.spray.alphaRange = 0x64;
+            first.spray.fadeStart = 0x10;
+            first.spray.fadeRate = 0xF;
+            first.spray.material = 0;
             first.spray.kind = 1;
             first.spray.scaleRange = 3.879999876f;
             first.spray.sizeBase = 0.694f;
             first.spray.sizeRange = 0.4500000179f;
             first.spray.speedBase = 12.0f;
             first.spray.speedRange = 13.90000057f;
-            first.spray.unk38 = 1.0f;
+            first.spray.burstChance = 1.0f;
             particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, owner, kind);
         }
         {
@@ -342,8 +342,8 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.angles.pitchRange = 0x18;
             second.spray.lifeBase = 0x23;
             second.spray.lifeRange = 0xB;
-            second.spray.unk24 = 0x64;
-            second.spray.unk25 = 0x64;
+            second.spray.alphaBase = 0x64;
+            second.spray.alphaRange = 0x64;
             second.spray.unk30 = 1;
             second.spray.kind = 1;
             second.spray.wobbles = 1;

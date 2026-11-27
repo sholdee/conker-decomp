@@ -453,7 +453,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
             burst.colorLevelBase = 0xFF;
             burst.colorLevelRange = 0;
             burst.renderMode = 3;
-            burst.unk21 = 0x24;
+            burst.combiner = 0x24;
             burst.setGeometryMode = 0x200005;
             burst.clearGeometryMode = 0x60600;
             burst.fadeStart = 10;
@@ -461,8 +461,8 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
             burst.shrinkStart = 1;
             burst.shrinkPaused = 0;
             burst.shrinkFactor = 1.0f;
-            burst.unk38 = -1;
-            burst.unk39 = 0;
+            burst.moveFn = -1;
+            burst.shapeFn = 0;
             burst.unk72 = -1;
             burst.unk73 = -1;
             particle_spawnTrailBurst(&burst, trail->head.header.owner, trail->head.header.kind);
@@ -517,7 +517,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.colorLevelBase = 0xFF;
     burst.colorLevelRange = 0;
     burst.renderMode = 3;
-    burst.unk21 = 0x24;
+    burst.combiner = 0x24;
     burst.setGeometryMode = 0x200005;
     burst.clearGeometryMode = 0x60600;
     burst.fadeStart = 8;
@@ -525,8 +525,8 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shrinkStart = 1;
     burst.shrinkPaused = 0;
     burst.shrinkFactor = 1.0f;
-    burst.unk38 = -1;
-    burst.unk39 = 0;
+    burst.moveFn = -1;
+    burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     particle_spawnTrailBurst(&burst, arg1, arg2);
@@ -625,7 +625,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.colorLevelBase = 0xFF;
     burst.colorLevelRange = 0;
     burst.renderMode = 3;
-    burst.unk21 = 0x24;
+    burst.combiner = 0x24;
     burst.setGeometryMode = 0x200005;
     burst.clearGeometryMode = 0x60600;
     burst.fadeStart = 8;
@@ -633,8 +633,8 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shrinkStart = 1;
     burst.shrinkPaused = 0;
     burst.shrinkFactor = 1.0f;
-    burst.unk38 = -1;
-    burst.unk39 = 0;
+    burst.moveFn = -1;
+    burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     particle_spawnTrailBurst(&burst, arg1, arg2);

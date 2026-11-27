@@ -176,7 +176,7 @@ void particle_spawnDropSpray(ConeBasis *cone, DropSpray *config, CollisionHit *g
             particle_spawnSteamParticle(&config->pos, &velocity, config->kind,
                           (math_randomFloat() * config->gravityRange) + config->gravityBase,
                           (math_random() % (config->lifeRange + 1)) + config->lifeBase,
-                          (math_random() % (config->unk25 + 1)) + config->unk24,
+                          (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                           (math_randomFloat() * config->sizeRange) + config->sizeBase,
                           math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                           math_randomFloat() < config->bounceChance, arg3, arg4);
@@ -199,7 +199,7 @@ void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, Coll
         particle_spawnSteamParticle(&config->pos, &velocity, config->kind,
                       (math_randomFloat() * config->gravityRange) + config->gravityBase,
                       (math_random() % (config->lifeRange + 1)) + config->lifeBase,
-                      (math_random() % (config->unk25 + 1)) + config->unk24,
+                      (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,
                       math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                       math_randomFloat() < config->bounceChance, arg3, arg4);
@@ -409,7 +409,7 @@ void particle_spawnDecalSpray(DecalSpray *config, u8 arg1, s32 arg2) {
             && math_isObjectHidden(surface) != 0 && distance < config->maxDistance) {
             particle_spawnKindEmitter(config->kind, (math_randomFloat() * config->sizeRange) + config->sizeBase,
                           (math_random() % 156U) + 100, hitTriangle, &hit,
-                          (math_random() % (config->unk2A + 1)) + config->unk28,
+                          (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                           1, 1, 1, arg1, arg2);
         }
         count--;
@@ -572,8 +572,8 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
         motion.texture = config->green;
         motion.shade = config->blue;
         motion.flags = config->red;
-        motion.unk1C = config->unk9C;
-        motion.unk1E = config->unk9E;
+        motion.fadeStart = config->unk9C;
+        motion.fadeRate = config->unk9E;
         spawn.pos = config->pos;
         spawn.material = config->unkA0;
         count = math_random() % (config->countRange + 1) + config->countBase;
@@ -619,9 +619,9 @@ void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
     motion.shade = config->blue;
     motion.flags = config->red;
     spawn.pos = config->pos;
-    motion.unk1C = config->unk80;
-    motion.unk1E = config->unk82;
-    spawn.material = config->unk84;
+    motion.fadeStart = config->fadeStart;
+    motion.fadeRate = config->fadeRate;
+    spawn.material = config->material;
     count = (math_random() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (math_random() % (config->angles.yawRange + 1)) + config->angles.yawBase;
@@ -641,7 +641,7 @@ void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = horizontal * cosYaw;
         trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
-                      config->handlers[4], config->handlers[5], config->unk58, config->unk5C, &config->render, 0, arg1, arg2);
+                      config->handlers[4], config->handlers[5], config->maxLights, config->lightMask, &config->render, 0, arg1, arg2);
         count--;
     }
 }
@@ -912,13 +912,13 @@ void particle_spawnTrailBurst(config, arg1, arg2)
     spawn.primMode = config->primMode;
     spawn.envMode = config->envMode;
     spawn.renderMode = config->renderMode;
-    spawn.unk21 = config->unk21;
+    spawn.combiner = config->combiner;
     spawn.setGeometryMode = config->setGeometryMode;
     spawn.clearGeometryMode = config->clearGeometryMode;
     spawn.fadeStart = config->fadeStart;
     spawn.fadeRate = config->fadeRate;
-    spawn.unk38 = config->unk38;
-    spawn.unk39 = config->unk39;
+    spawn.moveFn = config->moveFn;
+    spawn.shapeFn = config->shapeFn;
     spawn.shrinkStart = config->shrinkStart;
     spawn.shrinkPaused = config->shrinkPaused;
     spawn.shrinkFactor = config->shrinkFactor;
@@ -1188,11 +1188,11 @@ void particle_spawnSplashSpray(ConeBasis *cone, SplashSpray *config, CollisionHi
             particle_spawnSplash(&config->pos, &velocity,
                           (math_randomFloat() * config->sizeRange) + config->sizeBase,
                           (math_random() % (config->lifeRange + 1)) + config->lifeBase,
-                          (math_random() % (config->unk32 + 1)) + config->unk30,
+                          (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                           (math_randomFloat() * config->scaleRange) + config->scaleBase,
                           (math_random() % (config->itemCountRange + 1)) + config->itemCountBase,
-                          math_randomFloat() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
-                          config->unk3C, config->unk3E, config->unk40, arg3, arg4);
+                          math_randomFloat() < config->burstChance, 1.7f, 1.7f, 1, config->kind, ground,
+                          config->fadeStart, config->fadeRate, config->material, arg3, arg4);
             count--;
         }
     }
@@ -1212,11 +1212,11 @@ void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, 
         particle_spawnSplash(&config->pos, &velocity,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,
                       (math_random() % (config->lifeRange + 1)) + config->lifeBase,
-                      (math_random() % (config->unk32 + 1)) + config->unk30,
+                      (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                       (math_randomFloat() * config->scaleRange) + config->scaleBase,
                       (math_random() % (config->itemCountRange + 1)) + config->itemCountBase,
-                      math_randomFloat() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
-                      config->unk3C, config->unk3E, config->unk40, arg3, arg4);
+                      math_randomFloat() < config->burstChance, 1.7f, 1.7f, 1, config->kind, ground,
+                      config->fadeStart, config->fadeRate, config->material, arg3, arg4);
         count--;
     }
 }
