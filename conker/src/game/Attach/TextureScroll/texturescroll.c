@@ -189,19 +189,13 @@ void attach_spawnFootImpact(Actor *actor) {
     }
 }
 
-struct S150D88AC {
-    u8 pad0[0x14];
-    u8 *unk14;
-    u8 *unk18;
-};
-
-/* Light attach callback 2 (gLightAttachCallbacks): unk14 is the LightEffect's light and unk18 its actor; sets the
- * light's disabled byte (PointLight 0x09) while the actor's expression (0x6F) is 0 and clears it otherwise. */
-s32 attach_disableLightWithoutExpression(struct S150D88AC *effect) {
-    if (effect->unk18[0x6F] != 0) {
-        effect->unk14[9] = 0;
+/* Light attach callback 2 (gLightAttachCallbacks): disables the effect's light while its actor's expression is 0
+ * and enables it otherwise. */
+s32 attach_disableLightWithoutExpression(LightEffect *effect) {
+    if (effect->data.attach.actor->expression != 0) {
+        effect->light->disabled = 0;
     } else {
-        effect->unk14[9] = 1;
+        effect->light->disabled = 1;
     }
     return 1;
 }

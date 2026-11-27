@@ -22,6 +22,7 @@ u8 gAimPass; /* aim pass / slot counter */
 #include "conker/heap.h"
 #include "conker/math.h"
 #include "conker/model.h"
+#include "conker/swarm.h"
 
 /*
  * Per group (gNoAimAnimGroups[character_type] - 1): the animations during which an object does not aim
@@ -673,30 +674,11 @@ s32 aim_getFixedTarget(s32 objIndex, f32 *out) {
     return 0;
 }
 
-/* The eight node types aim_findTarget scans for aim targets. */
+/* The eight object types aim_findTarget scans for aim targets: the swarm members (SwarmActor) and, types 25 and 72, model
+ * particles (ModelParticle). */
 typedef struct {
     s32 types[8];
 } AimNodeTypes;
-
-/* Entries of the gObjectLists per-type lists, as far as aim_findTarget reads them. */
-typedef struct AimNode {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct AimNode *next;
-    /* 0x0C */ u8 padC[0x8C];
-    /* 0x98 */ f32 unk98; /* position */
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
-} AimNode;
-
-/* The entries of node types 25 and 72, which keep their position elsewhere. */
-typedef struct AimNodeAlt {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ f32 unk38; /* position */
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ u8 pad44[0x22];
-    /* 0x66 */ u16 unk66; /* skipped while non-zero */
-} AimNodeAlt;
 
 static AimNodeTypes gAimNodeTypes = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
 
@@ -780,7 +762,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         f32 maxDist;
         AimNodeTypes types;
         s32 type;
-        AimNode *node;
+        EffectHeader *node;
         f32 dx;
         f32 dy;
         f32 dz;
@@ -825,27 +807,27 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
-                node = (AimNode *)gObjectLists[list][type];
+                node = gObjectLists[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
-                        AimNodeAlt *alt;
+                        ModelParticle *alt;
 
-                        alt = (AimNodeAlt *)node;
-                        if (alt->unk66 == 0) {
+                        alt = (ModelParticle *)node;
+                        if (alt->model == 0) {
                             maxDist = 250000.0f;
                             usable = 1;
-                            pos[0] = alt->unk38;
-                            pos[1] = alt->unk3C;
-                            pos[2] = alt->unk40;
+                            pos[0] = alt->pos.x;
+                            pos[1] = alt->pos.y;
+                            pos[2] = alt->pos.z;
                         } else {
                             usable = 0;
                         }
                     } else {
                         maxDist = 250000.0f;
                         usable = 1;
-                        pos[0] = node->unk98;
-                        pos[1] = node->unk9C;
-                        pos[2] = node->unkA0;
+                        pos[0] = ((SwarmActor *)node)->x;
+                        pos[1] = ((SwarmActor *)node)->y;
+                        pos[2] = ((SwarmActor *)node)->z;
                     }
                     if (usable) {
                         pz = pos[2];

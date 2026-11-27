@@ -17,7 +17,6 @@
 
 /* Types that these files define; the declarations below use them. */
 struct SoundRecord;
-struct S150D88AC;
 
 /* game/Attach/Attachment/attachment.c */
 extern ModelAttachment *gAttachments; // head of the model attachment list
@@ -76,7 +75,7 @@ s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
 GameCommand *func_150D8590(GameCommand *cmd, s32 index);
 void attach_spawnFootImpact(Actor *actor);
-s32 attach_disableLightWithoutExpression(struct S150D88AC *effect);
+s32 attach_disableLightWithoutExpression(LightEffect *effect);
 
 /* game/Attach/BonePoint/bonepoint.c */
 s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);

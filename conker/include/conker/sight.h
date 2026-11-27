@@ -12,18 +12,8 @@
  *   game/Effects/Sight/effects_sight.c
  */
 
-typedef struct {
-    u8 pad0[0x6F];
-    u8 unk6F;
-} SightStatusBlock;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x48];
-    s32 flags;
-    u8 pad5C[0x12C];
-    SightStatusBlock *status;
-} SightStatusObject;
+/* Types that other headers define; the declarations below use them. */
+struct BoneGlow; /* conker/particle.h */
 
 /* Message 0x37 (see sight_handlePanelMessage). */
 typedef struct {
@@ -79,7 +69,7 @@ void sight_sendBeamCommand(s32 command, TriggerZone *source);
 void sight_explodeAtActor(Actor *actor, u8 owner, s32 list);
 void sight_spawnFloorImpact(Actor *actor, u8 owner, s32 list);
 s32 sight_updateStatusLight(LightEffect *obj);
-s32 func_151C9B64(SightStatusObject *obj, u8 *visible);
+s32 func_151C9B64(struct BoneGlow *emitter, u8 *visible);
 extern const s32 gSightBeamBreakHits[];
 
 /* game/Effects/Sight/effects_sight.c */
