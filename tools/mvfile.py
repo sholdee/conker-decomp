@@ -16,10 +16,13 @@ asm unit (`.s`) moves the same way. The batch:
 """
 import argparse
 import fcntl
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
+
+COAUTHOR = os.environ.get("CONKER_COAUTHOR", "Claude Opus 5.5 <noreply@anthropic.com>")  # the commit trailer (AGENTS.md, Paths)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mw  # noqa: E402
@@ -155,7 +158,7 @@ def main():
         git("add", "-A", "--", "conker/src", "conker/include", "conker/conker.us.yaml", "conker/Makefile",
             "tools/subsystems.tsv", "tools/hasm_proofs.tsv", "tools/accounting.tsv")
         msg = a.message or "move: " + ", ".join(f"{o} -> {n}" for o, n in moves[:4]) + (" ..." if len(moves) > 4 else "")
-        git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+        git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: " + COAUTHOR)
         print(f"MOVED {len(moves)} file(s): " + git("rev-parse", "--short", "HEAD").stdout.strip())
 
 

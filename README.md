@@ -168,7 +168,7 @@ Fur Day* is the property of its owners, and this project is not affiliated with 
   [Perfect Dark](https://github.com/n64decomp/perfect_dark) by Ryan Dwyer,
   [Donkey Kong 64](https://gitlab.com/dk64_decomp/dk64),
   [Diddy Kong Racing](https://github.com/DavidSM64/Diddy-Kong-Racing) and
-  [Banjo-Kazooie](https://gitlab.com/banjo.decomp/banjo-kazooie). Byte matches with their code gave the
+  [Banjo-Kazooie](https://github.com/n64decomp/banjo-kazooie). Byte matches with their code gave the
   SDK names of many audio functions and the file layout of `src/libultra/audio/`.
 - [ultralib](https://github.com/decompals/ultralib) (decompiled libultra),
   [splat](https://github.com/ethteck/splat) and [spimdisasm](https://github.com/Decompollaborate/spimdisasm),

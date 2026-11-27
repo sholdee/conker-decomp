@@ -76,7 +76,7 @@ project's own IDO 5.3. No code was copied from them. What was taken:
 | Perfect Dark, <https://github.com/n64decomp/perfect_dark> | MIT, Copyright (c) 2022 Ryan Dwyer (notice below) |
 | Donkey Kong 64, <https://gitlab.com/dk64_decomp/dk64> | CC0 1.0 |
 | Diddy Kong Racing, <https://github.com/DavidSM64/Diddy-Kong-Racing> | CC0 1.0 |
-| Banjo-Kazooie, <https://gitlab.com/banjo.decomp/banjo-kazooie> | CC0 1.0 |
+| Banjo-Kazooie, <https://github.com/n64decomp/banjo-kazooie> | CC0 1.0 |
 
 Perfect Dark uses the following notice:
 
