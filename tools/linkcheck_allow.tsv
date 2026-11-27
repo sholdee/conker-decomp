@@ -1,6 +1,8 @@
 # tools/linkcheck.py raw-pointer allow-list: data words whose value happens to fall inside a linked
 # section but that are not pointers (reviewed 2026-11-26). object, section, offset, value, reason.
 # A new entry needs review: a real pointer must be written as a symbol instead.
+# CI reads the base branch's copy of this list. A change that moves a listed object adds the new path in a
+# separate change first, and removes the old path itself.
 build/asm/data/290D0.data.s.o	.data	0x44	0x15000002	RSP microcode (extracted ROM data), not CPU data
 build/asm/data/290D0.data.s.o	.data	0x198	0x1000FFFF	RSP microcode (extracted ROM data), not CPU data
 build/asm/data/290D0.data.s.o	.data	0x16E0	0x15000003	RSP microcode (extracted ROM data), not CPU data
