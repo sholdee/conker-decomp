@@ -101,7 +101,7 @@ const Vec3f D_80099B94 = { 0.0f, 0.0f, 700.0f };
 const Vec3f D_80099BA0 = { 0.0f, 0.0f, 278.0f };
 const Vec3f D_80099BAC = { 0.0f, 0.0f, 556.0f };
 
-/* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
+/* Locals of the effect spawners event_spawnBone1BeamFlash / event_spawnBoneBeamFlashRumble, in stack order. */
 typedef struct EffectLocals {
     Vec3i header2;
     LightEffectHeader header;
@@ -132,91 +132,91 @@ typedef void EventHandler(void);
 void (*gAnimCommandProcs[])(s32) = {
     func_1506EFC8, func_1506F004, NULL, event_attachOwnerEmitter,
     event_startDustEmitter50, NULL, event_spawnFoot0Dust, event_spawnFoot1Dust,
-    event_sprayTrails, event_spawnBone12Flame, event_stopFlamethrowerJets, func_1506F8C0,
+    event_sprayTrails, event_spawnBone12Flame, event_stopFlamethrowerJets, event_callEmptyActorEventHook,
     event_spawnBone13Flame, event_stopFlames, NULL, func_1506F8F0,
-    func_1506F9C0, func_1506FA90, NULL, event_fireJointShot,
+    func_1506F9C0, event_spawnBone26Tracer, NULL, event_fireJointShot,
     event_fireJointShot, NULL, NULL, event_startSparkEmitter70,
     event_cancelTrailPair, event_startSparkEmitter40, NULL, event_spawnSide0StepEffects,
     event_spawnSide1StepEffects, func_1506FC9C, NULL, event_stopFlamethrowerJets,
-    func_1506FD30, event_spawnJetPreset5, event_queueTrailPair, event_spawnGroundMark0,
-    event_spawnGroundMark1, func_1506FE48, func_1506FE74, event_spawnGroundMark2,
+    event_spawnBone1Tracer, event_spawnJetPreset5, event_queueTrailPair, event_spawnGroundMark0,
+    event_spawnGroundMark1, event_spawnGroundMark0Alt, event_spawnGroundMark1Alt, event_spawnGroundMark2,
     event_spawnGroundMark3, func_1506FEF8, func_1506FF24, event_spawnSparkEmitterTask,
     event_spawnBoneGroundBurst0, event_spawnBoneGroundBurst1, event_spawnBoneGroundBurst2, event_spawnImpactRing,
     event_spawnJointImpact, event_spawnLandingBurst, event_spawnBloodGroundBurst, event_spawnJetPreset6,
     event_stopFlamethrowerJets, event_spawnBoneModelBurst, event_attachBloodStrip, event_fireBullet,
     event_fireSegmentShot, NULL, NULL, event_explodeSightAtActor,
-    func_15070224, func_15070300, event_fireBeamSlot, event_fireBeamSlot,
+    event_spawnShortLight, func_15070300, event_fireBeamSlot, event_fireBeamSlot,
     event_releaseBeamSlot, event_releaseBeamSlot, event_fireSlotProjectiles, event_fireMuzzle0,
     event_fireMuzzle1, event_fireLauncher, event_runLauncherMuzzle, func_15070830,
     func_15070860, event_spawnBone9Flame, event_spawnImpactBlast1, event_spawnImpactBlast0,
-    func_15070D24, func_15071230, func_15071254, NULL,
+    event_spawnBone1BeamFlash, event_spawnBone2BeamFlashRumble, event_spawnBone1BeamFlashRumble, NULL,
     NULL, event_spawnTwoSidedEmitter, event_fireForwardProjectile, event_fireAttachedGun,
     event_spawnShotEffectsWithAttacks, event_spawnStripEffect, event_spawnStripEffect, event_notifyFollowersGone,
     event_attachPointEmitter4, event_attachPointEmitter2, event_attachPointEmitter3, event_emptyAnimCommand91,
-    event_spawnShotEffects, event_spawnShotEffectsWithRay, func_150714E8, event_spawnLargeObjBurst,
+    event_spawnShotEffects, event_spawnShotEffectsWithRay, event_spawnGunMuzzleSegmentParticle, event_spawnLargeObjBurst,
     event_rumbleNearbyPlayers, func_15071764, func_150717E0, event_spawnDelayedBurst,
     func_15071860, func_15071888, event_spawnRandomBoneImpactBurst, event_spawnBonePointImpact0,
     event_spawnBonePointImpact1, event_spawnBonePointImpact2, event_emitLineBursts, func_15071A64,
-    event_startDustEmitter, func_15071B18, func_15071D08,
+    event_startDustEmitter, func_15071B18, event_spawnImpactBurstNearBone,
 };
 /* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
     event_doNothing, anim_updateIdle, func_1506AF74, func_1506AFE0,
     func_1506B020, event_emptyAnimState05, func_1506B078, event_doNothing,
-    event_playNextAnim, func_1506B198, func_1506B1E8, func_1506B228,
+    event_playNextAnim, event_playNextAnimHoldLastFrame, func_1506B1E8, func_1506B228,
     func_1506B268, func_1506B328, func_1506B2BC, event_emptyAnimState15,
-    func_15072AF8, event_finishDeath, NULL, event_emptyAnimState19,
+    event_playNextAnimDefaultSpeed, event_finishDeath, NULL, event_emptyAnimState19,
     event_emptyAnimState20, func_1506B5B4, func_1506B5CC, NULL,
-    func_1506B5E4, event_doNothing, event_doNothing, event_doNothing,
+    event_freezeAndFade, event_doNothing, event_doNothing, event_doNothing,
     NULL, event_emptyAnimState29, NULL, event_pickTurnAnim,
-    func_1506B50C, func_1506B520, func_15071ED4, func_15071F14,
+    event_clearScriptTimer, func_1506B520, func_15071ED4, func_15071F14,
     event_repickPissedWalk, func_1506B82C, func_1506B7F4, event_removeSelf,
-    func_15072968, func_150729D0, event_playFollowUpAnim, func_15072A14,
+    func_15072968, func_150729D0, event_playFollowUpAnim, event_clearIdleDelay,
     func_1506B860, func_1506B88C, func_1506B8B4, func_1506B91C,
     func_1506B984, event_updateIdle, event_emptyAnimState50, func_1506B944,
     func_1506B8F4, event_emptyAnimState53, event_clearIntelAnimSeq, event_markContextTextSeen,
-    event_finishGrenadeThrow, func_15072A7C, func_15072940, func_1506D898,
+    event_finishGrenadeThrow, func_15072A7C, event_removeSelfAndStopParts, func_1506D898,
 };
 /* Timed event handlers, indexed by the event id (see event_runTimedEvents). */
 static EventHandler *gTimedEventProcs[] = {
     event_doNothing, event_setYSpeed, event_jump, event_setYGravity,
     event_clearNoRun, event_setWantSpeed, event_setNoRun, event_setDoingHit,
     event_playSoundCommandAboveWater, event_playSoundCommand, event_playDeferredSound, event_fireProjectile,
-    event_requestExpression, event_resetBlink, func_1506EF5C, event_doNothing,
-    event_emptyTimedEvent16, event_stopHeadEffect, func_1506D4F4, func_1506D538,
-    func_15074870, event_doNothing, func_1506D74C, event_setYGravityTenths,
+    event_requestExpression, event_resetBlink, event_setHeadEffectOffset, event_doNothing,
+    event_emptyTimedEvent16, event_stopHeadEffect, func_1506D4F4, event_finishDeathOutsideCutscene,
+    event_setTurnAnimRow, event_doNothing, func_1506D74C, event_setYGravityTenths,
     event_setHeldObjectState, event_dropHeldObject, func_1506D934, event_doNothing,
-    effect_rearmPlayerMarker, func_1506D958, func_150748F4, event_setImmune,
+    effect_rearmPlayerMarker, func_1506D958, event_setPlayerIvehitit, event_setImmune,
     func_1506DA94, event_startChasing, func_1506DB30, event_setBreakStun,
-    event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, func_1506DBA0,
-    func_1506DC10, func_1506DBD4, event_setBodyHeight, event_setTaskInt1,
+    event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, event_setTurnRates,
+    func_1506DC10, event_removeWeaponProp, event_setBodyHeight, event_setTaskInt1,
     event_setEnergy, event_emptyTimedEvent45, event_skipNextEventIfNotLifting, event_scaleByPlayerDistance,
-    event_addNoShove, event_setMatrixPhysics, event_emptyTimedEvent50, func_1506DDC0,
+    event_addNoShove, event_setMatrixPhysics, event_emptyTimedEvent50, event_spawnThrottledEmitterIfCameraAboveLimit,
     event_spawnWakePuffPair, event_playSound2Range1800, event_throwHeldObject, event_playSound1Range8000,
-    event_playSound2Range8000, func_15074B7C, NULL, NULL,
-    func_1506EC50, func_1506ECD0, NULL, func_1506ECF0,
+    event_playSound2Range8000, event_jumpToFrame, NULL, NULL,
+    func_1506EC50, event_holdAnimLastFrame, NULL, event_setHopSpeed,
     NULL, NULL, func_1506ED0C, NULL,
-    func_1506ED4C, func_1506ED68, func_1506ED90, func_1506B4EC,
+    func_1506ED4C, func_1506ED68, event_setScriptTimer, event_pickTurnAnimAlt,
     event_setMvmtControl, event_addTaskAttrib, event_clearTaskAttrib, event_clearMvmtControl,
-    func_1506E7FC, event_playQuietSound2Range1800, func_1506DE84, event_setAfterimage,
-    event_playSound2Range800, func_1506EED8, event_playSound1Range1800, event_playSound1Range800,
+    event_playSound2OnGroundUnlessIvehitit, event_playQuietSound2Range1800, func_1506DE84, event_setAfterimage,
+    event_playSound2Range800, event_setWallHitScript, event_playSound1Range1800, event_playSound1Range800,
     event_playQuietSound1Range3000, event_addMvmtControl, event_setIntelAccel, event_setIntelDecel,
     event_playIntelAnimSeq, event_skipNextEventInCutscene, event_runAnimCommand, event_startHeadEffect,
-    event_startDeathCountdown, func_15071FB0, event_launchPlayer, event_fadeOwnedObject,
+    event_startDeathCountdown, event_clearReactionTimerOnGround, event_launchPlayer, event_fadeOwnedObject,
     func_1507266C, event_runActorEffects, event_runSurfaceHandler, event_setAnimSpeedTenths,
     event_setOwnedObjectsState, event_runChildAnimCommand, event_requestSubmergedExpression, event_setTaskInt0,
-    func_15072DA0, event_createPartSet, event_removePartSet, event_stopSound1,
+    event_setAimTargetMode, event_createPartSet, event_removePartSet, event_stopSound1,
     event_stopSound2, event_playSound2IfNotPlaying, event_playSound2Range3000, event_playQuietSound2Range3000,
-    event_runFadeCommand, func_15072E7C, event_scaleAnimSpeed, func_15072EC0,
-    event_setStunned, func_15072F10, func_1506BDE8, event_spawnObjectAhead,
-    event_emptyTimedEvent120, func_15073054, event_respawnObject, func_1507233C,
-    func_15072360, func_15072388, event_removeObjectById, event_removeAttachedObjectById,
+    event_runFadeCommand, event_setReactionTimer, event_scaleAnimSpeed, event_clearReactionTimerBelowAnimSpeed,
+    event_setStunned, event_fireRayAtObjects, func_1506BDE8, event_spawnObjectAhead,
+    event_emptyTimedEvent120, event_setAlertCooldown, event_respawnObject, event_showOnlyParts,
+    event_showParts, event_hideParts, event_removeObjectById, event_removeAttachedObjectById,
     event_startCameraEnvelope, func_150730A4, event_fireVolley, func_150730D0,
     event_releaseHeldObject, event_setWaitTimer, event_waitForTimer, event_setStickSpeed,
     func_15073A50, func_1506EEAC, event_setRopeSwing, func_15073C50,
-    func_15072740, event_playSound1Range3000, func_15073CB8, event_playSound1Range4000,
+    event_attachTargetToBone, event_playSound1Range3000, func_15073CB8, event_playSound1Range4000,
     event_playSound2Range4000, event_playSound2Range1300, event_playSound1Range1300, event_setBodyRadius,
-    event_detachObjectById, func_15073DA4, func_1506B82C, func_15073F5C,
+    event_detachObjectById, func_15073DA4, func_1506B82C, event_setBouncePercent,
     event_clearNoShove, func_15073F78, event_startMp3TrackRange1800, event_spawnThrownItem,
     event_dealDamage, event_setWeaponStatus, func_15074664, event_setOwnerState,
     event_addShotsFired, event_skipEventsOnTaskBit, func_15073E2C, func_15073EA4,
@@ -227,13 +227,13 @@ s32 D_80086690 = 0x0FA10CDF; /* not referenced */
    prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
 void (*gHitReactionProcs[])() = {
     event_emptyHitReaction0, event_emptyHitReaction1, effect_hitReactLavaBoulder, func_15074C00,
-    func_15074C80, effect_hitReactFireImp, event_hitReactSetTaskInt1, event_hitReactSetUpSmoke,
-    func_15194588, func_15074E80, func_151945CC, func_15194810,
+    event_hitReactProjectile, effect_hitReactFireImp, event_hitReactSetTaskInt1, event_hitReactSetUpSmoke,
+    func_15194588, func_15074E80, effect_hitReactBloodSpray, func_15194810,
     func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
-    effect_hitReactNone, func_15075050, effect_hitReactKill, effect_hitReactSetOnFireDamaging,
-    func_15194A68, effect_hitReactImpactDebris, func_15194B94, effect_hitReactFlashAndKill,
-    func_15194F48, effect_hitReactLightBurst, effect_hitReactSetOnFire, effect_hitReactActorImpact,
-    effect_hitReactSplash, func_150750A4, func_150750C4, func_150FFD2C,
+    effect_hitReactNone, event_hitReactHop, effect_hitReactKill, effect_hitReactSetOnFireDamaging,
+    effect_hitReactHeadShot, effect_hitReactImpactDebris, func_15194B94, effect_hitReactFlashAndKill,
+    effect_hitReactBulletHitAndKill, effect_hitReactLightBurst, effect_hitReactSetOnFire, effect_hitReactActorImpact,
+    effect_hitReactSplash, event_hitReactSetYGravity, func_150750C4, func_150FFD2C,
     effect_hitReactJointImpact, effect_hitReactSmallSplash, func_15195698, effect_hitReactLava,
     effect_hitReactRumble,
 };
@@ -329,7 +329,7 @@ void event_playNextAnim(void) {
     actor_playAnim(gCurrentActor, gCurrentActor->animseq.uh + 1, gCurrentActor->animsp, 3.0f, 0.0f, 0.0f, 0);
 }
 
-void func_1506B198(void) {
+void event_playNextAnimHoldLastFrame(void) {
     actor_playAnim(gCurrentActor, gCurrentActor->animseq.uh + 1, gCurrentActor->animsp, 3.0f, 0.0f, 0.0f, 1);
 }
 
@@ -404,11 +404,11 @@ void event_pickTurnAnim(void) {
     gCurrentActor->scriptTimer = 20000;
 }
 
-void func_1506B4EC(void) {
+void event_pickTurnAnimAlt(void) {
     event_pickTurnAnim();
 }
 
-void func_1506B50C(void) {
+void event_clearScriptTimer(void) {
     gCurrentActor->scriptTimer = 0;
 }
 
@@ -441,7 +441,7 @@ void func_1506B5CC(void) {
     gCurrentActor->unk1CB = 1;
 }
 
-void func_1506B5E4(void) {
+void event_freezeAndFade(void) {
     actor_fadeCommand(gCurrentActor, 2, 7, 8, 0);
     gCurrentActor->animsp = 0.0f;
     gCurrentActor->anim->speed[0] = 0.0f;
@@ -1238,7 +1238,7 @@ void func_1506D4F4(void) {
     actor_playAnim(gCurrentActor, gCurrentActor->animseq.uh, 0.01f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_1506D538(void) {
+void event_finishDeathOutsideCutscene(void) {
     if (gCutsceneStates[0] != 1) {
         actor_finishDeath(dc_glbl_CharNum);
     }
@@ -1373,12 +1373,12 @@ void event_setIntelHitRoute(void) {
     gCurrentActor->intelhitroute = gEventParam;
 }
 
-void func_1506DBA0(void) {
+void event_setTurnRates(void) {
     gCurrentActor->moveTurnRate = gEventParam & 0xFF;
     gCurrentActor->faceTurnRate = (gEventParam >> 8) & 0xFF;
 }
 
-void func_1506DBD4(void) {
+void event_removeWeaponProp(void) {
     Actor *obj = event_getOwnedObject(gCurrentActor, 0);
 
     if (obj != NULL) {
@@ -1443,7 +1443,7 @@ void event_setMatrixPhysics(void) {
 void event_emptyTimedEvent50(void) {
 }
 
-void func_1506DDC0(void) {
+void event_spawnThrottledEmitterIfCameraAboveLimit(void) {
     if (level_isCameraAboveLimit(level) != 0) {
         particle_spawnThrottledEmitter(dc_glbl_CharNum, gEventParam, 0xFF, 0);
     }
@@ -1710,7 +1710,7 @@ void event_playQuietSound2Range3000(void) {
     }
 }
 
-void func_1506E7FC(void) {
+void event_playSound2OnGroundUnlessIvehitit(void) {
     if (gCurrentActor->shad == 0.0f) {
         if (gCurrentActor->ivehitit == 0) {
             event_playSound2Range1800();
@@ -1832,11 +1832,11 @@ void func_1506EC50(void) {
     }
 }
 
-void func_1506ECD0(void) {
+void event_holdAnimLastFrame(void) {
     gCurrentActor->anim->anim[0] |= 0x8000;
 }
 
-void func_1506ECF0(void) {
+void event_setHopSpeed(void) {
     gCurrentActor->hopSpeed = gEventParam;
 }
 
@@ -1855,7 +1855,7 @@ void func_1506ED68(void) {
     gCurrentActor->mv->prop = 0;
 }
 
-void func_1506ED90(void) {
+void event_setScriptTimer(void) {
     gCurrentActor->scriptTimer = gEventParam;
 }
 
@@ -1894,7 +1894,7 @@ void func_1506EEAC(void) {
     func_151898C0(gCurrentActor, gEventParam);
 }
 
-void func_1506EED8(void) {
+void event_setWallHitScript(void) {
     gCurrentActor->wallHitScript = gEventParam;
 }
 
@@ -1909,7 +1909,7 @@ void event_startHeadEffect(void) {
 }
 
 /* Stores the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of headEffectOffset. */
-void func_1506EF5C(void) {
+void event_setHeadEffectOffset(void) {
     s32 index;
     s16 first;
     s16 second;
@@ -2166,7 +2166,7 @@ void event_spawnBone13Flame(s32 cmd) {
     flamethrower_spawnFlame(0, &descriptor, 0xFF, 0);
 }
 
-void func_1506F8C0(s32 cmd) {
+void event_callEmptyActorEventHook(s32 cmd) {
     effect_emptyActorEventHook(gCurrentActor, 0, 0);
 }
 
@@ -2178,7 +2178,7 @@ void func_1506F9C0(s32 cmd) {
     beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
-void func_1506FA90(s32 cmd) {
+void event_spawnBone26Tracer(s32 cmd) {
     beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
@@ -2218,7 +2218,7 @@ void event_spawnJetPreset5(s32 cmd) {
     flamethrower_spawnJet(gCurrentActor, 5, 0xFF, 0);
 }
 
-void func_1506FD30(s32 cmd) {
+void event_spawnBone1Tracer(s32 cmd) {
     beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
@@ -2230,11 +2230,11 @@ void event_spawnGroundMark1(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
-void func_1506FE48(s32 cmd) {
+void event_spawnGroundMark0Alt(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 0);
 }
 
-void func_1506FE74(s32 cmd) {
+void event_spawnGroundMark1Alt(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
@@ -2321,7 +2321,7 @@ void event_explodeSightAtActor(s32 cmd) {
     sight_explodeAtActor(gCurrentActor, 0xFF, 1);
 }
 
-void func_15070224(s32 cmd) {
+void event_spawnShortLight(s32 cmd) {
     LightEffectHeader header;
     Vec3i position;
 
@@ -2588,7 +2588,7 @@ void event_spawnImpactBlast0(s32 cmd) {
     event_spawnImpactBlast(0);
 }
 
-void func_15070D24(s32 cmd) {
+void event_spawnBone1BeamFlash(s32 cmd) {
     EffectLocals fx;
 
     fx.localPos = D_80099B88;
@@ -2623,7 +2623,7 @@ void func_15070D24(s32 cmd) {
 
     light_createWithEffect(&fx.header, &fx.header2, (math_random() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
-void func_15070F60(cmd)
+void event_spawnBoneBeamFlashRumble(cmd)
     u8 cmd;
 {
     EffectLocals fx;
@@ -2662,12 +2662,12 @@ void func_15070F60(cmd)
     particle_startPlayerRumbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
     particle_startPlayerCameraWobbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
-void func_15071230(s32 cmd) {
-    func_15070F60(0);
+void event_spawnBone2BeamFlashRumble(s32 cmd) {
+    event_spawnBoneBeamFlashRumble(0);
 }
 
-void func_15071254(s32 cmd) {
-    func_15070F60(1);
+void event_spawnBone1BeamFlashRumble(s32 cmd) {
+    event_spawnBoneBeamFlashRumble(1);
 }
 
 void event_spawnTwoSidedEmitter(s32 cmd) {
@@ -2718,7 +2718,7 @@ void event_spawnShotEffectsWithRay(s32 cmd) {
     weapon_spawnShotEffects(gCurrentActor, 0, 1, 0xFF, 1);
 }
 
-void func_150714E8(s32 cmd) {
+void event_spawnGunMuzzleSegmentParticle(s32 cmd) {
     particle_spawnBoneSegmentParticle(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
 }
 
@@ -2894,7 +2894,7 @@ void func_15071B18(s32 cmd) {
     }
 }
 
-void func_15071D08(s32 cmd) {
+void event_spawnImpactBurstNearBone(s32 cmd) {
     beam_spawnImpactBurstNearBone(gCurrentActor, 0xFF, 1);
 }
 
@@ -2962,7 +2962,7 @@ void event_skipNextEventInCutscene(void) {
     }
 }
 
-void func_15071FB0(void) {
+void event_clearReactionTimerOnGround(void) {
     if (gCurrentActor->shad == 0.0f) {
         gCurrentActor->reactionTimer = 0;
     }
@@ -3066,15 +3066,15 @@ void event_fadeOwnedObject(void) {
     }
 }
 
-void func_1507233C(void) {
+void event_showOnlyParts(void) {
     gCurrentActor->hiddenParts = ~(gEventParam | 1);
 }
 
-void func_15072360(void) {
+void event_showParts(void) {
     gCurrentActor->hiddenParts &= ~gEventParam;
 }
 
-void func_15072388(void) {
+void event_hideParts(void) {
     gCurrentActor->hiddenParts |= gEventParam;
 }
 
@@ -3178,7 +3178,7 @@ void func_1507266C(void) {
     func_151B5BA0(&movement_obj[dc_glbl_CharNum], obj, angle);
 }
 
-void func_15072740(void) {
+void event_attachTargetToBone(void) {
     s32 angle;
     Actor *obj;
 
@@ -3209,7 +3209,7 @@ void event_removeSelf(void) {
     actor_remove(gCurrentActor, 0);
 }
 
-void func_15072940(void) {
+void event_removeSelfAndStopParts(void) {
     actor_remove(gCurrentActor, 1);
 }
 
@@ -3228,7 +3228,7 @@ void func_150729D0(void) {
     func_1506B82C();
 }
 
-void func_15072A14(void) {
+void event_clearIdleDelay(void) {
     gCurrentActor->mv->idle.delay = 0;
     anim_updateIdle();
 }
@@ -3248,7 +3248,7 @@ void func_15072A7C(void) {
     }
 }
 
-void func_15072AF8(void) {
+void event_playNextAnimDefaultSpeed(void) {
     actor_playAnim(gCurrentActor, gCurrentActor->animseq.uh + 1, 1.0f, 6.0f, 0.0f, 0.0f, 0);
 }
 
@@ -3340,7 +3340,7 @@ void event_playFollowUpAnim(void) {
     }
 }
 
-void func_15072DA0(void) {
+void event_setAimTargetMode(void) {
     gCurrentActor->unk2F8 &= 0xFFF8;
     gCurrentActor->unk2F8 |= gEventParam;
 }
@@ -3361,7 +3361,7 @@ void event_removePartSet(void) {
     }
 }
 
-void func_15072E7C(void) {
+void event_setReactionTimer(void) {
     gCurrentActor->reactionTimer = gEventParam;
 }
 
@@ -3369,7 +3369,7 @@ void event_scaleAnimSpeed(void) {
     gCurrentActor->anim->speed[0] *= gEventParamF;
 }
 
-void func_15072EC0(void) {
+void event_clearReactionTimerBelowAnimSpeed(void) {
     AnimInstance *anim;
 
     anim = gCurrentActor->anim;
@@ -3382,7 +3382,7 @@ void event_setStunned(void) {
     gCurrentActor->stunned = gEventParam;
 }
 
-void func_15072F10(void) {
+void event_fireRayAtObjects(void) {
     f32 targetX;
     f32 targetZ;
     f32 targetY;
@@ -3402,7 +3402,7 @@ void func_15072F10(void) {
 void event_emptyTimedEvent120(void) {
 }
 
-void func_15073054(void) {
+void event_setAlertCooldown(void) {
     gCurrentActor->alertCooldown = gEventParam;
 }
 
@@ -3707,7 +3707,7 @@ void func_15073F1C(void) {
 void event_emptyAnimState53(void) {
 }
 
-void func_15073F5C(void) {
+void event_setBouncePercent(void) {
     gCurrentActor->bouncePercent = gEventParam;
 }
 
@@ -3945,7 +3945,7 @@ void event_addShotsFired(void) {
     }
 }
 
-void func_15074870(void) {
+void event_setTurnAnimRow(void) {
     gCurrentActor->turnAnimRow = gEventParam;
 }
 
@@ -3966,7 +3966,7 @@ void event_skipEventsOnTaskBit(void) {
     }
 }
 
-void func_150748F4(void) {
+void event_setPlayerIvehitit(void) {
     movement_obj[0].ivehitit = gEventParam;
 }
 
@@ -4038,7 +4038,7 @@ void event_scaleByPlayerDistance(void) {
     gCurrentActor->scaleStep = 0.02f;
 }
 
-void func_15074B7C(void) {
+void event_jumpToFrame(void) {
     gEventLoopRunning = 0;
     gEventResult = gEventParam;
 
@@ -4069,7 +4069,7 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
     }
 }
 
-void func_15074C80(Actor *self, Actor *other) {
+void event_hitReactProjectile(Actor *self, Actor *other) {
     s32 anim;
 
     if (self->headEffectState == 17) {
@@ -4125,7 +4125,7 @@ void func_15074E80(Actor *self, Actor *other, u8 *result) {
         self->imune = 0xFF;
         other->imune = 200;
         gEventParam = 0x60000;
-        func_15072740();
+        event_attachTargetToBone();
     }
 }
 
@@ -4134,7 +4134,7 @@ void func_15074EE8(Actor *self, Actor *other, u8 *result) {
         self->imune = 0xFF;
         other->imune = 200;
         gEventParam = 0x70000;
-        func_15072740();
+        event_attachTargetToBone();
     }
 }
 
@@ -4161,12 +4161,12 @@ void func_15074FD4(Actor *self, Actor *other, u8 *result) {
         if (self->character_type == 0x8E) {
             gEventParam = 0x140000;
         }
-        func_15072740();
+        event_attachTargetToBone();
     }
     effect_hitReactSplash(self, other, result);
 }
 
-void func_15075050(Actor *self, Actor *other, u8 *result) {
+void event_hitReactHop(Actor *self, Actor *other, u8 *result) {
     self->vtilt = 5.0f;
     if (self->speed > 0.0f) {
         self->vtilt = -5.0f;
@@ -4175,7 +4175,7 @@ void func_15075050(Actor *self, Actor *other, u8 *result) {
     self->yspd = 12.0f;
 }
 
-void func_150750A4(Actor *self, Actor *other, u8 *result) {
+void event_hitReactSetYGravity(Actor *self, Actor *other, u8 *result) {
     self->ygrav = 5.0f;
 }
 

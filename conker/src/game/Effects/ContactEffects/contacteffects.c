@@ -155,7 +155,7 @@ void func_15194588(Actor *self, Actor *other, u8 *arg2) {
 }
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
-void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
     SplashSpraySpec burst;
@@ -288,7 +288,7 @@ void effect_spawnHitScreenFade(s32 arg0, Actor *self, Actor *other) {
     }
 }
 
-void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *arg2) {
     actor_applyHeadShot(other);
     blood_spawnBoneHit(other, 0xFF, 1);
     effect_spawnHitScreenFade(0, self, other);
@@ -428,7 +428,7 @@ void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2) {
     effect_hitReactKill(self, other, &result);
 }
 
-void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
 
     pos.x = other->xpos;
