@@ -4266,14 +4266,14 @@ void func_151E7DC0(void) {
     }
 }
 
-/* Calls func_10017870 with 1, 2 or 4 depending on D_800E0BE9. */
+/* Calls audio_setOutputMode with 1, 2 or 4 depending on D_800E0BE9. */
 void save_applySoundMode(void) {
     if (gSettings[9] == 2) {
-        func_10017870(1);
+        audio_setOutputMode(1);
     } else if (gSettings[9] == 0) {
-        func_10017870(2);
+        audio_setOutputMode(2);
     } else {
-        func_10017870(4);
+        audio_setOutputMode(4);
     }
 }
 

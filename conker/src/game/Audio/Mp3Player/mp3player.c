@@ -310,7 +310,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             if (D_800E0D80.unk32 > 0) {
                 if (D_800E0D80.unk58 != 0) {
-                    func_1001CF38((LowPass *)&D_800E0D80.unk30, 22020.0f);
+                    audio_updateLowPassCoefs((LowPass *)&D_800E0D80.unk30, 22020.0f);
                 }
                 {
                     Acmd *_a = (*cmdList)++;

@@ -1,7 +1,7 @@
 #include <n_libaudio.h>
 
 
-void func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2) {
+void audio_setCspFxMix(N_ALCSPlayer *csp, f32 arg1, f32 arg2) {
     N_ALEvent event;
 
     event.type = 25;
@@ -11,7 +11,7 @@ void func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2) {
     n_alEvtqPostEvent(&csp->evtq, &event, 0, 2);
 }
 
-void func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2) {
+void audio_setCspChannelFxBus(N_ALCSPlayer *csp, u8 chan, u8 arg2) {
     N_ALEvent event;
 
     event.type = 2; // AL_SEQP_MIDI_EVT ?

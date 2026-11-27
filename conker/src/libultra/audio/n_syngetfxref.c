@@ -14,7 +14,7 @@ void *n_alSynGetFXRef(s16 arg0) {
     }
 }
 
-LowPass *func_1001DA28(s16 arg0) {
+LowPass *audio_getBusLowPass(s16 arg0) {
     N_ALMainBus *sp4;
 
     sp4 = n_syn->mainBus;

@@ -5,7 +5,7 @@
 
 /* Posts filter type 19: n_alLoadParam (init/Audio/VoiceLowPass/voicelowpass.c) stores the value as
  * the cutoff (fc) of the voice's low-pass. */
-void func_1001CA90( N_ALVoice *v, f32 fc) {
+void audio_setVoiceLowPassCutoff( N_ALVoice *v, f32 fc) {
     ALParam  *update;
 
     if (v->pvoice) {

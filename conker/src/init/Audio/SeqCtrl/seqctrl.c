@@ -62,10 +62,10 @@ void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if (vs->channel == chan) {
             gain = seqp->chanState[chan].lowPassGain;
-            func_1001CB40(&vs->voice, gain);
+            audio_setVoiceLowPassGain(&vs->voice, gain);
             if (gain != 0) {
-                func_1001CA90(&vs->voice,
-                    func_1001CEA4((vs->key - vs->sound->keyMap->keyBase) + keyoff) * 440.0f * pb);
+                audio_setVoiceLowPassCutoff(&vs->voice,
+                    audio_semitonesToRatio((vs->key - vs->sound->keyMap->keyBase) + keyoff) * 440.0f * pb);
             }
         }
     }

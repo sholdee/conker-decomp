@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
+void audio_calcLowPassCoefs(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
     f32 sp20;
     f32 sp1C;
@@ -48,7 +48,7 @@ void init_lpfilter(LowPass *arg0) {
     }
 }
 
-f32 func_1001CEA4(s32 arg0) {
+f32 audio_semitonesToRatio(s32 arg0) {
     f32 sp4;
     f32 sp0 = 1.0f;
 
@@ -70,7 +70,7 @@ f32 func_1001CEA4(s32 arg0) {
     return sp0;
 }
 
-void func_1001CF38(LowPass *arg0, f32 arg1) {
+void audio_updateLowPassCoefs(LowPass *arg0, f32 arg1) {
     s32 i;
     f32 sp30[3];
     f32 sp24[3];
@@ -81,7 +81,7 @@ void func_1001CF38(LowPass *arg0, f32 arg1) {
     if (arg0->fgain < 10) {
         arg0->fgain = 10;
     }
-    func_1001CBF0(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, sp30, sp24);
+    audio_calcLowPassCoefs(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, sp30, sp24);
 
     for(i = 3; i < 8; i++) {
         arg0->fcvec.fccoef[i] = 0;

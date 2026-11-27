@@ -67,7 +67,7 @@ static N_ALSndPlayer *D_8002BA2C = &D_80042850.sndp;
 static s16 D_8002BA30 = 0; /* number of sounds playing */
 
 void _n_handleEvent(SndEvent *event);
-void func_10017298(SndState *arg0);
+void audio_freeSoundState(SndState *arg0);
 void _removeEvents(ALEventQueue *evtq, SndState *state, u16 typeMask);
 
 void n_alSndpNew(SndPlayerConfig *c) {
@@ -145,9 +145,9 @@ ALMicroTime _n_sndpVoiceHandler(void *node) {
     return alsp->nextDelta;
 }
 
-void     func_10016E90(SndState *arg0);
-void     func_10016F00(SndState *state);
-SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
+void     audio_endSound(SndState *arg0);
+void     audio_postSoundPitch(SndState *state);
+SndState *audio_playSound(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
                          SndState **arg7);
 
 /* Volume actually sent to the synth: the sound's own sample volume, scaled by the
@@ -201,7 +201,7 @@ void _n_handleEvent(SndEvent *event) {
                 }
                 n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 0x8235, 2);
             } else {
-                func_10016E90(state);
+                audio_endSound(state);
             }
         } else {
             switch (event->type) {
@@ -262,7 +262,7 @@ void _n_handleEvent(SndEvent *event) {
                             state->retries--;
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 0x8235, 2);
                         } else {
-                            func_10016E90(state);
+                            audio_endSound(state);
                         }
                         return;
                     }
@@ -303,7 +303,7 @@ void _n_handleEvent(SndEvent *event) {
                             evt.state = state;
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&evt, delta, 2);
                             if (state->unk53 & 0x20) {
-                                func_10016F00(state);
+                                audio_postSoundPitch(state);
                             }
                         } else {
                             evt.type = 0x40;
@@ -341,12 +341,12 @@ void _n_handleEvent(SndEvent *event) {
                                                       delta, 2);
                                     state->unk54 = 2;
                                 } else {
-                                    func_10016E90(state);
+                                    audio_endSound(state);
                                 }
                                 break;
                             case 4:
                             case 5:
-                                func_10016E90(state);
+                                audio_endSound(state);
                                 break;
                             default:
                                 break;
@@ -371,7 +371,7 @@ void _n_handleEvent(SndEvent *event) {
                     if (state->unk54 == 1) {
                         n_alSynSetPitch(&state->voice, state->pitch * state->ratio);
                         if (state->unk53 & 0x20) {
-                            func_10016F00(state);
+                            audio_postSoundPitch(state);
                         }
                     }
                     break;
@@ -444,18 +444,18 @@ void _n_handleEvent(SndEvent *event) {
                         evt.state = state;
                         n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&evt, delta, 2);
                         if (state->unk53 & 0x20) {
-                            func_10016F00(state);
+                            audio_postSoundPitch(state);
                         }
                     }
                     break;
 
                 case 0x80:
-                    func_10016E90(state);
+                    audio_endSound(state);
                     break;
 
                 case 0x200:
                     if (state->unk53 & 0x10) {
-                        func_10017438(event->bank, event->arg.i, state->unk44, state->unk4F,
+                        audio_playSound(event->bank, event->arg.i, state->unk44, state->unk4F,
                                       state->pitch, state->unk50, state->unk51, state->owner);
                     }
                     break;
@@ -479,17 +479,17 @@ void _n_handleEvent(SndEvent *event) {
     } while ((done == 0) && (state != NULL) && (typeMask == 0));
 }
 
-void func_10016E90(SndState *arg0) {
+void audio_endSound(SndState *arg0) {
     if ((arg0->unk53 & 4) != 0) {
         n_alSynStopVoice(&arg0->voice);
         n_alSynFreeVoice(&arg0->voice);
     }
-    func_10017298(arg0);
+    audio_freeSoundState(arg0);
     _removeEvents(&D_8002BA2C->evtq, arg0, 0xFFFF);
 }
 
 /* Posts a pitch event (type 16) for `state`: its requested pitch times the key map's detune ratio. */
-void func_10016F00(SndState *state) {
+void audio_postSoundPitch(SndState *state) {
     SndEvent event;
     f32 res;
 
@@ -551,7 +551,7 @@ void _removeEvents(ALEventQueue *evtq, SndState *state, u16 typeMask) {
 }
 
 
-SndState *func_10017100(ALBank *bank, s16 arg1) {
+SndState *audio_allocSoundState(ALBank *bank, s16 arg1) {
     SndState *sp24;
     u32 mask;
     SndState *sp1C;
@@ -594,7 +594,7 @@ SndState *func_10017100(ALBank *bank, s16 arg1) {
     return sp24;
 }
 
-void func_10017298(SndState *arg0) {
+void audio_freeSoundState(SndState *arg0) {
     SndState *sp4;
 
     if (D_8002BA20 == arg0) {
@@ -636,7 +636,7 @@ void func_10017298(SndState *arg0) {
 }
 
 /* The play state of the sound that `handle` (a SndState owner slot) refers to, or 0. */
-s32 func_100173C4(SndState **handle) {
+s32 audio_getSoundPlayState(SndState **handle) {
     s32 ret;
     s32 mask;
 
@@ -662,7 +662,7 @@ s32 func_100173C4(SndState **handle) {
  * register forcers.  The retry loop is the same story: arg1 is reset to 0 on
  * every pass, so the `arg1 != 0 && state != NULL` back-edge can never be
  * taken. */
-SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7) {
+SndState *audio_playSound(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7) {
     SndState *state;
     SndState *result;
     s16 count;
@@ -673,7 +673,7 @@ SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 
     count = 0;
     if (arg1 != 0) {
         do {
-            state = func_10017100(bank, arg1 - 1);
+            state = audio_allocSoundState(bank, arg1 - 1);
             if (state != NULL) {
                 D_8002BA2C->target = (s32)state;
                 event.type = 0x4000;
@@ -703,7 +703,7 @@ SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 
 }
 
 
-void func_10017594(SndState *arg0) {
+void audio_stopSound(SndState *arg0) {
     N_ALEvent event;
 
     if (arg0) {
@@ -714,7 +714,7 @@ void func_10017594(SndState *arg0) {
     }
 }
 
-void func_10017604(u8 arg0) {
+void audio_stopSoundsWithFlags(u8 arg0) {
     s32 mask;
     N_ALEvent event;
     SndState *ptr;
@@ -733,7 +733,7 @@ void func_10017604(u8 arg0) {
     osSetIntMask(mask);
 }
 // NON-MATCHING: stack isnt quite right
-// void func_10017604(u8 arg0) {
+// void audio_stopSoundsWithFlags(u8 arg0) {
 //     s32 mask;
 //     SndState *sp20;
 //     u16 foo;
@@ -758,15 +758,15 @@ void func_10017604(u8 arg0) {
 //     osSetIntMask(mask);
 // }
 
-void func_100176C4(void) {
-    func_10017604(1);
+void audio_stopAllSounds(void) {
+    audio_stopSoundsWithFlags(1);
 }
 
-void func_100176EC(void) {
-    func_10017604(3);
+void audio_stopLoopingSounds(void) {
+    audio_stopSoundsWithFlags(3);
 }
 
-void func_10017714(SndState *state, s16 type, s32 arg) {
+void audio_postSoundEvent(SndState *state, s16 type, s32 arg) {
     SndEvent event;
 
     if (state != NULL) {
@@ -777,7 +777,7 @@ void func_10017714(SndState *state, s16 type, s32 arg) {
     }
 }
 
-void func_10017780(u8 arg0, u16 arg1) {
+void audio_setSoundGroupVolume(u8 arg0, u16 arg1) {
     s32 mask;
     SndState *ptr;
     s32 count;
@@ -799,7 +799,7 @@ void func_10017780(u8 arg0, u16 arg1) {
 }
 
 // NON-MATCHING: far from matching
-// void func_10017780(u8 arg0, u16 arg1) {
+// void audio_setSoundGroupVolume(u8 arg0, u16 arg1) {
 //     s32 sp34;
 //     SndState *sp30;
 //     s32 sp2C;

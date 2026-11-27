@@ -65,7 +65,7 @@ Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *cmdList) {
             LowPass *lp = n_syn->auxBus[bus].lowPass;
 
             if (lp->first != 0) {
-                func_1001CF38(lp, n_syn->outputRate);
+                audio_updateLowPassCoefs(lp, n_syn->outputRate);
             }
             aLoadADPCM(p++, 0x20, osVirtualToPhysical(&lp->fcvec));
             // matching: the ROM masks the state address twice (once here, once in the macro)

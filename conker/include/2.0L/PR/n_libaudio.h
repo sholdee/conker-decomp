@@ -117,7 +117,7 @@ typedef struct LowPass {
 } LowPass; /* size 0x38 */
 
 /* Conker: recomputes the coefficients of lp for the output rate (n_drvrNew.c). */
-void    func_1001CF38(LowPass *lp, f32 outputRate);
+void    audio_updateLowPassCoefs(LowPass *lp, f32 outputRate);
 
 
 void    n_alSynAddPlayer(ALPlayer *client);
@@ -320,8 +320,8 @@ typedef struct {
     /* 0x78 */  ALOscStop           stopOsc;
     /* RARE CUSTOM (mpegBank, voiceLimit and voiceCount are the Oct 2000 debugger's names) */
     /* 0x7C */  f32          fxMixOffset;     /* fxmix = ((chan fxmix & 0x7F) + fxMixOffset * 127) * fxMixScale */
-    /* 0x80 */  f32          fxMixScale;      /* both set by event 25 (func_10017DF0) */
-    /* 0x84 */  struct OSMesgQueue_s *msgQueue; /* receives marker and note messages (func_10017AF0) */
+    /* 0x80 */  f32          fxMixScale;      /* both set by event 25 (audio_setCspFxMix) */
+    /* 0x84 */  struct OSMesgQueue_s *msgQueue; /* receives marker and note messages (audio_setCspMsgQueue) */
     /* 0x88 */  s32          pausedDelta;     /* ticks to the next sequence event, saved on pause (state 3) */
     /* 0x8C */  u8           voiceLimit;      /* Oct 2000 had these two at 0x88/0x89, before pausedDelta */
     /* 0x8D */  u8           voiceCount;
@@ -454,27 +454,27 @@ f32     _depth2Cents(u8 arg0);
 s32     initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
 s32     updateOsc(struct OscState *arg0, f32 *arg1);
 void    stopOsc(struct OscState *arg0);
-void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
+void    audio_initOscStates(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
 /* init/Audio/SeqChannel/seqchannel.c: the channels of a compact sequence player */
-void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue);
-void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
-void    func_10017B30(N_ALCSPlayer *seqp);
-void    func_10017BB8(N_ALCSPlayer *seqp, s32 arg1);
-void    func_10017C00(N_ALCSPlayer *seqp, s32 arg1);
-void    func_10017C68(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
+void    audio_setCspMsgQueue(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue);
+void    audio_setCspNoteMesg(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
+void    audio_enableAllCspChannels(N_ALCSPlayer *seqp);
+void    audio_muteCspChannel(N_ALCSPlayer *seqp, s32 arg1);
+void    audio_unmuteCspChannel(N_ALCSPlayer *seqp, s32 arg1);
+void    audio_fadeCspChannel(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
 void    func_10017CE0(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
-void    func_10017D30(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
-void    func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
-void    func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
-void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
-void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base); /* n_csq.c */
-void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
+void    audio_setCspChannelFade(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
+void    audio_setCspFxMix(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
+void    audio_setCspChannelFxBus(N_ALCSPlayer *csp, u8 chan, u8 arg2);
+void    audio_setCspFxParam(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
+void    audio_findLoopMarkers(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base); /* n_csq.c */
+void    audio_pauseCsp(N_ALCSPlayer *seqp);                              /* init_18D50.c */
 void    audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init/Audio/SeqCtrl/seqctrl.c */
-void    func_1001CA90(N_ALVoice *v, f32 fc);                            /* init/Audio/SynLowPassCutoff/synlowpasscutoff.c: filter type 19 */
-void    func_1001CB40(N_ALVoice *v, u8 fgain);                          /* init/Audio/SynLowPassGain/synlowpassgain.c: filter type 18 */
-f32     func_1001CEA4(s32 arg0);                                        /* n_drvrNew.c: the pitch ratio of a number of semitones */
-LowPass *func_1001DA28(s16 bus);                                        /* n_syngetfxref.c: the bus's low-pass */
-void    func_1001DAE4(LowPass *lp, s16 paramID, s32 *value);            /* n_synsetfxparam.c */
+void    audio_setVoiceLowPassCutoff(N_ALVoice *v, f32 fc);                            /* init/Audio/SynLowPassCutoff/synlowpasscutoff.c: filter type 19 */
+void    audio_setVoiceLowPassGain(N_ALVoice *v, u8 fgain);                          /* init/Audio/SynLowPassGain/synlowpassgain.c: filter type 18 */
+f32     audio_semitonesToRatio(s32 arg0);                                        /* n_drvrNew.c: the pitch ratio of a number of semitones */
+LowPass *audio_getBusLowPass(s16 bus);                                        /* n_syngetfxref.c: the bus's low-pass */
+void    audio_setBusLowPassParam(LowPass *lp, s16 paramID, s32 *value);            /* n_synsetfxparam.c */
 void    func_1001E350(N_ALVoice *v, u8 value);                          /* init/Audio/SynLowPassCount/synlowpasscount.c: filter type 17 */
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by n_sndplayer.c; it agrees with os_libc.h. */

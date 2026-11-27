@@ -5,7 +5,7 @@
 
 /* Posts filter type 18: n_alLoadParam (init/Audio/VoiceLowPass/voicelowpass.c) stores the value as
  * the fgain of the voice's low-pass. */
-void func_1001CB40( N_ALVoice *v, u8 fgain)
+void audio_setVoiceLowPassGain( N_ALVoice *v, u8 fgain)
 {
     ALParam  *update;
 

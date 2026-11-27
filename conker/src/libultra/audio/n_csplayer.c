@@ -35,7 +35,7 @@ void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
     seqp->target        = NULL;
     seqp->drvr          = n_syn;
     seqp->chanMask      = 0xffff;
-    func_10017B30(seqp);
+    audio_enableAllCspChannels(seqp);
     seqp->uspt          = 488;
     seqp->nextDelta     = 0;
     seqp->state         = AL_STOPPED;
@@ -168,8 +168,8 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 n_alSynSetPitch(&vs->voice, vs->pitch * vs->vibrato
                                 * seqp->chanState[chan].pitchBend);
                 if (seqp->chanState[chan].lowPassGain) {
-                    func_1001CA90(&vs->voice,
-                        440.0f * func_1001CEA4(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                    audio_setVoiceLowPassCutoff(&vs->voice,
+                        440.0f * audio_semitonesToRatio(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                         * seqp->chanState[chan].pitchBend * vs->vibrato);
                 }
                 evt.type = 24;
@@ -216,9 +216,9 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                                       &seqp->nextEvent.msg.unknown2.unk4);
                     }
                 } else {
-                    LowPass *b = func_1001DA28(seqp->nextEvent.msg.unknown2.unk0);
+                    LowPass *b = audio_getBusLowPass(seqp->nextEvent.msg.unknown2.unk0);
                     if (b) {
-                        func_1001DAE4(b, seqp->nextEvent.msg.unknown2.unk1, &seqp->nextEvent.msg.unknown2.unk4);
+                        audio_setBusLowPassParam(b, seqp->nextEvent.msg.unknown2.unk1, &seqp->nextEvent.msg.unknown2.unk4);
                     }
                 }
                 break;
@@ -542,7 +542,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 fxmix = audio_getVoiceFxMix(vs, seqp);
                 unk7A = cs->lowPassGain;
                 if (unk7A) {
-                    unk70 = func_1001CEA4(cents / 100 + cs->lowPassKey - 0x40) * 440.0f * cs->pitchBend;
+                    unk70 = audio_semitonesToRatio(cents / 100 + cs->lowPassKey - 0x40) * 440.0f * cs->pitchBend;
                 } else {
                     unk70 = 127.0f;
                 }
@@ -696,8 +696,8 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                         n_alSynSetPitch(&vs->voice,
                                         vs->pitch * bendRatio * vs->vibrato);
                         if (seqp->chanState[chan].lowPassGain) {
-                            func_1001CA90(&vs->voice,
-                                440.0f * func_1001CEA4(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                            audio_setVoiceLowPassCutoff(&vs->voice,
+                                440.0f * audio_semitonesToRatio(seqp->chanState[chan].lowPassKey + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                                 * bendRatio * vs->vibrato);
                         }
                     }

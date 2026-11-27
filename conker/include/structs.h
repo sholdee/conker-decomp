@@ -2299,7 +2299,7 @@ typedef struct StreamVoice {
     /* 0x26 */ u8   pad26[0x2];
     /* 0x28 */ s32  em_delta;
     /* 0x2C */ s32  em_segEnd;
-    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to func_1001CF38 as a LowPass): fc
+    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to audio_updateLowPassCoefs as a LowPass): fc
     /* 0x32 */ s16  unk32;          // fgain; the filter runs while it is > 0
     /* 0x34 */ u8   pad34[0x4];
     /* 0x38 */ s16  unk38[16];      // the coefficient vector (its physical address goes in an acmd)

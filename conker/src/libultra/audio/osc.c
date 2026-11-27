@@ -23,7 +23,7 @@ typedef struct OscState {
 
 /* This file's .bss. */
 static OscState *gFreeOscStates; /* free oscillator states */
-static OscState *D_80042804;     /* the oscillator states (func_100131FC) */
+static OscState *D_80042804;     /* the oscillator states (audio_initOscStates) */
 
 f32 _depth2Cents(u8 arg0) {
     f32 sp4 = 1.0309929847717285f;
@@ -118,7 +118,7 @@ void stopOsc(OscState *arg0) {
 }
 
 /* initOsc setup: allocates `arg1` oscillator states into the free list and installs the oscillator callbacks. */
-void func_100131FC(ALSeqpConfig *config, s32 arg1) {
+void audio_initOscStates(ALSeqpConfig *config, s32 arg1) {
     OscState *sp24;
     s32 i;
 

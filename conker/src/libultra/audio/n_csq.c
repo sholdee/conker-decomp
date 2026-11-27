@@ -164,7 +164,7 @@ void alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *marker) {
     }
 }
 
-void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base) {
+void audio_findLoopMarkers(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base) {
     N_ALEvent event;
     ALCSeq tmp;
     s32 j;
