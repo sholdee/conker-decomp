@@ -81,21 +81,6 @@
  *   game/Camera/CameraWobble/camerawobble.c
  */
 
-/* Sound emitter handed to the aim sound callbacks by sound_addDynamicSound. */
-typedef struct CamSound {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ Camera *camera;
-    /* 0x1C */ u32 data;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u16 voice;
-} CamSound;
-
 /* State of one z-buffer occlusion scan (see camera_testZPixel). */
 typedef struct ZScan {
     u8 state;        // 0 none, 1 occluder outside mid, 2 inside mid, 4 (camera_checkOcclusion)
@@ -377,8 +362,8 @@ void camera_filterButtons(Camera *camera);
 void camera_moveFocus(Camera *camera);
 void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView);
 s32 camera_updateFirstPersonAim(Camera *camera);
-s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
-s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
+s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
+s32 camera_onLookSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
 s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad);
 void camera_leaveFirstPersonAim(Camera *camera);
 void camera_startTransition(Camera *camera, s32 duration, s32 yaw);

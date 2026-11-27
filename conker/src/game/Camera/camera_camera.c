@@ -1579,7 +1579,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
 
 /* Sound callback while aiming (zoom): follows the player and switches between the gAimZoomSounds[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
-s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
+s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 index;
     u32 oldZoom;
@@ -1587,9 +1587,9 @@ s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
     f32 zoom;
     s32 changed;
 
-    camera = sound->camera;
-    index = sound->data >> 31;
-    oldZoom = sound->data & 0xFFFFFF;
+    camera = sound->callback_param1.camera;
+    index = sound->callback_param2.bits >> 31;
+    oldZoom = sound->callback_param2.bits & 0xFFFFFF;
     zoom = camera->TgetFOVX * -10000.0f;
     changed = 0;
 
@@ -1605,23 +1605,23 @@ s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
         newZoom = zoom;
         if (oldZoom != newZoom) {
             changed = 1;
-            sound->data = (index << 31) | newZoom;
+            sound->callback_param2.bits = (index << 31) | newZoom;
         }
 
         if (changed) {
             if (*soundId != gAimZoomSounds[index][0]) {
-                if (sound->voice != 0) {
-                    sound_stop(sound->voice);
+                if (sound->sound_id != 0) {
+                    sound_stop(sound->sound_id);
                 }
-                sound->voice = 0;
+                sound->sound_id = 0;
                 sound->flags &= ~0x80;
                 *soundId = gAimZoomSounds[index][0];
             }
         } else if (*soundId == gAimZoomSounds[index][0]) {
-            if (sound->voice != 0) {
-                sound_stop(sound->voice);
+            if (sound->sound_id != 0) {
+                sound_stop(sound->sound_id);
             }
-            sound->voice = 0;
+            sound->sound_id = 0;
             *soundId = gAimZoomSounds[index][1];
             sound_play(gAimZoomSounds[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
@@ -1638,7 +1638,7 @@ s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
 }
 /* Sound callback while aiming (look): plays sound 0x61C while the aim angles keep changing, 0x61D
    once they settle. Returns 1 when the aim ended. */
-s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
+s32 camera_onLookSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 count;
     u32 oldKey;
@@ -1646,9 +1646,9 @@ s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
     s32 changed;
     f32 key;
 
-    camera = sound->camera;
-    oldKey = sound->data & 0xFFFFFF;
-    count = sound->data >> 24;
+    camera = sound->callback_param1.camera;
+    oldKey = sound->callback_param2.bits & 0xFFFFFF;
+    count = sound->callback_param2.bits >> 24;
     key = camera->mv->aimYawTarget * camera->mv->aimPitchTarget;
     newKey = *(u32 *)&key & 0xFFFFFF;
     changed = 0;
@@ -1673,22 +1673,22 @@ s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
         } else {
             count = 0;
         }
-        sound->data = (count << 24) | newKey;
+        sound->callback_param2.bits = (count << 24) | newKey;
 
         if (changed) {
             if (*soundId != 0x61C) {
-                if (sound->voice != 0) {
-                    sound_stop(sound->voice);
+                if (sound->sound_id != 0) {
+                    sound_stop(sound->sound_id);
                 }
-                sound->voice = 0;
+                sound->sound_id = 0;
                 sound->flags &= ~0x80;
                 *soundId = 0x61C;
             }
         } else if (*soundId == 0x61C) {
-            if (sound->voice != 0) {
-                sound_stop(sound->voice);
+            if (sound->sound_id != 0) {
+                sound_stop(sound->sound_id);
             }
-            sound->voice = 0;
+            sound->sound_id = 0;
             *soundId = 0x61D;
             sound->flags &= ~0x80;
         }
@@ -1696,7 +1696,7 @@ s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cen
         return 1;
     }
 
-    if (sound->voice == 0 && *soundId == 0) {
+    if (sound->sound_id == 0 && *soundId == 0) {
         sound->flags &= ~0x80;
     }
     return 0;

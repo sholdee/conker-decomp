@@ -377,11 +377,14 @@ struct SoundRecord {
         s32 timer;      /* countdown (sound_chirpCallback, sound_fadeOutCallback) */
         s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
         u16 half[2];
+        Camera *camera; /* the aiming camera (camera_onZoomSound, camera_onLookSound) */
     } callback_param1;
     /* 0x1C */ union {
         s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */
         Actor *obj;     /* the object the delayed sound plays on (sound_actorSound1DelayCallback, game/Audio/ObjectSound/objectsound.c) */
         u16 *ids;       /* sound_followOwnerAnimsCallback: 0-terminated list of the owner's animation ids (Actor.unk84) */
+        u32 bits;       /* camera_onZoomSound: bit 31 the sound kind, bits 0-23 the last zoom; camera_onLookSound: bits 24-31 a
+                         * frame count, bits 0-23 the last aim key */
     } callback_param2;
     /* 0x20 */ s16 pitch_shift_cent;
     /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
@@ -613,7 +616,7 @@ typedef struct {
     /* 0x13C */ Vec3f aimEye;
     /* 0x148 */ Vec3f aimTarget;
     /* 0x154 */ u8  pad154[0xC];
-    /* 0x160 */ Vec3f savedCameraEye;
+    /* 0x160 */ Vec3f savedCameraEye;                /* world position: Camera.eye saved on entering first-person aim (camera_updateFirstPersonAim), restored by camera_easeYawBehind */
     /* 0x16C */ f32 aimYaw;
     /* 0x170 */ f32 aimPitch;
     /* 0x174 */ f32 aimYawTarget;
@@ -622,7 +625,7 @@ typedef struct {
     /* 0x180 */ f32 aimPitchVel;
     /* 0x184 */ f32 aimZoom;
     /* 0x188 */ f32 aimZoomY;
-    /* 0x18C */ f32 savedCameraYaw;
+    /* 0x18C */ f32 savedCameraYaw;                  /* degrees: Camera.CameraAngle saved with savedCameraEye; 999.0f = none saved */
     /* 0x190 */ s32 aimZone;
     /* 0x194 */ u8  aimReset;
     /* 0x195 */ s8  being_sniped;
@@ -1420,17 +1423,17 @@ struct WorldObject {
 
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
-    /* 0x00 */ s16 cmdReceived;
+    /* 0x00 */ s16 cmdReceived;                      /* set when camera_processMessages applies a camera zone command (message 1) this frame */
     /* 0x02 */ s16 cmdId;                            /* id (cmd.id) of the command last started */
     /* 0x04 */ s16 lastType;                         /* cmd.type of the last command run */
-    /* 0x06 */ s16 cancelled;
+    /* 0x06 */ s16 cancelled;                        /* set when the player dies during a command (not type 4, off a rail): CAMERA_MODE_FIXED is popped and the command skipped; cleared by a new command id or a frame with none */
     /* 0x08 */ s16 blending;                         /* still easing back (blend < 1) after a type 1 command */
     /* 0x0A */ u8 padA[0x6];
     /* 0x10 */ f32 blend;                            /* 0..1 easing factor */
     /* 0x14 */ f32 pushRate;                         /* 0..0.04, scales the minimum-distance push */
-    /* 0x18 */ f32 focusX;
+    /* 0x18 */ f32 focusX;                           /* the command's eased focus x, written back to Camera.focus.x */
     /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 focusZ;
+    /* 0x20 */ f32 focusZ;                           /* the same for z */
     /* 0x24 */ f32 minHeight;
     /* 0x28 */ f32 maxHeight;
     /* 0x2C */ f32 maxDistance;
@@ -1485,7 +1488,7 @@ typedef struct CamAim {
     /* 0x24 */ f32 savedTargetDistance;
     /* 0x28 */ f32 savedHeight;
     /* 0x2C */ f32 savedTightness;
-    /* 0x30 */ f32 savedBaseY;
+    /* 0x30 */ f32 savedBaseY;                       /* Camera.baseY on entering aim, restored on exit */
     /* 0x34 */ f32 targetYaw;
     /* 0x38 */ f32 targetPitch;
     /* 0x3C */ f32 pitch;
@@ -1493,7 +1496,7 @@ typedef struct CamAim {
     /* 0x44 */ f32 distance;
     /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.TripodMagnitude passes this */
     /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
-    /* 0x4D */ u8 swing;
+    /* 0x4D */ u8 swing;                             /* the camera swings round to targetYaw (from the player's facing) on entering aim */
     /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
     /* 0x4F */ u8 pad4F[0x1];
     /* 0x50 */ f32 overridePitch;
@@ -1624,7 +1627,7 @@ struct Camera {
     /* 0x274 */ s16 FToFromStatus;
     /* 0x276 */ u8 pad276[0x2];
     /* 0x278 */ f32 FTgetRadius;
-    /* 0x27C */ Vec3f fixedEye;
+    /* 0x27C */ Vec3f fixedEye;                      /* home eye of the fixed (F*) camera: the eye stays on the line from here to target, FTgetRadius short of it */
     /* 0x288 */ Vec3f posePos;                         /* gCameraPoses[FCameraIndex], the fixed pose point (game/Camera/CameraCommands/cameracommands.c) */
     /* 0x294 */ f32 FixedVel;                         /* not accessed by US code */
     /* 0x298 */ s16 CharMoved;
@@ -1641,11 +1644,11 @@ struct Camera {
     /* 0x2F8 */ Vec3f eye;                            /* camera position */
     /* 0x304 */ Vec3f prevEye;
     /* 0x310 */ u8 pad310[0x34];
-    /* 0x344 */ f32 eyeHeight;
+    /* 0x344 */ f32 eyeHeight;                       /* height of the eye above baseY (eye.y - baseY), world units */
     /* 0x348 */ f32 height;
-    /* 0x34C */ f32 idealHeight;
+    /* 0x34C */ f32 idealHeight;                     /* resting value of height (cameraocclusion.c resets height to it each frame) */
     /* 0x350 */ u8 pad350[0x4];
-    /* 0x354 */ f32 baseY;
+    /* 0x354 */ f32 baseY;                           /* world y the camera heights are measured from (floor, water or player height; camera_updateFloorHeights) */
     /* 0x358 */ f32 unk358;
     /* 0x35C */ f32 floorY;
     /* 0x360 */ f32 waterY;                           /* water surface below the eye, -10000.0f = none; eye below it = underwater */
@@ -1709,7 +1712,7 @@ struct Camera {
     /* 0x5F8 */ s16 SideHitsClear;
     /* 0x5FA */ s16 UDHitsCounter;
     /* 0x5FC */ s16 SHitsOffLastFrame;
-    /* 0x5FE */ s16 boxedInTimer;
+    /* 0x5FE */ s16 boxedInTimer;                    /* frames left while scan[0] and scan[1] are both blocked; 60 otherwise. At 0 camera_endUpdate (AvailableModes & 8) re-places the camera at the player */
     /* 0x600 */ u8 blocked;                           /* wall between focus and eye this frame */
     /* 0x601 */ u8 pad601[0x3];
     /* 0x604 */ f32 blockedDistance;
@@ -2776,7 +2779,7 @@ typedef struct CamMsg {
     /* 0x0 */ s32 type;
     /* 0x4 */ union {
         s32 index;               /* types 5, 6 */
-        struct Cfg15128CB0 *cfg; /* type 1 (game/Camera/CameraMessages/cameramessages.c) */
+        TriggerZone *zone;       /* type 1: a camera zone, applied as the current command (camera_processMessages) */
         CamShot *data;           /* types 7, 8, 10 */
         f32 *value;              /* type 9 */
     } arg;                       /* a pointer or a small integer, depending on the type */

@@ -18,25 +18,6 @@ Camera *gSavedCameras; // saved cameras (one per view)
 #include "conker/view.h"
 #include "conker/zone.h"
 
-typedef struct Cfg15128CB0 {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ u8 padC[0xB];
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-} Cfg15128CB0;
-
-
 s32 gCameraCutsceneExitSkips = 0; // number of coming message-6 (leave cutscene mode) events to ignore (set by camera command 27 in game/Script/CameraCmd/cameracmd.c)
 s32 gSavedSniperStates[4] = { 0 }; // per view: SniperState saved over a camera switch
 s32 gSavedAimStates[4] = { 0 }; // per view: aim state saved over a camera switch
@@ -283,20 +264,20 @@ void camera_processMessages(Camera *cam) {
         }
             break;
         case 1:
-            cam->cmd.type = msg->arg.cfg->unk17;
-            cam->cmd.data1 = msg->arg.cfg->unk18;
-            cam->cmd.data2 = msg->arg.cfg->unk1C;
-            cam->cmd.data3 = msg->arg.cfg->unk20;
-            cam->cmd.x = msg->arg.cfg->unk0;
-            cam->cmd.y = msg->arg.cfg->unk2;
-            cam->cmd.z = msg->arg.cfg->unk4;
-            cam->cmd.halfLength = msg->arg.cfg->unk6;
-            cam->cmd.ySize = msg->arg.cfg->unk8;
-            cam->cmd.zSize = msg->arg.cfg->unkA;
-            cam->cmd.cosPitch = msg->arg.cfg->unk28;
-            cam->cmd.sinPitch = msg->arg.cfg->unk24;
-            cam->cmd.cosYaw = msg->arg.cfg->unk30;
-            cam->cmd.sinYaw = msg->arg.cfg->unk2C;
+            cam->cmd.type = msg->arg.zone->subTypeData;
+            cam->cmd.data1 = msg->arg.zone->data1;
+            cam->cmd.data2 = msg->arg.zone->data2;
+            cam->cmd.data3 = msg->arg.zone->data3;
+            cam->cmd.x = msg->arg.zone->x;
+            cam->cmd.y = msg->arg.zone->y;
+            cam->cmd.z = msg->arg.zone->z;
+            cam->cmd.halfLength = msg->arg.zone->xSize;
+            cam->cmd.ySize = msg->arg.zone->ySize;
+            cam->cmd.zSize = msg->arg.zone->zSize;
+            cam->cmd.cosPitch = msg->arg.zone->cosPitch;
+            cam->cmd.sinPitch = msg->arg.zone->sinPitch;
+            cam->cmd.cosYaw = msg->arg.zone->cosYaw;
+            cam->cmd.sinYaw = msg->arg.zone->sinYaw;
             cam->cmdState.cmdReceived = 1;
             break;
         }
