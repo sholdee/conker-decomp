@@ -1,11 +1,6 @@
 #include <ultra64.h>
-#include <math.h>
-#include "conker/beam.h"
-#include "conker/camera.h"
-#include "conker/effect.h"
-#include "conker/game.h"
-#include "conker/math.h"
 
+/* This file's data and .bss, before the headers: after them, the .bss order would change with the number of declarations in them. */
 s32 D_80088A00 = 0; /* not referenced */
 static s32 gDistantTracersActive = 0; /* 1 while the effect runs */
 
@@ -15,6 +10,13 @@ static s32 gDistantTracerAngleSpread; /* angle spread of the bolt ends, in degre
 static s32 gDistantTracerMaxIntensity; /* largest intensity */
 static s32 gDistantTracerPhaseTimer; /* phase timer */
 static s32 gDistantTracerIntensity; /* intensity */
+
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
 
 void effect_updateDistantTracers(void) {
     s32 n;

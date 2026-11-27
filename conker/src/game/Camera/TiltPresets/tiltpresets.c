@@ -6,13 +6,13 @@
 
 
 
-/* Per-preset coefficients for camera_updateAngleOffsets, indexed by Camera.presetIndex. */
+/* Per-preset coefficients for camera_updateAngleOffsets, indexed by Camera.Tightness. */
 typedef struct {
-    /* 0x00 */ f32 unk3A8Scale;
-    /* 0x04 */ f32 unk5E8Scale;
-    /* 0x08 */ f32 unk3A8SpeedScale;
-    /* 0x0C */ f32 unk5E8SpeedScale;
-    /* 0x10 */ f32 unk3A8Bias;
+    /* 0x00 */ f32 pitchScale;
+    /* 0x04 */ f32 yawScale;
+    /* 0x08 */ f32 pitchSpeedScale;
+    /* 0x0C */ f32 yawSpeedScale;
+    /* 0x10 */ f32 pitchBias;
 } CamTiltPreset; // size 0x14
 
 static CamTiltPreset gCameraAngleOffsetPresets[] = {
@@ -21,18 +21,18 @@ static CamTiltPreset gCameraAngleOffsetPresets[] = {
 };
 
 /*
- * Eases the camera's unk3A8/unk5E8 towards targets derived from its angle and the player's speed,
- * using the coefficients of the current preset. If outUnk5E8/outUnk3A8 are given, the targets are
+ * Eases the camera's APitchAngle/YawAngle towards targets derived from its angle and the player's speed,
+ * using the coefficients of the current preset. If outYawAngle/outPitchAngle are given, the targets are
  * written there instead of being applied.
  */
-void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
+void camera_updateAngleOffsets(Camera *camera, f32 *outYawAngle, f32 *outPitchAngle) {
     s32 pad; // matching: unused stack slot keeps the frame layout
-    s32 savedPresetIndex;
-    f32 unk3A8Scale;
-    f32 unk5E8Scale;
-    f32 unk3A8SpeedScale;
-    f32 unk5E8SpeedScale;
-    f32 unk3A8Bias;
+    s32 prevTightness;
+    f32 pitchScale;
+    f32 yawScale;
+    f32 pitchSpeedScale;
+    f32 yawSpeedScale;
+    f32 pitchBias;
     f32 angle;
     f32 sign;
     f32 speed;
@@ -40,7 +40,7 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     f32 foldedAngle;
     s32 snap;
 
-    savedPresetIndex = camera->Tightness;
+    prevTightness = camera->Tightness;
     if (camera->Mode & 0x40) {
         camera->Tightness = 0;
     }
@@ -49,13 +49,13 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         math_springTo(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
         return;
     }
-    unk3A8Scale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Scale;
-    unk5E8Scale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8Scale;
-    unk3A8SpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8SpeedScale;
-    unk5E8SpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8SpeedScale;
-    unk3A8Bias = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Bias;
+    pitchScale = gCameraAngleOffsetPresets[camera->Tightness].pitchScale;
+    yawScale = gCameraAngleOffsetPresets[camera->Tightness].yawScale;
+    pitchSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].pitchSpeedScale;
+    yawSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].yawSpeedScale;
+    pitchBias = gCameraAngleOffsetPresets[camera->Tightness].pitchBias;
     snap = camera->Snap;
-    if ((snap != 0) || (unk3A8Scale == unk3A8SpeedScale)) {
+    if ((snap != 0) || (pitchScale == pitchSpeedScale)) {
         speed = 0.0f;
     } else {
         speed = camera->CharPtr->speed;
@@ -79,12 +79,12 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         sign = 1.0f;
     }
     angle -= 90.0f * sign;
-    target = angle * (1.0f / 90.0f) * unk3A8Scale - angle * speed * (1.0f / 2700.0f) * unk3A8SpeedScale + unk3A8Bias;
+    target = angle * (1.0f / 90.0f) * pitchScale - angle * speed * (1.0f / 2700.0f) * pitchSpeedScale + pitchBias;
     if (camera->Mode & 0x100) {
         target = 0.0f;
     }
-    if (outUnk3A8 != NULL) {
-        *outUnk3A8 = target;
+    if (outPitchAngle != NULL) {
+        *outPitchAngle = target;
     } else if (snap != 0) {
         camera->APitchAngle = target;
         camera->CentPitchAngleVel = 0.0f;
@@ -100,9 +100,9 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     } else if (foldedAngle < -90.0f) {
         foldedAngle = -180.0f - foldedAngle;
     }
-    target = -(foldedAngle * (1.0f / 90.0f) * unk5E8Scale) - foldedAngle * speed * (1.0f / 2700.0f) * unk5E8SpeedScale;
-    if (outUnk5E8 != NULL) {
-        *outUnk5E8 = target;
+    target = -(foldedAngle * (1.0f / 90.0f) * yawScale) - foldedAngle * speed * (1.0f / 2700.0f) * yawSpeedScale;
+    if (outYawAngle != NULL) {
+        *outYawAngle = target;
     } else if (camera->Snap != 0) { // matching: reload, not the snap local
         camera->YawAngle = target;
         camera->CentYawAngleVel = 0.0f;
@@ -111,5 +111,5 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     } else {
         math_springTo(&camera->YawAngle, target, &camera->CentYawAngleVel, 1.5f, 2.5f, camera->SpringTime);
     }
-    camera->Tightness = savedPresetIndex;
+    camera->Tightness = prevTightness;
 }

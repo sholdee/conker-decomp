@@ -156,7 +156,7 @@ void effect_levelHook26(Camera *actor) {
                 camera_loadDistancePreset(actor);
             }
             actor->height = 29.0f;
-            actor->unk34C = 29.0f;
+            actor->idealHeight = 29.0f;
             actor->IdealTripodMagnitude = 200.0f;
             actor->YOffsetTget = -19.0f;
             if (actor->TonyHitsClear == 0) {
@@ -179,7 +179,7 @@ void effect_levelHook26(Camera *actor) {
                 }
                 actor->Tightness = 0;
                 actor->height = 125.0f;
-                actor->unk34C = 125.0f;
+                actor->idealHeight = 125.0f;
                 actor->IdealTripodMagnitude = 220.0f;
                 actor->YOffsetTget = 30.0f;
             }

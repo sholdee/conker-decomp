@@ -3861,7 +3861,7 @@ camera_loadShakeTables	0x1512D238	172	game	c		build/src/game/Camera/ViewMatrix/v
 camera_startShake	0x1512D2E4	20	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
 camera_updateShake	0x1512D2F8	112	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
 camera_emptyViewMatrixHook	0x1512D368	24	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
-func_1512D380	0x1512D380	16	game	c		build/src/game/Camera/CameraStub/camerastub.c.o
+camera_emptySpecialModeHook	0x1512D380	16	game	c		build/src/game/Camera/CameraStub/camerastub.c.o
 camera_updateManualOrbit	0x1512D390	464	game	c		build/src/game/Camera/ManualOrbit/manualorbit.c.o
 camera_queueMessage	0x1512D560	164	game	c		build/src/game/Camera/MessageQueue/messagequeue.c.o
 camera_popMessage	0x1512D604	104	game	c		build/src/game/Camera/MessageQueue/messagequeue.c.o

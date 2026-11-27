@@ -12,6 +12,6 @@ void camera_levelHook34(Camera *camera) {
     }
 }
 
-void camera_levelUpdateWaveChains(s32 arg0) {
+void camera_levelUpdateWaveChains(s32 unused) {
     prop_updateWaveChains();
 }

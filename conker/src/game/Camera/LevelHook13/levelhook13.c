@@ -3,11 +3,11 @@
 #include "conker/camera.h"
 
 
-void camera_levelHook13(Camera *arg0) {
-    arg0->AvailableModes |= 0x10;
-    if (arg0->DistIndex == 3) {
-        arg0->DistMask = 5;
-        arg0->DistIndex = 2;
-        camera_loadDistancePreset(arg0);
+void camera_levelHook13(Camera *camera) {
+    camera->AvailableModes |= 0x10;
+    if (camera->DistIndex == 3) {
+        camera->DistMask = 5;
+        camera->DistIndex = 2;
+        camera_loadDistancePreset(camera);
     }
 }

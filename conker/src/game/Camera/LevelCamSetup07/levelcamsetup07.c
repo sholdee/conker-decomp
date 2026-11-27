@@ -4,7 +4,7 @@
 #include "conker/script.h"
 
 
-void camera_levelSetup07(Camera *arg0) {
+void camera_levelSetup07(Camera *camera) {
     s32 i;
 
     script_command(0, 0x4014, 0);

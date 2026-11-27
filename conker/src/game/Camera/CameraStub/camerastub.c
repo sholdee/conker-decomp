@@ -1,5 +1,5 @@
 #include <ultra64.h>
 
-
-void func_1512D380(struct Camera *camera) {
+/* The handler of camera special mode 0x400000 (camera_runSpecialModes); empty. */
+void camera_emptySpecialModeHook(struct Camera *camera) {
 }

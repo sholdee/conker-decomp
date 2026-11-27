@@ -7,13 +7,13 @@
 
 
 /*
- * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset
+ * Eases the camera's height above baseY (eyeY - baseY) towards its target height: the preset
  * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
  */
 void camera_easeHeight(Camera *camera) {
     f32 targetHeight;
     f32 height;
-    s32 cappedByCeiling; // left unset when unk84 bit 4 is set or unk180 >= unk17C (as in the original)
+    s32 cappedByCeiling; // left unset when AvailableModes bit 4 is set or unk180 >= unk17C (as in the original)
     f32 ceiling;
 
     if (gSpawnCutsceneActive != 0) {
@@ -22,7 +22,7 @@ void camera_easeHeight(Camera *camera) {
     if (!(camera->Mode & 0x100) && camera->DoingRail != 0 && !(camera->RailFlags & 8)) {
         return;
     }
-    height = camera->eye.y - camera->unk354;
+    height = camera->eye.y - camera->baseY;
     if ((camera->SpecialFlags & 0x10) && (camera->PadPtr->button & R_TRIG)) {
         targetHeight = 95.0f;
     } else {
@@ -35,8 +35,8 @@ void camera_easeHeight(Camera *camera) {
         if (camera->CharPtr->floorY < camera->CharPtr->ceilingY) {
             ceiling = camera->CharPtr->ceilingY - 40.0f;
             // matching: the second test recomputes unk17C - 40.0f instead of reusing ceiling
-            if (ceiling < camera->unk354 + targetHeight && camera->unk354 < camera->CharPtr->ceilingY - 40.0f) {
-                targetHeight = ceiling - camera->unk354;
+            if (ceiling < camera->baseY + targetHeight && camera->baseY < camera->CharPtr->ceilingY - 40.0f) {
+                targetHeight = ceiling - camera->baseY;
                 cappedByCeiling = TRUE;
             } else {
                 cappedByCeiling = FALSE;
@@ -70,12 +70,12 @@ void camera_easeHeight(Camera *camera) {
                           camera->AccelB, camera->SpringTime);
         }
     }
-    camera->eye.y = camera->unk354 + height;
-    camera->unk344 = camera->eye.y - camera->unk354;
+    camera->eye.y = camera->baseY + height;
+    camera->eyeHeight = camera->eye.y - camera->baseY;
     if (camera->CharPtr->inwater == 1 && camera->DoingAim != 0 && camera->waterY != -10000.0f) {
         if (camera->eye.y < camera->waterY + 5.0f) {
             camera->eye.y = camera->waterY + 5.0f;
-            camera->unk344 = 5.0f;
+            camera->eyeHeight = 5.0f;
         }
     }
 }

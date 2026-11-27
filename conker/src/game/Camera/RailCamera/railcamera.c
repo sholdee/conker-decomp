@@ -26,11 +26,11 @@ void camera_buildRail(Camera *camera) {
     z = cmd->z;
     scale = cmd->halfLength;
     // matching: scale/dx reuse (horizontal part, then x part) gives IDO's register split
-    dx = cmd->unk24 * scale;
-    dy = cmd->unk28 * scale;
+    dx = cmd->cosPitch * scale;
+    dy = cmd->sinPitch * scale;
     scale = dx;
-    dx = cmd->unk2C * dx;
-    dz = -scale * cmd->unk30;
+    dx = cmd->cosYaw * dx;
+    dz = -scale * cmd->sinYaw;
     rail->start.x = x - dx;
     rail->start.y = y - dy;
     rail->start.z = z - dz;
@@ -43,9 +43,9 @@ void camera_buildRail(Camera *camera) {
     rail->dir.x = scale * span.x;
     rail->dir.y = scale * span.y;
     rail->dir.z = scale * span.z;
-    rail->offset = cmd->unk20;
-    rail->heightOffset = cmd->unk8;
-    rail->offsetMode = cmd->unk1C;
+    rail->offset = cmd->data2;
+    rail->heightOffset = cmd->data3;
+    rail->offsetMode = cmd->data1;
     rail->eyeEaseA = 0.0f;
     rail->eyeEaseB = 0.0f;
 }

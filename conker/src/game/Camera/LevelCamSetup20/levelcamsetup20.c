@@ -3,9 +3,9 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup20(Camera *arg0) {
-    arg0->DistIndex = 3;
-    arg0->DistMask = 15;
-    camera_loadDistancePreset(arg0);
-    arg0->Tightness = 1;
+void camera_levelSetup20(Camera *camera) {
+    camera->DistIndex = 3;
+    camera->DistMask = 15;
+    camera_loadDistancePreset(camera);
+    camera->Tightness = 1;
 }

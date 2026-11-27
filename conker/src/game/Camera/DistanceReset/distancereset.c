@@ -9,7 +9,7 @@ void camera_resetDistances(Camera *camera) {
 
     if (camera->cmd.type != 0 || camera->cmdRunning == 0) {
         camera->height = 117.0f;
-        camera->unk34C = 117.0f;
+        camera->idealHeight = 117.0f;
         camera->IdealTripodMagnitude = 370.0f;
         camera->YOffsetTget = 77.0f;
     }

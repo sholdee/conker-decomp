@@ -6,9 +6,9 @@
 
 
 /* This file's .data. */
-static s32 D_80088800 = 0;
+static s32 gLevelHook06DefaultsApplied = 0; /* 1 once the query-0x5072 branch has restored the default camera; 0 again in the 0x5071-only branch */
 
-/* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from script_query state queries 0x5071/0x5072. */
+/* Updates camera flags and range fields (YOffsetTget/height/idealHeight/IdealTripodMagnitude) from script_query state queries 0x5071/0x5072. */
 void camera_levelHook06(Camera *camera)
 {
   s32 queryBC;
@@ -49,7 +49,7 @@ void camera_levelHook06(Camera *camera)
         }
         camera->SpecialFlags |= 0x200;
         camera->height = 500.0f;
-        camera->unk34C = 500.0f;
+        camera->idealHeight = 500.0f;
         camera->IdealTripodMagnitude = 800.0f;
       }
       else
@@ -87,14 +87,14 @@ void camera_levelHook06(Camera *camera)
       blend = (t < 0.0f) ? 0.0f : (t > 1.0f) ? 1.0f : t;
       if (queryBC == 0)
       {
-        camera->height = camera->unk34C = 200.0f;
+        camera->height = camera->idealHeight = 200.0f;
         camera->YOffsetTget = 100.0f;
       }
       else
       {
         camera->YOffsetTget = (103.0f * blend) + 287.0f;
         camera->IdealTripodMagnitude = (224.0f * blend) + 750.0f;
-        camera->height = camera->unk34C = 231.0f * blend;
+        camera->height = camera->idealHeight = 231.0f * blend;
       }
       script_command(2, 0x9000, 6, 1, 0x20000);
       script_command(2, 0x9000, 6, 0, 4);
@@ -102,7 +102,7 @@ void camera_levelHook06(Camera *camera)
       {
         camera->CharTrackingSpeed = 0.0f;
       }
-      D_80088800 = 0;
+      gLevelHook06DefaultsApplied = 0;
       if (camera->SpecialFlags & 4)
       {
         target = collision_findObjectById(0x10);
@@ -131,10 +131,10 @@ void camera_levelHook06(Camera *camera)
         }
       }
     }
-    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (D_80088800 == 0))
+    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (gLevelHook06DefaultsApplied == 0))
     {
       camera->AvailableModes |= 4;
-      D_80088800 = 1;
+      gLevelHook06DefaultsApplied = 1;
       camera_attachToObject(camera, 0);
       camera->mv->AimState = 0;
       camera->DoingAim = 0;

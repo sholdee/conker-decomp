@@ -4,11 +4,11 @@
 #include "conker/script.h"
 
 
-void camera_levelHook03(Camera *arg0) {
+void camera_levelHook03(Camera *camera) {
     if (script_query(1, 0x403F, 6, 0x2000)) {
-        arg0->AvailableModes |= 0x1000000;
+        camera->AvailableModes |= 0x1000000;
     } else {
-        arg0->AvailableModes &= 0xFEFFFFFF;
+        camera->AvailableModes &= 0xFEFFFFFF;
     }
     if (script_query(1, 0x4019, 6, 0x2000)) {
         script_command(1, 0x9000, 0x10, 0xA0);
