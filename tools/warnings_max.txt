@@ -1,2 +1,5 @@
 # The most IDO warnings the build may have (tools/warncheck.py). Lower it when you remove warnings.
-590
+# 616 = 590 + 26: the particle spawn callback table in spawnshapes.c (2026-11-27, the owner's decision).
+# Its entries are handler functions with their own parameter types, so each gives warning 709, like
+# the other handler tables (see the ObjType comment in include/structs.h).
+616
