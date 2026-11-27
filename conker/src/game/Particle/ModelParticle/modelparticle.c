@@ -67,7 +67,7 @@ static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
 static ParticleFloorType3Fn gModelParticleFloorType3Funcs[] = { NULL };
 static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatter };
 static void (*gModelParticleDestroyFuncs[])() = { NULL, blood_destroyDebris, particle_stopPulseSound };
-static s32 (*gModelParticleSquashFuncs[])() = { particle_updateSquash };
+static ParticleUpdateFn gModelParticleSquashFuncs[] = { particle_updateSquash };
 static s32 (*gModelParticleMatrixFuncs[])() = {
     particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, effect_setParticleIdentityMtx,
     light_getLampParticleMatrix, particle_buildOwnerMatrix,

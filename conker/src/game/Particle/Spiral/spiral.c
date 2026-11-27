@@ -24,8 +24,11 @@ VariantList gSpiralVariantLists[2] = {
     { 16, gSpiralVariant1Ids, gSpiralVariant1Scales },
 };
 
+/* A camera emitter condition: the emitter spawns only while it returns nonzero. */
+typedef s32 (*CameraEmitterCondition)(void);
+
 /* Conditions of the camera emitters (CameraEmitterData.condition). */
-static s32 (*gCameraEmitterConditions[])() = { effect_consumeZoneFlag };
+static CameraEmitterCondition gCameraEmitterConditions[] = { effect_consumeZoneFlag };
 
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
