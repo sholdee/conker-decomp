@@ -36,18 +36,6 @@ typedef struct {
     /* 0xE */ u8 sceneTag;   /* gCutsceneIds[scene] when the sound started */
 } SeqSound;
 
-/* The sound voice handed to the cutscene_updateSound callback. */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ SeqSound *userData;
-} SeqVoice;
-
 /* Owner of a cutscene_startTimer timer (an attachment handle in game/Cutscene/SeqEvents/seqevents.c): `timer` holds the running timer. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];
@@ -70,16 +58,8 @@ typedef struct EvTimer {
 
 /* An object spawned by particle_newModelParticleWithFloor (ProjectileParticle in game/Effects/ProjectilePuffs/projectilepuffs.c), here following a cutscene track. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 unk24;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ u8 pad44[0x12C];
-    /* 0x170 */ SeqTrackState *track;
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ SeqTrackState *track; /* the kind's data after the ModelParticle (extraSize 4) */
 } TrackPhysicsParticle;
 
 /* A particle spawned by particle_newQuadParticle (a DefParticleHead, as BoneBeamParticle in game/Effects/BoneBeamParticle/bonebeamparticle.c), here following a cutscene track. */
@@ -119,10 +99,10 @@ void cutscene_measurePath(s32 track, s32 scene);
 void cutscene_cacheSegment(s32 track, s32 segment, s32 scene);
 void cutscene_applyTracks(s32 scene);
 void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack);
-s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene);
-s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene);
-void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value);
-void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 value);
+s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene);
+s32 cutscene_getHeadAngles(f32 *yaw, f32 *pitch, s32 objIndex, s32 scene);
+void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 heading);
+void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 heading);
 void cutscene_resetSpawnedActors(s32 scene);
 void cutscene_resetActivatedActors(s32 scene);
 void cutscene_addSpawnedActor(s32 id, s32 scene);
@@ -147,16 +127,16 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen);
 s32 cutscene_releasePlayer(s32 scene);
 void cutscene_updateActors(void);
 extern u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
-extern u8 D_800BEBA0;
+extern u8 gStartWithMainUcode;
 extern s32 gDisplayListLimit;
 extern u64 gUcodeText[0x496]; // RSP ucode text buffer
 extern s32 gCutsceneTimes[2]; // per scene: current time
 extern s32 gCutscenePrevTimes[2]; /*time at the previous update */
-extern u8 D_800C35C0[2];
+extern u8 gCutsceneEventsDispatched[2];
 extern u8 gNextCutscene;
 extern u8 gNextCutsceneMap;
 extern u8 gPendingCutscene;
-extern u8 D_800C35C5;
+extern u8 gPendingCutsceneFromIdle;
 extern u16 *gSeqTrackEventCounts[2]; /*each track's event count */
 extern u8 **gSeqTextLists[2]; // per scene: text lists
 extern u8 gCutsceneIds[2]; // per scene: changes with each run of the scene
@@ -176,7 +156,7 @@ extern u8 gCutsceneShowUnboundObjects[2];
 extern u8 gCutsceneKeepSpawnedActors[2];
 extern u8 D_800C365C[2];
 extern u8 gCutsceneRunTimedEvents[2];
-extern u8 D_800C3660[2];
+extern u8 gCutsceneUseCullDistance[2];
 extern u8 gCutsceneHideWorld;
 extern u8 gCutsceneAnchorSet;
 extern u8 gCutsceneIgnorePlayed;
@@ -185,7 +165,7 @@ extern u8 gCutsceneSkipped;
 extern f32 gCutsceneCutbackAngle;
 extern f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 extern s32 gCutsceneEndTransitionTime;
-extern u8 D_800C3680;
+extern u8 gCutsceneKeepCamera;
 extern u8 gCutsceneHideSky;
 extern u8 gCutsceneSolidSky;
 extern u8 gCutsceneNoPause;
@@ -193,14 +173,14 @@ extern SeqEvent *gSeqEventTracks[2][30]; // cutscene script event tracks per sce
 extern SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
 extern SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
 extern u8 *gSeqActiveEvents[2][30];
-extern u8 D_800C3A58;
+extern u8 gCutsceneExitCountdown;
 extern s64 gPlayedCutscenes[69];
 extern u8 gCutsceneSkipState;
 extern u8 gCutsceneSkipFadeTimer;
-extern s8 D_800C3C8A;
-extern u8 D_800C3C8B;
+extern s8 gCutsceneFadeToColor;
+extern u8 gCutsceneFadeInAtEnd;
 extern u8 gCutsceneHoldEnd;
-extern u8 D_800C3C8D;
+extern u8 gCutsceneNoSkipFadeIn;
 extern u16 gCutsceneStartTime;
 extern u8 gCutsceneCallback;
 extern s32 gCutsceneCallbackArg;
@@ -216,14 +196,14 @@ extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSi
 extern u8 ucode_ROM_START[];                 /* ROM start of the RSP microcodes (linker-defined, undefined_syms.us.txt) */
 
 /* game_data_800CBE10.c (data only, owner unknown; linked after game/Collision/Probe/probe) */
-extern u64 D_800CBE10[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
+extern u64 gRspDramStack[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
 
 /* game/Cutscene/StartCallback/startcallback.c */
-void cutscene_startCallback1(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void cutscene_startCallback1(s32 map, s32 cutscene, s32 scene, s32 actorPath);
 
 /* game/Cutscene/SeqEvents/seqevents.c */
 void cutscene_emptyStartHook(void);
-s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 cutscene_updateSound(SoundRecord *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound);
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
                   s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene);
 void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type,
@@ -238,13 +218,13 @@ void cutscene_dispatchEvent(SeqEvent *event, s32 track, s32 index, s32 eventTime
 extern Color24 gCutsceneFadeColours[2]; /* screen fade colours for screen_startViewFade, picked by sequence events */
 
 /* game/Cutscene/EventEffects/eventeffects.c */
-EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
-                       s32 arg6);
+EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 fxOwner,
+                       s32 fxList);
 void cutscene_updateTimer(EvTimer *timer);
-void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4);
-void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4);
+void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 owner, s32 list);
+void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 owner, s32 list);
 s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj);
-void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4);
+void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 owner, s32 list);
 s32 cutscene_updateTrackParticle(TrackParticle *particle);
 
 #endif

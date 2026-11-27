@@ -1140,7 +1140,7 @@ void camera_startZoneShot(Camera *camera) {
         }
         gCameraSnapTimers[0] = 3;
         gCamShot.mode = 1;
-        gCamShot.unk4 = 0;
+        gCamShot.scene = 0;
         radius = 138.0f;
         sideRadius = 46.0f;
         height = 96.0f;
@@ -1148,10 +1148,10 @@ void camera_startZoneShot(Camera *camera) {
         gCamShot.eye.x = (camera->CharPtr->xpos + (radius * sinf(yaw * DEG2RAD))) + (sinf((yaw - 90.0f) * DEG2RAD) * sideRadius);
         gCamShot.eye.y = camera->CharPtr->ypos + height;
         gCamShot.eye.z = (camera->CharPtr->zpos + (radius * cosf(yaw * DEG2RAD))) + (cosf((yaw - 90.0f) * DEG2RAD) * sideRadius);
-        gCamShot.at.angles.sway = 0.0f;
-        gCamShot.at.angles.pitch = pitch;
-        gCamShot.unk8 = 0.0f;
-        gCamShot.at.angles.yaw = yaw - 180.0f;
+        gCamShot.at.aim.roll = 0.0f;
+        gCamShot.at.aim.pitch = pitch;
+        gCamShot.fovOffset = 0.0f;
+        gCamShot.at.aim.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
         camera_queueMessage(camera, 7, &gCamShot);
         return;

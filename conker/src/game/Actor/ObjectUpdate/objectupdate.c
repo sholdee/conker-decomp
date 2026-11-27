@@ -1146,7 +1146,7 @@ void actor_updateCulling(s32 index) {
     yOffset = (gModelDefs[id]->bodyHeight + actor->heightOffset) * actor->scale_y;
     actor->cull_radius_xz = width;
     range = actor->cullDistance;
-    if (gCutsceneStates[0] == 1 && D_800C3660[0] == 0) {
+    if (gCutsceneStates[0] == 1 && gCutsceneUseCullDistance[0] == 0) {
         range = 0;
     }
     maxDist = 0;

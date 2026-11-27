@@ -287,7 +287,7 @@ void game_resetCutscenes(s32 arg0) {
     for (i = 0; i < 3; i++)
     {
         gSubtitles[i].active = 0;
-        gSubtitles[i].isOpen = 0;
+        gSubtitles[i].config.numPages = 0;
     }
 
     gCutsceneHideSky = 0;
@@ -299,7 +299,7 @@ void game_startPendingCutscene(void) {
     s32 tmp = gPendingCutscene - 1;
 
     if (gPendingCutscene != 0) {
-        if (D_800C35C5 == 0) {
+        if (gPendingCutsceneFromIdle == 0) {
             gCutsceneStates[0] = 2;
         }
         gPendingCutscene = 0;

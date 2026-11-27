@@ -204,7 +204,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     s32 skipWorld;
 
     camera = &camera_global_Cameras[view];
-    D_800BEBA0 = 1;
+    gStartWithMainUcode = 1;
     skipWorld = FALSE;
     if (gCutsceneStates[0] == 1 && gCutsceneHideWorld != 0) {
         skipWorld = TRUE;
@@ -264,7 +264,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                         }
                         gSPDisplayList(gfx++, gLevelDisplayLists[1]);
                     }
-                    D_800BEBA0 = 0;
+                    gStartWithMainUcode = 0;
                     if (camera->HitsZBufferReadFlag && (camera->AvailableModes & 8)) {
                         gfx = camera_copyZRow(gfx, camera);
                         gDPPipeSync(gfx++);

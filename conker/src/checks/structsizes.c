@@ -51,6 +51,7 @@ STATIC_ASSERT(sizeof(ActorCtl) == 0x1C0, ActorCtl_size);
 STATIC_ASSERT(sizeof(SpawnRecord) == 0x30, SpawnRecord_size);
 STATIC_ASSERT(sizeof(PlayerStats) == 0x1C, PlayerStats_size);
 STATIC_ASSERT(sizeof(MatchState) == 0x20C, MatchState_size);
+STATIC_ASSERT(sizeof(TextBoxConfig) == 0x30, TextBoxConfig_size);
 STATIC_ASSERT(sizeof(AnimInstance) == 0x3F8, AnimInstance_size);
 STATIC_ASSERT(sizeof(ActorAnim) == 0x8, ActorAnim_size);
 STATIC_ASSERT(sizeof(AnimHeader) == 0x10, AnimHeader_size);
@@ -142,6 +143,7 @@ STATIC_ASSERT(sizeof(ObjTexture) == 0xC, ObjTexture_size);
 STATIC_ASSERT(sizeof(VtxMorphGroup) == 0x8, VtxMorphGroup_size);
 STATIC_ASSERT(sizeof(WaveSample) == 0xC, WaveSample_size);
 STATIC_ASSERT(sizeof(WavePreset) == 0x18, WavePreset_size);
+STATIC_ASSERT(sizeof(SeqEvent) == 0x8, SeqEvent_size);
 STATIC_ASSERT(sizeof(HitReaction) == 0x28, HitReaction_size);
 
 /* effects.h */
@@ -309,6 +311,7 @@ STATIC_ASSERT(sizeof(CamWobbleFalloff) == 0x18, CamWobbleFalloff_size);
 
 /* conker/cutscene.h */
 STATIC_ASSERT(sizeof(EvTimer) == 0x2C, EvTimer_size);
+STATIC_ASSERT(offsetof(TrackPhysicsParticle, track) == 0x170, TrackPhysicsParticle_track); /* after the ModelParticle */
 
 /* conker/effect.h */
 STATIC_ASSERT(sizeof(TextureFrameTables) == 0x8, TextureFrameTables_size);

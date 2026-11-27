@@ -30,12 +30,12 @@ typedef struct {
 
 /* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
    numTracks path-key lists, numTracks entries starting with the SeqTrackInfo table, numChannelLists channel-key lists,
-   numEventLists event lists and numUnkLists gSeqTextLists lists. */
+   numEventLists event lists and numTexts gSeqTextLists texts. */
 typedef struct {
-    u16 numTracks;
-    u16 numChannelLists;
-    u16 numEventLists;
-    u16 numUnkLists;
+    /* 0x0 */ u16 numTracks;
+    /* 0x2 */ u16 numChannelLists;
+    /* 0x4 */ u16 numEventLists;
+    /* 0x6 */ u16 numTexts;
 } SeqFileHeader;
 
 /* A block of the cutscene file; size >> 3 is its count of 8-byte elements. */
@@ -51,7 +51,7 @@ OSScTask *gCurGfxTask;
 OSScTask gGfxTasks[2];
 s32 D_800BEB98;
 u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
-u8 D_800BEBA0;
+u8 gStartWithMainUcode;
 s32 gDisplayListLimit;
 s32 D_800BEBA8[2]; /* not referenced */
 u64 gAltUcodeText[0x496];
@@ -66,15 +66,15 @@ s16 gNextCutsceneAnchorPos[3];
 f32 gNextCutsceneAnchorHeading;
 f32 gCutsceneAnchorTurn;
 u8 gLastCutsceneLevel;
-u8 D_800C35A9;
+u8 gCutsceneChangesLevel;
 u8 gCutsceneKeepPlayer;
 s32 gCutsceneTimes[2]; // per scene: current time
 s32 gCutscenePrevTimes[2]; /* time at the previous update */
-u8 D_800C35C0[2];
+u8 gCutsceneEventsDispatched[2];
 u8 gNextCutscene;
 u8 gNextCutsceneMap;
 u8 gPendingCutscene;
-u8 D_800C35C5;
+u8 gPendingCutsceneFromIdle;
 u16 *gSeqPathKeyCounts[2];
 u16 *gSeqChannelKeyCounts[2];
 u16 *gSeqTrackEventCounts[2]; /* each track's event count */
@@ -96,7 +96,7 @@ u8 gCutsceneShowUnboundObjects[2];
 u8 gCutsceneKeepSpawnedActors[2];
 u8 D_800C365C[2];
 u8 gCutsceneRunTimedEvents[2];
-u8 D_800C3660[2];
+u8 gCutsceneUseCullDistance[2];
 u8 gCutsceneHideWorld;
 u8 gCutsceneAnchorSet;
 SeqFileEntry *gCutsceneFiles[2];
@@ -106,7 +106,7 @@ u8 gCutsceneSkipped;
 f32 gCutsceneCutbackAngle;
 f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 s32 gCutsceneEndTransitionTime;
-u8 D_800C3680;
+u8 gCutsceneKeepCamera;
 u8 gCutsceneHideSky;
 u8 gCutsceneSolidSky;
 u8 gCutsceneNoPause;
@@ -116,14 +116,14 @@ SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
 SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
 u8 *gSeqActiveEvents[2][30];
 SeqTrackPath *gSeqTrackPaths[2];
-u8 D_800C3A58;
+u8 gCutsceneExitCountdown;
 s64 gPlayedCutscenes[69];
 u8 gCutsceneSkipState;
 u8 gCutsceneSkipFadeTimer;
-s8 D_800C3C8A;
-u8 D_800C3C8B;
+s8 gCutsceneFadeToColor;
+u8 gCutsceneFadeInAtEnd;
 u8 gCutsceneHoldEnd;
-u8 D_800C3C8D;
+u8 gCutsceneNoSkipFadeIn;
 u16 gCutsceneStartTime;
 u8 gCutsceneCallback;
 s32 gCutsceneCallbackArg;
@@ -207,7 +207,7 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
     gCurGfxTask->list.t.flags = OS_TASK_LOADABLE;
     gCurGfxTask->list.t.ucode_boot = (u64 *)rspbootTextStart;
     gCurGfxTask->list.t.ucode_boot_size = (s32)rspbootTextEnd - (s32)rspbootTextStart;
-    if (D_800BEBA0 != 0) {
+    if (gStartWithMainUcode != 0) {
         gCurGfxTask->list.t.ucode = gUcodeText;
         gCurGfxTask->list.t.ucode_data = gUcodeData;
     } else {
@@ -215,7 +215,7 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
         gCurGfxTask->list.t.ucode_data = gAltUcodeData;
     }
     gCurGfxTask->list.t.ucode_data_size = 0x800;
-    gCurGfxTask->list.t.dram_stack = D_800CBE10;
+    gCurGfxTask->list.t.dram_stack = gRspDramStack;
     gCurGfxTask->list.t.dram_stack_size = SP_DRAM_STACK_SIZE8;
     gCurGfxTask->list.t.output_buff = (u64 *)gRdpOutputBuffer;
     gCurGfxTask->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
@@ -379,7 +379,7 @@ s32 cutscene_countEvents(s32 scene) {
 void cutscene_resetScene(s32 scene) {
     gCutscenePrevTimes[scene] = -100;
     gCutsceneTimes[scene] = 0;
-    D_800C35C0[scene] = 0;
+    gCutsceneEventsDispatched[scene] = 0;
     gCutsceneStartTime = 0;
     gSeqTrackCounts[scene] = 0;
     gCutsceneStates[scene] = 0;
@@ -394,20 +394,20 @@ void cutscene_resetScene(s32 scene) {
     gCutsceneKeepSpawnedActors[scene] = 0;
     D_800C365C[scene] = 0;
     gCutsceneRunTimedEvents[scene] = 0;
-    D_800C3660[scene] = 0;
+    gCutsceneUseCullDistance[scene] = 0;
     gCutsceneActorLock = 0;
     gCutsceneHideWorld = 0;
     gCutsceneHoldEnd = 0;
-    D_800C3C8D = 0;
+    gCutsceneNoSkipFadeIn = 0;
     gNextCutscene = 0;
-    D_800C3A58 = 0;
+    gCutsceneExitCountdown = 0;
     gCutsceneAnchorTurn = 0.0f;
-    D_800C3C8A = -1;
-    D_800C3C8B = 0;
+    gCutsceneFadeToColor = -1;
+    gCutsceneFadeInAtEnd = 0;
     gCutsceneCutbackAngle = 999.0f;
     gCutsceneEndTransitionYaw = 999.0f;
     gCutsceneEndTransitionTime = 0;
-    D_800C3680 = 0;
+    gCutsceneKeepCamera = 0;
     gCutsceneSkipped = 0;
     gCutsceneChainBobScale = 100;
     gCutsceneCashOffset = -1;
@@ -472,10 +472,10 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
             gPendingCutscene = cutscene + 1;
             game_requestLevelChange(1, map, 0, 0, 0);
             if (gCutsceneStates[scene] != 0) {
-                D_800C35C5 = 0;
+                gPendingCutsceneFromIdle = 0;
                 return;
             }
-            D_800C35C5 = 1;
+            gPendingCutsceneFromIdle = 1;
             return;
         }
         gCutsceneIds[scene] = cutscene;
@@ -505,7 +505,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
             }
             gSeqTrackEventCounts[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
             bzero(gSeqTrackEventCounts[scene], size * sizeof(u16));
-            gSeqTextLists[scene] = allocate_memory(hdr->numUnkLists * sizeof(s32 *), 1, 0, 0);
+            gSeqTextLists[scene] = allocate_memory(hdr->numTexts * sizeof(s32 *), 1, 0, 0);
             gSeqTrackPaths[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackPath), 1, 0, 0);
             for (i = 0; i < hdr->numTracks; i++) {
                 if (gSeqPathKeyCounts[scene][i] != 0) {
@@ -541,7 +541,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
                 gSeqEventTracks[scene][i] = file[k].data;
                 k++;
             }
-            for (i = 0; i < hdr->numUnkLists; i++) {
+            for (i = 0; i < hdr->numTexts; i++) {
                 gSeqTextLists[scene][i] = file[k].data;
                 k++;
             }
@@ -579,7 +579,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
 
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
-   flags gCutsceneChained, gCutsceneNoSkip, gCutsceneKeepPlayer, D_800C35A9) and 0x77 (start time gCutsceneStartTime), and start
+   flags gCutsceneChained, gCutsceneNoSkip, gCutsceneKeepPlayer, gCutsceneChangesLevel) and 0x77 (start time gCutsceneStartTime), and start
    the screen fade (screen_startViewFade) to the gCutsceneFadeColours colour named by the earliest type-1 value-1 event. */
 void cutscene_prescanEvents(s32 scene) {
     s32 i;
@@ -589,7 +589,7 @@ void cutscene_prescanEvents(s32 scene) {
     SeqEvent *events;
 
     gCutsceneChained = 0;
-    D_800C35A9 = 0;
+    gCutsceneChangesLevel = 0;
     gCutsceneNoSkip = 0;
     gCutsceneKeepPlayer = 0;
     gCutsceneStartTime = 0;
@@ -619,7 +619,7 @@ void cutscene_prescanEvents(s32 scene) {
             found = NULL;
             cutscene_findEvent(&events[3], 5, i, &found, 1, 0x44, 0, 0, 0, 0, scene);
             if (found != NULL) {
-                D_800C35A9 = 1;
+                gCutsceneChangesLevel = 1;
             }
 
             found = NULL;
@@ -698,7 +698,7 @@ void cutscene_skip(s32 scene) {
             } while ((chained != 0) && (gPendingCutscene == 0));
         }
     }
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) {
+    if (gCutsceneChangesLevel == 0 && gCutsceneFadeToColor != 1 && gCutsceneNoSkipFadeIn == 0) {
         screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
     }
     for (i = 0; i < 25; i++) {
@@ -812,8 +812,8 @@ void cutscene_checkEnd(s32 scene) {
 
 /* Advance the scene clock gCutsceneTimes by this frame's ticks, clamped to the end time. */
 void cutscene_advanceTime(s32 scene) {
-    if (D_800C3A58 != 0) {
-        D_800C3A58 -= 1;
+    if (gCutsceneExitCountdown != 0) {
+        gCutsceneExitCountdown -= 1;
     }
     gCutscenePrevTimes[scene] = gCutsceneTimes[scene];
     if (gCutsceneStates[scene] == 1) {
@@ -821,7 +821,7 @@ void cutscene_advanceTime(s32 scene) {
         if ((scene != 0) || (gPaused == 0)) {
             gCutsceneTimes[scene] += gRawFrameTicks;
         }
-        if ((D_800C35C0[scene] == 0) &&
+        if ((gCutsceneEventsDispatched[scene] == 0) &&
             (gCutsceneStartTime == gCutscenePrevTimes[scene]) &&
             (gCutsceneStartTime != gCutsceneTimes[scene])) {
             gCutscenePrevTimes[scene] = -1;
@@ -947,7 +947,7 @@ void cutscene_finish(s32 skipped, s32 scene) {
             }
             return;
         }
-        if (D_800C3C8B != 0) {
+        if (gCutsceneFadeInAtEnd != 0) {
             screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
         }
         D_8008FD84[0] = 0;
@@ -965,13 +965,13 @@ void cutscene_restoreControl(s32 scene) {
 
     player = camera_global_Cameras;
     gCamShot.mode = 1;
-    gCamShot.unk4 = scene;
+    gCamShot.scene = scene;
     gCamShot.eye.x = player->eye.x;
     gCamShot.eye.y = player->eye.y;
     gCamShot.eye.z = player->eye.z;
-    gCamShot.at.angles.sway = 0.0f;
-    gCamShot.at.angles.pitch = player->CameraPitch;
-    gCamShot.at.angles.yaw = player->CameraAngle;
+    gCamShot.at.aim.roll = 0.0f;
+    gCamShot.at.aim.pitch = player->CameraPitch;
+    gCamShot.at.aim.yaw = player->CameraAngle;
     if (gSpawnCutsceneActive == 0) {
         camera_queueMessage(player, 7, &gCamShot);
         if (gCutsceneCutbackAngle != 999.0f) {
@@ -985,10 +985,10 @@ void cutscene_restoreControl(s32 scene) {
         }
     }
     if (gNextCutscene == 0 && gSpawnCutsceneActive == 0) {
-        if (D_800C3680 == 0) {
+        if (gCutsceneKeepCamera == 0) {
             camera_queueMessage(player, 6, (void *)scene);
         } else {
-            D_800C3680 = 0;
+            gCutsceneKeepCamera = 0;
         }
     }
     if (gCutsceneKeepSpawnedActors[scene] == 0) {
@@ -1003,7 +1003,7 @@ void cutscene_restoreControl(s32 scene) {
         }
     }
     if (gNextCutscene == 0) {
-        D_800C3A58 = 2;
+        gCutsceneExitCountdown = 2;
         gCutsceneAnchorSet = 0;
         gCutsceneAnchorHeading = gNextCutsceneAnchorHeading;
         gCutsceneAnchorPos[0] = gNextCutsceneAnchorPos[0];
@@ -1031,13 +1031,13 @@ void cutscene_evalTracks(s32 scene) {
     f32 t;
     s32 mask;
     s32 found;
-    s32 n;
+    s32 keyIdx;
     f32 points[4];
     s32 start;
     s32 needed;
     s32 m;
     s32 channel;
-    s32 q;
+    s32 pointIdx;
     s32 next;
     SeqChannelKey *key;
 
@@ -1055,9 +1055,9 @@ void cutscene_evalTracks(s32 scene) {
                 gSeqTrackStates[scene][track].z = 0.0f;
             }
             if (gSeqTrackInfos[scene][track].type == 4) {
-                gSeqTrackStates[scene][track].unkC = 64.0f;
-                gSeqTrackStates[scene][track].unk10 = 0.0f;
-                gSeqTrackStates[scene][track].unk14 = 20.0f;
+                gSeqTrackStates[scene][track].pitch = 64.0f;
+                gSeqTrackStates[scene][track].yaw = 0.0f;
+                gSeqTrackStates[scene][track].roll = 20.0f;
                 gSeqTrackStates[scene][track].unk18 = 255.0f;
                 gSeqTrackStates[scene][track].unk1C = 62.5f;
                 gSeqTrackStates[scene][track].unk20 = 50.0f;
@@ -1066,9 +1066,9 @@ void cutscene_evalTracks(s32 scene) {
                 gSeqTrackStates[scene][track].unk2C = 0.0f;
                 gSeqTrackStates[scene][track].unk34 = 0.0f;
             } else {
-                gSeqTrackStates[scene][track].unkC = 0.0f;
-                gSeqTrackStates[scene][track].unk10 = gCutsceneAnchorTurn;
-                gSeqTrackStates[scene][track].unk14 = 0.0f;
+                gSeqTrackStates[scene][track].pitch = 0.0f;
+                gSeqTrackStates[scene][track].yaw = gCutsceneAnchorTurn;
+                gSeqTrackStates[scene][track].roll = 0.0f;
                 gSeqTrackStates[scene][track].unk18 = -9999.0f;
                 gSeqTrackStates[scene][track].unk1C = -9999.0f;
                 gSeqTrackStates[scene][track].unk20 = -9999.0f;
@@ -1141,11 +1141,11 @@ void cutscene_evalTracks(s32 scene) {
                                 mask = 7;
                                 start = nextKey[j] - 2;
                                 needed = 3;
-                                q = 0;
+                                pointIdx = 0;
                             } else {
                                 start = nextKey[j] - 1;
                                 needed = 2;
-                                q = 1;
+                                pointIdx = 1;
                             }
                             if (nextKey[j] + 1 < numKeys[j]) {
                                 mask |= 8;
@@ -1159,7 +1159,7 @@ void cutscene_evalTracks(s32 scene) {
                                 key = &gSeqChannelKeys[scene][track][m];
                                 if (j == key->channel) {
                                     if (skip == start) {
-                                        points[q++] = key->value;
+                                        points[pointIdx++] = key->value;
                                         needed--;
                                     } else {
                                         skip++;
@@ -1174,15 +1174,15 @@ void cutscene_evalTracks(s32 scene) {
                             }
                             value[j] = math_catmullRom(points, 0, t);
                         } else {
-                            n = 0;
+                            keyIdx = 0;
                             for (k = 0; k < gSeqChannelKeyCounts[scene][track]; k++) {
                                 key = &gSeqChannelKeys[scene][track][k];
                                 if (j == key->channel) {
                                     if (found == -1) {
-                                        if (n == nextKey[j] - 1) {
+                                        if (keyIdx == nextKey[j] - 1) {
                                             found = k;
                                         } else {
-                                            n++;
+                                            keyIdx++;
                                         }
                                     } else {
                                         next = k;
@@ -1200,15 +1200,15 @@ void cutscene_evalTracks(s32 scene) {
                     value[10] = 0.0f;
                 }
                 if (gSeqActiveEvents[scene][track][0] != 0xFF) {
-                    cutscene_getTrackHeading(track, value[10], &gSeqTrackStates[scene][track].unk10, scene);
+                    cutscene_getTrackHeading(track, value[10], &gSeqTrackStates[scene][track].yaw, scene);
                 } else if (value[7] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unk10 = value[7];
+                    gSeqTrackStates[scene][track].yaw = value[7];
                 }
                 if (value[8] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unkC = value[8];
+                    gSeqTrackStates[scene][track].pitch = value[8];
                 }
                 if (value[6] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unk14 = value[6];
+                    gSeqTrackStates[scene][track].roll = value[6];
                 }
                 if (value[5] != -9999.0f) {
                     gSeqTrackStates[scene][track].unk18 = value[5];
@@ -1636,11 +1636,11 @@ void cutscene_applyTracks(s32 scene) {
                     }
                     state = ELEM(scene, track);
                     if (state->unk34 == -9999.0f) {
-                        gCamShot.unk8 = 0.0f;
+                        gCamShot.fovOffset = 0.0f;
                     } else {
                         state->unk34 = (state->unk34 < -20.0f) ? -20.0f : (state->unk34 > 40.0f) ? 40.0f : state->unk34;
                         state = ELEM(scene, track);
-                        gCamShot.unk8 = state->unk34;
+                        gCamShot.fovOffset = state->unk34;
                     }
                     if (state->unk3C == -9999.0f) {
                         tilt3C = 0.0f;
@@ -1652,61 +1652,61 @@ void cutscene_applyTracks(s32 scene) {
                     if (state->unk40 == -9999.0f) {
                         tilt40 = 0.0f;
                         while (0) { } // matching: orders the scene store after the ENT load
-                        gCamShot.unk4 = scene;
+                        gCamShot.scene = scene;
                     } else {
                         state->unk40 = (state->unk40 < -20.0f) ? -20.0f : (state->unk40 > 40.0f) ? 40.0f : state->unk40;
                         if (ENT(scene, track)) { } // matching: same, in this branch
                         state = ELEM(scene, track);
                         tilt40 = state->unk40;
-                        gCamShot.unk4 = scene;
+                        gCamShot.scene = scene;
                     }
                     gCamShot.eye.x = state->x;
                     gCamShot.eye.y = state->y;
                     gCamShot.eye.z = state->z;
                     if (ENT(scene, track)->targetId == 1) {
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
-                        gCamShot.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
-                        gCamShot.unk2C = -state->unk14;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = ELEM(scene, (s8)ENT(scene, track)->refId)->x;
+                        gCamShot.at.look.focus.y = ELEM(scene, (s8)ENT(scene, track)->refId)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = ELEM(scene, (s8)ENT(scene, track)->refId)->z;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
-                        obj = collision_findObjectById(ENT(scene, track)->unk3);
+                        obj = collision_findObjectById(ENT(scene, track)->refId);
                         if (obj == NULL) {
                             continue;
                         }
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = obj->xpos;
-                        gCamShot.at.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = obj->zpos;
-                        gCamShot.unk2C = -state->unk14;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = obj->xpos;
+                        gCamShot.at.look.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = obj->zpos;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 3) {
-                        WorldObject *actor3;
+                        WorldObject *focus;
 
-                        actor3 = gfx_findObjectById(ENT(scene, track)->unk3);
-                        if (actor3 == NULL) {
+                        focus = gfx_findObjectById(ENT(scene, track)->refId);
+                        if (focus == NULL) {
                             continue;
                         }
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = actor3->x;
-                        gCamShot.at.focus.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = actor3->z;
-                        gCamShot.unk2C = -state->unk14;
-                        gCamShot.unk30 = tilt3C;
-                        gCamShot.unk34 = tilt40;
+                        gCamShot.at.look.focus.x = focus->x;
+                        gCamShot.at.look.focus.y = (focus->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = focus->z;
+                        gCamShot.at.look.roll = -state->roll;
+                        gCamShot.at.look.fovX = tilt3C;
+                        gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 0) {
                         gCamShot.mode = 1;
-                        gCamShot.at.angles.sway = -state->unk14;
-                        gCamShot.at.angles.pitch = state->unkC;
-                        gCamShot.at.angles.yaw = state->unk10;
+                        gCamShot.at.aim.roll = -state->roll;
+                        gCamShot.at.aim.pitch = state->pitch;
+                        gCamShot.at.aim.yaw = state->yaw;
                         gCamShot.eye.y += state->yOffset;
-                        gCamShot.unk2C = tilt3C;
-                        gCamShot.unk30 = tilt40;
+                        gCamShot.at.aim.fovX = tilt3C;
+                        gCamShot.at.aim.fovY = tilt40;
                     }
                     if (gSpawnCutsceneActive == 0) {
                         camera_queueMessage(player, 7, &gCamShot);
@@ -1722,9 +1722,9 @@ void cutscene_applyTracks(s32 scene) {
                     actor->x = ELEM(scene, track)->x;
                     actor->y = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
                     actor->z = ELEM(scene, track)->z;
-                    actor->t = ELEM(scene, track)->unkC;
-                    actor->u = ELEM(scene, track)->unk10;
-                    actor->v = ELEM(scene, track)->unk14;
+                    actor->t = ELEM(scene, track)->pitch;
+                    actor->u = ELEM(scene, track)->yaw;
+                    actor->v = ELEM(scene, track)->roll;
                     if (ELEM(scene, track)->unk18 != -9999.0f) {
                         actor->xScale = ELEM(scene, track)->unk18 * 0.01f;
                     }
@@ -1742,10 +1742,10 @@ void cutscene_applyTracks(s32 scene) {
                         actor->alpha = (s32)ELEM(scene, track)->unk34;
                     }
                 } else if (ENT(scene, track)->type == 2) {
-                    Actor *obj2;
+                    Actor *obj;
 
-                    obj2 = collision_findObjectById(ENT(scene, track)->targetId);
-                    cutscene_applyObjectTrack(obj2, scene, track);
+                    obj = collision_findObjectById(ENT(scene, track)->targetId);
+                    cutscene_applyObjectTrack(obj, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
@@ -1847,8 +1847,8 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     if (rescaled) {
                         actor_setScale(obj, obj->scale_xz, obj->scale_y);
                     }
-                    obj->vtilt = gSeqTrackStates[scene][track].unkC;
-                    angle = gSeqTrackStates[scene][track].unk10 + 180.0f;
+                    obj->vtilt = gSeqTrackStates[scene][track].pitch;
+                    angle = gSeqTrackStates[scene][track].yaw + 180.0f;
                     while (angle >= 360.0f) {
                         angle -= 360.0f;
                     }
@@ -1857,7 +1857,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     }
                     obj->angle = obj->langle = obj->fangle = (s16)((u32)(angle * 182.0444489f) - 0x4000);
                     obj->theta = angle;
-                    obj->lean_angle = gSeqTrackStates[scene][track].unk14;
+                    obj->lean_angle = gSeqTrackStates[scene][track].roll;
                     gSeqTrackStates[scene][track].unk34 = (gSeqTrackStates[scene][track].unk34 < 0.0f) ? 0.0f : (gSeqTrackStates[scene][track].unk34 > 255.0f) ? 255.0f : gSeqTrackStates[scene][track].unk34;
                     actor_fadeCommand(obj, 1, gSeqTrackStates[scene][track].unk34, 0, 0);
                     obj->old_xpos = obj->xpos;
@@ -1872,8 +1872,8 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
 
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in gSeqActiveEvents (slot 2: another track's position, slot 1: this track's
-   unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
-s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
+   unk24..unk2C or the player). Returns 1 when yaw, pitch and roll were written, else 0. */
+s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
     Camera *player;
@@ -1893,13 +1893,13 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
         active = gSeqActiveEvents[scene][track];
         if (active[2] != 0xFF) {
             SeqEvent *event;
-            s32 other;
+            s32 otherTrack;
 
             event = &gSeqEventTracks[scene][track][active[2]];
-            other = event->unk5;
-            target[0] = gSeqTrackStates[scene][other].x;
-            target[1] = gSeqTrackStates[scene][other].y + event->unk6;
-            target[2] = gSeqTrackStates[scene][other].z;
+            otherTrack = event->unk5;
+            target[0] = gSeqTrackStates[scene][otherTrack].x;
+            target[1] = gSeqTrackStates[scene][otherTrack].y + event->unk6;
+            target[2] = gSeqTrackStates[scene][otherTrack].z;
             return 0;
         }
         if (active[1] != 0xFF) {
@@ -1907,9 +1907,9 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
 
             event = &gSeqEventTracks[scene][track][active[1]];
             if (event->unk5 == 0) {
-                *outX = gSeqTrackStates[scene][track].unk28;
-                *outY = gSeqTrackStates[scene][track].unk24;
-                *outZ = gSeqTrackStates[scene][track].unk2C;
+                *yaw = gSeqTrackStates[scene][track].unk28;
+                *pitch = gSeqTrackStates[scene][track].unk24;
+                *roll = gSeqTrackStates[scene][track].unk2C;
                 return 1;
             }
             player = camera_global_Cameras;
@@ -1927,9 +1927,9 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
     return 0;
 }
 
-/* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (outA) and unk3C
-   (outB) values, each written twice (0 where unset). */
-s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
+/* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (yaw) and unk3C
+   (pitch) values, each written twice (0 where unset). */
+s32 cutscene_getHeadAngles(f32 *yaw, f32 *pitch, s32 objIndex, s32 scene) {
     s32 track;
 
     if (gCutsceneStates[scene] != 1) {
@@ -1938,17 +1938,17 @@ s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (gSeqPathKeyCounts[scene][track] != 0) {
             if (gSeqTrackInfos[scene][track].type == 2 && movement_obj[objIndex].unique_id == gSeqTrackInfos[scene][track].targetId) {
-                outA[1] = 0.0f;
-                outB[1] = 0.0f;
-                outA[0] = 0.0f;
-                outB[0] = 0.0f;
+                yaw[1] = 0.0f;
+                pitch[1] = 0.0f;
+                yaw[0] = 0.0f;
+                pitch[0] = 0.0f;
                 if (gSeqTrackStates[scene][track].unk3C != -9999.0f) {
-                    outB[0] = gSeqTrackStates[scene][track].unk3C;
-                    outB[1] = outB[0];
+                    pitch[0] = gSeqTrackStates[scene][track].unk3C;
+                    pitch[1] = pitch[0];
                 }
                 if (gSeqTrackStates[scene][track].unk40 != -9999.0f) {
-                    outA[0] = gSeqTrackStates[scene][track].unk40;
-                    outA[1] = outA[0];
+                    yaw[0] = gSeqTrackStates[scene][track].unk40;
+                    yaw[1] = yaw[0];
                 }
                 return 1;
             }
@@ -1958,8 +1958,8 @@ s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
 }
 
 /* Set gCutsceneAnchorPos/gCutsceneAnchorHeading and raise gCutsceneAnchorSet. */
-void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value) {
-    gCutsceneAnchorHeading = value;
+void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 heading) {
+    gCutsceneAnchorHeading = heading;
     gCutsceneAnchorPos[0] = x;
     gCutsceneAnchorPos[1] = y;
     gCutsceneAnchorPos[2] = z;
@@ -1968,8 +1968,8 @@ void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value) {
 
 
 /* Set gNextCutsceneAnchorPos/gNextCutsceneAnchorHeading (copied back to gCutsceneAnchorPos/gCutsceneAnchorHeading when a cutscene ends). */
-void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 value) {
-    gNextCutsceneAnchorHeading = value;
+void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 heading) {
+    gNextCutsceneAnchorHeading = heading;
     gNextCutsceneAnchorPos[0] = x;
     gNextCutsceneAnchorPos[1] = y;
     gNextCutsceneAnchorPos[2] = z;
@@ -2281,7 +2281,7 @@ void cutscene_anchorPaths(s32 scene) {
             }
             if (gSeqTrackInfos[scene][track].targetId == 0) {
                 Actor *obj;
-                obj = collision_findObjectById(gSeqTrackInfos[scene][track].unk3);
+                obj = collision_findObjectById(gSeqTrackInfos[scene][track].refId);
                 if (obj == NULL) {
                     return;
                 }
@@ -2291,7 +2291,7 @@ void cutscene_anchorPaths(s32 scene) {
             } else if (gSeqTrackInfos[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
-                obj = (WorldObject *)(s8)gSeqTrackInfos[scene][track].unk3;
+                obj = (WorldObject *)(s8)gSeqTrackInfos[scene][track].refId;
                 obj = gfx_findObjectById((s32)obj);
                 if (obj == NULL) {
                     return;
@@ -2382,16 +2382,16 @@ s32 cutscene_pickCameraTrack(s32 scene, s32 time) {
     s32 result;
     s32 score;
     SeqEvent *found;
-    SeqEvent *ptr;
+    SeqEvent *events;
 
     result = -1;
     best = 99999;
 
     for (track = 0; track < gSeqTrackCounts[scene]; track++) {
-        ptr = gSeqEventTracks[scene][track];
-        if (ptr != NULL) {
+        events = gSeqEventTracks[scene][track];
+        if (events != NULL) {
             found = NULL;
-            score = cutscene_findEvent(&ptr[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
+            score = cutscene_findEvent(&events[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 if (score < best) {
                     best = score;
@@ -2447,7 +2447,7 @@ void cutscene_releaseSubtitle(SeqSubtitle *sub, s32 force) {
     if (force != 0) {
         text_removeBox(entry->handle);
         entry->handle = 0;
-    } else if (entry->isOpen != 0) {
+    } else if (entry->config.numPages != 0) {
         text_closeBoxSkipPages(entry->handle);
     } else {
         entry->handle = 0;
@@ -2466,7 +2466,7 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen) {
     slot = NULL;
     for (i = 0; i < 3; i++) {
         if (gSubtitles[i].active == track) {
-            if (replaceOpen != 0 && gSubtitles[i].isOpen != 0) {
+            if (replaceOpen != 0 && gSubtitles[i].config.numPages != 0) {
                 slot = gSubtitles;
                 cutscene_releaseSubtitle(slot, 1);
             } else {
@@ -2476,7 +2476,7 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen) {
         }
         if (gSubtitles[i].active == 0) {
             slot = &gSubtitles[i];
-            if (replaceOpen != 0 && slot->isOpen != 0) {
+            if (replaceOpen != 0 && slot->config.numPages != 0) {
                 cutscene_releaseSubtitle(slot, 1);
             }
             break;

@@ -190,7 +190,7 @@ void text_openContextText(s32 arg0) {
         gContextTextBoxConfig.duration = 100;
         gContextTextBoxConfig.numPages = 1;
         gContextTextBoxConfig.unk24 = 0;
-        gContextTextBoxConfig.unk2B = 0;
+        gContextTextBoxConfig.cutsceneOnly = 0;
         gContextTextBoxConfig.screenXPercent = &gContextTextScreenX;
         gContextTextBoxConfig.screenYPercent = &gContextTextScreenY;
         gContextTextBoxConfig.anglePercent = &gContextTextAngle;

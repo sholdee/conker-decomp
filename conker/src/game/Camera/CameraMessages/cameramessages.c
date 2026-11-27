@@ -213,53 +213,53 @@ void camera_processMessages(Camera *cam) {
             cam->eye.y = data->eye.y;
             cam->eye.z = data->eye.z;
             if (data->mode == 0 || data->mode == 2) {
-                cam->focus.x = data->at.focus.x;
-                cam->focus.y = data->at.focus.y;
-                cam->focus.z = data->at.focus.z;
-                cam->FOVX = data->unk30;
-                cam->FOVY = data->unk34;
-                cam->TgetFOVX = data->unk30;
-                cam->TgetFOVY = data->unk34;
+                cam->focus.x = data->at.look.focus.x;
+                cam->focus.y = data->at.look.focus.y;
+                cam->focus.z = data->at.look.focus.z;
+                cam->FOVX = data->at.look.fovX;
+                cam->FOVY = data->at.look.fovY;
+                cam->TgetFOVX = data->at.look.fovX;
+                cam->TgetFOVY = data->at.look.fovY;
                 cam->target = cam->focus;
-                cam->Roll = data->unk2C;
+                cam->Roll = data->at.look.roll;
                 cam->APitchAngle = 0.0f;
                 cam->YawAngle = 0.0f;
                 cam->AddOnPitch = 0.0f;
             } else {
                 pos = gCamShotFocusOffset;
-                while (data->at.angles.sway > 180.0f) {
-                    data->at.angles.sway -= 360.0f;
+                while (data->at.aim.roll > 180.0f) {
+                    data->at.aim.roll -= 360.0f;
                 }
-                while (data->at.angles.pitch > 180.0f) {
-                    data->at.angles.pitch -= 360.0f;
+                while (data->at.aim.pitch > 180.0f) {
+                    data->at.aim.pitch -= 360.0f;
                 }
-                while (data->at.angles.yaw > 180.0f) {
-                    data->at.angles.yaw -= 360.0f;
+                while (data->at.aim.yaw > 180.0f) {
+                    data->at.aim.yaw -= 360.0f;
                 }
-                cam->Roll = data->at.angles.sway;
-                angle = data->at.angles.pitch * 0.01745329238f;
+                cam->Roll = data->at.aim.roll;
+                angle = data->at.aim.pitch * 0.01745329238f;
                 pos.y = sinf(angle) * -pos.z;
                 pos.z = cosf(angle) * pos.z;
                 if (gCameraSnapTimers[0]) {
-                    cam->CameraAngle = data->at.angles.yaw;
-                    cam->TrueCameraAngle = data->at.angles.yaw;
+                    cam->CameraAngle = data->at.aim.yaw;
+                    cam->TrueCameraAngle = data->at.aim.yaw;
                     cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
                     cam->TrueCameraAngleRad = cam->TrueCameraAngle * 0.01745329238f;
                 } else {
                     x = cam->CameraAngle; // matching: dead store steers register allocation
                 }
                 angle = cam->CameraAngle;
-                angle += math_angleDiff(cam->CameraAngle, data->at.angles.yaw) / 1.0f;
+                angle += math_angleDiff(cam->CameraAngle, data->at.aim.yaw) / 1.0f;
                 angle *= 0.01745329238f;
                 pos.x = sinf(angle) * pos.z;
                 pos.z = cosf(angle) * pos.z;
                 pos.x += data->eye.x;
                 pos.y += data->eye.y;
                 pos.z += data->eye.z;
-                cam->FOVX = data->unk2C;
-                cam->FOVY = data->unk30;
-                cam->TgetFOVX = data->unk2C;
-                cam->TgetFOVY = data->unk30;
+                cam->FOVX = data->at.aim.fovX;
+                cam->FOVY = data->at.aim.fovY;
+                cam->TgetFOVX = data->at.aim.fovX;
+                cam->TgetFOVY = data->at.aim.fovY;
                 cam->focus.x = pos.x;
                 cam->focus.y = pos.y;
                 cam->focus.z = pos.z;
@@ -268,8 +268,8 @@ void camera_processMessages(Camera *cam) {
                 cam->YawAngle = 0.0f;
                 cam->AddOnPitch = 0.0f;
             }
-            if (gCutsceneStates[data->unk4] == 1) {
-                gViewFovOffset = data->unk8;
+            if (gCutsceneStates[data->scene] == 1) {
+                gViewFovOffset = data->fovOffset;
                 view_widenFov(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
             if (gCameraSnapTimers[0]) {

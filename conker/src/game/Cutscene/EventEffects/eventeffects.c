@@ -7,9 +7,9 @@
 
 
 /* Starts a timer effect that expires after `duration` frames of gFrameTicks. */
-EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
-                       s32 arg6) {
-    EvTimer *timer = effect_newObject(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
+EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 fxOwner,
+                       s32 fxList) {
+    EvTimer *timer = effect_newObject(0x26, fxList, sizeof(EvTimer), 1, fxOwner, 1);
 
     if (timer == NULL) {
         return NULL;
@@ -44,7 +44,7 @@ void cutscene_updateTimer(EvTimer *timer) {
 }
 
 /* Spawns a particle_spawnDebrisBurst effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
-void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
+void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 owner, s32 list) {
     DebrisBurst def;
     s32 idArg;
     f32 scaleArg;
@@ -67,11 +67,11 @@ void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4)
     def.spin = 26.18200111f;
     idArg = id;
     scaleArg = scale;
-    particle_spawnDebrisBurst(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
+    particle_spawnDebrisBurst(&def, &idArg, &scaleArg, 1, 0.0f, 0, owner, list);
 }
 
 /* Spawns a particle_newModelParticleWithFloor effect that follows a cutscene track (updated by cutscene_updateTrackEffect). */
-void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
+void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 owner, s32 list) {
     struct {
         SeqTrackState *track;
         ParticleSpawn spawn;
@@ -83,9 +83,9 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ar
     packet.spawn.elasticity = 1.0f;
     packet.spawn.sizeXZ = track->unk18 * 0.1f;
     packet.spawn.sizeY = track->unk1C * 0.1f;
-    packet.spawn.rot.x = track->unkC;
-    packet.spawn.rot.y = track->unk10;
-    packet.spawn.rot.z = track->unk14;
+    packet.spawn.rot.x = track->pitch;
+    packet.spawn.rot.y = track->yaw;
+    packet.spawn.rot.z = track->roll;
     packet.spawn.scale.x = 1.0f;
     packet.spawn.scale.y = 1.0f;
     packet.spawn.scale.z = 1.0f;
@@ -115,7 +115,7 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ar
     packet.spawn.fadeStart = 1;
     packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
-    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 4, arg3, arg4);
+    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 4, owner, list);
     if (obj != NULL) {
         memcpy(&obj->track, &packet.track, sizeof(packet.track));
     }
@@ -125,19 +125,19 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ar
 s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj) {
     SeqTrackState *track = obj->track;
 
-    obj->unk18 = track->unk18 * 0.1f;
-    obj->unk1C = track->unk1C * 0.1f;
-    obj->unk20 = track->unkC;
-    obj->unk24 = track->unk10;
-    obj->unk28 = track->unk14;
-    obj->pos.x = track->x;
-    obj->pos.y = track->y;
-    obj->pos.z = track->z;
+    obj->head.sizeXZ = track->unk18 * 0.1f;
+    obj->head.sizeY = track->unk1C * 0.1f;
+    obj->head.rot.x = track->pitch;
+    obj->head.rot.y = track->yaw;
+    obj->head.rot.z = track->roll;
+    obj->head.pos.x = track->x;
+    obj->head.pos.y = track->y;
+    obj->head.pos.z = track->z;
     return 1;
 }
 
 /* Spawns a particle that follows a cutscene track (updated by cutscene_updateTrackParticle). */
-void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4) {
+void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 owner, s32 list) {
     ParticleDef def;
     SeqTrackState *trackArg;
     TrackParticle *particle;
@@ -158,9 +158,9 @@ void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime
     def.pos.x = track->x;
     def.pos.y = track->y;
     def.pos.z = track->z;
-    def.rot.x = track->unkC;
-    def.rot.y = track->unk10;
-    def.rot.z = track->unk14;
+    def.rot.x = track->pitch;
+    def.rot.y = track->yaw;
+    def.rot.z = track->roll;
     def.scale.x = 1.0f;
     def.scale.y = 1.0f;
     def.scale.z = 1.0f;
@@ -175,7 +175,7 @@ void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
 
-    particle = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
+    particle = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, owner, list);
     if (particle != NULL) {
         memcpy(&particle->track, &trackArg, sizeof(trackArg));
     }
@@ -187,9 +187,9 @@ s32 cutscene_updateTrackParticle(TrackParticle *particle) {
 
     particle->head.def.width = track->unk18 * 10.0f;
     particle->head.def.height = track->unk1C * 10.0f;
-    particle->head.def.rot.x = track->unkC;
-    particle->head.def.rot.y = track->unk10;
-    particle->head.def.rot.z = track->unk14;
+    particle->head.def.rot.x = track->pitch;
+    particle->head.def.rot.y = track->yaw;
+    particle->head.def.rot.z = track->roll;
     particle->head.def.pos.x = track->x;
     particle->head.def.pos.y = track->y;
     particle->head.def.pos.z = track->z;

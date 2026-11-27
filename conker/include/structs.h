@@ -746,9 +746,9 @@ typedef struct TextBoxConfig {
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;
-    /* 0x2B */ u8 unk2B;            /* box is removed unless gCutsceneStates == 1 */
+    /* 0x2B */ u8 cutsceneOnly;     /* box is removed unless gCutsceneStates[0] == 1 */
     /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
-} TextBoxConfig;
+} TextBoxConfig; // size 0x30
 
 /* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
 typedef struct {
@@ -842,7 +842,7 @@ typedef struct {
 typedef struct SeqTrackInfo {
     /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (collision_findObjectById), 3 = an actor (gfx_findObjectById)
     /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
-    /* 0x3 */ u8 unk3;
+    /* 0x3 */ u8 refId;     // types 1 and 6: the track index, object id or actor id that targetId selects
     /* 0x4 */ s16 yOffset;
     /* 0x6 */ s16 unk6;
 } SeqTrackInfo; // size 0x8
@@ -1881,24 +1881,11 @@ typedef struct AimPointDef {
     /* 0x14 */ f32 unk14;
 } AimPointDef; // size 0x18
 
-/* A cutscene subtitle slot, gSubtitles[3] (see cutscene_getSubtitleSlot). 0x04..0x33 is the TextBoxConfig passed to text_createBox. */
+/* A cutscene subtitle slot, gSubtitles[3] (see cutscene_getSubtitleSlot). */
 typedef struct {
     /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
     /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
+    /* 0x04 */ TextBoxConfig config; /* passed to text_createBox, which keeps it; config.numPages != 0 while the box is open */
     /* 0x34 */ TextBox *handle; /* text_createBox */
 } SeqSubtitle; // size 0x38
 
@@ -1996,23 +1983,27 @@ typedef struct BloodProfile {
 /* A camera message payload (camera_queueMessage types 7, 8 and 10, applied by camera_processMessages in game/Camera/CameraMessages/cameramessages.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
-    /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
-    /* 0x04 */ s32 unk4;     /* index into gCutsceneStates (cutscene scene) */
-    /* 0x08 */ f32 unk8;     /* copied to gViewFovOffset, the FOV offset, when that scene is active */
-    /* 0x0C */ f32 yaw;      /* types 8 and 10: the end yaw; 999.0f = behind the player */
-    /* 0x10 */ s32 duration; /* type 10: transition length */
+    /* 0x00 */ s32 mode;      /* type 7: 0 or 2 = look at at.look.focus; otherwise aim by at.aim */
+    /* 0x04 */ s32 scene;     /* index into gCutsceneStates (cutscene scene) */
+    /* 0x08 */ f32 fovOffset; /* copied to gViewFovOffset, the FOV offset, when that scene is active */
+    /* 0x0C */ f32 yaw;       /* types 8 and 10: the end yaw; 999.0f = behind the player */
+    /* 0x10 */ s32 duration;  /* type 10: transition length */
     /* 0x14 */ Vec3f eye;
     /* 0x20 */ union {
-        Vec3f focus;
         struct {
-            f32 sway;
-            f32 pitch;
-            f32 yaw;
-        } angles;            /* degrees */
+            /* 0x20 */ Vec3f focus;
+            /* 0x2C */ f32 roll;
+            /* 0x30 */ f32 fovX;
+            /* 0x34 */ f32 fovY;
+        } look;               /* modes 0 and 2 */
+        struct {
+            /* 0x20 */ f32 roll;
+            /* 0x24 */ f32 pitch;
+            /* 0x28 */ f32 yaw;
+            /* 0x2C */ f32 fovX;
+            /* 0x30 */ f32 fovY;
+        } aim;                /* other modes; angles in degrees */
     } at;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
 } CamShot; // size 0x38 (gCutsceneActorLock follows)
 
 /* Zone types: TriggerZone.kind >> 2. Original names (Oct 2000 debugger table); the US spawn table
@@ -2631,10 +2622,10 @@ typedef struct SeqTrackState {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18; // light intensity (light_updateSeqTrack)
+    /* 0x0C */ f32 pitch;
+    /* 0x10 */ f32 yaw;
+    /* 0x14 */ f32 roll;
+    /* 0x18 */ f32 unk18; // light radius (light_updateSeqTrack)
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24; // light colour r, g, b (light_updateSeqTrack)
@@ -3261,7 +3252,7 @@ typedef struct {
     /* 0x4 */ s8 unk4;
     /* 0x5 */ s8 unk5;
     /* 0x6 */ s16 unk6;
-} SeqEvent;
+} SeqEvent; // size 0x8
 
 /* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
