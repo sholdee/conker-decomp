@@ -247,28 +247,17 @@ void effect_growBillboard(BillboardParticle *p) {
     p->tmpl.height = p->tmpl.width;
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
-} Sprite150AED9C;
-
-struct Particle150AED9C {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ Sprite150AED9C *sprite;
-};
-
-/* Sets the sprite's unk1B to unk1C * 8, capped at 255. Always returns 1. */
-s32 func_150AED9C(Particle150AED9C *particle) {
-    Sprite150AED9C *sprite = particle->sprite;
-    s32 value = particle->unk1C * 8;
+/* Motion trail update (gMotionTrailUpdateProcs[2]): sets the alpha to 8 per unit of the trail's life, capped at 255.
+ * Always returns 1. */
+s32 func_150AED9C(MotionTrail *trail) {
+    TrailParams *params = trail->params;
+    s32 value = trail->head.tmpl.life * 8;
 
     if (value > 255) {
         value = 255;
     }
-    sprite->unk1B = value;
-    if (sprite->unk1B < 0) { // always false for a u8, but the original tests it
+    params->motion.alpha = value;
+    if (params->motion.alpha < 0) { // always false for a u8, but the original tests it
         return 0;
     }
     return 1;

@@ -443,7 +443,7 @@ s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, 
         state = actor->state;
         particle.points = actor->points; // matching: kept in the request, a separate local mismatches
         kinds = gPipeLandParticleKinds;
-        state->unk20 = 4;
+        state->state = 4;
         size = math_randomFloat() * 50.0f + 50.0f;
         particle.texture = *(kinds.kind + math_random() % 3U); // matching: kinds.kind[i] grows the frame by 8
         particle.frame = 0;
@@ -491,7 +491,7 @@ s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, 
     pos.pos.z = particle.points[actor->head.start].z;
     pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;
-    motion.halfWidth = state->unk00 * 0.75f;
+    motion.halfWidth = state->halfWidth * 0.75f;
     motion.gravity = state->gravity;
     motion.velocity.x = state->velocityX;
     motion.velocity.y = math_randomFloat() * 15.0f + 15.0f;

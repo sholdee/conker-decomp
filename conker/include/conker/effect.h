@@ -213,14 +213,13 @@ void func_15008BE0(void);
 Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of object type 14 */
 
 /* game/Effects/AttachedBurst/attachedburst.c */
-typedef struct Particle150AED9C Particle150AED9C;
 typedef struct AttachedEffect AttachedEffect;
 void effect_levelHook02(Camera *camera);
 void effect_updateAttachedBurst(AttachedEffect *effect);
 void effect_spawnAttachedBursts(Actor *actor);
 void func_150AECCC(struct42 *particle);
 void effect_growBillboard(BillboardParticle *p);
-s32 func_150AED9C(Particle150AED9C *particle);
+s32 func_150AED9C(MotionTrail *trail);
 s32 effect_fadeQuadSpriteByLife(QuadSprite *sprite);
 void effect_attachedEffectMessage(AttachedEffect *effect, ActorMsg *msg, u8 type);
 

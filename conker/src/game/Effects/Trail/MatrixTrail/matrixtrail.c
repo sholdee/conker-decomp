@@ -22,7 +22,7 @@ typedef struct TrailSpec {
     /* 0x00 */ f32 gravity;
     /* 0x04 */ f32 spawnRate;
     /* 0x08 */ u8 brightness;
-    /* 0x0C */ s32 unkC;
+    /* 0x0C */ s32 itemCount;
     /* 0x10 */ u8 matrixIndex;
     /* 0x14 */ Vec3f offset;
     /* 0x20 */ s16 life;
@@ -117,7 +117,7 @@ MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u
     data.gravity = spec->gravity;
     data.spawnRate = spec->spawnRate;
     data.brightness = spec->brightness;
-    spawn.itemCount = spec->unkC;
+    spawn.itemCount = spec->itemCount;
     data.matrixIndex = spec->matrixIndex;
     data.offset = spec->offset;
     data.life = spec->life;

@@ -2877,8 +2877,8 @@ typedef struct BoneTrail {
         Actor *object;
         WorldObject *worldObj;
     } owner;
-    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
-} BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
+    /* 0x14 */ s32 hiddenParts; /* type 0 only: swapped into owner.object->hiddenParts while drawing */
+} BoneTrail; // size 0x18 (type 1 trails are allocated without hiddenParts)
 
 /* One 12-byte entry of the world-mesh triangle table gCurMapTris (built by func_15000F04 in game/Collision/MapBackground/mapbackground):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,

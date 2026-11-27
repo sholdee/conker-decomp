@@ -69,7 +69,7 @@ void trail_startActorAfterimage(Actor *object, s32 duration, s32 maxDist) {
         trail->timer = duration;
         trail->frames = frames;
         trail->owner.object = object;
-        trail->unk14 = 0;
+        trail->hiddenParts = 0;
         bzero(frames, size);
         trail_appendBoneTrail(trail, &gBoneTrailLists[0]);
     }
@@ -443,7 +443,7 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
         return gfx;
     }
     saved = trail->owner.object->hiddenParts;
-    trail->owner.object->hiddenParts = trail->unk14;
+    trail->owner.object->hiddenParts = trail->hiddenParts;
     bonesOverride = &gBoneTrailMtxs; // matching: IDO keeps the global's address in a register only via a pointer
     for (i = 0; i < numFilled; i++) {
         alphaScale = ((i + 3) * 32 * alpha) >> 8;
@@ -483,13 +483,13 @@ Gfx *trail_drawObjectAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     return gfx;
 }
 
-/* Sets unk14 of an object's type-0 trail. */
+/* Sets hiddenParts of an object's type-0 trail. */
 void func_151898C0(Actor *object, s32 value) {
     BoneTrail *trail;
 
     for (trail = gBoneTrailLists[0]; trail != NULL; trail = trail->next) {
         if (object == trail->owner.object) {
-            trail->unk14 = value;
+            trail->hiddenParts = value;
             return;
         }
     }

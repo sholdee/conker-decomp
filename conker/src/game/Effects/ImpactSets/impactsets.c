@@ -233,7 +233,7 @@ typedef struct {
     /* 0x04 */ u8 pad4[0x17];
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 state;     /* TrailParams.state */
 } FxEmitterData;
 
 /* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / gMotionTrailHitFns handler tables. */
@@ -279,6 +279,6 @@ s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 he
     } else {
         particle_spawnSquash(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
     }
-    data->unk20 = 4;
+    data->state = 4;
     return 1;
 }

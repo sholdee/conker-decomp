@@ -127,7 +127,7 @@ LevelStream *trail_createStreamEmitter(source, textureIndex, id, owner, list)
     data.widthRate = 0.05500000343f;
     data.spawnCount = 0.0f;
     data.id = id;
-    data.unk38 = -16384.0f;
+    data.spawnTc = -16384.0f;
     data.tc = -16384.0f;
     data.unk20 = 0.0f;
     data.textureIndex = textureIndex;
@@ -230,7 +230,7 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
         dx = (emitter->head.tmpl.pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
         dz = (emitter->head.tmpl.pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
         dWidth = (data->baseWidth + sinf(data->widthPhase) * data->widthAmp) - data->width;
-        dTc = data->tc - data->unk38;
+        dTc = data->tc - data->spawnTc;
         width = data->width;
         tc = data->tc;
         gravity = -0.255000025f;
@@ -270,7 +270,7 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
         }
         data->spawnPos = pos;
         data->width = width;
-        data->unk38 = tc;
+        data->spawnTc = tc;
         data->unk20 = unk20;
     }
     return 1;

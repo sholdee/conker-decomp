@@ -6,7 +6,7 @@
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 state;     /* TrailParams.state */
 } EffectSpawnState;
 
 typedef struct {
@@ -74,7 +74,7 @@ s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     state = source->state;
     points = source->points;
     size = math_randomFloat() * 70.0f + 10.0f;
-    state->unk20 = 4;
+    state->state = 4;
 
     switch (math_random() & 1) {
     case 0:
@@ -119,7 +119,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     state = source->state;
     points = source->points;
     size = math_randomFloat() * 10.0f + 10.0f;
-    state->unk20 = 4;
+    state->state = 4;
 
     switch (math_random() & 1) {
     case 0:

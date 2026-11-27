@@ -226,7 +226,7 @@ typedef struct StreamState {
     /* 0x1C */ f32 rate;
     /* 0x20 */ f32 count;
     /* 0x24 */ f32 floor; /* points below this height splash */
-    /* 0x28 */ u8 unk28;
+    /* 0x28 */ u8 colorLevel;   /* grey level of the env colour */
     /* 0x29 */ u8 alpha;
     /* 0x2A */ u8 pad2A[2];
     /* 0x2C */ f32 widthBase;
@@ -240,7 +240,7 @@ typedef struct StreamState {
     /* 0x3E */ s16 texCoordStepRange;
     /* 0x40 */ u8 texCoord;
     /* 0x41 */ u8 trailTexture; /* gEffectTextures index */
-    /* 0x42 */ u8 unk42;
+    /* 0x42 */ u8 renderModes;  /* low nibble: gEffectRenderModes index, high nibble: combiner */
     /* 0x43 */ u8 pad43;
     /* 0x44 */ s32 unk44;
     /* 0x48 */ s32 unk48;
@@ -249,7 +249,7 @@ typedef struct StreamState {
     /* 0x54 */ s32 unk54;
     /* 0x58 */ s32 unk58;
     /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
+    /* 0x60 */ u8 texAxis;      /* 2: the texture runs along T, else along S */
     /* 0x61 */ u8 pad61[3];
     /* 0x64 */ f32 spawnRate;
     /* 0x68 */ f32 spawnCount;
@@ -996,7 +996,7 @@ typedef struct {
     f32 widthPhase;
     f32 widthRate;
     f32 width;
-    f32 unk38;
+    f32 spawnTc; /* tc where the last particle was spawned */
     f32 tc;
     f32 spawnCount; /* particles owed; one is spawned per whole unit */
     f32 floorY;
