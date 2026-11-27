@@ -2000,7 +2000,7 @@ s32 camera_runSpecialModes(Camera *camera) {
     }
 
     if (mode & 0x400000) {
-        func_1512D380(camera);
+        camera_emptySpecialModeHook(camera);
         camera_updateStatus(camera);
         camera_endUpdate(camera);
         return 1;

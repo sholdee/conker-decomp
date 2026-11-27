@@ -397,7 +397,7 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outYawAngle, f32 *outPitchAn
 
 /* game/Camera/CameraMessages/cameramessages.c */
 void camera_processMessages(Camera *cam);
-extern s32 D_80089520;
+extern s32 gCameraCutsceneExitSkips;
 extern s32 gSavedSniperStates[4];
 extern s32 gSavedAimStates[4];
 extern Camera *gSavedCameras;
@@ -442,7 +442,7 @@ void camera_emptyViewMatrixHook(Camera *camera);
 extern Mtx *gViewMtxBuffers[2];
 
 /* game/Camera/CameraStub/camerastub.c */
-void func_1512D380(Camera *camera);
+void camera_emptySpecialModeHook(Camera *camera);
 
 /* game/Camera/ManualOrbit/manualorbit.c */
 void camera_updateManualOrbit(Camera *camera);

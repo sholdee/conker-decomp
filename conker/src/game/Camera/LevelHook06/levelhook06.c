@@ -6,7 +6,7 @@
 
 
 /* This file's .data. */
-static s32 D_80088800 = 0;
+static s32 gLevelHook06DefaultsApplied = 0;
 
 /* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from script_query state queries 0x5071/0x5072. */
 void camera_levelHook06(Camera *camera)
@@ -102,7 +102,7 @@ void camera_levelHook06(Camera *camera)
       {
         camera->CharTrackingSpeed = 0.0f;
       }
-      D_80088800 = 0;
+      gLevelHook06DefaultsApplied = 0;
       if (camera->SpecialFlags & 4)
       {
         target = collision_findObjectById(0x10);
@@ -131,10 +131,10 @@ void camera_levelHook06(Camera *camera)
         }
       }
     }
-    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (D_80088800 == 0))
+    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (gLevelHook06DefaultsApplied == 0))
     {
       camera->AvailableModes |= 4;
-      D_80088800 = 1;
+      gLevelHook06DefaultsApplied = 1;
       camera_attachToObject(camera, 0);
       camera->mv->AimState = 0;
       camera->DoingAim = 0;

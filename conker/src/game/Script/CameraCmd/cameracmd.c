@@ -312,7 +312,7 @@ s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd) {
         camera_reset(cam);
         break;
     case 27:
-        D_80089520 = cmd[2] - 1;
+        gCameraCutsceneExitSkips = cmd[2] - 1;
         break;
     case 13:
         break;

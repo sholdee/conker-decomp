@@ -120,7 +120,7 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     view->CameraRadius = 50.0f;
     view->ForceSwimAngle = 999.0f;
     view->HitsZBufferHoriDataPtr = gCameraZRowBuffers[view->CNumber];
-    D_80089520 = 0;
+    gCameraCutsceneExitSkips = 0;
     gSpawnCutsceneActive = 0;
     gSavedSniperStates[view->CNumber] = 0;
     gSavedAimStates[view->CNumber] = 0;
