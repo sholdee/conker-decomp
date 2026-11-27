@@ -61,7 +61,7 @@ void func_1500E70C(s32 id) {
     }
 }
 
-/* Sets two (shift, scale = 1 / 2^shift) pairs: gLayoutDetailShift/gLayoutDetailScale from gScreenLayout, D_800DCA28/D_800DCA2C
+/* Sets two (shift, scale = 1 / 2^shift) pairs: gLayoutDetailShift/gLayoutDetailScale from gScreenLayout, gPlayerCountDetailShift/gPlayerCountDetailScale
  * from gPlayerCount. */
 void level_setEffectDetail(void) {
     switch (gScreenLayout) {
@@ -81,20 +81,20 @@ void level_setEffectDetail(void) {
     }
     switch (gPlayerCount) {
     case 2:
-        D_800DCA28 = 1;
-        D_800DCA2C = 0.5f;
+        gPlayerCountDetailShift = 1;
+        gPlayerCountDetailScale = 0.5f;
         return;
     case 3:
     case 4:
-        D_800DCA28 = 2;
-        D_800DCA2C = 0.25f;
+        gPlayerCountDetailShift = 2;
+        gPlayerCountDetailScale = 0.25f;
         return;
     case 5:
     case 6:
     case 7:
     case 8:
-        D_800DCA28 = 3;
-        D_800DCA2C = 0.125f;
+        gPlayerCountDetailShift = 3;
+        gPlayerCountDetailScale = 0.125f;
         return;
     case 9:
     case 10:
@@ -104,13 +104,13 @@ void level_setEffectDetail(void) {
     case 14:
     case 15:
     case 16:
-        D_800DCA28 = 4;
-        D_800DCA2C = 0.0625f;
+        gPlayerCountDetailShift = 4;
+        gPlayerCountDetailScale = 0.0625f;
         return;
     case 1:
     default:
-        D_800DCA28 = 0;
-        D_800DCA2C = 1.0f;
+        gPlayerCountDetailShift = 0;
+        gPlayerCountDetailScale = 1.0f;
         return;
     }
 }

@@ -204,7 +204,7 @@ void func_15084C30(Actor *obj);
 s32 collision_getSpawnModelTypeIndex(s32 modelId);
 extern u8 *gModelData[187]; // per model id: model data (just past its header)
 extern ModelDef *gModelDefs[187];
-extern u8 D_800D1F80[187];
+extern u8 gModelDataRefCounts[187];
 extern u8 gModelUnloadTimers[187]; // per model id counter
 extern SpawnRecord *gSpawnRecords;
 extern u8 gSpawnRecordCount;

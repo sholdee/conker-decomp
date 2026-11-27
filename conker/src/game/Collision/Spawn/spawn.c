@@ -4,7 +4,7 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 *gModelData[187]; // per model id: model data (just past its header)
 ModelDef *gModelDefs[187];
-u8 D_800D1F80[187];
+u8 gModelDataRefCounts[187];
 u8 gModelUnloadTimers[187]; // per model id counter
 SpawnRecord *gSpawnRecords;
 u8 gSpawnRecordCount;
@@ -798,10 +798,10 @@ s32 collision_initModelData(Actor *obj, s32 model) {
         val = (s32)gModelData[id];
         *(s32 *)(slot + 0x290) = val;
         *(s32 *)(slot + 0x28C) = val;
-        D_800D1F80[id] += 2;
+        gModelDataRefCounts[id] += 2;
     } else if (mode == 1) {
         if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (s32)gModelData[id]) {
-            if (D_800D1F80[id] != 0) {
+            if (gModelDataRefCounts[id] != 0) {
                 size = gModelVertexCounts[id] * 16;
                 *(s32 *)(slot + 0x28C) = (s32)allocate_memory(size, 1, 2, 2);
                 if (*(s32 *)(slot + 0x28C) == 0) {
@@ -815,14 +815,14 @@ s32 collision_initModelData(Actor *obj, s32 model) {
                 val = (s32)gModelData[id];
                 *(s32 *)(slot + 0x290) = val;
                 *(s32 *)(slot + 0x28C) = val;
-                D_800D1F80[id] += 2;
+                gModelDataRefCounts[id] += 2;
             }
         }
         *(s32 *)(slot + 0x290) = *(s32 *)(slot + 0x28C);
     } else if (mode == 2) {
         for (i = 0; i < 2; i++) {
             if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0 || ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == (s32)gModelData[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
-                if (D_800D1F80[id] != 0) {
+                if (gModelDataRefCounts[id] != 0) {
                     size = gModelVertexCounts[id] * 16;
                     ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)allocate_memory(size, 1, 2, 2);
                     if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0) {
@@ -831,7 +831,7 @@ s32 collision_initModelData(Actor *obj, s32 model) {
                             if (*(s32 *)(slot + 0x28C) != (s32)gModelData[id]) {
                                 heap_free((void *)*(s32 *)(slot + 0x28C));
                             } else {
-                                D_800D1F80[id] -= 1;
+                                gModelDataRefCounts[id] -= 1;
                             }
                             *(s32 *)(slot + 0x28C) = 0;
                         }
@@ -843,7 +843,7 @@ s32 collision_initModelData(Actor *obj, s32 model) {
                     }
                 } else {
                     ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)gModelData[id];
-                    D_800D1F80[id] += 1;
+                    gModelDataRefCounts[id] += 1;
                 }
             }
         }
@@ -885,7 +885,7 @@ void collision_releaseModelData(Actor *obj, s32 model) {
             if (data != gModelData[id]) {
                 heap_setTag((s32 *)data, 3);
             } else {
-                D_800D1F80[id] -= 1;
+                gModelDataRefCounts[id] -= 1;
             }
             obj->modelData[model][i] = NULL;
         }
@@ -1084,7 +1084,7 @@ void collision_updateModelUnload(void) {
                     }
                 }
                 heap_free(gModelData[i] - 0x38);
-                D_800D1F80[i] = 0;
+                gModelDataRefCounts[i] = 0;
                 gModelData[i] = NULL;
             }
         }

@@ -8011,3 +8011,6 @@ collision_loadQuadNodeBitmap = 0x150025FC; // type:func
 collision_allocQuadTreeChecksumEnd = 0x15001B08; // type:func
 collision_loadMapSettingsChecksumEnd = 0x1500310C; // type:func
 level_spawnLightAlphaModel = 0x150121C0; // type:func
+gModelDataRefCounts = 0x800D1F80;
+gPlayerCountDetailShift = 0x800DCA28;
+gPlayerCountDetailScale = 0x800DCA2C;
