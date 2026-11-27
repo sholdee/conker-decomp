@@ -440,8 +440,8 @@ void     n_alSndpSetSound(ALSndId id);
 
 
 /*
- * Conker: Rare's additions to the audio library, in address order. The ones in SDK files (src/libultra/audio)
- * are first in each group; Rare's own files are in src/init/Audio. Rare's functions have the prefix audio_.
+ * Conker: Rare's additions to the audio library, in address order. A file with an SDK name is in
+ * src/libultra/audio, and Rare's own files are in src/init/Audio. Rare's functions have the prefix audio_.
  */
 /* bnkf.c: the SDK's static functions (Rare's _bnkfPatchBank takes a fourth argument), and two of Rare's */
 void    _bnkfPatchBank(ALBank *bank, s32 offset, s32 table, s32 arg3);
