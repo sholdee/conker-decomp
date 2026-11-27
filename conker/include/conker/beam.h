@@ -744,7 +744,7 @@ void beam_unlinkGlow(Glow *glow);
 void beam_destroyFlash(LightEffect *flash);
 void beam_freeFlash(LightEffect *flash);
 void beam_unlinkFlash(LightEffect *flash);
-struct Game1EF500Trail *beam_fireSlotProjectile(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
+struct Game1EF500Trail *beam_fireSlotProjectile(); /* (Actor *actor, u8 slot, u8 arg2, s32 arg3); K&R definition, declared without a prototype */
 void beam_sparkMessage(Bolt *spark, s32 data, u8 type);
 void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type);
 void beam_attachActorLights(Actor *actor);

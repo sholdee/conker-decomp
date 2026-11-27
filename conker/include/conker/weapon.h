@@ -126,8 +126,8 @@ extern u8 gSecondGunMuzzleBone;          /* the bone it is on */
 
 /* game/Weapon/Launcher/launcher.c */
 Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2);
-void weapon_runLauncherMuzzle(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
-void weapon_spawnLauncherFlash(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
+void weapon_runLauncherMuzzle(); /* (Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut); K&R definition, declared without a prototype */
+void weapon_spawnLauncherFlash(); /* (Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3); K&R definition, declared without a prototype */
 void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out);
 void weapon_rumbleLauncher(Actor *obj);
 

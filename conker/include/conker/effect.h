@@ -1259,7 +1259,7 @@ void effect_updateObjects(void);
 void effect_preUpdateObjects(void);
 void effect_preDrawObjects(void);
 Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list);
-void *effect_newObject(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+void *effect_newObject(); /* (s32 type, s32 list, s32 size, s32 arg3, u8 owner, u8 arg5); K&R definition, declared without a prototype */
 /* The 0x18-byte template effect_spawnSpriteFx copies into a new SpriteFx from its anim field on. */
 typedef struct SpriteFxTemplate {
     /* 0x00 */ TextureDesc *anim;
@@ -1282,7 +1282,7 @@ BillboardParticle *effect_spawnBillboard(BillboardTemplate *src, s32 altType, s3
 void effect_updateBillboard(BillboardParticle *p);
 Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex);
 void effect_initQuadFxTemplate(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
-QuadFx *effect_spawnQuadFx(QuadFxData *src, s32 owner, s32 list);
+QuadFx *effect_spawnQuadFx(); /* (QuadFxData *src, u8 owner, s32 list); K&R definition, declared without a prototype */
 void effect_updateQuadFx(QuadFx *fx);
 void effect_updatePendingFree(EffectHeader *obj);
 void effect_linkObject(EffectHeader *obj, s32 type);
@@ -1454,7 +1454,7 @@ void effect_hitReactLava(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2);
 void func_15194F48(Actor *self, Actor *other, u8 *arg2);
-void effect_setOnFire(Actor *self, Actor *other, s32 arg2);
+void effect_setOnFire(); /* (Actor *self, Actor *other, u8 arg2); K&R definition, declared without a prototype */
 void effect_killAndSplitActor(Actor *obj);
 void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *arg2);

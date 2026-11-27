@@ -413,11 +413,11 @@ s32 script_playSound(s32 sound, u32 *cmd);
 s32 script_stopSound(s32 arg0, u32 *cmd);
 s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd);
 s32 script_soundQuery(s32 arg0, s32 arg1, s32 arg2);
-s32 script_playRandomActorSound(s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s32 nearDistance, s32 farDistance);
-void script_playRandomObjectSound(s32 first, s32 last, s32 volume, s32 objId, s32 nearDistance, s32 farDistance);
+s32 script_playRandomActorSound(); /* (s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
+void script_playRandomObjectSound(); /* (s32 first, s32 last, s32 volume, s32 objId, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
 s32 script_playRandomZoneSound(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance);
 s32 script_playRandomSound(s32 first, s32 last, s32 volume);
-void script_playActorSound(s32 sound, s32 volume, s32 path, s32 nearDistance, s32 farDistance, s32 force);
+void script_playActorSound(); /* (u16 sound, s32 volume, s32 path, s16 nearDistance, s32 farDistance, s32 force); K&R definition, declared without a prototype */
 void script_stopActorSound(s32 path, s32 secondVoice);
 s32 script_playPlainSound(s32 sound, s32 volume, s32 cents, s32 pan);
 s32 script_playSoundAtActor(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);

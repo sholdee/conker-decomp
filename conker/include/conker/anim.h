@@ -37,7 +37,7 @@ extern const HitRule *gHitRoutes[56];
 void anim_addIdleCandidate(u8 *list, s32 *count, u8 seq);
 void anim_addIdleCategory(u8 *list, s32 *count, s32 category);
 s32 anim_filterRecentIdles(u8 *candidates, s32 numCandidates, u8 *out, s32 *outLen, u8 *recent);
-void anim_recordIdle(s32 seq, u8 *recent); /* K&R definition: seq is promoted */
+void anim_recordIdle(); /* (u8 seq, u8 *recent); K&R definition, declared without a prototype */
 void anim_pushRecentIdle(u8 seq, u8 *recent);
 void anim_advanceIdlePhase(void);
 void anim_forgetRecentIdle(s32 seq, u8 *recent);

@@ -208,7 +208,7 @@ void event_spawnImpactBlast(u8 variant);
 void event_spawnImpactBlast1(s32 cmd);
 void event_spawnImpactBlast0(s32 cmd);
 void func_15070D24(s32 cmd);
-void func_15070F60(u8 cmd);
+void func_15070F60(); /* (u8 cmd); K&R definition, declared without a prototype */
 void func_15071230(s32 cmd);
 void func_15071254(s32 cmd);
 void event_spawnTwoSidedEmitter(s32 cmd);
