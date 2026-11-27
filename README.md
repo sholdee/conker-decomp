@@ -164,6 +164,12 @@ Fur Day* is the property of its owners, and this project is not affiliated with 
   decompilation of the game. Its translation-unit boundaries and many struct, field and function names
   were adopted here by address, and its data-layout notes informed the data work. It is also the place
   to go for assets.
+- The decompilations of Rare's other N64 games, which share the modified audio library:
+  [Perfect Dark](https://github.com/n64decomp/perfect_dark) by Ryan Dwyer,
+  [Donkey Kong 64](https://gitlab.com/dk64_decomp/dk64),
+  [Diddy Kong Racing](https://github.com/DavidSM64/Diddy-Kong-Racing) and
+  [Banjo-Kazooie](https://gitlab.com/banjo.decomp/banjo-kazooie). Byte matches with their code gave the
+  SDK names of many audio functions and the file layout of `src/libultra/audio/`.
 - [ultralib](https://github.com/decompals/ultralib) (decompiled libultra),
   [splat](https://github.com/ethteck/splat) and [spimdisasm](https://github.com/Decompollaborate/spimdisasm),
   [asm-processor](https://github.com/simonlindholm/asm-processor),

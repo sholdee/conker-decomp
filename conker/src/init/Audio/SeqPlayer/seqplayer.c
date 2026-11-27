@@ -102,7 +102,7 @@ void audio_init(void) {
     func_10017944(1, 2);
 }
 
-/* Stop the player's sequence unless it is already stopped or stopping. */
+/* Play the player's sequence if it is stopped or paused (state 3). */
 void audio_playSeqIfStopped(u8 player) {
     if (n_alCSPGetState(gSeqPlayers[player]) == AL_STOPPED ||
         n_alCSPGetState(gSeqPlayers[player]) == 3) {
