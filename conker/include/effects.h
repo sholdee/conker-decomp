@@ -3107,7 +3107,7 @@ typedef struct Struct150C29F0 {
     /* 0x28 */ DiscEmitter unk28;
 } Struct150C29F0; /* size 0x38 */
 
-/* Sight beams (laser tripwires) and sight sprites, game/Sight/SightBeam/sightbeam.c and game/Sight/SightHud/sighthud.c. They are here and
+/* Sight beams (laser tripwires) and sight sprites, game/Sight/SightBeam/sightbeam.c and game/Effects/Sight/effects_sight.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
 
 /* Animation parameters copied into an emitter part by sight_spawnEmitter. */

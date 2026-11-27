@@ -628,7 +628,7 @@ typedef struct {
     /* 0x195 */ s8  being_sniped;
     /* 0x196 */ s8  being_s_char;
     /* 0x197 */ u8  SniperState;      // nonzero while aiming in first person (our earlier name: aimState)
-    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game/Camera/Camera/camera.c)
+    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game/Camera/camera_camera.c)
     /* 0x199 */ u8  shotCount;
     /* 0x19A */ u8  numGrenades;
     /* 0x19B */ u8  GrenadeThrowState;

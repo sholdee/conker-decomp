@@ -270,7 +270,7 @@ s32 particle_updateSlidingSprite(SlidingSprite *sprite) {
 }
 
 /*
- * Camera hooks, called each frame by game/Camera/Camera/camera.c with the camera's player index, depending on
+ * Camera hooks, called each frame by game/Camera/camera_camera.c with the camera's player index, depending on
  * whether its eye is at or below its unk360 height ("below") and was so last frame. "Special" means
  * camera status bit 4 or mode bit 0x40000 is set.
  */

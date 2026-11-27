@@ -789,7 +789,7 @@ segments:
       - [0x14F620, c, game/Camera/HeadingToPoint/headingtopoint]
       - [0x14F8F0, c, game/Camera/OrbitEye/orbiteye]
       - [0x14FE30, c, game/Camera/YawFollow/yawfollow]
-      - [0x14FF90, c, game/Camera/Camera/camera]
+      - [0x14FF90, c, game/Camera/camera_camera]
       - [0x155C90, c, game/Camera/TiltPresets/tiltpresets]
       - [0x156160, c, game/Camera/CameraMessages/cameramessages]
       - [0x156D70, c, game/Camera/CameraPoses/cameraposes]
@@ -953,7 +953,7 @@ segments:
       - [0x1F2730, c, game/Weapon/SegmentShot/segmentshot]
       - [0x1F3780, c, game/Weapon/JointShot/jointshot]
       - [0x1F4650, c, game/Sight/SightBeam/sightbeam]
-      - [0x1F7050, c, game/Sight/SightHud/sighthud]
+      - [0x1F7050, c, game/Effects/Sight/effects_sight]
       - [0x1FA770, c, game/Trail/LevelStream/levelstream]
       - [0x1FEA80, c, game/Trail/TrackerTrail/trackertrail]
       - [0x1FF760, c, game/Effects/ActorSoundBurst/actorsoundburst]
@@ -1130,7 +1130,7 @@ segments:
       - {start: 0x22DF04, type: .data, name: game/Prop/PropUpdates/propupdates, linker_section_order: .rodata}
       - {start: 0x22DF30, type: .data, name: game/Camera/CameraData/cameradata, linker_section_order: .rodata}
       - {start: 0x22DF80, type: .data, name: game/Camera/OrbitEye/orbiteye, linker_section_order: .rodata}
-      - {start: 0x22DFA0, type: .data, name: game/Camera/Camera/camera, linker_section_order: .rodata}
+      - {start: 0x22DFA0, type: .data, name: game/Camera/camera_camera, linker_section_order: .rodata}
       - {start: 0x22DFB0, type: .data, name: game/Camera/TiltPresets/tiltpresets, linker_section_order: .rodata}
       - {start: 0x22DFE0, type: .data, name: game/Camera/CameraMessages/cameramessages, linker_section_order: .rodata}
       - {start: 0x22E010, type: .data, name: game/Camera/CameraPoses/cameraposes, linker_section_order: .rodata}
@@ -1207,7 +1207,7 @@ segments:
       - {start: 0x234660, type: .data, name: game/Effects/FollowEffects/followeffects, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game/Effects/StatCounter/statcounter, linker_section_order: .rodata}
       - {start: 0x234690, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
-      - {start: 0x2346D0, type: .data, name: game/Sight/SightHud/sighthud, linker_section_order: .rodata}
+      - {start: 0x2346D0, type: .data, name: game/Effects/Sight/effects_sight, linker_section_order: .rodata}
       - {start: 0x2346F0, type: .data, name: game/Trail/LevelStream/levelstream, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game/Effects/BoneFollower/bonefollower, linker_section_order: .rodata}
       - {start: 0x234730, type: .data, name: game/Particle/HitImpact/hitimpact, linker_section_order: .rodata}
@@ -1490,7 +1490,7 @@ segments:
       - [0x247F30, .rodata, game/Camera/HeadingToPoint/headingtopoint]
       - [0x247F40, .rodata, game/Camera/OrbitEye/orbiteye]
       - [0x247F60, .rodata, game/Camera/YawFollow/yawfollow]
-      - [0x247F70, .rodata, game/Camera/Camera/camera]
+      - [0x247F70, .rodata, game/Camera/camera_camera]
       - [0x248070, .rodata, game/Camera/TiltPresets/tiltpresets]
       - [0x248090, .rodata, game/Camera/CameraMessages/cameramessages]
       - [0x2480D0, .rodata, game/Camera/CameraPoses/cameraposes]
@@ -1615,7 +1615,7 @@ segments:
       - [0x24F550, .rodata, game/Weapon/SegmentShot/segmentshot]
       - [0x24F5C0, .rodata, game/Weapon/JointShot/jointshot]
       - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
-      - [0x24F740, .rodata, game/Sight/SightHud/sighthud]
+      - [0x24F740, .rodata, game/Effects/Sight/effects_sight]
       - [0x24F9A0, .rodata, game/Trail/LevelStream/levelstream]
       - [0x24FB68, .rodata, game/Trail/TrackerTrail/trackertrail]
       - [0x24FB70, .rodata, game/Effects/ActorSoundBurst/actorsoundburst]
@@ -1737,7 +1737,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DBED0, name: game/Gfx/WorldObject/worldobject}
       - {start: 0x255880, type: .bss, vram: 0x800DBFC0, name: game/Prop/PropLinks/proplinks}
       - {start: 0x255880, type: .bss, vram: 0x800DBFF0, name: game/Camera/CameraData/cameradata}
-      - {start: 0x255880, type: .bss, vram: 0x800DC000, name: game/Camera/Camera/camera}
+      - {start: 0x255880, type: .bss, vram: 0x800DC000, name: game/Camera/camera_camera}
       - {start: 0x255880, type: .bss, vram: 0x800DC010, name: game/Camera/CameraMessages/cameramessages}
       - {start: 0x255880, type: .bss, vram: 0x800DC020, name: game/Camera/CameraPoses/cameraposes}
       - {start: 0x255880, type: .bss, vram: 0x800DC0C0, name: game/Camera/CameraOcclusion/cameraocclusion}

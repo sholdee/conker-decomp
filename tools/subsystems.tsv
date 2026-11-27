@@ -181,7 +181,7 @@ src/game/Bone/BoneRemap/boneremap.c	bone	data-only unit: bone remap byte lists a
 src/game/Boot/GameMain/gamemain.c	boot	game entrypoint: subsystem init and main loop
 src/game/Camera/AimAtObject/aimatobject.c	camera	aim at object
 src/game/Camera/AimCamera/aimcamera.c	camera	aim camera mode and aim ray
-src/game/Camera/Camera/camera.c	camera	player camera per-frame update (camera.c)
+src/game/Camera/camera_camera.c	camera	player camera per-frame update (camera.c)
 src/game/Camera/CameraCommands/cameracommands.c	camera	camera commands and path following
 src/game/Camera/CameraData/cameradata.c	camera	data-only unit: identity matrix, camera frame count, camera table, hold timers
 src/game/Camera/CameraMessages/cameramessages.c	camera	camera message pump and point easing
@@ -607,7 +607,7 @@ src/game/Script/ZoneCmd/zonecmd.c	script	record command/query handlers
 src/game/Shadow/BlobShadow/blobshadow.c	shadow	blob shadows under objects
 src/game/Shadow/RealTimeShadow/realtimeshadow.c	shadow	real-time shadows
 src/game/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
-src/game/Sight/SightHud/sighthud.c	sight	split from game_1F4650.c; same subsystem
+src/game/Effects/Sight/effects_sight.c	sight	split from game_1F4650.c; same subsystem
 src/game/Sprite/FadeSprite/fadesprite.c	sprite	fade-in/hold/fade-out sprite
 src/game/Sprite/LevelSprites/levelsprites.c	sprite	sprite animation callbacks
 src/game/Sprite/PointGroup/pointgroup.c	sprite	rotated texcoords and point groups
