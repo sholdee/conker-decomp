@@ -205,21 +205,21 @@ void particle_updateGatherParticle(BillboardParticle *particle) {
         px = (px << 8) | particle->tmpl.subX;
         vx = data->velX;
         vx = (vx << 8) | data->velSubX;
-        px += vx * D_800BE9E4;
+        px += vx * gFrameTicks;
         particle->tmpl.x = px >> 8;
         particle->tmpl.subX = px & 0xFF;
         py = particle->tmpl.y;
         py = (py << 8) | particle->tmpl.subY;
         vy = data->velY;
         vy = (vy << 8) | data->velSubY;
-        py += vy * D_800BE9E4;
+        py += vy * gFrameTicks;
         particle->tmpl.y = py >> 8;
         particle->tmpl.subY = py & 0xFF;
         pz = particle->tmpl.z;
         pz = (pz << 8) | particle->tmpl.subZ;
         vz = data->velZ;
         vz = (vz << 8) | data->velSubZ;
-        pz += vz * D_800BE9E4;
+        pz += vz * gFrameTicks;
         particle->tmpl.z = pz >> 8;
         particle->tmpl.subZ = pz & 0xFF;
     }
@@ -546,7 +546,7 @@ void particle_updateSwellParticle(BillboardParticle *particle) {
         particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
     if (particle->tmpl.life < data->swellStart) {
-        s16 growth = data->swellRate * D_800BE9E4;
+        s16 growth = data->swellRate * gFrameTicks;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;
@@ -577,7 +577,7 @@ void particle_updateSwellTint(BillboardParticle *particle) {
         particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
     if (particle->tmpl.life < data->swellStart) {
-        s16 growth = data->swellRate * D_800BE9E4;
+        s16 growth = data->swellRate * gFrameTicks;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;

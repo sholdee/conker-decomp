@@ -444,7 +444,7 @@ void light_getLitColourAt(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, 
     sum[0] = color[0];
     sum[1] = color[1];
     sum[2] = color[2];
-    v = D_800D9E21 & 0x7F;
+    v = gViewGfxLightCount & 0x7F;
     count = v - 1;
     i = 0;
     if (count > 0) {

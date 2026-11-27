@@ -101,7 +101,7 @@ void effect_updateBoneFollower(BoneFollower *follower) {
     math_transformOffset(&follower->offset, &position, &actor->ob_matrix_ptr[follower->bone]);
 
     if (follower->flags & 1) {
-        follower->timer -= D_800BE9E4;
+        follower->timer -= gFrameTicks;
         if (follower->timer < 0) {
             if (follower->expireFn != -1) {
                 gBoneFollowerExpireFuncs[follower->expireFn](follower, &position);
@@ -205,7 +205,7 @@ void effect_updateFollowerGroup(ActorFollowerGroup *group) {
         group->flags &= ~2;
     }
     if (group->flags & 1) {
-        group->timer -= D_800BE9E4;
+        group->timer -= gFrameTicks;
         if (group->timer < 0) {
             if (group->expireFn != -1) {
                 gFollowerGroupExpireFuncs[group->expireFn](group);

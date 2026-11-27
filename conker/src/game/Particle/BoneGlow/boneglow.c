@@ -5,7 +5,7 @@
 /* Emitter handlers run by particle_followBoneGlow before it follows the bone. Returning 0 ends the emitter's
  * update (particle_followBoneGlow returns 0); setting *follow to FALSE skips this frame's bone follow. */
 /* Declared without a prototype: func_151C9B64 takes its SightStatusObject. */
-static s32 (*gBoneGlowFollowFuncs[])() = { func_1518A214, func_1518A2E8, func_1518A324, func_151C9B64 };
+static s32 (*gBoneGlowFollowFuncs[])() = { func_1518A214, particle_hideBoneGlowWhileEyeClosed, particle_hideBoneGlowWithoutExpression, func_151C9B64 };
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
 BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
@@ -110,7 +110,7 @@ s32 func_1518A214(BoneGlow *emitter, u8 *follow) {
 }
 
 /* Handler: while the target's byte 0x6A is set, clears flag 2 and stops. */
-s32 func_1518A2E8(BoneGlow *emitter, u8 *follow) {
+s32 particle_hideBoneGlowWhileEyeClosed(BoneGlow *emitter, u8 *follow) {
     if (emitter->attach.target->eyeClosed[0] != 0) {
         emitter->head.def.flags &= ~2;
         *follow = FALSE;
@@ -121,7 +121,7 @@ s32 func_1518A2E8(BoneGlow *emitter, u8 *follow) {
 }
 
 /* Handler: once the target's byte 0x6F is clear, clears flag 2 and stops. */
-s32 func_1518A324(BoneGlow *emitter, u8 *follow) {
+s32 particle_hideBoneGlowWithoutExpression(BoneGlow *emitter, u8 *follow) {
     if (emitter->attach.target->expression == 0) {
         emitter->head.def.flags &= ~2;
         *follow = FALSE;

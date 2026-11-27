@@ -261,7 +261,7 @@ void camera_stepDistancePreset(Camera *camera) {
         return;
     }
     if (camera->ZoomCounter > 0) {
-        camera->ZoomCounter -= D_800BE9E4;
+        camera->ZoomCounter -= gFrameTicks;
         if (camera->ZoomCounter < 0) {
             camera->ZoomCounter = 0;
         }
@@ -390,7 +390,7 @@ void camera_updateFollow(Camera *camera) {
     savedDistance = camera->IdealTripodMagnitude;
     camera->blocked = 0;
     camera->blockedDistance = camera->IdealTripodMagnitude;
-    if (D_800C3671 == 0) {
+    if (gSpawnCutsceneActive == 0) {
         if (camera->cmdState.maxDistance != 0.0f) {
             camera->IdealTripodMagnitude = (camera->cmdState.maxDistance < camera->IdealTripodMagnitude) ? camera->cmdState.maxDistance : camera->IdealTripodMagnitude;
         }
@@ -816,7 +816,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
                 goalY = camera->CharPtr->ypos + height * 0.25f;
             } else if (camera->AvailableModes & 0x20000000) {
                 goalY = camera->CharPtr->floorY + height;
-            } else if ((D_800C3671 != 0) || (camera->CharPtr->unk137 != 0) ||
+            } else if ((gSpawnCutsceneActive != 0) || (camera->CharPtr->unk137 != 0) ||
                        (camera->CharPtr->animseq.uh == 0x194) || (camera->CharPtr->inwater == 1)) {
                 goalY = camera->CharPtr->ypos + height;
             } else if ((-10000.0f == camera->waterY) && !(camera->AvailableModes & 0x20000000) && !(camera->AvailableModes & 0x200000) &&
@@ -1220,7 +1220,7 @@ void camera_filterButtons(Camera *camera) {
         camera->CameraButtons &= ~CAM_C_BUTTONS;
     }
 
-    if ((D_800C3671 != 0) || (camera->SpecialFlags & 0x80)) {
+    if ((gSpawnCutsceneActive != 0) || (camera->SpecialFlags & 0x80)) {
         camera->CameraButtons &= ~(R_TRIG | CAM_C_BUTTONS);
         camera->PadPtr->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
@@ -1241,7 +1241,7 @@ void camera_filterButtons(Camera *camera) {
     }
 
     if ((camera->Mode & 0x40) && (camera->AimTimeOuts != 0)) {
-        camera->AimTimeOuts -= D_800BE9E4;
+        camera->AimTimeOuts -= gFrameTicks;
         camera->CameraButtons &= ~R_TRIG;
         camera->PadPtr->button &= ~R_TRIG;
         if (camera->AimTimeOuts <= 0) {
@@ -1643,7 +1643,7 @@ s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
         if (oldKey != newKey) {
             if (count < 10) {
                 if ((((oldKey - newKey) < 0) ? -(oldKey - newKey) : (oldKey - newKey)) > 100) {
-                    count += D_800BE9E4;
+                    count += gFrameTicks;
                 }
             } else {
                 changed = 1;
@@ -1696,7 +1696,7 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
 
     ext = obj->mv;
     zone = ext->rt_context_b;
-    dt = D_800BE9E4 * (1.0f / 60.0f);
+    dt = gFrameTicks * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
         contPad->button |= R_TRIG;
     }
@@ -1878,7 +1878,7 @@ s32 camera_updateTransition(Camera *camera) {
             camera->AvailableModes |= 8;
             break;
         }
-        camera->transition.LerpCurrentFrames -= D_800BE9E4;
+        camera->transition.LerpCurrentFrames -= gFrameTicks;
         if (camera->transition.LerpCurrentFrames < 0) {
             camera->transition.LerpCurrentFrames = 0;
         }
@@ -1955,7 +1955,7 @@ s32 camera_runSpecialModes(Camera *camera) {
 
     mode = camera->Mode;
     if (mode & 0x80000) {
-        func_1512A360(camera);
+        camera_updateFrontEndPath(camera);
         camera->target = camera->focus;
         camera_updateSway(camera);
         camera_updateStatus(camera);

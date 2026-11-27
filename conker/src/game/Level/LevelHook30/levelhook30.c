@@ -7,15 +7,15 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* This file's .data: the current values, targets and easing velocities of three channels. */
-static f32 D_800888C0 = 255.0f;
-static f32 D_800888C4 = 255.0f;
-static f32 D_800888C8 = 255.0f;
-static f32 D_800888CC = 255.0f;
-static f32 D_800888D0 = 255.0f;
-static f32 D_800888D4 = 255.0f;
-static f32 D_800888D8 = 0.0f;
-static f32 D_800888DC = 0.0f;
-static f32 D_800888E0 = 0.0f;
+static f32 gHook30Value0 = 255.0f;
+static f32 gHook30Value1 = 255.0f;
+static f32 gHook30Value2 = 255.0f;
+static f32 gHook30Target0 = 255.0f;
+static f32 gHook30Target1 = 255.0f;
+static f32 gHook30Target2 = 255.0f;
+static f32 gHook30Velocity0 = 0.0f;
+static f32 gHook30Velocity1 = 0.0f;
+static f32 gHook30Velocity2 = 0.0f;
 static s32 D_800888E4[7] = { 0 }; /* not referenced */
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
@@ -24,41 +24,41 @@ void level_hook30(Camera *camera) {
     if (script_query(1, 0x403D, 6, 0x9000)) {
         camera->AvailableModes |= 0x80021000;
         if (script_query(1, 0x4043, 6, 0x9000)) {
-            D_800888CC = 64.0f;
-            D_800888D0 = 255.0f;
-            D_800888D4 = 255.0f;
+            gHook30Target0 = 64.0f;
+            gHook30Target1 = 255.0f;
+            gHook30Target2 = 255.0f;
         } else if (script_query(1, 0x4044, 6, 0x9000)) {
-            D_800888CC = 255.0f;
-            D_800888D0 = 64.0f;
-            D_800888D4 = 255.0f;
+            gHook30Target0 = 255.0f;
+            gHook30Target1 = 64.0f;
+            gHook30Target2 = 255.0f;
         } else if (script_query(1, 0x4045, 6, 0x9000)) {
-            D_800888CC = 255.0f;
-            D_800888D0 = 255.0f;
-            D_800888D4 = 64.0f;
+            gHook30Target0 = 255.0f;
+            gHook30Target1 = 255.0f;
+            gHook30Target2 = 64.0f;
         } else {
-            D_800888CC = 255.0f;
-            D_800888D0 = 255.0f;
-            D_800888D4 = 255.0f;
+            gHook30Target0 = 255.0f;
+            gHook30Target1 = 255.0f;
+            gHook30Target2 = 255.0f;
         }
     } else {
-        D_800888CC = 255.0f;
-        D_800888D0 = 255.0f;
-        D_800888D4 = 255.0f;
+        gHook30Target0 = 255.0f;
+        gHook30Target1 = 255.0f;
+        gHook30Target2 = 255.0f;
         camera->AvailableModes &= ~0x80021000;
         camera->AvailableModes |= 8;
     }
-    math_springTo(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->SpringTime);
-    math_springTo(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->SpringTime);
-    math_springTo(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->SpringTime);
-    script_command(1, 0x30F5, 0x12, (u8)D_800888C0);
-    script_command(1, 0x30F4, 0x12, (u8)D_800888C4);
-    script_command(1, 0x30F3, 0x12, (u8)D_800888C8);
-    script_command(1, 0x30FA, 0x12, (u8)D_800888C0);
-    script_command(1, 0x30F9, 0x12, (u8)D_800888C4);
-    script_command(1, 0x30F8, 0x12, (u8)D_800888C8);
+    math_springTo(&gHook30Value0, gHook30Target0, &gHook30Velocity0, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&gHook30Value1, gHook30Target1, &gHook30Velocity1, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&gHook30Value2, gHook30Target2, &gHook30Velocity2, 4.0f, 6.0f, camera->SpringTime);
+    script_command(1, 0x30F5, 0x12, (u8)gHook30Value0);
+    script_command(1, 0x30F4, 0x12, (u8)gHook30Value1);
+    script_command(1, 0x30F3, 0x12, (u8)gHook30Value2);
+    script_command(1, 0x30FA, 0x12, (u8)gHook30Value0);
+    script_command(1, 0x30F9, 0x12, (u8)gHook30Value1);
+    script_command(1, 0x30F8, 0x12, (u8)gHook30Value2);
 }
 
-/* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s mv->death_State is set, kills
+/* Steps four scroll counters by gFrameTicks; then, unless movement_obj[0]'s mv->death_State is set, kills
  * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through blood_spawnHitEffects .. actor_kill(6). */
 void level_updateHazardProps(s32 arg0) {
@@ -66,10 +66,10 @@ void level_updateHazardProps(s32 arg0) {
     s32 propIndex;
     s32 i;
 
-    gTile0ScrollS += D_800BE9E4 * 40;
-    gTile0ScrollT += D_800BE9E4 * -66;
-    gTile1ScrollS += D_800BE9E4 * -8;
-    gTile1ScrollT += D_800BE9E4 * 92;
+    gTile0ScrollS += gFrameTicks * 40;
+    gTile0ScrollT += gFrameTicks * -66;
+    gTile1ScrollS += gFrameTicks * -8;
+    gTile1ScrollT += gFrameTicks * 92;
 
     if (movement_obj->mv->death_State == 0) {
         for (i = 0; i < 3; i++) {

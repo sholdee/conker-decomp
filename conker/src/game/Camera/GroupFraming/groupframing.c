@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /**
- * Frames the first D_8008FD8C objects of movement_obj: the camera looks at their max X, mean Y (+150) and
+ * Frames the first gPlayerCount objects of movement_obj: the camera looks at their max X, mean Y (+150) and
  * mid Z, and backs off along +X/+Y by the largest Z spread from the middle (at least 300, plus 100).
  * unk2BC..unk2C4 is the look-at point, unk2F8..unk300 the eye position.
  */
@@ -19,7 +19,7 @@ void camera_frameGroup(Camera *camera) {
     minX = 10000.0f;
     maxX = -10000.0f;
     sumY = 0.0f;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         x = movement_obj[i].xpos;
         if (x < minX) {
             minX = x;
@@ -36,13 +36,13 @@ void camera_frameGroup(Camera *camera) {
             maxZ = z;
         }
     }
-    sumY /= D_8008FD8C;
+    sumY /= gPlayerCount;
     camera->target.x = maxX;
     camera->target.y = sumY + 150.0f;
     maxDist = 0.0f;
     midZ = (minZ + maxZ) * 0.5f;
     camera->target.z = midZ;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         dx = (movement_obj[i].xpos - maxX) * 0.5f;
         if (dx < 0.0f) {
             dx = 0.0f;

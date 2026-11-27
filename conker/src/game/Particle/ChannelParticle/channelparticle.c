@@ -98,14 +98,14 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
 s32 particle_flickerChannelParticle(ChannelParticle *particle) {
     ParticleChannels *motion = &particle->motion;
 
-    motion->timerA -= D_800BE9E4;
+    motion->timerA -= gFrameTicks;
     if (motion->timerA < 0) {
         motion->timerA = math_random() % motion->periodA;
         motion->targetA = math_randomFloat() * (motion->maxA - motion->minA) + motion->minA;
     }
     particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->rateA;
 
-    motion->timerB -= D_800BE9E4;
+    motion->timerB -= gFrameTicks;
     if (motion->timerB < 0) {
         motion->timerB = math_random() % motion->periodB;
         if (math_random() & 3) {
@@ -116,7 +116,7 @@ s32 particle_flickerChannelParticle(ChannelParticle *particle) {
     }
     particle->head.def.height += (motion->targetB - particle->head.def.height) * motion->rateB;
 
-    motion->timerC -= D_800BE9E4;
+    motion->timerC -= gFrameTicks;
     if (motion->timerC < 0) {
         motion->timerC = math_random() % motion->periodC;
         motion->targetC = math_random() % (motion->maxC - motion->minC + 1) + motion->minC;

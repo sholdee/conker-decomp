@@ -80,7 +80,7 @@ void player_updateFlying(Actor *actor) {
         if (gCurrentPad->button & R_TRIG) {
             mag = 0.0f;
         }
-        angle += D_800CC280;
+        angle += gCameraYawAngle;
         actor->fangle = actor->langle;
         if (mag > 1.0f) {
             actor->fangle = angle;
@@ -333,7 +333,7 @@ void player_updateFlying(Actor *actor) {
     actor_playAnim(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150F43F0(Camera *actor) {
+void player_levelHook24(Camera *actor) {
     if (actor->CharContext == 0x3B) {
         script_command(0, 0x405C, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {

@@ -48,7 +48,7 @@ s32 particle_flickerSize(FlickerParticle *effect) {
 
     params = &effect->params;
 
-    params->heightTimer -= D_800BE9E4;
+    params->heightTimer -= gFrameTicks;
     if (params->heightTimer < 0) {
         params->heightTimer = math_random() % 6U;
         if (math_random() & 3) {
@@ -59,14 +59,14 @@ s32 particle_flickerSize(FlickerParticle *effect) {
     }
     effect->head.def.height += (params->heightTarget - effect->head.def.height) * 0.359f;
 
-    params->widthTimer -= D_800BE9E4;
+    params->widthTimer -= gFrameTicks;
     if (params->widthTimer < 0) {
         params->widthTimer = math_random() % 17U;
         params->widthTarget = math_randomFloat() * (params->widthMax - params->widthMin) + params->widthMin;
     }
     effect->head.def.width += (params->widthTarget - effect->head.def.width) * 0.186f;
 
-    params->unk24Timer -= D_800BE9E4;
+    params->unk24Timer -= gFrameTicks;
     if (params->unk24Timer < 0) {
         params->unk24Timer = math_random() % 15U;
         params->unk24Target = math_randomFloat() * (params->unk24Max - params->unk24Min) + params->unk24Min;

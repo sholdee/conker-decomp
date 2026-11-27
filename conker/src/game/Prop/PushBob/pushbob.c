@@ -36,8 +36,8 @@ void prop_bobAndSway(WorldObject *obj) {
     obj->yOffset = cosf(WORK(obj)->bob.heightPhase * 9.58738e-05f) * heightScale;
     sway = cosf(WORK(obj)->bob.swayPhase * 9.58738e-05f) * swayScale;
     obj->t = sway;
-    WORK(obj)->bob.heightPhase += heightRate * D_800BE9E4;
-    WORK(obj)->bob.swayPhase += swayRate * D_800BE9E4;
+    WORK(obj)->bob.heightPhase += heightRate * gFrameTicks;
+    WORK(obj)->bob.swayPhase += swayRate * gFrameTicks;
     obj->moveY = obj->y - previousY;
     obj->spinX = sway - previousSway;
 }
@@ -104,13 +104,13 @@ void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     } else if (timer > 0) { // matching: the redundant test is in the original (blezl)
         if (value > 0) {
             value += 1;
-            WORK(obj)->push.timer = timer - D_800BE9E4;
+            WORK(obj)->push.timer = timer - gFrameTicks;
             if (WORK(obj)->push.timer <= 0) {
                 WORK(obj)->push.timer = -1;
             }
         } else {
             value -= 1;
-            WORK(obj)->push.timer = timer - D_800BE9E4;
+            WORK(obj)->push.timer = timer - gFrameTicks;
             if (WORK(obj)->push.timer <= 0) {
                 WORK(obj)->push.timer = -1;
             }
@@ -167,5 +167,5 @@ s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other) {
 }
 
 /* Does nothing. */
-void func_15116924(s32 arg0) {
+void prop_emptyBehavior71(s32 arg0) {
 }

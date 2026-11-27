@@ -27,7 +27,7 @@ void effect_updateBounceRecords(void) {
                 target = -target;
             }
             diff = target - gBounceRecords[i].speed;
-            step = D_800BE9E4 * 16;
+            step = gFrameTicks * 16;
             dist = diff < 0 ? -diff : diff;
             if (dist < step) {
                 gBounceRecords[i].speed = target;

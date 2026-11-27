@@ -39,10 +39,10 @@ void save_beginScan(void);
 extern s8 gEepromRequest; // the pending EEPROM request
 extern ModeSettings *gModeSettings; // saved settings, one record per multiplayer mode
 extern u8 gSaveScanning; // scanning the EEPROM save files
-extern s16 D_800BE3DC;
+extern s16 gScanBestFlagCount;
 extern u8 D_800BE3DE;
-extern s8 D_800BE3DF;
-extern u8 D_800BE3E0;
+extern s8 gCheckpointLevel;
+extern u8 gCheckpointSpawn;
 extern u32 D_800BE3E4; // saved clock (seconds)
 extern s32 gPlayTime; // play time (seconds)
 extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
@@ -57,18 +57,18 @@ s32 save_pollEepromWrite(s32 arg0);
 void save_resetSettings(void);
 void save_validateSettings(void);
 s32 save_invertBits(s32 value);
-void func_151DDBA0(void);
+void save_quitToFrontEnd(void);
 void save_updatePauseMenu(void);
 void func_151DE6CC(void);
-void func_151DE6D4(void);
+void save_updateStartupScene(void);
 void func_151DE7D4(void);
 void func_151DE81C(void);
 void func_151DE85C(void);
 void func_151DE8E8(void);
 void save_updateMenuPages(void);
 void func_151DF1BC(void);
-void func_151DF574(void);
-void func_151DFF38(void);
+void save_updateListPage(void);
+void save_updateSaveSlotPage(void);
 void save_updateModeSelectPage(void);
 void save_updateOptionsPage(void);
 void save_updateJoinPage(void);
@@ -77,10 +77,10 @@ void save_updateTeamPage(void);
 void func_151E2284(void);
 void save_applyModeSettings(void);
 void save_storeModeSettings(void);
-s32 func_151E24F0(s32 *out);
+s32 save_addPartnerPlayers(s32 *out);
 void save_setupMatch(void);
-void func_151E30C4(void);
-void func_151E327C(void);
+void save_startListSelection(void);
+void save_startSavedGame(void);
 void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fade);
 void save_updateModeIntro(void);
 void save_playModeIntro(void);
@@ -99,46 +99,46 @@ void save_endMatch(s32 flag);
 void save_resetControllerMap(void);
 void save_updatePulse(void);
 void func_151E562C(void);
-s8 func_151E564C(void);
+s8 save_isFreeForAll(void);
 s32 save_checkMatchOver(void);
 s32 save_getTeam(s32 player);
-s8 func_151E5FAC(void);
+s8 save_getScreenCount(void);
 /* void save_recordHit(Actor *source, Actor *victim, s32 cause) is declared in the files that call it:
    game/Actor/ActorMotion/actormotion.c was compiled with a u8 cause. */
 void save_loadTextBank(s32 bank);
 void save_forgetTextBanks(void);
-void func_151E6C1C(s32 index);
+void save_updateMenuCamera(s32 index);
 void func_151E7DC0(void);
-void func_151E7E9C(void);
+void save_applySoundMode(void);
 void save_checkCodeTamper(void);
 void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx);
 void save_clearMenuCharacters(void);
-void func_151E8214(void);
-void func_151E82B8(void);
-void func_151E83E8(void);
+void save_startCredits(void);
+void save_updateCredits(void);
+void save_updateAfterCredits(void);
 extern s8 D_8008FD70;
 extern u8 gFrontEndFadeStep;
-extern s32 D_8008FD78;
+extern s32 gMatchTimeLeft;
 extern s8 D_8008FD7C;
 extern u8 D_8008FD80;
 extern s8 D_8008FD84[4];
 extern s8 D_8008FD88;
-extern s8 D_8008FD8C;
-extern s8 D_8008FD90;
-extern s8 D_8008FD94;
+extern s8 gPlayerCount;
+extern s8 gHumanCount;
+extern s8 gHumansRemaining;
 extern s8 gPauseConfirm;
 extern s8 D_8008FD9C;
 extern s8 gExtraPlayerSlots; /* extra (non-controller) slots in the player list */
-extern u8 D_8008FDA4;
+extern u8 gMenuLoadStep;
 extern s8 gCurrentSaveSlot;
 extern s16 D_8008FDAC;
-extern s8 gMenuListRow; /* highlighted row of the func_151DF574 list */
+extern s8 gMenuListRow; /* highlighted row of the save_updateListPage list */
 extern u8 D_8008FDB4;
 extern u8 D_8008FDB8;
-extern u16 D_8008FDBC;
-extern u16 D_8008FDC0;
+extern u16 gMatchFlags;
+extern u16 gMatchHudFlags;
 extern s8 D_8008FDC4;
-extern s8 D_8008FDC8;
+extern s8 gFreeForAll;
 extern s16 D_8008FDCC; /* save_updatePauseMenu reads its low byte */
 extern f32 D_8008FDD0;
 extern MenuState *gMenuState;
@@ -148,12 +148,12 @@ extern s8 D_8008FDE0;
 extern s8 D_8008FDE4;
 extern f32 D_8008FDE8;
 extern void (*gFrontEndStateHandlers[12])(void);
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
+extern f32 gHudScaleX;
+extern f32 gHudScaleY;
 extern s32 D_8008FE24;
-extern s8 D_8008FE28;
+extern s8 gFrontEndInputDelay;
 extern s8 gPauseCursor;
-extern s8 D_8008FE30;
+extern s8 gSettingsLoaded;
 extern u8 D_8008FE34;
 extern f32 D_8008FE38;
 extern f32 D_8008FE3C;
@@ -165,8 +165,8 @@ extern s8 gSettingMaxes[23]; /* settings maximums */
 extern s8 D_8008FE9C[8];
 extern u32 D_8008FEA4[8];
 extern s8 D_8008FEC4[32];
-extern s8 D_8008FEE4[8]; /* per team preset: row of D_800AB74C */
-extern const u8 D_800AB62C[10][3]; /* team colours (RGB) */
+extern s8 D_8008FEE4[8]; /* per team preset: row of gPlayerCountLimits */
+extern const u8 gTeamColorsRGB[10][3]; /* team colours (RGB) */
 extern s8 D_8008FEEC;
 extern s8 D_8008FEF0;
 extern s8 D_8008FEF8;
@@ -183,7 +183,7 @@ extern s8 D_8008FF80[6];
 extern u8 D_8008FF88[8];
 extern f32 D_8008FF90[8];
 extern u8 D_8008FFB0[2][6];
-extern s16 D_800E0A80;
+extern s16 gCreditsLine;
 extern s32 gFrontEndTimer;
 extern u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 extern u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
@@ -202,8 +202,8 @@ extern s8 D_800E0BB1;
 extern u8 D_800E0BB8[16];
 extern s8 D_800E0BC8[4];
 extern u16 D_800E0BCC;
-extern s8 D_800E0BCE[2];
-extern s8 D_800E0BD0;
+extern s8 gPartnerSlots[2];
+extern s8 gBotDifficulty;
 extern u8 D_800E0BD1;
 extern s8 D_800E0BD2;
 extern s8 D_800E0BD3;

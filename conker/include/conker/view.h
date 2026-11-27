@@ -83,7 +83,7 @@ extern MtxF gViewMatrices[4];
 extern MtxF gViewProjMatrices[4];
 extern PointLightGfx *gViewGfxLights[4];
 extern u8 gViewGfxLightMax;
-extern u8 D_800D9E21;
+extern u8 gViewGfxLightCount;
 extern PointLight *gPickedLights[14];
 void view_initDefaultProjection(s32 arg0);
 void view_widenFov(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near);

@@ -19,7 +19,7 @@ typedef struct {
 #define SWING_WORK(obj) ((SwingWork *)&(obj)->touch)
 #define CLOCK_WORK(obj) ((ClockWork *)&(obj)->touch)
 
-void func_1510AA20(s32 arg0) {
+void prop_levelUpdateRainOnly(s32 arg0) {
     effect_updateRain(0);
 }
 
@@ -43,7 +43,7 @@ void prop_updateClock(WorldObject *minuteHand) {
     if (oldMinute < 0) {
         oldMinute += 60;
     }
-    minuteHand->moveData.word += D_800BE9E4;
+    minuteHand->moveData.word += gFrameTicks;
     if (minuteHand->moveData.word >= 12 * 60 * 60 * 60) {
         minuteHand->moveData.word -= 12 * 60 * 60 * 60;
     }
@@ -80,10 +80,10 @@ void prop_updateClock(WorldObject *minuteHand) {
 }
 
 /* Swings obj->t (x rotation) by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
-void func_1510ADD8(WorldObject *obj) {
+void prop_swingClockPendulum(WorldObject *obj) {
     f32 rot;
 
-    SWING_WORK(obj)->phase += (3.1415927f * D_800BE9E4) / 60.0f;
+    SWING_WORK(obj)->phase += (3.1415927f * gFrameTicks) / 60.0f;
     rot = cosf(SWING_WORK(obj)->phase) * 10.0f;
     obj->spinX = obj->t - rot;
     obj->t = rot;

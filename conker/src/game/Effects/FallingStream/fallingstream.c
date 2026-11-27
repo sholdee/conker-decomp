@@ -456,7 +456,7 @@ s32 effect_updateFallingStream(StreamActor *actor) {
     rec->alpha = 0xBE;
     if (state->sound != 0) {
         timer = state->soundTimer;
-        timer -= D_800BE9E4; // matching: a separate statement (one expression reorders the loads)
+        timer -= gFrameTicks; // matching: a separate statement (one expression reorders the loads)
         if (timer <= 0) {
             sound_play(math_random() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
             timer = math_random() & 0xC;
@@ -494,8 +494,8 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
 
     state = actor->state;
     records = actor->records;
-    state->angleX += (math_random() % (state->angleXRange + 1)) * D_800BE9E4;
-    state->angleZ += (math_random() % (state->angleZRange + 1)) * D_800BE9E4;
+    state->angleX += (math_random() % (state->angleXRange + 1)) * gFrameTicks;
+    state->angleZ += (math_random() % (state->angleZRange + 1)) * gFrameTicks;
     state->count += state->rate * gFrameDelta;
     if (state->count > 0.99999f) {
         inverse = 1.0f / state->count;
@@ -598,7 +598,7 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
         state->x = x;
         state->z = z;
     }
-    state->timer -= D_800BE9E4;
+    state->timer -= gFrameTicks;
     if (state->timer < 0) {
         index = actor->head.end - 1;
         if (index < 0) {

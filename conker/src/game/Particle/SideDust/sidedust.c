@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /* This file's .rodata front-end data: the point of each side (2, 1) in its bone's space. */
-static const Vec3f D_800A05E0 = { 7.0f, 0.0f, 0.0f };
-static const Vec3f D_800A05EC = { -7.0f, 0.0f, 0.0f };
+static const Vec3f gDustSide2Offset = { 7.0f, 0.0f, 0.0f };
+static const Vec3f gDustSide1Offset = { -7.0f, 0.0f, 0.0f };
 
 /* This file's .bss. */
 struct Queue *gEffectQueue; /* the effect FIFO queue (allocated by effect_allocQueue) */
@@ -25,9 +25,9 @@ s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 s
     }
 
     if (side == 1) {
-        offset = &D_800A05EC;
+        offset = &gDustSide1Offset;
     } else {
-        offset = &D_800A05E0;
+        offset = &gDustSide2Offset;
     }
 
     if (side == 1) {
@@ -82,7 +82,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     if (particle_getDustSidePos(&pos, actor, &ground, side) == 0) {
         return;
     }
-    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
+    camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 7, 1);
     particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
     particle_getDepthTint(pos.z, &fr, &fg, &fb);
     r = fr;
@@ -235,7 +235,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
  * fades it out over the last 32 frames of its timer.
  */
 s32 particle_updateDustPuff(DustPuff *dust) {
-    dust->growth.growTime -= D_800BE9E4;
+    dust->growth.growTime -= gFrameTicks;
     if (dust->growth.growTime > 0) {
         f32 grow = dust->growth.growRate * gFrameDelta;
 
@@ -325,7 +325,7 @@ s32 particle_dampSparkXZ(SparkParticle *particle, s32 arg1) {
     f32 *damping;
 
     damping = &particle->damping; // matching: read through a pointer, IDO reloads it after every store
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         particle->head.desc.vel.x *= *damping;
         particle->head.desc.vel.z *= *damping;
     }

@@ -39,7 +39,7 @@ void prop_updatePickup(WorldObject *obj) {
         obj->y = (s32)(cosf(WORK(obj)->phase + WORK(obj)->phase) * 10.0f) + WORK(obj)->baseHeight + 10;
 
         if (WORK(obj)->respawnTimer == 0) {
-            for (i = 0; i < D_8008FD8C; i++) {
+            for (i = 0; i < gPlayerCount; i++) {
                 if (movement_obj[i].type == 0 || movement_obj[i].playernumber == 0xFF || obj->moveData.word < 0) {
                     continue;
                 }
@@ -61,7 +61,7 @@ void prop_updatePickup(WorldObject *obj) {
                             }
                             obj->object_status = 0x20;
                             sound_playActorSound1(0x1CF, &movement_obj[i], 0x7D00, 200, 2500);
-                            func_151D69B4(obj, &movement_obj[i]);
+                            text_spawnHealthPickupBurst(obj, &movement_obj[i]);
                         } else {
                             // fade from 25% (at the centre) to 100% (at the edge) of full opacity
                             distSq *= 0.0001171875f; // 0.75 / (80 * 80)
@@ -82,7 +82,7 @@ void prop_updatePickup(WorldObject *obj) {
         }
     }
     if (WORK(obj)->respawnTimer > 0) {
-        WORK(obj)->respawnTimer -= D_800BE9E4;
+        WORK(obj)->respawnTimer -= gFrameTicks;
         if (WORK(obj)->respawnTimer <= 0) {
             WORK(obj)->respawnTimer = 0;
             obj->alpha = 255;

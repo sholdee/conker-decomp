@@ -341,7 +341,7 @@ void model_moveFreeParts(s32 objIndex) {
     f32 dt;
 
     count = gPartCounts[gObjPartsStates[objIndex].kind];
-    dt = D_800BE9E4;
+    dt = gFrameTicks;
     for (i = 0; i < count; i++) {
         if (!gObjPartsStates[objIndex].parts[i].active) {
             continue;
@@ -451,7 +451,7 @@ void model_updatePartsTimed(s32 objIndex) {
     model_bounceParts(objIndex);
     ps = &gObjPartsStates[objIndex];
     timer = ps->timer;
-    timer -= D_800BE9E4;
+    timer -= gFrameTicks;
     ps->timer = timer;
     if (timer <= 0) {
         actor_remove(&movement_obj[objIndex], 1);
@@ -535,7 +535,7 @@ void model_updatePartsKind2(s32 objIndex) {
 
     model_bounceParts(objIndex);
     ps = &gObjPartsStates[objIndex];
-    ps->timer -= D_800BE9E4;
+    ps->timer -= gFrameTicks;
     if (ps->timer > 0) {
         return;
     }

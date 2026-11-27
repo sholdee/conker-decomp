@@ -111,7 +111,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
             for (i = 0; i < count; i++) {
                 if (lastSpawn != candidates[i]) {
                     nearestDistSq = 100000000.0f;
-                    for (mask = 0; mask < D_8008FD8C; mask++) {
+                    for (mask = 0; mask < gPlayerCount; mask++) {
                         if (team != movement_obj[mask].team) {
                             dx = movement_obj[mask].xpos - gSpawnPoints[candidates[i]].pos[0];
                             dz = movement_obj[mask].zpos - gSpawnPoints[candidates[i]].pos[2];

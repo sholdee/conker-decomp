@@ -214,8 +214,8 @@ static const s8 gWatcherMode4Actions[28] = {
    its own task view of the watcher. */
 static void (*gWatcherActions[])() = {
     func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
-    func_151A9FC8, func_151AA09C, effect_watcherNoAction, func_151AA17C, func_151AA1D0, func_151AA1F0,
-    func_151AA210, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
+    func_151A9FC8, func_151AA09C, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
+    effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
     particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, func_151AE6B0,
 };
 
@@ -240,9 +240,9 @@ void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
     oldMoveState = watcher->moveState;
     oldSurfaceState = watcher->surfaceState;
 
-    watcher->state0 = func_15159084(watcher->character, watcher->mode);
+    watcher->state0 = effect_watcherIsOutOfWater(watcher->character, watcher->mode);
     if (watcher->state0 == 0) {
-        watcher->state1 = func_15159120(watcher->character, watcher->mode);
+        watcher->state1 = effect_watcherIsDeepWater(watcher->character, watcher->mode);
     } else {
         watcher->state1 = 2;
     }
@@ -251,7 +251,7 @@ void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
         if (watcher->state1 == 0) {
             watcher->state2 = 1;
         } else {
-            watcher->state2 = func_15159184(watcher->character, watcher->mode);
+            watcher->state2 = effect_watcherIsNearWaterSurface(watcher->character, watcher->mode);
         }
     } else {
         watcher->state2 = 0;
@@ -308,7 +308,7 @@ void effect_characterWatcherMessage(void *self, ActorMsg *msg, u8 msgId) {
     }
 }
 
-s32 func_15159084(Actor *chr, u8 mode) {
+s32 effect_watcherIsOutOfWater(Actor *chr, u8 mode) {
     s32 ret;
     s32 flags;
 
@@ -327,7 +327,7 @@ s32 func_15159084(Actor *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159120(Actor *chr, u8 mode) {
+s32 effect_watcherIsDeepWater(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
@@ -340,7 +340,7 @@ s32 func_15159120(Actor *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159184(Actor *chr, u8 mode) {
+s32 effect_watcherIsNearWaterSurface(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
@@ -590,8 +590,8 @@ s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg 
 
     rise = &particle->motion.rise;
     alive = 1;
-    rise->widthPhase += rise->widthPhaseStep * D_800BE9E4;
-    rise->heightPhase += rise->heightPhaseStep * D_800BE9E4;
+    rise->widthPhase += rise->widthPhaseStep * gFrameTicks;
+    rise->heightPhase += rise->heightPhaseStep * gFrameTicks;
     sin0 = math_cosBinAngleMasked(rise->widthPhase - 0x40);
     sin1 = math_cosBinAngleMasked(rise->heightPhase - 0x40);
     particle->head.desc.width = rise->baseSize + (rise->widthWobble * sin0);
@@ -602,8 +602,8 @@ s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg 
             particle->head.desc.vel.y = rise->maxRiseSpeed;
         }
         sway = particle->head.desc.vel.y * rise->swayPerSpeed;
-        rise->swayPhaseX += rise->swayPhaseStepX * D_800BE9E4;
-        rise->swayPhaseZ += rise->swayPhaseStepZ * D_800BE9E4;
+        rise->swayPhaseX += rise->swayPhaseStepX * gFrameTicks;
+        rise->swayPhaseZ += rise->swayPhaseStepZ * gFrameTicks;
         sin0 = math_cosBinAngleMasked(rise->swayPhaseX - 0x40);
         sin1 = math_cosBinAngleMasked(rise->swayPhaseZ - 0x40);
         particle->head.desc.offset.x = (rise->swayX * sin0) * sway;
@@ -729,7 +729,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
     EffectMotionParticle *particle;
 
     emitter = &obj->emitter;
-    if (math_isNearCamera(D_800BE9E8, 3000.0f, &emitter->position)) {
+    if (math_isNearCamera(gLastPlayerIndex, 3000.0f, &emitter->position)) {
         emitter->pending += (emitter->rate + (math_randomFloat() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
@@ -835,8 +835,8 @@ s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdat
     f32 sin1;
 
     osc = &particle->motion.oscillate;
-    osc->widthPhase += osc->widthPhaseStep * D_800BE9E4;
-    osc->heightPhase += osc->heightPhaseStep * D_800BE9E4;
+    osc->widthPhase += osc->widthPhaseStep * gFrameTicks;
+    osc->heightPhase += osc->heightPhaseStep * gFrameTicks;
     sin0 = math_cosBinAngleMasked(osc->widthPhase - 0x40);
     sin1 = math_cosBinAngleMasked(osc->heightPhase - 0x40);
     particle->head.desc.width = osc->baseSize + (osc->widthWobble * sin0);
@@ -954,12 +954,12 @@ s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg
     particle->head.desc.offset.x = math_cosBinAngleMasked(drift->swayPhaseX - 0x40) * drift->swayX;
     particle->head.desc.offset.z = math_cosBinAngleMasked(drift->swayPhaseZ - 0x40) * drift->swayZ;
 
-    drift->widthPhase += drift->widthPhaseStep * D_800BE9E4;
-    drift->heightPhase += drift->heightPhaseStep * D_800BE9E4;
-    drift->swayPhaseX += drift->swayPhaseStepX * D_800BE9E4;
-    drift->swayPhaseZ += drift->swayPhaseStepZ * D_800BE9E4;
+    drift->widthPhase += drift->widthPhaseStep * gFrameTicks;
+    drift->heightPhase += drift->heightPhaseStep * gFrameTicks;
+    drift->swayPhaseX += drift->swayPhaseStepX * gFrameTicks;
+    drift->swayPhaseZ += drift->swayPhaseStepZ * gFrameTicks;
 
-    for (i = D_800BE9E4; i > 0; i--) {
+    for (i = gFrameTicks; i > 0; i--) {
         particle->head.desc.vel.x *= drift->damping;
         particle->head.desc.vel.y *= drift->damping;
         particle->head.desc.vel.z *= drift->damping;

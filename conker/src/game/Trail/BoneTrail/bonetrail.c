@@ -89,7 +89,7 @@ s32 trail_ageBoneTrail(BoneTrailEffect *effect) {
     if (effect->head.count < 2 && (state->flags & TRAIL_DETACHED)) {
         return 0;
     }
-    state->texOffset += state->params.texScroll * D_800BE9E4;
+    state->texOffset += state->params.texScroll * gFrameTicks;
     i = effect->head.end;
     while (i != effect->head.start) {
         i--;
@@ -98,9 +98,9 @@ s32 trail_ageBoneTrail(BoneTrailEffect *effect) {
         }
         point = &points[i];
         if (point->holdTime > 0) {
-            point->holdTime -= D_800BE9E4;
+            point->holdTime -= gFrameTicks;
         } else {
-            point->intensity -= D_800BE9E4 * state->params.fadeRate;
+            point->intensity -= gFrameTicks * state->params.fadeRate;
         }
         point->alpha = 0xFF;
         point->width += gFrameDelta * state->params.widthGrowth;
@@ -551,7 +551,7 @@ s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1) {
     }
     if (age < params->growStart) {
         {
-            f32 sizeStep = params->growRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * gFrameTicks;
 
             particle->head.desc.width += sizeStep;
             particle->head.desc.height += sizeStep;
@@ -580,7 +580,7 @@ s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
     }
     if (age < params->growStart) {
         {
-            f32 sizeStep = params->growRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * gFrameTicks;
 
             particle->head.desc.width += sizeStep;
             particle->head.desc.height += sizeStep;

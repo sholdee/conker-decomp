@@ -120,7 +120,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     }
     if (gTaskMenuResetTimer != 0) {
         buttons = 0;
-        gTaskMenuResetTimer -= D_800BE9E4;
+        gTaskMenuResetTimer -= gFrameTicks;
         if (gTaskMenuResetTimer <= 0) {
             gTaskMenuResetTimer = 0;
         }
@@ -135,7 +135,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     }
     debug_getStickRepeat(0, &stickDirX, &stickDirY);
     if (gTaskMenuScrollDir != 0) {
-        gTaskMenuScrollOffset += 1.25f * (gTaskMenuScrollDir * D_800BE9E4);
+        gTaskMenuScrollOffset += 1.25f * (gTaskMenuScrollDir * gFrameTicks);
         // matching: clamp through rowY (shares its FP register); a ternary or separate temp mismatches
         rowY = -SCROLL_LIMIT;
         if (gTaskMenuScrollOffset < -SCROLL_LIMIT) {
@@ -169,7 +169,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     if (entry > taskCount) {
         entry += taskCount;
     }
-    gTaskMenuBlinkTimer -= D_800BE9E4;
+    gTaskMenuBlinkTimer -= gFrameTicks;
     if (gTaskMenuBlinkTimer <= 0) {
         gTaskMenuBlinkTimer = 30;
         gTaskMenuBlinkPhase ^= 1;

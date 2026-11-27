@@ -118,8 +118,8 @@ void effect_updateQuadEffect(QuadEffect *effect) {
     s32 life;
 
     life = effect->life;
-    effect->size = effect->size + effect->growthRate * D_800BE9E4;
-    life -= D_800BE9E4;
+    effect->size = effect->size + effect->growthRate * gFrameTicks;
+    life -= gFrameTicks;
     if (life <= 0) {
         effect_destroyObject(&effect->header);
         return;

@@ -15,9 +15,9 @@ void func_150CF530(s32 arg0) {
 
 /* Advances the texture scroll offsets by the frames elapsed. */
 void effect_scrollTileTextures(s32 arg0) {
-    gTile0ScrollS += D_800BE9E4 * 26;
-    gTile0ScrollT -= D_800BE9E4 * 28;
-    gTile1ScrollS -= D_800BE9E4 * 28;
+    gTile0ScrollS += gFrameTicks * 26;
+    gTile0ScrollT -= gFrameTicks * 28;
+    gTile1ScrollS -= gFrameTicks * 28;
 }
 
 /* Sets the scrolled tile sizes of tiles 0 and 1. */

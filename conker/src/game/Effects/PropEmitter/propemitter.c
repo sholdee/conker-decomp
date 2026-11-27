@@ -22,7 +22,7 @@ static const u8 gEmitterPropIds[2] = { 0xF7, 0xF6 };
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
  * from script_query queries for the levels level == 0x1E, 0x1B and 0x2F. */
-void func_150E0D90(Camera *camera) {
+void effect_levelHook12(Camera *camera) {
     if (camera->CharContext == 9) {
         if (level == 0x1E) {
             script_command(0, 0x4044, 1);

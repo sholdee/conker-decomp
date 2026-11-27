@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15008A10(void) {
+void screen_resetKickableTargets(void) {
     gKickableLookAtActor = collision_findObjectById(1);
     gKickableLookAtPos.x = 0.0f;
     gKickableLookAtPos.y = 0.0f;

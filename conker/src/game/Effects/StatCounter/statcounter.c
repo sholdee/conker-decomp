@@ -498,7 +498,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
 }
 
 /* Update of effect_showStatCounter's counter. It waits until gCutsceneStates != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
- * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
+ * and gLevelLoadState == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */
 void effect_updateStatCounter(CounterEffect *effect) {
     f32 slide;
@@ -517,7 +517,7 @@ void effect_updateStatCounter(CounterEffect *effect) {
         if (screen_isIrisOpen(0) == 0) {
             return;
         }
-        if (screen_getViewFadeAlpha(0) != 0 || D_800BE9B4 != 0) {
+        if (screen_getViewFadeAlpha(0) != 0 || gLevelLoadState != 0) {
             return;
         }
         display->flags |= 1;

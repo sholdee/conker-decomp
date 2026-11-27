@@ -12,7 +12,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     }
     state->angle += state->angleSpeed * gFrameDelta;
     state->angle = math_wrapFloat(state->angle, 2048.0f, 0.0f);
-    state->phase += state->phaseSpeed * D_800BE9E4;
+    state->phase += state->phaseSpeed * gFrameTicks;
     state->alpha = math_cosBinAngleMasked(state->phase - 0x40) * 63.0f + 192.0f;
     if (math_isZoneHiddenFromViews(obj->head.def.unk48) == 0) {
         state->pending += (0.3930000067f + math_randomFloat() * 0.4370000064f) * gFrameDelta;

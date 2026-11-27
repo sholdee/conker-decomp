@@ -11,7 +11,7 @@ typedef struct {
     s32 unk4;
 } F4D20Entry;
 
-/* Whatever an object's work word points to in func_150C7968. */
+/* Whatever an object's work word points to in prop_scrollTextureByObject3. */
 typedef struct {
     /* 0x00 */ u8 pad00[0x13];
     /* 0x13 */ s8 unk13;
@@ -20,7 +20,7 @@ typedef struct {
 /* Behaviour scratch state of the objects in this file (WorldObject.touch). */
 typedef union {
     s32 count;        // func_150C7C90
-    LinkedObj *link;  // func_150C7968
+    LinkedObj *link;  // prop_scrollTextureByObject3
 } F4D20Work;
 
 #define WORK(obj) ((F4D20Work *)&(obj)->touch)
@@ -42,7 +42,7 @@ void func_150C7870(WorldObject *obj) {
 }
 
 /* Spins the object at the opposite of object 3's spin speed. */
-void func_150C78E0(WorldObject *obj) {
+void prop_spinOppositeObject3(WorldObject *obj) {
     WorldObject *obj3;
 
     if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
@@ -53,7 +53,7 @@ void func_150C78E0(WorldObject *obj) {
 }
 
 /* Spins the object at object 3's spin speed. */
-void func_150C7930(WorldObject *obj) {
+void prop_spinWithObject3(WorldObject *obj) {
     WorldObject *obj3;
 
     obj3 = &db_Object_array[3];
@@ -62,7 +62,7 @@ void func_150C7930(WorldObject *obj) {
 }
 
 /* After prop_registerTextureScroll, copies object 3's spin speed / 16 into the linked object's unk13. */
-void func_150C7968(WorldObject *obj) {
+void prop_scrollTextureByObject3(WorldObject *obj) {
     WorldObject *obj3;
     LinkedObj *link;
     s32 speed;

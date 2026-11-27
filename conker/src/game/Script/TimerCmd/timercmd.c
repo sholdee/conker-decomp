@@ -46,7 +46,7 @@ void script_updateTimers(void) {
 
     for (i = 0; i < 10; i++) {
         if ((gScriptTimers[i].active != 0) && (gScriptTimers[i].running == 1)) {
-            gScriptTimers[i].ticks = gScriptTimers[i].ticks + D_800BE9E4;
+            gScriptTimers[i].ticks = gScriptTimers[i].ticks + gFrameTicks;
             if (gScriptTimers[i].ticks >= gTimerUnitTicks[gScriptTimers[i].unit]) {
                 gScriptTimers[i].ticks = gScriptTimers[i].ticks - gTimerUnitTicks[gScriptTimers[i].unit];
                 gScriptTimers[i].count = gScriptTimers[i].count + 1;

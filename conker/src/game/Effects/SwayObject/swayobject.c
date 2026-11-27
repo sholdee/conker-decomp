@@ -135,7 +135,7 @@ s32 effect_placeSwayLight(LightEffect *effect) {
     return 1;
 }
 
-void func_150F26A0(Camera *actor) {
+void effect_levelHook26(Camera *actor) {
     Actor *state;
     s32 mode;
 

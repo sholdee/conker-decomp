@@ -10,7 +10,7 @@ void particle_updateBounceDebris(Debris *debris) {
     s32 timer;
     s32 alpha;
 
-    dt = D_800BE9E4;
+    dt = gFrameTicks;
     debris->x += debris->velX * dt;
     debris->z += debris->velZ * dt;
     debris->rotX += debris->spinX * dt;
@@ -19,7 +19,7 @@ void particle_updateBounceDebris(Debris *debris) {
     debris->velY += -0.5f * dt;
     debris->y += debris->velY * dt;
     if (debris->flags & 1) {
-        debris->phase += D_800BE9E4 * 8;
+        debris->phase += gFrameTicks * 8;
         debris->scale = (math_sinBinAngle(debris->phase) * 0.400000006f + 1.0f) * debris->baseScale;
     }
     if (debris->flags & 2) {
@@ -109,11 +109,11 @@ void particle_updateBounceDebris(Debris *debris) {
     }
     timer = debris->timer;
     if (timer != 0) {
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer <= 0) {
             debris->state = 2;
             alpha = debris->alpha;
-            alpha -= D_800BE9E4 * 4;
+            alpha -= gFrameTicks * 4;
             if (alpha <= 0) {
                 attach_releaseModel(debris->sound);
                 effect_destroyObject(&debris->header);
@@ -189,14 +189,14 @@ s32 particle_updateStyleBounce(StyleParticle *particle) {
     alpha = particle->alpha;
     if (particle->lifetime != 0) {
         if (alpha != 255) {
-            alpha += D_800BE9E4 * 16;
+            alpha += gFrameTicks * 16;
             if (alpha >= 256) {
                 alpha = 255;
             }
             particle->alpha = alpha;
         }
     } else if (alpha != 0) {
-        alpha -= D_800BE9E4 * 4;
+        alpha -= gFrameTicks * 4;
         if (alpha < 0) {
             alpha = 0;
         }

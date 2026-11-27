@@ -108,7 +108,7 @@ f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32
 }
 
 /* Hides `obj` in the controlling player's camera view (its bit in forcedCullMask) while that player holds R with SniperState set. */
-void func_150ED578(Actor *obj) {
+void weapon_hideTankInSniperView(Actor *obj) {
     ActorCtl *state;
     s32 player;
     Actor *owner;
@@ -257,8 +257,8 @@ void weapon_updateTank(Actor *obj) {
                 if (driver->mv->unk128 & 0x80) {
                     if (driver->mv->unk12C != 0) {
                         obj->imune = 0xFF;
-                        if (D_800BE9E4 < movement_obj[player].mv->unk12C) {
-                            movement_obj[player].mv->unk12C -= D_800BE9E4;
+                        if (gFrameTicks < movement_obj[player].mv->unk12C) {
+                            movement_obj[player].mv->unk12C -= gFrameTicks;
                         } else {
                             movement_obj[player].mv->unk12C = 0;
                             mp_releaseSlot(player, 0);
@@ -288,8 +288,8 @@ void weapon_updateTank(Actor *obj) {
                 obj->intel_decel = 28;
                 gPads[player].stick_y = 80;
                 throttleScale += throttleScale;
-                if (D_800BE9E4 < movement_obj[player].mv->unk12C) {
-                    movement_obj[player].mv->unk12C -= D_800BE9E4;
+                if (gFrameTicks < movement_obj[player].mv->unk12C) {
+                    movement_obj[player].mv->unk12C -= gFrameTicks;
                 } else {
                     movement_obj[player].mv->unk12C = 0;
                     mp_releaseSlot(player, 0);
@@ -320,8 +320,8 @@ void weapon_updateTank(Actor *obj) {
             obj->mvmt_control |= 0x40;
             buttonPad = player;
             if ((gIsMultiplayer != 0) && (player < 2)) {
-                if (D_800E0BCE[player] != 0) {
-                    buttonPad = D_800E0BCE[player];
+                if (gPartnerSlots[player] != 0) {
+                    buttonPad = gPartnerSlots[player];
                 }
             }
             if (gButtonsPressed[buttonPad] & Z_TRIG) {
@@ -336,7 +336,7 @@ void weapon_updateTank(Actor *obj) {
         obj->stickspeed = gPads[player].stick_y * throttleScale;
         movement_obj[player].mv->context_b = lockFlags;
         movement_obj[player].mv->rt_context_b = lockFlags;
-    } else if (dc_glbl_CharNum < D_8008FD8C) {
+    } else if (dc_glbl_CharNum < gPlayerCount) {
         actor_updateButtonTimers(obj);
         if ((player < 4) && (gPadTable[player]->button & Z_TRIG)) {
             gActorPressedButtons = Z_TRIG;
@@ -347,7 +347,7 @@ void weapon_updateTank(Actor *obj) {
     }
     obj->intel_accel = 50;
     obj->intel_decel = 50;
-    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
+    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= gPlayerCount) || (obj->mv->death_State == 0)) {
         actor_updateCommon(obj);
     }
     if (obj->type != 0) {
@@ -434,9 +434,9 @@ void weapon_updateTank(Actor *obj) {
             yawStep = 3.0f * gFrameDelta;
             bestIdx = -1;
             camSlot = 0;
-            objCount = D_8008FD8C;
-            if ((gIsMultiplayer != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
-                camSlot = D_800E0BCE[viewer[0]] + 1;
+            objCount = gPlayerCount;
+            if ((gIsMultiplayer != 0) && (viewer[0] < 2) && (gPartnerSlots[viewer[0]] != 0)) {
+                camSlot = gPartnerSlots[viewer[0]] + 1;
             } else {
                 pad = &gPads[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
@@ -545,7 +545,7 @@ void weapon_updateTank(Actor *obj) {
                     if (hit != 0) {
                         hit = 1;
                     }
-                    for (j = 0; j < D_8008FD8C; j++) {
+                    for (j = 0; j < gPlayerCount; j++) {
                         if (obj->team != movement_obj[j].team) {
                             hitX = movement_obj[j].xpos - camera->eye.x;
                             hitZ = movement_obj[j].zpos - camera->eye.z;

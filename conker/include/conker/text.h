@@ -113,11 +113,11 @@ TextBox *text_closeBoxNow(TextBox *box);
 
 /* game/Text/AmountText/amounttext.c */
 void func_151D6970(Actor *character, void *obj);
-void func_151D69B4(WorldObject *pickup, Actor *player);
+void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player);
 void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2);
-s32 func_151D6E60(ModelEffect *fx);
+s32 text_updateCashModel(ModelEffect *fx);
 s32 text_updateAmount(TextObj *obj);
 void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type);
-Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
+Gfx *text_preDrawCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 
 #endif

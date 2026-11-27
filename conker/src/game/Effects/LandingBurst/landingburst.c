@@ -353,7 +353,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                                   &slot->particle->head.def.pos,
                                   emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, gJointEmitterMounts36[i].joint)
                                                              : JOINT_MTX(emitter->owner, gJointEmitterMounts[i].joint));
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= gFrameTicks;
                     if (slot->timer < 0) {
                         Vec3f *velocity = &slot->particle->motion.velocity;
 
@@ -607,8 +607,8 @@ s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
     f32 swingW;
     f32 swingH;
 
-    motion->phaseWidth += motion->phaseSpeedWidth * D_800BE9E4;
-    motion->phaseHeight += motion->phaseSpeedHeight * D_800BE9E4;
+    motion->phaseWidth += motion->phaseSpeedWidth * gFrameTicks;
+    motion->phaseHeight += motion->phaseSpeedHeight * gFrameTicks;
     swingW = math_cosBinAngleMasked(motion->phaseWidth - 0x40);
     swingH = math_cosBinAngleMasked(motion->phaseHeight - 0x40);
     particle->head.def.width += (motion->baseWidth + motion->swingWidth * swingW - particle->head.def.width) * 0.5f;

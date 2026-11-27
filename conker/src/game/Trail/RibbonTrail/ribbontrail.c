@@ -637,7 +637,7 @@ s32 trail_moveRibbon(EffectObj *obj) {
 
     state = obj->userData;
     points = obj->items;
-    if (D_800BE9E4 > 0) {
+    if (gFrameTicks > 0) {
         previous = obj->head.tmpl.pos;
         if (gRibbonSourceProcs[state->selector](obj, &obj->head.tmpl.pos) == 0) {
             return 0;

@@ -24,7 +24,7 @@ u8 gModePlayerCounts[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by gMatchState.
 
 /* Changes one of player `player`'s stats: 0/1/2/5/8/9 set unk0/unk4/unk8/health/unkA/unkC to
  * `value`; 3/6/10 add to unk8 (max 100), health (max 99) and unkC; 4/7/11 subtract from unk8,
- * health (min 0) and unkC (min 0). While D_8008FDBC bit 0 is set, setting unk8 sets 6 and
+ * health (min 0) and unkC (min 0). While gMatchFlags bit 0 is set, setting unk8 sets 6 and
  * subtracting from it does nothing. */
 void player_setStat(s16 player, s16 stat, s32 value) {
     PlayerStats *stats;
@@ -40,7 +40,7 @@ void player_setStat(s16 player, s16 stat, s32 value) {
         gMatchState.players[player].unk4 = value;
         break;
     case 2:
-        if (D_8008FDBC & 1) {
+        if (gMatchFlags & 1) {
             value = 6;
         }
         gMatchState.players[player].unk8 = value;
@@ -51,7 +51,7 @@ void player_setStat(s16 player, s16 stat, s32 value) {
         stats->unk8 = (stats->unk8 > 100) ? 100 : stats->unk8;
         break;
     case 4:
-        if (!(D_8008FDBC & 1)) {
+        if (!(gMatchFlags & 1)) {
             stats = PLAYER_STATS(player);
             stats->unk8 -= value;
         }

@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-static const Vec3f D_800A1CC0 = { 0.0f, -8.0f, -85.0f };
-static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
-static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
-static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
-static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
+static const Vec3f gDelayedBurstLightOffset = { 0.0f, -8.0f, -85.0f };
+static const Vec3f gDelayedBurstPosOffset0 = { 24.0f, -8.0f, -85.0f };
+static const Vec3f gDelayedBurstPosOffset1 = { -24.0f, -8.0f, -85.0f };
+static const Vec3f gDelayedBurstRotOffset0 = { 30.0f, -70.0f, -85.0f };
+static const Vec3f gDelayedBurstRotOffset1 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f gBoneImpactOffsets[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
 u8 gLineEmitterStarted = 0;
@@ -164,7 +164,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
         event.strength = 8;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, owner, kind);
-        light_createAttached(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
+        light_createAttached(actor, 1, &gDelayedBurstLightOffset, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
 
@@ -192,10 +192,10 @@ void effect_updateDelayedBurst(BurstEffect *effect) {
         BurstGlow *glow;
         u8 i;
 
-        offsets[0] = &D_800A1CCC;
-        offsets[1] = &D_800A1CD8;
-        offsets[2] = &D_800A1CE4;
-        offsets[3] = &D_800A1CF0;
+        offsets[0] = &gDelayedBurstPosOffset0;
+        offsets[1] = &gDelayedBurstPosOffset1;
+        offsets[2] = &gDelayedBurstRotOffset0;
+        offsets[3] = &gDelayedBurstRotOffset1;
         results[0] = &positions[0];
         results[1] = &positions[1];
         results[2] = &directions[0];
@@ -512,7 +512,7 @@ typedef struct {
  * Spawns a effect_newModelEffect object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
  */
-void func_150FAE18(s16 duration, u8 owner, s32 kind) {
+void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind) {
     s16 pad; // matching: unused stack slot
     s16 tag;
 
@@ -605,8 +605,8 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
     }
 }
 
-/* Update callback (D_8008ADA8[2]): places the model at (-95, -80, 0), unrotated, scaled by 0.3. */
-s32 func_150FB188(ModelEffect *fx) {
+/* Update callback (gModelEffectUpdate2FuncsTail[2]): places the model at (-95, -80, 0), unrotated, scaled by 0.3. */
+s32 effect_placeScreenCashModel(ModelEffect *fx) {
     f32 xform[5];
 
     fx->params.pos.z = 0.0f;
@@ -621,9 +621,9 @@ s32 func_150FB188(ModelEffect *fx) {
     return 1;
 }
 
-/* Passes func_151D710C's result, with the same remaining arguments, to effect_preDrawModelEffectOrtho. */
-Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
-    return effect_preDrawModelEffectOrtho(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
+/* Passes text_preDrawCashModel's result, with the same remaining arguments, to effect_preDrawModelEffectOrtho. */
+Gfx *effect_preDrawScreenCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    return effect_preDrawModelEffectOrtho(text_preDrawCashModel(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
 /* Layout of Effect (game/Effects/ModelEffect/modeleffect.c), as far as effect_updateFadeInEffect uses it. */

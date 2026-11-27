@@ -112,7 +112,7 @@ void effect_updateDynModel(DynModel *obj) {
     u8 done = FALSE;
 
     if (obj->desc.flags & DYNMODEL_FLAG_LIFETIME) {
-        obj->desc.lifetime -= D_800BE9E4;
+        obj->desc.lifetime -= gFrameTicks;
         if (obj->desc.lifetime < 0) {
             done = TRUE;
         }

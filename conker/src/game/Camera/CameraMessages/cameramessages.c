@@ -29,7 +29,7 @@ typedef struct Cfg15128CB0 {
 s32 D_80089520 = 0; // frames left before a pending yaw override applies (set by game/Script/CameraCmd/cameracmd.c)
 s32 gSavedSniperStates[4] = { 0 }; // per view: SniperState saved over a camera switch
 s32 gSavedAimStates[4] = { 0 }; // per view: aim state saved over a camera switch
-static Vec3f D_80089544 = { 0.0f, 0.0f, -400.0f };
+static Vec3f gCamShotFocusOffset = { 0.0f, 0.0f, -400.0f };
 
 /*
  * Per-frame camera message pump: handles a pending unk734 request, then drains the camera's
@@ -145,7 +145,7 @@ void camera_processMessages(Camera *cam) {
                     cam->savedEye = cam->eye;
                     cam->prevTarget = cam->target;
                     cam->prevEye = cam->eye;
-                    zone_updateGlobal(D_800BE9E4);
+                    zone_updateGlobal(gFrameTicks);
                     zone_updateActor(&movement_obj[cam->CNumber]);
                     camera_runCommand(cam);
                     camera_updateAngleOffsets(cam, 0, 0);
@@ -215,7 +215,7 @@ void camera_processMessages(Camera *cam) {
                 cam->YawAngle = 0.0f;
                 cam->AddOnPitch = 0.0f;
             } else {
-                pos = D_80089544;
+                pos = gCamShotFocusOffset;
                 while (data->at.angles.sway > 180.0f) {
                     data->at.angles.sway -= 360.0f;
                 }

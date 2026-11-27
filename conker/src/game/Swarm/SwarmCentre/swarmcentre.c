@@ -398,14 +398,14 @@ void swarm_updateSwarm(Swarm *swarm, s32 x, s32 y, s32 z) {
     if (distSq < 0 || distSq == 0) {} // matching: the empty test shifts IDO's temp register numbering
     if (distSq > 10000) {
         if (swarm->speed != 1600) {
-            swarm->speed += D_800BE9E4 + 40;
+            swarm->speed += gFrameTicks + 40;
             if (swarm->speed > 1600) {
                 swarm->speed = 1600;
             }
         }
     } else {
         if (swarm->speed != 800) {
-            swarm->speed -= D_800BE9E4 + 40;
+            swarm->speed -= gFrameTicks + 40;
             if (swarm->speed < 800) {
                 swarm->speed = 800;
             }

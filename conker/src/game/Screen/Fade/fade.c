@@ -37,8 +37,8 @@ void screen_updateFade(FadeEffect *effect) {
                 triggered = TRUE;
             }
         } else if (mode == 1) {
-            if (D_800BE9E4 < effect->timer) {
-                effect->timer -= D_800BE9E4;
+            if (gFrameTicks < effect->timer) {
+                effect->timer -= gFrameTicks;
             } else {
                 triggered = TRUE;
             }
@@ -118,7 +118,7 @@ Gfx *screen_drawFade(Gfx *gfx, FadeEffect *effect, s16 view) {
 }
 
 /* Returns player 0's mv->matrix_physics, or 0 when it has no mv. */
-u8 func_151044F4(void) {
+u8 screen_getPlayer0MatrixPhysics(void) {
     if (movement_obj[0].mv != NULL) {
         return movement_obj[0].mv->matrix_physics;
     }

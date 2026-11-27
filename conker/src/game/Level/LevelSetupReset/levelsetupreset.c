@@ -9,7 +9,7 @@ void level_resetSetupState(void) {
     s32 j;
 
     view_initGroundDecalQueue();
-    func_15008A10();
+    screen_resetKickableTargets();
     func_15012770();
     for (i = 0; i < 20; i++) {
         gAnchorRefCounts[i] = 0;
@@ -49,7 +49,7 @@ void func_1500E70C(s32 id) {
     }
 }
 
-/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from gScreenLayout, D_800DCA28/2C from D_8008FD8C. */
+/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from gScreenLayout, D_800DCA28/2C from gPlayerCount. */
 void func_1500E738(void) {
     switch (gScreenLayout) {
     case 0:
@@ -66,7 +66,7 @@ void func_1500E738(void) {
         D_800DCA24 = 0.25f;
         break;
     }
-    switch (D_8008FD8C) {
+    switch (gPlayerCount) {
     case 2:
         D_800DCA28 = 1;
         D_800DCA2C = 0.5f;

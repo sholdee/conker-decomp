@@ -2,16 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The variant ids and scales of the debris that func_151D22B0 sprays (particle_spawnDebrisSpray). */
-static const s32 D_800AB0B0[12] = { 0x3F, 0x40, 0x40, 0x41, 0x42, 0x42, 0x42, 0x42, 0x43, 0x43, 0x02, 0x03 };
-static const f32 D_800AB0E0[12] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+/* The variant ids and scales of the debris that effect_spawnDeathDebrisBurst sprays (particle_spawnDebrisSpray). */
+static const s32 gDeathDebrisSprayIds[12] = { 0x3F, 0x40, 0x40, 0x41, 0x42, 0x42, 0x42, 0x42, 0x43, 0x43, 0x02, 0x03 };
+static const f32 gDeathDebrisSprayScales[12] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 /* The variant id and scale of its debris burst (particle_spawnDebrisBurst). */
-static const s32 D_800AB110[1] = { 0x39 };
-static const f32 D_800AB114[1] = { 1.0f };
+static const s32 gDeathDebrisBurstIds[1] = { 0x39 };
+static const f32 gDeathDebrisBurstScales[1] = { 1.0f };
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via particle_spawnDebrisSpray, particle_spawnDebrisBurst
  * and particle_spawnPuffSpray) at its origin. */
-void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f origin;
     f32 extent1;
     f32 extent2;
@@ -44,7 +44,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.spin = 20.24800110f;
             params.floorHitChance = 1.0f;
             params.floorHitFn = 11;
-            particle_spawnDebrisSpray(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, &surface, 20.0f, 0, 0, arg1, arg2);
+            particle_spawnDebrisSpray(&params, gDeathDebrisSprayIds, gDeathDebrisSprayScales, 12, 0, 0, 0, 1, -1, &surface, 20.0f, 0, 0, arg1, arg2);
         }
         {
             DebrisBurst params;
@@ -64,7 +64,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.scaleBase = 0.1070000082f;
             params.scaleRange = 0.3000000119f;
             params.spin = 19.23800087f;
-            particle_spawnDebrisBurst(&params, D_800AB110, D_800AB114, 1, 0.0f, 0, arg1, arg2);
+            particle_spawnDebrisBurst(&params, gDeathDebrisBurstIds, gDeathDebrisBurstScales, 1, 0.0f, 0, arg1, arg2);
         }
         {
             PuffSpray params;

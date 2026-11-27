@@ -259,7 +259,7 @@ typedef struct {
 } Msg151AA17C;
 
 /* Sends message 10 ({unk18, unk1C}) through effect_sendEventToEffectObjs and effect_sendEventToTimedEffects, then trail_startSurfaceTrails. */
-void func_151AA17C(SurfaceTrailOwner *owner) {
+void effect_watcherStartSurfaceTrails1(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
 
@@ -273,16 +273,16 @@ void func_151AA17C(SurfaceTrailOwner *owner) {
     trail_startSurfaceTrails(owner);
 }
 
-void func_151AA1D0(void) {
+void effect_watcherReleaseSurfaceTrails1(void) {
     trail_releaseSurfaceTrails();
 }
 
-void func_151AA1F0(void) {
+void effect_watcherReleaseSurfaceTrails2(void) {
     trail_releaseSurfaceTrails();
 }
 
-/* Same as func_151AA17C. */
-void func_151AA210(SurfaceTrailOwner *owner) {
+/* Same as effect_watcherStartSurfaceTrails1. */
+void effect_watcherStartSurfaceTrails2(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
 
@@ -488,7 +488,7 @@ f32 effect_stepTaskPulse(PulseFx *fx) {
 
     pulse = &fx->payload;
     value = (math_cosBinAngleMasked((pulse->phase >> 16) - 0x40) * pulse->amplitude) + pulse->base;
-    pulse->phase += pulse->phaseStep * D_800BE9E4;
+    pulse->phase += pulse->phaseStep * gFrameTicks;
     return value;
 }
 
@@ -692,7 +692,7 @@ s32 effect_updateTaskFlicker(FlickerSprite *fx) {
         alive = FALSE;
     }
     flicker->keepAlive = 0;
-    flicker->timer -= D_800BE9E4;
+    flicker->timer -= gFrameTicks;
     if (flicker->timer < 0) {
         flicker->timer = (math_random() % (flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = math_randomFloat() * flicker->targetRange + flicker->minTarget;

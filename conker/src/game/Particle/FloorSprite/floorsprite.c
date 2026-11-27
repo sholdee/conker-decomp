@@ -102,8 +102,8 @@ void particle_updateFloorSprite(Particle19F150 *particle) {
     }
 
     if (!(particle->flags & 4)) {
-        if (D_800BE9E4 < lifetime) {
-            particle->lifetime = lifetime - D_800BE9E4;
+        if (gFrameTicks < lifetime) {
+            particle->lifetime = lifetime - gFrameTicks;
         } else {
             particle->lifetime = 0;
         }

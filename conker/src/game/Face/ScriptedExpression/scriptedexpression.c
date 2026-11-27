@@ -4,7 +4,7 @@
 u8 gExpressionTarget;       // the object whose expression the messages set (index into movement_obj)
 u8 D_800D18D8[0x50]; /* not referenced */
 static s32 gScriptedExpressionMode;
-static s32 D_800D192C;
+static s32 gScriptedExpressionCycleIndex;
 static s32 D_800D1930;
 
 #include "functions.h"
@@ -15,11 +15,11 @@ static s32 D_800D1930;
  */
 
 /* The expressions that mode 2 cycles through. */
-static const s32 D_8009BD10[5] = { 0, 1, 2, 3, 4 };
+static const s32 gScriptedExpressionCycle[5] = { 0, 1, 2, 3, 4 };
 
 /* Resets the expression mode, cycle index and D_800D1930. */
 void face_resetScripted(void) {
-    D_800D1930 = gScriptedExpressionMode = D_800D192C = 0;
+    D_800D1930 = gScriptedExpressionMode = gScriptedExpressionCycleIndex = 0;
 }
 
 /* Drains queued 0x100-byte messages; type 0x4C ones set the current object's expression. */
@@ -46,7 +46,7 @@ void face_processMessages(void) {
 /*
  * Per-frame update while mode gScriptedExpressionMode is set: mode 1 sets unk1FF from D_800427F0. Mode 2, once
  * D_800427F0 exceeds 1000 and morphDuration is below the frame step, moves unk134 to the next of
- * the 5 D_8009BD10 values with a random morphDuration of 4-10. Both clear D_800427F0.
+ * the 5 gScriptedExpressionCycle values with a random morphDuration of 4-10. Both clear D_800427F0.
  */
 void face_updateScripted(Actor *actor) {
     s32 index;
@@ -60,18 +60,18 @@ void face_updateScripted(Actor *actor) {
                 actor->levelMode = 1;
             }
         } else {
-            index = D_800D192C;
+            index = gScriptedExpressionCycleIndex;
             if (D_800427F0 > 1000) {
                 countdown = actor->morphDuration;
                 index++;
-                countdown -= D_800BE9E4;
+                countdown -= gFrameTicks;
                 if (countdown < 0) {
                     if (index >= 5) {
                         index = 0;
                     }
-                    actor->unk134 = D_8009BD10[index];
+                    actor->unk134 = gScriptedExpressionCycle[index];
                     actor->morphDuration = (math_rand() % 7) + 4;
-                    D_800D192C = index;
+                    gScriptedExpressionCycleIndex = index;
                 }
             }
         }

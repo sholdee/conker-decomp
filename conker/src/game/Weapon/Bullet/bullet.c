@@ -22,7 +22,7 @@ void weapon_initImpactSpray(JetSpray *config, f32 *scale) {
     config->sizeSlopeBase = 203.0f;
     config->sizeSlopeRange = 414.0f;
     config->particleCountBase = 7;
-    config->particleCountRange = 3 >> ((gScreenLayout >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    config->particleCountRange = 3 >> ((gScreenLayout >= 2 || gPlayerCount >= 8) ? 1 : 0);
     config->spread = 15.0f;
     config->drag = 0.8800000548f;
     config->gravityBase = -0.3980000317f;
@@ -33,7 +33,7 @@ void weapon_initImpactSpray(JetSpray *config, f32 *scale) {
     config->alphaRange = 100;
     config->fadeStart = 12;
     config->fadeOutStart = 20;
-    config->eventFunc = (gScreenLayout >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+    config->eventFunc = (gScreenLayout >= 2 || gPlayerCount >= 8) ? -1 : 0;
 }
 
 
@@ -406,7 +406,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             bulletState->sound = sound_addDynamicSound(math_random() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
             bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
-            if (gScreenLayout < 2 && D_8008FD8C < 4) {
+            if (gScreenLayout < 2 && gPlayerCount < 4) {
                 bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
                 /* matching: a declaration makes this an IDO scope block (register choice) */

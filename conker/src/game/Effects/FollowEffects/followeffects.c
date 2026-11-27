@@ -26,10 +26,10 @@ void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
     {
         s32 objIndex = owner - movement_obj;
 
-        if ((objIndex < 2) && (D_800E0BCE[objIndex] != 0)) {
-            if (D_8008FD90 == 2) {
+        if ((objIndex < 2) && (gPartnerSlots[objIndex] != 0)) {
+            if (gHumanCount == 2) {
                 desc.viewportMask = 0xFD;
-            } else if (D_8008FD90 == 4) {
+            } else if (gHumanCount == 4) {
                 if (objIndex == 0) {
                     desc.viewportMask = 0xFB;
                 } else {
@@ -233,7 +233,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.sizeRange = 68.0f;
     burst.spray.sizeSlopeBase = 609.0f;
     burst.spray.sizeSlopeRange = 271.0f;
-    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (gPlayerCount >= 8)) {
         shift = 1;
     } else {
         shift = 0;
@@ -249,7 +249,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.drag = 0.7690000534f;
     burst.spray.gravityBase = -0.1690000147f;
     burst.spray.gravityRange = 0;
-    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (gPlayerCount >= 8)) {
         burst.spray.eventFunc = -1;
     } else {
         burst.spray.eventFunc = 0;
@@ -510,7 +510,7 @@ s32 effect_updateTankSound(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, 
                     }
                 }
             } else {
-                timer -= D_800BE9E4;
+                timer -= gFrameTicks;
                 if (timer <= 0) {
                     timer = 0;
                     if (*soundId == 0x4A8) {
@@ -664,7 +664,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.sizeRange = 53.0f;
         burst.spray.sizeSlopeBase = 203.0f;
         burst.spray.sizeSlopeRange = 414.0f;
-        burst.spray.particleCountRange = 3 >> ((gScreenLayout >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        burst.spray.particleCountRange = 3 >> ((gScreenLayout >= 2 || gPlayerCount >= 8) ? 1 : 0);
         burst.spray.delayBase = 25;
         burst.spray.delayRange = 15;
         burst.spray.alphaBase = 100;
@@ -675,7 +675,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.drag = 0.8720000386f;
         burst.spray.gravityBase = -0.3980000317f;
         burst.spray.gravityRange = 0.3640000224f;
-        if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
+        if (gScreenLayout >= 2 || gPlayerCount >= 8) {
             burst.spray.eventFunc = -1;
         } else {
             burst.spray.eventFunc = 0;
@@ -783,13 +783,13 @@ typedef struct {
 } Fx15147A80;
 
 /*
- * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and D_8008FD8C < 5),
+ * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and gPlayerCount < 5),
  * each with a reference back to its owner.
  */
 void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     BloodTrail *fx1;
 
-    if ((gScreenLayout < 2) && (D_8008FD8C < 5)) {
+    if ((gScreenLayout < 2) && (gPlayerCount < 5)) {
         BloodTrailDesc desc;
         ActorRef ref;
 
@@ -938,7 +938,7 @@ s32 effect_ageRibbonTrail(RibbonTrail *trail) {
             i = trail->head.tmpl.itemCount - 1;
         }
         point = &points[i];
-        point->lifetime -= D_800BE9E4;
+        point->lifetime -= gFrameTicks;
         lifetime = point->lifetime;
         if (lifetime < 0) {
             /* this point and every older one expire */
@@ -1386,7 +1386,7 @@ f32 effect_getBloodStripRate(AgedBloodStrip *strip) {
     // matching: `1.0f + 1.0f` keeps the multiply by 2 (a 2.0f literal becomes an add); 40 * 0.001f folds
     // to the ROM's 0.04000000283f
     rate = strip->sampleAge * (1.0f + 1.0f) * 0.001000000047f + 40.0f * 0.001000000047f;
-    strip->sampleAge += D_800BE9E4;
+    strip->sampleAge += gFrameTicks;
     return rate;
 }
 
@@ -1819,7 +1819,7 @@ s32 effect_updateBurstGlow(BurstGlow *glow) {
     const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
     GlowShape *shape = &glow->shape;
 
-    glow->data.textureTimer -= D_800BE9E4;
+    glow->data.textureTimer -= gFrameTicks;
     if (glow->data.textureTimer < 0) {
         glow->head.def.texture = textures[math_random() & 3];
         glow->data.textureTimer = (math_random() & 7) + 3;

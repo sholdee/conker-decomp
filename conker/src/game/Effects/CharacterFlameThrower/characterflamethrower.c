@@ -394,8 +394,8 @@ void flamethrower_updateTexScrolls(Gfx *dl0, Gfx *dl1) {
         w *= 8;
         h *= 8;
         if (gPaused == 0) {
-            x += scroll->speedS * D_800BE9E4;
-            y += scroll->speedT * D_800BE9E4;
+            x += scroll->speedS * gFrameTicks;
+            y += scroll->speedT * gFrameTicks;
         }
         if (x < 0) {
             x += w;
@@ -537,7 +537,7 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x64 */ s8 soundUpdateFn; /* gJetSoundUpdateProcs index */
     /* 0x65 */ s8 soundStopFn;   /* gJetSoundStopProcs index */
     /* 0x66 */ u16 sound;
-    /* 0x68 */ s8 unk68;     /* D_8008F89C index */
+    /* 0x68 */ s8 unk68;     /* gFlamethrowerJetProcs index */
     /* 0x69 */ u8 childPreset; /* gJetChildPresets index */
     /* 0x6A */ u8 childLife; /* points whose life drops below this spawn a child (flamethrower_shedJetLines) */
     /* 0x6C */ f32 childRate;
@@ -571,7 +571,7 @@ void (*gJetDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivate
 s16 (*gJetSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startJetSound };
 void (*gJetSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveJetSound };
 void (*gJetSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopJetSound };
-void (*D_8008F89C[])(void *) = { (void (*)(void *))flamethrower_emptyJetProc };
+void (*gFlamethrowerJetProcs[])(void *) = { (void (*)(void *))flamethrower_emptyJetProc };
 
 /* Runs a jet's destroy callbacks, then effect_defaultDestroyEffectObj. */
 void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
@@ -763,9 +763,9 @@ s32 flamethrower_updateJet(CharacterFlamethrowerActor *actor) {
         points[i].alpha = 255;
         hold = points[i].holdTimer;
         if (hold > 0) {
-            points[i].holdTimer = hold - D_800BE9E4;
+            points[i].holdTimer = hold - gFrameTicks;
         } else {
-            points[i].life -= jet->fadeRate * D_800BE9E4;
+            points[i].life -= jet->fadeRate * gFrameTicks;
         }
         if (points[i].life < jet->childLife) {
             if (points[i].spawnedChild == 0) {
@@ -815,7 +815,7 @@ s32 flamethrower_updateJet(CharacterFlamethrowerActor *actor) {
         gJetSoundUpdateProcs[jet->soundUpdateFn](actor);
     }
     if (jet->unk68 != -1) {
-        D_8008F89C[jet->unk68](actor);
+        gFlamethrowerJetProcs[jet->unk68](actor);
     }
     if (jet->updateFn != -1) {
         if (gJetUpdateProcs[jet->updateFn](actor) == 0) {
@@ -1700,7 +1700,7 @@ void flamethrower_stopJetSound(CharacterFlamethrowerActor *actor) {
     }
 }
 
-/* Jet callback (D_8008F89C): does nothing. */
+/* Jet callback (gFlamethrowerJetProcs): does nothing. */
 void flamethrower_emptyJetProc(CharacterFlamethrowerActor *actor) {
 }
 
@@ -2382,7 +2382,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             } while (flame->particleAccum > 1.0f);
         }
     }
-    flame->timer151 += D_800BE9E4;
+    flame->timer151 += gFrameTicks;
     if (flame->timer151 >= 0x3D) {
         if (flame->seed.owner != NULL && flame->seed.owner->mv != NULL) {
             flame->seed.owner->mv->shotsfired++;
@@ -2390,7 +2390,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         flame->timer151 = 0;
     }
     if ((flame->flags & 8) && obj->CameraPtr != NULL) {
-        flame->sparkTimer -= D_800BE9E4;
+        flame->sparkTimer -= gFrameTicks;
         if (flame->sparkTimer < 0) {
             s32 pad2; // matching: unused stack slot
             RumbleParams spark;
@@ -3084,7 +3084,7 @@ s32 flamethrower_moveFlameLine(SceneParticle *beam) {
     {
         s32 i;
 
-        for (i = D_800BE9E4; i > 0; i--) {
+        for (i = gFrameTicks; i > 0; i--) {
             p->velA.x *= p->dragA;
             p->velA.y *= p->dragA;
             p->velA.z *= p->dragA;
@@ -3113,7 +3113,7 @@ s32 flamethrower_fadeFlameLine(SceneParticle *beam) {
     s32 i;
     FlameLineData *p = &beam->data.line;
 
-    for (i = D_800BE9E4; i > 0; i--) {
+    for (i = gFrameTicks; i > 0; i--) {
         beam->head.def.width = beam->head.def.width - beam->head.def.width * p->shrinkRate;
         beam->head.def.height = beam->head.def.height - beam->head.def.height * p->shrinkRate;
     }

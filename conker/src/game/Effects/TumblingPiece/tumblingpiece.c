@@ -85,7 +85,7 @@ s32 effect_updateTumblingPiece(EffectActor *actor) {
 
         prevVel = motion->vel;
         motion->vel.y += motion->gravity * gFrameDelta;
-        for (i = D_800BE9E4; i != 0; i--) {
+        for (i = gFrameTicks; i != 0; i--) {
             motion->vel.x *= motion->drag;
             motion->vel.y *= motion->drag;
             motion->vel.z *= motion->drag;

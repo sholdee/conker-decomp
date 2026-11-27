@@ -90,7 +90,7 @@ extern u64 gRandomState;
 
 
 
-extern f32 D_8009F6C0; // 0.01745329238474369f
+extern f32 gRotateRPYFDegToRad; // 0.01745329238474369f
 
 /* 800A0000 */
 
@@ -111,10 +111,10 @@ extern s32 D_800BE5D0;
 
 extern GroundCandidate gGroundCandidates[]; // ground-probe hits
 extern u8  gCurrentActorSlot; // 1-based slot of the actor being updated (0 = none)
-extern f32 D_800D35E0;
+extern f32 gFrustumSlopeX;
 extern f32 gCullVtxFlags; /* 0x800D35E4 == (&gCullVtxFlags)[-1]; it has no symbol of its own */
-extern u8 *D_800D3668; // per-face shadow flag table
-extern u8 *D_800D366C; // end of D_800D3668
+extern u8 *gShadowFaceFlags; // per-face shadow flag table
+extern u8 *gShadowFaceFlagsEnd; // end of gShadowFaceFlags
 extern f32 D_800D3670;
 extern s16 D_800D3674;
 extern u16 gSurfSetA[40]; // grid-query result: triangle indices (u16 list for collision_gatherPropGroundTris / collision_transformPropTris)

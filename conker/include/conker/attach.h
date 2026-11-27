@@ -46,7 +46,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner);
 s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner);
 s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner);
 s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner);
-s32 func_150333A8(ModelAttachment *att, Actor *owner);
+s32 attach_hookRemoveInWater(ModelAttachment *att, Actor *owner);
 s32 func_15033440(ModelAttachment *att, Actor *owner);
 s32 attach_scrollTile(ModelAttachment *att, Actor *owner);
 ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation);
@@ -71,7 +71,7 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner);
 s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor);
 
 /* game/Attach/TextureScroll/texturescroll.c */
-void func_150D82B0(s32 arg0);
+void attach_emptyLevelUpdateHook1(s32 arg0);
 s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
 GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
@@ -80,7 +80,7 @@ s32 func_150D88AC(struct S150D88AC *arg0);
 
 /* game/Attach/BonePoint/bonepoint.c */
 s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);
-s32 func_150D8A20(s32 arg0, s32 arg1);
+s32 attach_selectBonePointEffects(s32 arg0, s32 arg1);
 void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2);
 
 /* game/Attach/AttachModel/attachmodel.c */

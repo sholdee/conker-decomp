@@ -11,7 +11,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
     RumbleParams event;
 
     if ((obj != NULL) && (obj->ob_matrix_ptr != NULL)) {
-        camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 6, 1);
+        camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 6, 1);
         yaw = (obj->langle >> 8) + 0x40;
         math_transformOffset(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)

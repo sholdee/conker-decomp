@@ -161,7 +161,7 @@ void script_startTimedMove(void) {
 }
 
 /* Jumps to arg0 when waypoint arg1 compares (per arg2) with the waypoint unk221 steps back. */
-void func_15075938(void) {
+void script_jumpIfWaypointCompare(void) {
     s32 position;
     s32 desired;
     s32 matched;
@@ -243,7 +243,7 @@ void func_15075BE8(void) {
 }
 
 /* Sets the vertical velocity to the s16 (arg2:arg0) unless arg3 == 1, and gravity to (s8)arg1 unless arg3 == 2. */
-void func_15075C24(void) {
+void script_setYSpeedAndGravity(void) {
     if (gScriptArg3 != 1) {
         gCurrentActor->yspd = (s16)((gScriptArg2 << 8) | gScriptArg0);
     }
@@ -384,8 +384,8 @@ void script_playPlayerSound(void) {
     actor_playPlayerSound(id, gCurrentActor, 32000, -100, 500, 2500, gScriptArg2);
 }
 
-void func_150762B0(void) {
-    func_1000CBA8(gScriptArg0);
+void script_fadeFirstTwoChannels(void) {
+    music_fadeFirstTwoChannels(gScriptArg0);
 }
 
 void script_spawnPuff(void) {
@@ -461,7 +461,7 @@ void func_1507659C(void) {
     }
 }
 
-void func_15076600(void) {
+void script_emptyCommand61(void) {
 }
 
 void func_15076608(void) {
@@ -490,7 +490,7 @@ void func_150766D0(void) {
     }
 }
 
-void func_15076760(void) {
+void script_emptyCommand70(void) {
 }
 
 void func_15076768(void) {
@@ -652,7 +652,7 @@ void func_15076E10(void) {
     gCurrentActor->unk22C |= gScriptArg1;
 }
 
-void func_15076E48(void) {
+void script_emptyCommand113(void) {
 }
 
 /* Starts mode 7: a jump in a random direction with random speeds. */
@@ -716,7 +716,7 @@ void script_playUntrackedSound(void) {
     }
 }
 
-void func_150771F0(void) {
+void script_runFadeCommand(void) {
     u8 mode;
     u8 param0;
     u8 param1;
@@ -761,7 +761,7 @@ void func_15077318(void) {
     }
 }
 
-void func_1507735C(void) {
+void script_doNothing(void) {
 }
 
 void script_setAnimSpeedAndAccel(void) {
@@ -775,7 +775,7 @@ void script_setAnimSpeedAndAccel(void) {
 }
 
 /*
- * arg3 != 0: adds (s16)(arg1:arg2) * D_800BE9E4 to the 13-bit counter kept in unk246 (high bits) and
+ * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in unk246 (high bits) and
  * unk249 (low byte), clamping at 0 and setting bit 7 of unk246; otherwise sets unk246 to arg0.
  */
 void func_15077404(void) {
@@ -785,7 +785,7 @@ void func_15077404(void) {
 
         value = ((gCurrentActor->intel_animspd & 0x1F) << 8) + gCurrentActor->unk249;
         delta = (gScriptArg1 << 8) + gScriptArg2;
-        value += delta * D_800BE9E4;
+        value += delta * gFrameTicks;
         if (value < 0) {
             value = 0;
         }
@@ -962,7 +962,7 @@ void script_jumpIfWithinRange(void) {
     }
 }
 
-void func_15077AA0(void) {
+void script_setHitRouteAlt(void) {
     gCurrentActor->intelhitroute = gScriptArg0;
 }
 
@@ -1087,7 +1087,7 @@ void script_turnToWaypoint(void) {
     }
     if (gTurnAnimTable[index][0] < turn) {
         gCurrentActor->unk250 = gScriptArg1;
-        func_15056A00(gCurrentActor, turn, index);
+        actor_startTurnAnim(gCurrentActor, turn, index);
     }
 }
 
@@ -1579,7 +1579,7 @@ void func_15079790(void) {
 }
 
 /* Starts a move with object 0's speed plus (s8)arg2, clamped to [arg1, 250]. */
-void func_15079880(void) {
+void script_startMoveAtPlayerSpeed(void) {
     s32 speed = movement_obj[0].speed + (s8)gScriptArg2;
 
     if (speed < gScriptArg1) {
@@ -1643,7 +1643,7 @@ u16 script_getAngleToPathStart(s32 arg0) {
  * Changes a property of an object: arg1 selects the object (0, 1: the current one, else unique id
  * arg1 - 2), arg2 the property and, for counters 1-3, arg3 the operation applied with value arg0.
  */
-void func_15079B30(void) {
+void script_changeObjectProperty(void) {
     s32 index;
     s32 *counter;
     Actor *savedObj;
@@ -1731,13 +1731,13 @@ select_object: // matching: unused label, splits the block for the scheduler
         (*counter)--;
         break;
     case 2:
-        *counter += D_800BE9E4;
+        *counter += gFrameTicks;
         break;
     case 3:
         (*counter)++;
         break;
     case 4:
-        *counter -= D_800BE9E4;
+        *counter -= gFrameTicks;
         break;
     case 5:
         *counter -= gActorStepPercent;
@@ -1827,7 +1827,7 @@ void func_1507A210(void) {
     script_applyMoveFlags();
 }
 
-void func_1507A270(void) {
+void script_breakIntoPartsVariant(void) {
     model_breakIntoParts(gCurrentActor, gScriptArg0, (s8)gScriptArg1);
 }
 
@@ -1898,7 +1898,7 @@ void func_1507A4D4(void) {
  * Waypoint direction: arg0 0 sets the step unk221 to arg1, 1 reverses it, 2 reverses it and moves
  * the waypoint index by the new step plus arg3 further, wrapping at arg2 (0: the path's count).
  */
-void func_1507A528(void) {
+void script_changeWaypointDirection(void) {
     s32 count;
     s32 index;
 
@@ -2193,77 +2193,77 @@ void script_setBodySize(void) {
     }
 }
 
-void func_1507B234(void) {
+void script_playSound1Range1800(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(300, 1800);
     }
 }
 
-void func_1507B280(void) {
+void script_playSound1Range3000(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(300, 3000);
     }
 }
 
-void func_1507B2CC(void) {
+void script_playSound2Range1800(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         event_playOrStopSound2(300, 1800);
     }
 }
 
-void func_1507B318(void) {
+void script_playSound2Range3000(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         event_playOrStopSound2(300, 3000);
     }
 }
 
-void func_1507B364(void) {
+void script_playSound1Range4000(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(700, 4000);
     }
 }
 
-void func_1507B3B0(void) {
+void script_playSound2Range4000(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         event_playOrStopSound2(700, 4000);
     }
 }
 
-void func_1507B3FC(void) {
+void script_playSound1Range8000(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(3000, 8000);
     }
 }
 
-void func_1507B448(void) {
+void script_playSound1Range1300(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(190, 1300);
     }
 }
 
-void func_1507B494(void) {
+void script_playSound2Range1300(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         event_playOrStopSound2(190, 1300);
     }
 }
 
-void func_1507B4E0(void) {
+void script_playSound1Range800(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         event_playOrStopSound1(100, 800);
     }
 }
 
-void func_1507B52C(void) {
+void script_playSound2Range800(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         event_playOrStopSound2(100, 800);
@@ -2276,7 +2276,7 @@ void func_1507B578(void) {
 }
 
 /* Jumps to arg0 when mv->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
-void func_1507B5C4(void) {
+void script_jumpIfContext(void) {
     if (gCurrentActor->mv->context_b == gScriptArg1) {
         gScriptArg2 ^= 1;
     }
@@ -2404,7 +2404,7 @@ void func_1507BAF8(void) {
     gCurrentActor->unk2CC = script_getArgWord();
 }
 
-void func_1507BB20(void) {
+void script_emptyCommand108(void) {
 }
 
 typedef struct ScriptEntry {
@@ -2423,13 +2423,13 @@ static const ObjScriptCmd gFallbackObjScript[5] = {
 
 /* The command handlers, indexed by opcode. */
 static void (*gObjScriptHandlers[214])(void) = {
-    func_1507735C, script_startMove, func_15075BE8, script_jumpIfLevel,
-    script_jumpIfButtonsHeld, script_setNorun, func_15075C24, func_15075CA0,
+    script_doNothing, script_startMove, func_15075BE8, script_jumpIfLevel,
+    script_jumpIfButtonsHeld, script_setNorun, script_setYSpeedAndGravity, func_15075CA0,
     script_switchScript, func_15075E6C, func_15075E98, script_jumpRandom,
     func_15075F00, func_15075F40, script_playRandomUntrackedSound, func_15075F6C,
     script_leapToWaypoint, func_150761C8, func_1507BAD0, func_150761F4,
     func_1507AE94, script_removePartSet, script_jumpIfEnergy, script_startViewEnvelope,
-    script_playPlayerSound, func_150762B0, func_1507A8A8, script_setFacing,
+    script_playPlayerSound, script_fadeFirstTwoChannels, func_1507A8A8, script_setFacing,
     script_setWaypointRange, func_1507ACE0, script_jumpIfAngleInRange, func_1507AF3C,
     func_15076220, script_jumpIfNotHit, func_15077404, func_15075CCC,
     func_15075BB8, NULL, func_15075DC8, script_spawnPuff,
@@ -2437,29 +2437,29 @@ static void (*gObjScriptHandlers[214])(void) = {
     func_15076394, func_150764C8, func_1507AE78, script_setHitRoute,
     func_15076500, func_150763B0, func_1507AF98, script_setImmune,
     func_1507B040, script_commandOwnedObject, func_1507659C, script_jumpIfCoordBelow,
-    script_setNojump, func_1507B234, func_1507B280, func_1507B2CC,
-    func_1507B318, func_15076600, func_1507B364, func_1507B3B0,
-    func_1507B3FC, script_setNoshoveFlags, script_setBodySize, func_15076608,
-    script_jumpIfWaypointParam, func_150766D0, func_15076760, func_15076768,
+    script_setNojump, script_playSound1Range1800, script_playSound1Range3000, script_playSound2Range1800,
+    script_playSound2Range3000, script_emptyCommand61, script_playSound1Range4000, script_playSound2Range4000,
+    script_playSound1Range8000, script_setNoshoveFlags, script_setBodySize, func_15076608,
+    script_jumpIfWaypointParam, func_150766D0, script_emptyCommand70, func_15076768,
     func_1507B578, func_1507BAF8, script_jumpIfBehindTarget, script_findNearestInView,
     script_targetFoundObject, script_setDrawType, script_startMove, func_15076C7C,
     func_15076CB4, script_moveToLastOfType, script_setMvmtControl, script_clearMvmtControl,
     func_15076CCC, script_setSpeed, script_setScale, func_1507B7BC,
-    script_setType, func_1507B448, func_1507B494, func_1507B4E0,
-    script_startMove, func_1507B52C, func_15075B8C, script_jumpIfTargetStunned,
-    script_startMove, func_1507B8F4, func_150771F0, script_breakIntoParts,
+    script_setType, script_playSound1Range1300, script_playSound2Range1300, script_playSound1Range800,
+    script_startMove, script_playSound2Range800, func_15075B8C, script_jumpIfTargetStunned,
+    script_startMove, func_1507B8F4, script_runFadeCommand, script_breakIntoParts,
     script_clearNoshoveFlags, func_1507A808, script_pickWaypoint, script_setAnimSpeedAndAccel,
     script_advanceWaypoint, func_150779A8, script_jumpIfWithinRange, func_15075D64,
-    func_1507BB20, script_startMoveUnlessNear, script_playUntrackedSound, func_15075B60,
-    func_15076E10, func_15076E48, func_1507B5C4, func_1507B630,
+    script_emptyCommand108, script_startMoveUnlessNear, script_playUntrackedSound, func_15075B60,
+    func_15076E10, script_emptyCommand113, script_jumpIfContext, func_1507B630,
     func_1507B6E0, script_startRandomJump, script_pressButtons, func_15076F40,
     func_15076F78, func_15076FA8, script_clearTaskAttrib, script_jumpIfTargetSlow,
     func_15077174, func_1507B958, func_15075D9C, script_setEnergy,
-    script_leapToTarget, script_restartById, func_150796CC, func_1507735C,
-    script_targetRandomOfType, func_1507A3B4, func_1507A528, func_1507735C,
-    func_1507735C, func_1507735C, func_15077AA0, func_1507735C,
+    script_leapToTarget, script_restartById, func_150796CC, script_doNothing,
+    script_targetRandomOfType, func_1507A3B4, script_changeWaypointDirection, script_doNothing,
+    script_doNothing, script_doNothing, script_setHitRouteAlt, script_doNothing,
     func_15077ABC, func_15077B14, script_playSoundOnSelf, func_15077C1C,
-    func_15075938, script_startTimedMove, script_findTarget, script_jumpIfWaypoint,
+    script_jumpIfWaypointCompare, script_startTimedMove, script_findTarget, script_jumpIfWaypoint,
     script_setTaskAttrib, script_restartObjectOfType, script_setWaypoint, NULL,
     script_startTrackAt, script_warpToWaypoint, func_15077EEC, func_15077F08,
     func_15077F34, script_turnToWaypoint, script_jumpIfAnyObjectNear, script_jumpIfTargetInactive,
@@ -2468,12 +2468,12 @@ static void (*gObjScriptHandlers[214])(void) = {
     script_placeWaypointNearTarget, script_jumpIfTargetAnimFrame, func_15078874, func_15078890,
     func_15078900, script_copyTargetAnimFrame, script_jumpIfPlayerProperty, func_15079228,
     script_setIntelWalk, func_150792FC, script_sendAttachmentMessage, script_switchIfPlayerProperty,
-    script_placeWaypointNearPlayer, func_15079880, script_jumpIfAtWaypoint, script_requestExpression,
+    script_placeWaypointNearPlayer, script_startMoveAtPlayerSpeed, script_jumpIfAtWaypoint, script_requestExpression,
     script_setDefaultExpression, script_jumpIfProperty, script_playRandomSoundOnSelf, func_15079790,
     script_restartFoundObject, script_setForcedLod, func_15079A28, script_setSpawnDelay,
-    func_15079B30, script_setSpeedup, func_15079F50, func_15079F6C,
+    script_changeObjectProperty, script_setSpeedup, func_15079F50, func_15079F6C,
     script_steerByPlayerStick, script_setWaypointCoord, script_setSpeedFromPlayer, func_1507A210,
-    script_switchIfProperty, func_15075D38, func_1507A270, func_15075D0C,
+    script_switchIfProperty, func_15075D38, script_breakIntoPartsVariant, func_15075D0C,
     func_1507A2A4, func_1507A3CC, func_1507A428, func_1507A47C,
     func_1507A4D4, script_attachToObject, script_stepPathGraph, script_jumpIfAtDestination,
     func_15077318, script_callHandler

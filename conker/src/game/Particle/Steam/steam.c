@@ -21,8 +21,8 @@ static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 /* Per effect kind (0..12): texture id pickers. */
 u8 (*gKindParticleTexturePickers[13])(void) = {
-    func_151D8E6C, func_151D8EB0, func_151D8EBC, func_151D8EC8, func_151D8EFC, func_151D8F30, func_151D8F7C,
-    func_151D8FB0, func_151D8FB0, func_151D8FBC, func_151D8FC8, func_151D8FD4, func_151D8FE0,
+    particle_pickKind0Texture, particle_pickKind1Texture, particle_pickKind2Texture, particle_pickKind3Texture, particle_pickKind4Texture, particle_pickKind5Texture, particle_pickKind6Texture,
+    particle_pickKind7Texture, particle_pickKind7Texture, particle_pickKind9Texture, particle_pickKind10Texture, particle_pickKind11Texture, particle_pickKind12Texture,
 };
 u8 (*D_8008FD04[13])(void) = {
     func_151D97A8, func_151D9878, func_151D98D0, func_151D9820, func_151D9918, func_151D9960, func_151D99C8,
@@ -30,8 +30,8 @@ u8 (*D_8008FD04[13])(void) = {
 };
 /* Per effect kind: the colour setters of particle_spawnKindSprite's particles. */
 static void (*gEffectKindColorFuncs[13])(ParticleDesc *) = {
-    func_151DB004, func_151DB068, func_151DB0CC, func_151DB15C, func_151DB1EC, func_151DB27C, func_151DB2A8,
-    func_151DB2CC, func_151DB330, func_151DB3D8, func_151DB43C, func_151DB068, func_151DB4CC,
+    particle_setKind0Colors, particle_setKind1Colors, particle_setKind2Colors, particle_setKind3Colors, particle_setKind4Colors, particle_setKind5Colors, particle_setKind6Colors,
+    particle_setKind7Colors, particle_setKind8Colors, particle_setKind9Colors, particle_setKind10Colors, particle_setKind1Colors, particle_setKind12Colors,
 };
 
 
@@ -45,64 +45,64 @@ s32 particle_getContextEffectKind(void) {
 }
 
 /* Id picker for effect kind 0 in the gKindParticleTexturePickers table. */
-u8 func_151D8E6C(void) {
+u8 particle_pickKind0Texture(void) {
     const u8 ids[3] = { 88, 64, 62 };
     return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 1 in the gKindParticleTexturePickers table. */
-u8 func_151D8EB0(void) {
+u8 particle_pickKind1Texture(void) {
     return 117;
 }
 
 /* Id picker for effect kind 2 in the gKindParticleTexturePickers table. */
-u8 func_151D8EBC(void) {
+u8 particle_pickKind2Texture(void) {
     return 29;
 }
 
 /* Id picker for effect kind 3 in the gKindParticleTexturePickers table. */
-u8 func_151D8EC8(void) {
+u8 particle_pickKind3Texture(void) {
     return (math_random() & 1) ? 17 : 147;
 }
 
 /* Id picker for effect kind 4 in the gKindParticleTexturePickers table. */
-u8 func_151D8EFC(void) {
+u8 particle_pickKind4Texture(void) {
     return (math_random() & 1) ? 90 : 91;
 }
 
 /* Id picker for effect kind 5 in the gKindParticleTexturePickers table. */
-u8 func_151D8F30(void) {
+u8 particle_pickKind5Texture(void) {
     const u8 ids[5] = { 46, 48, 45, 51, 52 };
     return ids[math_random() % 5U];
 }
 
 /* Id picker for effect kind 6 in the gKindParticleTexturePickers table. */
-u8 func_151D8F7C(void) {
+u8 particle_pickKind6Texture(void) {
     return (math_random() & 1) ? 102 : 103;
 }
 
 /* Id picker for effect kinds 7 and 8 in the gKindParticleTexturePickers table. */
-u8 func_151D8FB0(void) {
+u8 particle_pickKind7Texture(void) {
     return 149;
 }
 
 /* Id picker for effect kind 9 in the gKindParticleTexturePickers table. */
-u8 func_151D8FBC(void) {
+u8 particle_pickKind9Texture(void) {
     return 159;
 }
 
 /* Id picker for effect kind 10 in the gKindParticleTexturePickers table. */
-u8 func_151D8FC8(void) {
+u8 particle_pickKind10Texture(void) {
     return 179;
 }
 
 /* Id picker for effect kind 11 in the gKindParticleTexturePickers table. */
-u8 func_151D8FD4(void) {
+u8 particle_pickKind11Texture(void) {
     return 117;
 }
 
 /* Id picker for effect kind 12 in the gKindParticleTexturePickers table. */
-u8 func_151D8FE0(void) {
+u8 particle_pickKind12Texture(void) {
     const u8 ids[4] = { 96, 97, 98, 99 };
     return ids[math_random() & 3];
 }
@@ -210,8 +210,8 @@ s32 particle_wobbleSteamSize(SteamParticle *particle, Vec3f *arg1) {
     if (wobble->flags & WOBBLE_FLAG_FIXED_SIZE) {
         return 1;
     }
-    wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
-    wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
+    wobble->phaseX = wobble->phaseX + wobble->stepX * gFrameTicks;
+    wobble->phaseY = wobble->phaseY + wobble->stepY * gFrameTicks;
     particle->head.desc.width = wobble->amplitudeX * math_cosBinAngleMasked(wobble->phaseX - 0x40) + wobble->size;
     particle->head.desc.height = wobble->amplitudeY * math_cosBinAngleMasked(wobble->phaseY - 0x40) + wobble->size;
     return 1;
@@ -414,7 +414,7 @@ void particle_updateDripEffect(DripEffect *effect) {
     f32 rand;
 
     drip = &effect->drip;
-    drip->timer = drip->timer - D_800BE9E4;
+    drip->timer = drip->timer - gFrameTicks;
     if (drip->timer < 0) {
         rand = math_randomFloat();
         lifeRand = math_random();
@@ -521,8 +521,8 @@ s32 particle_updateSteamEffect(SteamEffect *effect) {
     s16 angle;
 
     steam = &effect->steam;
-    steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
-    steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
+    steam->phaseX = steam->phaseX + steam->stepX * gFrameTicks;
+    steam->phaseY = steam->phaseY + steam->stepY * gFrameTicks;
     effect->head.def.width = math_cosBinAngleMasked(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
     effect->head.def.height = math_cosBinAngleMasked(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
@@ -575,7 +575,7 @@ s32 particle_shrinkSteamEffect(SteamEffect *effect) {
 
     if (effect->head.def.flags & 1) {
         steam = &effect->steam;
-        i = D_800BE9E4;
+        i = gFrameTicks;
         while (i--) {
             steam->size = steam->size * steam->shrink;
         }
@@ -758,7 +758,7 @@ s32 particle_updateSquashEffect(SquashEffect *effect) {
     SquashData *squash;
 
     squash = &effect->squash;
-    squash->phase = squash->phase + squash->step * D_800BE9E4;
+    squash->phase = squash->phase + squash->step * gFrameTicks;
     wave = math_cosBinAngleMasked(squash->phase - 0x40);
     effect->head.def.scale.x = squash->amplitudeX * wave + 1.0f;
     effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
@@ -807,7 +807,7 @@ Vtx *particle_buildSquashQuad(DefParticleHead *effect, s16 view) {
 }
 
 /* Colour setter for effect kind 0 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB004(ParticleDesc *desc) {
+void particle_setKind0Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 80;
     desc->g = 0;
     desc->b = 0;
@@ -817,7 +817,7 @@ void func_151DB004(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kinds 1 and 11 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB068(ParticleDesc *desc) {
+void particle_setKind1Colors(ParticleDesc *desc) {
     desc->r = desc->g = (math_random() % 56U) + 100;
     desc->b = 0;
     desc->r2 = desc->g2 = (math_random() % 46U) + 180;
@@ -825,7 +825,7 @@ void func_151DB068(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 2 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB0CC(ParticleDesc *desc) {
+void particle_setKind2Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 80;
     desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
@@ -835,7 +835,7 @@ void func_151DB0CC(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 3 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB15C(ParticleDesc *desc) {
+void particle_setKind3Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 80;
     desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
@@ -845,7 +845,7 @@ void func_151DB15C(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 4 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB1EC(ParticleDesc *desc) {
+void particle_setKind4Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 80;
     desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
@@ -855,7 +855,7 @@ void func_151DB1EC(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 5 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB27C(ParticleDesc *desc) {
+void particle_setKind5Colors(ParticleDesc *desc) {
     desc->r = 255;
     desc->g = 255;
     desc->b = 255;
@@ -865,7 +865,7 @@ void func_151DB27C(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 6 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB2A8(ParticleDesc *desc) {
+void particle_setKind6Colors(ParticleDesc *desc) {
     desc->r = 0;
     desc->g = 200;
     desc->b = 0;
@@ -875,7 +875,7 @@ void func_151DB2A8(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 7 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB2CC(ParticleDesc *desc) {
+void particle_setKind7Colors(ParticleDesc *desc) {
     desc->r = 0;
     desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
@@ -885,7 +885,7 @@ void func_151DB2CC(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 8 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB330(ParticleDesc *desc) {
+void particle_setKind8Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 21U) + 95;
     desc->g = (math_random() % 21U) + 95;
     desc->b = (math_random() % 11U) + 45;
@@ -895,7 +895,7 @@ void func_151DB330(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 9 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB3D8(ParticleDesc *desc) {
+void particle_setKind9Colors(ParticleDesc *desc) {
     desc->r = 0;
     desc->g = desc->b = (math_random() % 56U) + 80;
     desc->r2 = 0;
@@ -903,7 +903,7 @@ void func_151DB3D8(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 10 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB43C(ParticleDesc *desc) {
+void particle_setKind10Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 80;
     desc->g = 0;
     desc->b = (math_random() % 56U) + 80;
@@ -913,7 +913,7 @@ void func_151DB43C(ParticleDesc *desc) {
 }
 
 /* Colour setter for effect kind 12 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
-void func_151DB4CC(ParticleDesc *desc) {
+void particle_setKind12Colors(ParticleDesc *desc) {
     desc->r = (math_random() % 56U) + 200;
     desc->g = (math_random() % 56U) + 200;
     desc->b = (math_random() % 56U) + 200;
@@ -1003,9 +1003,9 @@ s32 particle_updateKindSprite(SteamParticle *particle, s32 arg1) {
         particle_applyDragXZ(&particle->head.desc.vel, spin->drag);
     }
     if (spin->flags & SPIN_FLAG_SPIN) {
-        spin->angleX = spin->angleX + (spin->stepX * D_800BE9E4);
-        spin->angleY = spin->angleY + (spin->stepY * D_800BE9E4);
-        spin->angleZ = spin->angleZ + (spin->stepZ * D_800BE9E4);
+        spin->angleX = spin->angleX + (spin->stepX * gFrameTicks);
+        spin->angleY = spin->angleY + (spin->stepY * gFrameTicks);
+        spin->angleZ = spin->angleZ + (spin->stepZ * gFrameTicks);
 
         waveX = math_cosBinAngleMasked(spin->angleX - 0x40);
         waveY = math_cosBinAngleMasked(spin->angleY - 0x40);

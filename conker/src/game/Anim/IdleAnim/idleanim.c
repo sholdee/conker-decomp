@@ -517,7 +517,7 @@ void anim_updateIdle(void) {
     if (gCurrentActor->drawtype == 4) {
         return;
     }
-    if (dc_glbl_CharNum >= D_8008FD8C) {
+    if (dc_glbl_CharNum >= gPlayerCount) {
         return;
     }
     idle = &gCurrentActor->mv->idle;
@@ -801,10 +801,10 @@ void anim_updateIdleTimer(Actor *actor) {
         actor->unk13A = countdown - 1;
     }
     if (idle->active == TRUE && gCutsceneStates[0] != 1) {
-        limit = 0xFFFF - D_800BE9E4;
+        limit = 0xFFFF - gFrameTicks;
         timer = idle->timer;
         if (timer < limit) {
-            idle->timer = timer + D_800BE9E4;
+            idle->timer = timer + gFrameTicks;
         }
     } else {
         idle->timer = 0;
@@ -815,8 +815,8 @@ void anim_updateIdleTimer(Actor *actor) {
     }
     delay = actor->mv->idle.delay; // matching: re-read through actor, not idle
     if (delay != 0) {
-        if (D_800BE9E4 < delay) {
-            actor->mv->idle.delay = delay - D_800BE9E4;
+        if (gFrameTicks < delay) {
+            actor->mv->idle.delay = delay - gFrameTicks;
         } else {
             anim_sendIdleDelayEvent(actor);
             actor->mv->idle.delay = 0;

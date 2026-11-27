@@ -6,7 +6,7 @@
 #include "libc/string.h"
 
 /* Zeroes the 0xFE0-byte block at gPageSlots, one word at a time. */
-void func_10001420(void) {
+void libc_clearPageSlots(void) {
     // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0
     // (plain loop is byte-identical but uses v0/v1); no idiomatic form found
     s32 zero0 = 0;
@@ -27,23 +27,23 @@ void func_10001420(void) {
 
 /* With interrupts disabled: clears gPageSlots and invalidates the I-cache from
  * D_1002AAD0 up to the end of 4MB RDRAM. */
-void func_10001444(void) {
+void libc_resetPaging(void) {
     u32 saveMask = __osDisableInt();
     boot_invalidateTlbEntries(2, 31);
-    func_10001420();
+    libc_clearPageSlots();
     boot_resetPageBitmap();
     osInvalICache(&D_1002AAD0, 0x80400000 - (u32)&D_1002AAD0);
     __osRestoreInt(saveMask);
 }
 
 /* Stops thread gMainThread. */
-void func_100014A0(void) {
+void libc_stopMainThread(void) {
     osStopThread(&gMainThread);
 }
 
 /* With interrupts disabled: releases the gPagePool and gPageFreeBitmap blocks (as KSEG0
  * pointers) through heap_free, then hands arg0 to boot_initPaging and clears gPageSlots. */
-void func_100014C4(s32 arg0) {
+void libc_reinitPaging(s32 arg0) {
     u32 saveMask = __osDisableInt();
     boot_invalidateTlbEntries(2, 31);
 
@@ -54,7 +54,7 @@ void func_100014C4(s32 arg0) {
         heap_free((void *)(gPageFreeBitmap | 0x80000000));
     }
     boot_initPaging(arg0);
-    func_10001420();
+    libc_clearPageSlots();
     boot_resetPageBitmap();
     __osRestoreInt(saveMask);
 }

@@ -125,7 +125,7 @@ Gfx *flare_drawAll(Gfx *gfx, s32 arg1) {
         if (flare->alpha != 0) {
             hidden = FALSE;
             if (flare->flags & FLARE_SUN) {
-                if (D_800DCDD0 == 0) {
+                if (gDaylight == 0) {
                     hidden = TRUE;
                 } else {
                     sunPos = gSunPositions[D_800B0DF0->unk10];
@@ -188,7 +188,7 @@ Gfx *flare_draw(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff,
                 target = 0;
             }
         }
-        step = D_800BE9E4 * 5;
+        step = gFrameTicks * 5;
         intensity = *flash;
         if (ABS(target - intensity) < step) {
             intensity = target;
@@ -208,7 +208,7 @@ Gfx *flare_draw(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff,
     } else {
         intensity = (0x1ADB00 / (dist + 10000)) * strength / 256;
     }
-    step = D_800BE9E4 * 10;
+    step = gFrameTicks * 10;
     if (ABS(intensity - flare->brightness) < step) {
         flare->brightness = intensity;
     } else if (intensity < flare->brightness) {
@@ -239,7 +239,7 @@ Gfx *flare_draw(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff,
             sprite.alpha = intensity;
             sprite.scaleX = (size << 12) * gScreenScaleX / 255.0f;
             sprite.scaleY = (size << 12) * gScreenScaleY / 255.0f;
-            D_800D2DAB = 0;
+            gSpriteKeepPrimColor = 0;
             gfx = sprite_drawScreen(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);
         }

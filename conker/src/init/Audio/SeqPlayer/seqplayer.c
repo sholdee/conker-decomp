@@ -103,7 +103,7 @@ void audio_init(void) {
 }
 
 /* Stop the player's sequence unless it is already stopped or stopping. */
-void func_100084D8(u8 player) {
+void audio_playSeqIfStopped(u8 player) {
     if (n_alCSPGetState(gSeqPlayers[player]) == AL_STOPPED ||
         n_alCSPGetState(gSeqPlayers[player]) == 3) {
         func_10017AA0(gSeqPlayers[player]);
@@ -231,11 +231,11 @@ void func_10008B2C(u8 player) {
     n_alCSPGetTempo(gSeqPlayers[player]);
 }
 
-void func_10008B60(u8 player, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+void audio_setSeqFxParam(u8 player, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_10017F10(gSeqPlayers[player], arg1, arg2, arg3, arg4);
 }
 
-void func_10008BC0(u8 player, f32 arg1, f32 arg2) {
+void audio_setSeqFxMix(u8 player, f32 arg1, f32 arg2) {
     func_10017DF0(gSeqPlayers[player], arg1, arg2);
 }
 
@@ -291,7 +291,7 @@ void audio_setSeqVolume(u8 player, s32 vol) {
     func_10018D00(gSeqPlayers[player], vol);
 }
 
-void func_10008F24(u8 player) {
+void audio_endSeqTrack(u8 player) {
     // AL_TRACK_END
     func_10018C60(gSeqPlayers[player]);
 }

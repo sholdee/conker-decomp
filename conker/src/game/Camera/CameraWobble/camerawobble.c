@@ -78,7 +78,7 @@ void camera_updateWobble(CamWobble *wobble) {
     finished = 0;
     stop = 0;
     if (wobble->def.flags & CAM_WOBBLE_TIMED) {
-        wobble->def.timer -= D_800BE9E4;
+        wobble->def.timer -= gFrameTicks;
         if (wobble->def.timer < 0) {
             stop = 1;
         }

@@ -110,19 +110,19 @@ glabel shadow_projectLevelFaces
     /* D31B4 150A5D04 022C8820 */  add        $s1, $s1, $t4 /* handwritten instruction */
     /* D31B8 150A5D08 022A8820 */  add        $s1, $s1, $t2 /* handwritten instruction */
     /* D31BC 150A5D0C 241200FF */  addiu      $s2, $zero, 0xFF
-    /* D31C0 150A5D10 0D42984F */  jal        func_150A613C
+    /* D31C0 150A5D10 0D42984F */  jal        shadow_clipCodeVertex
     /* D31C4 150A5D14 8E2C0000 */   lw        $t4, 0x0($s1)
     /* D31C8 150A5D18 46006906 */  mov.s      $f4, $f13
     /* D31CC 150A5D1C 0160A025 */  or         $s4, $t3, $zero
     /* D31D0 150A5D20 46007146 */  mov.s      $f5, $f14
     /* D31D4 150A5D24 46007986 */  mov.s      $f6, $f15
-    /* D31D8 150A5D28 0D42984F */  jal        func_150A613C
+    /* D31D8 150A5D28 0D42984F */  jal        shadow_clipCodeVertex
     /* D31DC 150A5D2C 8E2C0004 */   lw        $t4, 0x4($s1)
     /* D31E0 150A5D30 0160A825 */  or         $s5, $t3, $zero
     /* D31E4 150A5D34 460069C6 */  mov.s      $f7, $f13
     /* D31E8 150A5D38 46007206 */  mov.s      $f8, $f14
     /* D31EC 150A5D3C 46007A46 */  mov.s      $f9, $f15
-    /* D31F0 150A5D40 0D42984F */  jal        func_150A613C
+    /* D31F0 150A5D40 0D42984F */  jal        shadow_clipCodeVertex
     /* D31F4 150A5D44 8E2C0008 */   lw        $t4, 0x8($s1)
     /* D31F8 150A5D48 1640FFD7 */  bnez       $s2, .L150A5CA8
     /* D31FC 150A5D4C 00000000 */   nop
@@ -307,21 +307,21 @@ glabel func_150A5FA4
     /* D349C 150A5FEC 022A8820 */  add        $s1, $s1, $t2 /* handwritten instruction */
     /* D34A0 150A5FF0 241200FF */  addiu      $s2, $zero, 0xFF
     /* D34A4 150A5FF4 8E2C0000 */  lw         $t4, 0x0($s1)
-    /* D34A8 150A5FF8 0D42984F */  jal        func_150A613C
+    /* D34A8 150A5FF8 0D42984F */  jal        shadow_clipCodeVertex
     /* D34AC 150A5FFC 019C6021 */   addu      $t4, $t4, $gp
     /* D34B0 150A6000 46006906 */  mov.s      $f4, $f13
     /* D34B4 150A6004 0160A025 */  or         $s4, $t3, $zero
     /* D34B8 150A6008 46007146 */  mov.s      $f5, $f14
     /* D34BC 150A600C 46007986 */  mov.s      $f6, $f15
     /* D34C0 150A6010 8E2C0004 */  lw         $t4, 0x4($s1)
-    /* D34C4 150A6014 0D42984F */  jal        func_150A613C
+    /* D34C4 150A6014 0D42984F */  jal        shadow_clipCodeVertex
     /* D34C8 150A6018 019C6021 */   addu      $t4, $t4, $gp
     /* D34CC 150A601C 0160A825 */  or         $s5, $t3, $zero
     /* D34D0 150A6020 460069C6 */  mov.s      $f7, $f13
     /* D34D4 150A6024 46007206 */  mov.s      $f8, $f14
     /* D34D8 150A6028 46007A46 */  mov.s      $f9, $f15
     /* D34DC 150A602C 8E2C0008 */  lw         $t4, 0x8($s1)
-    /* D34E0 150A6030 0D42984F */  jal        func_150A613C
+    /* D34E0 150A6030 0D42984F */  jal        shadow_clipCodeVertex
     /* D34E4 150A6034 019C6021 */   addu      $t4, $t4, $gp
     /* D34E8 150A6038 1640FFD3 */  bnez       $s2, func_150A5F88
     /* D34EC 150A603C 00000000 */   nop
@@ -390,7 +390,7 @@ glabel func_150A5FA4
     /* D35E4 150A6134 03E00008 */  jr         $ra
     /* D35E8 150A6138 00000000 */   nop
 
-glabel func_150A613C
+glabel shadow_clipCodeVertex
     /* D35EC 150A613C 85880000 */  lh         $t0, 0x0($t4)
     /* D35F0 150A6140 85890002 */  lh         $t1, 0x2($t4)
     /* D35F4 150A6144 44880800 */  mtc1       $t0, $f1

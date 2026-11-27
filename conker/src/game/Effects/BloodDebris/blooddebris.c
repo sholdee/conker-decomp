@@ -242,7 +242,7 @@ void func_151A77C0(BillboardParticle *particle) {
         particle->tmpl.primA = particle->tmpl.life * data->fadeStep;
     }
     if (particle->tmpl.life < data->growStart) {
-        s16 growth = data->growRate * D_800BE9E4;
+        s16 growth = data->growRate * gFrameTicks;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;
@@ -263,7 +263,7 @@ void func_151A787C(BillboardParticle *particle) {
         particle->tmpl.primA = particle->tmpl.life * data->fadeStep;
     }
     if (particle->tmpl.life < data->growStart) {
-        s16 growth = data->growRate * D_800BE9E4;
+        s16 growth = data->growRate * gFrameTicks;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;

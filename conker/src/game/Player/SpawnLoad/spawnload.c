@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15016670(void) {
+void player_clearIdleRequests(void) {
     gIdleRequestFlags = 0;
 }
 

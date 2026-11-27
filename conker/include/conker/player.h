@@ -16,7 +16,7 @@
  */
 
 /* game_43B20.c */
-void func_15016670(void);
+void player_clearIdleRequests(void);
 void player_clearSpawnPoints(void);
 void player_loadSpawnPoints(s32 arg0);
 

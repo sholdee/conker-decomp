@@ -11,7 +11,7 @@
  * IDO lays out .bss in first-declaration order, and an extern there would count. None is static,
  * though some are used only here: IDO places statics after all the globals.
  */
-s16 D_800E0A80;
+s16 gCreditsLine;
 s16 D_800E0A82;
 s8 D_800E0A84;
 s8 D_800E0A85;
@@ -22,7 +22,7 @@ s32 gFrontEndTimer;
 u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
 s8 gMenuPendingPage; /* page to switch to once faded out; -1: none */
-u8 D_800E0A97;
+u8 gMenuTune;
 u8 D_800E0A98;
 s8 D_800E0A99;
 s16 D_800E0AA0[4];
@@ -32,8 +32,8 @@ s8 D_800E0AAA;
 s8 D_800E0AB0[16];
 s8 gPlayerRanks[16];
 s16 D_800E0AD0[16];
-MenuState D_800E0AF0; // the instance gMenuState points at
-u8 **D_800E0B88; // bank 2 text strings (80)
+MenuState gMenuStateData; // the instance gMenuState points at
+u8 **gTextBank2Strings; // bank 2 text strings (80)
 u8 D_800E0B8C;
 s8 gPlayerCharacters[4];
 u8 gFrontEndState;
@@ -42,15 +42,15 @@ u8 gFrontEndFade;
 u8 gMenuPulse;
 u8 gMenuPulseFalling;
 u8 D_800E0B99;
-s16 D_800E0B9A;
+s16 gFrontEndButtons;
 Actor *gMenuCharacters[4]; /* characters spawned by save_spawnMenuCharacter */
 s8 D_800E0BB0;
 s8 D_800E0BB1;
 u8 D_800E0BB8[16];
 s8 D_800E0BC8[4];
 u16 D_800E0BCC;
-s8 D_800E0BCE[2];
-s8 D_800E0BD0;
+s8 gPartnerSlots[2];
+s8 gBotDifficulty;
 u8 D_800E0BD1;
 s8 D_800E0BD2;
 s8 D_800E0BD3;
@@ -130,7 +130,7 @@ static const Entry151E7F60 gMenuCharacterTypes[22] = {
     { 0.07f, 0, 180, 40 },
 };
 /* team colours (RGB) */
-const u8 D_800AB62C[10][3] = {
+const u8 gTeamColorsRGB[10][3] = {
     { 0xFF, 0x37, 0x37 },
     { 0x20, 0x55, 0xFF },
     { 0x78, 0xFF, 0x16 },
@@ -143,14 +143,14 @@ const u8 D_800AB62C[10][3] = {
     { 0xFF, 0xFF, 0xFF },
 };
 /* option descriptors of save_drawOptionMenu (indexed by descOff) */
-static const s8 D_800AB64C[64] = {
+static const s8 gOptionDescriptors[64] = {
     2, 3, 4, 5, 6, 127, -53, 123, -61, 125, -64, 126, 10, 126, -55, 122,
     -54, 126, 13, 14, 15, -1, -19, 21, 22, 25, 23, 24, 26, 27, 127, 2,
     28, 4, 29, 9, 124, -56, 127, 31, 32, 33, -6, 35, 36, 37, 38, 39,
     -57, 127, -65, 122, -62, 43, 44, -1, -17, -1, -16, -63, 127, 0, 0, 0,
 };
 /* multiplayer game-mode table */
-static const ModeEntry D_800AB68C[13] = {
+static const ModeEntry gModeEntries[13] = {
     { 22, 26, 0, 0, 0, 0, 1, 0 },
     { 22, 36, 1, -8, 1, 1, 8, 0 },
     { 22, 63, 3, 4, 5, 5, 9, 0 },
@@ -173,18 +173,18 @@ static const TeamSetup gTeamSetups[5] = {
     { 2, 0, 12, 8, 0, 8, 2, 2, { 7, 8, -1, -1 } },
 };
 /* team size limits per player count (row: D_8008FEE4) */
-static const s8 D_800AB74C[2][4] = {
+static const s8 gPlayerCountLimits[2][4] = {
     { 10, 8, 4, 4 },
     { 8, 4, 4, 4 },
 };
 /* per mode: option mask and flags */
-static const s32 D_800AB754[10] = { 0x3001C, 0x3404C, 0x36008, 0x7000C, 0x3004C, 0x50008, 0x3000C, 0x70008, 0x10084, 0x10084 };
-/* per mode: D_8008FDC0 */
-static const s16 D_800AB77C[10] = { 0x15, 0xC14, 0x1C, 0x4014, 0xC14, 0x54, 0x114, 0xA014, 0x94, 0x94 };
-/* per mode: D_8008FDBC */
-static const s16 D_800AB790[10] = { 0x100, 0x0, 0xB, 0x300, 0x0, 0x21, 0x0, 0x0, 0x100, 0x140 };
+static const s32 gModeOptionFlags[10] = { 0x3001C, 0x3404C, 0x36008, 0x7000C, 0x3004C, 0x50008, 0x3000C, 0x70008, 0x10084, 0x10084 };
+/* per mode: gMatchHudFlags */
+static const s16 gModeHudFlags[10] = { 0x15, 0xC14, 0x1C, 0x4014, 0xC14, 0x54, 0x114, 0xA014, 0x94, 0x94 };
+/* per mode: gMatchFlags */
+static const s16 gModeMatchFlags[10] = { 0x100, 0x0, 0xB, 0x300, 0x0, 0x21, 0x0, 0x0, 0x100, 0x140 };
 /* cue per mode (ModeEntry.introCue), menu 0 */
-static const struct Struct151E4314 D_800AB7A4[6] = {
+static const struct Struct151E4314 gModeIntroCues[6] = {
     { 26, 1, 1 },
     { 36, 1, 1 },
     { 45, 1, 3 },
@@ -193,7 +193,7 @@ static const struct Struct151E4314 D_800AB7A4[6] = {
     { 63, 1, 3 },
 };
 /* cue per mode, menu 1 */
-static const struct Struct151E4314 D_800AB7BC[6] = {
+static const struct Struct151E4314 gModeResultCues[6] = {
     { 26, 2, 3 },
     { 36, 2, 2 },
     { 48, 1, 5 },
@@ -205,27 +205,27 @@ static const struct Struct151E4314 D_800AB7BC[6] = {
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
 s8 D_8008FD70 = 0;
 u8 gFrontEndFadeStep = 8;
-s32 D_8008FD78 = 1000;
+s32 gMatchTimeLeft = 1000;
 s8 D_8008FD7C = 0;
 u8 D_8008FD80 = 0;
 s8 D_8008FD84[4] = { 0 };
 s8 D_8008FD88 = 1;
-s8 D_8008FD8C = 1;
-s8 D_8008FD90 = 1;
-s8 D_8008FD94 = 1;
+s8 gPlayerCount = 1;
+s8 gHumanCount = 1;
+s8 gHumansRemaining = 1;
 s8 gPauseConfirm = 0;
 s8 D_8008FD9C = 0;
 s8 gExtraPlayerSlots = 0; /* extra (non-controller) slots in the player list */
-u8 D_8008FDA4 = 0;
+u8 gMenuLoadStep = 0;
 s8 gCurrentSaveSlot = -1;
 s16 D_8008FDAC = 0;
-s8 gMenuListRow = 0; /* highlighted row of the func_151DF574 list */
+s8 gMenuListRow = 0; /* highlighted row of the save_updateListPage list */
 u8 D_8008FDB4 = 0;
 u8 D_8008FDB8 = 0;
-u16 D_8008FDBC = 0;
-u16 D_8008FDC0 = 0;
+u16 gMatchFlags = 0;
+u16 gMatchHudFlags = 0;
 s8 D_8008FDC4 = 0;
-s8 D_8008FDC8 = 0;
+s8 gFreeForAll = 0;
 s16 D_8008FDCC = 0; /* save_updatePauseMenu reads its low byte */
 f32 D_8008FDD0 = 1.0f;
 MenuState *gMenuState = NULL;
@@ -237,14 +237,14 @@ f32 D_8008FDE8 = 0.0f;
 /* Per-mode (gFrontEndState) update functions. */
 void (*gFrontEndStateHandlers[12])(void) = {
     save_updatePauseMenu, func_151DE81C, func_151DE8E8, save_updateMenuPages, func_151E4E64, save_updateModeIntro,
-    save_updateResultsScreen, save_updateFadeTransition, func_151E82B8, func_151E83E8, func_151E4DD8, func_151DE6D4,
+    save_updateResultsScreen, save_updateFadeTransition, save_updateCredits, save_updateAfterCredits, func_151E4DD8, save_updateStartupScene,
 };
-f32 D_8008FE1C = 1.0f;
-f32 D_8008FE20 = 1.0f;
+f32 gHudScaleX = 1.0f;
+f32 gHudScaleY = 1.0f;
 s32 D_8008FE24 = 0;
-s8 D_8008FE28 = 0;
+s8 gFrontEndInputDelay = 0;
 s8 gPauseCursor = 0;
-s8 D_8008FE30 = 0;
+s8 gSettingsLoaded = 0;
 u8 D_8008FE34 = 0;
 f32 D_8008FE38 = 0.0f;
 f32 D_8008FE3C = 0.0f;
@@ -259,7 +259,7 @@ u32 D_8008FEA4[8] = { 0x815, 0x815, 0x815, 0x831, 0x5C0, 0x4380, 0x23800, 0 };
 s8 D_8008FEC4[32] = {
     0, 2, 11, 4, 0, 2, 11, 4, 0, 2, 11, 4, 4, 5, 0, 11, 6, 7, 8, 10, 7, 8, 9, 14, 13, 12, 11, 11, 0, 0, 0, 0,
 };
-s8 D_8008FEE4[8] = { 0, 0, 0, 0, 0, 1, 0, 1 }; /* per team preset: row of D_800AB74C */
+s8 D_8008FEE4[8] = { 0, 0, 0, 0, 0, 1, 0, 1 }; /* per team preset: row of gPlayerCountLimits */
 s8 D_8008FEEC = 0;
 s8 D_8008FEF0 = 0;
 
@@ -291,17 +291,17 @@ s32 save_invertBits(s32 value) {
 /* ---- formerly game_20B050.c ---- */
 
 /* Requests a switch to map 0x1D (game_requestLevelChange mode 6) and resets this mode's state flags. */
-void func_151DDBA0(void) {
+void save_quitToFrontEnd(void) {
     D_800D2E40 = 0;
     game_requestLevelChange(6, 0x1D, 0, 0, 1);
     gFrontEndState = 3;
-    D_8008FDA4 = 0;
+    gMenuLoadStep = 0;
     gPauseRequested = 0;
     save_resetControllerMap();
     sound_resetVoices();
     music_reset();
-    D_8008FD8C = 1;
-    D_8008FD90 = 1;
+    gPlayerCount = 1;
+    gHumanCount = 1;
 }
 
 /* ---- formerly game_20B0D0.c ---- */
@@ -344,7 +344,7 @@ void save_updatePauseMenu(void) {
             blocked = 1;
         }
     }
-    if ((gCutsceneStates[0] == 1) && (D_800C3683 != 0)) {
+    if ((gCutsceneStates[0] == 1) && (gCutsceneNoPause != 0)) {
         blocked = 1;
     }
     if (D_8008FEEC > 0) {
@@ -354,7 +354,7 @@ void save_updatePauseMenu(void) {
         for (i = 0; (i <= gScreenLayout) && (gPauseRequested == 0); i++) {
             if ((gMenuButtonsPressed[i] & START_BUTTON) && !(gEliminatedPlayers & (1 << i))) {
                 gPauseRequested = 1;
-                D_800BEAC3 = 1;
+                gRumbleStopRequest = 1;
                 D_800E0A98 = i;
                 gPauseCursor = 0;
                 D_8008FEF4 = gMenuPads[i].stick_y;
@@ -363,7 +363,7 @@ void save_updatePauseMenu(void) {
         }
     }
     if ((gPaused == 0) && (gCurrentTaskId != 0xC7)) {
-        D_800E0A99 += D_800BE9E4;
+        D_800E0A99 += gFrameTicks;
         if (D_800E0A99 >= 60) {
             D_800E0A99 -= 60;
             gPlayTime++;
@@ -371,13 +371,13 @@ void save_updatePauseMenu(void) {
     }
     if ((gIsMultiplayer != 0) && (gPauseRequested == 0) && (gSettings[3] >= 3)) {
         timerY = 198;
-        if (gScreenLayout > 0) timerY = 100; // matching: on one line (-g3 line order schedules the D_8008FD78 load)
-        if (D_8008FD78 > 0) {
-            D_8008FD78 -= gRawFrameTicks;
+        if (gScreenLayout > 0) timerY = 100; // matching: on one line (-g3 line order schedules the gMatchTimeLeft load)
+        if (gMatchTimeLeft > 0) {
+            gMatchTimeLeft -= gRawFrameTicks;
         } else {
-            D_8008FD78 = 0;
+            gMatchTimeLeft = 0;
         }
-        seconds = D_8008FD78 / 60;
+        seconds = gMatchTimeLeft / 60;
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
         text_printAt(135, timerY, 0x80, "%d:%02d", seconds / 60, seconds % 60);
     }
@@ -394,9 +394,9 @@ void save_updatePauseMenu(void) {
             menuY = 5;
             numOptions = 2;
         }
-        D_800E0B9A = gMenuButtonsPressed[D_800E0A98];
+        gFrontEndButtons = gMenuButtonsPressed[D_800E0A98];
         if (D_8008FEEC != 0) {
-            D_800E0B9A = 0;
+            gFrontEndButtons = 0;
         }
         cont = &gMenuPads[D_800E0A98];
         stickX = cont->stick_x;
@@ -454,15 +454,15 @@ void save_updatePauseMenu(void) {
                 }
                 text_print("#", (i == gPauseCursor) + 0xE);
             }
-            if (D_800E0B9A & START_BUTTON) {
+            if (gFrontEndButtons & START_BUTTON) {
                 D_8008FEF0 = 5;
                 D_8008FEEC = 10;
-            } else if ((gPauseCursor == 0) || (D_800E0B9A & B_BUTTON)) {
-                if (D_800E0B9A & (A_BUTTON | B_BUTTON)) {
+            } else if ((gPauseCursor == 0) || (gFrontEndButtons & B_BUTTON)) {
+                if (gFrontEndButtons & (A_BUTTON | B_BUTTON)) {
                     D_8008FEF0 = 5;
                     D_8008FEEC = 10;
                 }
-            } else if (D_800E0B9A & A_BUTTON) {
+            } else if (gFrontEndButtons & A_BUTTON) {
                 gPauseConfirm = 0;
                 gPauseCursor += numOptions - 1;
                 if (numOptions == 2) {
@@ -473,10 +473,10 @@ void save_updatePauseMenu(void) {
         } else {
             text_printAt(108, textY, 1, "#", gPauseConfirm + 0x1F);
             text_printAt(188, textY, 1, "#", 0x1E - gPauseConfirm);
-            if (D_800E0B9A & A_BUTTON) {
+            if (gFrontEndButtons & A_BUTTON) {
                 if (gPauseConfirm != 0) {
                     gFrontEndState = 7;
-                    gPendingTransition = func_151DDBA0;
+                    gPendingTransition = save_quitToFrontEnd;
                     gFrontEndFadeStep = 8;
                     if (gIsMultiplayer != 0) {
                         gMenuState->page = 4;
@@ -511,7 +511,7 @@ void save_updatePauseMenu(void) {
                     gPauseCursor -= 2;
                 }
                 sfx = 0x500; /* confirm */
-            } else if (D_800E0B9A & B_BUTTON) {
+            } else if (gFrontEndButtons & B_BUTTON) {
                 gPauseCursor -= 2;
             }
         }
@@ -525,7 +525,7 @@ void func_151DE6CC(void) {
 }
 
 /* Per-frame update of a timed sequence: A skips ahead to frame 480 and later 720; at frame 841 it hands over (game_requestLevelChange(6, 0x21, ...)). */
-void func_151DE6D4(void) {
+void save_updateStartupScene(void) {
     s32 timer;
 
     save_updateFadeIn();
@@ -537,7 +537,7 @@ void func_151DE6D4(void) {
     }
 
     timer = gFrontEndTimer;
-    if ((timer >= 331) && (D_800E0B9A & A_BUTTON)) {
+    if ((timer >= 331) && (gFrontEndButtons & A_BUTTON)) {
         if (timer < 480) {
             timer = gFrontEndTimer = 480;
         }
@@ -547,7 +547,7 @@ void func_151DE6D4(void) {
     }
 
     if (timer >= 841) {
-        D_8008FE28 = 2;
+        gFrontEndInputDelay = 2;
         gFrontEndState = 1;
         D_800D2E40 = 0;
         game_requestLevelChange(6, 0x21, 0, 0, 1);
@@ -561,14 +561,14 @@ void func_151DE7D4(void) {
     gMenuPulse = 0;
     gMenuPulseFalling = 0;
     D_800E0A8C = 0;
-    D_8008FE28 = 2;
+    gFrontEndInputDelay = 2;
     func_151DE85C();
 }
 
 void func_151DE81C(void) {
     gFrontEndFadeStep = 4;
     gFrontEndFade = 0;
-    if (D_8008FE30 == 0) {
+    if (gSettingsLoaded == 0) {
         save_requestReadSettings();
     }
 }
@@ -579,8 +579,8 @@ void func_151DE85C(void) {
     game_requestLevelChange(6, 0x1D, 0, 0, 1);
     gFrontEndState = 3;
     D_8008FD80 = 1;
-    D_8008FE28 = 2;
-    D_8008FDA4 = 0;
+    gFrontEndInputDelay = 2;
+    gMenuLoadStep = 0;
     gMenuState->menu = 0;
     gMenuState->currentStop = 5;
     gMenuState->displayedStop = gMenuState->currentStop;
@@ -612,23 +612,23 @@ void save_updateMenuPages(void) {
     s16 unused; // matching: unused stack slot sets IDO's frame layout
     OSContPad *cont;
 
-    if (D_8008FDA4 < 5) {
-        if (D_8008FDA4 == 0) {
+    if (gMenuLoadStep < 5) {
+        if (gMenuLoadStep == 0) {
             hud_initCodeEntry();
             save_beginScan();
             func_151E7DC0();
             save_clearMenuCharacters();
         }
-        if (D_8008FDA4 < 4) {
-            save_requestReadFile(D_8008FDA4);
+        if (gMenuLoadStep < 4) {
+            save_requestReadFile(gMenuLoadStep);
         } else {
             save_requestReadModeSettings();
         }
-        D_8008FDA4++;
+        gMenuLoadStep++;
     } else {
     lbl1:
         if (0) goto lbl1; // matching: dead goto splits the block so as1 xbb skips a cross-branch hoist
-        if (D_8008FE30 == 0) {
+        if (gSettingsLoaded == 0) {
             save_requestReadSettings();
         }
     }
@@ -646,7 +646,7 @@ void save_updateMenuPages(void) {
         }
         D_8008FD70 = 0;
     }
-    if (D_8008FDA4 >= 5) {
+    if (gMenuLoadStep >= 5) {
         save_updateFadeIn();
     }
     for (i = 0; i != 4; i++) {
@@ -693,7 +693,7 @@ void save_updateMenuPages(void) {
             // matching: store via an alias of D_8008FDDC so IDO re-materialises its address
             *(s8 *)((u8 *)&D_8008FDE0 - 4) = D_8008FDDC & ~(1 << i);
         } else if (!(D_8008FDDC & (1 << i))) {
-            gMenuState->repeatX[i] += D_800BE9E4;
+            gMenuState->repeatX[i] += gFrameTicks;
             if (gMenuState->repeatX[i] > 50) {
                 gMenuState->repeatX[i] = 40;
                 gMenuState->stickX[i] = 0;
@@ -702,7 +702,7 @@ void save_updateMenuPages(void) {
         if (gMenuState->stickY[i] > -50 && gMenuState->stickY[i] < 50) {
             gMenuState->repeatY[i] = 0;
         } else {
-            gMenuState->repeatY[i] += D_800BE9E4;
+            gMenuState->repeatY[i] += gFrameTicks;
             if (gMenuState->repeatY[i] > 50) {
                 gMenuState->repeatY[i] = 40;
                 gMenuState->stickY[i] = 0;
@@ -718,7 +718,7 @@ void save_updateMenuPages(void) {
         return;
     }
     if (messageTimer > 0) {
-        messageTimer -= D_800BE9E4;
+        messageTimer -= gFrameTicks;
         if (messageTimer > 60) {
             s32 alpha;
 
@@ -747,7 +747,7 @@ void save_updateMenuPages(void) {
     }
     camera_global_Cameras->Mode = 0x80000;
     music_postEvent(4, gMenuState->menu);
-    if (gMenuState == NULL || D_8008FDA4 < 5) {
+    if (gMenuState == NULL || gMenuLoadStep < 5) {
         return;
     }
     gMenuState->prevPage = gMenuState->page;
@@ -776,12 +776,12 @@ void save_updateMenuPages(void) {
                         func_151DF1BC();
                         break;
                     case 2:
-                        func_151DF574();
+                        save_updateListPage();
                         break;
                     case 3:
                     case 4:
                     case 5:
-                        func_151DFF38();
+                        save_updateSaveSlotPage();
                         break;
                     case 6:
                         break;
@@ -843,7 +843,7 @@ void func_151DF1BC(void) {
 
     obj = collision_findObjectById(9);
     if (gMenuPendingPage != -1) {
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             alpha = 0;
             D_8008FEF8 = D_8008FEF8 == 0;
@@ -866,7 +866,7 @@ void func_151DF1BC(void) {
         }
         gMenuState->input &= ~(MENU_ACCEPT | MENU_BACK);
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
@@ -879,9 +879,9 @@ void func_151DF1BC(void) {
     if (D_8008FEF8 == 0) {
         save_drawOptionMenu(0x200200, 0, 1, alpha, 1);
         if ((D_8008FE34 == 9) && (gMenuState->input & (MENU_LEFT | MENU_RIGHT))) {
-            func_151E7E9C();
-            music_stopTune(D_800E0A97, 0);
-            D_800E0A97 = func_1000EA94(gSettings[9]);
+            save_applySoundMode();
+            music_stopTune(gMenuTune, 0);
+            gMenuTune = func_1000EA94(gSettings[9]);
         }
         {
             s32 input;
@@ -925,7 +925,7 @@ void func_151DF1BC(void) {
     }
 }
 
-/* per row of the func_151DF574 list: its number of entries */
+/* per row of the save_updateListPage list: its number of entries */
 static const s8 D_800AB804[9] = { 4, 9, 10, 9, 5, 10, 5, 14, 5 };
 
 s8 gMenuListCategory = 0;
@@ -939,7 +939,7 @@ u8 D_8008FF08[28] = {
  * Menu page for displayedStop == 2: a scrolling list of the entries in category gMenuListCategory.
  * Left/right changes category, the stick scrolls; the highlighted entry goes to gMenuListSelection.
  */
-void func_151DF574(void) {
+void save_updateListPage(void) {
     s32 r;
     s32 redo;
     s32 i;
@@ -1022,7 +1022,7 @@ void func_151DF574(void) {
             }
             if (rowAlpha) {
                 for (i = 0; i < D_800AB804[gMenuListCategory] - 1; i++) {
-                    if (func_1509D08C(gMenuListCategory, i, &j, NULL)) {
+                    if (script_areResourceDepsLoaded(gMenuListCategory, i, &j, NULL)) {
                         mask |= 1 << i;
                     }
                     if ((1 << i) & mask) {
@@ -1060,7 +1060,7 @@ void func_151DF574(void) {
     } while (redo);
 
     if (gMenuPendingPage > 0) {
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             alpha = 0;
             if (gMenuPendingPage == 3) {
@@ -1080,7 +1080,7 @@ void func_151DF574(void) {
             }
         }
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
@@ -1154,7 +1154,7 @@ draw_rows: // matching: unused label splits the basic block for as1
                     wave = 0x7F - wave;
                 }
                 shade = wave + 0xC0;
-                pulse += D_800BE9E4;
+                pulse += gFrameTicks;
             } else {
                 pulse = 0x1F;
             }
@@ -1187,7 +1187,7 @@ draw_rows: // matching: unused label splits the basic block for as1
         b = (D_8008FF08[color + 2] * shade) >> 8;
         text_setColor(r, g, b, rowAlpha);
         if ((y >= 0x46) && (y < height + 0x50) && (pass == 0)) {
-            text_printAt(0x94, y + 0xF, 0x81, (char *)D_800E0B88[list[i] + offset]);
+            text_printAt(0x94, y + 0xF, 0x81, (char *)gTextBank2Strings[list[i] + offset]);
         }
         y += 11;
         i++;
@@ -1206,7 +1206,7 @@ draw_rows: // matching: unused label splits the basic block for as1
         }
         if ((gMenuState->input & MENU_ACCEPT) && (gMenuListSelection != 0xFF)) {
             gFrontEndState = 7;
-            gPendingTransition = func_151E30C4;
+            gPendingTransition = save_startListSelection;
             *(u8 *)&gFrontEndFadeStep = 3; // matching: a u8 view of the s8 (same sb) keeps IDO's schedule
             sfx = 0x500;
         }
@@ -1219,7 +1219,7 @@ draw_rows: // matching: unused label splits the basic block for as1
 /* Saved-record slot (gSaveSlots[]); see game/Save/SaveData/savedata.c */
 
 /* Menu page for displayedStop == 3..5: shows saved record slot displayedStop - 3 (score, h:m:s time) with play/erase options. */
-void func_151DFF38(void) {
+void save_updateSaveSlotPage(void) {
     s32 slot;
     u8 alpha;
     s32 sfx;
@@ -1293,10 +1293,10 @@ void func_151DFF38(void) {
                 s32 pad; // matching: -g3 block scope keeps the stores in order
 
                 gFrontEndState = 7;
-                gPendingTransition = func_151E327C;
+                gPendingTransition = save_startSavedGame;
                 gFrontEndFadeStep = 3;
                 gCurrentSaveSlot = slot;
-                D_800BE3DC = -1;
+                gScanBestFlagCount = -1;
                 gSaveScanning = 0;
                 save_requestReadFile(entry->eepromSlot);
                 sfx = 0x500;
@@ -1312,14 +1312,14 @@ void func_151DFF38(void) {
             if (gPauseCursor == 3) {
                 gPauseCursor = 0;
                 save_requestEraseSlot(slot);
-                D_800BE3DF = 0x29;
-                D_800BE3E0 = 0;
+                gCheckpointLevel = 0x29;
+                gCheckpointSpawn = 0;
                 D_800BE3E4 = 0;
                 zone_resetTaskProgress();
                 entry->checkpointLevel = 0x18;
                 entry->unk4 = 0;
                 entry->sequence = -1;
-                D_8008FDA4 = 0;
+                gMenuLoadStep = 0;
             } else {
                 gPauseCursor = 1;
             }
@@ -1354,7 +1354,7 @@ void save_updateModeSelectPage(void) {
         titleAlpha = alpha;
         if (gMenuPendingPage != -1) {
             gMenuState->input &= ~MENU_BACK;
-            i = gMenuPageFade - (D_800BE9E4 << 5); // matching: the fade level shares i's register
+            i = gMenuPageFade - (gFrameTicks << 5); // matching: the fade level shares i's register
             if (i <= 0) {
                 gMenuPageFade = 0;
                 gMenuState->page = gMenuPendingPage;
@@ -1373,7 +1373,7 @@ void save_updateModeSelectPage(void) {
                 titleAlpha = alpha;
             }
         } else {
-            i = gMenuPageFade + (D_800BE9E4 << 5);
+            i = gMenuPageFade + (gFrameTicks << 5);
             if (i >= 0x100) {
                 i = 0xFF;
             }
@@ -1428,7 +1428,7 @@ void save_updateModeSelectPage(void) {
             x = 140 - ((modeCount * 28) >> 1);
             for (i = 0; i < modeCount; i++) {
                 text_setPosition(0x53, x);
-                value = D_800AB68C[first + i].nameText;
+                value = gModeEntries[first + i].nameText;
                 if ((i == cursor) && (gPauseCursor == 0)) {
                     value++;
                 }
@@ -1436,7 +1436,7 @@ void save_updateModeSelectPage(void) {
                 x += 28;
             }
         } else {
-            step = D_800BE9E4 * 0.05f;
+            step = gFrameTicks * 0.05f;
             if (D_8008FDE8 < 0.0f) {
                 D_8008FDE8 += step;
                 if (D_8008FDE8 > 0.0f) {
@@ -1459,7 +1459,7 @@ void save_updateModeSelectPage(void) {
                 if (gPauseCursor == 0) {
                     gMenuPendingPage = 4;
                     gSettings[0] = gMenuState->cursor;
-                    teams = D_800AB68C[gMenuState->selection].teamSetup;
+                    teams = gModeEntries[gMenuState->selection].teamSetup;
                     if (teams < 0) {
                         gPlayerCharacters[0] = D_8008FEC4[(-teams - 1) << 2];
                     } else {
@@ -1475,7 +1475,7 @@ void save_updateModeSelectPage(void) {
     }
 }
 
-/* Options page for the selected mode (D_800AB754[mode]); leaving it saves the settings if D_8008FDE0 is set. */
+/* Options page for the selected mode (gModeOptionFlags[mode]); leaving it saves the settings if D_8008FDE0 is set. */
 void save_updateOptionsPage(void) {
     s32 options;
     s32 alpha;
@@ -1484,10 +1484,10 @@ void save_updateOptionsPage(void) {
     text_printAt(0x94, 0x7E, 1, "#", 0x1A);
     text_setFlags(0x81);
 
-    options = D_800AB754[D_800AB68C[gMenuState->selection].mode];
+    options = gModeOptionFlags[gModeEntries[gMenuState->selection].mode];
     if (gMenuPendingPage == 0) {
         gMenuState->input &= ~MENU_BACK;
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             gMenuState->page = 0;
             if (D_8008FDE0 != 0) {
@@ -1499,7 +1499,7 @@ void save_updateOptionsPage(void) {
         }
         gMenuPageFade = alpha; // matching: stored twice on this path
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
@@ -1540,7 +1540,7 @@ void save_updateJoinPage(void) {
     reload = 0;
     if (gMenuPendingPage != -1) {
         gMenuState->input &= ~MENU_BACK;
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             gMenuPageFade = 0;
             gMenuState->page = gMenuPendingPage;
@@ -1555,16 +1555,16 @@ void save_updateJoinPage(void) {
         }
         gMenuPageFade = alpha;
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
         gMenuPageFade = alpha;
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    if (D_800AB68C[gMenuState->selection].teamSetup < 0) {
+    if (gModeEntries[gMenuState->selection].teamSetup < 0) {
         nextPage = 5;
-        i = -D_800AB68C[gMenuState->selection].teamSetup - 1;
+        i = -gModeEntries[gMenuState->selection].teamSetup - 1;
         remap = D_8008FEC4 + (i << 2);
         allowed = D_8008FEA4[i];
         if (D_800E9D00 & 0x20) {
@@ -1597,7 +1597,7 @@ void save_updateJoinPage(void) {
         maxPlayers = 4;
     }
     D_800E0B8C = 0;
-    if ((nextPage == 5) && (D_800AB68C[gMenuState->selection].unk8 != 8)) {
+    if ((nextPage == 5) && (gModeEntries[gMenuState->selection].unk8 != 8)) {
         if (gMenuCharacters[0] == NULL) {
             save_spawnMenuCharacter(0, gPlayerCharacters[0]);
         }
@@ -1698,7 +1698,7 @@ void save_updateCpuPlayersPage(void) {
 
     if (gMenuPendingPage != -1) {
         gMenuState->input &= ~MENU_BACK;
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             gMenuPageFade = 0;
             gMenuState->page = gMenuPendingPage;
@@ -1707,7 +1707,7 @@ void save_updateCpuPlayersPage(void) {
         }
         gMenuPageFade = alpha;
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
@@ -1715,7 +1715,7 @@ void save_updateCpuPlayersPage(void) {
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
     // teamSetup is -(preset + 1) here, so -1 - teamSetup is the preset
-    limits = D_800AB74C[D_8008FEE4[-1 - D_800AB68C[gMenuState->selection].teamSetup]];
+    limits = gPlayerCountLimits[D_8008FEE4[-1 - gModeEntries[gMenuState->selection].teamSetup]];
     limit = (limits - 1)[gRosterSize]; // matching: limits[gRosterSize - 1] schedules differently
     for (i = 0; i < gRosterSize; i++) {
         if (gRoster[i] >= 0) {
@@ -1753,7 +1753,7 @@ void save_updateCpuPlayersPage(void) {
         gFrontEndState = 7;
         gFrontEndFadeStep = 8;
         sound_play(0x500, 0x7D00, 0x40, 0, 0);
-        if (D_800AB68C[gMenuState->selection].introCue == -1) {
+        if (gModeEntries[gMenuState->selection].introCue == -1) {
             gPendingTransition = save_setupMatch;
         } else {
             gPendingTransition = save_playModeIntro;
@@ -1815,7 +1815,7 @@ void save_updateTeamPage(void) {
     jitter = D_8008FF34;
     if (gMenuPendingPage != -1) {
         gMenuState->input &= ~MENU_BACK;
-        alpha = gMenuPageFade - (D_800BE9E4 << 5);
+        alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             gMenuPageFade = 0;
             gMenuState->page = gMenuPendingPage;
@@ -1824,14 +1824,14 @@ void save_updateTeamPage(void) {
         }
         gMenuPageFade = alpha;
     } else {
-        alpha = gMenuPageFade + (D_800BE9E4 << 5);
+        alpha = gMenuPageFade + (gFrameTicks << 5);
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
         gMenuPageFade = alpha;
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    setup = &gTeamSetups[D_800AB68C[gMenuState->selection].teamSetup];
+    setup = &gTeamSetups[gModeEntries[gMenuState->selection].teamSetup];
     special = setup->unk7;
     D_800E0BB0 = setup->teamCount;
     D_800E0BC8[0] = setup->teamColor[0];
@@ -1983,7 +1983,7 @@ void save_updateTeamPage(void) {
         x = teamX[i];
         old = D_800E0BC8[i] * 3;
         // matching: flat byte index into the RGB rows (old is the tripled colour)
-        text_setColor(D_800AB62C[0][old], D_800AB62C[0][old + 1], D_800AB62C[0][old + 2], alpha);
+        text_setColor(gTeamColorsRGB[0][old], gTeamColorsRGB[0][old + 1], gTeamColorsRGB[0][old + 2], alpha);
         text_setPosition(x, 0x50);
         if (D_800E0BC8[i] == 4) {
             text_print("#", 9);
@@ -2000,7 +2000,7 @@ void save_updateTeamPage(void) {
             text_print("#", D_800E0BC8[i] + old);
         }
     }
-    hasExtra = func_151E24F0(extra);
+    hasExtra = save_addPartnerPlayers(extra);
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
     for (i = 0; i < slots; i++) {
         old = gRosterTeams[i];
@@ -2046,7 +2046,7 @@ void save_applyModeSettings(void) {
     s32 mode;
     ModeSettings *settings;
 
-    mode = D_800AB68C[gMenuState->selection].mode;
+    mode = gModeEntries[gMenuState->selection].mode;
     settings = &gModeSettings[mode];
     if (settings->unk3 >= 5) {
         settings->unk3 = 4;
@@ -2098,7 +2098,7 @@ void save_storeModeSettings(void) {
     ModeSettings *settings;
     s32 mode;
 
-    mode = D_800AB68C[gMenuState->selection].mode;
+    mode = gModeEntries[gMenuState->selection].mode;
     settings = &gModeSettings[mode];
     settings->unk0 = 0;
     settings->unk1 = gSettings[2];
@@ -2137,7 +2137,7 @@ void save_storeModeSettings(void) {
  * roster gRoster[0..3]. With out == NULL they are inserted as extra roster slots; otherwise they are
  * written to out. Returns the number of rostered players, or 0 when nothing was added.
  */
-s32 func_151E24F0(s32 *out) {
+s32 save_addPartnerPlayers(s32 *out) {
     s32 i;
     s32 j;
     s32 count;
@@ -2147,11 +2147,11 @@ s32 func_151E24F0(s32 *out) {
     u8 mask;
 
     if (out == NULL) {
-        D_800E0BCE[0] = 0;
-        D_800E0BCE[1] = 0;
+        gPartnerSlots[0] = 0;
+        gPartnerSlots[1] = 0;
     }
 
-    if (D_800AB68C[gMenuState->selection].unk8 == 8) {
+    if (gModeEntries[gMenuState->selection].unk8 == 8) {
         mask = 0;
         count = 0;
         if (gSettings[14] != 0) {
@@ -2187,7 +2187,7 @@ s32 func_151E24F0(s32 *out) {
                             if ((used[i] == 0) && (allowed[i] != 0)) {
                                 gRoster[j] = i;
                                 gRosterTeams[j] = gRosterTeams[j - count];
-                                D_800E0BCE[j - count] = j;
+                                gPartnerSlots[j - count] = j;
                                 D_80087270[j] = 10;
                                 j++;
                             }
@@ -2221,7 +2221,7 @@ void save_setupMatch(void) {
     s32 v;
     const ModeEntry *entry;
 
-    entry = &D_800AB68C[gMenuState->selection];
+    entry = &gModeEntries[gMenuState->selection];
     if (gSettings[3] < 3) {
         gSettings[3] = 0;
     }
@@ -2249,38 +2249,38 @@ void save_setupMatch(void) {
     gPlayerChannels[2] = -1;
     gPlayerChannels[3] = -1;
     param = entry->map;
-    D_8008FDC8 = entry->teamSetup < 0;
-    flags = D_800AB754[entry->mode];
-    D_8008FDC0 = D_800AB77C[entry->mode];
-    D_8008FDBC = D_800AB790[entry->mode] | 1;
+    gFreeForAll = entry->teamSetup < 0;
+    flags = gModeOptionFlags[entry->mode];
+    gMatchHudFlags = gModeHudFlags[entry->mode];
+    gMatchFlags = gModeMatchFlags[entry->mode] | 1;
     if (flags & 0x80000) {
         gRaceDirection = gSettings[19];
     } else {
         gRaceDirection = 0;
     }
     if (flags & 8) {
-        D_8008FD78 = gSettings[3] * 3600;
+        gMatchTimeLeft = gSettings[3] * 3600;
     } else {
-        D_8008FD78 = 0;
+        gMatchTimeLeft = 0;
     }
     if (flags & 0x10000) {
-        D_800E0BD0 = gSettings[16];
+        gBotDifficulty = gSettings[16];
     } else {
-        D_800E0BD0 = 2;
+        gBotDifficulty = 2;
     }
-    if ((flags & 4) && (D_8008FD78 == 0)) {
-        D_8008FDC0 |= 2;
-        D_8008FDBC &= ~1;
+    if ((flags & 4) && (gMatchTimeLeft == 0)) {
+        gMatchHudFlags |= 2;
+        gMatchFlags &= ~1;
     }
-    if (D_8008FDC0 & 0x80) {
-        D_8008FDC0 |= 0x1000;
+    if (gMatchHudFlags & 0x80) {
+        gMatchHudFlags |= 0x1000;
     }
     if ((flags & 0x20000) && (gSettings[17] != 0)) {
-        D_8008FDC0 |= 0x20;
+        gMatchHudFlags |= 0x20;
     }
-    if ((D_8008FDC0 & 0x100) && (D_8008FD78 != 0)) {
-        D_8008FDC0 &= ~0x100;
-        D_8008FDC0 |= 0x200;
+    if ((gMatchHudFlags & 0x100) && (gMatchTimeLeft != 0)) {
+        gMatchHudFlags &= ~0x100;
+        gMatchHudFlags |= 0x200;
     }
     D_80087260 = gSettings[2];
     gSpawnGrenadeCount = 3;
@@ -2296,7 +2296,7 @@ void save_setupMatch(void) {
         do {
             D_80087270[i] = 8;
         } while (++i < 16);
-        D_8008FD70 = func_151E24F0(NULL);
+        D_8008FD70 = save_addPartnerPlayers(NULL);
     }
     playerMask = 1;
     D_8008FD88 = 1;
@@ -2354,17 +2354,17 @@ void save_setupMatch(void) {
         }
     }
     D_800E0B99 = 2;
-    D_8008FD8C = D_8008FD88;
-    D_8008FD90 = 0;
+    gPlayerCount = D_8008FD88;
+    gHumanCount = 0;
     D_800E0AA8 = 0;
     for (i = 0; i < D_8008FD88; i++) {
         if (gRoster[i] >= 0) {
-            D_8008FD90++;
+            gHumanCount++;
             D_800E0AA8 |= 1 << gRosterTeams[i];
         }
     }
-    D_8008FD94 = D_8008FD90;
-    D_800BE618 = D_8008FD8C;
+    gHumansRemaining = gHumanCount;
+    D_800BE618 = gPlayerCount;
     bzero(D_800E0BB8, 0x10);
     D_800E0AAA = -1;
     D_800E0AA9 = 4;
@@ -2374,9 +2374,9 @@ void save_setupMatch(void) {
         gPlayerRanks[i] = 0;
     }
     usedTeams = 0;
-    if (D_8008FDC8 != 0) {
+    if (gFreeForAll != 0) {
         k = 0;
-        D_800E0AA9 = D_8008FD8C;
+        D_800E0AA9 = gPlayerCount;
         for (i = 0; i < D_8008FD88; i++) {
             v = gRoster[i];
             if (v >= 0) {
@@ -2406,7 +2406,7 @@ void save_setupMatch(void) {
 }
 
 /* Sets up a single-player scene from resource table entry gMenuListSelection (or the preset D_8008FDAC). */
-void func_151E30C4(void) {
+void save_startListSelection(void) {
     s32 resourceCount;
     s32 resource;
     s32 unk0;
@@ -2416,7 +2416,7 @@ void func_151E30C4(void) {
         resource = D_8008FDAC;
     } else {
         script_loadResourceTable(gMenuListCategory, &resourceCount);
-        func_1509D08C(gMenuListCategory, gMenuListSelection, &resource, &unk0);
+        script_areResourceDepsLoaded(gMenuListCategory, gMenuListSelection, &resource, &unk0);
         script_freeResourceTable();
     }
 
@@ -2434,13 +2434,13 @@ void func_151E30C4(void) {
 
     D_8008FD70 = 0;
     gRaceDirection = 0;
-    D_8008FDBC = 0;
+    gMatchFlags = 0;
     gCurrentSaveSlot = -1;
     gFrontEndState = 0;
     D_800E0B99 = 1;
-    D_8008FD8C = 1;
-    D_8008FD90 = 1;
-    D_8008FD94 = 1;
+    gPlayerCount = 1;
+    gHumanCount = 1;
+    gHumansRemaining = 1;
 
     D_800BE618 = 1;
     D_80087260 = 3;
@@ -2456,23 +2456,23 @@ void func_151E30C4(void) {
     game_requestLevelChange(6, gNextLevel, script_getTaskSpawnPoint(resource), 0, 1);
 }
 
-/* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
-void func_151E327C(void) {
+/* Resets to a one-player session using the cue gCheckpointLevel/gCheckpointSpawn. */
+void save_startSavedGame(void) {
     D_80087260 = 3;
     if (D_800E9D00 & 0x200) {
         D_80087260 = 0x33;
     }
 
     D_80087270[0] = 0;
-    D_8008FD8C = 1;
-    D_8008FD90 = 1;
-    D_8008FD94 = 1;
-    D_8008FDBC = 0;
+    gPlayerCount = 1;
+    gHumanCount = 1;
+    gHumansRemaining = 1;
+    gMatchFlags = 0;
     D_800BE618 = 1;
     gRaceDirection = 0;
     gFrontEndState = 0;
     D_800D2E40 = 0;
-    game_requestLevelChange(6, D_800BE3DF, D_800BE3E0, 0, 1);
+    game_requestLevelChange(6, gCheckpointLevel, gCheckpointSpawn, 0, 1);
     D_800E0B99 = 1;
     D_800E0BB1 = 1;
     save_checkCodeTamper();
@@ -2480,7 +2480,7 @@ void func_151E327C(void) {
 
 
 /*
- * Draws the option menu (gSettings values described by D_800AB64C) for the options in optionMask,
+ * Draws the option menu (gSettings values described by gOptionDescriptors) for the options in optionMask,
  * either as a list or as a rotating carousel, and handles the d-pad to change the selection and values.
  */
 void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fade) {
@@ -2513,7 +2513,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
 
     // matching: these dead stores create uopt spill temps in the order the target's stack slots need
     value = (s16)x;
-    kind = D_800AB64C[descOff + 1];
+    kind = gOptionDescriptors[descOff + 1];
     arrowX = alpha;
     count = 0;
     for (i = 0, j = 1; i < 23; i = j++) { // matching: j = i + 1 induction var, as in the draw loop
@@ -2605,7 +2605,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
     descOff = 0;
     row = 0;
     for (i = 0, j = 1, k = 0; i < 23; i = j++, k++) { // matching: k (== i) is IDO's separate index var
-        kind = D_800AB64C[descOff + 1];
+        kind = gOptionDescriptors[descOff + 1];
         if ((1 << i) & optionMask) {
             value = gSettings[k];
             if (i == D_8008FE34) {
@@ -2625,11 +2625,11 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
             }
             text_setColor(0xFF, 0xFF, 0xFF, drawAlpha);
             text_setPosition(x, y);
-            if (D_800AB64C[descOff] >= 0) {
-                text_print((char *)gTextStrings[D_800AB64C[descOff]]);
-            } else if (D_800AB64C[descOff] < -1) {
+            if (gOptionDescriptors[descOff] >= 0) {
+                text_print((char *)gTextStrings[gOptionDescriptors[descOff]]);
+            } else if (gOptionDescriptors[descOff] < -1) {
                 text_setPosition(x, y + 9);
-                text_print("#", -D_800AB64C[descOff]);
+                text_print("#", -gOptionDescriptors[descOff]);
                 text_setPosition(x, y + 22);
             }
             if (i == D_8008FE34 && D_8008FE38 <= 0.0f) {
@@ -2679,7 +2679,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
                         }
                         break;
                     default:
-                        text_print((char *)gTextStrings[D_800AB64C[descOff + 1 + value]]);
+                        text_print((char *)gTextStrings[gOptionDescriptors[descOff + 1 + value]]);
                         break;
                 }
             }
@@ -2778,7 +2778,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
             D_8008FDE0 = 1;
         }
     }
-    D_8008FE38 += D_8008FE3C * D_800BE9E4;
+    D_8008FE38 += D_8008FE3C * gFrameTicks;
     if (D_8008FE38 >= 1.0f) {
         descOff++;
         if (descOff >= 23) {
@@ -2816,7 +2816,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
         text_printAt(arrowX + 148, arrowY, 1, "#", 0x1A);
         text_printAt(148 - arrowX, arrowY, 1, "#", 0x1A);
         if (selRow != D_8008FDE4) {
-            D_8008FDE8 += 0.1000000015f * D_800BE9E4;
+            D_8008FDE8 += 0.1000000015f * gFrameTicks;
             if (D_8008FDE8 >= 1.0f) {
                 D_8008FDE4 = selRow;
                 D_8008FDE8 = 0.0f;
@@ -2833,7 +2833,7 @@ void save_updateModeIntro(void) {
     }
 
     save_updateFadeIn();
-    if ((D_800E0B9A != 0) || (gCutsceneStates[0] != 1)) {
+    if ((gFrontEndButtons != 0) || (gCutsceneStates[0] != 1)) {
         if ((gCutsceneStates[0] == 1) && (func_151F2CDC() == 1)) {
             func_151F2D6C(0, 0x2DE0);
         }
@@ -2849,9 +2849,9 @@ void save_playModeIntro(void) {
     s32 cueIdx;
     s32 param;
 
-    cueIdx = D_800AB68C[gMenuState->selection].introCue;
+    cueIdx = gModeEntries[gMenuState->selection].introCue;
     if (cueIdx >= 0) {
-        entry = &D_800AB7A4[cueIdx];
+        entry = &gModeIntroCues[cueIdx];
         if (gRosterTeams[0]) {
             param = entry->altCutscene;
         } else {
@@ -2860,8 +2860,8 @@ void save_playModeIntro(void) {
         cutscene_start(entry->map, param, 0, 0, 0);
         D_8008FD80 = 1;
         gFrontEndState = 5;
-        D_8008FD8C = 1;
-        D_8008FD90 = 1;
+        gPlayerCount = 1;
+        gHumanCount = 1;
     } else {
         save_setupMatch();
     }
@@ -2882,8 +2882,8 @@ void save_updateResultsScreen(void) {
     s32 j;
 
     if (D_8008FD80 == 1) {
-        idx = D_800AB68C[gMenuState->selection].resultCue;
-        param = D_800AB7BC[idx].cutscene;
+        idx = gModeEntries[gMenuState->selection].resultCue;
+        param = gModeResultCues[idx].cutscene;
         if (gMenuState->selection == 0) {
             count = 1;
             for (i = 0; i < D_8008FD88; i++) {
@@ -2892,19 +2892,19 @@ void save_updateResultsScreen(void) {
                 }
             }
             if (count) {
-                param = D_800AB7BC[idx].altCutscene;
+                param = gModeResultCues[idx].altCutscene;
             }
         } else if (gPlayerRanks[0] != 1) {
-            param = D_800AB7BC[idx].altCutscene;
+            param = gModeResultCues[idx].altCutscene;
         }
-        cutscene_start(D_800AB7BC[idx].map, param, 0, 0, 0);
+        cutscene_start(gModeResultCues[idx].map, param, 0, 0, 0);
         D_8008FD80 = 0;
     } else {
         if (gMenuState->selection != 11 && gMenuState->selection != 12) {
             save_updateFadeIn();
         }
         if (D_8008FD80 == 2 || D_8008FD80 == 3 || D_8008FD80 == 4) {
-            D_8008FDCC += D_800BE9E4 * 4;
+            D_8008FDCC += gFrameTicks * 4;
             if (D_8008FDCC > 255) {
                 D_8008FDCC = 0xFF;
             }
@@ -2917,7 +2917,7 @@ void save_updateResultsScreen(void) {
             if (D_8008FD80 == 4) {
                 camera_global_Cameras->Mode = 0x80000;
             }
-            if (D_800AB68C[gMenuState->selection].teamSetup < 0) {
+            if (gModeEntries[gMenuState->selection].teamSetup < 0) {
                 if (gMenuState->selection == 11 || gMenuState->selection == 12) {
                     y = 0x48;
                     for (i = 0; i < D_8008FD88; i++) {
@@ -2971,7 +2971,7 @@ void save_updateResultsScreen(void) {
             text_printAt(83, 180, 1, "#", (gPauseCursor == 0) + 0x21);
             text_printAt(213, 180, 1, "#", (gPauseCursor == 1) + 0xE);
             text_printAt(148, 180, 1, "#", 0x1A);
-            if ((D_800E0B9A & 0x8000) || gFrontEndTimer > 2400) {
+            if ((gFrontEndButtons & 0x8000) || gFrontEndTimer > 2400) {
                 if (gCutsceneStates[0] == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
                 }
@@ -3000,10 +3000,10 @@ void save_updateResultsScreen(void) {
                 gFrontEndFadeStep = 8;
                 D_8008FD80 = 0;
                 save_resetControllerMap();
-                D_8008FD8C = 1;
-                D_8008FD90 = 1;
+                gPlayerCount = 1;
+                gHumanCount = 1;
             }
-        } else if (D_800E0B9A != 0 || gCutsceneHoldEnd == 2) {
+        } else if (gFrontEndButtons != 0 || gCutsceneHoldEnd == 2) {
             D_8008FDCC = 0;
             D_8008FD80 = 2;
         }
@@ -3021,12 +3021,12 @@ void save_endRound(void) {
 
     gPauseCursor = 0;
     gPauseRequested = 0;
-    D_8008FDA4 = 0;
+    gMenuLoadStep = 0;
     gFrontEndTimer = 0;
     count = 0;
-    resultCue = D_800AB68C[gMenuState->selection].resultCue;
-    D_8008FDC0 &= 0xF369;
-    if (D_800AB68C[gMenuState->selection].teamSetup >= 0) {
+    resultCue = gModeEntries[gMenuState->selection].resultCue;
+    gMatchHudFlags &= 0xF369;
+    if (gModeEntries[gMenuState->selection].teamSetup >= 0) {
         for (i = 0; i < 4; i++) {
             if (gPlayerRanks[i] == 1) {
                 count++;
@@ -3038,7 +3038,7 @@ void save_endRound(void) {
         if (resultCue == -2 && D_800E0A86 == 0) {
             gFrontEndState = 6;
             D_8008FD80 = 2;
-            D_8008FDC0 = 0;
+            gMatchHudFlags = 0;
             return;
         }
         param = 0x1D;
@@ -3049,15 +3049,15 @@ void save_endRound(void) {
             D_8008FD80 = 4;
         }
     } else {
-        param = D_800AB7BC[resultCue].map;
+        param = gModeResultCues[resultCue].map;
         gFrontEndState = 6;
         D_8008FD80 = 1;
     }
     D_800D2E40 = 0;
     game_requestLevelChange(6, param, 0, 0, 1);
     save_resetControllerMap();
-    D_8008FD8C = 1;
-    D_8008FD90 = 1;
+    gPlayerCount = 1;
+    gHumanCount = 1;
 }
 
 /* Switches the menu to state 10. */
@@ -3067,7 +3067,7 @@ void func_151E4DC4(void) {
 
 /* Switches to state 4 when input bits 0x8020 are set. */
 void func_151E4DD8(void) {
-    if (D_800E0B9A & 0x8020) {
+    if (gFrontEndButtons & 0x8020) {
         gFrontEndState = 4;
     }
 }
@@ -3077,7 +3077,7 @@ void func_151E4E00(void) {
     D_8008FDCC = 0;
     save_resetControllerMap();
     gFrontEndState = 3;
-    D_8008FDA4 = 0;
+    gMenuLoadStep = 0;
     D_8008FD80 = 0;
     D_800D2E40 = 0;
     game_requestLevelChange(6, 0x1D, 0, 0, 1);
@@ -3088,9 +3088,9 @@ void func_151E4E64(void) {
     save_updateFadeIn();
     save_updatePulse();
     if (gFrontEndTimer > 1200) {
-        D_800E0B9A |= 0x8000;
+        gFrontEndButtons |= 0x8000;
     }
-    if (D_800E0B9A != 0) {
+    if (gFrontEndButtons != 0) {
         gFrontEndState = 7;
         gPendingTransition = func_151E4E00;
         gFrontEndFadeStep = 8;
@@ -3104,7 +3104,7 @@ void save_updateFadeTransition(void) {
     D_8008FDD0 = 1.0f - gFrontEndFade / 255.0f;
     if (gFrontEndFadeStep == 0xFF) {
         if (0.8700000048f < gIrisClosures[0]) {
-            gFrontEndFade += D_800BE9E4;
+            gFrontEndFade += gFrameTicks;
             if (gFrontEndFade < 0x55) {
                 gIrisSpeeds[0] = 9.999999975e-07f;
             } else {
@@ -3118,7 +3118,7 @@ void save_updateFadeTransition(void) {
             return;
         }
     } else if (gFrontEndFade != 0xFF) {
-        fade = gFrontEndFade + D_800BE9E4 * gFrontEndFadeStep;
+        fade = gFrontEndFade + gFrameTicks * gFrontEndFadeStep;
         if (fade > 255) {
             fade = 0xFF;
         }
@@ -3160,7 +3160,7 @@ void save_initMenu(void) {
     gFrontEndTimer = 0;
     save_forgetTextBanks();
     if (gMenuState == NULL) {
-        gMenuState = &D_800E0AF0;
+        gMenuState = &gMenuStateData;
         save_resetMenuState();
         if (gMenuState->menu == 1) {
             gMenuState->displayedStop = D_800AB570[gMenuState->displayedStop];
@@ -3183,11 +3183,11 @@ void save_updateFrontEnd(void) {
     D_800E0BDC = 0xFF;
     text_setFlags(0x81);
 
-    D_800E0B9A = gMenuButtonsPressed[0];
-    timer = D_8008FE28;
+    gFrontEndButtons = gMenuButtonsPressed[0];
+    timer = gFrontEndInputDelay;
     if (timer != 0) {
-        D_8008FE28 = timer - 1;
-        D_800E0B9A = 0;
+        gFrontEndInputDelay = timer - 1;
+        gFrontEndButtons = 0;
     }
 
     if (gFrontEndState == 0) {
@@ -3201,7 +3201,7 @@ void save_updateFrontEnd(void) {
     gFrontEndStateHandlers[gFrontEndState]();
 
     if (gFrontEndState != 7) {
-        gFrontEndTimer += D_800BE9E4;
+        gFrontEndTimer += gFrameTicks;
         if (gFrontEndState != prevState) {
             gPrevFrontEndState = prevState;
             gFrontEndTimer = 0;
@@ -3217,7 +3217,7 @@ void save_updateFadeIn(void) {
 
     if (gFrontEndState != 2) {
         if (gFrontEndFade != 0) {
-            fade = gFrontEndFade - D_800BE9E4 * gFrontEndFadeStep;
+            fade = gFrontEndFade - gFrameTicks * gFrontEndFadeStep;
             if (fade < 0) {
                 fade = 0;
             }
@@ -3244,24 +3244,24 @@ void save_endMatch(s32 flag) {
     if (gIsMultiplayer != 0) {
         gFrontEndState = 7;
         gFrontEndFadeStep = 8;
-        if (D_800AB68C[gMenuState->selection].resultCue != -1) {
+        if (gModeEntries[gMenuState->selection].resultCue != -1) {
             gMenuState->page = 4;
             gPendingTransition = save_endRound;
         } else {
             gMenuState->page = 3;
-            gPendingTransition = func_151DDBA0;
+            gPendingTransition = save_quitToFrontEnd;
         }
-        for (i = 0; i < D_8008FD90; i++) {
+        for (i = 0; i < gHumanCount; i++) {
             gMenuState->stats[i].shotsFired = movement_obj[i].mv->shotsfired;
         }
-        D_8008FDC0 &= 0xE35F;
+        gMatchHudFlags &= 0xE35F;
         D_800E0A86 = flag;
-        if (D_800AB68C[gMenuState->selection].resultCue == -2) {
+        if (gModeEntries[gMenuState->selection].resultCue == -2) {
             if (flag == 0) {
                 save_endRound();
                 return;
             }
-            gPendingTransition = func_151DDBA0;
+            gPendingTransition = save_quitToFrontEnd;
             gMenuState->page = 3;
         }
     } else {
@@ -3285,9 +3285,9 @@ void save_updatePulse(void) {
 
     direction = gMenuPulseFalling;
     if (direction == 0) {
-        step = D_800BE9E4 * 8;
+        step = gFrameTicks * 8;
     } else {
-        step = -D_800BE9E4 * 8;
+        step = -gFrameTicks * 8;
     }
     intensity = gMenuPulse;
     intensity += step;
@@ -3308,9 +3308,9 @@ void func_151E562C(void) {
     }
 }
 
-/* Returns D_8008FDC8: set when the mode entry's teamSetup is negative (every player then gets a team of their own). */
-s8 func_151E564C(void) {
-    return D_8008FDC8;
+/* Returns gFreeForAll: set when the mode entry's teamSetup is negative (every player then gets a team of their own). */
+s8 save_isFreeForAll(void) {
+    return gFreeForAll;
 }
 
 /*
@@ -3337,13 +3337,13 @@ s32 save_checkMatchOver(void) {
     if (gMatchResult != 0) {
         return 1;
     }
-    if (gSettings[3] >= 3 && D_8008FD78 <= 0) {
+    if (gSettings[3] >= 3 && gMatchTimeLeft <= 0) {
         D_800E0AAA = -1;
         gameOver = 1;
     }
-    if (D_8008FDC8 != 0) {
+    if (gFreeForAll != 0) {
         winScore = -1;
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             if (gSettings[6] != 0 && gMenuState->score[i] >= gSettings[6]) {
                 gameOver = 1;
                 winScore = gSettings[6];
@@ -3354,12 +3354,12 @@ s32 save_checkMatchOver(void) {
                 }
             }
         }
-        if (D_800BE618 - D_8008FD70 < 2 || D_8008FD94 - D_8008FD70 <= 0) {
+        if (D_800BE618 - D_8008FD70 < 2 || gHumansRemaining - D_8008FD70 <= 0) {
             gameOver = 1;
         }
         D_800E0AAA = -1;
-        if (D_8008FDC0 & 0x80) {
-            for (i = 0; i < D_8008FD90; i++) {
+        if (gMatchHudFlags & 0x80) {
+            for (i = 0; i < gHumanCount; i++) {
                 if (D_800E0AB0[i] != -1) {
                     gPlayerRanks[i] = D_800E0AB0[i];
                 } else {
@@ -3371,7 +3371,7 @@ s32 save_checkMatchOver(void) {
                 }
             }
         } else {
-            for (i = 0; i < D_8008FD90; i++) {
+            for (i = 0; i < gHumanCount; i++) {
                 if (D_80087270[i] != 10) {
                     if (D_800E0AB0[i] != -1) {
                         gPlayerRanks[i] = D_800E0AB0[i];
@@ -3382,7 +3382,7 @@ s32 save_checkMatchOver(void) {
                             score += 1000;
                         }
                         score -= D_800E0AD0[i];
-                        for (j = 0; j < D_8008FD8C; j++) {
+                        for (j = 0; j < gPlayerCount; j++) {
                             if (j != i && D_800E0AB0[j] == -1 && D_80087270[j] != 10) {
                                 other = gMenuState->score[j];
                                 if (other >= winScore) {
@@ -3414,7 +3414,7 @@ s32 save_checkMatchOver(void) {
         teamStats[k] = 0;
     }
     k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         team = movement_obj[i].team; // team: first byte of an unnamed Actor field
         teamStats[team] += gMenuState->score[i];
         teamStats[team + 4] += player_getStat(i, 3) * 6 + player_getStat(i, 4);
@@ -3470,7 +3470,7 @@ s32 save_checkMatchOver(void) {
     }
     liveTeams = 0;
     j = 0;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         if (D_80087270[i] != 10) {
             team = movement_obj[i].team;
             if (!(gEliminatedPlayers & (1 << i))) {
@@ -3511,15 +3511,15 @@ s32 save_getTeam(s32 player) {
     return player;
 }
 
-/* Returns D_8008FD8C when D_800E0BEB is set and it is below 5, else D_8008FD90. */
-s8 func_151E5FAC(void) {
+/* Returns gPlayerCount when D_800E0BEB is set and it is below 5, else gHumanCount. */
+s8 save_getScreenCount(void) {
     if (gSettings[11] != 0) {
-        if (D_8008FD8C >= 5) {
-            return D_8008FD90;
+        if (gPlayerCount >= 5) {
+            return gHumanCount;
         }
-        return D_8008FD8C;
+        return gPlayerCount;
     }
-    return D_8008FD90;
+    return gHumanCount;
 }
 
 /*
@@ -3542,16 +3542,16 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
 
     attacker = source;
     attackerIdx = source - movement_obj;
-    if (attackerIdx >= D_8008FD8C) {
+    if (attackerIdx >= gPlayerCount) {
         attackerIdx = source->owner - 1;
         if (attackerIdx >= 0) {
             attacker = &movement_obj[attackerIdx];
         }
     }
-    if ((attackerIdx >= 0) && (attackerIdx < D_8008FD8C) && (attackerIdx < D_8008FD8C) /* matching: repeated test */) {
+    if ((attackerIdx >= 0) && (attackerIdx < gPlayerCount) && (attackerIdx < gPlayerCount) /* matching: repeated test */) {
         victimIdx = victim - movement_obj;
         D_800E0BB8[victimIdx] = attackerIdx | 0x80;
-        if (attackerIdx < D_8008FD90) {
+        if (attackerIdx < gHumanCount) {
             if (gRosterTeams[attackerIdx] != gRosterTeams[victimIdx]) {
                 gMenuState->stats[attackerIdx].hits++;
                 if (cause == 0x2E) {
@@ -3565,12 +3565,12 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
         if (victim->energy <= 0) {
             if ((gMenuState->score[attackerIdx] < 9999) && (gRosterTeams[attackerIdx] != gRosterTeams[victimIdx])) {
                 gMenuState->score[attackerIdx]++;
-                if (D_8008FDBC & 0x200) {
+                if (gMatchFlags & 0x200) {
                     player_setStat(gRosterTeams[attackerIdx] != 0, 10, 1);
                 }
             }
         }
-        if (victimIdx < D_8008FD90) {
+        if (victimIdx < gHumanCount) {
             gMenuState->stats[victimIdx].hitsTaken++;
         }
         if ((attacker != victim) && (victim->mv != NULL) && (attacker->energy != 0)) {
@@ -3585,7 +3585,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                 }
             } else if ((attacker->character_type == 0x75) && (victim->energy <= 0)) {
                 if (attacker->character_type == victim->character_type) {
-                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
+                    if ((victimIdx < gHumanCount) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
                         sound = 0x665;
                         variants = 4;
                     }
@@ -3609,7 +3609,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     sourceState = source->headEffectState;
                 }
                 if (attacker->character_type == victim->character_type) {
-                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
+                    if ((victimIdx < gHumanCount) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
                         variants = 8;
                         sound = 0x65A;
                     }
@@ -3729,7 +3729,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
 
 /*
  * Loads text bank (bank - 1) of language D_800E0BEA and indexes its NUL-separated strings into gTextStrings;
- * bank 1 also loads bank 2's 80 strings into D_800E0B88. Bank 0 just frees the current one.
+ * bank 1 also loads bank 2's 80 strings into gTextBank2Strings. Bank 0 just frees the current one.
  */
 void save_loadTextBank(s32 bank) {
     u8 *cursor;
@@ -3749,7 +3749,7 @@ void save_loadTextBank(s32 bank) {
         gTextBank = 0;
         if (gTextBank2 != 0) {
             heap_free((void *)gTextBank2);
-            heap_free(D_800E0B88);
+            heap_free(gTextBank2Strings);
             heap_free(gTextStrings);
             gTextBank2 = 0;
         }
@@ -3793,11 +3793,11 @@ void save_loadTextBank(s32 bank) {
     }
 
     gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, gTextLanguage, 2);
-    D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
+    gTextBank2Strings = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)gTextBank2;
     count = 0;
     do {
-        D_800E0B88[count] = cursor;
+        gTextBank2Strings[count] = cursor;
         count++;
         while (*cursor != 0) {
             cursor++;
@@ -3854,7 +3854,7 @@ static const Snd151E6C1C D_800AB920[8] = {
  * along it), spline-interpolating its position (unk2F8..) and look-at point (unk2A4..), and drives the
  * related objects returned by gfx_findObjectById.
  */
-void func_151E6C1C(s32 index) {
+void save_updateMenuCamera(s32 index) {
     Camera *obj;
     s32 pad1A0; // matching: unused stack slot
     s32 idx;
@@ -3903,7 +3903,7 @@ void func_151E6C1C(s32 index) {
     mp_getNodePos(mp_findNodeById(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
 
     if (gMenuState->stepSpeed != 0.0f) {
-        gMenuState->stepProgress += gMenuState->stepSpeed * D_800BE9E4;
+        gMenuState->stepProgress += gMenuState->stepSpeed * gFrameTicks;
         if (gMenuState->stepProgress <= 0.0f) {
             gMenuState->stepProgress = 0.0f;
             gMenuState->stepSpeed = 0.0f;
@@ -3919,8 +3919,8 @@ void func_151E6C1C(s32 index) {
     } else if (gMenuState->pathSpeed != 0.0f || gMenuState->pathProgress != 0.0f) {
         if ((gMenuState->input & 0x20) && (gMenuState->menu == 0 || gMenuState->currentStop != 0)) {
             gMenuState->pathSpeed = -speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk2, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->currentStop].unk2;
+            music_playTune(sounds[gMenuState->currentStop].unk2, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].unk2;
         }
         if (gMenuState->unk2A != 0 && gMenuState->menu == 1 && gMenuState->currentStop == 0) {
             if (gMenuState->input & 0x20) {
@@ -3929,7 +3929,7 @@ void func_151E6C1C(s32 index) {
         } else if (gMenuState->input & 0x10) {
             gMenuState->pathSpeed = speeds[gMenuState->currentStop];
         }
-        gMenuState->pathProgress += gMenuState->pathSpeed * D_800BE9E4;
+        gMenuState->pathProgress += gMenuState->pathSpeed * gFrameTicks;
         if (gMenuState->pathProgress >= 1.0f) {
             gMenuState->pathProgress = 1.0f;
             gMenuState->pathSpeed = 0.0f;
@@ -3944,8 +3944,8 @@ void func_151E6C1C(s32 index) {
     } else {
         if (gMenuState->input & 0x10) {
             gMenuState->pathSpeed = speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk0, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->currentStop].unk0;
+            music_playTune(sounds[gMenuState->currentStop].unk0, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].unk0;
         } else {
             if (gMenuState->input & 4) {
                 gMenuState->currentStop--;
@@ -4122,8 +4122,8 @@ void func_151E6C1C(s32 index) {
             }
             state = 1;
             gMenuState->pathSpeed = speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk0, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->currentStop].unk0;
+            music_playTune(sounds[gMenuState->currentStop].unk0, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].unk0;
         }
         if (gMenuState->pathProgress < 0.25f && gMenuState->unk2A == 1) {
             gMenuState->currentStop = 4;
@@ -4242,7 +4242,7 @@ void func_151E7DC0(void) {
 }
 
 /* Calls func_10017870 with 1, 2 or 4 depending on D_800E0BE9. */
-void func_151E7E9C(void) {
+void save_applySoundMode(void) {
     if (gSettings[9] == 2) {
         func_10017870(1);
     } else if (gSettings[9] == 0) {
@@ -4258,7 +4258,7 @@ void save_checkCodeTamper(void) {
     s32 *end;
     s32 sum;
 
-    func_151E7E9C();
+    save_applySoundMode();
     sum = 0;
     word = (s32 *)save_updatePauseMenu;
     end = (s32 *)func_151DE7D4;
@@ -4344,7 +4344,7 @@ void save_clearMenuCharacters(void) {
 }
 
 /* Switches to state 8 once gFrontEndTimer passes 160 frames (held at 0 while screen_areViewsCovered() returns 0). */
-void func_151E8214(void) {
+void save_startCredits(void) {
     if (gFrontEndState != 8) {
         if (screen_areViewsCovered() == 0) {
             gFrontEndTimer = 0;
@@ -4352,10 +4352,10 @@ void func_151E8214(void) {
         if (gFrontEndTimer > 160) {
             D_8008FDCC = 0;
             gFrontEndState = 8;
-            D_8008FD8C = 1;
-            D_8008FD90 = 1;
-            D_8008FDA4 = 0;
-            D_800E0A80 = -2;
+            gPlayerCount = 1;
+            gHumanCount = 1;
+            gMenuLoadStep = 0;
+            gCreditsLine = -2;
             gFrontEndTimer = 0;
             gAutoSavePending = 1;
         }
@@ -4363,33 +4363,33 @@ void func_151E8214(void) {
 }
 
 /*
- * Pages through the text bank: every 445 frames D_800E0A80 skips past the next line starting with '*';
+ * Pages through the text bank: every 445 frames gCreditsLine skips past the next line starting with '*';
  * a line starting with '=' ends paging, and 120 frames later the menu switches to state 9.
  */
-void func_151E82B8(void) {
+void save_updateCredits(void) {
     save_updateFadeIn();
-    if (D_800E0A80 == -1) {
+    if (gCreditsLine == -1) {
         if (gFrontEndTimer > 120) {
             gFrontEndState = 9;
             gFrontEndTimer = 0;
             D_8008FDCC = 0xFF;
-            D_800E0A80 = 0;
+            gCreditsLine = 0;
             game_requestLevelChange(6, 0x1D, 0, 0, 1);
             return;
         }
     }
-    if (D_800E0A80 == -2) {
-        D_800E0A80 = 0;
+    if (gCreditsLine == -2) {
+        gCreditsLine = 0;
     }
 
     if (gFrontEndTimer > 445) {
-        if (D_800E0A80 >= 0) {
-            while (gTextStrings[D_800E0A80][0] != '*') {
-                D_800E0A80++;
+        if (gCreditsLine >= 0) {
+            while (gTextStrings[gCreditsLine][0] != '*') {
+                gCreditsLine++;
             }
-            D_800E0A80++;
-            if (gTextStrings[D_800E0A80][0] == '=') {
-                D_800E0A80 = -1;
+            gCreditsLine++;
+            if (gTextStrings[gCreditsLine][0] == '=') {
+                gCreditsLine = -1;
             }
             gFrontEndTimer = 0;
         }
@@ -4397,9 +4397,9 @@ void func_151E82B8(void) {
 }
 
 /* State 9: plays cue 0x1D once, then after 100 frames (timer held while screen_areViewsCovered() is 0) goes to state 1. */
-void func_151E83E8(void) {
-    if (D_800E0A80 == 0) {
-        D_800E0A80 = -1;
+void save_updateAfterCredits(void) {
+    if (gCreditsLine == 0) {
+        gCreditsLine = -1;
         cutscene_start(0x1D, 6, 0, 0, 0);
     }
     save_updateFadeIn();
@@ -4408,7 +4408,7 @@ void func_151E83E8(void) {
     }
     if (gFrontEndTimer > 100) {
         save_resetMenuState();
-        D_8008FDA4 = 0;
+        gMenuLoadStep = 0;
         gFrontEndState = 1;
         gFrontEndTimer = 0;
         D_800D2E40 = 0;

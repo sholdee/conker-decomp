@@ -65,8 +65,8 @@ static Gfx gIrisSetupDl[] = {
 };
 
 /* Scripted iris closures, by gScreenLayout: the hold closure, then the final closure. */
-static const f32 D_800A7260[4] = { 0.8f, 0.9f, 0.9f, 0.9f };
-static const f32 D_800A7270[4] = { 0.9649999738f, 0.9649999738f, 0.9649999738f, 0.9649999738f };
+static const f32 gIrisDeathHoldClosures[4] = { 0.8f, 0.9f, 0.9f, 0.9f };
+static const f32 gIrisDeathEndClosures[4] = { 0.9649999738f, 0.9649999738f, 0.9649999738f, 0.9649999738f };
 
 /* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
  * unless that same fade has already run to completion. */
@@ -165,7 +165,7 @@ s32 screen_isViewFadeDone(s32 view) {
 /* Advances the colour fade timer of `view`. */
 void screen_advanceViewFade(s32 view) {
     if (gFadeElapsed[view] != gFadeDurations[view]) {
-        gFadeElapsed[view] += D_800BE9E4;
+        gFadeElapsed[view] += gFrameTicks;
     }
 }
 
@@ -245,8 +245,8 @@ void screen_updateViewFlashes(void) {
     s32 view;
 
     for (view = 0; view <= gScreenLayout; view++) {
-        if (D_800BE9E4 < gFlashFrames[view]) {
-            gFlashFrames[view] -= D_800BE9E4;
+        if (gFrameTicks < gFlashFrames[view]) {
+            gFlashFrames[view] -= gFrameTicks;
         } else {
             gFlashFrames[view] = 0;
         }
@@ -256,12 +256,12 @@ void screen_updateViewFlashes(void) {
 /* Counts down the tint timer and advances its pulse. */
 void screen_updateTint(void) {
     if (gTintFrames) {
-        if (D_800BE9E4 < gTintFrames) {
-            gTintFrames -= D_800BE9E4;
+        if (gFrameTicks < gTintFrames) {
+            gTintFrames -= gFrameTicks;
         } else {
             gTintFrames = 0;
         }
-        gTintPulseAngle += gTintPulseSpeed * D_800BE9E4;
+        gTintPulseAngle += gTintPulseSpeed * gFrameTicks;
     }
 }
 
@@ -607,12 +607,12 @@ void screen_updateIrises(void) {
         if (gIrisScripted[i] != 0) {
 
             player = &movement_obj[i];
-            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * gFrameTicks;
             if (player->mv == NULL) {
                 gIrisClosures[i] = 1.0f;
             } else if (player->mv->death_State == 3) {
-                if (D_800A7260[gScreenLayout] <= gIrisClosures[i]) {
-                    gIrisClosures[i] = D_800A7260[gScreenLayout];
+                if (gIrisDeathHoldClosures[gScreenLayout] <= gIrisClosures[i]) {
+                    gIrisClosures[i] = gIrisDeathHoldClosures[gScreenLayout];
                     player->mv->death_State = 4;
                     gIrisWobbleFrames[i] = 30;
                     gIrisWobbleAngles[i] = 0;
@@ -621,28 +621,28 @@ void screen_updateIrises(void) {
                 if (gIrisWobbleFrames[i]) {
                     f32 scale;
 
-                    if (gIrisWobbleFrames[i] >= D_800BE9E4) {
-                        gIrisWobbleFrames[i] -= D_800BE9E4;
+                    if (gIrisWobbleFrames[i] >= gFrameTicks) {
+                        gIrisWobbleFrames[i] -= gFrameTicks;
                     } else {
                         gIrisWobbleFrames[i] = 0;
                     }
-                    gIrisWobbleAngles[i] += D_800BE9E4 * 20;
+                    gIrisWobbleAngles[i] += gFrameTicks * 20;
                     if (gIrisWobbleFrames[i] < 30) {
                         scale = (gIrisWobbleFrames[i] * 0.01f) / 30.0f;
                     } else {
                         scale = 0.01f;
                     }
-                    gIrisClosures[i] = D_800A7260[gScreenLayout] + scale * math_sinBinAngle(gIrisWobbleAngles[i]);
+                    gIrisClosures[i] = gIrisDeathHoldClosures[gScreenLayout] + scale * math_sinBinAngle(gIrisWobbleAngles[i]);
                 } else {
-                    gIrisClosures[i] = D_800A7260[gScreenLayout];
+                    gIrisClosures[i] = gIrisDeathHoldClosures[gScreenLayout];
                     player->mv->death_State = 5;
                 }
             } else if (player->mv->death_State == 5) {
-                gIrisClosures[i] = D_800A7260[gScreenLayout];
+                gIrisClosures[i] = gIrisDeathHoldClosures[gScreenLayout];
             } else if (player->mv->death_State == 6) {
                 gIrisSpeeds[i] = 0.009f;
-                if (D_800A7270[gScreenLayout] <= gIrisClosures[i]) {
-                    gIrisClosures[i] = D_800A7270[gScreenLayout];
+                if (gIrisDeathEndClosures[gScreenLayout] <= gIrisClosures[i]) {
+                    gIrisClosures[i] = gIrisDeathEndClosures[gScreenLayout];
                     player->mv->death_State = 7;
                     player->mv->deathTimer = 30;
                     gIrisSpeeds[i] = 0.0f;
@@ -667,7 +667,7 @@ void screen_updateIrises(void) {
             s32 sign;
 
             actor = &movement_obj[i];
-            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * gFrameTicks;
             if (actor->ob_matrix_ptr != NULL) {
                 MtxF *model;
                 f32 height;
@@ -688,7 +688,7 @@ void screen_updateIrises(void) {
             screen_moveIris(0, x, y, z, i);
             x = gIrisCentres[i][0];
             y = gIrisCentres[i][1];
-            if (D_800BE9B4 != 0) {
+            if (gLevelLoadState != 0) {
                 rate = 1.0f;
             } else {
                 rate = 0.05f;
@@ -724,12 +724,12 @@ void screen_updateIrises(void) {
                 if (gIrisWobbleFrames[i]) {
                     f32 scale;
 
-                    if (gIrisWobbleFrames[i] >= D_800BE9E4) {
-                        gIrisWobbleFrames[i] -= D_800BE9E4;
+                    if (gIrisWobbleFrames[i] >= gFrameTicks) {
+                        gIrisWobbleFrames[i] -= gFrameTicks;
                     } else {
                         gIrisWobbleFrames[i] = 0;
                     }
-                    gIrisWobbleAngles[i] -= D_800BE9E4 * 20;
+                    gIrisWobbleAngles[i] -= gFrameTicks * 20;
                     if (gIrisWobbleFrames[i] < 30) {
                         scale = (gIrisWobbleFrames[i] * 0.01f) / 30.0f;
                     } else {
@@ -742,8 +742,8 @@ void screen_updateIrises(void) {
                     gIrisHoldFrames[i] = 60;
                 }
             } else if (gIrisTracking[i] == 3) {
-                if (D_800BE9E4 < gIrisHoldFrames[i]) {
-                    gIrisHoldFrames[i] -= D_800BE9E4;
+                if (gFrameTicks < gIrisHoldFrames[i]) {
+                    gIrisHoldFrames[i] -= gFrameTicks;
                 } else {
                     gIrisTracking[i] = 4;
                     gIrisSpeeds[i] = -0.009f;
@@ -765,7 +765,7 @@ void screen_updateIrises(void) {
                 gIrisSpeeds[i] = 0.0f;
                 gIrisClosures[i] = 0.0f;
             }
-            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * gFrameTicks;
         }
     }
 }

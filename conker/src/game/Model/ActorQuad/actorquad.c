@@ -4,7 +4,7 @@
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 Vtx *gActorQuadVtx[1];          // per actor: its 5-vertex quad buffer; [0] is gActorQuadVtxTemplate
-static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
+static s16 gActorQuadAnchor[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
 
 #include "functions.h"
 #include "variables.h"
@@ -29,7 +29,7 @@ static Gfx gActorQuadDl[] = {
 };
 
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
-#define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
+#define QUAD_ANCHOR(index) ((s16 *)((s32)&gActorQuadAnchor + (index) * 6))
 
 /*
  * Places vertex 0 of actor `index`'s quad. During some animation states it snaps to a fixed point of

@@ -35,7 +35,7 @@ void sprite_updateTexQuad(TexturedQuad *quad) {
 
     dead = FALSE;
     if (quad->flags & 1) {
-        quad->lifetime -= D_800BE9E4;
+        quad->lifetime -= gFrameTicks;
         if (quad->lifetime < 0) {
             dead = TRUE;
         }
@@ -146,7 +146,7 @@ void sprite_updateActorTracker(ActorTracker *tracker) {
 
     dead = FALSE;
     if (tracker->desc.flags & 1) {
-        tracker->desc.lifetime -= D_800BE9E4;
+        tracker->desc.lifetime -= gFrameTicks;
         if (tracker->desc.lifetime < 0) {
             dead = TRUE;
         }

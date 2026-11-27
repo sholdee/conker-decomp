@@ -57,12 +57,12 @@ void level_setup11(void) {
     level_queueObjectDrop11(-0xBD5, 0x3F1, 0x659, -0x602, 2);
     level_queueObjectDrop11(-0xE6B, -0x263, -0x427, -0x647, 1);
 
-    D_800DCDA4 = gAmbientColour[0];
-    D_800DCDA8 = gAmbientColour[1];
-    D_800DCDAC = gAmbientColour[2];
-    D_800DCDB0 = gDirLightAmbientTint[0];
-    D_800DCDB4 = gDirLightAmbientTint[1];
-    D_800DCDB8 = gDirLightAmbientTint[2];
-    D_800DCDBC = gDirLightAmount;
-    D_800DCDC0 = gDirLightAmbientAmount;
+    gSavedAmbientRed = gAmbientColour[0];
+    gSavedAmbientGreen = gAmbientColour[1];
+    gSavedAmbientBlue = gAmbientColour[2];
+    gSavedDirLightAmbientTintRed = gDirLightAmbientTint[0];
+    gSavedDirLightAmbientTintGreen = gDirLightAmbientTint[1];
+    gSavedDirLightAmbientTintBlue = gDirLightAmbientTint[2];
+    gSavedDirLightAmount = gDirLightAmount;
+    gSavedDirLightAmbientAmount = gDirLightAmbientAmount;
 }

@@ -63,7 +63,7 @@ s32 prop_segmentHitsCylinders(Vec3f *start, Vec3f *end, Vec3f *hit) {
  * otherwise -40). Once the player's mv->unk57 is set it switches to state 2, which bounces
  * rotX back to 0 with prop_bounceX until it stops; then state 3 keeps it at 0.
  */
-void func_150EB614(WorldObject *obj) {
+void prop_springTiltByPlayerDistance(WorldObject *obj) {
     f32 velocity;
     f32 dz;
     f32 target;
@@ -106,7 +106,7 @@ void func_150EB614(WorldObject *obj) {
         acceleration = WORK(obj)->swing.acceleration;
         velocity = WORK(obj)->swing.velocity;
         if (angle != target || velocity != 0.0f) {
-            angle += velocity * D_800BE9E4;
+            angle += velocity * gFrameTicks;
             delta = math_angleDiff(angle, target);
             magnitude = fabsf(delta);
             if (delta > 0.0f) {
@@ -155,7 +155,7 @@ static const u8 D_800A14D8[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
 void func_150EB8C4(void) {
     ParticleSpawn spawn;
 
-    camera_startWobblePreset(2, D_800BE9E8, NULL, 0xFF, 1);
+    camera_startWobblePreset(2, gLastPlayerIndex, NULL, 0xFF, 1);
     particle_startRandomEmitter(&D_800A149C, math_random() % 62U + 120, 0xFF, 1);
     particle_spawnBlastSpray(&D_800A1490, 0xFF, 1);
     particle_spawnLightFlash(&D_800A1490, 0xFF, 1);

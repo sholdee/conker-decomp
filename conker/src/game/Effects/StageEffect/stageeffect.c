@@ -169,7 +169,7 @@ void effect_advanceStage(StageObj *obj) {
         return;
     }
     if (state->stage < 7) {
-        state->stageTimer -= D_800BE9E4 * count;
+        state->stageTimer -= gFrameTicks * count;
         if (state->stageTimer < 0) {
             RumbleParams event;
             sound_playAt(math_random() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
@@ -187,7 +187,7 @@ void effect_advanceStage(StageObj *obj) {
             state->stageTimer = math_random() % 31U + 70;
         }
     }
-    state->eventTimer -= D_800BE9E4 * count;
+    state->eventTimer -= gFrameTicks * count;
     if (state->eventTimer < 0) {
         RumbleParams event;
         event.flags = 1;

@@ -41,15 +41,15 @@ typedef struct HudBars {
 } HudBars;
 
 /* This file's .data. */
-static Gfx D_80087390[] = {
+static Gfx gMultiplayerHudDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
     gsSPEndDisplayList(),
 };
-static HudBars D_800873B0 = { 0 };
-static u8 D_800873B4[5] = { 4, 16, 25, 39, 53 };
-static u8 D_800873BC[5] = { 12, 9, 14, 12, 10 };
+static HudBars gHudBarsZero = { 0 };
+static u8 gHudIconSheetRows[5] = { 4, 16, 25, 39, 53 };
+static u8 gHudIconRowHeights[5] = { 12, 9, 14, 12, 10 };
 static u8 gHudDigitCols[4] = { 1, 8, 15, 21 };
 static u8 gHudDigitRows[3] = { 0, 8, 16 };
 
@@ -96,7 +96,7 @@ void hud_updateBlockStack(void) {
         node->rot.y += node->rotVel.y;
         node->rot.z += node->rotVel.z;
         timer = node->timer;
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer <= 0) {
             *link = node->next;
             heap_setTag(node, 3);
@@ -132,20 +132,20 @@ void hud_updateBlockStack(void) {
         cur = gHudBlockStackPos[0];
         target = gHudBlockStackPath[3];
         if (cur == target) {
-            gHudBlockStackTimer -= D_800BE9E4;
+            gHudBlockStackTimer -= gFrameTicks;
             if (gHudBlockStackTimer <= 0) {
                 gHudBlockStackTimer = 0;
             }
             for (j = 0; j < 4; j += 2) {
-                for (i = 0; i < D_800BE9E4; i++) {
+                for (i = 0; i < gFrameTicks; i++) {
                     gHudBlockStackWobbleVel[j] += gHudBlockStackWobble[j] * -0.1f;
                     gHudBlockStackWobbleVel[j] *= 0.85f;
-                    gHudBlockStackWobble[j] += gHudBlockStackWobbleVel[j] * D_800BE9E4;
+                    gHudBlockStackWobble[j] += gHudBlockStackWobbleVel[j] * gFrameTicks;
                 }
             }
         } else if (gHudBlockTarget < gHudBlockCount) {
             count = gHudBlockCount - gHudBlockTarget;
-            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            gHudBlockStackPos[0] += 50.0f * gFrameTicks;
             if (target <= gHudBlockStackPos[0]) {
                 gHudBlockStackPos[0] = target;
                 for (i = 0; i < count; i++) {
@@ -155,7 +155,7 @@ void hud_updateBlockStack(void) {
             }
         } else {
             count = gHudBlockTarget - gHudBlockCount;
-            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            gHudBlockStackPos[0] += 50.0f * gFrameTicks;
             if (target <= gHudBlockStackPos[0]) {
                 gHudBlockStackPos[0] = target;
                 for (i = 0; i < count; i++) {
@@ -171,7 +171,7 @@ void hud_updateBlockStack(void) {
             if (target < 0.01f) {
                 target = 0.01f;
             }
-            gHudBlockStackPos[0] -= target * D_800BE9E4;
+            gHudBlockStackPos[0] -= target * gFrameTicks;
             if (gHudBlockStackPos[0] < base) {
                 gHudBlockStackPos[0] = base;
             }
@@ -179,7 +179,7 @@ void hud_updateBlockStack(void) {
     }
     for (i = 0; i < 6; i++) {
         if (gHudBlockScales[i] != 1.0f) {
-            inc = D_800BE9E4 * 0.03f;
+            inc = gFrameTicks * 0.03f;
             gHudBlockScales[i] += inc;
             if (gHudBlockScales[i] > 1.0f) {
                 gHudBlockScales[i] = 1.0f;
@@ -232,7 +232,7 @@ void hud_updateBubbles(void) {
 
     air = gHudBubbleCooldown;
     if (air != 0) {
-        air -= D_800BE9E4;
+        air -= gFrameTicks;
         if (air < 0) {
             air = 0;
         }
@@ -260,7 +260,7 @@ void hud_updateBubbles(void) {
         Bubble *p = &gHudBubbles[i];
         if (p->state == 2) {
             v = p->timer;
-            v -= D_800BE9E4;
+            v -= gFrameTicks;
             if (v <= 0) {
                 v = 6;
                 p->state = 3;
@@ -288,7 +288,7 @@ void hud_updateBubbles(void) {
             break;
         case 1:
             v = p->size;
-            v += D_800BE9E4 * 200;
+            v += gFrameTicks * 200;
             if (v >= 0x666) {
                 p->state = 2;
                 v = 0x666;
@@ -296,7 +296,7 @@ void hud_updateBubbles(void) {
             p->size = v;
             break;
         case 2:
-            dt = D_800BE9E4;
+            dt = gFrameTicks;
             j = 0;
             v = p->accel;
             if (v < 32) {
@@ -321,7 +321,7 @@ void hud_updateBubbles(void) {
             p->angle += dt * 5;
             p->radius += dt * 30;
             p->x = ((s32)(math_sinBinAngle(p->angle) * p->radius) >> 8) + p->originX;
-            p->phase += D_800BE9E4 * 10;
+            p->phase += gFrameTicks * 10;
         // matching: label steers block layout of case 2's exit
         lbl:
             break;
@@ -341,7 +341,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     s32 i;
     s32 step;
     s32 overflow;
-    s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale D_8008FE1C */
+    s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale gHudScaleX */
 
     start = gfx;
     if (level == 0x1D) {
@@ -366,10 +366,10 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     }
     if (D_8008CD00 != 0) {
         step = 0x400;
-        if (D_8008FE1C != 1.0f) {
-            step = step / D_8008FE1C;
+        if (gHudScaleX != 1.0f) {
+            step = step / gHudScaleX;
             for (i = 0; i < 33; i++) {
-                scaled[i] = i * D_8008FE1C;
+                scaled[i] = i * gHudScaleX;
             }
         } else {
             // matching: one line; the loop body's line number steers as1's unrolled store order
@@ -558,7 +558,7 @@ Gfx *hud_drawBubbles(Gfx *gfx) {
             }
             gfx = sprite_drawScreen(gfx, &sprite, x, y);
             timer = gHudBubbles[i].timer;
-            timer -= D_800BE9E4;
+            timer -= gFrameTicks;
             if (timer < 0) {
                 timer = 0;
             }
@@ -622,7 +622,7 @@ void hud_updateWaterSurface(void) {
         gHudWaterStage.unk9C = 1.0f;
     }
     if (intensity < 1441) {
-        gHudWaterStage.unk94 += gHudWaterStage.unk98 * D_800BE9E4;
+        gHudWaterStage.unk94 += gHudWaterStage.unk98 * gFrameTicks;
         lo = gHudWaterStage.unk9C - 0.2f;
         if (lo < 0.0f) {
             lo = 0.0f;
@@ -739,7 +739,7 @@ void hud_updateWaterSurface(void) {
             i++;
         } while (i < gHudWaterStage.count);
     }
-    dt = D_800BE9E4;
+    dt = gFrameTicks;
     if (fadeRaw > 0x2CE2E) {
         gHudWaterStage.unkAC = 0.0f;
     } else if (fadeRaw > 0x1DF1E) {
@@ -747,7 +747,7 @@ void hud_updateWaterSurface(void) {
             gHudWaterStage.unkAC = 0.6f;
         }
     } else if (gHudWaterStage.timer != 0) {
-        tmp = gHudWaterStage.timer - D_800BE9E4;
+        tmp = gHudWaterStage.timer - gFrameTicks;
         if (tmp <= 0) {
             tmp = 0;
             gHudWaterStage.unkAC = 0.2f;
@@ -768,7 +768,7 @@ void hud_updateWaterSurface(void) {
         gHudWaterStage.unkAC = 0.0f;
     }
     if (fadeRaw >= 720 * 255 && gHudWaterStage.unkA0 > -22.0f) {
-        gHudWaterStage.unkA4 -= 0.25f * D_800BE9E4;
+        gHudWaterStage.unkA4 -= 0.25f * gFrameTicks;
         gHudWaterStage.unkA0 += gHudWaterStage.unkA4;
     }
 }
@@ -880,7 +880,7 @@ void hud_printRaceTime(s32 x, s32 y, s32 frames, s32 style) {
     text_printAt(x + 16, y, style, ": --");
 }
 
-/* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
+/* Draws the multiplayer HUD in each player's viewport, as enabled by the gMatchHudFlags flags:
  * 0x002 an icon picked by player_getStat(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
  * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
  * player_getStat(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
@@ -919,29 +919,29 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
 
     barMode = 0;
     grenades = 0;
-    barLen = D_800873B0;
+    barLen = gHudBarsZero;
     vpWidth = gViews->right - gViews->left;
-    gSPDisplayList(gfx++, D_80087390);
+    gSPDisplayList(gfx++, gMultiplayerHudDl);
     text_setColor(255, 255, 255, 255);
     step = 0x400;
-    if (D_8008FE1C != 1.0f) {
-        step = step / D_8008FE1C;
+    if (gHudScaleX != 1.0f) {
+        step = step / gHudScaleX;
         for (j = 0; j < 33; j++) {
-            scaled[j] = j * D_8008FE1C;
+            scaled[j] = j * gHudScaleX;
         }
     } else {
         // matching: one line; the loop body's line number steers as1's unrolled store order
         for (j = 0; j < 33; j++) scaled[j] = j;
     }
 
-    if (D_8008FDC0 & 0xC02) {
+    if (gMatchHudFlags & 0xC02) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
             if (D_80087270[i] != 10) {
                 vpLeft = gViews[i].left;
                 y = gViews[i].top + scaled[6];
-                if (D_8008FDC0 & 2) {
+                if (gMatchHudFlags & 2) {
                     if (!texLoaded) {
                         n = texture_getAddress((s32)&D_D14, 0, 3, 0);
                         texLoaded = 1;
@@ -967,16 +967,16 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         gSPScisTextureRectangle(gfx++, x * 4, y * 4, (scaled[5] + x) * 4, (scaled[7] + y) * 4, 0, texS, texT, step, step);
                     }
                 }
-                if (D_8008FDC0 & 0x400) {
+                if (gMatchHudFlags & 0x400) {
                     x = (vpWidth >> 1) + vpLeft - 8;
-                    if (D_8008FE1C != 1.0f) {
+                    if (gHudScaleX != 1.0f) {
                         x -= 8;
                     }
                     text_printAt(x, y, 0x41, "%d", gMenuState->score[i]);
                 }
-                if (D_8008FDC0 & 0x800) {
+                if (gMatchHudFlags & 0x800) {
                     x = (vpWidth >> 1) + vpLeft + 16;
-                    if (D_8008FE1C != 1.0f) {
+                    if (gHudScaleX != 1.0f) {
                         x += 16;
                     }
                     text_printAt(x, y, 0x41, "(%s)", gTextStrings[8 + gPlayerRanks[i]]);
@@ -985,7 +985,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         }
     }
 
-    if (D_8008FDC0 & 0x14) {
+    if (gMatchHudFlags & 0x14) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
@@ -993,7 +993,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 vpLeft = gViews[i].left + scaled[5];
                 vpRight = gViews[i].right - scaled[5];
                 y = gViews[i].top + scaled[5];
-                if (D_8008FDC0 & 4) {
+                if (gMatchHudFlags & 4) {
                     player = &movement_obj[i];
                     n = 1;
                     h = player->mv->context_b;
@@ -1075,8 +1075,8 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                             gfx = hud_loadIconSheet(gfx, 0, &texOk);
                         }
                         x = (vpRight - scaled[25]) * 4;
-                        texT = D_800873B4[icon / 3] << 5;
-                        iconH = scaled[D_800873BC[icon / 3]] * 4;
+                        texT = gHudIconSheetRows[icon / 3] << 5;
+                        iconH = scaled[gHudIconRowHeights[icon / 3]] * 4;
                         if (icon == 4) {
                             j = 4;
                             iconH -= 8;
@@ -1093,7 +1093,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         } while (--n > 0);
                     }
                 }
-                if (D_8008FDC0 & 0x10) {
+                if (gMatchHudFlags & 0x10) {
                     if (!texLoaded) {
                         gfx = hud_loadIconSheet(gfx, 0, &texOk);
                     }
@@ -1112,7 +1112,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         }
     }
 
-    if (D_8008FDC0 & 4) {
+    if (gMatchHudFlags & 4) {
         u8 pad3a; // matching: unused stack slots in the original frame
         s32 cellOffset;
         s32 pad3b;
@@ -1179,12 +1179,12 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                     x = vpRight - scaled[25];
                     texS = (icon % 3) * 25;
                     icon = icon / 3;
-                    texT = D_800873B4[icon] + cellOffset;
+                    texT = gHudIconSheetRows[icon] + cellOffset;
                     texS <<= 5;
                     texT <<= 5;
                     do {
                         if (texOk) {
-                            gSPTextureRectangle(gfx++, x * 4, y * 4, (x + scaled[22]) * 4, (scaled[D_800873BC[icon]] + y) * 4, 0, texS, texT, step, step);
+                            gSPTextureRectangle(gfx++, x * 4, y * 4, (x + scaled[22]) * 4, (scaled[gHudIconRowHeights[icon]] + y) * 4, 0, texS, texT, step, step);
                         }
                         x -= 18;
                     } while (--n > 0);
@@ -1267,7 +1267,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         }
     }
 
-    if ((D_8008FDC0 & 0x80) && gRacers != NULL) {
+    if ((gMatchHudFlags & 0x80) && gRacers != NULL) {
         lapCount = gSettings[7];
         for (i = 0; i <= gScreenLayout; i++) {
             rowY = (s32)gViews[i].top + 5;
@@ -1286,7 +1286,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         }
     }
 
-    if (gPauseRequested == 0 && (D_8008FDC0 & 0x1000)) {
+    if (gPauseRequested == 0 && (gMatchHudFlags & 0x1000)) {
         s32 shift;
         s32 size;
         f32 scale;
@@ -1296,7 +1296,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         i = 0;
         x = (s32)gViews->right - scaled[32];
         x *= 4;
-        if (D_8008FE1C != 1.0f) {
+        if (gHudScaleX != 1.0f) {
             shift = 6;
             scale *= 1.56f;
             size = 99;
@@ -1304,7 +1304,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
             shift = 4;
             size = 64;
         }
-        k = (D_8008FDBC & 0x40) ? (s32)&D_CF2 : (s32)&D_CF1;
+        k = (gMatchFlags & 0x40) ? (s32)&D_CF2 : (s32)&D_CF1;
         vpRight = texture_getAddress(k, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, vpRight);
         gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
@@ -1314,7 +1314,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 63 << G_TEXTURE_IMAGE_FRAC, 63 << G_TEXTURE_IMAGE_FRAC);
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
-        for (i = 0; i < D_8008FD90; i++) {
+        for (i = 0; i < gHumanCount; i++) {
             if (player_getStat(i, 3) > 0) {
                 rowY = scaled[21] + ((s32)gViews[i].top + scaled[24]);
                 rowY *= 4;
@@ -1327,11 +1327,11 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
                 for (k = 0, player = movement_obj; k != 25; k++, player++) {
-                    if (k == i || (k < D_8008FD8C && player_getStat(k, 3) > 0) || player->unk328 != 0) {
+                    if (k == i || (k < gPlayerCount && player_getStat(k, 3) > 0) || player->unk328 != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
-                        } else if (k < D_8008FD8C) {
+                        } else if (k < gPlayerCount) {
                             gDPSetEnvColor(gfx++, 255, 0, 0, 255);
                         } else {
                             gDPSetEnvColor(gfx++, 255, 255, 255, 255);
@@ -1346,7 +1346,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
             }
         }
     }
-    if (gPauseRequested == 0 && (D_8008FDC0 & 0x20)) {
+    if (gPauseRequested == 0 && (gMatchHudFlags & 0x20)) {
         gfx = hud_drawRadar(gfx, step, scaled, 0x2C30, 0);
     }
     return gfx;
@@ -1435,15 +1435,15 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     } else {
         zoom = 1.0f;
     }
-    if (D_8008FD90 == 1) {
+    if (gHumanCount == 1) {
         scale = 0.02025f;
         radiusSq = 7744.0f;
         dotStep = (step * 2) / 3;
         radius = scaled[24];
     }
-    scale *= D_8008FE1C;
-    dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
-    radiusSq *= D_8008FE1C;
+    scale *= gHudScaleX;
+    dotSize = (gHudScaleX == 1.0f) ? 4 : 6;
+    radiusSq *= gHudScaleX;
     tex = texture_getAddress((s32)(&D_CF2 + 1), 0, 3, 0);
     if (tex == 0x80000000) {
         return gfx;
@@ -1457,7 +1457,7 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
     gDPSetOtherMode(gfx++, renderMode | 0xF, 0x00504244);
 
-    for (i = 0; i < D_8008FD90; i++) {
+    for (i = 0; i < gHumanCount; i++) {
         if (player_getStat(i, 3) > 0) {
             s32 halfSize;
             s32 dsdx;
@@ -1534,7 +1534,7 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 if (other->type != 0) {
                     if (other->unk328 != 0) {
                         color = other->unk328 - 1;
-                        if (j < D_8008FD8C) {
+                        if (j < gPlayerCount) {
                             if (player_getStat(j, 3) <= 0) {
                                 color = -1;
                             } else if (player_getStat(j, 4) <= 0) {
@@ -1550,9 +1550,9 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                         if (color != -1) {
                             dx = (other->xpos - px) * scale;
                             dz = (other->zpos - pz) * scale;
-                            // matching: the tripled index plus a row-0 pointer, not D_800AB62C[color]
+                            // matching: the tripled index plus a row-0 pointer, not gTeamColorsRGB[color]
                             color = color + color + color;
-                            rgb = D_800AB62C[0] + color;
+                            rgb = gTeamColorsRGB[0] + color;
                             if (dx * dx + dz * dz < radiusSq) {
                                 gDPPipeSync(gfx++);
                                 gDPSetEnvColor(gfx++, rgb[0], rgb[1], rgb[2], 255);

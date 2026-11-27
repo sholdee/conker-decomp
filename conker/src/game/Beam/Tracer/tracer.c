@@ -127,7 +127,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
     bone = (void *)&effect->target_z;
     texture = 0x23;
     dist = 0.0f;
-    effect->lifetime -= D_800BE9E4;
+    effect->lifetime -= gFrameTicks;
     if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->animseq.uh != effect->ownerTag)) {
         effect_destroyObject(&effect->header);
         return;
@@ -143,7 +143,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
         } else {
             effect->attachDelay--;
         }
-        effect->timer -= D_800BE9E4;
+        effect->timer -= gFrameTicks;
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId) {
@@ -250,7 +250,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
         effect->dx = vx;
         effect->dy = vy;
         effect->dz = vz;
-        len = effect->speed * D_800BE9E4;
+        len = effect->speed * gFrameTicks;
         if (dist < len && effect->stopDist != 0.0f) {
             vx *= dist;
             vy *= dist;

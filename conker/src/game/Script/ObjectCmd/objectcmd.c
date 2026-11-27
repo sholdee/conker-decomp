@@ -334,7 +334,7 @@ s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd) {
     return 0;
 }
 
-s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_soundQuery(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
@@ -464,11 +464,11 @@ void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, 
     sound_setVoiceSpatial(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
-s32 func_1509F800(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_emptyQuery12(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-s32 func_1509F818(s32 arg0, s32 arg1, s32 arg2) {
+s32 script_trapCommand12(s32 arg0, s32 arg1, s32 arg2) {
     debug_fatalTrap();
     return 0;
 }

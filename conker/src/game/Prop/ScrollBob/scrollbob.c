@@ -72,6 +72,6 @@ void prop_bob(WorldObject *obj) {
     speed = (obj->moveData.word >> 16) & 0xFFFF;
     offset = cosf(WORK(obj)->phase * (360.0f / 65536.0f)) * amplitude;
     obj->yOffset = offset;
-    WORK(obj)->phase += speed * D_800BE9E4;
+    WORK(obj)->phase += speed * gFrameTicks;
     obj->moveY = (obj->y + offset) - prevY;
 }

@@ -48,7 +48,7 @@ glabel boot_initPaging
     /* 5B30 10005B30 A429BE82 */  sh         $t1, %lo(D_8003BE82)($at)
     /* 5B34 10005B34 3C108004 */  lui        $s0, %hi(gPagePoolCount)
     /* 5B38 10005B38 8610BE78 */  lh         $s0, %lo(gPagePoolCount)($s0)
-  glabel func_10005B3C
+  glabel boot_allocPagePool
     /* 5B3C 10005B3C 3C018004 */  lui        $at, %hi(gPagePoolCount)
     /* 5B40 10005B40 A424BE78 */  sh         $a0, %lo(gPagePoolCount)($at)
     /* 5B44 10005B44 00042300 */  sll        $a0, $a0, 12
@@ -60,7 +60,7 @@ glabel boot_initPaging
     /* 5B5C 10005B5C AFA80010 */   sw        $t0, 0x10($sp)
     /* 5B60 10005B60 14400003 */  bnez       $v0, .L10005B70
     /* 5B64 10005B64 00000000 */   nop
-    /* 5B68 10005B68 080016CF */  j          func_10005B3C
+    /* 5B68 10005B68 080016CF */  j          boot_allocPagePool
     /* 5B6C 10005B6C 02002025 */   or        $a0, $s0, $zero
   .L10005B70:
     /* 5B70 10005B70 3C080FFF */  lui        $t0, (0xFFFFFFF >> 16)

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-static s16 D_800C3EF0; // the last channel level that bone_addLevelCommands wrote; bone_lowerBones lowers bones by it
+static s16 gBoneLastChannelLevel; // the last channel level that bone_addLevelCommands wrote; bone_lowerBones lowers bones by it
 
 /*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
@@ -59,7 +59,7 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
             cmd->value = value;
             cmd++;
         }
-        D_800C3EF0 = value;
+        gBoneLastChannelLevel = value;
         value = (s16)((actor->unk202 * actor->level) / 255 * 65535.0f * (1.0f / 255));
         if (!skipChannel) {
             // matching: maxStep doubles as the second opcode offset; a separate local changes regalloc
@@ -92,8 +92,8 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
         sum = (sum < 0) ? 0 : ((sum >= 0x100) ? 0xFF : sum);
         actor->level = sum;
         if (actor->levelMode == 3) {
-            if (actor->levelTimer >= D_800BE9E4) {
-                actor->levelTimer -= D_800BE9E4;
+            if (actor->levelTimer >= gFrameTicks) {
+                actor->levelTimer -= gFrameTicks;
             } else {
                 actor->levelTimer = 0;
                 actor->levelMode = 0;
@@ -173,8 +173,8 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
             }
         }
         if (actor->level2Mode == 3) {
-            if (actor->level2Timer >= D_800BE9E4) {
-                actor->level2Timer -= D_800BE9E4;
+            if (actor->level2Timer >= gFrameTicks) {
+                actor->level2Timer -= gFrameTicks;
             } else {
                 actor->level2Timer = 0;
                 actor->level2Mode = 0;
@@ -184,7 +184,7 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
     return cmd;
 }
 
-/* Lowers bone `first` (and bone `second`, unless -1) by the last value stored in D_800C3EF0, scaled by the
+/* Lowers bone `first` (and bone `second`, unless -1) by the last value stored in gBoneLastChannelLevel, scaled by the
    actor's scale_xz: subtracts it from the y translation of the bone matrix. */
 void bone_lowerBones(Actor *actor, s32 first, s32 second) {
     f32 amount;
@@ -192,9 +192,9 @@ void bone_lowerBones(Actor *actor, s32 first, s32 second) {
     MtxF *bone2;
     MtxF *bones;
 
-    if (D_800C3EF0 != 0) {
+    if (gBoneLastChannelLevel != 0) {
         bones = actor->ob_matrix_ptr;
-        amount = (D_800C3EF0 * 0.0007629627362f) * actor->scale_xz;
+        amount = (gBoneLastChannelLevel * 0.0007629627362f) * actor->scale_xz;
         bone = &bones[first];
         (*bone)[3][1] -= amount;
         if (second != -1) {

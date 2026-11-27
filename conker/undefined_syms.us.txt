@@ -13,8 +13,8 @@ osRomBase = 0x80000308;
 
 /* local labels referenced across the hasm/C split boundaries */
 
-/* second names of game_79F10.c's D_800CC280 and D_800CC2BC (see the comment there) */
-D_800cc280 = D_800CC280;
+/* second names of game_79F10.c's gCameraYawAngle and D_800CC2BC (see the comment there) */
+D_800cc280 = gCameraYawAngle;
 D_800cc2bc = D_800CC2BC;
 
 

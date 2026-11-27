@@ -43,7 +43,7 @@ void effect_swingVertices(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32
         verts[vtxIndices[i + count]].v.ob[0] = x;
         verts[vtxIndices[i + count]].v.ob[1] = y;
     }
-    *angle += speed * D_800BE9E4;
+    *angle += speed * gFrameTicks;
     if (maxAngle <= *angle) {
         *velocity = -speed;
         *angle = maxAngle;

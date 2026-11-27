@@ -53,7 +53,7 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
         return;
     }
     i = gScreenLayout; // matching: dead store makes uopt color the loop bound before the timer reload
-    emitter->idleTimer -= D_800BE9E4;
+    emitter->idleTimer -= gFrameTicks;
     if (emitter->idleTimer < 0) {
         emitter->idleTimer += 50;
         found = FALSE;

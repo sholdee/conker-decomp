@@ -763,8 +763,8 @@ void func_150F1A00(Actor *actor);
 GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
 void func_150F1CB0(Actor *actor);
 void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2);
-void func_150F20F0(s32 index);
-void func_150F2230(Actor *actor, s32 arg1, s32 arg2);
+void beam_levelUpdateRandomSounds(s32 index);
+void beam_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2);
 
 /* game/Beam/ModelBeam/modelbeam.c */
 void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);

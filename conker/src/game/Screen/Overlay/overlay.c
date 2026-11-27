@@ -31,7 +31,7 @@ void screen_updateOverlay(ScreenOverlay *overlay) {
     s32 speed;
 
     // matching: assigning speed inside the expression schedules its lb before the timer's lh
-    overlay->header.state += D_800BE9E4 * (speed = overlay->speed);
+    overlay->header.state += gFrameTicks * (speed = overlay->speed);
 
     if (speed > 0 && overlay->header.state >= 237) {
         overlay->alpha = (296 - overlay->header.state) << 2;

@@ -14,8 +14,8 @@ u8 D_8008CD00 = 0;
 /* Per-level update hooks, indexed by the level header's updateCallback (0: none). */
 static void (*gLevelUpdateHooks[])(s32) = {
     NULL,
-    func_150D82B0,
-    func_150BEF70,
+    attach_emptyLevelUpdateHook1,
+    prop_emptyLevelUpdateHook2,
     effect_levelUpdateDistantTracers,
     effect_levelUpdateRain,
     sprite_runQueuedCommand,
@@ -26,7 +26,7 @@ static void (*gLevelUpdateHooks[])(s32) = {
     effect_levelUpdateFlagLights,
     func_150DE320,
     NULL,
-    func_1510AA20,
+    prop_levelUpdateRainOnly,
     effect_playRandomZoneSounds,
     effect_levelUpdateSoundCooldowns,
     effect_levelUpdateSprayCooldowns,
@@ -38,7 +38,7 @@ static void (*gLevelUpdateHooks[])(s32) = {
     func_150F2A60,
     func_150B003C,
     effect_advanceTexAnimClock,
-    func_150F20F0,
+    beam_levelUpdateRandomSounds,
     effect_updateSurfaceSound,
     NULL,
 };
@@ -55,7 +55,7 @@ static Gfx *(*gLevelDrawHooks2[5])(Gfx *, s32) = { NULL, NULL, NULL, NULL, NULL 
 }
 
 void effect_advanceLevelTexFrame(s32 arg0, s32 arg1) {
-    gLevelTexFrameTime += D_800BE9E4;
+    gLevelTexFrameTime += gFrameTicks;
     if (arg0 < gLevelTexFrameTime) {
         gLevelTexFrame++;
         if (gLevelTexFrame >= arg1) {
@@ -79,7 +79,7 @@ void effect_updateLevel(s32 arg0, s32 arg1) {
         sprite_updateLevelSprites();
         effect_updateColorAnims();
     }
-    gTextAnimClock += D_800BE9E4 << 6;
+    gTextAnimClock += gFrameTicks << 6;
 }
 
 Gfx *effect_drawLevelHook1(Gfx *gfx, s32 arg1, s32 arg2) {

@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-u8 D_800DCDD0;
+u8 gDaylight;
 
 #include "functions.h"
 #include "variables.h"
@@ -123,7 +123,7 @@ void light_updateEffect(LightEffect *effect) {
     u8 done = FALSE;
 
     if (effect->flags & 1) {
-        effect->lifetime -= D_800BE9E4;
+        effect->lifetime -= gFrameTicks;
         if (effect->lifetime < 0) {
             done = TRUE;
         }
@@ -1211,7 +1211,7 @@ s32 light_updateLightning(LightEffect *effect) {
     effect->light->radius = storm->level;
     {
         s32 i;
-        for (i = D_800BE9E4; i != 0; i--) {
+        for (i = gFrameTicks; i != 0; i--) {
             storm->level -= storm->level * storm->decay;
         }
     }
@@ -1679,8 +1679,8 @@ void light_placeSwing(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX,
 }
 
 /* Turns the special lighting for the current level setting on or off, setting the colours in gAmbientColour and D_800B0DF0. */
-void func_151645C4(u8 enable) {
-    D_800DCDD0 = enable;
+void light_setDaylight(u8 enable) {
+    gDaylight = enable;
     if (enable) {
         switch (level) {
         case 11:

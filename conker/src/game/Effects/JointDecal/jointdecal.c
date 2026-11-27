@@ -153,7 +153,7 @@ s32 effect_dampJointSparkXZ(SparkParticle *particle, s32 arg1) {
     f32 *damping; // matching: reading particle->damping directly changes the loop code
 
     damping = &particle->damping;
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         particle->head.desc.vel.x *= *damping;
         particle->head.desc.vel.z *= *damping;
     }

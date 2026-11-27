@@ -7,7 +7,7 @@ void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *p
                    u8 arg9, u8 owner, s32 kind);
 
 
-void func_150D82B0(s32 arg0) {
+void attach_emptyLevelUpdateHook1(s32 arg0) {
 }
 
 
@@ -67,7 +67,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 1:
-            att->hookState2 += D_800BE9E4;
+            att->hookState2 += gFrameTicks;
             if (att->hookState2 >= 100) {
                 att->hookState2 = 100;
                 att->hookState = 2;
@@ -79,7 +79,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 3:
-            att->hookState2 -= D_800BE9E4 * 4;
+            att->hookState2 -= gFrameTicks * 4;
             if (att->hookState2 <= 0) {
                 att->hookState2 = 0;
                 att->hookState = 4;

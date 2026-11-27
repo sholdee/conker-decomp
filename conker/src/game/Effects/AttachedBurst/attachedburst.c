@@ -5,7 +5,7 @@
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
    checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
-void func_150AE5B0(Camera *arg0) {
+void effect_levelHook02(Camera *arg0) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
             if (camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
@@ -220,12 +220,12 @@ void effect_spawnAttachedBursts(Actor *actor) {
 /* Accelerates unk96 by unk94 per elapsed frame (capped at 0x1400), moves unk9E down by unk96 / 256,
    and counts unkA4 up to 25. */
 void func_150AECCC(struct42 *arg0) {
-    arg0->unk96 += arg0->unk94 * D_800BE9E4;
+    arg0->unk96 += arg0->unk94 * gFrameTicks;
     if (arg0->unk96 > 0x1400) {
         arg0->unk96 = 0x1400;
     }
     arg0->unk9E -= arg0->unk96 >> 8;
-    arg0->unkA4 += D_800BE9E4;
+    arg0->unkA4 += gFrameTicks;
     if (arg0->unkA4 > 25) {
         arg0->unkA4 = 25;
     }
@@ -234,7 +234,7 @@ void func_150AECCC(struct42 *arg0) {
 /* Particle callback 11 (gParticleCallbacks[11]): grows the billboard square by tmpl.unk4 per elapsed frame up to the
    size tmpl.unk1A, then starts its fade (fadeStep 70). */
 void effect_growBillboard(BillboardParticle *p) {
-    p->tmpl.width += p->tmpl.unk4 * D_800BE9E4;
+    p->tmpl.width += p->tmpl.unk4 * gFrameTicks;
     if (p->tmpl.unk1A < p->tmpl.width) {
         p->tmpl.fadeStep = 70;
         p->tmpl.width = p->tmpl.unk1A;

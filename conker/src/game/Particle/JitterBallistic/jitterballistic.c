@@ -25,7 +25,7 @@ void particle_moveJitterBallistic(JitterParticle *p) {
 
     motion = &p->jitter;
     oldVel = motion->velocity;
-    for (ticks = D_800BE9E4; ticks != 0; ticks--) {
+    for (ticks = gFrameTicks; ticks != 0; ticks--) {
         motion->velocity.x *= motion->drag;
         motion->velocity.y *= motion->drag;
         motion->velocity.z *= motion->drag;

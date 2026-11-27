@@ -41,8 +41,8 @@ void face_updateBlink(Actor *actor) {
             actor->eyeClosed[1] = 0;
         }
         // matching: the dead `== 1U` makes IDO load the constant 1 (later stored) in this block
-        if ((actor->blinkTimer >= D_800BE9E4) | (0 * (actor->blinkTimer == 1U))) {
-            actor->blinkTimer -= D_800BE9E4;
+        if ((actor->blinkTimer >= gFrameTicks) | (0 * (actor->blinkTimer == 1U))) {
+            actor->blinkTimer -= gFrameTicks;
             return;
         }
         actor->blinkTimer = 0;
@@ -186,8 +186,8 @@ void face_update(Actor *actor) {
                 return;
             }
             if (timer != 0xFFFF) {
-                if (D_800BE9E4 < timer) {
-                    actor->expressionTimer = timer - D_800BE9E4;
+                if (gFrameTicks < timer) {
+                    actor->expressionTimer = timer - gFrameTicks;
                 } else {
                     actor->expressionTimer = 0;
                 }

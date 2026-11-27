@@ -11,7 +11,7 @@ EffectHeader *gLevelSprayEffects[4];
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the two behaviours here: the pendulum's push phase
- * (prop_swingPendulum) and the texture scroll state (func_150C4E9C).
+ * (prop_swingPendulum) and the texture scroll state (prop_rampTextureScroll).
  */
 typedef union {
     struct {
@@ -41,7 +41,7 @@ void prop_swingPendulum(WorldObject *pendulum) {
         angle -= 360.0f;
     }
     phase = WORK(pendulum)->pendulum.phase;
-    phase += D_800BE9E4;
+    phase += gFrameTicks;
     velocity -= angle * 0.009f;
     if (phase >= 256.0f) {
         phase -= 256.0f;
@@ -63,7 +63,7 @@ void prop_swingPendulum(WorldObject *pendulum) {
     }
 }
 
-/* Per-object state of func_150C4E9C, allocated on first use. */
+/* Per-object state of prop_rampTextureScroll, allocated on first use. */
 typedef struct ScrollState {
     /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from prop_findSetTimg
     /* 0x04 */ s16 startT;        // vertex 0's initial t texture coordinate
@@ -78,7 +78,7 @@ typedef struct ScrollState {
  * with the start position again. Binds texture 0x2C1 (modes 0, 2) or 0x1C0 (modes 1, 3) to segment 4 and,
  * when the dl has a second G_SETTIMG, the texture's last 0x200 bytes to segment 5.
  */
-void func_150C4E9C(WorldObject *obj) {
+void prop_rampTextureScroll(WorldObject *obj) {
     s32 texture;
     s32 size;
     s32 addr;
@@ -108,7 +108,7 @@ void func_150C4E9C(WorldObject *obj) {
         scroll->unkC = 0.0f;
     } else if (mode == TASK_FLAG_GOING_ON) {
         if (scroll->speed < 300.0f) {
-            scroll->speed += 25.0f * D_800BE9E4;
+            scroll->speed += 25.0f * gFrameTicks;
         } else {
             scroll->speed = 300.0f;
         }
@@ -117,7 +117,7 @@ void func_150C4E9C(WorldObject *obj) {
         s32 startT;
 
         if (scroll->speed > 100.0f) {
-            scroll->speed -= 25.0f * D_800BE9E4;
+            scroll->speed -= 25.0f * gFrameTicks;
         } else {
             scroll->speed = 100.0f;
             t = obj->vertices[gDrawBufferIndex]->v.tc[1] % 1024;
@@ -176,12 +176,12 @@ s32 func_150C5280(void) {
     return FALSE;
 }
 
-/* Update callback (D_8008ADA8[4]): runs D_8008ADA8[0] unless func_150C5280 holds. */
+/* Update callback (gModelEffectUpdate2FuncsTail[4]): runs gModelEffectUpdate2FuncsTail[0] unless func_150C5280 holds. */
 s32 func_150C52CC(void *fx) {
     if (func_150C5280()) {
         return FALSE;
     }
-    return D_8008ADA8[0](fx);
+    return gModelEffectUpdate2FuncsTail[0](fx);
 }
 
 /* Callback (table at 0x80089910): sets flags bit 0x20000 while func_150C5280 holds, clears it otherwise. */

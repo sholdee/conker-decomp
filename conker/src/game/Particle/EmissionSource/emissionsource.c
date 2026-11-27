@@ -460,7 +460,7 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) 
         return NULL;
     }
 
-    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 0, 1);
+    camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 0, 1);
 
     event.flags = 1;
     event.duration = (math_random() % 11) + 30;
@@ -754,7 +754,7 @@ void particle_fireShake() {
     RumbleParams event;
 
     effect_sendEventToTypes(ids, 2, 0, 0x1B);
-    camera_startWobblePreset(0, D_800BE9E8, NULL, 0xFF, 1);
+    camera_startWobblePreset(0, gLastPlayerIndex, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (math_random() % 21) + 20;
     event.playerMask = 1;
@@ -813,7 +813,7 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
     f32 dz;
 
     dataPtr = &data; // matching: using &data directly at each use does not match
-    center = math_getCameraPos(D_800BE9E8);
+    center = math_getCameraPos(gLastPlayerIndex);
     spawner = &effect->spawner;
     spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * gDustRegionsArea;
     if (spawner->accum > 1.0f) {
@@ -970,7 +970,7 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
     f32 dy;
     f32 dz;
 
-    center = math_getCameraPos(D_800BE9E8);
+    center = math_getCameraPos(gLastPlayerIndex);
     spawner = &effect->spawner;
     spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * gDustRegionsArea;
     if (spawner->accum > 1.0f) {

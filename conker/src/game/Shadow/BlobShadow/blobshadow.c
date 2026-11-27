@@ -33,7 +33,7 @@ struct Shadow {
     /* 0x118 */ f32 z;
     /* 0x11C */ f32 floorY;
     /* 0x120 */ u8 ownerType;      /* 0 or 1: selects how owner is read */
-    /* 0x121 */ u8 texture;        /* index into D_80091770 */
+    /* 0x121 */ u8 texture;        /* index into gBlobShadowTextures */
     /* 0x122 */ u8 alpha;
     /* 0x123 */ u8 visible;
     /* 0x124 */ u8 flags;
@@ -170,7 +170,7 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
         if (shadow->flags & 1) {
             alpha = shadow->alpha;
             if (alpha != 0xFF) {
-                alpha += D_800BE9E4 * 5;
+                alpha += gFrameTicks * 5;
                 if (alpha >= 0x100) {
                     alpha = 0xFF;
                 }
@@ -243,7 +243,7 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
         gSPMatrix(gfx++, &shadow->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (gCachedTexture != shadow->texture) {
             (&gCachedTextureId)[1] = shadow->texture; // matching: gCachedTexture through another symbol keeps the split %hi/%lo
-            tex = texture_getAddress(D_80091770[shadow->texture], 0, 0x3E, 0);
+            tex = texture_getAddress(gBlobShadowTextures[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);

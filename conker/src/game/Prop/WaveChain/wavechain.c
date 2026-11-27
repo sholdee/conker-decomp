@@ -92,7 +92,7 @@ void prop_updateWaveChains(void) {
             } else if (!falling) {
                 // matching: the duplicated test is in the original (it emits a second lbu/beqz)
                 if (gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer != 0 && gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer != 0) {
-                    gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer -= D_800BE9E4;
+                    gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer -= gFrameTicks;
                 }
             }
         }

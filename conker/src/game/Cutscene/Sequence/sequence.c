@@ -65,7 +65,7 @@ f32 gCutsceneAnchorHeading;
 s16 gNextCutsceneAnchorPos[3];
 f32 gNextCutsceneAnchorHeading;
 f32 gCutsceneAnchorTurn;
-u8 D_800C35A8;
+u8 gLastCutsceneLevel;
 u8 D_800C35A9;
 u8 gCutsceneKeepPlayer;
 s32 gCutsceneTimes[2]; // per scene: current time
@@ -84,32 +84,32 @@ u8 gCutsceneStates[2]; // per cutscene scene slot (0/1): cutscene state, 1 = pla
 SeqTrackInfo *gSeqTrackInfos[2]; // per scene: what each track drives
 u8 gSeqCameraTrack;
 CamShot gCamShot; // scripted camera shot
-u8 D_800C3638;
+u8 gCutsceneActorLock;
 u8 gSeqTrackCounts[2]; /* track count */
 s32 gCutsceneEndTimes[2]; /* end time */
 f32 gViewFovOffset; // added to both FOVs of every view
 f32 gNearPlaneOverride; // near-plane override when non-zero
 f32 gFarPlaneOverride; // far-plane override when non-zero
-u8 D_800C3654[2];
-u8 D_800C3656[2];
-u8 D_800C3658[2];
+u8 gCutsceneUpdateUnboundActors[2];
+u8 gCutsceneShowUnboundActors[2];
+u8 gCutsceneShowUnboundObjects[2];
 u8 gCutsceneKeepSpawnedActors[2];
 u8 D_800C365C[2];
-u8 D_800C365E[2];
+u8 gCutsceneRunTimedEvents[2];
 u8 D_800C3660[2];
 u8 gCutsceneHideWorld;
 u8 gCutsceneAnchorSet;
 SeqFileEntry *gCutsceneFiles[2];
-u8 D_800C3670;
-u8 D_800C3671;
+u8 gCutsceneIgnorePlayed;
+u8 gSpawnCutsceneActive;
 u8 gCutsceneSkipped;
 f32 gCutsceneCutbackAngle;
 f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 s32 gCutsceneEndTransitionTime;
 u8 D_800C3680;
 u8 gCutsceneHideSky;
-u8 D_800C3682;
-u8 D_800C3683;
+u8 gCutsceneSolidSky;
+u8 gCutsceneNoPause;
 SeqEvent *gSeqEventTracks[2][30]; // cutscene script event tracks per scene
 SeqChannelKey *gSeqChannelKeys[2][30];
 SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
@@ -132,7 +132,7 @@ u8 gCutsceneChained;
 u16 gSeqEventQueueSize;
 u8 gCutsceneNoSkip;
 u8 gCutsceneChainBobScale;
-s16 D_800C3C9E;
+s16 gCutsceneCashOffset;
 SeqSubtitle gSubtitles[3];
 u8 D_800C3D48[8]; // not referenced, but cutscene_closeSubtitles stops at its address: the end of gSubtitles
 struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
@@ -199,9 +199,9 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
     if (swapBuffers != 0) {
         gCurGfxTask->flags |= 0x40;
     }
-    if (D_800BE617 != 0) {
+    if (gViewLayoutChanged != 0) {
         gCurGfxTask->flags |= (gScreenLayout + 1) << 16;
-        D_800BE617 = 0;
+        gViewLayoutChanged = 0;
     }
     gCurGfxTask->msgQ = &gGameMesgQueue;
     gCurGfxTask->msg = &gTaskDoneMsgs[gDrawBufferIndex];
@@ -362,14 +362,14 @@ void cutscene_resetScene(s32 scene) {
     gViewFovOffset = 0.0f;
     gNearPlaneOverride = 0.0f;
     gFarPlaneOverride = 0.0f;
-    D_800C3654[scene] = 0;
-    D_800C3656[scene] = 0;
-    D_800C3658[scene] = 1;
+    gCutsceneUpdateUnboundActors[scene] = 0;
+    gCutsceneShowUnboundActors[scene] = 0;
+    gCutsceneShowUnboundObjects[scene] = 1;
     gCutsceneKeepSpawnedActors[scene] = 0;
     D_800C365C[scene] = 0;
-    D_800C365E[scene] = 0;
+    gCutsceneRunTimedEvents[scene] = 0;
     D_800C3660[scene] = 0;
-    D_800C3638 = 0;
+    gCutsceneActorLock = 0;
     gCutsceneHideWorld = 0;
     gCutsceneHoldEnd = 0;
     D_800C3C8D = 0;
@@ -384,10 +384,10 @@ void cutscene_resetScene(s32 scene) {
     D_800C3680 = 0;
     gCutsceneSkipped = 0;
     gCutsceneChainBobScale = 100;
-    D_800C3C9E = -1;
+    gCutsceneCashOffset = -1;
     cutscene_freeSubtitles();
     D_8008FD84[0] = 0;
-    D_800C3670 = 0;
+    gCutsceneIgnorePlayed = 0;
 }
 
 /* Load cutscene `cutscene` of map `map` into gCutsceneFiles[scene]; returns the file (0 if missing). */
@@ -406,16 +406,16 @@ SeqFileEntry *cutscene_loadFile(s32 map, s32 cutscene, s32 scene) {
     return file;
 }
 
-/* Flag cutscene `cutscene` of map `map` as played (unless D_800C3670 is set). */
+/* Flag cutscene `cutscene` of map `map` as played (unless gCutsceneIgnorePlayed is set). */
 void cutscene_setPlayed(s32 map, s32 cutscene) {
-    if (!D_800C3670) {
+    if (!gCutsceneIgnorePlayed) {
         gPlayedCutscenes[map] |= (1LL << cutscene);
     }
 }
 
-/* Whether cutscene `cutscene` of map `map` has been played; always true while D_800C3670 is set. */
+/* Whether cutscene `cutscene` of map `map` has been played; always true while gCutsceneIgnorePlayed is set. */
 s32 cutscene_isPlayed(s32 map, s32 cutscene) {
-    if (D_800C3670 != 0) {
+    if (gCutsceneIgnorePlayed != 0) {
         return 1;
     }
     if ((gPlayedCutscenes[map] & (1ULL << cutscene)) != 0) {
@@ -454,7 +454,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
         }
         gCutsceneIds[scene] = cutscene;
         if (state != 2) {
-            D_800C35A8 = level;
+            gLastCutsceneLevel = level;
             gLastCutscene = cutscene;
         }
         cutscene_resetScene(scene);
@@ -533,7 +533,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
             }
             cutscene_emptyStartHook();
             gCutsceneStates[scene] = 1;
-            D_800C3638 = 1;
+            gCutsceneActorLock = 1;
             cutscene_resetSpawnedActors(scene);
             cutscene_resetActivatedActors(scene);
             if (gSeqTrackCounts[scene] == 0) {
@@ -891,11 +891,11 @@ void cutscene_finish(s32 skipped, s32 scene) {
         gCutsceneTimes[scene] = gCutsceneStartTime;
         cutscene_setPlayed(level, gCutsceneIds[scene]);
         gCutsceneStates[scene] = 0;
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         cutscene_resetBoundFaces(scene);
         cutscene_closeSubtitles();
         gCutsceneHideWorld = 0;
-        D_800C3683 = 0;
+        gCutsceneNoPause = 0;
         cutscene_releasePlayer(scene);
         cutscene_restoreControl(scene);
         cutscene_freeScene(scene);
@@ -914,7 +914,7 @@ void cutscene_finish(s32 skipped, s32 scene) {
                 level = 0x25;
                 map = 0x25;
             }
-            D_800C3671 = 0;
+            gSpawnCutsceneActive = 0;
             cutscene_start(map, gNextCutscene - 1, scene, gCutsceneCallback, gCutsceneCallbackArg);
             if (0x25 == gNextCutsceneMap) {
                 level = savedMap;
@@ -925,8 +925,8 @@ void cutscene_finish(s32 skipped, s32 scene) {
             screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
         }
         D_8008FD84[0] = 0;
-        D_800C3670 = 0;
-        D_800C3671 = 0;
+        gCutsceneIgnorePlayed = 0;
+        gSpawnCutsceneActive = 0;
     }
 }
 
@@ -946,7 +946,7 @@ void cutscene_restoreControl(s32 scene) {
     gCamShot.at.angles.sway = 0.0f;
     gCamShot.at.angles.pitch = player->CameraPitch;
     gCamShot.at.angles.yaw = player->CameraAngle;
-    if (D_800C3671 == 0) {
+    if (gSpawnCutsceneActive == 0) {
         camera_queueMessage(player, 7, &gCamShot);
         if (gCutsceneCutbackAngle != 999.0f) {
             gCamShot.yaw = gCutsceneCutbackAngle;
@@ -958,7 +958,7 @@ void cutscene_restoreControl(s32 scene) {
             camera_queueMessage(player, 10, &gCamShot);
         }
     }
-    if (gNextCutscene == 0 && D_800C3671 == 0) {
+    if (gNextCutscene == 0 && gSpawnCutsceneActive == 0) {
         if (D_800C3680 == 0) {
             camera_queueMessage(player, 6, (void *)scene);
         } else {
@@ -1017,7 +1017,7 @@ void cutscene_evalTracks(s32 scene) {
 
     // matching: indexing through &gCutsceneStates[0] rather than the array changes register allocation
     if ((&gCutsceneStates[0])[scene] == 1) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         for (track = 0; track < gSeqTrackCounts[scene]; track++) {
             if (gSeqPathKeyCounts[scene][track] != 0) {
                 gSeqTrackStates[scene][track].x = gSeqPathKeys[scene][track]->x;
@@ -1222,7 +1222,7 @@ void cutscene_evalTracks(s32 scene) {
                               &gSeqTrackStates[scene][track].z, scene);
             }
         }
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
     }
 }
 
@@ -1578,7 +1578,7 @@ void cutscene_applyTracks(s32 scene) {
 
     // matching: indexing through &gCutsceneStates[0] rather than the array changes register allocation
     if ((&gCutsceneStates[0])[scene] == 1) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         if (gSeqCameraTrack == 0xFF) {
             gSeqCameraTrack = cutscene_pickCameraTrack(scene, gCutsceneTimes[scene]);
         }
@@ -1603,7 +1603,7 @@ void cutscene_applyTracks(s32 scene) {
                         continue;
                     }
                     if (!(player->Mode & 0x40000)) {
-                        if (D_800C3671 == 0) {
+                        if (gSpawnCutsceneActive == 0) {
                             camera_queueMessage(player, 5, (void *)scene);
                         }
                         camera_processMessages(player);
@@ -1682,7 +1682,7 @@ void cutscene_applyTracks(s32 scene) {
                         gCamShot.unk2C = tilt3C;
                         gCamShot.unk30 = tilt40;
                     }
-                    if (D_800C3671 == 0) {
+                    if (gSpawnCutsceneActive == 0) {
                         camera_queueMessage(player, 7, &gCamShot);
                     }
                 } else if (ENT(scene, track)->type == 3) {
@@ -1734,12 +1734,12 @@ void cutscene_applyTracks(s32 scene) {
                 }
             }
         }
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
     }
 }
 
 
-// matching: ((u8 *)&D_800D35E0)[-4] is gCurrentActorSlot; a distinct base keeps IDO from reusing the hoisted address
+// matching: ((u8 *)&gFrustumSlopeX)[-4] is gCurrentActorSlot; a distinct base keeps IDO from reusing the hoisted address
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
@@ -1755,7 +1755,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
     s32 rescaled;
 
     if (gCutsceneStates[scene] == 1) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         if (onlyTrack != -1) {
             start = onlyTrack;
             end = onlyTrack + 1;
@@ -1796,7 +1796,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->waterHeight, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);
-                    ((u8 *)&D_800D35E0)[-4] = 0;
+                    ((u8 *)&gFrustumSlopeX)[-4] = 0;
                     obj->floorY = floorY;
                     obj->doing_hit = 0;
                     obj->shad = obj->ypos - obj->floorY;
@@ -1840,7 +1840,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                 }
             }
         }
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
     }
 }
 
@@ -2136,12 +2136,12 @@ void cutscene_spawnTrackActors(s32 scene) {
     s32 track;
 
     if (gCutsceneStates[scene] == 1) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         for (track = 0; track < gSeqTrackCounts[scene]; track++) {
             cutscene_spawnTrackActor(track, scene);
             cutscene_resetTrackFace(track, scene);
         }
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
     }
 }
 
@@ -2530,7 +2530,7 @@ s32 cutscene_releasePlayer(s32 scene) {
     }
 }
 
-/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to actor_updateAll): run
+/* Per-frame update of the cutscene's objects (unless gCutsceneUpdateUnboundActors[0] hands it to actor_updateAll): run
    each live object's handler and apply the track of objects bound to one. */
 void cutscene_updateActors(void) {
     s32 bound;
@@ -2541,7 +2541,7 @@ void cutscene_updateActors(void) {
 
     obj = movement_obj;
     i = 0;
-    if (D_800C3654[0] != 0) {
+    if (gCutsceneUpdateUnboundActors[0] != 0) {
         actor_updateAll();
         return;
     }

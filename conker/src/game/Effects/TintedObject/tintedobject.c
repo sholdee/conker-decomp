@@ -20,7 +20,7 @@ struct TintedObject {
 #define MSG_SET_TINT 0x36
 
 /* Message handler: state 1 or 2 tints the object red, 3 tints it green, anything else clears the tint. */
-void func_150D7420(TintedObject *obj, u8 *state, u8 msg) {
+void effect_handleTintMessageRedFrom1(TintedObject *obj, u8 *state, u8 msg) {
     if (msg == MSG_SET_TINT) {
         switch (*state) {
             case 0:
@@ -49,7 +49,7 @@ void func_150D7420(TintedObject *obj, u8 *state, u8 msg) {
 }
 
 /* Message handler: state 2 tints the object red, 3 tints it green, anything else clears the tint. */
-void func_150D74DC(TintedObject *obj, u8 *state, u8 msg) {
+void effect_handleTintMessageRedFrom2(TintedObject *obj, u8 *state, u8 msg) {
     if (msg == MSG_SET_TINT) {
         switch (*state) {
             case 0:
@@ -75,7 +75,7 @@ void func_150D74DC(TintedObject *obj, u8 *state, u8 msg) {
 }
 
 /* Message handler: state 3 tints the object green, anything else clears the tint. */
-void func_150D758C(TintedObject *obj, u8 *state, u8 msg) {
+void effect_handleTintMessageGreenOnly(TintedObject *obj, u8 *state, u8 msg) {
     if (msg == MSG_SET_TINT) {
         switch (*state) {
             case 0:
@@ -102,7 +102,7 @@ static u16 gTexAnimClock; /* texture animation clock; the high byte is the frame
 /* Advances the texture animation clock by this frame's tick count (unless arg0 is set). */
 void effect_advanceTexAnimClock(s32 arg0) {
     if (arg0 == 0) {
-        gTexAnimClock += D_800BE9E4 << 6;
+        gTexAnimClock += gFrameTicks << 6;
     }
 }
 
@@ -313,7 +313,7 @@ void func_150D7928(Actor *obj) {
             f32 height = obj->floorY + 180.0f;
 
             obj->noshove |= 0x10000;
-            func_15058EA4(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
+            actor_setHoverGravity(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
             if (obj->lifting != 0) {
                 movement_obj[obj->owner].unkCC = 30;
             }

@@ -122,7 +122,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
 }
 
 /* Like weapon_fireAttachedGun, but spawns its shot through effect_spawnProjectile. */
-void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
+void weapon_fireAttachedGunProjectile(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
     Vec3f direction;

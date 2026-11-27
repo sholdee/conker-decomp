@@ -225,7 +225,7 @@ s32 particle_settleWobble(WobbleParticle *particle) {
         wobble->phase += wobble->phaseSpeed * gFrameDelta;
         wobble->phase = math_wrapRadians(wobble->phase);
         particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
-        wobble->timer -= D_800BE9E4;
+        wobble->timer -= gFrameTicks;
     } else {
         particle->unk20 = particle->unk50;
     }
@@ -611,7 +611,7 @@ s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to
             victim->energy = hp - 1;
         } else {
             victim->energy = 0;
-            func_1507DE4C(victim);
+            actor_applyHeadShot(victim);
             blood_spawnFatalHit(victim, 0xFF, 1);
             flags = 0x100020;
         }

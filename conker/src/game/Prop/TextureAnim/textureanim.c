@@ -154,7 +154,7 @@ void prop_animateTexture(WorldObject *obj, s32 *texIndices, s32 *animState) {
 }
 
 /* Runs prop_registerTextureScroll while unk3C is set, then advances the texture animation. */
-void func_1511A6FC(WorldObject *obj) {
+void prop_scrollAndAnimateTexture(WorldObject *obj) {
     if (obj->moveData.word != 0) {
         prop_registerTextureScroll(obj);
     }
@@ -163,7 +163,7 @@ void func_1511A6FC(WorldObject *obj) {
 
 /* When gCutsceneStates is 1 and cutscene_isActorIndexBound accepts this object's index, clears unk7C and unk18;
  * then runs prop_bob and advances the texture animation. */
-void func_1511A738(WorldObject *obj) {
+void prop_bobAndAnimateTexture(WorldObject *obj) {
     if (gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(obj - db_Object_array, 0) != 0) {
         WORK(obj)->unk7C = 0;
         obj->yOffset = 0.0f;

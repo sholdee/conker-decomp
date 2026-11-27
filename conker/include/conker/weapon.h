@@ -113,7 +113,7 @@ void func_150EC45C(void *particle);
 f32 weapon_getAngleDelta(f32 from, f32 to);
 f32 weapon_getAngleToTarget(Actor *self, Actor *target);
 f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius);
-void func_150ED578(Actor *obj);
+void weapon_hideTankInSniperView(Actor *obj);
 void weapon_scrollTreads(Actor *obj, s32 left, s32 right);
 void weapon_updateTank(Actor *obj);
 void weapon_releaseTankCamera(Actor *obj);
@@ -138,7 +138,7 @@ void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f
 /* game/Weapon/AttachedGun/attachedgun.c */
 void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2);
 void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out);
-void func_150FF084(Actor *obj, u8 arg1, s32 arg2);
+void weapon_fireAttachedGunProjectile(Actor *obj, u8 arg1, s32 arg2);
 ModelAttachment *weapon_getGunAttachment(Actor *obj);
 void weapon_getShotAxes(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void weapon_findShotStart(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
@@ -223,7 +223,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
 s8 weapon_updateProjectile(Game1EF500Trail *trail);
 Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index);
 s32 weapon_isOtherLiveObject(Actor *obj, Actor *self);
-s32 func_151C2E94(Actor *obj, Actor *self);
+s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self);
 s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit);
 void weapon_onProjectileExpire(Game1EF500Trail *trail);
@@ -275,7 +275,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
 void weapon_getSide0JointPos(Actor *arg0, s16 arg1, Vec3f *out);
 void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out);
 void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side);
-void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3);
+void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
 void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151C7038(Func151C7038Arg *arg0);

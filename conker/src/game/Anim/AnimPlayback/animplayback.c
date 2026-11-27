@@ -262,7 +262,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
 
     jumped = 0;
     if (obj != NULL) {
-        if ((gCutsceneStates[mode] != 1) || (D_800C365E[mode] != 0)) {
+        if ((gCutsceneStates[mode] != 1) || (gCutsceneRunTimedEvents[mode] != 0)) {
             result = event_runTimedEvents(gCurrentActor, time, 0);
             if (result != 0.0f) {
                 time = result;
@@ -334,7 +334,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
 
     if (anim->unk3C > 0) {
-        anim->unk3C -= anim->unk3A * D_800BE9E4;
+        anim->unk3C -= anim->unk3A * gFrameTicks;
     }
     if (obj != NULL) {
         if (jumped) {
@@ -356,7 +356,7 @@ void anim_advanceObjects(s32 onlyType4) {
         if (obj->type == 0) continue;
         if (obj->task_attrib & 0x200) continue;
         if (onlyType4 && (obj->drawtype != 4)) continue;
-        if (D_800C3638 && (D_800C3654[0] == 0) && (cutscene_isActorBound(obj) == 0)) continue;
+        if (gCutsceneActorLock && (gCutsceneUpdateUnboundActors[0] == 0) && (cutscene_isActorBound(obj) == 0)) continue;
         anim = obj->unk2D0;
         if ((anim != NULL) && obj->activeFlags) {
             anim_advance(anim, obj->speedup, obj, onlyType4);

@@ -9,7 +9,7 @@ static OSMesg gSiMesgBuf[8]; // message buffer of the SI event queue gSiMesgQueu
 
 void cont_initSiQueue(void) {
     osCreateMesgQueue(&gSiMesgQueue, gSiMesgBuf, 8);
-    osSetEventMesg(OS_EVENT_SI, &gSiMesgQueue, D_800BE9E0);
+    osSetEventMesg(OS_EVENT_SI, &gSiMesgQueue, gSiEventMesg);
     gPadPtrs[0] = &gPads[0];
     gPadPtrs[1] = &gPads[1];
     gPadPtrs[2] = &gPads[2];

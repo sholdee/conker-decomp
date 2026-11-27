@@ -9,7 +9,7 @@
 /* Update and draw handlers per screen effect kind (EffectDesc.updateIndex, drawIndex). Declared without
  * a prototype: each handler takes the effect as its own type. */
 static s32 (*gScreenEffectUpdateProcs[])() = { colourfb_readTunables, screen_updateMosaic };
-static void (*gScreenEffectDrawProcs[])() = { screen_drawMosaic, sight_drawLens, func_150AF790 };
+static void (*gScreenEffectDrawProcs[])() = { screen_drawMosaic, sight_drawLens, particle_drawGreyscaleScreen };
 /* Message handlers per kind (EffectDesc.messageIndex), as colourfb_dispatchMessage calls them; the handlers take
  * the effect and the message as their own types. */
 static void (*gScreenEffectMessageProcs[])(ScreenEffect *, s32, u8) = { NULL, sight_handleLensMessage, screen_handleMosaicMessage };
@@ -71,7 +71,7 @@ void colourfb_updateScreenEffect(ScreenEffect *effect) {
 
     finished = FALSE;
     if (effect->desc.flags & 1) {
-        effect->desc.lifetime -= D_800BE9E4;
+        effect->desc.lifetime -= gFrameTicks;
         if (effect->desc.lifetime < 0) {
             finished = TRUE;
         }

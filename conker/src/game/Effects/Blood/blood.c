@@ -9,22 +9,22 @@ const f32 gBloodBurstScales[15] = {
 };
 
 /* Per-profile blood model lists; the .data table gBloodModelLists[profile] points at one of them. */
-const s32 D_800A3C6C[10] = { 2, 3, 0x3A, 0x3B, 0x3B, 0x3D, 0x3D, 0x3E, 0x3C, 0x3C };
-const s32 D_800A3C94[8] = { 2, 3, 0x30, 0x92, 0x92, 0x91, 0x31, 0x31 };
-const s32 D_800A3CB4[8] = { 2, 3, 0x44, 0x46, 0x46, 0x47, 0x45, 0x45 };
+const s32 gConkerBloodModels[10] = { 2, 3, 0x3A, 0x3B, 0x3B, 0x3D, 0x3D, 0x3E, 0x3C, 0x3C };
+const s32 gWeaselBloodModels[8] = { 2, 3, 0x30, 0x92, 0x92, 0x91, 0x31, 0x31 };
+const s32 gTedizBloodModels[8] = { 2, 3, 0x44, 0x46, 0x46, 0x47, 0x45, 0x45 };
 const s32 D_800A3CD4[8] = { 2, 3, 0x49, 0x49, 0x4B, 0x4C, 0x4A, 0x4A };
-const s32 D_800A3CF4[8] = { 2, 3, 0x81, 0x80, 0x7F, 0x7F, 0x7E, 0x7E };
+const s32 gUgaBugaBloodModels[8] = { 2, 3, 0x81, 0x80, 0x7F, 0x7F, 0x7E, 0x7E };
 const s32 D_800A3D14[8] = { 2, 3, 0xB2, 0xA0, 0xA0, 0xA1, 0x9F, 0x9F };
 const s32 D_800A3D34[8] = { 2, 3, 0xB2, 0x9D, 0x9D, 0x9E, 0x9C, 0x9C };
-const s32 D_800A3D54[10] = { 2, 3, 0x3A, 0x8E, 0x8E, 0x3D, 0x3D, 0x8F, 0x90, 0x90 };
-const s32 D_800A3D7C[8] = { 2, 3, 0xBB, 0xAC, 0xAC, 0xAE, 0xAD, 0xAD };
-const s32 D_800A3D9C[8] = { 2, 3, 0xBC, 0xAF, 0xAF, 0xB1, 0xB0, 0xB0 };
-const s32 D_800A3DBC[12] = { 0x95, 0x95, 0x96, 0x97, 0x95, 0x95, 0x2D, 0x2E, 0x2D, 0x2E, 0x95, 0x95 };
-const s32 D_800A3DEC[8] = { 2, 3, 0x98, 0x99, 0x99, 0x9B, 0x9A, 0x9A };
+const s32 gBlackConkerBloodModels[10] = { 2, 3, 0x3A, 0x8E, 0x8E, 0x3D, 0x3D, 0x8F, 0x90, 0x90 };
+const s32 gZombieDressBloodModels[8] = { 2, 3, 0xBB, 0xAC, 0xAC, 0xAE, 0xAD, 0xAD };
+const s32 gZombieSuitBloodModels[8] = { 2, 3, 0xBC, 0xAF, 0xAF, 0xB1, 0xB0, 0xB0 };
+const s32 gRoboSpiderBloodModels[12] = { 0x95, 0x95, 0x96, 0x97, 0x95, 0x95, 0x2D, 0x2E, 0x2D, 0x2E, 0x95, 0x95 };
+const s32 gTntImpBloodModels[8] = { 2, 3, 0x98, 0x99, 0x99, 0x9B, 0x9A, 0x9A };
 const s32 D_800A3E0C[8] = { 2, 3, 0xC0, 0xC0, 0xC2, 0xC3, 0xC1, 0xC1 };
-const s32 D_800A3E2C[7] = { 0xE7, 0xE7, 0xD8, 0xD8, 0xE7, 0xD7, 0xD7 };
+const s32 gRockBloodModels[7] = { 0xE7, 0xE7, 0xD8, 0xD8, 0xE7, 0xD7, 0xD7 };
 const s32 D_800A3E48[10] = { 2, 3, 0xDC, 0xDC, 0xDB, 0xDB, 0xDB, 0xDA, 0xD9, 0xD9 };
-const s32 D_800A3E70[8] = { 2, 3, 0xDE, 0xDE, 0xE8, 0x44, 0xDD, 0xDD };
+const s32 gBroadTedizBloodModels[8] = { 2, 3, 0xDE, 0xDE, 0xE8, 0x44, 0xDD, 0xDD };
 const s32 D_800A3E90[9] = { 0xE2, 0xE2, 0xE1, 0xE1, 0xDF, 0xE3, 0xE5, 0xE0, 0xE0 };
 const s32 D_800A3EB4[8] = { 0xE2, 0xE2, 0xD5, 0xD5, 0xD3, 0xD6, 0xD4, 0xD4 };
 const s32 D_800A3ED4[7] = { 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE };
@@ -35,16 +35,16 @@ const s32 gBloodModelCounts[20] = {
     10, 8, 8, 8, 8, 8, 8, 10, 8, 8,
     12, 8, 8, 7, 10, 8, 9, 8, 7, 9,
 };
-const s32 D_800A3F64[20] = {
+const s32 gBloodBurstFloorHitFns[20] = {
     11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
     12, 11, 11, 13, 11, 11, 11, 11, 10, 11,
 };
 
 /* Blood model list of each profile (the counts are in gBloodModelCounts). */
 const s32 *gBloodModelLists[20] = {
-    D_800A3C6C, D_800A3C94, D_800A3CB4, D_800A3CD4, D_800A3CF4, D_800A3D14, D_800A3D34,
-    D_800A3D54, D_800A3D7C, D_800A3D9C, D_800A3DBC, D_800A3DEC, D_800A3E0C, D_800A3E2C,
-    D_800A3E48, D_800A3E70, D_800A3E90, D_800A3EB4, D_800A3ED4, D_800A3EF0,
+    gConkerBloodModels, gWeaselBloodModels, gTedizBloodModels, D_800A3CD4, gUgaBugaBloodModels, D_800A3D14, D_800A3D34,
+    gBlackConkerBloodModels, gZombieDressBloodModels, gZombieSuitBloodModels, gRoboSpiderBloodModels, gTntImpBloodModels, D_800A3E0C, gRockBloodModels,
+    D_800A3E48, gBroadTedizBloodModels, D_800A3E90, D_800A3EB4, D_800A3ED4, D_800A3EF0,
 };
 
 
@@ -213,7 +213,7 @@ void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, trail_emitBurst, effect_emitFallingDriftParticle, effect_emitDriftRiseParticle, particle_spawnWatcherParticle, effect_spawnRisingParticle,
+    blood_emitNoDripDrop, trail_emitBurst, effect_emitFallingDriftParticle, effect_emitDriftRiseParticle, particle_spawnWatcherParticle, effect_spawnRisingParticle,
     func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
@@ -247,7 +247,7 @@ void blood_updateDrip(BloodDrip *drip) {
 
     dead = 0;
     if (drip->desc.flags & BLOOD_DRIP_LIFETIME) {
-        drip->desc.lifetime -= D_800BE9E4;
+        drip->desc.lifetime -= gFrameTicks;
         if (drip->desc.lifetime < 0) {
             dead = 1;
         }
@@ -406,7 +406,7 @@ void blood_handleDripMessage(void *arg0, ActorMsg *msg, u8 message) {
 }
 
 /* Empty callback. */
-void func_151348F0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
+void blood_emitNoDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
 }
 
 #define BLOOD_TRAIL_LIFETIME   0x01
@@ -434,7 +434,7 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Drop emitters of a trail (BloodTrail.emitter), as gBloodDripEmitters (with a prototype for the same reason). */
 static void (*gBloodTrailEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_15134CD4, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, func_150C2898,
+    blood_emitNoTrailDrop, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, func_150C2898,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
 static s32 (*gBloodTrailCallbacks[])() = { effect_isBloodTrailOwnerActive };
@@ -494,7 +494,7 @@ void blood_updateTrail(BloodTrail *trail) {
     }
     trail->previous = *(Vec3f *)position;
     if (trail->flags & BLOOD_TRAIL_LIFETIME) {
-        trail->lifetime -= D_800BE9E4;
+        trail->lifetime -= gFrameTicks;
         if (trail->lifetime < 0) {
             effect_destroyObject(&trail->header);
         }
@@ -509,7 +509,7 @@ void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 }
 
 /* Empty callback. */
-void func_15134CD4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
+void blood_emitNoTrailDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
 }
 
 /* Particle callback: accelerates and moves the particle and fades unk2E; returns 0 to kill it. */
@@ -524,7 +524,7 @@ s32 func_15134CEC(Struct15134CEC *particle) {
     if (particle->unk14 > 130.0f) {
         return 0;
     }
-    fade -= D_800BE9E4 * 2;
+    fade -= gFrameTicks * 2;
     if (fade < 0) {
         return 0;
     }
@@ -579,7 +579,7 @@ void blood_updateStrip(BloodStrip *arg0) {
     if (strip->active & 1) {
         if (!kill && strip->owner->ob_matrix_ptr != 0 && (strip->owner->cullMask & 0xF) != 0xF) {
             boneMatrix = BONE_MATRIX(strip->owner, strip->bone);
-            strip->timer -= D_800BE9E4;
+            strip->timer -= gFrameTicks;
             if (strip->timer < -strip->pause) {
                 strip->timer = strip->duration;
                 blood_transformPoints(boneMatrix, &strip->offsetA, &strip->offsetB, &strip->posA, &strip->posB);
@@ -660,7 +660,7 @@ void blood_updateStrip(BloodStrip *arg0) {
             kill = 1;
         }
         if (strip->flags & BLOOD_STRIP_LIFETIME) {
-            strip->lifetime -= D_800BE9E4;
+            strip->lifetime -= gFrameTicks;
             if (strip->lifetime < 0) {
                 kill = 1;
             }
@@ -754,10 +754,10 @@ void blood_handleStripMessage(BloodStrip *strip, ActorMsg *msg, u8 message) {
     }
     switch (strip->mode) {
     case 1:
-        func_151355B8(strip, msg, message);
+        blood_handleStripMessageMode1(strip, msg, message);
         break;
     case 2:
-        func_1513555C(strip, msg, message);
+        blood_handleStripMessageMode2(strip, msg, message);
         break;
     default:
         if (message == 0) {
@@ -770,7 +770,7 @@ void blood_handleStripMessage(BloodStrip *strip, ActorMsg *msg, u8 message) {
 }
 
 /* Mode 2 handler: frees the strip when its owner is removed (messages 0 and 0x12). */
-void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message) {
+void blood_handleStripMessageMode2(BloodStrip *strip, ActorMsg *msg, u8 message) {
     if (message == 0 || message == 0x12) {
         if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
             effect_destroyObject(&strip->header);
@@ -779,7 +779,7 @@ void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message) {
 }
 
 /* Mode 1 handler: frees the strip on message 0, stops it on message 3, for its owner. */
-void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message) {
+void blood_handleStripMessageMode1(BloodStrip *strip, ActorMsg *msg, u8 message) {
     switch (message) {
     case 0:
         if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
@@ -819,7 +819,7 @@ const BloodProfile gBloodProfiles[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [0] */
     { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 }, /* [1] */
 };
-const BloodProfile D_800A3FF8[2] = {
+const BloodProfile gTedizBloodProfiles[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x44, 1, 0 }, /* [2] */
     { { 0.0f, 30.0f, 8.0f }, 0x4B, 0, 0 }, /* [3] */
 };
@@ -833,10 +833,10 @@ const BloodProfile D_800A4038[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 }, /* [6] */
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [7] */
 };
-const BloodProfile D_800A4058[1] = {
+const BloodProfile gZombieDressBloodProfiles[1] = {
     { { 0.0f, 30.0f, 8.0f }, 0xBB, 0, 0 }, /* [8] */
 };
-const BloodProfile D_800A4068[6] = {
+const BloodProfile gZombieSuitBloodProfiles[6] = {
     { { 0.0f, 30.0f, 8.0f }, 0xBC, 0, 0 }, /* [9] */
     { { 0.0f, 30.0f, 8.0f }, 0xBC, 1, 0 }, /* [10] */
     { { 0.0f, 30.0f, 8.0f }, 0x98, 0, 0 }, /* [11] */
@@ -844,7 +844,7 @@ const BloodProfile D_800A4068[6] = {
     { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 }, /* [13] */
     { { 0.0f, 20.0f, 30.0f }, 0xDA, 0, 0 }, /* [14] */
 };
-const BloodProfile D_800A40C8[3] = {
+const BloodProfile gBroadTedizBloodProfiles[3] = {
     { { 0.0f, 20.0f, 30.0f }, 0x44, 1, 0 }, /* [15] */
     { { 0.0f, 20.0f, 30.0f }, 0xE3, 2, 0 }, /* [16] */
     { { 0.0f, 20.0f, 30.0f }, 0xD3, 2, 0 }, /* [17] */
@@ -978,7 +978,7 @@ s32 blood_updateSplat(BloodSplat *splat) {
     motion = &splat->motion;
     alive = 1;
     if (splat->motion.timer > 0) {
-        motion->timer -= D_800BE9E4;
+        motion->timer -= gFrameTicks;
         splat->position.x += motion->velocity.x * gFrameDelta;
         splat->position.y += motion->velocity.y * gFrameDelta;
         splat->width += motion->growth * gFrameDelta;
@@ -1330,7 +1330,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                       ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
                           ? gBloodModelCounts[kind] - 2
                           : gBloodModelCounts[kind],
-                      scale, kind, D_800A3F64[kind], actor, &hit, arg6,
+                      scale, kind, gBloodBurstFloorHitFns[kind], actor, &hit, arg6,
                       arg7);
     }
     if (gBloodProfiles[kind].bloodKind == 2) {
@@ -1349,7 +1349,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         spray.maxDistance = 998.0f;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;
-        if ((D_800A3FF8 == &gBloodProfiles[kind]) || (D_800A40C8 == &gBloodProfiles[kind]) ||
+        if ((gTedizBloodProfiles == &gBloodProfiles[kind]) || (gBroadTedizBloodProfiles == &gBloodProfiles[kind]) ||
             (D_800A40F8 == &gBloodProfiles[kind])) {
             spray.kind = 1;
         } else {
@@ -1358,7 +1358,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         particle_spawnDecalSpray(&spray, arg6, arg7);
     }
     if (arg2 != 0) {
-        if ((D_800A3FF8 == &gBloodProfiles[kind]) || (D_800A40C8 == &gBloodProfiles[kind]) ||
+        if ((gTedizBloodProfiles == &gBloodProfiles[kind]) || (gBroadTedizBloodProfiles == &gBloodProfiles[kind]) ||
             (D_800A40F8 == &gBloodProfiles[kind])) {
             heavy = 1;
         } else {
@@ -1368,7 +1368,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                       (math_random() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
-        if ((D_800A3FF8 == &gBloodProfiles[kind]) || (D_800A40C8 == &gBloodProfiles[kind])) {
+        if ((gTedizBloodProfiles == &gBloodProfiles[kind]) || (gBroadTedizBloodProfiles == &gBloodProfiles[kind])) {
             func_151C61A0(&position, &hit, arg6, arg7);
         } else {
             blood_spawnSmallSplash(&position, arg6, arg7);
@@ -1612,7 +1612,7 @@ void blood_spawnDeathEffects(Actor *actor, u8 arg1, s32 arg2) {
         probe = position;
     }
     blood_spawnProfileBurst(&position, gBloodModelLists[kind] + 2, gBloodBurstScales,
-                  gBloodModelCounts[kind] - 2, scale, kind, D_800A3F64[kind],
+                  gBloodModelCounts[kind] - 2, scale, kind, gBloodBurstFloorHitFns[kind],
                   actor, &hit, arg1, arg2);
     if (gBloodProfiles[kind].bloodKind != 2) {
         blood_spawnSmallSplash(&position, arg1, arg2);
@@ -1770,7 +1770,7 @@ void blood_startBleeding(Actor *actor, s32 kind, u8 arg2) {
         desc.offsetB.x = 0.0f;
         desc.offsetB.z = 0.0f;
         desc.offsetB.y = 20.0f;
-        if ((D_800A4058 == &gBloodProfiles[kind]) || (D_800A4068 == &gBloodProfiles[kind])) {
+        if ((gZombieDressBloodProfiles == &gBloodProfiles[kind]) || (gZombieSuitBloodProfiles == &gBloodProfiles[kind])) {
             desc.lifetime = (actor->unk94 & 0xE) ? 120 : 240;
         } else {
             desc.lifetime = 600;
@@ -1860,7 +1860,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 a
     spawn.rotVel.y = 0.0f;
     spawn.lifetime = math_random() % 51U + 250;
     spawn.model = gBloodProfiles[kind].chunkModel;
-    spawn.sizeY = ((D_800A40C8 == &gBloodProfiles[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
+    spawn.sizeY = ((gBroadTedizBloodProfiles == &gBloodProfiles[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (math_randomFloat() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
@@ -2010,14 +2010,14 @@ void blood_spawnFatalHit(Actor *actor, u8 arg1, s32 arg2) {
             blood_spawnBurst(&position, kind, &hit, arg1, arg2);
             switch (kind) {
             case 16:
-                func_1513B0F8(actor, &position, &hit, arg1, arg2);
+                blood_spawnGreggGore(actor, &position, &hit, arg1, arg2);
                 return;
             case 17:
                 effect_throwDebrisBurst(&position, arg1, arg2);
                 return;
             case 0:
             case 7:
-                func_1513A6E0(actor, &position, &hit, arg1, arg2);
+                blood_spawnConkerGore(actor, &position, &hit, arg1, arg2);
                 return;
             case 3:
                 func_15138E98(actor, &position, 1, &hit, arg1, arg2);
@@ -2027,17 +2027,17 @@ void blood_spawnFatalHit(Actor *actor, u8 arg1, s32 arg2) {
                 func_15138E98(actor, &position, 0, &hit, arg1, arg2);
                 return;
             case 15:
-                func_15139768(actor, &position, 0.6f, &hit, arg1, arg2);
+                blood_spawnTedizGore(actor, &position, 0.6f, &hit, arg1, arg2);
                 return;
             case 2:
-                func_15139768(actor, &position, 1.0f, &hit, arg1, arg2);
+                blood_spawnTedizGore(actor, &position, 1.0f, &hit, arg1, arg2);
                 return;
             case 4:
-                func_1513A594(actor, &position, &hit, arg1, arg2);
+                blood_spawnSplashOnlyGore(actor, &position, &hit, arg1, arg2);
                 return;
             case 8:
             case 9:
-                func_1513ABB8(actor, &position, kind == 9, &hit, arg1, arg2);
+                blood_spawnZombieGore(actor, &position, kind == 9, &hit, arg1, arg2);
                 return;
             case 10:
             case 11:
@@ -2232,7 +2232,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
 }
 
 /* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
-s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface) {
+s32 blood_onGorePartLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface) {
     Vec3f pos;
     f32 bounce;
     u32 random;
@@ -2275,10 +2275,10 @@ s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Collision
     return 1;
 }
 
-const u8 D_800A41C4[4] = { 0x08, 0x0C, 0x0A, 0x00 };
-const s32 D_800A41C8[4] = { 0x61, 0x62, 0x63, 0x64 };
-const s32 D_800A41D8[4] = { 0x5D, 0x5E, 0x5F, 0x60 };
-const Vec3f D_800A41E8[4] = {
+const u8 gTedizGoreMasks[4] = { 0x08, 0x0C, 0x0A, 0x00 };
+const s32 gTedizGoreAttachedModels[4] = { 0x61, 0x62, 0x63, 0x64 };
+const s32 gTedizGoreThrownModels[4] = { 0x5D, 0x5E, 0x5F, 0x60 };
+const Vec3f gTedizGoreThrowOffsets[4] = {
     { -15.082999f, 50.3348f, 3.2628f },
     { 14.2554f, 52.1254f, 4.4064f },
     { -14.681799f, 17.8482f, -1.3326f },
@@ -2286,7 +2286,7 @@ const Vec3f D_800A41E8[4] = {
 };
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
-void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 arg4, s32 arg5) {
+void blood_spawnTedizGore(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 arg4, s32 arg5) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2335,9 +2335,9 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
         spawn.fadeStart = 12;
         spawn.fadeRate = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
-            if (D_800A41C4[idx] & mask) {
+            if (gTedizGoreMasks[idx] & mask) {
                 BloodChunk *ret;
-                spawn.model = D_800A41C8[i];
+                spawn.model = gTedizGoreAttachedModels[i];
                 ret = particle_newModelParticle(&spawn, 3, 0xFF, 1, arg4, arg5);
                 if (ret != NULL) {
                     memcpy(&ret->unk170, tag, 1);
@@ -2389,9 +2389,9 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
         spawn2.matrixFn = 2;
         spawn2.floorHitFn = 9;
         for (j = 0, mask2 = 1; j < 4; j++, mask2 <<= 1) {
-            if (!(D_800A41C4[idx] & mask2)) {
-                spawn2.model = D_800A41D8[j];
-                math_transformOffset(&D_800A41E8[j], &spawn2.pos, BONE_MATRIX(actor, 12));
+            if (!(gTedizGoreMasks[idx] & mask2)) {
+                spawn2.model = gTedizGoreThrownModels[j];
+                math_transformOffset(&gTedizGoreThrowOffsets[j], &spawn2.pos, BONE_MATRIX(actor, 12));
                 math_dirFromBinAngles(math_random() & 0xFF, math_random() % 35U - 84, math_randomFloat() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = math_randomFloat() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = math_randomFloat() * 30.7460022f + -15.3730011f;
@@ -2403,10 +2403,10 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
     }
 }
 
-const u8 D_800A4218[3] = { 0x00, 0x04, 0x00 };
-const s32 D_800A421C[3] = { 0x69, 0x6A, 0x6B };
-const s32 D_800A4228[3] = { 0x66, 0x67, 0x68 };
-const Vec3f D_800A4234[3] = {
+const u8 gDefaultGoreMasks[3] = { 0x00, 0x04, 0x00 };
+const s32 gDefaultGoreAttachedModels[3] = { 0x69, 0x6A, 0x6B };
+const s32 gDefaultGoreThrownModels[3] = { 0x66, 0x67, 0x68 };
+const Vec3f gDefaultGoreThrowOffsets[3] = {
     { 0.06725f, 14.119f, 66.579254f },
     { 4.36975f, 22.8435f, 17.31975f },
     { -2.76875f, 8.011f, 10.78625f },
@@ -2464,10 +2464,10 @@ void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 a
         burst.fadeStart = 12;
         burst.fadeRate = 21;
         for (i = 0, mask = 1; i < 3; i++, mask <<= 1) {
-            if (!(D_800A4218[index] & mask)) {
+            if (!(gDefaultGoreMasks[index] & mask)) {
                 continue;
             }
-            burst.model = D_800A421C[i];
+            burst.model = gDefaultGoreAttachedModels[i];
             result = particle_newModelParticle(&burst, 3, 0xFF, 1, arg3, arg4);
             if (result != NULL) {
                 memcpy(&result->unk170, tag, 1);
@@ -2519,9 +2519,9 @@ void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 a
         packet.matrixFn = 2;
         packet.floorHitFn = 9;
         for (j = 0, bit = 1; j < 3; j++, bit <<= 1) {
-            if (!(D_800A4218[index] & bit)) {
-                packet.model = D_800A4228[j];
-                math_transformOffset(&D_800A4234[j], &packet.pos, BONE_MATRIX(actor, 12));
+            if (!(gDefaultGoreMasks[index] & bit)) {
+                packet.model = gDefaultGoreThrownModels[j];
+                math_transformOffset(&gDefaultGoreThrowOffsets[j], &packet.pos, BONE_MATRIX(actor, 12));
                 yaw = math_random();
                 pitch = math_random();
                 math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, math_randomFloat() * 6.12f + 3.0f,
@@ -2602,10 +2602,10 @@ void blood_spawnProfileBurst(Vec3f *position, const s32 *table, const f32 *arg2,
     particle_broadcastToModelParticles(0, 0x45);
 }
 
-const s32 D_800A4260[1] = { 0x39 };
-const f32 D_800A4264[1] = { 1.0f };
+const s32 gBloodSmallSplashIds[1] = { 0x39 };
+const f32 gBloodSmallSplashScales[1] = { 1.0f };
 
-/* Small blood splash at position (particle_spawnDebrisBurst with D_800A4260). */
+/* Small blood splash at position (particle_spawnDebrisBurst with gBloodSmallSplashIds). */
 void blood_spawnSmallSplash(Vec3f *position, u8 arg1, s32 arg2) {
     DebrisBurst config;
 
@@ -2625,11 +2625,11 @@ void blood_spawnSmallSplash(Vec3f *position, u8 arg1, s32 arg2) {
     config.gravityBase = -1.0040001f;
     config.gravityRange = 0.254f;
     config.spin = 23.446001f;
-    particle_spawnDebrisBurst(&config, D_800A4260, D_800A4264, 1, 0.0f, 1, arg1, arg2);
+    particle_spawnDebrisBurst(&config, gBloodSmallSplashIds, gBloodSmallSplashScales, 1, 0.0f, 1, arg1, arg2);
 }
 
 /* Gore for profile 4 actors: just a splash. */
-void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
+void blood_spawnSplashOnlyGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     blood_spawnSplash(origin, arg3, arg4);
     if (actor->ob_matrix_ptr != 0) { // matching: dead test, IDO still emits the ob_matrix_ptr load
         if (actor) {
@@ -2637,10 +2637,10 @@ void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     }
 }
 
-const s32 D_800A4268[2] = { 0x39, 0x65 };
-const f32 D_800A4270[2] = { 1.0f, 4.0f };
+const s32 gBloodSplashIds[2] = { 0x39, 0x65 };
+const f32 gBloodSplashScales[2] = { 1.0f, 4.0f };
 
-/* Blood splash at position (particle_spawnDebrisBurst with D_800A4268). */
+/* Blood splash at position (particle_spawnDebrisBurst with gBloodSplashIds). */
 void blood_spawnSplash(Vec3f *position, u8 arg1, s32 arg2) {
     DebrisBurst config;
 
@@ -2660,13 +2660,13 @@ void blood_spawnSplash(Vec3f *position, u8 arg1, s32 arg2) {
     config.gravityBase = -0.43f;
     config.gravityRange = 0.272f;
     config.spin = 20.187f;
-    particle_spawnDebrisBurst(&config, D_800A4268, D_800A4270, 2, 0.0f, 1, arg1, arg2);
+    particle_spawnDebrisBurst(&config, gBloodSplashIds, gBloodSplashScales, 2, 0.0f, 1, arg1, arg2);
 }
 
-const u8 D_800A4278[6] = { 0x04, 0x0C, 0x06, 0x07, 0x0D, 0x00 };
-const s32 D_800A4280[4] = { 0x7A, 0x7B, 0x7C, 0x7D };
-const s32 D_800A4290[4] = { 0x76, 0x77, 0x78, 0x79 };
-const Vec3f D_800A42A0[4] = {
+const u8 gConkerGoreMasks[6] = { 0x04, 0x0C, 0x06, 0x07, 0x0D, 0x00 };
+const s32 gConkerGoreAttachedModels[4] = { 0x7A, 0x7B, 0x7C, 0x7D };
+const s32 gConkerGoreThrownModels[4] = { 0x76, 0x77, 0x78, 0x79 };
+const Vec3f gConkerGoreThrowOffsets[4] = {
     { 14.159599f, 51.866f, 11.1582f },
     { -16.682f, 45.5596f, 13.6838f },
     { -8.215199f, 13.5648f, 26.177399f },
@@ -2674,7 +2674,7 @@ const Vec3f D_800A42A0[4] = {
 };
 
 /* Gore for profile 0/7 actors. */
-void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
+void blood_spawnConkerGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2724,9 +2724,9 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
         spawn.fadeStart = 12;
         spawn.fadeRate = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
-            if (D_800A4278[idx] & mask) {
+            if (gConkerGoreMasks[idx] & mask) {
                 BloodChunk *ret;
-                spawn.model = D_800A4280[i];
+                spawn.model = gConkerGoreAttachedModels[i];
                 ret = particle_newModelParticle(&spawn, 3, 0xFF, 1, arg3, arg4);
                 if (ret != NULL) {
                     memcpy(&ret->unk170, extra, 1);
@@ -2772,9 +2772,9 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
         spawn2.matrixFn = 2;
         spawn2.floorHitFn = 9;
         for (i = 0, mask2 = 1; i < 4; i++, mask2 <<= 1) {
-            if (!(D_800A4278[idx] & mask2)) {
-                spawn2.model = D_800A4290[i];
-                math_transformOffset(&D_800A42A0[i], &spawn2.pos, BONE_MATRIX(actor, 12));
+            if (!(gConkerGoreMasks[idx] & mask2)) {
+                spawn2.model = gConkerGoreThrownModels[i];
+                math_transformOffset(&gConkerGoreThrowOffsets[i], &spawn2.pos, BONE_MATRIX(actor, 12));
                 r1 = math_random();
                 r2 = math_random();
                 math_dirFromBinAngles(r1 & 0xFF, r2 % 35U - 84, math_randomFloat() * 6.119999886f + 3.0f, &spawn2.vel);
@@ -2788,16 +2788,16 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     }
 }
 
-const u8 D_800A42D0[3] = { 0x00, 0x01, 0x02 };
-const s32 D_800A42D4[2][2] = { { 0xB3, 0xB4 }, { 0xB7, 0xB8 } };
-const s32 D_800A42E4[2][2] = { { 0xB5, 0xB6 }, { 0xB9, 0xBA } };
-const Vec3f D_800A42F4[2][2] = {
+const u8 gZombieGoreMasks[3] = { 0x00, 0x01, 0x02 };
+const s32 gZombieGoreAttachedModels[2][2] = { { 0xB3, 0xB4 }, { 0xB7, 0xB8 } };
+const s32 gZombieGoreThrownModels[2][2] = { { 0xB5, 0xB6 }, { 0xB9, 0xBA } };
+const Vec3f gZombieGoreThrowOffsets[2][2] = {
     { { 12.4256f, 18.9344f, 17.148f }, { -17.1182f, 32.8964f, 4.2846003f } },
     { { 11.5694f, 18.168f, 18.0524f }, { -13.6272f, 34.7778f, 7.015f } },
 };
 
 /* Gore for profile 8/9 actors (variant 1 for profile 9). */
-void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u8 arg4, s32 arg5) {
+void blood_spawnZombieGore(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u8 arg4, s32 arg5) {
     u8 index;
     Vec3f position;
 
@@ -2848,10 +2848,10 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
         burst.fadeStart = 12;
         burst.fadeRate = 21;
         for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
-            if (!(D_800A42D0[index] & mask)) {
+            if (!(gZombieGoreMasks[index] & mask)) {
                 continue;
             }
-            burst.model = D_800A42D4[variant][i];
+            burst.model = gZombieGoreAttachedModels[variant][i];
             result = particle_newModelParticle(&burst, 3, 0xFF, 1, arg4, arg5);
             if (result != NULL) {
                 memcpy(&result->unk170, tag, 1);
@@ -2903,9 +2903,9 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
         packet.matrixFn = 2;
         packet.floorHitFn = 9;
         for (j = 0, bit = 1; j < 2; j++, bit <<= 1) {
-            if (!(D_800A42D0[index] & bit)) {
-                packet.model = D_800A42E4[variant][j];
-                math_transformOffset(&D_800A42F4[variant][j], &packet.pos, BONE_MATRIX(actor, 12));
+            if (!(gZombieGoreMasks[index] & bit)) {
+                packet.model = gZombieGoreThrownModels[variant][j];
+                math_transformOffset(&gZombieGoreThrowOffsets[variant][j], &packet.pos, BONE_MATRIX(actor, 12));
                 yaw = math_random();
                 pitch = math_random();
                 math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, math_randomFloat() * 6.12f + 3.0f,
@@ -2931,15 +2931,15 @@ void blood_handleChunkMessage(BloodChunk *chunk, s32 arg1, u8 message) {
     }
 }
 
-const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
-const s32 D_800A4328[2] = { 0xE3, 0xE5 };
-const s32 D_800A4330[2] = { 0xE4, 0xE6 };
-const Vec3f D_800A4338[2] = {
+const u8 gGreggGoreMasks[3] = { 0x00, 0x01, 0x02 };
+const s32 gGreggGoreAttachedModels[2] = { 0xE3, 0xE5 };
+const s32 gGreggGoreThrownModels[2] = { 0xE4, 0xE6 };
+const Vec3f gGreggGoreThrowOffsets[2] = {
     { -15.369999f, 15.095f, 13.3182f },
     { -0.0834f, -19.5498f, 23.541f },
 };
 /* Gore for profile 16 actors. */
-void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
+void blood_spawnGreggGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     u8 index;
     Vec3f rotation;
     ParticleSpawn spawn;
@@ -2998,10 +2998,10 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
     for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
-        if (D_800A4324[index] & mask) {
+        if (gGreggGoreMasks[index] & mask) {
             void *particle;
 
-            spawn.model = D_800A4328[i];
+            spawn.model = gGreggGoreAttachedModels[i];
             particle = particle_newModelParticle(&spawn, 3, 0xFF, 1, arg3, arg4);
             if (particle != NULL) {
                 memcpy(&((BloodChunk *)particle)->unk170, &tag, 1);
@@ -3043,11 +3043,11 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     drop.matrixFn = 2;
     drop.floorHitFn = 9;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
-        if (!(D_800A4324[index] & bit)) {
+        if (!(gGreggGoreMasks[index] & bit)) {
             u32 random;
 
-            drop.model = D_800A4330[i];
-            math_transformOffset(&D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
+            drop.model = gGreggGoreThrownModels[i];
+            math_transformOffset(&gGreggGoreThrowOffsets[i], &drop.pos, BONE_MATRIX(actor, 12));
             yaw = math_random();
             pitch = math_random();
             math_dirFromBinAngles((u8)yaw, (pitch % 35U) - 0x54, (math_randomFloat() * 6.12f) + 3.0f, &drop.vel);

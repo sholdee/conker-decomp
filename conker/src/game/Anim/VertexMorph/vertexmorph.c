@@ -75,7 +75,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
         if (movement_obj[actorIndex].modelData[set][gDrawBufferIndex] == NULL || gModelData[id] == NULL) {
             if (frame == morph->cur) {
                 if (gPaused == 0) {
-                    morph->blend += morph->rate * D_800BE9E4;
+                    morph->blend += morph->rate * gFrameTicks;
                 }
                 if (morph->blend > 1.0f) {
                     morph->blend = 1.0f;
@@ -144,7 +144,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
         }
     }
     if (gPaused == 0) {
-        morph->blend += morph->rate * D_800BE9E4;
+        morph->blend += morph->rate * gFrameTicks;
     }
     if (morph->blend > 1.0f) {
         morph->blend = 1.0f;

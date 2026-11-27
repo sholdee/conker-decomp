@@ -16,7 +16,7 @@ u8 gAimPass; /* aim pass / slot counter */
  * Per group (gNoAimAnimGroups[character_type] - 1): the animations during which an object does not aim
  * (aim_updateLock). gNoAimAnimCounts holds the length of each group's list.
  */
-static const u16 D_80097D90[] = {
+static const u16 gNoAimAnimList11[] = {
     0x16, 0xEB, 0xD, 0x19F, 0xE, 8, 0xF0, 0x30, 0x72, 0xEF, 0x58, 0xF1, 0xF2, 0x59, 0xF5, 0x14, 0x13,
     7, 0x3E, 0x3D, 0x41, 0x25, 0x2C, 0xA9, 0x24, 0xAD, 0x2E, 0x2D, 0x69, 0x2F, 0x171, 0x173, 0x174,
     0x17A, 0x172, 0xF6, 0x11, 0x26, 0x29, 0x7C, 0x55, 0x56, 0x57, 0x49, 0x47, 0x35, 0x3A, 0x3F, 0x5D,
@@ -40,44 +40,44 @@ static const u8 gNoAimAnimGroups[] = {
     0x0C, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C,
     0x0C, 0x0C, 0x02, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
-static const u16 D_80097F38[] = { 4, 5, 6, 7, 9, 0xA, 0xB };
-static const u16 D_80097F48[] = { 1, 3, 4, 5, 6 };
-static const u16 D_80097F54[] = { 1 };
-static const u16 D_80097F58[] = { 0, 1, 2, 3, 4, 5 };
-static const u16 D_80097F64[] = { 0, 1, 2, 3, 4, 5, 6 };
-static const u16 D_80097F74[] = { 1, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 2 }; /* 11 entries; gNoAimAnimCounts counts 10 */
-static const u16 D_80097F8C[] = { 1, 2, 5, 6, 8, 9 };
-static const u16 D_80097F98[] = { 2, 3, 5 };
-static const u16 D_80097FA0[] = { 0, 2, 5, 0x22 };
-static const u16 D_80097FA8[] = { 2, 3, 6, 7, 8, 9 };
-static const u16 D_80097FB4[] = {
+static const u16 gNoAimAnimList17[] = { 4, 5, 6, 7, 9, 0xA, 0xB };
+static const u16 gNoAimAnimList18[] = { 1, 3, 4, 5, 6 };
+static const u16 gNoAimAnimList19[] = { 1 };
+static const u16 gNoAimAnimList20[] = { 0, 1, 2, 3, 4, 5 };
+static const u16 gNoAimAnimList14[] = { 0, 1, 2, 3, 4, 5, 6 };
+static const u16 gNoAimAnimList13[] = { 1, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 2 }; /* 11 entries; gNoAimAnimCounts counts 10 */
+static const u16 gNoAimAnimList00[] = { 1, 2, 5, 6, 8, 9 };
+static const u16 gNoAimAnimList01[] = { 2, 3, 5 };
+static const u16 gNoAimAnimList02[] = { 0, 2, 5, 0x22 };
+static const u16 gNoAimAnimList03[] = { 2, 3, 6, 7, 8, 9 };
+static const u16 gNoAimAnimList04[] = {
     2, 3, 6, 7, 8, 9, 0xC, 0xE, 0x11, 0x12, 0x13, 0x19, 0xB, 0xD, 0x10, 0x15, 0x1D, 0x1C, 0x22, 0x1F,
     4, 5, 0xD, 0x10
 };
-static const u16 D_80097FE4[] = { 0, 3, 4, 5 };
-static const u16 D_80097FEC[] = { 0x15 };
-static const u16 D_80097FF0[] = { 0, 6, 9, 0xA, 0xB, 0x18 };
-static const u16 D_80097FFC[] = { 0xF };
-static const u16 D_80098000[] = { 0xD, 0xE, 0x10, 0x16, 0x12, 0x1E };
-static const u16 D_8009800C[] = { 0xF };
-static const u16 D_80098010[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0x10, 0x11, 0x12, 0x13 };
-static const u16 D_80098034[] = { 0x25 };
-static const u16 D_80098038[] = { 8, 9 };
-static const u16 D_8009803C[] = { 0x3B, 0x3C };
-static const u16 D_80098040[] = { 0xB, 0x13, 0x15, 0x14 };
-static const u16 D_80098048[] = { 0x1A, 0, 0, 0 };
+static const u16 gNoAimAnimList05[] = { 0, 3, 4, 5 };
+static const u16 gNoAimAnimList06[] = { 0x15 };
+static const u16 gNoAimAnimList07[] = { 0, 6, 9, 0xA, 0xB, 0x18 };
+static const u16 gNoAimAnimList08[] = { 0xF };
+static const u16 gNoAimAnimList09[] = { 0xD, 0xE, 0x10, 0x16, 0x12, 0x1E };
+static const u16 gNoAimAnimList10[] = { 0xF };
+static const u16 gNoAimAnimList12[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0x10, 0x11, 0x12, 0x13 };
+static const u16 gNoAimAnimList15[] = { 0x25 };
+static const u16 gNoAimAnimList16[] = { 8, 9 };
+static const u16 gNoAimAnimList22[] = { 0x3B, 0x3C };
+static const u16 gNoAimAnimList21[] = { 0xB, 0x13, 0x15, 0x14 };
+static const u16 gNoAimAnimList23[] = { 0x1A, 0, 0, 0 };
 static const u8 gNoAimAnimCounts[] = {
     0x06, 0x03, 0x04, 0x06, 0x18, 0x04, 0x01, 0x06, 0x01, 0x06, 0x01, 0x75, 0x12, 0x0A, 0x07, 0x01,
     0x02, 0x07, 0x05, 0x01, 0x06, 0x04, 0x02, 0x04,
 };
 
 static const u16 *gNoAimAnimLists[] = {
-    D_80097F8C, D_80097F98, D_80097FA0, D_80097FA8,
-    D_80097FB4, D_80097FE4, D_80097FEC, D_80097FF0,
-    D_80097FFC, D_80098000, D_8009800C, D_80097D90,
-    D_80098010, D_80097F74, D_80097F64, D_80098034,
-    D_80098038, D_80097F38, D_80097F48, D_80097F54,
-    D_80097F58, D_80098040, D_8009803C, D_80098048,
+    gNoAimAnimList00, gNoAimAnimList01, gNoAimAnimList02, gNoAimAnimList03,
+    gNoAimAnimList04, gNoAimAnimList05, gNoAimAnimList06, gNoAimAnimList07,
+    gNoAimAnimList08, gNoAimAnimList09, gNoAimAnimList10, gNoAimAnimList11,
+    gNoAimAnimList12, gNoAimAnimList13, gNoAimAnimList14, gNoAimAnimList15,
+    gNoAimAnimList16, gNoAimAnimList17, gNoAimAnimList18, gNoAimAnimList19,
+    gNoAimAnimList20, gNoAimAnimList21, gNoAimAnimList22, gNoAimAnimList23,
 };
 
 
@@ -1184,7 +1184,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
     }
     origYaw = yaw;
     origPitch = pitch;
-    if ((timerDone && !hasOverride) || D_800BE9B4) {
+    if ((timerDone && !hasOverride) || gLevelLoadState) {
         aim_clampToLimits(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
         data->yawVel[slot] = 0.0f;
         data->pitchVel[slot] = 0.0f;
@@ -1398,7 +1398,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         data->timer[slot] = 40;
     }
 
-    step = D_800BE9E4 * 10;
+    step = gFrameTicks * 10;
     if (step < ((data->offYaw[slot] < 0) ? -data->offYaw[slot] : data->offYaw[slot])) {
         data->offYaw[slot] -= step * ((data->offYaw[slot] < 0) ? -1 : 1);
     } else {
@@ -1455,7 +1455,7 @@ void aim_clampAngles(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fal
 }
 
 /*
- * Per-frame aim bookkeeping: object 0x53 in anim 0x15 (or any object while D_800BE9B4 is set) resets all aim
+ * Per-frame aim bookkeeping: object 0x53 in anim 0x15 (or any object while gLevelLoadState is set) resets all aim
  * slots, and an object whose type has an "aim-locked" anim list gets unk2FB bit 2 set while it plays one of
  * them, or (for interaction state 1) while dead, slow in water, flagged in mv, or moving fast.
  */
@@ -1470,7 +1470,7 @@ void aim_updateLock(Actor *obj) {
     data = obj->camData;
     if (data != NULL) {
         id = obj->character_type;
-        if ((id == 0x53 && obj->animseq.uh == 0x15) || D_800BE9B4 != 0) {
+        if ((id == 0x53 && obj->animseq.uh == 0x15) || gLevelLoadState != 0) {
             for (i = 0; i < 3; i++) {
                 data->timer[i] = 40;
                 data->blend[i] = 0;
@@ -1864,8 +1864,8 @@ void aim_turnHead(Actor *obj) {
             obj->headPitch[1] -= obj->unk287;
             phase0 = obj->headEffectState & 0xFF;
             phase1 = obj->headEffectState >> 8;
-            phase0 += D_800BE9E4 * 3;
-            phase1 -= D_800BE9E4 * 4;
+            phase0 += gFrameTicks * 3;
+            phase1 -= gFrameTicks * 4;
             obj->headEffectState = (phase1 << 8) | phase0;
             if (obj->headEffectTimer < 30) {
                 scale = (f32)(obj->headEffectTimer + 0U) / 30.0f; // matching: unsigned int to float conversion
@@ -1931,13 +1931,13 @@ void aim_turnHead(Actor *obj) {
         } else if (obj->headEffect == 4) {
             if (obj->animseq.uh == 0x26) {
                 if (obj->headEffectState == 0) {
-                    obj->unk284 -= D_800BE9E4;
+                    obj->unk284 -= gFrameTicks;
                     if (obj->unk284 < -20) {
                         obj->unk284 = -20;
                         obj->headEffectState = 1;
                     }
                 } else {
-                    obj->unk284 += D_800BE9E4 * 3;
+                    obj->unk284 += gFrameTicks * 3;
                     if (obj->unk284 > 20) {
                         obj->unk284 = 20;
                         obj->headEffectState = 0;
@@ -1978,8 +1978,8 @@ void aim_turnHead(Actor *obj) {
             pitch[1] = pitch[0];
         }
         if (obj->headEffectTimer != 0xFFFF) {
-            if (obj->headEffectTimer >= D_800BE9E4) {
-                obj->headEffectTimer -= D_800BE9E4;
+            if (obj->headEffectTimer >= gFrameTicks) {
+                obj->headEffectTimer -= gFrameTicks;
             } else {
                 obj->headEffectTimer = 0;
             }

@@ -7,7 +7,7 @@ void particle_updateSparkSpawner(SparkEffect *obj) {
     EmitterTrigger *trigger = &obj->data.trigger;
 
     if (trigger->params[0] & 1) {
-        trigger->countdown -= D_800BE9E4;
+        trigger->countdown -= gFrameTicks;
         if (trigger->countdown < 0) {
             particle_spawnSparkEmitter(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
             trigger->countdown = math_randomU8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;

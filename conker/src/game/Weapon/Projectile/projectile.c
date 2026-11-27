@@ -194,7 +194,7 @@ s8 weapon_updateProjectile(Game1EF500Trail *trail) {
 
     ext = &trail->trail;
     alive = TRUE;
-    weapon_easeProjectileAccel(trail, ext, D_800BE9E4);
+    weapon_easeProjectileAccel(trail, ext, gFrameTicks);
     if (weapon_traceProjectile(trail, ext, gFrameDelta) == 0) {
         alive = FALSE;
     }
@@ -348,7 +348,7 @@ s32 weapon_isOtherLiveObject(Actor *obj, Actor *self) {
 }
 
 /* As weapon_isOtherLiveObject, and obj's unk127 must also be set (not 0xFF). */
-s32 func_151C2E94(Actor *obj, Actor *self) {
+s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -927,7 +927,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
     TimedEffect *effect;
 
     emitter = &owner->emitter;
-    emitter->timer -= D_800BE9E4;
+    emitter->timer -= gFrameTicks;
     if (emitter->timer < 0) {
         data.stream.angleX = emitter->angleX;
         data.stream.angleY = emitter->angleY;

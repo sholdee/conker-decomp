@@ -30,8 +30,8 @@ glabel boot_runFaultDebugger
     /* 7DEC 10007DEC 0C009894 */  jal        osViBlack
     /* 7DF0 10007DF0 00000000 */   nop
     /* 7DF4 10007DF4 00C02025 */  or         $a0, $a2, $zero
-    /* 7DF8 10007DF8 3C048003 */  lui        $a0, %hi(D_8002AE34)
-    /* 7DFC 10007DFC 8C84AE34 */  lw         $a0, %lo(D_8002AE34)($a0)
+    /* 7DF8 10007DF8 3C048003 */  lui        $a0, %hi(gFaultTextPos)
+    /* 7DFC 10007DFC 8C84AE34 */  lw         $a0, %lo(gFaultTextPos)($a0)
     /* 7E00 10007E00 28810240 */  slti       $at, $a0, 0x240
     /* 7E04 10007E04 1420000C */  bnez       $at, .L10007E38
     /* 7E08 10007E08 00000000 */   nop
@@ -76,8 +76,8 @@ glabel boot_runFaultDebugger
     /* 7EA0 10007EA0 0C001F1D */  jal        boot_drawHexWord
     /* 7EA4 10007EA4 00000000 */   nop
     /* 7EA8 10007EA8 20840020 */  addi       $a0, $a0, 0x20 /* handwritten instruction */
-    /* 7EAC 10007EAC 3C018003 */  lui        $at, %hi(D_8002AE34)
-    /* 7EB0 10007EB0 AC24AE34 */  sw         $a0, %lo(D_8002AE34)($at)
+    /* 7EAC 10007EAC 3C018003 */  lui        $at, %hi(gFaultTextPos)
+    /* 7EB0 10007EB0 AC24AE34 */  sw         $a0, %lo(gFaultTextPos)($at)
     /* 7EB4 10007EB4 3C058003 */  lui        $a1, %hi(D_8002ADFF)
     /* 7EB8 10007EB8 24A5ADFF */  addiu      $a1, $a1, %lo(D_8002ADFF)
     /* 7EBC 10007EBC 24040056 */  addiu      $a0, $zero, 0x56
@@ -125,8 +125,8 @@ glabel boot_runFaultDebugger
     /* 7F64 10007F64 00000000 */   nop
     /* 7F68 10007F68 0C0093C4 */  jal        osWritebackDCacheAll
     /* 7F6C 10007F6C 00000000 */   nop
-  glabel func_10007F70
-    /* 7F70 10007F70 08001FDC */  j          func_10007F70
+  glabel boot_faultDebuggerHang
+    /* 7F70 10007F70 08001FDC */  j          boot_faultDebuggerHang
     /* 7F74 10007F74 00000000 */   nop
   .L10007F78:
     /* 7F78 10007F78 0C0098B0 */  jal        osPiGetStatus
@@ -211,7 +211,7 @@ glabel boot_runFaultDebugger
     /* 80A8 100080A8 24010020 */  addiu      $at, $zero, 0x20
     /* 80AC 100080AC 1621FFFA */  bne        $s1, $at, .L10008098
     /* 80B0 100080B0 00000000 */   nop
-    /* 80B4 100080B4 0C000508 */  jal        func_10001420
+    /* 80B4 100080B4 0C000508 */  jal        libc_clearPageSlots
     /* 80B8 100080B8 00000000 */   nop
     /* 80BC 100080BC 0C0016F8 */  jal        boot_resetPageBitmap
     /* 80C0 100080C0 00000000 */   nop
@@ -230,8 +230,8 @@ glabel boot_runFaultDebugger
     /* 80EC 100080EC 00000000 */   nop
     /* 80F0 100080F0 0C0093C4 */  jal        osWritebackDCacheAll
     /* 80F4 100080F4 00000000 */   nop
-    /* 80F8 100080F8 3C018003 */  lui        $at, %hi(D_8002AE34)
-    /* 80FC 100080FC AC20AE34 */  sw         $zero, %lo(D_8002AE34)($at)
+    /* 80F8 100080F8 3C018003 */  lui        $at, %hi(gFaultTextPos)
+    /* 80FC 100080FC AC20AE34 */  sw         $zero, %lo(gFaultTextPos)($at)
     /* 8100 10008100 3C1D8004 */  lui        $sp, %hi(gFaultDebuggerSavedSp)
     /* 8104 10008104 8FBDC8FC */  lw         $sp, %lo(gFaultDebuggerSavedSp)($sp)
   .L10008108:
@@ -283,7 +283,7 @@ glabel D_8002AE1F
     /* 2AE2C 8002AE2C 20444542 */ .word 0x20444542
     /* 2AE30 8002AE30 55470000 */ .word 0x55470000
 
-glabel D_8002AE34
+glabel gFaultTextPos
     /* 2AE34 8002AE34 00000000 */ .word 0x00000000
     /* 2AE38 8002AE38 00000000 */ .word 0x00000000
     /* 2AE3C 8002AE3C 00000000 */ .word 0x00000000
@@ -294,7 +294,7 @@ glabel D_8002AE34
 glabel gDebugStatusCode
     /* 8003C8E0 */ .space 0x08
 
-glabel D_8003C8E8
+glabel gFaultTlbEntry
     /* 8003C8E8 */ .space 0x10
 
 /* The saved $ra and $sp of boot_runFaultDebugger */

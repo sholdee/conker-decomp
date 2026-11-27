@@ -33,7 +33,7 @@ static Vec3f gWatcherRootOffset = { 0.0f, 0.0f, 0.0f }; /* the point below the c
 const struct CeilingProbe {
     f32 rayStart;
     f32 defaultCeiling;
-} D_800A0450 = { 5000.0f, 5000.0f };
+} gWatcherCeilingProbe = { 5000.0f, 5000.0f };
 
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
 void effect_keepWatcherFloorSprite(Watcher *watcher) {
@@ -60,7 +60,7 @@ s32 effect_updateFlickerSprite(FlickerSprite *sprite) {
         alive = 0;
     }
     flicker->keepAlive = 0;
-    flicker->timer -= D_800BE9E4;
+    flicker->timer -= gFrameTicks;
     if (flicker->timer < 0) {
         flicker->timer = (math_random() % (flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = math_randomFloat() * flicker->targetRange + flicker->minTarget;
@@ -108,12 +108,12 @@ WatcherEmitter *effect_attachRisingEmitter(Actor *character, Watcher *watcher) {
         link.owner = &watcher->watcher;
         link.keepAlive = 1;
         pos.x = character->xpos;
-        pos.y = character->ypos + D_800A0450.rayStart;
+        pos.y = character->ypos + gWatcherCeilingProbe.rayStart;
         pos.z = character->zpos;
         if (collision_probeFloorSurfBCached(&pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
             link.ceiling = watcher->watcher.hit.height;
         } else {
-            link.ceiling = character->ypos + D_800A0450.defaultCeiling;
+            link.ceiling = character->ypos + gWatcherCeilingProbe.defaultCeiling;
         }
     }
     desc.target[0] = 0;

@@ -5,8 +5,8 @@
 
 /* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
-    NULL,           func_1514E00C, func_1514E194, func_1514E31C, func_1514E5B8, func_1514E668,
-    func_1514E508,  func_1514E718, func_1514E7C8, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
+    NULL,           func_1514E00C, func_1514E194, func_1514E31C, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
+    effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     func_1514D64C,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, func_1514D564, func_1514DA38,
     func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInLevel20, func_1514DE88, func_1514DB98,
 };
@@ -15,8 +15,8 @@ static void (*gAttachSpawnFuncs[])(Actor *) = {
 static void (*gAttachSpawnFuncsById[])(Actor *) = {
     effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
     func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
-    func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
-    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, level_spawnBoltEmitter, effect_attachTrailToBone1,
+    func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
+    func_1514DC98, func_1514DC38, effect_attachBone2Light, effect_attachFrontendFireImpEffect, level_spawnBoltEmitter, effect_attachTrailToBone1,
     effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, func_1514F590, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
     particle_spawnBoneBurstEmitter, level_attachDripEmitter, func_1514DC5C, effect_attachTrailToBone4, func_1514D978,
 };
@@ -25,12 +25,12 @@ static void (*gAttachSpawnFuncsById[])(Actor *) = {
    prototype: the handlers take the attachment's handle as what it is. */
 static void (*gAttachDestroyFuncs[])() = { effect_releaseAttachedObject, effect_releaseAttachedEmitter, effect_releaseAttachedPointLight };
 static s32 (*gAttachMessageFuncs[])() = {
-    effect_handleToggleMessage, effect_handleGlowToggleMessage, func_1514E9DC, func_1514E9FC,
+    effect_handleToggleMessage, effect_handleGlowToggleMessage, effect_forwardGlowToggleMessage, effect_forwardToggleMessage,
     effect_handleEmitterTableMessage, effect_handleRopeRiderMessage, effect_handleLightMessage, effect_acceptAnyMessage,
 };
 
 /* Emitter offsets. */
-static const Vec3f D_800A58A0 = { 0.0f, 75.0f, 96.0f };
+static const Vec3f gBone2LightOffset = { 0.0f, 75.0f, 96.0f };
 static const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
 static const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
 static const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
@@ -752,8 +752,8 @@ void func_1514DB98(Actor *obj) {
     effect_attachTankEffects(obj);
 }
 
-void func_1514DBB8(Actor *obj) {
-    light_createAttached(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+void effect_attachBone2Light(Actor *obj) {
+    light_createAttached(obj, 2, &gBone2LightOffset, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 void func_1514DC38(Actor *obj) {
@@ -842,7 +842,7 @@ void func_1514DE94(Actor *obj) {
     light_createBeam(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
-    if (D_800BE9B4 == 0) {
+    if (gLevelLoadState == 0) {
         part->hookState = 2400;
     }
     effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
@@ -1025,7 +1025,7 @@ void func_1514E31C(Actor *obj) {
 }
 
 /** Attaches the "Charactereffect 0" effect (type 0xD) and a light_createPointLight object tracking obj's position (type 0x18). */
-void func_1514E508(Actor *obj) {
+void effect_attachCharacterEffect0(Actor *obj) {
     void *handle;
     s32 pos;
 
@@ -1036,7 +1036,7 @@ void func_1514E508(Actor *obj) {
     effect_attach(handle, obj, 0x18);
 }
 
-void func_1514E5B8(Actor *obj) {
+void effect_attachCharacterEffectMinus1(Actor *obj) {
     void *handle;
     s32 pos;
 
@@ -1047,7 +1047,7 @@ void func_1514E5B8(Actor *obj) {
     effect_attach(handle, obj, 0x18);
 }
 
-void func_1514E668(Actor *obj) {
+void effect_attachCharacterEffect1(Actor *obj) {
     void *handle;
     s32 pos;
 
@@ -1058,7 +1058,7 @@ void func_1514E668(Actor *obj) {
     effect_attach(handle, obj, 0x18);
 }
 
-void func_1514E718(Actor *obj) {
+void effect_attachCharacterEffect2(Actor *obj) {
     void *handle;
     s32 pos;
 
@@ -1069,7 +1069,7 @@ void func_1514E718(Actor *obj) {
     effect_attach(handle, obj, 0x18);
 }
 
-void func_1514E7C8(Actor *obj) {
+void effect_attachCharacterEffect3(Actor *obj) {
     void *handle;
 
     handle = particle_startActorEmitter(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
@@ -1172,11 +1172,11 @@ s32 effect_handleGlowToggleMessage(s32 handle, s32 msg, s32 arg) {
     return 1;
 }
 
-s32 func_1514E9DC(s32 handle, s32 msg, s32 arg) {
+s32 effect_forwardGlowToggleMessage(s32 handle, s32 msg, s32 arg) {
     return effect_handleGlowToggleMessage(handle, msg, arg);
 }
 
-s32 func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
+s32 effect_forwardToggleMessage(ToggleTarget *target, s32 msg, s32 arg) {
     return effect_handleToggleMessage(target, msg, arg);
 }
 
@@ -1486,7 +1486,7 @@ void effect_attachTankEffects(Actor *obj) {
     }
 }
 
-void func_1514F308(Actor *obj) {
+void effect_attachBone5LightBeam(Actor *obj) {
     const Vec3f pointA = { 52.0f, 0.0f, 80.0f };
     const Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
@@ -1513,7 +1513,7 @@ void func_1514F3CC(Actor *obj) {
     }
 }
 
-void func_1514F44C(Actor *obj) {
+void effect_attachFrontendFireImpEffect(Actor *obj) {
     void *handle;
 
     handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");

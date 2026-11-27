@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-static const Vec3f D_800A1950 = { 0.0f, 24.0f, 11.0f };
-static const Vec3f D_800A195C = { 0.0f, 71.0f, 9.0f };
+static const Vec3f gBoneBurstStartOffset = { 0.0f, 24.0f, 11.0f };
+static const Vec3f gBoneBurstDirOffset = { 0.0f, 71.0f, 9.0f };
 
 ZoneNode *D_800D9A40;
 
@@ -113,8 +113,8 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                     Vec3f *dst[2];
                     Vec3f dir;
 
-                    src[0] = &D_800A1950;
-                    src[1] = &D_800A195C;
+                    src[0] = &gBoneBurstStartOffset;
+                    src[1] = &gBoneBurstDirOffset;
                     dst[0] = &def.pos;
                     dst[1] = &dir;
                     math_transformOffsets(src, dst, target->ob_matrix_ptr + 15, 2);
@@ -185,7 +185,7 @@ s32 particle_updateBoneBurstParticle(BoneBurstParticle *particle) {
         return 0;
     }
 
-    math_transformOffset(&D_800A1950, &particle->head.def.pos, target->ob_matrix_ptr + 15);
+    math_transformOffset(&gBoneBurstStartOffset, &particle->head.def.pos, target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;

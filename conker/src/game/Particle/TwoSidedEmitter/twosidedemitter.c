@@ -14,17 +14,17 @@ typedef struct {
 } CameraArg_150FB8C0;
 
 /* Per side (0, 1): the bone and the bone-space points of particle_spawnSideEffect's effect, for most objects... */
-static const u8 D_800A1DD0[2] = { 5, 7 };
-static const Vec3f D_800A1DD4[2] = { { 13.0f, 0.0f, 200.0f }, { -13.0f, 0.0f, 200.0f } };
-static const Vec3f D_800A1DEC[2] = { { 13.0f, 0.0f, 300.0f }, { -13.0f, 0.0f, 300.0f } };
-static const Vec3f D_800A1E04[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
-static const Vec3f D_800A1E1C[2] = { { 13.0f, 50.0f, 220.0f }, { -13.0f, 50.0f, 220.0f } };
+static const u8 gSideEffectBones[2] = { 5, 7 };
+static const Vec3f gSideEffectOrigins[2] = { { 13.0f, 0.0f, 200.0f }, { -13.0f, 0.0f, 200.0f } };
+static const Vec3f gSideEffectDirPoints[2] = { { 13.0f, 0.0f, 300.0f }, { -13.0f, 0.0f, 300.0f } };
+static const Vec3f gSideEffectEdgeAPoints[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
+static const Vec3f gSideEffectEdgeBPoints[2] = { { 13.0f, 50.0f, 220.0f }, { -13.0f, 50.0f, 220.0f } };
 /* ... and for character type 0x23. */
-static const u8 D_800A1E34[2] = { 3, 2 };
-static const Vec3f D_800A1E38[2] = { { 0.0f, 0.0f, 200.0f }, { 0.0f, 0.0f, 200.0f } };
-static const Vec3f D_800A1E50[2] = { { 0.0f, 0.0f, 300.0f }, { 0.0f, 0.0f, 300.0f } };
-static const Vec3f D_800A1E68[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
-static const Vec3f D_800A1E80[2] = { { 0.0f, 50.0f, 220.0f }, { 0.0f, 50.0f, 220.0f } };
+static const u8 gSideEffectBonesType23[2] = { 3, 2 };
+static const Vec3f gSideEffectOriginsType23[2] = { { 0.0f, 0.0f, 200.0f }, { 0.0f, 0.0f, 200.0f } };
+static const Vec3f gSideEffectDirPointsType23[2] = { { 0.0f, 0.0f, 300.0f }, { 0.0f, 0.0f, 300.0f } };
+static const Vec3f gSideEffectEdgeAPointsType23[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
+static const Vec3f gSideEffectEdgeBPointsType23[2] = { { 0.0f, 50.0f, 220.0f }, { 0.0f, 50.0f, 220.0f } };
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
  * ob_matrix_ptr matrices; when the target found by event_getFirstLiveOwnedObject has unk197 set, the effect is aimed at the point
@@ -83,22 +83,22 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         return;
     }
     if (obj->character_type == 0x23) {
-        srcPoints[0] = &D_800A1E38[side];
+        srcPoints[0] = &gSideEffectOriginsType23[side];
         if (useTarget) {
-            srcPoints[1] = &D_800A1E68[side];
+            srcPoints[1] = &gSideEffectEdgeAPointsType23[side];
         } else {
-            srcPoints[1] = &D_800A1E50[side];
+            srcPoints[1] = &gSideEffectDirPointsType23[side];
         }
-        srcPoints[2] = &D_800A1E80[side];
-        matrix = &obj->ob_matrix_ptr[D_800A1E34[side]];
+        srcPoints[2] = &gSideEffectEdgeBPointsType23[side];
+        matrix = &obj->ob_matrix_ptr[gSideEffectBonesType23[side]];
     } else {
         localPoint.x = (13.0f - (1.0f + math_randomFloat() * 6.0f)) * (side ? -1 : 1);
-        localPoint.y = D_800A1DEC[side].y;
-        localPoint.z = D_800A1DEC[side].z;
-        srcPoints[0] = &D_800A1DD4[side];
-        srcPoints[1] = useTarget ? &D_800A1E04[side] : &localPoint;
-        srcPoints[2] = &D_800A1E1C[side];
-        matrix = &obj->ob_matrix_ptr[D_800A1DD0[side]];
+        localPoint.y = gSideEffectDirPoints[side].y;
+        localPoint.z = gSideEffectDirPoints[side].z;
+        srcPoints[0] = &gSideEffectOrigins[side];
+        srcPoints[1] = useTarget ? &gSideEffectEdgeAPoints[side] : &localPoint;
+        srcPoints[2] = &gSideEffectEdgeBPoints[side];
+        matrix = &obj->ob_matrix_ptr[gSideEffectBones[side]];
     }
     dstPoints[0] = &origin;
     if (useTarget) {
@@ -169,8 +169,8 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             } else {
                 trailCameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
             }
-            effect_spawnBoneBeamParticle(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? &D_800A1E38[side] : &D_800A1DD4[side],
-                          (obj->character_type == 0x23) ? &D_800A1E50[side] : &D_800A1DEC[side], &trailParams,
+            effect_spawnBoneBeamParticle(obj, (obj->character_type == 0x23) ? gSideEffectBonesType23[side] : gSideEffectBones[side], (obj->character_type == 0x23) ? &gSideEffectOriginsType23[side] : &gSideEffectOrigins[side],
+                          (obj->character_type == 0x23) ? &gSideEffectDirPointsType23[side] : &gSideEffectDirPoints[side], &trailParams,
                           (math_random() % 3U) + 4, (math_random() % 101U) + 155, (math_randomFloat() * 1012.0f) + 1497.0f, &origin,
                           trailCameraMask, 0, -1, arg4, arg5);
         }
@@ -324,7 +324,7 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
     if (state->unk16 == -1) {
         return;
     }
-    state->unk14 -= D_800BE9E4;
+    state->unk14 -= gFrameTicks;
     if (state->unk14 < 0) {
         spark.flags = 1;
         math_random();

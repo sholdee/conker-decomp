@@ -14,7 +14,7 @@ void boot_runGame(void) {
     osCreateMesgQueue(&gGameMesgQueue, gGameMesgBuf, 16);
     gTaskDoneMsgs[0].type = OS_SC_DONE_MSG;
     gTaskDoneMsgs[1].type = OS_SC_DONE_MSG;
-    D_800BE617 = 0;
+    gViewLayoutChanged = 0;
     sched_init(&gGameMesgQueue);
     level_readTextureSizes();
     gTextLanguage = 0;
@@ -30,9 +30,9 @@ void boot_runGame(void) {
     screen_resetEffects();
     text_clearQueue();
     gLevelChangeRequest = 5;
-    D_800BEA04 = 0;
-    D_800BEA00 = 1;
-    D_800BEAAA = 1;
+    gNextMatchMode = 0;
+    gNextMatchPlayerMask = 1;
+    gCullLevelDisplayList = 1;
     script_reallocTaskDoneBits();
 
     // matching: `while (1)`, not `do {} while (1)`; only this form 32-byte-aligns the dead epilogue
@@ -47,7 +47,7 @@ void boot_runGame(void) {
                 if (gFrontEndState == 2) {
                     math_seedRandom(0x81280783);
                 }
-                func_15007A70(D_800BEA04, D_800BEA00, gNextLevel);
+                game_startMatch(gNextMatchMode, gNextMatchPlayerMask, gNextLevel);
                 /* fallthrough */
             case 3:
                 game_loadLevel();
@@ -57,7 +57,7 @@ void boot_runGame(void) {
                 break;
         }
         sched_sendRetraceMsg();
-        D_800BE9E8 = 0;
+        gLastPlayerIndex = 0;
         game_mainLoop();
     }
 }

@@ -11,7 +11,7 @@ f32 gRaceTargetX; // camera target circling the actor until the start
 f32 gRaceTargetY;
 f32 gRaceTargetZ;
 s8 gRaceDirection;  // race direction: 0 = towards higher node params
-s8 D_800D23A9;
+s8 gRacersUpdated;
 
 #include "functions.h"
 #include "variables.h"
@@ -210,7 +210,7 @@ void mp_initRacers(s32 startId, s32 numRacers, s32 numSpare) {
         if (i < gNumRacers) {
             racer->actorIndex = i;
         }
-        racer->state = i >= D_8008FD90;
+        racer->state = i >= gHumanCount;
         racer->lapLength = lapLength;
     }
 
@@ -322,7 +322,7 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
         } while (again);
         text_setFlags(0x80);
         racer->prevTicks = racer->ticks;
-        racer->ticks = D_800BE9E4;
+        racer->ticks = gFrameTicks;
         adist = (obj->old_xpos * dx + dz * obj->old_zpos + d) - dist;
         racer->speed = (adist * 4.0f) / racer->prevTicks;
         if (racer->state != 0) {
@@ -373,9 +373,9 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
             }
         }
         racer->started = started;
-        D_800D23A9 = 1;
+        gRacersUpdated = 1;
         if (racer->state == 0 && racer->started > 0 && !(gEliminatedPlayers & (1 << racer->actorIndex))) {
-            racer->raceTime += D_800BE9E4;
+            racer->raceTime += gFrameTicks;
         }
         if (racer->state >= 2 && obj->mv->bot == 0) {
             mp_endRace(racer, obj, 13);
@@ -420,7 +420,7 @@ void mp_updateRaceCameras(void) {
     Actor *obj;
     s32 i;
 
-    D_800D23A9 = 0;
+    gRacersUpdated = 0;
     if (gRacers == NULL) {
         return;
     }
@@ -937,7 +937,7 @@ s32 mp_advanceRacer(Racer *racer, f32 step) {
         }
         if (racer->maxLap < racer->lap) {
             racer->maxLap = racer->lap;
-            if (idx < D_8008FD90 && racer->state == 0 && racer->raceTime > 0) {
+            if (idx < gHumanCount && racer->state == 0 && racer->raceTime > 0) {
                 if (lim >= racer->maxLap) {
                     t = racer->raceTime - racer->lapStartTime;
                     if (t > 32000) {
@@ -1118,7 +1118,7 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
     if (obj->CameraPtr == NULL) {
         return;
     }
-    if (D_8008FDBC & 0x40) {
+    if (gMatchFlags & 0x40) {
         param = 1;
     } else {
         param = 0;
@@ -1260,7 +1260,7 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
         camera_queueMessage(obj->CameraPtr, 5, (void *)cam->CNumber);
         racer->camState = 1;
     }
-    racer->camT += 0.01700000092f * D_800BE9E4;
+    racer->camT += 0.01700000092f * gFrameTicks;
     if (racer->camT >= 1.0f) {
         if (racer->camNodes[2] == 0xFF) {
             racer->camT = 1.0f;

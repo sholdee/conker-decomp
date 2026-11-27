@@ -3,10 +3,10 @@ boot_romEntry	0x10001000	80	init	hasm	b	build/src/init/Boot/EntryPoint/entrypoin
 boot_entry	0x10001050	168	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_idleThread	0x100010F8	156	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_mainThread	0x10001194	652	init	c		build/src/init/Boot/BootMain/bootmain.c.o
-func_10001420	0x10001420	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-func_10001444	0x10001444	92	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-func_100014A0	0x100014A0	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-func_100014C4	0x100014C4	140	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+libc_clearPageSlots	0x10001420	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+libc_resetPaging	0x10001444	92	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+libc_stopMainThread	0x100014A0	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+libc_reinitPaging	0x100014C4	140	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldtob	0x10001550	1184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldunscale	0x100019F0	184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Genld	0x10001AA8	1480	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
@@ -60,11 +60,11 @@ osMotorInit	0x100057E0	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
 _MakeMotorData	0x10005948	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
 boot_mapCodeSegment	0x10005AB0	84	init	hasm	b	build/src/init/Boot/Paging/pagesetup.s.o
 boot_initPaging	0x10005B04	56	init	hasm	b,d	build/src/init/Boot/Paging/pagesetup.s.o
-func_10005B3C	0x10005B3C	164	init	hasm	b,d	build/src/init/Boot/Paging/pagesetup.s.o
+boot_allocPagePool	0x10005B3C	164	init	hasm	b,d	build/src/init/Boot/Paging/pagesetup.s.o
 boot_resetPageBitmap	0x10005BE0	76	init	hasm	k	build/src/init/Boot/Paging/pagebitmap.s.o
 boot_handleGamePageFault	0x10005C2C	244	init	hasm	b,d,f	build/src/init/Boot/Paging/pagefault.s.o
 boot_loadGamePage	0x10005D20	976	init	hasm	b,d,f	build/src/init/Boot/Paging/pagefault.s.o
-func_100060F0	0x100060F0	72	init	hasm	b,d,f	build/src/init/Boot/Paging/pagefault.s.o
+boot_invalidateLoadedPage	0x100060F0	72	init	hasm	b,d,f	build/src/init/Boot/Paging/pagefault.s.o
 boot_evictGamePage	0x10006138	192	init	hasm	b,d,f	build/src/init/Boot/Paging/pagefault.s.o
 boot_invalidateTlbEntries	0x100061F8	72	init	hasm	b,c	build/src/init/Boot/Paging/pagefault.s.o
 boot_decompress	0x10006240	28	init	hasm	f	build/src/init/Boot/Inflate/decompress.s.o
@@ -103,10 +103,10 @@ boot_drawString	0x10007CC4	100	init	hasm	b,h	build/src/init/Boot/Exception/excep
 boot_drawGlyph	0x10007D28	120	init	hasm	c	build/src/init/Boot/Exception/exceptasm.s.o
 boot_debugTrap	0x10007DA0	12	init	hasm	b	build/src/init/Boot/DebugTrap/debugtrap.s.o
 boot_runFaultDebugger	0x10007DAC	452	init	hasm	b,d	build/src/init/Boot/FaultDebugger/faultdebugger.s.o
-func_10007F70	0x10007F70	432	init	hasm	b,d	build/src/init/Boot/FaultDebugger/faultdebugger.s.o
+boot_faultDebuggerHang	0x10007F70	432	init	hasm	b,d	build/src/init/Boot/FaultDebugger/faultdebugger.s.o
 osMapTLBRdb	0x10008120	96	init	hasm	b,c	build/src/libultra/os/maptlbrdb.s.o
 audio_init	0x10008180	856	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-func_100084D8	0x100084D8	100	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_playSeqIfStopped	0x100084D8	100	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_getSeqState	0x1000853C	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_setSeqMsgQueue	0x10008570	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 func_100085A4	0x100085A4	20	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
@@ -124,13 +124,13 @@ audio_setChannelMask	0x10008988	196	init	c		build/src/init/Audio/SeqPlayer/seqpl
 func_10008A4C	0x10008A4C	72	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 func_10008A94	0x10008A94	152	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 func_10008B2C	0x10008B2C	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-func_10008B60	0x10008B60	96	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-func_10008BC0	0x10008BC0	68	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_setSeqFxParam	0x10008B60	96	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_setSeqFxMix	0x10008BC0	68	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_findSeqLoopMarkers	0x10008C04	104	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_jumpToSeqMarker	0x10008C6C	124	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_playSequence	0x10008CE8	504	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_setSeqVolume	0x10008EE0	68	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-func_10008F24	0x10008F24	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_endSeqTrack	0x10008F24	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_stopSeq	0x10008F58	56	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_createAudioMgr	0x10008F90	1084	init	c		build/src/init/Audio/AudioMgr/audiomgr.c.o
 audio_stopThread	0x100093CC	52	init	c		build/src/init/Audio/AudioMgr/audiomgr.c.o
@@ -171,7 +171,7 @@ music_updateSeq62	0x1000C7E8	332	init	c		build/src/init/Audio/Tune/tune.c.o
 music_updateSeq76	0x1000C934	228	init	c		build/src/init/Audio/Tune/tune.c.o
 music_updateSeq84	0x1000CA18	204	init	c		build/src/init/Audio/Tune/tune.c.o
 music_updateSeq88	0x1000CAE4	196	init	c		build/src/init/Audio/Tune/tune.c.o
-func_1000CBA8	0x1000CBA8	72	init	c		build/src/init/Audio/Tune/tune.c.o
+music_fadeFirstTwoChannels	0x1000CBA8	72	init	c		build/src/init/Audio/Tune/tune.c.o
 music_setDuck	0x1000CBF0	100	init	c		build/src/init/Audio/Tune/tune.c.o
 music_updateChannelVolume	0x1000CC54	236	init	c		build/src/init/Audio/Tune/tune.c.o
 music_stepVolume	0x1000CD40	96	init	c		build/src/init/Audio/Tune/tune.c.o
@@ -207,11 +207,11 @@ sound_actorSound1DelayCallback	0x1000ECCC	212	init	c		build/src/init/Audio/Dynam
 sound_actorUntrackedDelayCallback	0x1000EDA0	208	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_followOwnerCallback	0x1000EE70	208	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopWhenSilentCallback	0x1000EF40	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000EFB4	0x1000EFB4	500	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_followOwnerAnimsCallback	0x1000EFB4	500	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_resetVoices	0x1000F1A8	160	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_initLevel	0x1000F248	392	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_isPlaying	0x1000F3D0	124	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000F44C	0x1000F44C	140	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_isLooping	0x1000F44C	140	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_isSoundPlaying	0x1000F4D8	144	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_pickVariant	0x1000F568	336	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_getNearestListenerVolume	0x1000F6B8	420	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
@@ -251,7 +251,7 @@ sound_getPlayingSound	0x1001147C	84	init	c		build/src/init/Audio/DynamicSound/dy
 sound_getPanVolumeAt	0x100114D0	340	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_updateRecords	0x10011624	1428	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_update	0x10011BB8	720	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_10011E88	0x10011E88	12	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_emptyInitLevel	0x10011E88	12	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_setMuted	0x10011E94	36	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_pickEffectVariant	0x10011EB8	232	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 audio_requestMixSelector	0x10011FA0	16	init	c		build/src/init/Audio/MixSelector/mixselector.c.o
@@ -552,7 +552,7 @@ corrupted	0x10028EE8	488	init	c		build/src/libultra/io/pfschecker.c.o
 music_init	0x15000000	144	game	c		build/src/game/Audio/LevelMusic/levelmusic.c.o
 func_15000090	0x15000090	32	game	c		build/src/game/Audio/LevelMusic/levelmusic.c.o
 music_startLevelMusic	0x150000B0	1584	game	c		build/src/game/Audio/LevelMusic/levelmusic.c.o
-func_150006E0	0x150006E0	608	game	c		build/src/game/Audio/LevelMusic/levelmusic.c.o
+music_initLevelViewState	0x150006E0	608	game	c		build/src/game/Audio/LevelMusic/levelmusic.c.o
 level_initTintWaves	0x15000940	384	game	c		build/src/game/Level/LevelTints/leveltints.c.o
 collision_clearUvWobbles	0x15000AC0	16	game	c		build/src/game/Collision/MapBackground/mapbackground.c.o
 collision_initMapBackground	0x15000AD0	2448	game	c		build/src/game/Collision/MapBackground/mapbackground.c.o
@@ -659,7 +659,7 @@ save_requestEraseSlot	0x15007750	40	game	c		build/src/game/Save/SaveData/savedat
 save_beginScan	0x15007778	184	game	c		build/src/game/Save/SaveData/savedata.c.o
 boot_runGame	0x15007830	496	game	c		build/src/game/Boot/GameMain/gamemain.c.o
 game_clearBss	0x15007A20	80	game	c		build/src/game/Game/ClearBss/clearbss.c.o
-func_15007A70	0x15007A70	204	game	c		build/src/game/Game/LevelStart/levelstart.c.o
+game_startMatch	0x15007A70	204	game	c		build/src/game/Game/LevelStart/levelstart.c.o
 game_loadLevel	0x15007B3C	1704	game	c		build/src/game/Game/LevelStart/levelstart.c.o
 game_clearLevelPointers	0x150081E4	76	game	c		build/src/game/Game/LevelStart/levelstart.c.o
 game_clearPendingCutscene	0x15008230	24	game	c		build/src/game/Game/LevelStart/levelstart.c.o
@@ -670,7 +670,7 @@ effect_clearHomingEffects	0x15008840	48	game	c		build/src/game/Effects/HomingRes
 effect_clearObjectLists	0x15008870	192	game	c		build/src/game/Effects/ObjectReset/objectreset.c.o
 effect_runResetCallbacks	0x15008930	160	game	c		build/src/game/Effects/ObjectReset/objectreset.c.o
 particle_resetStyleEmitterTimers	0x150089D0	64	game	c		build/src/game/Particle/StyleTimerReset/styletimerreset.c.o
-func_15008A10	0x15008A10	80	game	c		build/src/game/Screen/ResetEffects/reseteffects.c.o
+screen_resetKickableTargets	0x15008A10	80	game	c		build/src/game/Screen/ResetEffects/reseteffects.c.o
 screen_resetEffects	0x15008A60	304	game	c		build/src/game/Screen/ResetEffects/reseteffects.c.o
 effect_initQueue	0x15008B90	32	game	c		build/src/game/Effects/EffectQueueInit/effectqueueinit.c.o
 effect_allocQueue	0x15008BB0	48	game	c		build/src/game/Effects/EffectQueueInit/effectqueueinit.c.o
@@ -885,7 +885,7 @@ actor_setDefaultSizes	0x15016370	96	game	c		build/src/game/Actor/DefaultSize/def
 collision_loadCylinderSets	0x150163D0	304	game	c		build/src/game/Collision/CylinderSets/cylindersets.c.o
 text_resetContextText	0x15016500	136	game	c		build/src/game/Text/TextInit/textinit.c.o
 text_initAvailable	0x15016588	232	game	c		build/src/game/Text/TextInit/textinit.c.o
-func_15016670	0x15016670	16	game	c		build/src/game/Player/SpawnLoad/spawnload.c.o
+player_clearIdleRequests	0x15016670	16	game	c		build/src/game/Player/SpawnLoad/spawnload.c.o
 player_clearSpawnPoints	0x15016680	16	game	c		build/src/game/Player/SpawnLoad/spawnload.c.o
 player_loadSpawnPoints	0x15016690	448	game	c		build/src/game/Player/SpawnLoad/spawnload.c.o
 level_collectSpawnModelTypes	0x15016850	336	game	c		build/src/game/Level/SpawnTable/spawntable.c.o
@@ -915,18 +915,18 @@ func_150186B0	0x150186B0	32	game	hasm	d,h	build/src/game/Zone/CodeTree/codetree.
 game_mainLoop	0x150186D0	188	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_processMessage	0x1501878C	1648	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_updateActors	0x15018DFC	140	game	c		build/src/game/Game/MainLoop/mainloop.c.o
-func_15018E88	0x15018E88	128	game	c		build/src/game/Game/MainLoop/mainloop.c.o
-func_15018F08	0x15018F08	120	game	c		build/src/game/Game/MainLoop/mainloop.c.o
+game_drawObjectGroup0Pass	0x15018E88	128	game	c		build/src/game/Game/MainLoop/mainloop.c.o
+game_drawObjectGroup1Pass	0x15018F08	120	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_prepareView	0x15018F80	220	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_beginFrame	0x1501905C	212	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_updateFrame	0x15019130	740	game	c		build/src/game/Game/MainLoop/mainloop.c.o
-func_15019414	0x15019414	80	game	c		build/src/game/Game/MainLoop/mainloop.c.o
+game_updateAfterMainPass	0x15019414	80	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_drawWorldPass	0x15019464	316	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_drawMainPass	0x150195A0	860	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_drawScreenPass	0x150198FC	700	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_drawViewOverlays	0x15019BB8	272	game	c		build/src/game/Game/MainLoop/mainloop.c.o
-func_15019CC8	0x15019CC8	408	game	c		build/src/game/Game/MainLoop/mainloop.c.o
-func_15019E60	0x15019E60	192	game	c		build/src/game/Game/MainLoop/mainloop.c.o
+game_drawObjectGroup5Pass	0x15019CC8	408	game	c		build/src/game/Game/MainLoop/mainloop.c.o
+game_drawModeOverlayPass	0x15019E60	192	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 game_updateFrameTiming	0x15019F20	768	game	c		build/src/game/Game/MainLoop/mainloop.c.o
 view_allocViews	0x1501A220	380	game	c		build/src/game/View/Views/views.c.o
 view_initFrameDisplayLists	0x1501A39C	244	game	c		build/src/game/View/Views/views.c.o
@@ -1099,7 +1099,7 @@ attach_hookHeldProp	0x15031FC8	4592	game	c		build/src/game/Attach/Attachment/att
 attach_hookFollowAnim	0x150331B8	196	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_hookPlayOnce	0x1503327C	172	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_hookRemoveWhenDry	0x15033328	128	game	c		build/src/game/Attach/Attachment/attachment.c.o
-func_150333A8	0x150333A8	152	game	c		build/src/game/Attach/Attachment/attachment.c.o
+attach_hookRemoveInWater	0x150333A8	152	game	c		build/src/game/Attach/Attachment/attachment.c.o
 func_15033440	0x15033440	120	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_scrollTile	0x150334B8	272	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_attachInPlace	0x150335C8	452	game	c		build/src/game/Attach/Attachment/attachment.c.o
@@ -1173,7 +1173,7 @@ model_loadAnimTable	0x1503D660	276	game	c		build/src/game/Model/ModelLoad/modell
 model_loadDef	0x1503D774	144	game	c		build/src/game/Model/ModelLoad/modelload.c.o
 model_saveTexCoords	0x1503D804	384	game	c		build/src/game/Model/ModelLoad/modelload.c.o
 model_countTris	0x1503D984	184	game	c		build/src/game/Model/ModelLoad/modelload.c.o
-func_1503DA3C	0x1503DA3C	96	game	c		build/src/game/Model/ModelLoad/modelload.c.o
+model_getLevelChannel	0x1503DA3C	96	game	c		build/src/game/Model/ModelLoad/modelload.c.o
 model_loadForActor	0x1503DA9C	416	game	c		build/src/game/Model/ModelLoad/modelload.c.o
 model_loadTextures	0x1503DC3C	224	game	c		build/src/game/Model/ModelLoad/modelload.c.o
 model_freeTextures	0x1503DD1C	180	game	c		build/src/game/Model/ModelLoad/modelload.c.o
@@ -1402,8 +1402,8 @@ powf	0x1504A400	480	game	c		build/src/game/Math/Powf/powf.c.o
 tanf	0x1504A5E0	64	game	c		build/src/game/Math/Tanf/tanf.c.o
 logf	0x1504A620	272	game	c		build/src/game/Math/Logf/logf.c.o
 actor_updateAll	0x1504A730	1696	game	c		build/src/game/Actor/Movement/movement.c.o
-func_1504ADD0	0x1504ADD0	292	game	c		build/src/game/Actor/Movement/movement.c.o
-func_1504AEF4	0x1504AEF4	28	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_hideTanksInSniperView	0x1504ADD0	292	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_resolveAttachId	0x1504AEF4	28	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateAttachedObject	0x1504AF10	492	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateSwim	0x1504B0FC	2364	game	c		build/src/game/Actor/Movement/movement.c.o
 func_1504BA38	0x1504BA38	184	game	c		build/src/game/Actor/Movement/movement.c.o
@@ -1416,11 +1416,11 @@ actor_getDuckWalkAnim	0x1504C0B8	48	game	c		build/src/game/Actor/Movement/moveme
 actor_updateWalkAnim	0x1504C0E8	1900	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateButtonTimers	0x1504C854	104	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_interleaveUpdate	0x1504C8BC	296	game	c		build/src/game/Actor/Movement/movement.c.o
-func_1504C9E4	0x1504C9E4	124	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_stepAimPitch	0x1504C9E4	124	game	c		build/src/game/Actor/Movement/movement.c.o
 func_1504CA60	0x1504CA60	312	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updatePlayer	0x1504CB98	18000	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_tiltToGround	0x150511E8	880	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15051558	0x15051558	2996	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_updateSlopeTilt	0x15051558	2996	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_slopeToAngles	0x1505210C	340	game	c		build/src/game/Actor/Movement/movement.c.o
 func_15052260	0x15052260	424	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_leaveWater	0x15052408	80	game	c		build/src/game/Actor/Movement/movement.c.o
@@ -1432,12 +1432,12 @@ actor_updateCommon	0x15052590	464	game	c		build/src/game/Actor/Movement/movement
 actor_leanIntoTurn	0x15052760	360	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updatePathFollower	0x150528C8	1576	game	c		build/src/game/Actor/Movement/movement.c.o
 func_15052EF0	0x15052EF0	104	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15052F58	0x15052F58	68	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_setIntelWalk	0x15052F58	68	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_seatRider	0x15052F9C	736	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_startRiderJump	0x1505327C	436	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_handleDeath	0x15053430	452	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_checkDeath	0x150535F4	160	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15053694	0x15053694	60	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_fadeOutAndRemove	0x15053694	60	game	c		build/src/game/Actor/Movement/movement.c.o
 func_150536D0	0x150536D0	24	game	c		build/src/game/Actor/Movement/movement.c.o
 func_150536E8	0x150536E8	52	game	c		build/src/game/Actor/Movement/movement.c.o
 func_1505371C	0x1505371C	52	game	c		build/src/game/Actor/Movement/movement.c.o
@@ -1447,14 +1447,14 @@ func_150538CC	0x150538CC	4108	game	c		build/src/game/Actor/Movement/movement.c.o
 func_150548D8	0x150548D8	12	game	c		build/src/game/Actor/Movement/movement.c.o
 func_150548E4	0x150548E4	296	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_removeAtAnimEnd	0x15054A0C	80	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15054A5C	0x15054A5C	56	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15054A94	0x15054A94	1248	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15054F74	0x15054F74	748	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15055260	0x15055260	44	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_removeWeaponProp	0x15054A5C	56	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_updateWeaponProp	0x15054A94	1248	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_updateCharacterSpecials	0x15054F74	748	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_stickToTarget	0x15055260	44	game	c		build/src/game/Actor/Movement/movement.c.o
 func_1505528C	0x1505528C	1952	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_playImpactSound	0x15055A2C	224	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15055B0C	0x15055B0C	88	game	c		build/src/game/Actor/Movement/movement.c.o
-func_15055B64	0x15055B64	148	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_freezeUntilRemoval	0x15055B0C	88	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_updateFrozenRemoval	0x15055B64	148	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateSinkAway	0x15055BF8	144	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_startOverEdge	0x15055C88	192	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateOverEdge	0x15055D48	264	game	c		build/src/game/Actor/Movement/movement.c.o
@@ -1463,12 +1463,12 @@ actor_clampToPathRange	0x15056150	264	game	c		build/src/game/Actor/ActorMotion/a
 actor_followWaterLevel	0x15056258	164	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_moveToHost	0x150562FC	1600	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_isTargetInPathArea	0x1505693C	196	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
-func_15056A00	0x15056A00	264	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
+actor_startTurnAnim	0x15056A00	264	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_updateChaseAi	0x15056B08	6420	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_playMoveAnim	0x1505841C	468	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_updateStunned	0x150585F0	680	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_updateFloorAndWalls	0x15058898	1548	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
-func_15058EA4	0x15058EA4	128	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
+actor_setHoverGravity	0x15058EA4	128	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_floatOnWater	0x15058F24	540	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_updatePhysics	0x15059140	644	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_easePushVelocity	0x150593C4	128	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
@@ -1543,7 +1543,7 @@ actor_setBodyHeight	0x15062B50	52	game	c		build/src/game/Actor/ActorMotion/actor
 actor_updateHitRatios	0x15062B84	88	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_setScale	0x15062BDC	308	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_scrollTypeTexture	0x15062D10	276	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
-func_15062E24	0x15062E24	412	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
+actor_rotateModelTexCoords	0x15062E24	412	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_scrollVertexTexCoords	0x15062FC0	424	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_igniteTouching	0x15063168	236	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
 actor_respawnInPlace	0x15063254	316	game	c		build/src/game/Actor/ActorMotion/actormotion.c.o
@@ -1558,7 +1558,7 @@ actor_getWaistOffsetToLinked	0x150639BC	124	game	c		build/src/game/Actor/ActorAc
 actor_turnWaist	0x15063A38	300	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
 actor_throwGrenade	0x15063B64	252	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
 actor_findLinked	0x15063C60	548	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
-func_15063E84	0x15063E84	284	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
+actor_tryStartBAction	0x15063E84	284	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
 actor_fireShot	0x15063FA0	568	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
 actor_pickRandomAnim	0x150641D8	212	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
 func_150642AC	0x150642AC	1780	game	c		build/src/game/Actor/ActorActions/actoractions.c.o
@@ -1586,7 +1586,7 @@ event_runTimedEvents	0x1506AD30	580	game	c		build/src/game/Event/TimedEvent/time
 func_1506AF74	0x1506AF74	108	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506AFE0	0x1506AFE0	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B020	0x1506B020	80	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B070	0x1506B070	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState05	0x1506B070	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B078	0x1506B078	136	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_playAnim	0x1506B100	76	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_playNextAnim	0x1506B14C	76	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1596,20 +1596,20 @@ func_1506B228	0x1506B228	64	game	c		build/src/game/Event/TimedEvent/timedevent.c
 func_1506B268	0x1506B268	84	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B2BC	0x1506B2BC	108	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B328	0x1506B328	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B368	0x1506B368	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState15	0x1506B368	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_finishDeath	0x1506B370	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B3B0	0x1506B3B0	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState29	0x1506B3B0	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_pickTurnAnim	0x1506B3B8	308	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B4EC	0x1506B4EC	32	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B50C	0x1506B50C	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B520	0x1506B520	132	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B5A4	0x1506B5A4	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B5AC	0x1506B5AC	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState19	0x1506B5A4	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState20	0x1506B5AC	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B5B4	0x1506B5B4	24	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B5CC	0x1506B5CC	24	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B5E4	0x1506B5E4	80	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_pickPissedWalk	0x1506B634	268	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B740	0x1506B740	180	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_repickPissedWalk	0x1506B740	180	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B7F4	0x1506B7F4	56	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B82C	0x1506B82C	52	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B860	0x1506B860	44	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1620,7 +1620,7 @@ func_1506B91C	0x1506B91C	40	game	c		build/src/game/Event/TimedEvent/timedevent.c
 func_1506B944	0x1506B944	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506B984	0x1506B984	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_clearIntelAnimSeq	0x1506B9AC	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506B9C0	0x1506B9C0	140	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_markContextTextSeen	0x1506B9C0	140	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_playOrStopSound2	0x1506BA4C	140	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_playOrStopSound1	0x1506BAD8	140	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_startMp3Track	0x1506BB64	68	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1643,7 +1643,7 @@ event_stopSound2	0x1506C43C	36	game	c		build/src/game/Event/TimedEvent/timedeven
 event_spawnProjectile	0x1506C460	2572	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_fireProjectile	0x1506CE6C	1148	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnObjectAhead	0x1506D2E8	516	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506D4EC	0x1506D4EC	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyTimedEvent16	0x1506D4EC	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506D4F4	0x1506D4F4	68	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506D538	0x1506D538	56	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_resetBlink	0x1506D570	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1665,11 +1665,11 @@ func_1506DC10	0x1506DC10	148	game	c		build/src/game/Event/TimedEvent/timedevent.
 event_setTaskInt1	0x1506DCA4	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setTaskInt2	0x1506DCC0	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setEnergy	0x1506DCDC	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506DCF8	0x1506DCF8	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyTimedEvent45	0x1506DCF8	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_addNoShove	0x1506DD00	68	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_clearNoShove	0x1506DD44	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setMatrixPhysics	0x1506DD6C	76	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1506DDB8	0x1506DDB8	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyTimedEvent50	0x1506DDB8	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506DDC0	0x1506DDC0	68	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnWakePuffPair	0x1506DE04	128	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_1506DE84	0x1506DE84	616	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1788,10 +1788,10 @@ event_spawnShotEffectsWithAttacks	0x15071434	60	game	c		build/src/game/Event/Tim
 event_spawnShotEffects	0x15071470	60	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnShotEffectsWithRay	0x150714AC	60	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_150714E8	0x150714E8	92	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15071544	0x15071544	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1507158C	0x1507158C	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_150715D4	0x150715D4	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1507161C	0x1507161C	12	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_attachPointEmitter4	0x15071544	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_attachPointEmitter2	0x1507158C	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_attachPointEmitter3	0x150715D4	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimCommand91	0x1507161C	12	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnStripEffect	0x15071628	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_notifyFollowersGone	0x15071668	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnLargeObjBurst	0x15071690	92	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1801,7 +1801,7 @@ func_150717E0	0x150717E0	80	game	c		build/src/game/Event/TimedEvent/timedevent.c
 event_spawnDelayedBurst	0x15071830	48	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15071860	0x15071860	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15071888	0x15071888	92	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_150718E4	0x150718E4	180	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_spawnRandomBoneImpactBurst	0x150718E4	180	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnBonePointImpact0	0x15071998	52	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnBonePointImpact1	0x150719CC	52	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnBonePointImpact2	0x15071A00	52	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1815,7 +1815,7 @@ event_runActorEffects	0x15071DC8	44	game	c		build/src/game/Event/TimedEvent/time
 event_runSurfaceHandler	0x15071DF4	44	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setIntelAccel	0x15071E20	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setIntelDecel	0x15071E3C	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15071E58	0x15071E58	124	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_playIntelAnimSeq	0x15071E58	124	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15071ED4	0x15071ED4	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15071F14	0x15071F14	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_startDeathCountdown	0x15071F54	44	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1842,7 +1842,7 @@ func_15072968	0x15072968	76	game	c		build/src/game/Event/TimedEvent/timedevent.c
 event_setTaskInt0	0x150729B4	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_150729D0	0x150729D0	68	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15072A14	0x15072A14	44	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15072A40	0x15072A40	60	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_finishGrenadeThrow	0x15072A40	60	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15072A7C	0x15072A7C	124	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15072AF8	0x15072AF8	76	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_playFollowUpAnim	0x15072B44	604	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1854,7 +1854,7 @@ event_scaleAnimSpeed	0x15072E98	40	game	c		build/src/game/Event/TimedEvent/timed
 func_15072EC0	0x15072EC0	52	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setStunned	0x15072EF4	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15072F10	0x15072F10	316	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_1507304C	0x1507304C	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyTimedEvent120	0x1507304C	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073054	0x15073054	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073070	0x15073070	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_startCameraEnvelope	0x15073078	44	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1869,7 +1869,7 @@ event_setStickSpeed	0x15073A28	40	game	c		build/src/game/Event/TimedEvent/timede
 func_15073A50	0x15073A50	232	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setRopeSwing	0x15073B38	240	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_updateIdle	0x15073C28	32	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15073C48	0x15073C48	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState50	0x15073C48	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073C50	0x15073C50	104	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073CB8	0x15073CB8	60	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_setBodyRadius	0x15073CF4	64	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1879,7 +1879,7 @@ func_15073DA4	0x15073DA4	136	game	c		build/src/game/Event/TimedEvent/timedevent.
 func_15073E2C	0x15073E2C	120	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073EA4	0x15073EA4	120	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073F1C	0x15073F1C	56	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15073F54	0x15073F54	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyAnimState53	0x15073F54	8	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073F5C	0x15073F5C	28	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15073F78	0x15073F78	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_spawnThrownItem	0x15073FA0	1700	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1897,12 +1897,12 @@ event_setBreakStun	0x15074A44	40	game	c		build/src/game/Event/TimedEvent/timedev
 event_skipNextEventIfNotLifting	0x15074A6C	40	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 event_scaleByPlayerDistance	0x15074A94	232	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074B7C	0x15074B7C	92	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15074BD8	0x15074BD8	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15074BEC	0x15074BEC	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyHitReaction0	0x15074BD8	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_emptyHitReaction1	0x15074BEC	20	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074C00	0x15074C00	128	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074C80	0x15074C80	364	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15074DEC	0x15074DEC	24	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
-func_15074E04	0x15074E04	124	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_hitReactSetTaskInt1	0x15074DEC	24	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
+event_hitReactSetUpSmoke	0x15074E04	124	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074E80	0x15074E80	104	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074EE8	0x15074EE8	72	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
 func_15074F30	0x15074F30	24	game	c		build/src/game/Event/TimedEvent/timedevent.c.o
@@ -1917,14 +1917,14 @@ script_applyMoveFlags	0x15075498	176	game	c		build/src/game/Script/ObjScript/obj
 script_startMove	0x15075548	264	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_pickWaypoint	0x15075650	564	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_startTimedMove	0x15075884	180	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15075938	0x15075938	280	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_jumpIfWaypointCompare	0x15075938	280	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfWaypoint	0x15075A50	92	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_startMoveUnlessNear	0x15075AAC	180	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075B60	0x15075B60	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075B8C	0x15075B8C	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075BB8	0x15075BB8	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075BE8	0x15075BE8	60	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15075C24	0x15075C24	124	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_setYSpeedAndGravity	0x15075C24	124	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075CA0	0x15075CA0	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075CCC	0x15075CCC	64	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15075D0C	0x15075D0C	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -1944,7 +1944,7 @@ func_150761C8	0x150761C8	44	game	c		build/src/game/Script/ObjScript/objscript.c.
 func_150761F4	0x150761F4	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076220	0x15076220	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_playPlayerSound	0x15076250	96	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_150762B0	0x150762B0	36	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_fadeFirstTwoChannels	0x150762B0	36	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_spawnPuff	0x150762D4	108	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfNotHit	0x15076340	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076394	0x15076394	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -1954,12 +1954,12 @@ script_setHitRoute	0x150764E4	28	game	c		build/src/game/Script/ObjScript/objscri
 func_15076500	0x15076500	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setImmune	0x1507652C	112	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507659C	0x1507659C	100	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15076600	0x15076600	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_emptyCommand61	0x15076600	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076608	0x15076608	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setNoshoveFlags	0x15076624	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_clearNoshoveFlags	0x15076678	88	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_150766D0	0x150766D0	144	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15076760	0x15076760	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_emptyCommand70	0x15076760	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076768	0x15076768	140	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfBehindTarget	0x150767F4	232	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_findNearestInView	0x150768DC	640	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -1973,7 +1973,7 @@ script_setSpeed	0x15076D04	56	game	c		build/src/game/Script/ObjScript/objscript.
 script_setScale	0x15076D3C	184	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setType	0x15076DF4	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076E10	0x15076E10	56	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15076E48	0x15076E48	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_emptyCommand113	0x15076E48	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_startRandomJump	0x15076E50	240	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076F40	0x15076F40	56	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15076F78	0x15076F78	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -1981,11 +1981,11 @@ func_15076FA8	0x15076FA8	316	game	c		build/src/game/Script/ObjScript/objscript.c
 script_jumpIfTargetSlow	0x150770E4	144	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15077174	0x15077174	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_playUntrackedSound	0x15077190	96	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_150771F0	0x150771F0	164	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_runFadeCommand	0x150771F0	164	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setEnergy	0x15077294	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_breakIntoParts	0x150772E8	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15077318	0x15077318	68	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507735C	0x1507735C	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_doNothing	0x1507735C	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setAnimSpeedAndAccel	0x15077364	160	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15077404	0x15077404	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfAtDestination	0x150774B4	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -1993,7 +1993,7 @@ script_stepPathGraph	0x15077508	1000	game	c		build/src/game/Script/ObjScript/obj
 script_advanceWaypoint	0x150778F0	184	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_150779A8	0x150779A8	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfWithinRange	0x150779D4	204	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15077AA0	0x15077AA0	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_setHitRouteAlt	0x15077AA0	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15077ABC	0x15077ABC	88	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15077B14	0x15077B14	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_playSoundOnSelf	0x15077B44	60	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2041,7 +2041,7 @@ script_leapToTarget	0x15079570	236	game	c		build/src/game/Script/ObjScript/objsc
 script_restartById	0x1507965C	112	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_150796CC	0x150796CC	196	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15079790	0x15079790	240	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15079880	0x15079880	120	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_startMoveAtPlayerSpeed	0x15079880	120	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfAtWaypoint	0x150798F8	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_requestExpression	0x15079928	96	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setDefaultExpression	0x15079988	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2049,7 +2049,7 @@ script_playRandomSoundOnSelf	0x150799B4	116	game	c		build/src/game/Script/ObjScr
 func_15079A28	0x15079A28	48	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setSpawnDelay	0x15079A58	64	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_getAngleToPathStart	0x15079A98	152	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15079B30	0x15079B30	1012	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_changeObjectProperty	0x15079B30	1012	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setSpeedup	0x15079F24	44	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15079F50	0x15079F50	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_15079F6C	0x15079F6C	80	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2057,7 +2057,7 @@ script_steerByPlayerStick	0x15079FBC	324	game	c		build/src/game/Script/ObjScript
 script_setWaypointCoord	0x1507A100	100	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setSpeedFromPlayer	0x1507A164	172	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507A210	0x1507A210	96	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507A270	0x1507A270	52	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_breakIntoPartsVariant	0x1507A270	52	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507A2A4	0x1507A2A4	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_targetRandomOfType	0x1507A2F8	188	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507A3B4	0x1507A3B4	24	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2066,7 +2066,7 @@ script_getArgWord	0x1507A3E8	64	game	c		build/src/game/Script/ObjScript/objscrip
 func_1507A428	0x1507A428	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507A47C	0x1507A47C	88	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507A4D4	0x1507A4D4	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507A528	0x1507A528	248	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_changeWaypointDirection	0x1507A528	248	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfAngleInRange	0x1507A620	220	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_getPadButtons	0x1507A6FC	32	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfButtonsHeld	0x1507A71C	88	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2095,19 +2095,19 @@ func_1507B040	0x1507B040	24	game	c		build/src/game/Script/ObjScript/objscript.c.
 script_commandOwnedObject	0x1507B058	260	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setNojump	0x1507B15C	28	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setBodySize	0x1507B178	188	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B234	0x1507B234	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B280	0x1507B280	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B2CC	0x1507B2CC	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B318	0x1507B318	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B364	0x1507B364	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B3B0	0x1507B3B0	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B3FC	0x1507B3FC	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B448	0x1507B448	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B494	0x1507B494	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B4E0	0x1507B4E0	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B52C	0x1507B52C	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range1800	0x1507B234	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range3000	0x1507B280	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound2Range1800	0x1507B2CC	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound2Range3000	0x1507B318	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range4000	0x1507B364	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound2Range4000	0x1507B3B0	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range8000	0x1507B3FC	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range1300	0x1507B448	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound2Range1300	0x1507B494	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound1Range800	0x1507B4E0	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_playSound2Range800	0x1507B52C	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507B578	0x1507B578	76	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507B5C4	0x1507B5C4	108	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_jumpIfContext	0x1507B5C4	108	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507B630	0x1507B630	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507B6E0	0x1507B6E0	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_pressButtons	0x1507B734	136	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2120,7 +2120,7 @@ script_jumpIfWaypointParam	0x1507B974	212	game	c		build/src/game/Script/ObjScrip
 script_playRandomUntrackedSound	0x1507BA48	136	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507BAD0	0x1507BAD0	40	game	c		build/src/game/Script/ObjScript/objscript.c.o
 func_1507BAF8	0x1507BAF8	40	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_1507BB20	0x1507BB20	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_emptyCommand108	0x1507BB20	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_getScript	0x1507BB28	236	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_runActor	0x1507BC14	412	game	c		build/src/game/Script/ObjScript/objscript.c.o
 anim_advance	0x1507BDB0	1148	game	c		build/src/game/Anim/AnimPlayback/animplayback.c.o
@@ -2141,8 +2141,8 @@ func_1507DB3C	0x1507DB3C	8	game	c		build/src/game/Actor/KillRespawn/killrespawn.
 actor_breakIntoParts	0x1507DB44	32	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 func_1507DB64	0x1507DB64	8	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 func_1507DB6C	0x1507DB6C	736	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
-func_1507DE4C	0x1507DE4C	196	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
-func_1507DF10	0x1507DF10	212	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
+actor_applyHeadShot	0x1507DE4C	196	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
+actor_applyPartHit	0x1507DF10	212	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 func_1507DFE4	0x1507DFE4	304	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 func_1507E114	0x1507E114	188	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 actor_getTrackPoint	0x1507E1D0	224	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
@@ -2281,8 +2281,8 @@ mp_loadGame	0x15089BC0	988	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_pickOpponentInRange	0x15089F9C	544	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_updateTargetList	0x1508A1BC	1344	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_update	0x1508A6FC	2712	game	c		build/src/game/Mp/MpGame/mpgame.c.o
-func_1508B194	0x1508B194	64	game	c		build/src/game/Mp/MpGame/mpgame.c.o
-func_1508B1D4	0x1508B1D4	56	game	c		build/src/game/Mp/MpGame/mpgame.c.o
+mp_getTeamKills	0x1508B194	64	game	c		build/src/game/Mp/MpGame/mpgame.c.o
+mp_clearTeamKills	0x1508B1D4	56	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_addZone	0x1508B20C	156	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_floodFillPath	0x1508B2A8	336	game	c		build/src/game/Mp/MpGame/mpgame.c.o
 mp_assignZoneNodes	0x1508B3F8	1476	game	c		build/src/game/Mp/MpGame/mpgame.c.o
@@ -2378,7 +2378,7 @@ script_autoSave	0x1509C3A0	116	game	c		build/src/game/Script/TaskSet/taskset.c.o
 func_1509C414	0x1509C414	44	game	c		build/src/game/Script/TaskSet/taskset.c.o
 script_cutsceneCommand	0x1509C440	904	game	c		build/src/game/Script/CutsceneCmd/cutscenecmd.c.o
 script_cutsceneQuery	0x1509C7C8	308	game	c		build/src/game/Script/CutsceneCmd/cutscenecmd.c.o
-func_1509C8FC	0x1509C8FC	276	game	c		build/src/game/Script/CutsceneCmd/cutscenecmd.c.o
+script_setAnchorAtObject	0x1509C8FC	276	game	c		build/src/game/Script/CutsceneCmd/cutscenecmd.c.o
 script_getTaskName	0x1509CA10	32	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_getTaskLevel	0x1509CA30	32	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_getTaskSpawnPoint	0x1509CA50	40	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
@@ -2393,21 +2393,21 @@ script_propagateTasksDone	0x1509CDDC	136	game	c		build/src/game/Script/EffectCmd
 script_markTasksDone	0x1509CE64	196	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_loadResourceTable	0x1509CF28	300	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_freeResourceTable	0x1509D054	56	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
-func_1509D08C	0x1509D08C	244	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
+script_areResourceDepsLoaded	0x1509D08C	244	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_startEffect	0x1509D180	1536	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_endEffect	0x1509D780	380	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_effectCommand	0x1509D8FC	704	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
 script_effectQuery	0x1509DBBC	340	game	c		build/src/game/Script/EffectCmd/effectcmd.c.o
-func_1509DD10	0x1509DD10	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
-func_1509DD20	0x1509DD20	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
-func_1509DD30	0x1509DD30	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
-func_1509DD40	0x1509DD40	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
+script_alwaysTrue0	0x1509DD10	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
+script_alwaysTrue1	0x1509DD20	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
+script_alwaysTrue2	0x1509DD30	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
+script_alwaysTrue13	0x1509DD40	16	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
 script_spawnSwarm	0x1509DD50	116	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
 script_destroySwarm	0x1509DDC4	56	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
 script_swarmCommand	0x1509DDFC	200	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
 script_swarmQuery	0x1509DEC4	92	game	c		build/src/game/Script/SwarmCmd/swarmcmd.c.o
 script_initSpringValue	0x1509DF20	148	game	c		build/src/game/Script/MiscCmd/misccmd.c.o
-func_1509DFB4	0x1509DFB4	16	game	c		build/src/game/Script/MiscCmd/misccmd.c.o
+script_emptyMiscEnd	0x1509DFB4	16	game	c		build/src/game/Script/MiscCmd/misccmd.c.o
 script_miscCommand	0x1509DFC4	1048	game	c		build/src/game/Script/MiscCmd/misccmd.c.o
 script_miscQuery	0x1509E3DC	612	game	c		build/src/game/Script/MiscCmd/misccmd.c.o
 script_streamCommand	0x1509E640	176	game	c		build/src/game/Script/MusicCmd/musiccmd.c.o
@@ -2419,7 +2419,7 @@ script_worldObjectQuery	0x1509ED74	636	game	c		build/src/game/Script/ObjectCmd/o
 script_playSound	0x1509EFF0	600	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_stopSound	0x1509F248	60	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_actorSoundCommand	0x1509F284	184	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
-func_1509F33C	0x1509F33C	24	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
+script_soundQuery	0x1509F33C	24	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_playRandomActorSound	0x1509F354	296	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_playRandomObjectSound	0x1509F47C	108	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_playRandomZoneSound	0x1509F4E8	192	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
@@ -2429,8 +2429,8 @@ script_stopActorSound	0x1509F660	80	game	c		build/src/game/Script/ObjectCmd/obje
 script_playPlainSound	0x1509F6B0	56	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_playSoundAtActor	0x1509F6E8	148	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_moveSoundToActor	0x1509F77C	132	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
-func_1509F800	0x1509F800	24	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
-func_1509F818	0x1509F818	56	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
+script_emptyQuery12	0x1509F800	24	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
+script_trapCommand12	0x1509F818	56	game	c		build/src/game/Script/ObjectCmd/objectcmd.c.o
 script_taskCommand	0x1509F850	1468	game	c		build/src/game/Script/TaskCmd/taskcmd.c.o
 script_taskQuery	0x1509FE0C	740	game	c		build/src/game/Script/TaskCmd/taskcmd.c.o
 script_resetTimers	0x150A00F0	172	game	c		build/src/game/Script/TimerCmd/timercmd.c.o
@@ -2504,14 +2504,14 @@ func_150A5790	0x150A5790	8	game	hasm	b,d,h	build/src/game/Gfx/CullLevelDl/cullle
 func_150A5798	0x150A5798	4	game	hasm	b,d,h	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 func_150A579C	0x150A579C	140	game	hasm	b,d,h	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 func_150A5828	0x150A5828	656	game	hasm	b,c,d,h	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
-func_150A5AB8	0x150A5AB8	216	game	hasm	c,h	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
+gfx_clipCodePoint	0x150A5AB8	216	game	hasm	c,h	build/src/game/Gfx/CullLevelDl/cullleveldl.s.o
 shadow_projectLevelFaces	0x150A5B90	248	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 func_150A5C88	0x150A5C88	444	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 shadow_projectPropFaces	0x150A5E44	324	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 func_150A5F88	0x150A5F88	28	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 func_150A5FA4	0x150A5FA4	288	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 func_150A60C4	0x150A60C4	120	game	hasm	b,d,f,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
-func_150A613C	0x150A613C	212	game	hasm	c,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
+shadow_clipCodeVertex	0x150A613C	212	game	hasm	c,h	build/src/game/Shadow/ShadowFaces/shadowfaces.s.o
 view_getQuadViewDepth	0x150A6210	324	game	hasm	c,d,e,h	build/src/game/View/QuadInView/quadinview.s.o
 func_150A6354	0x150A6354	12	game	hasm	c,d,e,h	build/src/game/View/QuadInView/quadinview.s.o
 view_testCylinderInView	0x150A6360	344	game	hasm	d,e,h	build/src/game/View/CylinderInView/cylinderinview.s.o
@@ -2654,7 +2654,7 @@ func_150AD750	0x150AD750	32	game	hasm	d,h	build/src/game/Collision/RayWorld/rayw
 debug_fatalTrap	0x150AD770	16	game	hasm	b,g	build/src/game/Debug/FatalTrap/fataltrap.s.o
 math_cos	0x150AD780	12	game	hasm	g	build/src/game/Math/SinCos/sincos.s.o
 math_sin	0x150AD78C	272	game	hasm	d,e	build/src/game/Math/SinCos/sincos.s.o
-func_150AD89C	0x150AD89C	20	game	hasm	d,e	build/src/game/Math/SinCos/sincos.s.o
+math_sinReturn	0x150AD89C	20	game	hasm	d,e	build/src/game/Math/SinCos/sincos.s.o
 math_cross3	0x150AD8B0	80	game	hasm	s	build/src/game/Math/Cross3/cross3.s.o
 math_dot3	0x150AD900	48	game	hasm	s	build/src/game/Math/DotLength/dotlength.s.o
 math_length3	0x150AD930	48	game	hasm	s	build/src/game/Math/DotLength/dotlength.s.o
@@ -2673,10 +2673,10 @@ func_150AE1DC	0x150AE1DC	24	game	hasm	b	build/src/game/Script/ScriptInterp/scrip
 func_150AE1F4	0x150AE1F4	64	game	hasm	b	build/src/game/Script/ScriptInterp/scriptinterp.s.o
 func_150AE234	0x150AE234	76	game	hasm	b	build/src/game/Script/ScriptInterp/scriptinterp.s.o
 script_exitTask	0x150AE280	32	game	hasm	d,g	build/src/game/Script/TaskExit/taskexit.s.o
-func_150AE2A0	0x150AE2A0	188	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
+collision_updateWobble	0x150AE2A0	188	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 func_150AE35C	0x150AE35C	16	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
-func_150AE36C	0x150AE36C	580	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
-func_150AE5B0	0x150AE5B0	480	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
+collision_buildTransformedUprightQuad	0x150AE36C	580	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
+effect_levelHook02	0x150AE5B0	480	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 effect_updateAttachedBurst	0x150AE790	1036	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 effect_spawnAttachedBursts	0x150AEB9C	304	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 func_150AECCC	0x150AECCC	128	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
@@ -2690,8 +2690,8 @@ particle_hitPlayerOnObjectContact	0x150AF200	224	game	c		build/src/game/Particle
 func_150AF2E0	0x150AF2E0	72	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_updateSmokeEmitter	0x150AF328	956	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_wobbleSmoke	0x150AF6E4	84	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
-func_150AF738	0x150AF738	88	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
-func_150AF790	0x150AF790	52	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
+particle_startGreyscaleScreen	0x150AF738	88	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
+particle_drawGreyscaleScreen	0x150AF790	52	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_updateSmokeSource	0x150AF7C4	1072	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_updateSineOscillator	0x150AFBF4	116	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_spawnBoneSpriteEmitter	0x150AFC68	328	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
@@ -2716,10 +2716,10 @@ func_150B1484	0x150B1484	856	game	c		build/src/game_DE5A0.c.o
 func_150B17DC	0x150B17DC	516	game	c		build/src/game_DE5A0.c.o
 func_150B19E0	0x150B19E0	976	game	c		build/src/game_DE5A0.c.o
 colourfb_toGreyscale	0x150B1DB0	112	game	hasm	b	build/src/game/Effects/Greyscale/greyscale.s.o
-func_150B1E20	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
+particle_levelHook29	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_spawnPointEmitter	0x150B1EE0	176	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_updatePointEmitter	0x150B1F90	944	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
-func_150B2340	0x150B2340	320	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
+particle_levelHook21	0x150B2340	320	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_selectObjGroundBurst	0x150B2480	20	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
 particle_spawnObjGroundBurst	0x150B2494	220	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
 particle_spawnYawStreak	0x150B2570	464	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
@@ -2831,8 +2831,8 @@ effect_spawnQuadrupedFootprint	0x150BEACC	356	game	c		build/src/game/Effects/Bon
 effect_getQuadrupedFootPosAlt	0x150BEC30	248	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 effect_selectQuadrupedFootEffectAlt	0x150BED28	36	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 effect_spawnQuadrupedFootprintAlt	0x150BED4C	356	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
-func_150BEEB0	0x150BEEB0	192	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
-func_150BEF70	0x150BEF70	12	game	c		build/src/game/Prop/Scenery/scenery.c.o
+effect_levelHook27	0x150BEEB0	192	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
+prop_emptyLevelUpdateHook2	0x150BEF70	12	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_startMirroredEmitters	0x150BEF7C	376	game	c		build/src/game/Prop/Scenery/scenery.c.o
 func_150BF0F4	0x150BF0F4	296	game	c		build/src/game/Prop/Scenery/scenery.c.o
 func_150BF21C	0x150BF21C	1348	game	c		build/src/game/Prop/Scenery/scenery.c.o
@@ -2873,7 +2873,7 @@ func_150C3160	0x150C3160	208	game	c		build/src/game/Particle/SprayObjects/sprayo
 func_150C3230	0x150C3230	836	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3574	0x150C3574	1056	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3994	0x150C3994	948	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
-func_150C3D48	0x150C3D48	20	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
+particle_decodeTamperAddress	0x150C3D48	20	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3D5C	0x150C3D5C	964	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 effect_spawnPulseEffect	0x150C4120	900	game	c		build/src/game/Effects/PulseEffect/pulseeffect.c.o
 effect_updatePulseEffect	0x150C44A4	1588	game	c		build/src/game/Effects/PulseEffect/pulseeffect.c.o
@@ -2883,7 +2883,7 @@ effect_freePulseEffect	0x150C4B34	44	game	c		build/src/game/Effects/PulseEffect/
 effect_pulseEffectMessage	0x150C4B60	144	game	c		build/src/game/Effects/PulseEffect/pulseeffect.c.o
 camera_levelHook03	0x150C4BF0	304	game	c		build/src/game/Camera/LevelHook03/levelhook03.c.o
 prop_swingPendulum	0x150C4D20	380	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
-func_150C4E9C	0x150C4E9C	912	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
+prop_rampTextureScroll	0x150C4E9C	912	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
 prop_destroyLevelSprays	0x150C522C	84	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
 func_150C5280	0x150C5280	76	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
 func_150C52CC	0x150C52CC	68	game	c		build/src/game/Prop/Pendulum/pendulum.c.o
@@ -2931,9 +2931,9 @@ func_150C7670	0x150C7670	204	game	c		build/src/game/Effects/ParticleCallbacks/pa
 effect_setParticleIdentityMtx	0x150C773C	52	game	c		build/src/game/Effects/ParticleCallbacks/particlecallbacks.c.o
 camera_levelHook01	0x150C7770	256	game	c		build/src/game/Camera/LevelHook01/levelhook01.c.o
 func_150C7870	0x150C7870	112	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
-func_150C78E0	0x150C78E0	80	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
-func_150C7930	0x150C7930	56	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
-func_150C7968	0x150C7968	84	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
+prop_spinOppositeObject3	0x150C78E0	80	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
+prop_spinWithObject3	0x150C7930	56	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
+prop_scrollTextureByObject3	0x150C7968	84	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 func_150C79BC	0x150C79BC	724	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 func_150C7C90	0x150C7C90	236	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 func_150C7D7C	0x150C7D7C	132	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
@@ -2990,7 +2990,7 @@ actor_updateMount	0x150CE740	2000	game	c		build/src/game/Actor/MountControl/moun
 camera_levelHook13	0x150CEF10	80	game	c		build/src/game/Camera/LevelHook13/levelhook13.c.o
 effect_levelUpdateRotatingZone	0x150CEF60	224	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
 func_150CF040	0x150CF040	64	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
-func_150CF080	0x150CF080	32	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
+effect_levelHook16	0x150CF080	32	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
 func_150CF0A0	0x150CF0A0	160	game	c		build/src/game/Prop/LinkedToggle/linkedtoggle.c.o
 effect_updateActorEmitter	0x150CF140	836	game	c		build/src/game/Effects/ActorEmitterTick/actoremittertick.c.o
 effect_actorEmitterMessage	0x150CF484	172	game	c		build/src/game/Effects/ActorEmitterTick/actoremittertick.c.o
@@ -3031,7 +3031,7 @@ effect_updateAmbientPulse	0x150D149C	148	game	c		build/src/game_FE850.c.o
 camera_scaleBySpeed	0x150D1530	736	game	c		build/src/game/Camera/SpeedDistance/speeddistance.c.o
 env_drawSkyGradient	0x150D1810	816	game	c		build/src/game/Env/SkyGradient/skygradient.c.o
 light_updateAmbientRedDrift	0x150D1B40	144	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
-func_150D1BD0	0x150D1BD0	96	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
+light_levelHook31	0x150D1BD0	96	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
 effect_updateRaySpinner	0x150D1C30	828	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
 effect_raySpinnerMessage	0x150D1F6C	232	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
 effect_destroyRaySpinnerChildren	0x150D2054	92	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
@@ -3082,27 +3082,27 @@ particle_updateFollowGrow	0x150D6F0C	348	game	c		build/src/game/Particle/FollowE
 particle_onFollowGrowMsg	0x150D7068	184	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 effect_spawnRayHitDebris	0x150D7120	364	game	c		build/src/game/Effects/HitSpray/hitspray.c.o
 effect_spawnRaySurfaceImpact	0x150D728C	404	game	c		build/src/game/Effects/HitSpray/hitspray.c.o
-func_150D7420	0x150D7420	188	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
-func_150D74DC	0x150D74DC	176	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
-func_150D758C	0x150D758C	164	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
+effect_handleTintMessageRedFrom1	0x150D7420	188	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
+effect_handleTintMessageRedFrom2	0x150D74DC	176	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
+effect_handleTintMessageGreenOnly	0x150D758C	164	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 effect_advanceTexAnimClock	0x150D7630	44	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 effect_bindAnimatedTextures	0x150D765C	308	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 func_150D7790	0x150D7790	408	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 func_150D7928	0x150D7928	2440	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
-func_150D82B0	0x150D82B0	12	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
+attach_emptyLevelUpdateHook1	0x150D82B0	12	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_hookScrollTexH	0x150D82BC	284	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_hookScrollTexV	0x150D83D8	440	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 func_150D8590	0x150D8590	28	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_spawnFootImpact	0x150D85AC	768	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 func_150D88AC	0x150D88AC	52	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_getBonePoint	0x150D88E0	320	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
-func_150D8A20	0x150D8A20	20	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
+attach_selectBonePointEffects	0x150D8A20	20	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
 attach_spawnBonePointEffects	0x150D8A34	220	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
 trail_getPissAnchor	0x150D8B10	44	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_getPissLaunchDir	0x150D8B3C	76	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_spawnPissTrail	0x150D8B88	508	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_stepBallistic	0x150D8D84	152	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
-func_150D8E1C	0x150D8E1C	48	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
+trail_endPissTrail	0x150D8E1C	48	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_movePissPoints	0x150D8E4C	352	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_emitPissPoints	0x150D8FAC	1152	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_tracePissTrail	0x150D942C	2128	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
@@ -3112,7 +3112,7 @@ trail_destroyPissTrail	0x150DA4B4	44	game	c		build/src/game/Trail/PissTrail/piss
 trail_freePissTrail	0x150DA4E0	44	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_onPissTrailMessage	0x150DA50C	224	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_setPissSpeedScale	0x150DA5EC	60	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
-func_150DA628	0x150DA628	84	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
+trail_updatePissSpark	0x150DA628	84	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 trail_spawnPissImpact	0x150DA67C	2036	game	c		build/src/game/Trail/PissTrail/pisstrail.c.o
 beam_spawnBoneQuad	0x150DAE70	676	game	c		build/src/game/Beam/BeamQuad/beamquad.c.o
 beam_updateQuad	0x150DB114	452	game	c		build/src/game/Beam/BeamQuad/beamquad.c.o
@@ -3134,14 +3134,14 @@ effect_fadeTrailSpriteByLife	0x150DE2A4	32	game	c		build/src/game/Effects/TrapEf
 effect_shrinkBillboard	0x150DE2C4	76	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
 effect_emptyLevelHook14	0x150DE310	16	game	c		build/src/game_10B7C0.c.o
 func_150DE320	0x150DE320	12	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
-func_150DE32C	0x150DE32C	300	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
+effect_onBulletImpactZones	0x150DE32C	300	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 func_150DE458	0x150DE458	640	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 func_150DE6D8	0x150DE6D8	232	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 effect_updateZonePairEmitter	0x150DE7C0	780	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 effect_moveTravelParticle	0x150DEACC	140	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 effect_buildTravelParticleQuad	0x150DEB58	136	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
-func_150DEBE0	0x150DEBE0	72	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
-func_150DEC28	0x150DEC28	104	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
+effect_sendFirstLightAndGlowEvents	0x150DEBE0	72	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
+effect_sendLightAndGlowEvent	0x150DEC28	104	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 effect_levelUpdateRain	0x150DEC90	48	game	c		build/src/game/Effects/RainHook/rainhook.c.o
 effect_spawnExplosion	0x150DECC0	1652	game	c		build/src/game/Effects/Explosion/explosion.c.o
 effect_dropPointEffect	0x150DF334	388	game	c		build/src/game/Effects/Explosion/explosion.c.o
@@ -3162,7 +3162,7 @@ effect_fadeByCameraDistance	0x150E05F8	224	game	c		build/src/game_10CD70.c.o
 effect_spawnSlotBoneBeam	0x150E06D8	408	game	c		build/src/game_10CD70.c.o
 func_150E0870	0x150E0870	880	game	c		build/src/game/Effects/SplashBurst/splashburst.c.o
 func_150E0BE0	0x150E0BE0	432	game	c		build/src/game/Effects/SplashBurst/splashburst.c.o
-func_150E0D90	0x150E0D90	720	game	c		build/src/game/Effects/PropEmitter/propemitter.c.o
+effect_levelHook12	0x150E0D90	720	game	c		build/src/game/Effects/PropEmitter/propemitter.c.o
 effect_spawnPropEmitter	0x150E1060	236	game	c		build/src/game/Effects/PropEmitter/propemitter.c.o
 effect_updatePropEmitter	0x150E114C	1060	game	c		build/src/game/Effects/PropEmitter/propemitter.c.o
 collision_castRayAtObjects	0x150E1570	656	game	c		build/src/game/Collision/ObjectRay/objectray.c.o
@@ -3252,7 +3252,7 @@ effect_spawnFootprintAtAltFoot	0x150EB090	304	game	c		build/src/game/Effects/Bon
 camera_levelHook04	0x150EB1C0	624	game	c		build/src/game/Camera/LevelHook04/levelhook04.c.o
 prop_shotHitsCylinders	0x150EB430	84	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 prop_segmentHitsCylinders	0x150EB484	400	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
-func_150EB614	0x150EB614	688	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
+prop_springTiltByPlayerDistance	0x150EB614	688	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 func_150EB8C4	0x150EB8C4	956	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 prop_spawnCylinderBurst	0x150EBC80	576	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 weapon_fireTwinMuzzleShot	0x150EBEC0	1300	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
@@ -3264,12 +3264,12 @@ particle_updateSourceEmitter	0x150EC6B0	952	game	c		build/src/game/Particle/FogF
 particle_attachFogFlash	0x150ECA68	228	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 particle_onFogFlashEvent	0x150ECB4C	64	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 particle_updateFogFlash	0x150ECB8C	116	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
-func_150ECC00	0x150ECC00	112	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
-func_150ECC70	0x150ECC70	1376	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
+particle_spawnFloorImpactGreenFlash	0x150ECC00	112	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
+particle_levelHook17	0x150ECC70	1376	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 weapon_getAngleDelta	0x150ED1D0	100	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_getAngleToTarget	0x150ED234	100	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_getShellAimError	0x150ED298	736	game	c		build/src/game/Weapon/Tank/tank.c.o
-func_150ED578	0x150ED578	192	game	c		build/src/game/Weapon/Tank/tank.c.o
+weapon_hideTankInSniperView	0x150ED578	192	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_scrollTreads	0x150ED638	272	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_updateTank	0x150ED748	5436	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_releaseTankCamera	0x150EEC84	292	game	c		build/src/game/Weapon/Tank/tank.c.o
@@ -3316,8 +3316,8 @@ func_150F1A00	0x150F1A00	328	game	c		build/src/game_11EEB0.c.o
 func_150F1B48	0x150F1B48	360	game	c		build/src/game_11EEB0.c.o
 func_150F1CB0	0x150F1CB0	96	game	c		build/src/game_11EEB0.c.o
 beam_spawnActorExplosion	0x150F1D10	992	game	c		build/src/game_11EEB0.c.o
-func_150F20F0	0x150F20F0	320	game	c		build/src/game_11EEB0.c.o
-func_150F2230	0x150F2230	160	game	c		build/src/game_11EEB0.c.o
+beam_levelUpdateRandomSounds	0x150F20F0	320	game	c		build/src/game_11EEB0.c.o
+beam_spawnImpactBurstNearBone	0x150F2230	160	game	c		build/src/game_11EEB0.c.o
 effect_getLegBonePoint	0x150F22D0	172	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_selectLegImpactEffect	0x150F237C	20	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_spawnLegImpactBurst	0x150F2390	80	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
@@ -3325,7 +3325,7 @@ effect_updateSway	0x150F23E0	160	game	c		build/src/game/Effects/SwayObject/swayo
 effect_updateModelSway	0x150F2480	152	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_buildSwayMatrix	0x150F2518	136	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_placeSwayLight	0x150F25A0	256	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
-func_150F26A0	0x150F26A0	756	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
+effect_levelHook26	0x150F26A0	756	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 func_150F2994	0x150F2994	204	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 func_150F2A60	0x150F2A60	556	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_spawnBoneBurstEmitter	0x150F2C8C	136	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
@@ -3338,7 +3338,7 @@ func_150F33B0	0x150F33B0	72	game	c		build/src/game/Particle/BoneBurst/boneburst.
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
-func_150F43F0	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
+player_levelHook24	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 particle_spawnSpiral	0x150F4570	864	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_moveSpiral	0x150F48D0	360	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_updateSpiralFadeSound	0x150F4A38	708	game	c		build/src/game/Particle/Spiral/spiral.c.o
@@ -3350,7 +3350,7 @@ effect_consumeZoneFlag	0x150F51BC	44	game	c		build/src/game/Effects/SurfaceSound
 effect_updateSurfaceSound	0x150F51E8	200	game	c		build/src/game/Effects/SurfaceSound/surfacesound.c.o
 camera_levelHook34	0x150F52B0	96	game	c		build/src/game/Camera/LevelHook34/levelhook34.c.o
 camera_levelUpdateWaveChains	0x150F5310	48	game	c		build/src/game/Camera/LevelHook34/levelhook34.c.o
-func_150F5340	0x150F5340	224	game	c		build/src/game/Effects/BeamZones/beamzones.c.o
+effect_turnBeamsOff	0x150F5340	224	game	c		build/src/game/Effects/BeamZones/beamzones.c.o
 beam_showFadeSprite	0x150F5420	368	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
 beam_updateGrowSprite	0x150F5590	56	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
 beam_updateSpriteFade	0x150F55C8	196	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
@@ -3401,7 +3401,7 @@ effect_freeStage	0x150F97C0	44	game	c		build/src/game/Effects/StageEffect/stagee
 effect_spawnCutsceneBoneBeam	0x150F97EC	356	game	c		build/src/game/Effects/StageEffect/stageeffect.c.o
 effect_spawnGunMuzzleEffects	0x150F9950	208	game	c		build/src/game/Effects/StageEffect/stageeffect.c.o
 camera_levelHook28	0x150F9A20	144	game	c		build/src/game/Camera/LevelHook28/levelhook28.c.o
-func_150F9AB0	0x150F9AB0	256	game	c		build/src/game_126F60.c.o
+screen_drawStarSky	0x150F9AB0	256	game	c		build/src/game_126F60.c.o
 effect_spawnDelayedBurst	0x150F9BB0	1544	game	c		build/src/game_127060.c.o
 effect_updateDelayedBurst	0x150FA1B8	688	game	c		build/src/game_127060.c.o
 effect_handleLightSwitchEvent	0x150FA468	184	game	c		build/src/game_127060.c.o
@@ -3412,9 +3412,9 @@ func_150FACE4	0x150FACE4	68	game	c		build/src/game_127060.c.o
 effect_turnLightsOn	0x150FAD28	80	game	c		build/src/game_127060.c.o
 effect_turnLightsOff	0x150FAD78	80	game	c		build/src/game_127060.c.o
 func_150FADC8	0x150FADC8	80	game	c		build/src/game_127060.c.o
-func_150FAE18	0x150FAE18	880	game	c		build/src/game_127060.c.o
-func_150FB188	0x150FB188	96	game	c		build/src/game_127060.c.o
-func_150FB1E8	0x150FB1E8	88	game	c		build/src/game_127060.c.o
+effect_spawnScreenCash	0x150FAE18	880	game	c		build/src/game_127060.c.o
+effect_placeScreenCashModel	0x150FB188	96	game	c		build/src/game_127060.c.o
+effect_preDrawScreenCashModel	0x150FB1E8	88	game	c		build/src/game_127060.c.o
 effect_fadeInAlpha	0x150FB240	92	game	c		build/src/game_127060.c.o
 effect_updateFadeInEffect	0x150FB29C	68	game	c		build/src/game_127060.c.o
 effect_updateFadeInSprite	0x150FB2E0	68	game	c		build/src/game_127060.c.o
@@ -3457,7 +3457,7 @@ weapon_getForwardProjectileStart	0x150FEBC8	96	game	c		build/src/game/Weapon/For
 weapon_spawnBoneBeam	0x150FEC28	264	game	c		build/src/game/Weapon/ForwardShot/forwardshot.c.o
 weapon_fireAttachedGun	0x150FED30	672	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
 weapon_getAttachmentPos	0x150FEFD0	180	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
-func_150FF084	0x150FF084	516	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
+weapon_fireAttachedGunProjectile	0x150FF084	516	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
 weapon_getGunAttachment	0x150FF288	36	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
 weapon_getShotAxes	0x150FF2AC	40	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
 weapon_findShotStart	0x150FF2D4	416	game	c		build/src/game/Weapon/AttachedGun/attachedgun.c.o
@@ -3513,14 +3513,14 @@ effect_throwDebrisBurst	0x151036B4	296	game	c		build/src/game/Effects/DebrisThro
 effect_nullSoundCallback	0x151037DC	36	game	c		build/src/game/Effects/DebrisThrow/debristhrow.c.o
 sound_clearCooldowns	0x15103800	40	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
 sound_updateCooldowns	0x15103828	232	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
-func_15103910	0x15103910	400	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
-func_15103AA0	0x15103AA0	372	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
+sound_followDelayedCameraCallback	0x15103910	400	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
+sound_followDelayedCallback	0x15103AA0	372	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
 sound_playWithCooldown	0x15103C14	556	game	c		build/src/game/Audio/ObjectSound/objectsound.c.o
 effect_spawnImpactBlast	0x15103E40	816	game	c		build/src/game/Effects/ImpactSplash/impactsplash.c.o
 screen_spawnFade	0x15104170	116	game	c		build/src/game/Screen/Fade/fade.c.o
 screen_updateFade	0x151041E4	680	game	c		build/src/game/Screen/Fade/fade.c.o
 screen_drawFade	0x1510448C	104	game	c		build/src/game/Screen/Fade/fade.c.o
-func_151044F4	0x151044F4	44	game	c		build/src/game/Screen/Fade/fade.c.o
+screen_getPlayer0MatrixPhysics	0x151044F4	44	game	c		build/src/game/Screen/Fade/fade.c.o
 camera_resetDistances	0x15104520	192	game	c		build/src/game/Camera/DistanceReset/distancereset.c.o
 func_151045E0	0x151045E0	20	game	c		build/src/game/Collision/GroundHeight/groundheight.c.o
 func_151045F4	0x151045F4	20	game	c		build/src/game/Collision/GroundHeight/groundheight.c.o
@@ -3602,9 +3602,9 @@ particle_updatePointPairEmitter	0x1510A40C	1124	game	c		build/src/game/Particle/
 particle_onSegmentEmitterSwap	0x1510A870	92	game	c		build/src/game/Particle/SegmentEmitter/segmentemitter.c.o
 particle_onPointPairEmitterSwap	0x1510A8CC	100	game	c		build/src/game/Particle/SegmentEmitter/segmentemitter.c.o
 sprite_showFadeSprite	0x1510A930	240	game	c		build/src/game/Sprite/FadeSprite/fadesprite.c.o
-func_1510AA20	0x1510AA20	36	game	c		build/src/game/Prop/Clock/clock.c.o
+prop_levelUpdateRainOnly	0x1510AA20	36	game	c		build/src/game/Prop/Clock/clock.c.o
 prop_updateClock	0x1510AA44	916	game	c		build/src/game/Prop/Clock/clock.c.o
-func_1510ADD8	0x1510ADD8	264	game	c		build/src/game/Prop/Clock/clock.c.o
+prop_swingClockPendulum	0x1510ADD8	264	game	c		build/src/game/Prop/Clock/clock.c.o
 prop_isOutsideFrustum	0x1510AEE0	400	game	c		build/src/game/Prop/Clock/clock.c.o
 view_initDefaultProjection	0x1510B070	184	game	c		build/src/game/View/Projection/projection.c.o
 view_widenFov	0x1510B128	516	game	c		build/src/game/View/Projection/projection.c.o
@@ -3687,17 +3687,17 @@ gfx_objectSoundCallback	0x15114CC4	96	game	c		build/src/game/Gfx/WorldObject/wor
 gfx_playObjectSound	0x15114D24	480	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
 gfx_startObjectSound	0x15114F04	64	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
 func_15114F44	0x15114F44	364	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
-func_151150B0	0x151150B0	12	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
+prop_emptyBehavior22	0x151150B0	12	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_spinZ	0x151150BC	160	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_spinY	0x1511515C	160	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_spinX	0x151151FC	160	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
-func_1511529C	0x1511529C	12	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
+prop_emptyBehavior55	0x1511529C	12	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_sinkWhileTriggered	0x151152A8	192	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_shakeAndSink	0x15115368	600	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_moveToHeight	0x151155C0	412	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
 prop_moveByOffset	0x1511575C	1712	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
 prop_addSeesawWeight	0x15115E0C	208	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
-func_15115EDC	0x15115EDC	140	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
+prop_addSeesawWeightBoosted	0x15115EDC	140	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
 prop_tiltSeesaw	0x15115F68	240	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
 prop_scrollTexture	0x15116058	184	game	c		build/src/game/Prop/Seesaw/seesaw.c.o
 prop_registerTextureScroll	0x15116110	108	game	c		build/src/game/Prop/ScrollBob/scrollbob.c.o
@@ -3706,11 +3706,11 @@ prop_bob	0x151162D4	236	game	c		build/src/game/Prop/ScrollBob/scrollbob.c.o
 prop_bobAndSway	0x151163C0	332	game	c		build/src/game/Prop/PushBob/pushbob.c.o
 prop_updatePush	0x1511650C	892	game	c		build/src/game/Prop/PushBob/pushbob.c.o
 prop_getApproachSpeed	0x15116888	156	game	c		build/src/game/Prop/PushBob/pushbob.c.o
-func_15116924	0x15116924	12	game	c		build/src/game/Prop/PushBob/pushbob.c.o
-func_15116930	0x15116930	84	game	c		build/src/game/Prop/PropMover/propmover.c.o
+prop_emptyBehavior71	0x15116924	12	game	c		build/src/game/Prop/PushBob/pushbob.c.o
+prop_triggerMover	0x15116930	84	game	c		build/src/game/Prop/PropMover/propmover.c.o
 prop_updateMover	0x15116984	48	game	c		build/src/game/Prop/PropMover/propmover.c.o
 prop_stepToTarget	0x151169B4	504	game	c		build/src/game/Prop/PropMover/propmover.c.o
-func_15116BAC	0x15116BAC	464	game	c		build/src/game/Prop/PropMover/propmover.c.o
+prop_stepToTargetWithSounds	0x15116BAC	464	game	c		build/src/game/Prop/PropMover/propmover.c.o
 prop_spinToTarget	0x15116D7C	296	game	c		build/src/game/Prop/PropMover/propmover.c.o
 prop_animateVertices	0x15116EA4	1076	game	c		build/src/game/Prop/PropMover/propmover.c.o
 prop_springAngle	0x151172D8	456	game	c		build/src/game/Prop/PropMover/propmover.c.o
@@ -3720,62 +3720,62 @@ prop_swingX	0x151174F0	40	game	c		build/src/game/Prop/SwingBounce/swingbounce.c.
 prop_bounceAngle	0x15117518	600	game	c		build/src/game/Prop/SwingBounce/swingbounce.c.o
 prop_bounceX	0x15117770	40	game	c		build/src/game/Prop/SwingBounce/swingbounce.c.o
 prop_bounceZ	0x15117798	40	game	c		build/src/game/Prop/SwingBounce/swingbounce.c.o
-func_151177C0	0x151177C0	508	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
+prop_lowerAndRaise	0x151177C0	508	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_slideOut	0x151179BC	896	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_triggerOnPlayer	0x15117D3C	104	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_localToWorld	0x15117DA4	408	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
-func_15117F3C	0x15117F3C	2608	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
-func_1511896C	0x1511896C	32	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
-func_1511898C	0x1511898C	32	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
+prop_grabAndSwingCharacter	0x15117F3C	2608	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
+prop_swingDoorLink0	0x1511896C	32	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
+prop_swingDoorLink3	0x1511898C	32	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_swingDoor	0x151189AC	1400	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_swingFlap	0x15118F24	1160	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_triggerOnFreePlayer	0x151193AC	72	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
-func_151193F4	0x151193F4	224	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
+prop_followHeight	0x151193F4	224	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_floodFillVertexGroup	0x151194D4	512	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_initSwayGroups	0x151196D4	612	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_swayVertexGroups	0x15119938	1672	game	c		build/src/game/Prop/DoorsLifts/doorslifts.c.o
 prop_updatePickup	0x15119FC0	1104	game	c		build/src/game/Prop/Pickup/pickup.c.o
 prop_findSetTimg	0x1511A410	132	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
 prop_animateTexture	0x1511A494	616	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
-func_1511A6FC	0x1511A6FC	60	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
-func_1511A738	0x1511A738	136	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
+prop_scrollAndAnimateTexture	0x1511A6FC	60	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
+prop_bobAndAnimateTexture	0x1511A738	136	game	c		build/src/game/Prop/TextureAnim/textureanim.c.o
 prop_startRipple	0x1511A7C0	120	game	c		build/src/game/Prop/RippleMesh/ripplemesh.c.o
 prop_updateRippleMesh	0x1511A838	1784	game	c		build/src/game/Prop/RippleMesh/ripplemesh.c.o
-func_1511AF30	0x1511AF30	332	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_wobbleTilt	0x1511AF30	332	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_slideWaypoints	0x1511B07C	1184	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511B51C	0x1511B51C	696	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_swingAndFadeColours	0x1511B51C	696	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_rotateAboutPivots	0x1511B7D4	592	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511BA24	0x1511BA24	224	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_setAlphaFromColorAnim	0x1511BA24	224	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_projectTexture	0x1511BB04	752	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_projectTextureUnderRef	0x1511BDF4	104	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_faceCamera	0x1511BE5C	96	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511BEBC	0x1511BEBC	1668	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_grabAndLowerCharacter	0x1511BEBC	1668	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_updateNone	0x1511C540	8	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_sway	0x1511C548	240	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 func_1511C638	0x1511C638	1268	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_getWaveOriginZ	0x1511CB2C	24	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_animateWaveMesh	0x1511CB44	2128	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511D394	0x1511D394	1064	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_scrollWithOwnerWave	0x1511D394	1064	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_wobbleTexture	0x1511D7BC	552	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_rotateTexture	0x1511D9E4	480	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511DBC4	0x1511DBC4	468	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_swingOpen90	0x1511DBC4	468	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_playImpactSound	0x1511DD98	468	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511DF6C	0x1511DF6C	2068	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_pulseUntilTouched	0x1511DF6C	2068	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_swingHinge	0x1511E780	1232	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_raiseWhileTriggered	0x1511EC50	308	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511ED84	0x1511ED84	444	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511EF40	0x1511EF40	988	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
+prop_slideZUntilTriggered	0x1511ED84	444	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_carryCharacterInArc	0x1511EF40	988	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 func_1511F31C	0x1511F31C	204	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_fadeOutAfterDelay	0x1511F3E8	232	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
-func_1511F4D0	0x1511F4D0	664	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
+prop_partFourPieces	0x1511F4D0	664	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_start	0x1511F768	32	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_bobThenSink	0x1511F788	420	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_copyLinkedPos	0x1511F92C	84	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_clearLinks	0x1511F980	16	game	c		build/src/game/Prop/PropLinks/proplinks.c.o
 prop_registerLink	0x1511F990	656	game	c		build/src/game/Prop/PropLinks/proplinks.c.o
-func_1511FC20	0x1511FC20	12	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
-func_1511FC2C	0x1511FC2C	24	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
-func_1511FC44	0x1511FC44	28	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
+prop_emptyFrameHook	0x1511FC20	12	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
+prop_emptyDrawEffectAngled	0x1511FC2C	24	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
+prop_emptyDrawEffect	0x1511FC44	28	game	c		build/src/game/Prop/DrawHooks/drawhooks.c.o
 camera_enterAim	0x1511FC60	1272	game	c		build/src/game/Camera/AimCamera/aimcamera.c.o
 camera_updateAim	0x15120158	4920	game	c		build/src/game/Camera/AimCamera/aimcamera.c.o
 camera_publishAimRay	0x15121490	616	game	c		build/src/game/Camera/AimCamera/aimcamera.c.o
@@ -3839,7 +3839,7 @@ camera_processMessages	0x15128CB0	3088	game	c		build/src/game/Camera/CameraMessa
 func_151298C0	0x151298C0	116	game	c		build/src/game/Camera/CameraPoses/cameraposes.c.o
 func_15129934	0x15129934	764	game	c		build/src/game/Camera/CameraPoses/cameraposes.c.o
 camera_updateFreeFly	0x15129C30	1840	game	c		build/src/game/Camera/FreeFlyCamera/freeflycamera.c.o
-func_1512A360	0x1512A360	48	game	c		build/src/game/Camera/FreeFlyCamera/freeflycamera.c.o
+camera_updateFrontEndPath	0x1512A360	48	game	c		build/src/game/Camera/FreeFlyCamera/freeflycamera.c.o
 camera_updateFloorHeights	0x1512A390	2152	game	c		build/src/game/Camera/CameraOcclusion/cameraocclusion.c.o
 camera_resetZScans	0x1512ABF8	348	game	c		build/src/game/Camera/CameraOcclusion/cameraocclusion.c.o
 camera_checkOcclusion	0x1512AD54	940	game	c		build/src/game/Camera/CameraOcclusion/cameraocclusion.c.o
@@ -3860,7 +3860,7 @@ camera_applyBreathing	0x1512D070	456	game	c		build/src/game/Camera/ViewMatrix/vi
 camera_loadShakeTables	0x1512D238	172	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
 camera_startShake	0x1512D2E4	20	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
 camera_updateShake	0x1512D2F8	112	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
-func_1512D368	0x1512D368	24	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
+camera_emptyViewMatrixHook	0x1512D368	24	game	c		build/src/game/Camera/ViewMatrix/viewmatrix.c.o
 func_1512D380	0x1512D380	16	game	c		build/src/game/Camera/CameraStub/camerastub.c.o
 camera_updateManualOrbit	0x1512D390	464	game	c		build/src/game/Camera/ManualOrbit/manualorbit.c.o
 camera_queueMessage	0x1512D560	164	game	c		build/src/game/Camera/MessageQueue/messagequeue.c.o
@@ -3950,11 +3950,11 @@ blood_freeDripDefault	0x1513470C	32	game	c		build/src/game/Effects/Blood/blood.c
 blood_destroyDrip	0x1513472C	80	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_freeDrip	0x1513477C	80	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_handleDripMessage	0x151347CC	292	game	c		build/src/game/Effects/Blood/blood.c.o
-func_151348F0	0x151348F0	24	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_emitNoDripDrop	0x151348F0	24	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnTrail	0x15134908	200	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_updateTrail	0x151349D0	712	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_handleTrailMessage	0x15134C98	60	game	c		build/src/game/Effects/Blood/blood.c.o
-func_15134CD4	0x15134CD4	24	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_emitNoTrailDrop	0x15134CD4	24	game	c		build/src/game/Effects/Blood/blood.c.o
 func_15134CEC	0x15134CEC	192	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnStrip	0x15134DAC	156	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_updateStrip	0x15134E48	1188	game	c		build/src/game/Effects/Blood/blood.c.o
@@ -3964,8 +3964,8 @@ blood_destroyStrip	0x1513532C	124	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_freeStrip	0x151353A8	124	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_transformPoints	0x15135424	92	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_handleStripMessage	0x15135480	220	game	c		build/src/game/Effects/Blood/blood.c.o
-func_1513555C	0x1513555C	92	game	c		build/src/game/Effects/Blood/blood.c.o
-func_151355B8	0x151355B8	160	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_handleStripMessageMode2	0x1513555C	92	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_handleStripMessageMode1	0x151355B8	160	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_sampleFullPower	0x15135658	24	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_getTunedPower	0x15135670	100	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnSplat	0x151356D4	1316	game	c		build/src/game/Effects/Blood/blood.c.o
@@ -3994,17 +3994,17 @@ blood_onChunkLand	0x151389A8	536	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnBoneHit	0x15138BC0	192	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnFatalHit	0x15138C80	536	game	c		build/src/game/Effects/Blood/blood.c.o
 func_15138E98	0x15138E98	1760	game	c		build/src/game/Effects/Blood/blood.c.o
-func_15139578	0x15139578	496	game	c		build/src/game/Effects/Blood/blood.c.o
-func_15139768	0x15139768	1548	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_onGorePartLand	0x15139578	496	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_spawnTedizGore	0x15139768	1548	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnDefaultGore	0x15139D74	1240	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnProfileBurst	0x1513A24C	576	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnSmallSplash	0x1513A48C	264	game	c		build/src/game/Effects/Blood/blood.c.o
-func_1513A594	0x1513A594	76	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_spawnSplashOnlyGore	0x1513A594	76	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_spawnSplash	0x1513A5E0	256	game	c		build/src/game/Effects/Blood/blood.c.o
-func_1513A6E0	0x1513A6E0	1240	game	c		build/src/game/Effects/Blood/blood.c.o
-func_1513ABB8	0x1513ABB8	1280	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_spawnConkerGore	0x1513A6E0	1240	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_spawnZombieGore	0x1513ABB8	1280	game	c		build/src/game/Effects/Blood/blood.c.o
 blood_handleChunkMessage	0x1513B0B8	64	game	c		build/src/game/Effects/Blood/blood.c.o
-func_1513B0F8	0x1513B0F8	1256	game	c		build/src/game/Effects/Blood/blood.c.o
+blood_spawnGreggGore	0x1513B0F8	1256	game	c		build/src/game/Effects/Blood/blood.c.o
 effect_newDynModel	0x1513B5E0	440	game	c		build/src/game/Effects/DynModel/dynmodel.c.o
 effect_updateDynModel	0x1513B798	164	game	c		build/src/game/Effects/DynModel/dynmodel.c.o
 effect_drawDynModel	0x1513B83C	300	game	c		build/src/game/Effects/DynModel/dynmodel.c.o
@@ -4281,7 +4281,7 @@ effect_attachCharacterWatcher	0x1514DB18	64	game	c		build/src/game/Effects/Actor
 func_1514DB58	0x1514DB58	12	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_spawnRopeTieInLevel20	0x1514DB64	52	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DB98	0x1514DB98	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514DBB8	0x1514DBB8	128	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachBone2Light	0x1514DBB8	128	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DC38	0x1514DC38	36	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DC5C	0x1514DC5C	40	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DC84	0x1514DC84	20	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
@@ -4306,19 +4306,19 @@ effect_linkToObjectId9	0x1514DFD0	60	game	c		build/src/game/Effects/ActorAttachm
 func_1514E00C	0x1514E00C	392	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514E194	0x1514E194	392	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514E31C	0x1514E31C	492	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E508	0x1514E508	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E5B8	0x1514E5B8	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E668	0x1514E668	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E718	0x1514E718	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E7C8	0x1514E7C8	92	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachCharacterEffect0	0x1514E508	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachCharacterEffectMinus1	0x1514E5B8	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachCharacterEffect1	0x1514E668	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachCharacterEffect2	0x1514E718	176	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachCharacterEffect3	0x1514E7C8	92	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514E824	0x1514E824	12	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_releaseAttachedObject	0x1514E830	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_releaseAttachedEmitter	0x1514E850	44	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_releaseAttachedPointLight	0x1514E87C	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_handleToggleMessage	0x1514E89C	132	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_handleGlowToggleMessage	0x1514E920	188	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E9DC	0x1514E9DC	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514E9FC	0x1514E9FC	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_forwardGlowToggleMessage	0x1514E9DC	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_forwardToggleMessage	0x1514E9FC	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_handleEmitterTableMessage	0x1514EA1C	336	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_handleRopeRiderMessage	0x1514EB6C	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_acceptAnyMessage	0x1514EB8C	24	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
@@ -4333,9 +4333,9 @@ func_1514EECC	0x1514EECC	580	game	c		build/src/game/Effects/ActorAttachments/act
 func_1514F110	0x1514F110	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_handleLightMessage	0x1514F130	100	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachTankEffects	0x1514F194	372	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514F308	0x1514F308	196	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachBone5LightBeam	0x1514F308	196	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514F3CC	0x1514F3CC	128	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-func_1514F44C	0x1514F44C	92	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_attachFrontendFireImpEffect	0x1514F44C	92	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachTrailToBone1	0x1514F4A8	48	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachTrailToBone2	0x1514F4D8	48	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachTrailToBone3	0x1514F508	48	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
@@ -4436,9 +4436,9 @@ effect_destroyCharacterWatcher	0x15158CD4	44	game	c		build/src/game/Effects/Char
 effect_freeCharacterWatcher	0x15158D00	44	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
 effect_updateCharacterWatcher	0x15158D2C	632	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
 effect_characterWatcherMessage	0x15158FA4	224	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
-func_15159084	0x15159084	156	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
-func_15159120	0x15159120	100	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
-func_15159184	0x15159184	172	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
+effect_watcherIsOutOfWater	0x15159084	156	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
+effect_watcherIsDeepWater	0x15159120	100	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
+effect_watcherIsNearWaterSurface	0x15159184	172	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
 effect_getWatcherMoveState	0x15159230	136	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
 func_151592B8	0x151592B8	184	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
 effect_pickWatcherMode	0x15159370	188	game	c		build/src/game/Effects/CharacterWatcher/characterwatcher.c.o
@@ -4516,7 +4516,7 @@ light_runHandlerZone	0x1515F270	72	game	c		build/src/game/Lighting/AmbientZone/a
 func_1515F2B8	0x1515F2B8	48	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
 light_runAmbientZoneEffect	0x1515F2E8	80	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
 light_easeAmbientToGrey	0x1515F338	652	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
-func_1515F5C4	0x1515F5C4	652	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
+light_easeAmbientToYellowGreen	0x1515F5C4	652	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
 light_easeAmbientToPulse	0x1515F850	800	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
 func_1515FB70	0x1515FB70	36	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
 func_1515FB94	0x1515FB94	48	game	c		build/src/game/Lighting/AmbientZone/ambientzone.c.o
@@ -4606,7 +4606,7 @@ light_updateTransformed	0x151643F8	36	game	c		build/src/game/Effects/Light/light
 light_placeTransformed	0x1516441C	140	game	c		build/src/game/Effects/Light/light.c.o
 light_updateSwing	0x151644A8	76	game	c		build/src/game/Effects/Light/light.c.o
 light_placeSwing	0x151644F4	208	game	c		build/src/game/Effects/Light/light.c.o
-func_151645C4	0x151645C4	444	game	c		build/src/game/Effects/Light/light.c.o
+light_setDaylight	0x151645C4	444	game	c		build/src/game/Effects/Light/light.c.o
 camera_createWobble	0x15164780	264	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 camera_stopWobble	0x15164888	20	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 camera_updateWobble	0x1516489C	1608	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
@@ -4928,8 +4928,8 @@ func_15189FD0	0x15189FD0	32	game	c		build/src/game/Trail/SprayEmitter/sprayemitt
 particle_spawnBoneGlow	0x15189FF0	164	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_followBoneGlow	0x1518A094	384	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 func_1518A214	0x1518A214	212	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
-func_1518A2E8	0x1518A2E8	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
-func_1518A324	0x1518A324	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
+particle_hideBoneGlowWhileEyeClosed	0x1518A2E8	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
+particle_hideBoneGlowWithoutExpression	0x1518A324	60	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 particle_onBoneGlowSwap	0x1518A360	96	game	c		build/src/game/Particle/BoneGlow/boneglow.c.o
 effect_spawnTumblingPiece	0x1518A3C0	564	game	c		build/src/game/Effects/TumblingPiece/tumblingpiece.c.o
 effect_updateTumblingPiece	0x1518A5F4	800	game	c		build/src/game/Effects/TumblingPiece/tumblingpiece.c.o
@@ -4943,7 +4943,7 @@ particle_dieBelowFloor	0x1518B1AC	44	game	c		build/src/game/Particle/Droplets/dr
 particle_fadeInAboveFloor	0x1518B1D8	140	game	c		build/src/game/Particle/Droplets/droplets.c.o
 particle_spawnDroplets	0x1518B264	68	game	c		build/src/game/Particle/Droplets/droplets.c.o
 particle_spawnModelDroplets	0x1518B2A8	1032	game	c		build/src/game/Particle/Droplets/droplets.c.o
-func_1518B6B0	0x1518B6B0	992	game	c		build/src/game/Particle/BillboardBurst/billboardburst.c.o
+particle_spawnModelBurstWithBillboard	0x1518B6B0	992	game	c		build/src/game/Particle/BillboardBurst/billboardburst.c.o
 trail_getActorEmitter	0x1518BA90	356	game	c		build/src/game/Trail/TrailEmitter/trailemitter.c.o
 trail_destroyAllEmitters	0x1518BBF4	220	game	c		build/src/game/Trail/TrailEmitter/trailemitter.c.o
 trail_spawnEmitter	0x1518BCD0	144	game	c		build/src/game/Trail/TrailEmitter/trailemitter.c.o
@@ -5002,7 +5002,7 @@ particle_destroyAnchorEmitter	0x151904BC	92	game	c		build/src/game/Particle/Anch
 particle_sendActorGoneToEmitters	0x15190518	56	game	c		build/src/game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c.o
 effect_anchorEmitterMessage	0x15190550	108	game	c		build/src/game/Effects/BurnDamage/burndamage.c.o
 effect_updateBurnDamage	0x151905BC	264	game	c		build/src/game/Effects/BurnDamage/burndamage.c.o
-func_151906C4	0x151906C4	28	game	c		build/src/game/Effects/BurnDamage/burndamage.c.o
+effect_clearOnFire	0x151906C4	28	game	c		build/src/game/Effects/BurnDamage/burndamage.c.o
 effect_periodicTriggerMessage	0x151906E0	76	game	c		build/src/game/Effects/TriggerSwap/triggerswap.c.o
 func_1519072C	0x1519072C	68	game	c		build/src/game/Effects/TriggerSwap/triggerswap.c.o
 particle_newDripEmitter	0x15190770	208	game	c		build/src/game/Particle/Drips/drips.c.o
@@ -5044,8 +5044,8 @@ particle_emitOnSegment	0x151938FC	932	game	c		build/src/game/Particle/SegmentBur
 effect_spawnHitSplash	0x15193CA0	1552	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactSplash	0x151942B0	56	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactSmallSplash	0x151942E8	56	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
-func_15194320	0x15194320	116	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
-func_15194394	0x15194394	116	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
+effect_hitReactLavaBoulder	0x15194320	116	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
+effect_hitReactFireImp	0x15194394	116	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 func_15194408	0x15194408	384	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 func_15194588	0x15194588	68	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 func_151945CC	0x151945CC	456	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
@@ -5060,7 +5060,7 @@ func_15194B94	0x15194B94	92	game	c		build/src/game/Effects/ContactEffects/contac
 effect_hitReactKill	0x15194BF0	400	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactSetOnFire	0x15194D80	36	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactSetOnFireDamaging	0x15194DA4	36	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
-func_15194DC8	0x15194DC8	140	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
+effect_hitReactLava	0x15194DC8	140	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactImpactDebris	0x15194E54	84	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 effect_hitReactFlashAndKill	0x15194EA8	160	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
 func_15194F48	0x15194F48	172	game	c		build/src/game/Effects/ContactEffects/contacteffects.c.o
@@ -5152,7 +5152,7 @@ trail_getAttachPoint	0x1519E304	184	game	c		build/src/game/Trail/MatrixTrail/mat
 trail_restartTrailPair	0x1519E3BC	168	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
 trail_updateStartTask	0x1519E464	268	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
 trail_onTaskEvent	0x1519E570	172	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
-func_1519E61C	0x1519E61C	64	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
+trail_destroyOnEndEvent	0x1519E61C	64	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
 trail_stopTrailPair	0x1519E65C	44	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
 trail_cancelTrailPair	0x1519E688	52	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
 trail_queueTrailPair	0x1519E6BC	152	game	c		build/src/game/Trail/MatrixTrail/matrixtrail.c.o
@@ -5286,10 +5286,10 @@ func_151A9EC0	0x151A9EC0	264	game	c		build/src/game/Effects/ActorTasks/actortask
 func_151A9FC8	0x151A9FC8	212	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
 func_151AA09C	0x151AA09C	212	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
 effect_watcherNoAction	0x151AA170	12	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
-func_151AA17C	0x151AA17C	84	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
-func_151AA1D0	0x151AA1D0	32	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
-func_151AA1F0	0x151AA1F0	32	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
-func_151AA210	0x151AA210	84	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
+effect_watcherStartSurfaceTrails1	0x151AA17C	84	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
+effect_watcherReleaseSurfaceTrails1	0x151AA1D0	32	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
+effect_watcherReleaseSurfaceTrails2	0x151AA1F0	32	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
+effect_watcherStartSurfaceTrails2	0x151AA210	84	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
 func_151AA264	0x151AA264	168	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
 effect_emitFallingDriftParticle	0x151AA30C	384	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
 effect_spawnTaskPulse	0x151AA48C	280	game	c		build/src/game/Effects/ActorTasks/actortasks.c.o
@@ -5548,7 +5548,7 @@ weapon_spawnProjectile	0x151C229C	1176	game	c		build/src/game/Weapon/Projectile/
 weapon_updateProjectile	0x151C2734	924	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_buildProjectileTail	0x151C2AD0	892	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_isOtherLiveObject	0x151C2E4C	72	game	c		build/src/game/Weapon/Projectile/projectile.c.o
-func_151C2E94	0x151C2E94	92	game	c		build/src/game/Weapon/Projectile/projectile.c.o
+weapon_isOtherLivePlayer	0x151C2E94	92	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_onProjectileImpact	0x151C2EF0	88	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_onProjectileExpire	0x151C2F48	852	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_spawnImpactBurst	0x151C329C	1084	game	c		build/src/game/Weapon/Projectile/projectile.c.o
@@ -5574,7 +5574,7 @@ weapon_fireJointShot	0x151C62D0	1700	game	c		build/src/game/Weapon/JointShot/joi
 weapon_getSide0JointPos	0x151C6974	44	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_getSide1JointPos	0x151C69A0	44	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_getJointPos	0x151C69CC	92	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
-func_151C6A28	0x151C6A28	840	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
+weapon_fireJointShotProjectile	0x151C6A28	840	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_spawnJointBeam	0x151C6D70	304	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 func_151C6EA0	0x151C6EA0	408	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 func_151C7038	0x151C7038	360	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
@@ -5598,7 +5598,7 @@ sight_spawnFloorImpact	0x151C9AC0	112	game	c		build/src/game/Sight/SightBeam/sig
 sight_updateStatusLight	0x151C9B30	52	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 func_151C9B64	0x151C9B64	60	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_startPlayerEffects	0x151C9BA0	584	game	c		build/src/game/Sight/SightHud/sighthud.c.o
-func_151C9DE8	0x151C9DE8	236	game	c		build/src/game/Sight/SightHud/sighthud.c.o
+sight_spawnScopeSight	0x151C9DE8	236	game	c		build/src/game/Sight/SightHud/sighthud.c.o
 sight_resetPlayerEffects	0x151C9ED4	100	game	c		build/src/game/Sight/SightHud/sighthud.c.o
 sight_spawnRing	0x151C9F38	1896	game	c		build/src/game/Sight/SightHud/sighthud.c.o
 sight_spawnBasicSight	0x151CA6A0	1068	game	c		build/src/game/Sight/SightHud/sighthud.c.o
@@ -5675,7 +5675,7 @@ trail_drawTrackerTrail	0x151D1C98	1444	game	c		build/src/game/Trail/TrackerTrail
 trail_detachTrackerTrail	0x151D223C	28	game	c		build/src/game/Trail/TrackerTrail/trackertrail.c.o
 trail_destroyTrackerTrail	0x151D2258	44	game	c		build/src/game/Trail/TrackerTrail/trackertrail.c.o
 trail_freeTrackerTrail	0x151D2284	44	game	c		build/src/game/Trail/TrackerTrail/trackertrail.c.o
-func_151D22B0	0x151D22B0	1040	game	c		build/src/game/Effects/ActorSoundBurst/actorsoundburst.c.o
+effect_spawnDeathDebrisBurst	0x151D22B0	1040	game	c		build/src/game/Effects/ActorSoundBurst/actorsoundburst.c.o
 screen_spawnOverlay	0x151D26C0	88	game	c		build/src/game/Screen/Overlay/overlay.c.o
 screen_fadeOutOverlays	0x151D2718	68	game	c		build/src/game/Screen/Overlay/overlay.c.o
 screen_updateOverlay	0x151D275C	212	game	c		build/src/game/Screen/Overlay/overlay.c.o
@@ -5733,12 +5733,12 @@ screen_drawImageAlpha	0x151D6418	728	game	c		build/src/game/Screen/FrameImage/fr
 screen_setFrameEcho	0x151D66F0	136	game	c		build/src/game/Screen/FrameImage/frameimage.c.o
 screen_drawFrameEcho	0x151D6778	504	game	c		build/src/game/Screen/FrameImage/frameimage.c.o
 func_151D6970	0x151D6970	68	game	c		build/src/game/Text/AmountText/amounttext.c.o
-func_151D69B4	0x151D69B4	584	game	c		build/src/game/Text/AmountText/amounttext.c.o
+text_spawnHealthPickupBurst	0x151D69B4	584	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_spawnAmount	0x151D6BFC	612	game	c		build/src/game/Text/AmountText/amounttext.c.o
-func_151D6E60	0x151D6E60	416	game	c		build/src/game/Text/AmountText/amounttext.c.o
+text_updateCashModel	0x151D6E60	416	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_updateAmount	0x151D7000	204	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_handleAmountMessage	0x151D70CC	64	game	c		build/src/game/Text/AmountText/amounttext.c.o
-func_151D710C	0x151D710C	164	game	c		build/src/game/Text/AmountText/amounttext.c.o
+text_preDrawCashModel	0x151D710C	164	game	c		build/src/game/Text/AmountText/amounttext.c.o
 trail_createAnchoredEmitter	0x151D71B0	180	game	c		build/src/game/Trail/AnchoredTrail/anchoredtrail.c.o
 trail_updateAnchoredEmitter	0x151D7264	324	game	c		build/src/game/Trail/AnchoredTrail/anchoredtrail.c.o
 trail_onAnchoredEmitterMessage	0x151D73A8	92	game	c		build/src/game/Trail/AnchoredTrail/anchoredtrail.c.o
@@ -5774,18 +5774,18 @@ cont_handleRumbleMessage	0x151D8D5C	88	game	c		build/src/game/Cont/Rumble/rumble
 cont_sendRumbleMessage	0x151D8DB4	52	game	c		build/src/game/Cont/Rumble/rumble.c.o
 cont_killAllRumble	0x151D8DE8	56	game	c		build/src/game/Cont/Rumble/rumble.c.o
 particle_getContextEffectKind	0x151D8E20	76	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8E6C	0x151D8E6C	68	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8EB0	0x151D8EB0	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8EBC	0x151D8EBC	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8EC8	0x151D8EC8	52	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8EFC	0x151D8EFC	52	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8F30	0x151D8F30	76	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8F7C	0x151D8F7C	52	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8FB0	0x151D8FB0	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8FBC	0x151D8FBC	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8FC8	0x151D8FC8	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8FD4	0x151D8FD4	12	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151D8FE0	0x151D8FE0	52	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind0Texture	0x151D8E6C	68	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind1Texture	0x151D8EB0	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind2Texture	0x151D8EBC	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind3Texture	0x151D8EC8	52	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind4Texture	0x151D8EFC	52	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind5Texture	0x151D8F30	76	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind6Texture	0x151D8F7C	52	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind7Texture	0x151D8FB0	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind9Texture	0x151D8FBC	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind10Texture	0x151D8FC8	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind11Texture	0x151D8FD4	12	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_pickKind12Texture	0x151D8FE0	52	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_spawnSteamParticle	0x151D9014	992	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_updateSteamParticle	0x151D93F4	92	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_wobbleSteamSize	0x151D9450	228	game	c		build/src/game/Particle/Steam/steam.c.o
@@ -5814,18 +5814,18 @@ particle_splashSpray	0x151DAA88	208	game	c		build/src/game/Particle/Steam/steam.
 particle_spawnSquash	0x151DAB58	584	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_updateSquashEffect	0x151DADA0	136	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_buildSquashQuad	0x151DAE28	476	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB004	0x151DB004	100	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB068	0x151DB068	100	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB0CC	0x151DB0CC	144	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB15C	0x151DB15C	144	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB1EC	0x151DB1EC	144	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB27C	0x151DB27C	44	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB2A8	0x151DB2A8	36	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB2CC	0x151DB2CC	100	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB330	0x151DB330	168	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB3D8	0x151DB3D8	100	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB43C	0x151DB43C	144	game	c		build/src/game/Particle/Steam/steam.c.o
-func_151DB4CC	0x151DB4CC	260	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind0Colors	0x151DB004	100	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind1Colors	0x151DB068	100	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind2Colors	0x151DB0CC	144	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind3Colors	0x151DB15C	144	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind4Colors	0x151DB1EC	144	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind5Colors	0x151DB27C	44	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind6Colors	0x151DB2A8	36	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind7Colors	0x151DB2CC	100	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind8Colors	0x151DB330	168	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind9Colors	0x151DB3D8	100	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind10Colors	0x151DB43C	144	game	c		build/src/game/Particle/Steam/steam.c.o
+particle_setKind12Colors	0x151DB4CC	260	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_spawnKindSprite	0x151DB5D0	940	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_updateKindSprite	0x151DB97C	300	game	c		build/src/game/Particle/Steam/steam.c.o
 particle_throwSplashes	0x151DBAA8	300	game	c		build/src/game/Particle/Steam/steam.c.o
@@ -5852,18 +5852,18 @@ os_playDemoInput	0x151DD8C0	176	game	c		build/src/game/Os/EepromWrite/eepromwrit
 save_resetSettings	0x151DD970	116	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_validateSettings	0x151DD9E4	432	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_invertBits	0x151DDB94	12	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151DDBA0	0x151DDBA0	128	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_quitToFrontEnd	0x151DDBA0	128	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updatePauseMenu	0x151DDC20	2732	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE6CC	0x151DE6CC	8	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151DE6D4	0x151DE6D4	256	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateStartupScene	0x151DE6D4	256	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE7D4	0x151DE7D4	72	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE81C	0x151DE81C	64	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE85C	0x151DE85C	140	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE8E8	0x151DE8E8	8	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateMenuPages	0x151DE8F0	2252	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DF1BC	0x151DF1BC	952	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151DF574	0x151DF574	2500	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151DFF38	0x151DFF38	1260	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateListPage	0x151DF574	2500	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateSaveSlotPage	0x151DFF38	1260	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateModeSelectPage	0x151E0424	1464	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateOptionsPage	0x151E09DC	404	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateJoinPage	0x151E0B70	1700	game	c		build/src/game/Save/FrontEnd/frontend.c.o
@@ -5872,10 +5872,10 @@ save_updateTeamPage	0x151E1744	2880	game	c		build/src/game/Save/FrontEnd/fronten
 func_151E2284	0x151E2284	56	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_applyModeSettings	0x151E22BC	328	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_storeModeSettings	0x151E2404	236	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E24F0	0x151E24F0	836	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_addPartnerPlayers	0x151E24F0	836	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_setupMatch	0x151E2834	2192	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E30C4	0x151E30C4	440	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E327C	0x151E327C	200	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_startListSelection	0x151E30C4	440	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_startSavedGame	0x151E327C	200	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_drawOptionMenu	0x151E3344	3872	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateModeIntro	0x151E4264	176	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_playModeIntro	0x151E4314	200	game	c		build/src/game/Save/FrontEnd/frontend.c.o
@@ -5894,22 +5894,22 @@ save_endMatch	0x151E53E8	404	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_resetControllerMap	0x151E557C	44	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updatePulse	0x151E55A8	132	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151E562C	0x151E562C	32	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E564C	0x151E564C	16	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_isFreeForAll	0x151E564C	16	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_checkMatchOver	0x151E565C	2312	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_getTeam	0x151E5F64	72	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E5FAC	0x151E5FAC	72	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_getScreenCount	0x151E5FAC	72	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_recordHit	0x151E5FF4	2416	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_loadTextBank	0x151E6964	664	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_forgetTextBanks	0x151E6BFC	32	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E6C1C	0x151E6C1C	4516	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateMenuCamera	0x151E6C1C	4516	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151E7DC0	0x151E7DC0	220	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E7E9C	0x151E7E9C	92	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_applySoundMode	0x151E7E9C	92	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_checkCodeTamper	0x151E7EF8	104	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_spawnMenuCharacter	0x151E7F60	652	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_clearMenuCharacters	0x151E81EC	40	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E8214	0x151E8214	164	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E82B8	0x151E82B8	304	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E83E8	0x151E83E8	200	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_startCredits	0x151E8214	164	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateCredits	0x151E82B8	304	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateAfterCredits	0x151E83E8	200	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 hud_drawMain	0x151E84B0	368	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_drawModeOverlay	0x151E8620	196	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_texRectScaled	0x151E86E4	700	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
@@ -5924,7 +5924,7 @@ hud_drawFadingMessage	0x151EB96C	484	game	c		build/src/game/Hud/HudOverlay/hudov
 func_151EBB50	0x151EBB50	1576	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151EC178	0x151EC178	120	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151EC1F0	0x151EC1F0	504	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-func_151EC3E8	0x151EC3E8	608	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
+hud_drawMenuOverlay	0x151EC3E8	608	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151EC648	0x151EC648	2644	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151ED09C	0x151ED09C	324	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_darkenScreen	0x151ED1E0	188	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o

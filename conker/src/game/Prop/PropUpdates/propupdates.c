@@ -71,7 +71,7 @@ typedef union {
         /* 0x7C */ s32 started;   /* set after the first update */
         /* 0x80 */ s32 triggered; /* 1: move away from home, 0: return home */
         /* 0x84 */ f32 home;      /* rotation or coordinate saved on the first update */
-    } slide; /* prop_swingHinge, prop_raiseWhileTriggered, func_1511ED84 */
+    } slide; /* prop_swingHinge, prop_raiseWhileTriggered, prop_slideZUntilTriggered */
     struct {
         /* 0x7C */ s32 started;
         /* 0x80 */ s32 unk80;
@@ -87,7 +87,7 @@ typedef union {
 
 
 /* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
-void func_1511AF30(WorldObject *obj) {
+void prop_wobbleTilt(WorldObject *obj) {
     f32 intensity;
     f32 target;
     f32 diff;
@@ -265,7 +265,7 @@ void prop_slideWaypoints(WorldObject *obj) {
 
 
 /* Swings the angle toward its open/closed target with a damped bounce, driving a sound by it. */
-void func_1511B51C(WorldObject *obj) {
+void prop_swingAndFadeColours(WorldObject *obj) {
     f32 velocity;
     f32 target;
     f32 angle;
@@ -326,7 +326,7 @@ void func_1511B51C(WorldObject *obj) {
         obj->task_flag |= mode;
     }
     WORK(obj)->w1511B51C.velocity = velocity;
-    if (D_800BE9B4 != 0 || angle != obj->v) {
+    if (gLevelLoadState != 0 || angle != obj->v) {
         obj->v = angle;
         sound = (obj->moveData.word >> 24) & 0xFF;
         if (sound != 0 && openAngle != 0) {
@@ -395,7 +395,7 @@ void prop_rotateAboutPivots(WorldObject *obj) {
 
 
 /* Sets the alpha from a 0..1 level looked up by the param, never fully transparent. */
-void func_1511BA24(WorldObject *obj) {
+void prop_setAlphaFromColorAnim(WorldObject *obj) {
     f32 intensity;
 
     intensity = 0.0f;
@@ -477,7 +477,7 @@ void prop_faceCamera(WorldObject *obj) {
 }
 
 /* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
-void func_1511BEBC(WorldObject *obj) {
+void prop_grabAndLowerCharacter(WorldObject *obj) {
     f32 pos[3];
     s16 restY;
     Actor *target;
@@ -524,7 +524,7 @@ void func_1511BEBC(WorldObject *obj) {
         pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
         pos[2] = obj->z;
         if (mode != TASK_FLAG_ON && mode != TASK_FLAG_GOING_OFF) {
-            for (i = 0; i < D_8008FD8C; i++) {
+            for (i = 0; i < gPlayerCount; i++) {
                 player = &camera_global_Cameras[i];
                 if (player->mv->unk6B >= 4) {
                     continue;
@@ -544,7 +544,7 @@ void func_1511BEBC(WorldObject *obj) {
             }
         }
         if (target == NULL && (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF)) {
-            for (i = 0; i < D_8008FD8C; i++) {
+            for (i = 0; i < gPlayerCount; i++) {
                 character = &movement_obj[i];
                 if (character->mv->unk6B != 0) {
                     target = character;
@@ -573,8 +573,8 @@ void func_1511BEBC(WorldObject *obj) {
                     }
                 }
                 if (timer != 0) {
-                    if (D_800BE9E4 < timer) {
-                        timer -= D_800BE9E4;
+                    if (gFrameTicks < timer) {
+                        timer -= gFrameTicks;
                     } else {
                         timer = 0;
                         sound_playAt(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
@@ -611,8 +611,8 @@ void func_1511BEBC(WorldObject *obj) {
                     triggered = 0;
                 }
                 if (timer != 0) {
-                    if (D_800BE9E4 < timer) {
-                        timer -= D_800BE9E4;
+                    if (gFrameTicks < timer) {
+                        timer -= gFrameTicks;
                     } else {
                         timer = 0;
                     }
@@ -706,7 +706,7 @@ void func_1511C638(WorldObject *obj) {
             env_fadeLevelVtxColours(0, obj->moveData.word);
         }
     }
-    if (D_800BE9B4 != 0) {
+    if (gLevelLoadState != 0) {
         if (mode == TASK_FLAG_ON) {
             obj->alpha = 0xFF;
             next->inactive = 1;
@@ -723,7 +723,7 @@ void func_1511C638(WorldObject *obj) {
     }
     if (mode == TASK_FLAG_GOING_ON) {
         if (WORK(obj)->w1511C638.delay < 0) {
-            WORK(obj)->w1511C638.delay += D_800BE9E4;
+            WORK(obj)->w1511C638.delay += gFrameTicks;
         } else {
             if (WORK(obj)->w1511C638.fade == 0) {
                 switch (next->moveData.word & 0xFF) {
@@ -764,7 +764,7 @@ void func_1511C638(WorldObject *obj) {
             if (third != NULL) {
                 third->inactive = 1;
             }
-            WORK(obj)->w1511C638.fade += D_800BE9E4 * 30;
+            WORK(obj)->w1511C638.fade += gFrameTicks * 30;
             if (WORK(obj)->w1511C638.fade >= 0xFF) {
                 WORK(obj)->w1511C638.fade = 0xFF;
                 mode = TASK_FLAG_ON;
@@ -938,9 +938,9 @@ void prop_animateWaveMesh(WorldObject *obj) {
         tmp = (math_cosBinAngle((wave->phase >> 8) + shade) + 1.0f) * 0.5f * halfSpeed;
         speed = halfSpeed + tmp;
     }
-    wave->phase -= speed * D_800BE9E4;
+    wave->phase -= speed * gFrameTicks;
     if (wave->pulseAlpha) {
-        wave->alphaPhase += D_800BE9E4 * 2;
+        wave->alphaPhase += gFrameTicks * 2;
         obj->alpha = (math_cosBinAngle(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
     if (uvRate != 0.0f) {
@@ -977,7 +977,7 @@ static struct Entry1511D394 D_80089444[2] = {
  * Scrolls the mesh texture with the wave phase of the owner object (numbered by the low param
  * byte): S eases toward the wave level, T drifts by a cosine amount, and the alpha pulses.
  */
-void func_1511D394(WorldObject *obj) {
+void prop_scrollWithOwnerWave(WorldObject *obj) {
     struct Wave1511CB44 *ownerWave;
     WorldObject *owner;
     s32 pad; // matching: unused stack slot keeps the original frame layout
@@ -1057,7 +1057,7 @@ void func_1511D394(WorldObject *obj) {
         obj->vertices[gDrawBufferIndex][i].v.tc[0] = savedS[i] - offsetS;
         obj->vertices[gDrawBufferIndex][i].v.tc[1] = obj->vertices[!gDrawBufferIndex][i].v.tc[1] + offsetT;
     }
-    entry->alphaPhase += D_800BE9E4 * 2;
+    entry->alphaPhase += gFrameTicks * 2;
     obj->alpha = (math_cosBinAngle(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
@@ -1098,7 +1098,7 @@ void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
     angle = mesh->phase >> 4;
     cosine = math_sinBinAngle(angle);
     sine = math_cosBinAngle(angle);
-    mesh->phase += parameters.speed * D_800BE9E4;
+    mesh->phase += parameters.speed * gFrameTicks;
     s_delta = parameters.amplitude_s * sine;
     t_delta = parameters.amplitude_t * cosine;
     for (index = 0; index < mesh->count; index++) {
@@ -1133,7 +1133,7 @@ void prop_rotateTexture(WorldObject *obj) {
     uvArg4 = obj->moveData.word >> 24;
     uvArg5 = (obj->moveData.word >> 16) & 0xFF;
     speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
-    WORK(obj)->w1511D9E4.uvAngle += speed * D_800BE9E4;
+    WORK(obj)->w1511D9E4.uvAngle += speed * gFrameTicks;
     sprite_rotateTexcoords(obj->vertices[gDrawBufferIndex], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
 }
 
@@ -1148,7 +1148,7 @@ struct Swing1511DBC4 {
  * Opens the object to 90 degrees with ever-increasing acceleration, wobbles slightly while open,
  * and closes one degree per frame.
  */
-void func_1511DBC4(WorldObject *obj) {
+void prop_swingOpen90(WorldObject *obj) {
     s32 mode;
     struct Swing1511DBC4 *swing;
     f32 wobble;
@@ -1172,7 +1172,7 @@ void func_1511DBC4(WorldObject *obj) {
         wobble = cosf(swing->time * 0.01745329238f);
         wobble *= 0.5f;
         obj->v += wobble;
-        swing->time += 3.0f * D_800BE9E4;
+        swing->time += 3.0f * gFrameTicks;
     } else if (mode == TASK_FLAG_GOING_ON) {
         if (obj->v == 0.0f) {
             swing->velocity = 0.0f;
@@ -1186,8 +1186,8 @@ void func_1511DBC4(WorldObject *obj) {
             obj->v = 90.0f;
         }
     } else {
-        if (D_800BE9E4 < obj->v) {
-            obj->v -= D_800BE9E4;
+        if (gFrameTicks < obj->v) {
+            obj->v -= gFrameTicks;
         } else {
             obj->v = 0.0f;
             mode = TASK_FLAG_OFF;
@@ -1308,7 +1308,7 @@ void prop_playImpactSound(WorldObject *obj, Actor *character) {
  * Pulses the object's scale and wobbles it; when a character (filtered by the "filter" field)
  * touches it, plays the impact sound, notifies func_151D6970 and shrinks it away.
  */
-void func_1511DF6C(WorldObject *obj) {
+void prop_pulseUntilTouched(WorldObject *obj) {
     f32 dist;
     s32 hp; // matching: the stored copy of unk1FE4 steers register allocation
     f32 radius;
@@ -1351,17 +1351,17 @@ void func_1511DF6C(WorldObject *obj) {
         }
         /* fallthrough */
     default:
-        obj->u += D_800BE9E4 * 1.519999981f;
+        obj->u += gFrameTicks * 1.519999981f;
         dist = cosf(pulse->phaseX * 9.587380191e-05f);
         obj->t = 8.0f * dist;
         dist = cosf(pulse->phaseZ * 9.587380191e-05f);
         obj->yOffset = 12.0f * dist;
-        pulse->phaseX += D_800BE9E4 * 507.0f;
-        pulse->phaseZ += D_800BE9E4 * 419.0f;
+        pulse->phaseX += gFrameTicks * 507.0f;
+        pulse->phaseZ += gFrameTicks * 419.0f;
         break;
     }
     if (pulse->state < 3 && !skip) {
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             character = &movement_obj[i];
             if (character->type == 0 || character->energy <= 0 || character->playernumber == 0xFF) {
                 continue;
@@ -1414,7 +1414,7 @@ void func_1511DF6C(WorldObject *obj) {
         }
         obj->zScale = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
         obj->xScale = obj->yScale = obj->zScale;
-        pulse->bouncePhase += D_800BE9E4 * 0x1613;
+        pulse->bouncePhase += gFrameTicks * 0x1613;
     } else if (pulse->state == 2) {
     } else if (pulse->state == 3) {
         obj->zScale -= 0.2599999905f * pulse->fullScale;
@@ -1464,7 +1464,7 @@ void prop_swingHinge(WorldObject *prop) {
             gfx_playObjectSound(prop, sound, 24000, 200, 2500, 0);
         }
     }
-    speed *= D_800BE9E4;
+    speed *= gFrameTicks;
     range = 70.0f;
     rate = 6.0f;
     switch (prop->moveData.word >> 16) {
@@ -1541,7 +1541,7 @@ void prop_swingHinge(WorldObject *prop) {
         WORK(prop)->wobble.phase += 0.00999999977648f;
         /* fallthrough */
     case 11:
-        WORK(prop)->wobble.phase += 0.0399999991059f * D_800BE9E4;
+        WORK(prop)->wobble.phase += 0.0399999991059f * gFrameTicks;
         prop->v = sinf(WORK(prop)->wobble.phase) * 10.0f;
         if (WORK(prop)->wobble.phase > 12.5663709641f) { /* 4 pi */
             WORK(prop)->wobble.phase -= 12.5663709641f * ((math_random() & 4) + 1); // u32 multiplier
@@ -1552,7 +1552,7 @@ void prop_swingHinge(WorldObject *prop) {
         WORK(prop)->wobble.phase += 0.00999999977648f;
         /* fallthrough */
     case 13:
-        WORK(prop)->wobble.phase += 0.0399999991059f * D_800BE9E4;
+        WORK(prop)->wobble.phase += 0.0399999991059f * gFrameTicks;
         // matching: computed in double precision (180.0, not 180.0f)
         prop->v = 180.0 - sinf(WORK(prop)->wobble.phase) * 10.0f;
         break;
@@ -1574,7 +1574,7 @@ void prop_raiseWhileTriggered(WorldObject *prop) {
         WORK(prop)->slide.home = prop->y;
     }
 
-    step = D_800BE9E4 * 4.0f;
+    step = gFrameTicks * 4.0f;
     if (prop->moveData.word != 0) {
         step *= 0.25f;
     }
@@ -1599,7 +1599,7 @@ void prop_raiseWhileTriggered(WorldObject *prop) {
  * Slides the prop along z: away from home by up to 350 units while not triggered and back to home
  * once triggered. Bit 0 of the prop's id picks the direction.
  */
-void func_1511ED84(WorldObject *prop) {
+void prop_slideZUntilTriggered(WorldObject *prop) {
     f32 step;
     f32 limit;
     s32 direction;
@@ -1608,7 +1608,7 @@ void func_1511ED84(WorldObject *prop) {
         WORK(prop)->slide.home = prop->z;
     }
 
-    step = D_800BE9E4 * 4.0f;
+    step = gFrameTicks * 4.0f;
     direction = 1 - (prop->unique_id & 1);
 
     if (WORK(prop)->slide.triggered != 0) {

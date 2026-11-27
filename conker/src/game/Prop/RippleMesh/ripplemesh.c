@@ -135,7 +135,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
     }
     if (ripple->active) {
         prevPhase = ripple->phase;
-        ripple->phase += ripple->phaseStep * D_800BE9E4;
+        ripple->phase += ripple->phaseStep * gFrameTicks;
         if (ripple->amplitude < ripple->decayThreshold) {
             factor = 0.5f;
         } else {

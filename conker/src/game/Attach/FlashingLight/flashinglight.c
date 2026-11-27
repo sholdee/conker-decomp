@@ -44,10 +44,10 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
         brightness += (fullBrightness - brightness) * 0.1f;
     }
 
-    if (light->hookState <= D_800BE9E4) {
+    if (light->hookState <= gFrameTicks) {
         light->hookState = 0;
     } else {
-        light->hookState -= D_800BE9E4;
+        light->hookState -= gFrameTicks;
     }
 
     light->hookState2 = brightness * 255.0f;

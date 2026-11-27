@@ -46,7 +46,7 @@ struct Foo150AE36C {
 
 
 
-s32 func_150AE2A0(struct Foo150AE280 *arg0) {
+s32 collision_updateWobble(struct Foo150AE280 *arg0) {
     struct Foo150AE280Inner *temp_v0;
 
     arg0->unk170.unk8 += 0.065f * gFrameDelta;
@@ -63,7 +63,7 @@ s32 func_150AE35C(s32 arg0) {
     return 1;
 }
 
-s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {
+s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *arg0, s16 arg1) {
     s16 *var_v0;
     s16 *ret;
     f32 temp_f2;

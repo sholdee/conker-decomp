@@ -167,7 +167,7 @@ s32 effect_updateFadeTextBox(TextObj *obj) {
     if (*fadeTimer > 0) {
         fade = *fadeTimer * 31;
         alpha = 255 - fade;
-        *fadeTimer -= D_800BE9E4;
+        *fadeTimer -= gFrameTicks;
     } else {
         alpha = 255;
         fade = 0;
@@ -266,7 +266,7 @@ s32 effect_updateSlowFadeTextBox(TextObj *obj) {
     if (*fadeTimer > 0) {
         fade = *fadeTimer * 12;
         alpha = 255 - fade;
-        *fadeTimer -= D_800BE9E4;
+        *fadeTimer -= gFrameTicks;
     } else {
         alpha = 255;
         fade = 0;

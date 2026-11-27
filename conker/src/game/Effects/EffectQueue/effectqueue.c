@@ -50,7 +50,7 @@ void effect_updateQueue(Queue *arg) {
             effect_destroyObject(&node->header);
             queue->count--;
         } else if (queue->flags & 1) {
-            queue->timer -= D_800BE9E4;
+            queue->timer -= gFrameTicks;
         }
     }
 }

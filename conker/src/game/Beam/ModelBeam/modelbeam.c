@@ -489,7 +489,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
         return;
     }
     if ((owner->ob_matrix_ptr != NULL) && !(owner->unk94 & 2)) {
-        data->timer -= D_800BE9E4;
+        data->timer -= gFrameTicks;
         if (data->timer < 0) {
             sound_playAt(0x679, 0x18CE, 0, 0, 0, owner->xpos, owner->ypos, owner->zpos,
                           0x7918, 0x7D00);

@@ -17,8 +17,8 @@ void sound_updateCooldowns(void) {
 
     for (i = 0; i < 4; i++) {
         if (gSoundCooldowns[i]) {
-            if (gSoundCooldowns[i] > D_800BE9E4) {
-                gSoundCooldowns[i] -= D_800BE9E4;
+            if (gSoundCooldowns[i] > gFrameTicks) {
+                gSoundCooldowns[i] -= gFrameTicks;
             } else {
                 gSoundCooldowns[i] = 0;
             }
@@ -27,12 +27,12 @@ void sound_updateCooldowns(void) {
 }
 
 // The two callbacks below (records started by sound_playWithCooldown) use callback_param1.delay as a
-// countdown in the low half (bit 15: skip the fade, func_15103AA0 only) with the held-back sound
+// countdown in the low half (bit 15: skip the fade, sound_followDelayedCallback only) with the held-back sound
 // id in the high half, and callback_param2.obj as the object the sound follows.
 
 // Callback for an object with a camera: follow the object; while the delay runs, hold back
 // the record's sound and play 0x5B0 instead. Once playing, the object owns the voice.
-s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_followDelayedCameraCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     s16 remaining;
     Actor *obj;
@@ -50,7 +50,7 @@ s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
             sound_playActorSound1(0x5B0, obj, 25000, 100, 120);
             return 0;
         }
-        remaining -= D_800BE9E4;
+        remaining -= gFrameTicks;
         if (remaining <= 0) {
             *sound = record->callback_param1.delay >> 16;
             record->sample = *sound;
@@ -76,9 +76,9 @@ s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
     return 0;
 }
 
-// Callback for an object without a camera: like func_15103910, but with a 15-bit countdown,
+// Callback for an object without a camera: like sound_followDelayedCameraCallback, but with a 15-bit countdown,
 // and once playing it sends the voice param 0x8000 unless delay bit 15 is set.
-s32 func_15103AA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_followDelayedCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     u32 remaining;
     Actor *obj;
@@ -96,13 +96,13 @@ s32 func_15103AA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
             sound_playActorSound1(0x5B0, obj, -25000, record->distance_loudest, record->distance_max);
             return 0;
         }
-        if (remaining <= D_800BE9E4) {
+        if (remaining <= gFrameTicks) {
             *sound = record->callback_param1.delay >> 16;
             record->sample = *sound;
             record->callback_param1.delay &= ~0x7FFF;
             return 0;
         }
-        remaining -= D_800BE9E4;
+        remaining -= gFrameTicks;
     } else {
         if (record->sound_id == 0) {
             sound_playActorSound1(0x5B1, obj, -25000, record->distance_loudest, record->distance_max);
@@ -158,10 +158,10 @@ void sound_playWithCooldown(s32 sound, s32 objId, u32 variantCount, s32 slot, s3
 
     if (hasCamera) {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, 30000, 0x7FFF,
-                      0x7FFE, func_15103910, 20, obj, 0x100, 0);
+                      0x7FFE, sound_followDelayedCameraCallback, 20, obj, 0x100, 0);
     } else {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, 32700, 0x7FFF,
-                      0x7FFE, func_15103AA0, (pairVariants << 15) | 20, obj, 0x100, 0);
+                      0x7FFE, sound_followDelayedCallback, (pairVariants << 15) | 20, obj, 0x100, 0);
     }
 
     gSoundCooldowns[slot] = 600;

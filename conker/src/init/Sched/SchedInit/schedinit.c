@@ -12,7 +12,7 @@
  * __osShutdown and piThread (D_80035910) for the files that include it. */
 /* matching: these lines also set the .bss order; with fewer declarations here the .bss moves */
 extern u32 __osShutdown;
-extern u8 D_8002AAE0;
+extern u8 gPageFaultsDisabled;
 extern u8 gPadInitDone;
 extern u8 gResetPending;
 extern OSThread gMainThread;
@@ -107,7 +107,7 @@ void sched_preNmiThread(void *arg) {
     audio_stopThread(); // stop thread gAudioThread if gAudioThreadStarted not null
     gPreNmiTime = osGetTime();
     __osViInit();
-    D_8002AAE0 = 1;
+    gPageFaultsDisabled = 1;
     osSetThreadPri(NULL, 11);
 
     if (gPadInitDone != 0) {

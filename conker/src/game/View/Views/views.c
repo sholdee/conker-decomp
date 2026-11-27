@@ -234,7 +234,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
         gTwoPlayerWidthScale = (scaledWidth - (scaledWidth % 4)) / width;
     }
 
-    func_150006E0(level);
+    music_initLevelViewState(level);
 
     for (i = 0; i <= (layout = gScreenLayout); i++) {
         view_setupView(i, layout, 1023, 0);
@@ -244,7 +244,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
         view_setupView(i, 0, 1023, 0);
     }
 
-    D_800BE617 = 1;
+    gViewLayoutChanged = 1;
     gRebuildFrameDisplayLists = 1;
     D_800BE635 = 0;
     view_initDefaultProjection(arg1);

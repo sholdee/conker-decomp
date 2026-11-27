@@ -114,12 +114,12 @@ void particle_updateSpinDebris(SpinDebrisParticle *particle) {
         particle->velZ += -sign * drag;
     }
     timer = particle->timer;
-    timer -= D_800BE9E4;
+    timer -= gFrameTicks;
     if (timer < 0) {
         s32 alpha;
         timer = 0;
         alpha = particle->alpha;
-        alpha -= D_800BE9E4 * 4;
+        alpha -= gFrameTicks * 4;
         if (alpha < 0) {
             alpha = 0;
         }
@@ -144,7 +144,7 @@ Gfx *func_1517A394(Gfx *gfx) {
 Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
         prop_isOutsideFrustum(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
-                      D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
+                      gFrustumSlopeX, D_800D35E4, NULL, NULL) != 0) {
         if (particle->header.type == 8 && (particle->viewFlags & (1 << view))) {
             particle->viewFlags |= 0x10 << view;
         }
@@ -246,7 +246,7 @@ void particle_updateGroundChunk(SpinDebrisParticle *particle) {
             particle->rotZ += particle->spinZ;
         }
     } else {
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer > 0) {
             particle->timer = timer;
             particle->alpha = (timer << 8) / 60;

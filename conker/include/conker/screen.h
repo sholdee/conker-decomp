@@ -140,7 +140,7 @@ typedef struct ScreenOverlay {
 } ScreenOverlay;
 
 /* game/Screen/ResetEffects/reseteffects.c */
-void func_15008A10(void);
+void screen_resetKickableTargets(void);
 void screen_resetEffects(void);
 
 /* game/Screen/Mosaic/mosaic.c */
@@ -163,13 +163,13 @@ extern u8 gStrobeCount;
 void screen_updateStrobeSpawner(StrobeSpawner *spawner);
 
 /* game_126F60.c */
-Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
+Gfx *screen_drawStarSky(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game/Screen/Fade/fade.c */
 void screen_spawnFade(s32 mode, Actor *owner, Actor *source);
 void screen_updateFade(FadeEffect *effect);
 Gfx *screen_drawFade(Gfx *gfx, FadeEffect *effect, s16 view);
-u8 func_151044F4(void);
+u8 screen_getPlayer0MatrixPhysics(void);
 
 /* game/Screen/ViewEffects/vieweffects.c */
 extern s8 gFadeDirections[4];

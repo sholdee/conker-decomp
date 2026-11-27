@@ -90,7 +90,7 @@ void particle_updateStreakParticle(StreakParticle *arg0) {
     particle = arg0;
     expired = FALSE;
     if (particle->flags & 1) {
-        particle->lifetime -= D_800BE9E4;
+        particle->lifetime -= gFrameTicks;
         if (particle->lifetime < 0) {
             expired = TRUE;
         }
@@ -275,7 +275,7 @@ void particle_updateRandomBurstEffect(RandomBurstEffect *effect) {
     LightEffectHeader header;
     Vec3i intPos;
 
-    effect->timer.value -= D_800BE9E4;
+    effect->timer.value -= gFrameTicks;
     if (effect->timer.value < 0) {
         row = math_random() % 3U;
         col = math_random() % 10U;

@@ -25,7 +25,7 @@ s8 particle_updateFlickerSprite(FlickerSprite *particle) {
         alive = FALSE;
     }
     flicker->keepAlive = FALSE;
-    flicker->timer -= D_800BE9E4;
+    flicker->timer -= gFrameTicks;
     if (flicker->timer < 0) {
         flicker->timer = math_random() % (flicker->delayRange + 1) + flicker->minDelay;
         flicker->target = math_randomFloat() * flicker->targetRange + flicker->minTarget;

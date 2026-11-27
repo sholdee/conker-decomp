@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-static const s32 D_800A18C0[3] = { 0xBD, 0xBE, 0xBF };
-static const f32 D_800A18CC[3] = { 1.0f, 1.0f, 1.0f };
-static const s32 D_800A18D8[2] = { 0x2D, 0x2E };
-static const f32 D_800A18E0[2] = { 1.0f, 1.0f };
+static const s32 gExplosionSprayModels[3] = { 0xBD, 0xBE, 0xBF };
+static const f32 gExplosionSprayScales[3] = { 1.0f, 1.0f, 1.0f };
+static const s32 gExplosionBurstModels[2] = { 0x2D, 0x2E };
+static const f32 gExplosionBurstScales[2] = { 1.0f, 1.0f };
 
 /* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
 void func_150F1A00(Actor *actor) {
@@ -27,7 +27,7 @@ void func_150F1A00(Actor *actor) {
     }
     rate = rates[idx];
     rec = &D_800CC298;
-    rec->pulse += rate * D_800BE9E4;
+    rec->pulse += rate * gFrameTicks;
     scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
     mtx = actor->ob_matrix_ptr[62];
     for (i = 0; i < 3; i++) {
@@ -46,7 +46,7 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     s32 i;
 
     down = (movement_obj[index].animseq.uh == 0x21) ? 1 : 0;
-    step = D_800BE9E4 * 0x222;
+    step = gFrameTicks * 0x222;
     if (down) {
         tilt = D_800CC298.tilt - step;
         if (-6553.600098f < tilt) {
@@ -128,7 +128,7 @@ void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
         a.spin = 8.990000725f;
         a.floorHitChance = 0.0f;
         a.floorHitFn = 12;
-        particle_spawnDebrisSpray(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
+        particle_spawnDebrisSpray(&a, gExplosionSprayModels, gExplosionSprayScales, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
         b.countBase = 5;
         b.countRange = 3;
         b.pos = pos;
@@ -145,13 +145,13 @@ void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
         b.scaleBase = 0.503000021f;
         b.scaleRange = 0.2560000122f;
         b.spin = 13.93300056f;
-        particle_spawnDebrisBurst(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&b, gExplosionBurstModels, gExplosionBurstScales, 2, 0.0f, 0, arg1, arg2);
     }
 }
 
 /* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
  * 128-255 ticks (gRandomSoundTimer counts down); sound_getPanVolumeAt derives the pan from its height. */
-void func_150F20F0(s32 index) {
+void beam_levelUpdateRandomSounds(s32 index) {
     f32 x;
     f32 z;
     s32 pan;
@@ -167,8 +167,8 @@ void func_150F20F0(s32 index) {
     /* squares the already-squared terms: the test is on x^4 + z^4 */
     x = (x * x) + (z * z);
     if (gRandomSoundTimer != 0) {
-        if (D_800BE9E4 < gRandomSoundTimer) {
-            gRandomSoundTimer -= D_800BE9E4;
+        if (gFrameTicks < gRandomSoundTimer) {
+            gRandomSoundTimer -= gFrameTicks;
         } else {
             gRandomSoundTimer = 0;
         }
@@ -183,7 +183,7 @@ void func_150F20F0(s32 index) {
 
 /* Spawns weapon_spawnImpactBurst's effect at a random point 100 units around bone 19 of `actor`
  * (unless actor->cullMask's low nibble is 0xF). */
-void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
+void beam_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
     Vec3f pos;
 

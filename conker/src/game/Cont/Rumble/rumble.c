@@ -45,7 +45,7 @@ RumbleObj *cont_spawnRumble(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg
     if (!cont_hasRumblePak(params->playerMask)) {
         return NULL;
     }
-    if (gPaused != 0 || gPauseRequested != 0 || gPauseCooldown != 0 || D_800BEAC3 != 0) {
+    if (gPaused != 0 || gPauseRequested != 0 || gPauseCooldown != 0 || gRumbleStopRequest != 0) {
         return NULL;
     }
     {
@@ -83,7 +83,7 @@ void cont_updateRumbleObj(RumbleObj *obj) {
 
     expired = FALSE;
     if (obj->params.flags & 1) {
-        obj->params.duration -= D_800BE9E4;
+        obj->params.duration -= gFrameTicks;
         if (obj->params.duration < 0) {
             expired = TRUE;
         }

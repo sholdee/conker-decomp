@@ -6,5 +6,5 @@
 
 void level_setup16(void) {
     particle_startShakeTimer();
-    D_80041FD8 = 0x10;
+    gSoundFxMixBoost = 0x10;
 }

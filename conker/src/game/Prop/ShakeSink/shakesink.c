@@ -21,12 +21,12 @@ typedef struct {
 
 #define WORK(obj) ((Work142560 *)&(obj)->touch)
 
-void func_151150B0(WorldObject *obj) {
+void prop_emptyBehavior22(WorldObject *obj) {
 }
 
 /* Spins the object about Z by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void prop_spinZ(WorldObject *obj) {
-    obj->spinZ = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinZ = ((obj->moveData.word >> 16) * gFrameTicks) * (1.0f / 256.0f);
     obj->v += obj->spinZ;
     if (obj->v < 0.0f) {
         obj->v += 360.0f;
@@ -39,7 +39,7 @@ void prop_spinZ(WorldObject *obj) {
 
 /* Spins the object about Y by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void prop_spinY(WorldObject *obj) {
-    obj->spinY = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinY = ((obj->moveData.word >> 16) * gFrameTicks) * (1.0f / 256.0f);
     obj->u += obj->spinY;
     if (obj->u < 0.0f) {
         obj->u += 360.0f;
@@ -52,7 +52,7 @@ void prop_spinY(WorldObject *obj) {
 
 /* Spins the object about X by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void prop_spinX(WorldObject *obj) {
-    obj->spinX = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinX = ((obj->moveData.word >> 16) * gFrameTicks) * (1.0f / 256.0f);
     obj->t += obj->spinX;
     if (obj->t < 0.0f) {
         obj->t += 360.0f;
@@ -63,7 +63,7 @@ void prop_spinX(WorldObject *obj) {
     }
 }
 
-void func_1511529C(s32 arg0) {
+void prop_emptyBehavior55(s32 arg0) {
 }
 
 /*
@@ -76,10 +76,10 @@ void prop_sinkWhileTriggered(WorldObject *obj) {
     }
     if (obj->object_status & 4) {
         if (WORK(obj)->homeY - obj->y < (s16)obj->moveData.word) {
-            obj->y -= (s16)(obj->moveData.word >> 16) * D_800BE9E4;
+            obj->y -= (s16)(obj->moveData.word >> 16) * gFrameTicks;
         }
     } else {
-        obj->y += (WORK(obj)->homeY - obj->y) * 0.05f * D_800BE9E4;
+        obj->y += (WORK(obj)->homeY - obj->y) * 0.05f * gFrameTicks;
     }
 }
 
@@ -101,7 +101,7 @@ void prop_shakeAndSink(WorldObject *obj) {
     hold = (s8)(obj->moveData.word >> 8);
     start = obj->moveData.word >> 24;
     if (obj->object_status & 4) {
-        WORK(obj)->timer += D_800BE9E4;
+        WORK(obj)->timer += gFrameTicks;
     }
     if (WORK(obj)->timer <= start) {
         if (!(obj->object_status & 4) && WORK(obj)->timer != 0) {
@@ -113,7 +113,7 @@ void prop_shakeAndSink(WorldObject *obj) {
         }
     } else {
         if (!(obj->object_status & 4)) {
-            WORK(obj)->timer += D_800BE9E4;
+            WORK(obj)->timer += gFrameTicks;
         }
         t = WORK(obj)->timer - start - hold;
         if (WORK(obj)->returning == 0) {
@@ -125,7 +125,7 @@ void prop_shakeAndSink(WorldObject *obj) {
                 if (WORK(obj)->homeY == 0) {
                     WORK(obj)->homeY = obj->y;
                 }
-                obj->y -= (s8)(obj->moveData.word >> 16) * D_800BE9E4;
+                obj->y -= (s8)(obj->moveData.word >> 16) * gFrameTicks;
                 if ((obj->moveData.word & 0xFF) * 16 < WORK(obj)->homeY - obj->y) {
                     s32 pad; // matching: this block's -g3 scope (and slot) fixes the schedule and frame
                     obj->object_status &= ~0x61;

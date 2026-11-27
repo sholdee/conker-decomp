@@ -17,7 +17,7 @@ static const f32 gAsinQuarterPi = 0.7853980064f;  /* pi/4 */
 static const f32 gAsinHalfPi = 1.570796013f;   /* pi/2 */
 static const f32 gAsinMinusQuarterPi = -0.7853980064f; /* -pi/4 */
 static const f32 gAsinMinusHalfPi = -1.570796013f;  /* -pi/2 */
-static const f32 D_80085FE8 = 0.866024971f;   /* cos(pi/6) */
+static const f32 gAsinSqrt3Over2 = 0.866024971f;   /* cos(pi/6) */
 
 /* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
 void math_mtxRigidInverse(MtxF mtx, MtxF out) {
@@ -79,7 +79,7 @@ f32 asinf(f32 x) {
     if (exponent < 127) {
         /* 0.5 <= |x| < 1 */
         absX = fabsf(x);
-        if (absX < D_80085FE8) {
+        if (absX < gAsinSqrt3Over2) {
             /* asin(x) = +-pi/4 + asin(2x^2 - 1) / 2 */
             sq = x * x;
             reduced = (sq + sq) - gAsinOne;

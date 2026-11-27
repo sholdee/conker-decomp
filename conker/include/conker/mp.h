@@ -159,7 +159,7 @@ extern f32 gRaceTargetX;    /* camera target circling the actor until the start 
 extern f32 gRaceTargetY;
 extern f32 gRaceTargetZ;
 extern s8 gRaceDirection;     /* race direction: 0 = towards higher node params */
-extern s8 D_800D23A9;
+extern s8 gRacersUpdated;
 
 /* game/Mp/MpGame/mpgame.c */
 extern MpGame *gMpGame; /* the loaded multiplayer game resource (mp_loadGame) */
@@ -168,8 +168,8 @@ s32 mp_loadGame(void);
 s32 mp_pickOpponentInRange(s32 player);
 s32 mp_updateTargetList(void);
 s32 mp_update(void);
-s32 func_1508B194(s32 player);
-void func_1508B1D4(s32 player);
+s32 mp_getTeamKills(s32 player);
+void mp_clearTeamKills(s32 player);
 void mp_addZone(f32 x, f32 y, f32 z, f32 r);
 void mp_floodFillPath(u8 id, PathSearch *s);
 void mp_assignZoneNodes(void);
@@ -201,7 +201,7 @@ extern s16 gBotAimTimeLimits[5]; /* aim time limit, -1 = none */
 extern s8 gBotAttackIntervals[5];
 extern s8 gBotFireHoldTimes[5];
 extern s8 gBotAttackDelays[5];
-extern s8 D_800872E8[5]; /* percent chance */
+extern s8 gBotAimAccuracy[5]; /* percent chance */
 extern s8 D_800872F0[5];
 extern f32 gBotAimRates[5]; /* aim rate */
 extern f32 D_8008730C[5]; /* not referenced by any code */

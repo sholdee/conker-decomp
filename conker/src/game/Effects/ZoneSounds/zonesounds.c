@@ -12,8 +12,8 @@ void effect_playRandomZoneSounds(s32 arg0) {
     prop_updateWaveChains();
 
     if (gRandomSoundTimer != 0) {
-        if (D_800BE9E4 < gRandomSoundTimer) {
-            gRandomSoundTimer -= D_800BE9E4;
+        if (gFrameTicks < gRandomSoundTimer) {
+            gRandomSoundTimer -= gFrameTicks;
         } else {
             gRandomSoundTimer = 0;
         }

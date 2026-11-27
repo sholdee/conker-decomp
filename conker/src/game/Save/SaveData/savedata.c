@@ -6,10 +6,10 @@
 static u8 gModeSettingsRecord[0x68]; /* the EEPROM record of blocks 0x44-0x51: a u16 checksum, then gModeSettings */
 static u8 gEepromBuffer[0x80]; /* EEPROM transfer buffer; [0..1] is a u16 checksum */
 static s8 gEepromFileSlots[4]; /* save slot loaded from each EEPROM save file, -1 if none */
-s16 D_800BE3DC;
+s16 gScanBestFlagCount;
 u8 D_800BE3DE;
-s8 D_800BE3DF;
-u8 D_800BE3E0;
+s8 gCheckpointLevel;
+u8 gCheckpointSpawn;
 u32 D_800BE3E4; // saved clock (seconds)
 s32 gPlayTime; // play time (seconds)
 s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
@@ -59,7 +59,7 @@ void save_resetGameState(void) {
     zone_resetTaskProgress();
     for (i = 0; i < 69; i++) { gPlayedCutscenes[i] = 0; }
 
-    D_800BE3DF = 24;
+    gCheckpointLevel = 24;
     gPlayTime = 0;
     D_800D2E45 = 1;
 }
@@ -103,7 +103,7 @@ void save_readFile(s32 eepromSlot) {
     p += 2;
     if (sum != *(u16 *)gEepromBuffer) {
         save_resetGameState();
-        if (D_800BE3DC >= 0 && gSaveScanning != 0) {
+        if (gScanBestFlagCount >= 0 && gSaveScanning != 0) {
             for (i = 0; i < 27; i++) {
                 gTaskDoneBits[i] = backup[i];
             }
@@ -124,8 +124,8 @@ void save_readFile(s32 eepromSlot) {
         for (i = 0; i < 9; i++) {
             gSeenTextBits[i] = *p++;
         }
-        D_800BE3DF = *p++;
-        D_800BE3E0 = *p++;
+        gCheckpointLevel = *p++;
+        gCheckpointSpawn = *p++;
         D_800BE3E4 = *p++ << 8;
         D_800BE3E4 |= *p++;
         player_setStat(0, 9, D_800BE3E4);
@@ -167,12 +167,12 @@ void save_readFile(s32 eepromSlot) {
                 }
                 gSaveSlots[saveSlot].playTime = gPlayTime;
                 gSaveSlots[saveSlot].flagCount = flagCount;
-                gSaveSlots[saveSlot].checkpointLevel = D_800BE3DF;
+                gSaveSlots[saveSlot].checkpointLevel = gCheckpointLevel;
                 gSaveSlots[saveSlot].unk4 = D_800BE3E4;
                 gSaveSlots[saveSlot].sequence = sequence;
                 gSaveSlots[saveSlot].eepromSlot = eepromSlot;
-                if ((u8)flagCount >= D_800BE3DC) {
-                    D_800BE3DC = (u8)flagCount;
+                if ((u8)flagCount >= gScanBestFlagCount) {
+                    gScanBestFlagCount = (u8)flagCount;
                     if (gSeenTextBits[8] & 0x20) {
                         D_800BE3DE = 1;
                     }
@@ -195,7 +195,7 @@ void save_readFile(s32 eepromSlot) {
 /*
  * Writes the game state as save slot `saveSlot` (0-2). The save goes to an EEPROM save file that no
  * other slot uses. Its last block is overwritten with 0xFE first, so an interrupted write fails the
- * checksum. Layout: checksum, slot, sequence, the gTaskDoneBits/gSeenTextBits/D_800BE3DF/D_800BE3E0/
+ * checksum. Layout: checksum, slot, sequence, the gTaskDoneBits/gSeenTextBits/gCheckpointLevel/gCheckpointSpawn/
  * D_800BE3E4/gPlayTime values, then each gPlayedCutscenes entry packed MSB-first in gSaveEntryBits[i] bits.
  */
 void save_writeSlot(s32 saveSlot) {
@@ -241,8 +241,8 @@ void save_writeSlot(s32 saveSlot) {
     *p++ = sequence & 0xFF;
     for (i = 0; i < 27; i++) { *p++ = gTaskDoneBits[i]; }
     for (i = 0; i < 9; i++) { *p++ = gSeenTextBits[i]; }
-    *p++ = D_800BE3DF; // matching: original loads it signed (lb)
-    *p++ = D_800BE3E0;
+    *p++ = gCheckpointLevel; // matching: original loads it signed (lb)
+    *p++ = gCheckpointSpawn;
     D_800BE3E4 = player_getStat(0, 6);
     *p++ = (D_800BE3E4 >> 8) & 0xFF;
     *p++ = D_800BE3E4 & 0xFF;
@@ -379,7 +379,7 @@ void save_readSettings(void) {
     gSettings[0x10] = saved;
     save_validateSettings();
     save_checkCodeTamper();
-    D_8008FE30 = 1;
+    gSettingsLoaded = 1;
 }
 
 /* Checksums the settings record (gSettings) and writes it to EEPROM. */
@@ -461,7 +461,7 @@ void save_beginScan(void) {
     gSaveSlots[0].eepromSlot = -1;
     gSaveSlots[1].eepromSlot = -1;
     gSaveSlots[2].eepromSlot = -1;
-    D_800BE3DC = -1;
+    gScanBestFlagCount = -1;
     D_800BE3DE = 0;
     gSaveScanning = 1;
     for (i = 0; i < 27; i++) { gTaskDoneBits[i] = 0; }

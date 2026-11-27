@@ -159,10 +159,10 @@ glabel func_150A5174
     /* D2824 150A5374 00000000 */   nop
 
 glabel gfx_copyLevelDlCulled
-    /* D2828 150A5378 3C0A800D */  lui        $t2, %hi(D_800D3668)
-    /* D282C 150A537C 8D4A3668 */  lw         $t2, %lo(D_800D3668)($t2)
-    /* D2830 150A5380 3C0B800D */  lui        $t3, %hi(D_800D366C)
-    /* D2834 150A5384 8D6B366C */  lw         $t3, %lo(D_800D366C)($t3)
+    /* D2828 150A5378 3C0A800D */  lui        $t2, %hi(gShadowFaceFlags)
+    /* D282C 150A537C 8D4A3668 */  lw         $t2, %lo(gShadowFaceFlags)($t2)
+    /* D2830 150A5380 3C0B800D */  lui        $t3, %hi(gShadowFaceFlagsEnd)
+    /* D2834 150A5384 8D6B366C */  lw         $t3, %lo(gShadowFaceFlagsEnd)($t3)
   .L150A5388:
     /* D2838 150A5388 FD400000 */  sd         $zero, 0x0($t2)
     /* D283C 150A538C 254A0008 */  addiu      $t2, $t2, 0x8
@@ -195,10 +195,10 @@ glabel gfx_copyLevelDlCulled
     /* D28A8 150A53F8 8FB60174 */  lw         $s6, 0x174($sp)
     /* D28AC 150A53FC 44800000 */  mtc1       $zero, $f0
     /* D28B0 150A5400 00000000 */  nop
-    /* D28B4 150A5404 3C01800D */  lui        $at, %hi(D_800D35E0)
-    /* D28B8 150A5408 C43C35E0 */  lwc1       $f28, %lo(D_800D35E0)($at)
-    /* D28BC 150A540C 3C01800D */  lui        $at, %hi(D_800D35E0 + 0x4)
-    /* D28C0 150A5410 C43B35E4 */  lwc1       $f27, %lo(D_800D35E0 + 0x4)($at)
+    /* D28B4 150A5404 3C01800D */  lui        $at, %hi(gFrustumSlopeX)
+    /* D28B8 150A5408 C43C35E0 */  lwc1       $f28, %lo(gFrustumSlopeX)($at)
+    /* D28BC 150A540C 3C01800D */  lui        $at, %hi(gFrustumSlopeX + 0x4)
+    /* D28C0 150A5410 C43B35E4 */  lwc1       $f27, %lo(gFrustumSlopeX + 0x4)($at)
     /* D28C4 150A5414 4600E707 */  neg.s      $f28, $f28
     /* D28C8 150A5418 4600DEC7 */  neg.s      $f27, $f27
     /* D28CC 150A541C 3C01800D */  lui        $at, %hi(D_800D3670)
@@ -219,8 +219,8 @@ glabel gfx_copyLevelDlCulled
     /* D2908 150A5458 8E73BE48 */  lw         $s3, %lo(gCurMapQuadTree)($s3)
     /* D290C 150A545C 3C17800E */  lui        $s7, %hi(gCurMapTris)
     /* D2910 150A5460 8EF7BE3C */  lw         $s7, %lo(gCurMapTris)($s7)
-    /* D2914 150A5464 3C14800D */  lui        $s4, %hi(D_800D3668)
-    /* D2918 150A5468 8E943668 */  lw         $s4, %lo(D_800D3668)($s4)
+    /* D2914 150A5464 3C14800D */  lui        $s4, %hi(gShadowFaceFlags)
+    /* D2918 150A5468 8E943668 */  lw         $s4, %lo(gShadowFaceFlags)($s4)
     /* D291C 150A546C 240F0000 */  addiu      $t7, $zero, 0x0
     /* D2920 150A5470 241E0001 */  addiu      $fp, $zero, 0x1
     /* D2924 150A5474 24070004 */  addiu      $a3, $zero, 0x4
@@ -244,11 +244,11 @@ glabel gfx_copyLevelDlCulled
     /* D2964 150A54B4 96720006 */  lhu        $s2, 0x6($s3)
     /* D2968 150A54B8 02124021 */  addu       $t0, $s0, $s2
     /* D296C 150A54BC 01C04825 */  or         $t1, $t6, $zero
-    /* D2970 150A54C0 0D4296AE */  jal        func_150A5AB8
+    /* D2970 150A54C0 0D4296AE */  jal        gfx_clipCodePoint
     /* D2974 150A54C4 02325021 */   addu      $t2, $s1, $s2
     /* D2978 150A54C8 01606025 */  or         $t4, $t3, $zero
     /* D297C 150A54CC 01607825 */  or         $t7, $t3, $zero
-    /* D2980 150A54D0 0D4296AE */  jal        func_150A5AB8
+    /* D2980 150A54D0 0D4296AE */  jal        gfx_clipCodePoint
     /* D2984 150A54D4 03004825 */   or        $t1, $t8, $zero
     /* D2988 150A54D8 15600002 */  bnez       $t3, .L150A54E4
     /* D298C 150A54DC 01EB7821 */   addu      $t7, $t7, $t3
@@ -256,14 +256,14 @@ glabel gfx_copyLevelDlCulled
   .L150A54E4:
     /* D2994 150A54E4 018B6024 */   and       $t4, $t4, $t3
     /* D2998 150A54E8 01C04825 */  or         $t1, $t6, $zero
-    /* D299C 150A54EC 0D4296AE */  jal        func_150A5AB8
+    /* D299C 150A54EC 0D4296AE */  jal        gfx_clipCodePoint
     /* D29A0 150A54F0 02124023 */   subu      $t0, $s0, $s2
     /* D29A4 150A54F4 15600002 */  bnez       $t3, .L150A5500
     /* D29A8 150A54F8 01EB7821 */   addu      $t7, $t7, $t3
     /* D29AC 150A54FC 15E00026 */  bnez       $t7, .L150A5598
   .L150A5500:
     /* D29B0 150A5500 018B6024 */   and       $t4, $t4, $t3
-    /* D29B4 150A5504 0D4296AE */  jal        func_150A5AB8
+    /* D29B4 150A5504 0D4296AE */  jal        gfx_clipCodePoint
     /* D29B8 150A5508 03004825 */   or        $t1, $t8, $zero
     /* D29BC 150A550C 15600002 */  bnez       $t3, .L150A5518
     /* D29C0 150A5510 01EB7821 */   addu      $t7, $t7, $t3
@@ -272,14 +272,14 @@ glabel gfx_copyLevelDlCulled
     /* D29C8 150A5518 018B6024 */   and       $t4, $t4, $t3
     /* D29CC 150A551C 02124021 */  addu       $t0, $s0, $s2
     /* D29D0 150A5520 01C04825 */  or         $t1, $t6, $zero
-    /* D29D4 150A5524 0D4296AE */  jal        func_150A5AB8
+    /* D29D4 150A5524 0D4296AE */  jal        gfx_clipCodePoint
     /* D29D8 150A5528 02325023 */   subu      $t2, $s1, $s2
     /* D29DC 150A552C 15600002 */  bnez       $t3, .L150A5538
     /* D29E0 150A5530 01EB7821 */   addu      $t7, $t7, $t3
     /* D29E4 150A5534 15E00018 */  bnez       $t7, .L150A5598
   .L150A5538:
     /* D29E8 150A5538 018B6024 */   and       $t4, $t4, $t3
-    /* D29EC 150A553C 0D4296AE */  jal        func_150A5AB8
+    /* D29EC 150A553C 0D4296AE */  jal        gfx_clipCodePoint
     /* D29F0 150A5540 03004825 */   or        $t1, $t8, $zero
     /* D29F4 150A5544 15600002 */  bnez       $t3, .L150A5550
     /* D29F8 150A5548 01EB7821 */   addu      $t7, $t7, $t3
@@ -287,14 +287,14 @@ glabel gfx_copyLevelDlCulled
   .L150A5550:
     /* D2A00 150A5550 018B6024 */   and       $t4, $t4, $t3
     /* D2A04 150A5554 01C04825 */  or         $t1, $t6, $zero
-    /* D2A08 150A5558 0D4296AE */  jal        func_150A5AB8
+    /* D2A08 150A5558 0D4296AE */  jal        gfx_clipCodePoint
     /* D2A0C 150A555C 02124023 */   subu      $t0, $s0, $s2
     /* D2A10 150A5560 15600002 */  bnez       $t3, .L150A556C
     /* D2A14 150A5564 01EB7821 */   addu      $t7, $t7, $t3
     /* D2A18 150A5568 15E0000B */  bnez       $t7, .L150A5598
   .L150A556C:
     /* D2A1C 150A556C 018B6024 */   and       $t4, $t4, $t3
-    /* D2A20 150A5570 0D4296AE */  jal        func_150A5AB8
+    /* D2A20 150A5570 0D4296AE */  jal        gfx_clipCodePoint
     /* D2A24 150A5574 03004825 */   or        $t1, $t8, $zero
     /* D2A28 150A5578 018B6024 */  and        $t4, $t4, $t3
     /* D2A2C 150A557C 140C001F */  bne        $zero, $t4, .L150A55FC
@@ -372,8 +372,8 @@ glabel gfx_copyLevelDlCulled
     /* D2B24 150A5674 3C08E700 */  lui        $t0, (0xE7000000 >> 16)
     /* D2B28 150A5678 0008403C */  dsll32     $t0, $t0, 0
     /* D2B2C 150A567C 44A82000 */  dmtc1      $t0, $f4
-    /* D2B30 150A5680 3C09800D */  lui        $t1, %hi(D_800D3668)
-    /* D2B34 150A5684 8D293668 */  lw         $t1, %lo(D_800D3668)($t1)
+    /* D2B30 150A5680 3C09800D */  lui        $t1, %hi(gShadowFaceFlags)
+    /* D2B34 150A5684 8D293668 */  lw         $t1, %lo(gShadowFaceFlags)($t1)
     /* D2B38 150A5688 24100001 */  addiu      $s0, $zero, 0x1
     /* D2B3C 150A568C 24110001 */  addiu      $s1, $zero, 0x1
     /* D2B40 150A5690 24020000 */  addiu      $v0, $zero, 0x0
@@ -679,7 +679,7 @@ glabel func_150A5828
     /* D2F60 150A5AB0 03E00008 */  jr         $ra
     /* D2F64 150A5AB4 00000000 */   nop
 
-glabel func_150A5AB8
+glabel gfx_clipCodePoint
     /* D2F68 150A5AB8 44889000 */  mtc1       $t0, $f18
     /* D2F6C 150A5ABC 4489F000 */  mtc1       $t1, $f30
     /* D2F70 150A5AC0 468094A0 */  cvt.s.w    $f18, $f18

@@ -4,7 +4,7 @@
 
 
 
-void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
+void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;
     ParticleSpawn78 sp;
     s32 pad; // matching: unused stack slot

@@ -143,7 +143,7 @@ void collision_addDlTris(Gfx *dl) {
             if ((u32)verts[0] > 0x100000) {
                 // matching: `opcode` doubles as the axis counter; a separate local reallocates registers
                 for (opcode = 0; opcode < 3; opcode++) {
-                    if (D_800DBE63 == 0) {
+                    if (gTriBoundsFull == 0) {
                         min[opcode] = max[opcode] = verts[tris[t][0]]->v.ob[opcode];
                         for (k = 1; k < 3; k++) {
                             if (verts[tris[t][k]]->v.ob[opcode] < min[opcode]) {
@@ -184,7 +184,7 @@ void collision_initTriArena(void) {
     s32 size;
 
     gAllMapsTriCount = 0;
-    D_800DBE63 = 0;
+    gTriBoundsFull = 0;
     for (i = 0; i < 4; i++) {
         gMapTriCounts[i] = 0;
     }
@@ -877,7 +877,7 @@ void collision_loadMapSettings(s32 map) {
         gLevelTaskIds = NULL;
     }
 
-    if (D_8008FD90 >= 2 && info->unk8 == 4) {
+    if (gHumanCount >= 2 && info->unk8 == 4) {
         info->unk8 = 2;
     }
 }

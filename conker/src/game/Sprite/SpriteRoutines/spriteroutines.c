@@ -54,7 +54,7 @@ void sprite_resetSlots(void) {
     if (gSpriteTintEffect != NULL) {
         effect_destroyObject(gSpriteTintEffect);
     }
-    gSpriteTintEffect = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    gSpriteTintEffect = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, gLastPlayerIndex, 0, 0);
     gSpriteQueuedCmd = 3;
     for (i = 0; i < 10; i++) {
         gSpriteSlots[i] = NULL;
@@ -94,7 +94,7 @@ void sprite_freeAll(void) {
 
 /* Update routine 4: advances unk34 by 0x30 per frame, wrapping from above 0x800 back to -0xC00. */
 void sprite_updateTexScroll(Sprite2D *sprite) {
-    sprite->params.sOffset += D_800BE9E4 * 0x30;
+    sprite->params.sOffset += gFrameTicks * 0x30;
     if (sprite->params.sOffset > 0x800) {
         sprite->params.sOffset = -0xC00;
     }
@@ -114,8 +114,8 @@ void sprite_updateFrameScroll(Sprite2D *sprite) {
     if (sprite->params.data.scroll.stage == 0 || sprite->params.frame != sprite->params.data.scroll.frame ||
         (dist = (sprite->params.y < sprite->params.data.scroll.y)
                     ? -(sprite->params.y - sprite->params.data.scroll.y) : (sprite->params.y - sprite->params.data.scroll.y),
-         (s32)(D_800BE9E4 * three) < dist)) {
-        sprite->params.y -= (s32)(D_800BE9E4 * three);
+         (s32)(gFrameTicks * three) < dist)) {
+        sprite->params.y -= (s32)(gFrameTicks * three);
         if (sprite->params.y <= 140.0f) {
             sprite->params.frame += 0x100;
             if (sprite->params.frame >= (sprite->params.frameCount << 8)) {
@@ -135,7 +135,7 @@ void sprite_updateFrameScroll(Sprite2D *sprite) {
     sprite->params.y = sprite->params.data.scroll.y;
     if (sprite->params.data.scroll.y == 170) {
         alpha = sprite->params.alpha;
-        alpha += D_800BE9E4 * 8;
+        alpha += gFrameTicks * 8;
         if (alpha >= 0x100) {
             sprite->params.data.scroll.stage++;
             if (sprite->params.data.scroll.stage == three) {
@@ -169,13 +169,13 @@ void sprite_updateSlideBlink(Sprite2D *sprite) {
     elapsed = sprite->params.data.slide.elapsed;
     if (elapsed == 30) {
         alpha = sprite->params.alpha;
-        alpha += D_800BE9E4 * 8;
+        alpha += gFrameTicks * 8;
         if (alpha >= 0x100) {
             alpha = 0;
         }
         sprite->params.alpha = alpha;
     }
-    elapsed += D_800BE9E4 * 2;
+    elapsed += gFrameTicks * 2;
     if (elapsed > 30) {
         elapsed = 30;
     }
@@ -187,12 +187,12 @@ void sprite_updateSlideBlink(Sprite2D *sprite) {
 /* Update routine 6: grows scaleX up to 1.0, then scaleY. */
 void sprite_updateGrowIn(Sprite2D *sprite) {
     if (sprite->params.scaleX != 0x1000) {
-        sprite->params.scaleX += D_800BE9E4 * 0x100;
+        sprite->params.scaleX += gFrameTicks * 0x100;
         if (sprite->params.scaleX > 0x1000) {
             sprite->params.scaleX = 0x1000;
         }
     } else if (sprite->params.scaleY != 0x1000) {
-        sprite->params.scaleY += D_800BE9E4 * 0x100;
+        sprite->params.scaleY += gFrameTicks * 0x100;
         if (sprite->params.scaleY > 0x1000) {
             sprite->params.scaleY = 0x1000;
         }

@@ -467,10 +467,10 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                         } else if (step == 1) {
                             gSpritePingPongDirs[i] &= math_rand() % 16;
                         } else {
-                            step = D_800BE9E4 << 5;
+                            step = gFrameTicks << 5;
                         }
                     } else {
-                        step = D_800BE9E4 << 6;
+                        step = gFrameTicks << 6;
                     }
                     fadeDist = i << 2;
                     for (j = 0; j != 4; j++, fadeDist++) {
@@ -491,7 +491,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                         }
                     }
                 } else {
-                    bits = D_800BE9E4 * 48;
+                    bits = gFrameTicks * 48;
                     fadeDist = i << 2;
                     for (j = 0; j != 4; j++, fadeDist++) {
                         gSpriteTypePhases[fadeDist] += bits;

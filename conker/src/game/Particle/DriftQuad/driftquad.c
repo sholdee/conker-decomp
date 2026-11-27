@@ -74,12 +74,12 @@ s32 particle_updateDriftQuad(DriftQuad *effect) {
     effect->pos.y += drift->vel.y * gFrameDelta + 0.5f * drift->gravity * gFrameDelta * gFrameDelta;
     effect->pos.z += drift->vel.z * gFrameDelta;
     drift->vel.y += drift->gravity * gFrameDelta;
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         drift->vel.x *= drift->drag;
         drift->vel.z *= drift->drag;
     }
     if (drift->vel.y > 0.0f) {
-        for (i = D_800BE9E4; i != 0; i--) {
+        for (i = gFrameTicks; i != 0; i--) {
             drift->vel.y *= drift->drag;
         }
     }

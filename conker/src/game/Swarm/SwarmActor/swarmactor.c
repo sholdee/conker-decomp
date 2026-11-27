@@ -342,7 +342,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         if ((actor->flags & 8) && gSwarmGroupsInUse[actor->group] == 0) {
             actor->fadingOut = 1;
         } else if (alpha != 255) {
-            alpha += D_800BE9E4 * 4;
+            alpha += gFrameTicks * 4;
             if (alpha >= 256) {
                 alpha = 255;
             }
@@ -353,7 +353,7 @@ void swarm_updateFlight(SwarmActor *actor) {
             effect_destroyObject(&actor->header);
             return;
         }
-        alpha -= D_800BE9E4 * 4;
+        alpha -= gFrameTicks * 4;
         if (alpha < 0) {
             alpha = 0;
         }
@@ -390,7 +390,7 @@ void swarm_updateFlight(SwarmActor *actor) {
             actor->state = 3;
         }
         if (actor->state == 3) {
-            step = D_800BE9E4 * 0.5f;
+            step = gFrameTicks * 0.5f;
             if (actor->targetYaw < actor->yaw) {
                 step = -step;
             }
@@ -406,18 +406,18 @@ void swarm_updateFlight(SwarmActor *actor) {
         if (actor->state == 2) {
             if (actor->yawStep != 0.0f) {
                 if (actor->yawStep > 0.0f) {
-                    actor->yawStep -= D_800BE9E4 * 0.5f;
+                    actor->yawStep -= gFrameTicks * 0.5f;
                     if (actor->yawStep < 0.0f) {
                         actor->yawStep = 0.0f;
                     }
                 } else {
-                    actor->yawStep += D_800BE9E4 * 0.5f;
+                    actor->yawStep += gFrameTicks * 0.5f;
                     if (actor->yawStep > 0.0f) {
                         actor->yawStep = 0.0f;
                     }
                 }
             }
-            actor->turnTimer -= D_800BE9E4;
+            actor->turnTimer -= gFrameTicks;
             if (actor->turnTimer <= 0) {
                 actor->targetYaw = math_random() % 360;
                 actor->turnTimer = flight->wanderTime;
@@ -444,7 +444,7 @@ void swarm_updateFlight(SwarmActor *actor) {
     }
     if (actor->flags & 0x40) {
         if (actor->hoverTimer >= 0) {
-            actor->hoverTimer -= D_800BE9E4;
+            actor->hoverTimer -= gFrameTicks;
             if (actor->hoverTimer <= 0) {
                 actor->hoverTimer = -1;
                 actor->targetY = (f32)(math_random() % actor->heightRange) + actor->originY;
@@ -510,7 +510,7 @@ void swarm_updateFlight(SwarmActor *actor) {
     }
     if (actor->flags & 0x200) {
         f32 speed;
-        speed = D_800BE9E4;
+        speed = gFrameTicks;
         actor->pitchStep += actor->yawStep * speed;
         actor->yawStep += 0.005189999938f;
         if (0.1499999911f < actor->yawStep) {
@@ -541,7 +541,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         dir[0] = cosPitch * sinYaw;
         dir[1] = -sinPitch;
         dir[2] = cosPitch * cosYaw;
-        speed = actor->speed * D_800BE9E4;
+        speed = actor->speed * gFrameTicks;
         actor->x += dir[0] * speed;
         actor->y += dir[1] * speed;
         actor->z += dir[2] * speed;
@@ -551,9 +551,9 @@ void swarm_updateFlight(SwarmActor *actor) {
         gSwarmGroupSoundTimers[actor->group] = (math_random() & 0x3F) + 30;
     }
     if ((actor->flags & 2) &&
-        prop_isOutsideFrustum(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
+        prop_isOutsideFrustum(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, gFrustumSlopeX, D_800D35E4, NULL, NULL) != 0 &&
         (gMatchState.mode != 1 ||
-         prop_isOutsideFrustum(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
+         prop_isOutsideFrustum(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, gFrustumSlopeX, D_800D35E4, NULL, NULL) != 0)) {
         effect_destroyObject(&actor->header);
     }
 }
@@ -652,7 +652,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
         if (gSwarmGroupsInUse[actor->group] == 0) {
             actor->fadingOut = 1;
         } else if (alpha != 255) {
-            alpha += D_800BE9E4 * 4;
+            alpha += gFrameTicks * 4;
             if (alpha >= 256) {
                 alpha = 255;
             }
@@ -663,7 +663,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
             effect_destroyObject(&actor->header);
             return;
         }
-        alpha -= D_800BE9E4 * 4;
+        alpha -= gFrameTicks * 4;
         if (alpha < 0) {
             alpha = 0;
         }
@@ -731,12 +731,12 @@ Gfx *swarm_drawFlying(Gfx *gdl, SwarmActor *actor, s16 camera) {
     target = gSwarmGroundBrightness[(actor->surfaceFlags >> 5) & 3];
     if (brightness != target) {
         if (brightness < target) {
-            brightness += D_800BE9E4 * 4;
+            brightness += gFrameTicks * 4;
             if (target < brightness) {
                 brightness = target;
             }
         } else {
-            brightness -= D_800BE9E4 * 4;
+            brightness -= gFrameTicks * 4;
             if (brightness < 0) {
                 brightness = 0;
             }
@@ -762,7 +762,7 @@ Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 culled;
 
     culled = prop_isOutsideFrustum(gViewMatrices[camera], actor->x, actor->y, actor->z,
-                           gDefaultNear, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
+                           gDefaultNear, 4000.0f, gFrustumSlopeX, D_800D35E4, NULL, NULL);
     if (culled == 0) {
         switch (actor->state) {
         case 0:

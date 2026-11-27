@@ -40,7 +40,7 @@ void texture_updateTint(s32 slot) {
 
     if (camera_global_Cameras[slot].SpecialFlags & 1) {
         override = gTintTargetOverrides[slot][0];
-        step = D_800BE9E4 * 2;
+        step = gFrameTicks * 2;
 
         for (i = 0; i < 3; i++) {
             cur = gTintLevels[slot][i];

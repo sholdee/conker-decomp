@@ -7,7 +7,7 @@
 
 /* Fills the current view with black, sets a primitive-colour combiner, and passes the view-projection
  * matrix built from (pitch, yaw, roll) on to effect_drawStarField. A sky draw routine (gSkyDrawFuncs). */
-Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
+Gfx *screen_drawStarSky(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     MtxF viewMtx;
     RenderView *view;
 

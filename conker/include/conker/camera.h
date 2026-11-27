@@ -412,7 +412,7 @@ extern CamPose *gTargetCameraPose;
 
 /* game/Camera/FreeFlyCamera/freeflycamera.c */
 void camera_updateFreeFly(Camera *cam);
-void func_1512A360(Camera *cam);
+void camera_updateFrontEndPath(Camera *cam);
 
 /* game/Camera/CameraOcclusion/cameraocclusion.c */
 void camera_updateFloorHeights(Camera *arg0);
@@ -438,7 +438,7 @@ void camera_applyBreathing(Camera *camera);
 void camera_loadShakeTables(void);
 void camera_startShake(Camera *camera, s32 index);
 void camera_updateShake(Camera *camera);
-void func_1512D368(Camera *camera);
+void camera_emptyViewMatrixHook(Camera *camera);
 extern Mtx *gViewMtxBuffers[2];
 
 /* game/Camera/CameraStub/camerastub.c */

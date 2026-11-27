@@ -30,7 +30,7 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
 
     timer = effect->timer;
     if (timer != 0) {
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer <= 0) {
             effect_destroyObject(&effect->header);
             return;
@@ -43,7 +43,7 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
     }
 
     red = effect->red;
-    step = D_800BE9E4 * 2;
+    step = gFrameTicks * 2;
     if (!effect->rising) {
         red -= step;
         if (red < 0x90) {

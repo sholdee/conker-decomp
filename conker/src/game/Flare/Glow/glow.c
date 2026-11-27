@@ -50,8 +50,8 @@ static void (*gGlowFreeHandlers[])() = {
 /* Message handlers, indexed by GlowShape.type. */
 typedef void (*GlowMsgFn)();
 static GlowMsgFn gGlowMsgHandlers[] = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, func_150D7420,
-    func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, effect_handleTintMessageRedFrom1,
+    effect_handleTintMessageRedFrom2, effect_handleTintMessageGreenOnly, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
 static IdList2 gGlowEventTypes = { { 0x1C, 0x56 } }; /* effect-object kinds */
 

@@ -28,16 +28,16 @@ void effect_updateDistantTracers(void) {
     f32 z2;
 
     if (gDistantTracersActive == 1) {
-        gDistantTracerPhaseTimer += D_800BE9E4;
+        gDistantTracerPhaseTimer += gFrameTicks;
         if (gDistantTracerPhaseTimer >= 0x83) {
             gDistantTracerPhaseTimer = -(math_rand() % 30);
         }
         if (gDistantTracerPhaseTimer >= 0x1F) {
             if (gDistantTracerIntensity < gDistantTracerMaxIntensity) {
-                gDistantTracerIntensity += D_800BE9E4 * 2;
+                gDistantTracerIntensity += gFrameTicks * 2;
             }
-        } else if (D_800BE9E4 < gDistantTracerIntensity) {
-            gDistantTracerIntensity -= D_800BE9E4;
+        } else if (gFrameTicks < gDistantTracerIntensity) {
+            gDistantTracerIntensity -= gFrameTicks;
         } else {
             gDistantTracersActive = 0;
             gDistantTracerIntensity = 0;

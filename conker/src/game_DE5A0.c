@@ -55,7 +55,7 @@ void func_150B12FC(Actor *obj) {
         f32 height;
 
         height = gSpawnPaths[obj->listpos][0].y;
-        func_15058EA4(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
+        actor_setHoverGravity(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
     }
     actor_updateChaseAi(obj);
     prevAngle -= obj->angle;
@@ -134,7 +134,7 @@ void func_150B1484(Actor *obj) {
                     gravity = 5.0f;
                     maxSpeed = 35.0f;
                 }
-                func_15058EA4(obj, targetY, gravity, targetY, -gravity, maxSpeed, -maxSpeed);
+                actor_setHoverGravity(obj, targetY, gravity, targetY, -gravity, maxSpeed, -maxSpeed);
             }
         }
         actor_updateChaseAi(obj);
@@ -196,7 +196,7 @@ void func_150B17DC(Actor *obj) {
 
 /*
  * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, unk21C >= 9
- * and its host (movement_obj[carried - 100]) not stunned or D_800CC250 bit 2 set), and
+ * and its host (movement_obj[carried - 100]) not stunned or gActorClock bit 2 set), and
  * now and then emits a particle at a random point around it that drifts with the player's motion.
  */
 void func_150B19E0(Actor *obj) {
@@ -228,7 +228,7 @@ void func_150B19E0(Actor *obj) {
     }
     if (obj->carried != 0) {
         actor_moveToHost(obj);
-        if ((movement_obj[obj->carried - 100].stunned == 0 || (D_800CC250 & 4)) && obj->unk21C >= 9) {
+        if ((movement_obj[obj->carried - 100].stunned == 0 || (gActorClock & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }

@@ -32,7 +32,7 @@ typedef union {
 
 #define WORK(prop) ((Work14C3F0 *)&(prop)->touch)
 
-/* State of func_1511EF40's swing, allocated on its first update. */
+/* State of prop_carryCharacterInArc's swing, allocated on its first update. */
 struct SwingMotion {
     /* 0x00 */ f32 x; /* centre of the arc */
     /* 0x04 */ f32 y;
@@ -51,7 +51,7 @@ struct SwingMotion {
  * (state 2) the character's actor is put in mode 0x400000 at the prop's position; it is released
  * 60 frames later.
  */
-void func_1511EF40(WorldObject *prop) {
+void prop_carryCharacterInArc(WorldObject *prop) {
     Actor *character;
     f32 x, y, z, angle;
     SwingMotion *motion;
@@ -65,7 +65,7 @@ void func_1511EF40(WorldObject *prop) {
         motion = WORK(prop)->swing.motion;
     }
     if (motion->timer > 0) {
-        motion->timer -= D_800BE9E4;
+        motion->timer -= gFrameTicks;
         if (motion->timer <= 0) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
             camera_popMode(actor, CAMERA_MODE_CUTSCENE);
@@ -109,7 +109,7 @@ void func_1511EF40(WorldObject *prop) {
         dx = sinf(angle); // matching: dx doubles as the sine, as above
         prop->x = motion->x + motion->dx * dx;
         prop->z = motion->z + motion->dz * dx;
-        motion->angle += D_800BE9E4;
+        motion->angle += gFrameTicks;
         if (motion->angle > 90.0f) {
             motion->angle = 90.0f;
             WORK(prop)->swing.state = 0;
@@ -158,14 +158,14 @@ void prop_fadeOutAfterDelay(WorldObject *prop) {
     }
     fadeTime = (prop->moveData.word & 0xFFFF) * 60;
     if (WORK(prop)->fade.delay != 0) {
-        if (D_800BE9E4 < WORK(prop)->fade.delay) {
-            WORK(prop)->fade.delay -= D_800BE9E4;
+        if (gFrameTicks < WORK(prop)->fade.delay) {
+            WORK(prop)->fade.delay -= gFrameTicks;
         } else {
             WORK(prop)->fade.delay = 0;
             WORK(prop)->fade.timer = fadeTime;
         }
-    } else if (D_800BE9E4 < WORK(prop)->fade.timer) {
-        WORK(prop)->fade.timer -= D_800BE9E4;
+    } else if (gFrameTicks < WORK(prop)->fade.timer) {
+        WORK(prop)->fade.timer -= gFrameTicks;
         prop->alpha = (WORK(prop)->fade.timer * 255) / fadeTime;
     } else {
         prop->inactive = TRUE;
@@ -178,7 +178,7 @@ void prop_fadeOutAfterDelay(WorldObject *prop) {
  * params * scaleY in 13 steps. MOVING opens the group (ending ARRIVED), RETURNING closes it again
  * (ending REST); state bit 2 swaps the two.
  */
-void func_1511F4D0(WorldObject *prop) {
+void prop_partFourPieces(WorldObject *prop) {
     s32 motion;
     s32 openY;
     s32 openX;
@@ -214,14 +214,14 @@ void func_1511F4D0(WorldObject *prop) {
     home[1] = (s16)(WORK(prop)->opening.home & 0xFFFF);
     home[2] = (s16)((WORK(prop)->opening.home >> 16) & 0xFFFF);
     if (motion == TASK_FLAG_GOING_ON) {
-        next = openY + D_800BE9E4;
+        next = openY + gFrameTicks;
         if (next < 13) {
             openY = next;
         } else {
             openY = 13;
         }
         if (openY >= 9) {
-            next = openX + D_800BE9E4;
+            next = openX + gFrameTicks;
             if (next < 13) {
                 openX = next;
             } else {
@@ -230,14 +230,14 @@ void func_1511F4D0(WorldObject *prop) {
             }
         }
     } else if (motion == TASK_FLAG_GOING_OFF) {
-        next = openX - D_800BE9E4;
+        next = openX - gFrameTicks;
         if (next > 0) {
             openX = next;
         } else {
             openX = 0;
         }
         if (openX < 4) {
-            next = openY - D_800BE9E4;
+            next = openY - gFrameTicks;
             if (next > 0) {
                 openY = next;
             } else {
@@ -278,21 +278,21 @@ void prop_bobThenSink(WorldObject *prop) {
     startY = prop->y + prop->yOffset;
     waitTime = prop->moveData.word; // matching: params goes through waitTime first
     waitTime = waitTime * 60 / 60;
-    if (D_800BE9B4 != 0) {
+    if (gLevelLoadState != 0) {
         WORK(prop)->bob.phase = math_random() & 0xFFFF;
     }
 
     prop->yOffset = cosf(WORK(prop)->bob.phase * 0.0054931640625f) * 25.0f;
     state = WORK(prop)->bob.state;
-    WORK(prop)->bob.phase += D_800BE9E4 * 10;
+    WORK(prop)->bob.phase += gFrameTicks * 10;
 
     if (state == 1) {
-        WORK(prop)->bob.timer += D_800BE9E4;
+        WORK(prop)->bob.timer += gFrameTicks;
         if (waitTime < WORK(prop)->bob.timer) {
             WORK(prop)->bob.state = 2;
         }
     } else if (state == 2) {
-        prop->y -= D_800BE9E4;
+        prop->y -= gFrameTicks;
         if (prop->y < -10000) {
             prop->inactive = TRUE;
         }

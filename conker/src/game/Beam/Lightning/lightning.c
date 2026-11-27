@@ -63,7 +63,7 @@ void beam_updateLightning(Bolt *bolt) {
     self = bolt;
     done = FALSE;
     if (bolt->def.flags & BOLT_TIMED) {
-        bolt->def.lifetime -= D_800BE9E4;
+        bolt->def.lifetime -= gFrameTicks;
         if (bolt->def.lifetime < 0) {
             done = TRUE;
         }

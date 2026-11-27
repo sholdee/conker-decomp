@@ -44,7 +44,7 @@ void level_collectSpawnModelTypes(void) {
 }
 
 /* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
- * entry per player slot (the first D_8008FD8C) from the type player_getStat reports and the slot's object. */
+ * entry per player slot (the first gPlayerCount) from the type player_getStat reports and the slot's object. */
 void level_loadSpawnTable(s32 levelId) {
     s32 j;
     u8 *romEnd;
@@ -87,7 +87,7 @@ void level_loadSpawnTable(s32 levelId) {
     bzero(gSpawnDelays, size);
     gActorFrameCount = 0;
 players: // matching: unused label splits the basic block; IDO schedules the loop setup differently without it
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         if ((1 << i) & gMatchState.playerMask) {
             s32 type = player_getStat(i, 1);
 
@@ -171,7 +171,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             case 14:
             case 15:
                 gSpawnRecords[i].type = 0x90;
-                if (i < D_8008FD90) {
+                if (i < gHumanCount) {
                     gSpawnRecords[i].interaction_state = 1;
                 } else {
                     gSpawnRecords[i].interaction_state = 0xC;
@@ -183,7 +183,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                 gSpawnRecords[i].type = 0x77;
                 gSpawnRecords[i].interaction_state = 0x1E;
                 gSpawnRecords[i].unk10 = 0xAA;
-                if (i >= D_8008FD90) {
+                if (i >= gHumanCount) {
                     gSpawnRecords[i].unkD = 3;
                 } else {
                     gSpawnRecords[i].unkD = 1;
@@ -253,7 +253,7 @@ void level_allocSpawnPaths(s32 levelId) {
     gSpawnPathCounts = allocate_memory(countsSize, 1, 0, 0);
     bzero(gSpawnPaths, count * 4);
     bzero(gSpawnPathCounts, countsSize);
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         gSpawnPaths[i] = allocate_memory(2 * sizeof(PathPoint), 1, 2, 0); // centre + one waypoint
         bzero(gSpawnPaths[i], 2 * sizeof(PathPoint));
         gSpawnPathCounts[i] = 2;

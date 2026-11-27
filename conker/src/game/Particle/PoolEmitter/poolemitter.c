@@ -186,7 +186,7 @@ void particle_updatePoolEmitter(PoolEmitter *emitter) {
         emitter->lastZ = pos.z;
     }
     if (emitter->desc.flags & 1) {
-        emitter->desc.timer -= D_800BE9E4;
+        emitter->desc.timer -= gFrameTicks;
         if (emitter->desc.timer < 0) {
             kill = TRUE;
         }

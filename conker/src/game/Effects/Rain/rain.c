@@ -74,7 +74,7 @@ void effect_updateRain(s32 player) {
 
     maxDrops = RAIN_MAX_DROPS;
     gustTimer = gWindGustTimer;
-    gustTimer -= D_800BE9E4;
+    gustTimer -= gFrameTicks;
     if (gustTimer <= 0) {
         if (gWindStrength < 40) {
             gustTimer = (math_randomU8() % 31U) + 20;
@@ -103,7 +103,7 @@ void effect_updateRain(s32 player) {
                 gRainSoundHandle = sound_play(0x6F, 200, 0x40, 0, 0x80);
             }
         } else if (gCutsceneStates[player] == 0) {
-            gRainStateTimer += D_800BE9E4;
+            gRainStateTimer += gFrameTicks;
         }
         break;
     case 1:
@@ -121,7 +121,7 @@ void effect_updateRain(s32 player) {
             sound_setVoiceParam(gRainSoundHandle, 8, (gRainDropCount << 14) / maxDrops);
             sound_setVoiceParam(gRainSoundHandle, 0x2000, 0);
         }
-        gRainStateTimer += D_800BE9E4;
+        gRainStateTimer += gFrameTicks;
         break;
     case 2:
         if (gRainRequestedState == 1) {
@@ -131,7 +131,7 @@ void effect_updateRain(s32 player) {
             gRainState = 3;
             gRainStateTimer = gRainDropCount;
         } else if (gRainRequestedState == 3 && gCutsceneStates[player] == 0) {
-            gRainStateTimer += D_800BE9E4;
+            gRainStateTimer += gFrameTicks;
         }
         break;
     case 3:
@@ -282,7 +282,7 @@ void effect_updateRainDrop(QuadFx *drop) {
         heading = 0x3200;
     }
     drop->data.heading = heading;
-    step = drop->data.speed * D_800BE9E4;
+    step = drop->data.speed * gFrameTicks;
     sn = math_sinBinAngle(drop->data.heading >> 8);
     drop->data.x = drop->data.x + step * sn;
     cs = math_cosBinAngle(drop->data.heading >> 8);

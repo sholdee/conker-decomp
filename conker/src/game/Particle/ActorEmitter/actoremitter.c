@@ -196,7 +196,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             self->scale = *self->scaleSrc->unk18 * 0.009999999776f;
         }
         if (self->params.flags & 1) {
-            self->params.lifetime -= D_800BE9E4;
+            self->params.lifetime -= gFrameTicks;
             if (self->params.lifetime < 0) {
                 if (self->params.expireCb != -1) {
                     done = gActorEmitterExpireFuncs[self->params.expireCb](self);
@@ -267,7 +267,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         math_transformOffset(&info->points[k].pos, &slot->particle->head.def.pos,
                                       self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= gFrameTicks;
                     if (slot->timer < 0) {
                         ActorEmitterParticleData *data;
 

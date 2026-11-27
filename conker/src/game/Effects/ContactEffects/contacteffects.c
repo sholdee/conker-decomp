@@ -66,7 +66,7 @@ void effect_hitReactSmallSplash(self, other, arg2)
     effect_spawnHitSplash(other, TRUE, 0xFF, 1);
 }
 
-void func_15194320(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0:
     case 1:
@@ -78,7 +78,7 @@ void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_15194394(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactFireImp(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0:
     case 1:
@@ -269,16 +269,16 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void effect_hitReactNone(Actor *self, Actor *other, u8 *arg2) {
 }
 
-// Calls screen_spawnFade when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
+// Calls screen_spawnFade when gHumanCount == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void effect_spawnHitScreenFade(s32 arg0, Actor *self, Actor *other) {
-    if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
+    if (gHumanCount == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
         screen_spawnFade(arg0, self, other);
         self->mv->unk1A0 = 1200;
     }
 }
 
 void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
-    func_1507DE4C(other);
+    actor_applyHeadShot(other);
     blood_spawnBoneHit(other, 0xFF, 1);
     effect_spawnHitScreenFade(0, self, other);
 }
@@ -384,7 +384,7 @@ void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *arg2) {
     effect_setOnFire(self, other, TRUE);
 }
 
-void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactLava(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
 
     if (gIsMultiplayer != 0) {

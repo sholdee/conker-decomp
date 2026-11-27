@@ -811,7 +811,7 @@ start:
             }
         }
         if (found2) {
-            camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], arg0, 1);
+            camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], arg0, 1);
             spawn.flags = 1;
             spawn.duration = (math_random() & 0xF) + 0x14;
             spawn.strength = (math_random() & 3) + 4;
@@ -825,7 +825,7 @@ start:
 }
 
 /*
- * Advances a 16.16 position through sequence `id` (gEffectTextures[id].frameCount steps long) by speed * D_800BE9E4.
+ * Advances a 16.16 position through sequence `id` (gEffectTextures[id].frameCount steps long) by speed * gFrameTicks.
  * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
  */
 s32 math_advanceFrameSeq(u8 id, u32 *speed, s32 *pos, u8 flags) {
@@ -836,7 +836,7 @@ s32 math_advanceFrameSeq(u8 id, u32 *speed, s32 *pos, u8 flags) {
     ret = 0;
     n = gEffectTextures[id].frameCount;
     max = (n << 16) - 1;
-    *pos += *speed * D_800BE9E4;
+    *pos += *speed * gFrameTicks;
     if (max < *pos) {
         if (flags & 1) {
             ret = 1;
@@ -1580,7 +1580,7 @@ void func_15145A50(Actor *actor) {
                 actor->mv->rt_context_b = 0;
             }
         } else {
-            func_15053694(actor);
+            actor_fadeOutAndRemove(actor);
         }
     }
 }
@@ -1859,7 +1859,7 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
                                     actor->unk314);
                 break;
             case 2:
-                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, D_800D9E21, &gViewAmbients[slot][gDrawBufferIndex]);
+                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, gViewGfxLightCount, &gViewAmbients[slot][gDrawBufferIndex]);
                 break;
             case 0:
             default:

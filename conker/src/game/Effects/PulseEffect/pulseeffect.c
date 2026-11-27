@@ -105,19 +105,19 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     }
 }
 
-const Vec3f D_800A0350[3] = {
+const Vec3f gPulseBonePathOffsets[3] = {
     { 0.0f, 16.0f, 0.0f },
     { 0.0f, 16.0f, 0.0f },
     { 0.0f, 13.0f, 0.0f },
 };
-const u8 D_800A0374[4] = { 1, 2, 3, 0 };
-const Vec3f D_800A0378[4] = {
+const u8 gPulseBonePathBones[4] = { 1, 2, 3, 0 };
+const Vec3f gPulseAttachPathOffsets[4] = {
     { 0.0f, 37.44779587f, 32.76682281f },
     { 0.0f, 31.68659782f, 29.16607285f },
     { 0.0f, 34.56719589f, 30.96644783f },
     { 0.0f, 29.10982704f, 25.31375504f },
 };
-const u8 D_800A03A8[4] = { 1, 2, 3, 4 };
+const u8 gPulseAttachPathMatrices[4] = { 1, 2, 3, 4 };
 
 /* Per-frame update of the effect_spawnPulseEffect effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
@@ -172,12 +172,12 @@ void effect_updatePulseEffect(PulseEffect *effect) {
             i = 3;
         }
         t = (progress - i * 0.25f) * 4.0f;
-        offset.x = D_800A0378[i].x * t;
-        offset.y = D_800A0378[i].y * t;
-        offset.z = D_800A0378[i].z * t;
+        offset.x = gPulseAttachPathOffsets[i].x * t;
+        offset.y = gPulseAttachPathOffsets[i].y * t;
+        offset.z = gPulseAttachPathOffsets[i].z * t;
         offsetPtr = &offset;
         posPtr = &pos;
-        if (math_transformAttachmentOffsets(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
+        if (math_transformAttachmentOffsets(owner, attachment, gPulseAttachPathMatrices[i], &offsetPtr, &posPtr, 1) == 0) {
             pos.x = owner->xpos;
             pos.y = owner->ypos + 800.0f;
             pos.z = owner->zpos;
@@ -193,10 +193,10 @@ void effect_updatePulseEffect(PulseEffect *effect) {
             i = 2;
         }
         t = (progress - i * 0.33333334f) * 3.0f;
-        offset.x = D_800A0350[i].x * t;
-        offset.y = D_800A0350[i].y * t;
-        offset.z = D_800A0350[i].z * t;
-        math_transformOffset(&offset, &pos, owner->ob_matrix_ptr + D_800A0374[i]);
+        offset.x = gPulseBonePathOffsets[i].x * t;
+        offset.y = gPulseBonePathOffsets[i].y * t;
+        offset.z = gPulseBonePathOffsets[i].z * t;
+        math_transformOffset(&offset, &pos, owner->ob_matrix_ptr + gPulseBonePathBones[i]);
     }
     if (data->particle != NULL) {
         data->particle->head.desc.drawFunc = -1;

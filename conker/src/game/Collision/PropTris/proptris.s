@@ -54,8 +54,8 @@ glabel collision_transformPropTris
     /* D1A44 150A4594 8D08BEFC */  lw         $t0, %lo(gObjectBlockDelays)($t0)
     /* D1A48 150A4598 4488B800 */  mtc1       $t0, $f23
     /* D1A4C 150A459C 00000000 */  nop
-    /* D1A50 150A45A0 3C01800A */  lui        $at, %hi(D_8009F680)
-    /* D1A54 150A45A4 C434F680 */  lwc1       $f20, %lo(D_8009F680)($at)
+    /* D1A50 150A45A0 3C01800A */  lui        $at, %hi(gPropTrisDegToRad)
+    /* D1A54 150A45A4 C434F680 */  lwc1       $f20, %lo(gPropTrisDegToRad)($at)
   .L150A45A8:
     /* D1A58 150A45A8 AFA00054 */  sw         $zero, 0x54($sp)
     /* D1A5C 150A45AC 96120000 */  lhu        $s2, 0x0($s0)
@@ -114,8 +114,8 @@ glabel collision_transformPropTris
     /* D1B20 150A4670 9259004E */  lbu        $t9, 0x4E($s2)
     /* D1B24 150A4674 240100FF */  addiu      $at, $zero, 0xFF
     /* D1B28 150A4678 17210011 */  bne        $t9, $at, .L150A46C0
-    /* D1B2C 150A467C 3C19800E */   lui       $t9, %hi(D_800DBF08)
-    /* D1B30 150A4680 2739BF08 */  addiu      $t9, $t9, %lo(D_800DBF08)
+    /* D1B2C 150A467C 3C19800E */   lui       $t9, %hi(gObjectIdentityMtxs)
+    /* D1B30 150A4680 2739BF08 */  addiu      $t9, $t9, %lo(gObjectIdentityMtxs)
     /* D1B34 150A4684 57800001 */  bnel       $gp, $zero, .L150A468C
     /* D1B38 150A4688 27390040 */   addiu     $t9, $t9, 0x40
   .L150A468C:
@@ -426,6 +426,6 @@ glabel .L150A4A94
 
 .section .rodata
 
-glabel D_8009F680
+glabel gPropTrisDegToRad
     .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
     .balign 16

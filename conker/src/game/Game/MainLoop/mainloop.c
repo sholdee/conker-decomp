@@ -3,13 +3,13 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c), which the subsystem headers change often.
-u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
+u8 gStepTicks;      // the ticks of this frame; bit 0 carries over to the next
 f32 gFrameDeltaHistory[10]; // the last 10 frame deltas
 u32 gTickRemainder;     // the leftover tick remainder
 u8 gRebuildFrameDisplayLists;
 u8 gLevelChangeRequest;
 u8 gIsMultiplayer;
-u8 D_800BE617;
+u8 gViewLayoutChanged;
 s8 D_800BE618;
 u8 gFrameDeltaHistoryNext; // the next slot of gFrameDeltaHistory
 u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
@@ -19,15 +19,15 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {
-    func_10001444();
+    libc_resetPaging();
     view_initFrameDisplayLists();
     save_forgetTextBanks();
 
-    D_800BE5E0 = 1;
+    gStepTicks = 1;
     gEliminatedPlayers = 0;
     D_800D18A2 = 0;
     *(s32 *)D_800D18A4 = 0; // clears all four players with one word store
-    D_800D23A9 = 0;
+    gRacersUpdated = 0;
 
     while (game_processMessage() != 0) {
     }
@@ -135,17 +135,17 @@ s32 game_processMessage(void) {
                             }
                         }
                         gCurrentView = 0;
-                        func_15019414();
+                        game_updateAfterMainPass();
                         gDisplayListHead = game_drawScreenPass(gDisplayListHead);
                         for (i = 0; i <= gScreenLayout; i++) {
                             gCurrentView = gViewPlayers[i];
                             gDisplayListHead = light_beginView(gDisplayListHead, gCurrentView);
-                            gDisplayListHead = func_15019CC8(gDisplayListHead, gCurrentView);
+                            gDisplayListHead = game_drawObjectGroup5Pass(gDisplayListHead, gCurrentView);
                             if (gPaused == 0 && gScreenLayout > 0) {
                                 gDisplayListHead = game_drawViewOverlays(gDisplayListHead, gCurrentView);
                             }
                         }
-                        gDisplayListHead = func_15019E60(gDisplayListHead);
+                        gDisplayListHead = game_drawModeOverlayPass(gDisplayListHead);
                         if (gPaused == 0 && gScreenLayout == 0) {
                             for (i = 0; i <= gScreenLayout; i++) {
                                 gCurrentView = gViewPlayers[i];
@@ -167,7 +167,7 @@ s32 game_processMessage(void) {
                     gfx_freeHiddenObjectBlocks();
                     sprite_freeTypeTextures();
                     cutscene_sendGfxTask(0, 1);
-                    D_800BE9B4 = 0;
+                    gLevelLoadState = 0;
                     if (gPaused != 0) {
                         gPauseCooldown = 2;
                     } else if (gPauseCooldown > 0) {
@@ -204,7 +204,7 @@ s32 game_processMessage(void) {
 
 /* Per-frame updates called from game_updateFrame, most of them only outside gPaused mode. */
 void game_updateActors(void) {
-    zone_updateGlobal(D_800BE9E4);
+    zone_updateGlobal(gFrameTicks);
     actor_updateVisibility();
     func_1501C870();
     if (gPaused == 0) {
@@ -220,7 +220,7 @@ void game_updateActors(void) {
 }
 
 /* Draws group 0 of player's display lists (effect_drawObjectGroup), then effect_drawLevelHook1 for the level. */
-Gfx *func_15018E88(Gfx *gfx, s16 player) {
+Gfx *game_drawObjectGroup0Pass(Gfx *gfx, s16 player) {
     if (gIsMultiplayer == 0) {
         sprite_drawLevelSprites(&gfx, 1);
     }
@@ -229,8 +229,8 @@ Gfx *func_15018E88(Gfx *gfx, s16 player) {
     return effect_drawLevelHook1(gfx, level, player);
 }
 
-/* Counterpart of func_15018E88: effect_drawLevelHook2, then group 1 of player's display lists. */
-Gfx *func_15018F08(Gfx *gfx, s16 player) {
+/* Counterpart of game_drawObjectGroup0Pass: effect_drawLevelHook2, then group 1 of player's display lists. */
+Gfx *game_drawObjectGroup1Pass(Gfx *gfx, s16 player) {
     gfx = effect_drawLevelHook2(gfx, level, player);
     gfx = effect_drawObjectGroup(gfx, 1, player, 0);
     gfx = effect_drawObjectGroup(gfx, 1, player, 1);
@@ -311,11 +311,11 @@ s32 game_updateFrame(void) {
     cutscene_dispatchEvents(0, 0);
     cutscene_applyTracks(0);
     cutscene_checkEnd(0);
-    if (D_800D23A9 != 0) {
+    if (gRacersUpdated != 0) {
         mp_updateRaceCameras();
     }
     camera_updateAll();
-    func_1504ADD0();
+    actor_hideTanksInSniperView();
     collision_selectMap(0);
     for (i = 0; i <= gScreenLayout; i++) {
         collision_updateCameraZone(i);
@@ -327,7 +327,7 @@ s32 game_updateFrame(void) {
     gfx_buildDrawLists(0);
     effect_updateLevel(level, 0);
     func_1501C860();
-    func_1511FC20(gDrawBufferIndex);
+    prop_emptyFrameHook(gDrawBufferIndex);
     trail_updateBoneTrails(0);
     if (gPaused == 0) {
         effect_runFrameHooks();
@@ -363,7 +363,7 @@ s32 game_updateFrame(void) {
     return 1;
 }
 
-void func_15019414(void) {
+void game_updateAfterMainPass(void) {
     if (gPaused == 0) {
         effect_runTypeGlobalHooks();
     }
@@ -423,13 +423,13 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     gfx = model_drawReflections(gfx, player);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     if (camera->SpecialFlags & 1) {
-        gfx = func_15018E88(gfx, player);
+        gfx = game_drawObjectGroup0Pass(gfx, player);
         gfx = gfx_drawObjectList(gfx, 0, player);
-        gfx = func_15018F08(gfx, player);
+        gfx = game_drawObjectGroup1Pass(gfx, player);
     } else {
-        gfx = func_15018F08(gfx, player);
+        gfx = game_drawObjectGroup1Pass(gfx, player);
         gfx = gfx_drawObjectList(gfx, 0, player);
-        gfx = func_15018E88(gfx, player);
+        gfx = game_drawObjectGroup0Pass(gfx, player);
     }
     gfx = trail_drawBoneTrails(gfx, 0, player);
     gfx = trail_drawBoneTrails(gfx, 1, player);
@@ -499,7 +499,7 @@ Gfx *game_drawViewOverlays(Gfx *gfx, s32 player) {
 #define FRAME_MTX(fb, player) (&gViewMtxBuffers[fb][player])
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
-Gfx *func_15019CC8(Gfx *gfx, s32 player) {
+Gfx *game_drawObjectGroup5Pass(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
@@ -515,7 +515,7 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
 }
 
 /* Sets the full-screen viewport and closes the frame's scene drawing. */
-Gfx *func_15019E60(Gfx *gfx) {
+Gfx *game_drawModeOverlayPass(Gfx *gfx) {
     if (gScreenLayout != 0) {
         gCurrentView = gScreenLayout + 1;
         gSPViewport(gfx++, &(gCurrentView + gViews)->viewports[0]); // matching: index + base operand order
@@ -526,7 +526,7 @@ Gfx *func_15019E60(Gfx *gfx) {
 }
 
 /*
- * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta
+ * Frame timing: turns the ticks elapsed since the last frame (gFrameTicks) into the frame delta
  * gFrameDelta and its reciprocal gFrameDeltaInv, slowed down by gFrameRateDivider when that is nonzero, and keeps
  * a 10-frame running average in gAvgFrameDelta / gAvgFrameDeltaInv.
  */
@@ -536,39 +536,39 @@ void game_updateFrameTiming(void) {
     f32 sum;
     u32 i;
 
-    ticks = D_800BE9E4;
+    ticks = gFrameTicks;
     gRawFrameTicks = ticks;
     rate = gFrameRateDivider;
     if (rate) {
         s32 pad; // matching: a local in this block puts a -g3 block end on the join (as1 branch fill)
         if (rate == 1) {
-            D_800BE9E4 = 0;
-            D_800BE5E0 = 0;
+            gFrameTicks = 0;
+            gStepTicks = 0;
             ticks = 0;
             gFrameDelta = 0.0f;
         } else {
             i = ((u32 *)gFrameDeltaHistory)[10]; // matching: reads gTickRemainder (the word after the array) through gFrameDeltaHistory, keeping its address out of CSE
             i += ticks;
             gFrameDelta = (f32)ticks / (u32)rate;
-            D_800BE9E4 = gFrameDelta;
+            gFrameTicks = gFrameDelta;
             gFrameDelta *= 0.5f;
             if (i >= rate) {
-                D_800BE9E4 = i / rate;
-                i -= D_800BE9E4 * i;
+                gFrameTicks = i / rate;
+                i -= gFrameTicks * i;
                 if (1) {} if (1) {} if (1) {} if (1) {} if (1) {} // matching: steers ticks/i register colouring
                 gTickRemainder = i;
-                ticks = D_800BE9E4;
+                ticks = gFrameTicks;
             } else {
                 gTickRemainder = i;
-                D_800BE9E4 = ticks = 0;
+                gFrameTicks = ticks = 0;
             }
         }
     } else {
         gFrameDelta = ticks * 0.5f;
     }
-    D_800BE5E0 &= 1;
-    D_800BE5E0 += ticks;
-    gFrameSteps = D_800BE5E0 >> 1;
+    gStepTicks &= 1;
+    gStepTicks += ticks;
+    gFrameSteps = gStepTicks >> 1;
     if (gFrameDelta != 0) {
         gFrameDeltaInv = 1.0f / gFrameDelta;
     } else {
@@ -577,7 +577,7 @@ void game_updateFrameTiming(void) {
         ; // matching: empty statement (a compiled-out macro?); its line entry steers as1's scheduling
     }
     gTotalTicks += ticks;
-    D_800BE9B0 = gTotalTicks % 30;
+    gTotalTicksMod30 = gTotalTicks % 30;
     gFrameDeltaHistory[gFrameDeltaHistoryNext] = gFrameDelta;
     gFrameDeltaHistoryNext++;
     if (gFrameDeltaHistoryNext == 10) {
