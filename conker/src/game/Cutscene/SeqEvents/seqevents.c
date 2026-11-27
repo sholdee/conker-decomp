@@ -2172,7 +2172,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                particle_startKind6ShortTrail(pos, pos + 1, pos + 2, duration, sceneTag, 0);
+                particle_startSteamTrail(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
         } else if (event->value == 0x3A) {
             Vec3f p;

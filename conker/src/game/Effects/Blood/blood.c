@@ -447,7 +447,7 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 owner, s32 list) 
 
 /* Drop emitters of a trail (BloodTrail.emitter), as gBloodDripEmitters (with a prototype for the same reason). */
 static void (*gBloodTrailEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    blood_emitNoTrailDrop, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, particle_emitKind6TrailSpray,
+    blood_emitNoTrailDrop, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, particle_emitSteamTrailSpray,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
 static s32 (*gBloodTrailCallbacks[])() = { effect_isBloodTrailOwnerActive };

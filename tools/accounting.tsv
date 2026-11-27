@@ -2863,8 +2863,8 @@ func_150C2424	0x150C2424	248	game	c		build/src/game/Particle/PuffSprays/puffspra
 particle_fadeMotionTrailByLife	0x150C251C	60	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 func_150C2558	0x150C2558	424	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 func_150C2700	0x150C2700	260	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
-particle_startKind6ShortTrail	0x150C2804	148	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
-particle_emitKind6TrailSpray	0x150C2898	344	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
+particle_startSteamTrail	0x150C2804	148	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
+particle_emitSteamTrailSpray	0x150C2898	344	game	c		build/src/game/Particle/PuffSprays/puffsprays.c.o
 particle_emitDiscParticle	0x150C29F0	528	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 particle_updateOriginRingEmitter	0x150C2C00	972	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 particle_shrinkBallisticChannelParticle	0x150C2FCC	192	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o

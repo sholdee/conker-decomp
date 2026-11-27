@@ -390,8 +390,8 @@ s32 func_150C2558(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 or
                   s32 argB, s32 argC, void *data, u8 owner);
 s32 func_150C2700(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
                   s32 argB, s32 argC, void *data, u8 owner);
-void particle_startKind6ShortTrail(f32 *x, f32 *y, f32 *z, s16 delay, s32 owner, s32 list);
-void particle_emitKind6TrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter);
+void particle_startSteamTrail(f32 *x, f32 *y, f32 *z, s16 delay, s32 owner, s32 list);
+void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter);
 
 /* game/Particle/DiscEmitter/discemitter.c */
 void particle_emitDiscParticle(Struct150C29F0 *emitter);
