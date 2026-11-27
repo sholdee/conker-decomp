@@ -10,7 +10,7 @@
 /* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (gGunMuzzlePoints points to the first). */
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f gGunMuzzleEnd = { 10.0f, -155.0f, 99.0f };
-/* Muzzle points (from, to) used by particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
+/* The side particle's points (from, to), passed to particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
 const Vec3f gGunDirParticleFrom = { -1.0f, -38.0f, 38.0f };
 const Vec3f gGunDirParticleTo = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
