@@ -636,13 +636,13 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     {
         s32 pad; // matching: unused stack slot
 
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 0x220005;
         style.clearGeometryMode = 0x50600;
         style.renderMode = 3;
-        style.unk10 = 0x46;
-        style.unk14 = 0x80;
-        style.unk18 = 0x20;
+        style.combiner = 0x46;
+        style.colorDither = 0x80;
+        style.alphaDither = 0x20;
         style.primMode = 0;
         style.envMode = 0xC;
         if (argA != 0) {

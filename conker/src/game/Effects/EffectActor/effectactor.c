@@ -104,8 +104,8 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 view) {
                   actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
-    gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
+    gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.combiner)[3] /* matching: reads the low byte */, &update);
+    gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.colorDither | actor->tmpl.render.alphaDither,
                         gEffectRenderModes[actor->tmpl.render.renderMode].cycle1 | gEffectRenderModes[actor->tmpl.render.renderMode].cycle2, &update);
     if (actor->tmpl.flags & 2) {
         gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, view,

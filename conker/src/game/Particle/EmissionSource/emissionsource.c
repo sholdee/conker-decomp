@@ -364,16 +364,16 @@ void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 unk12, u8 flags, 
     arg.color2.green = 0xFF;
     arg.color2.blue = 0xFF;
     arg.color2.alpha = 0xFF;
-    arg.unk23 = unk23;
-    arg.otherModeH = 1;
-    arg.unk28 = 0;
-    arg.unk2C = 0;
-    arg.unk40 = 0;
-    arg.unk41 = 10;
-    arg.combineMode = 7;
-    arg.unk34 = 60;
-    arg.unk38 = 0x80;
-    arg.unk3C = 0x20;
+    arg.colorLevel = unk23;
+    arg.render.otherModeH = 1;
+    arg.render.setGeometryMode = 0;
+    arg.render.clearGeometryMode = 0;
+    arg.render.primMode = 0;
+    arg.render.envMode = 10;
+    arg.render.renderMode = 7;
+    arg.render.combiner = 60;
+    arg.render.colorDither = 0x80;
+    arg.render.alphaDither = 0x20;
     sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
@@ -399,16 +399,16 @@ void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
     arg.color2.green = 0xFF;
     arg.color2.blue = 0xFF;
     arg.color2.alpha = 0xFF;
-    arg.unk23 = unk23;
-    arg.otherModeH = 1;
-    arg.unk28 = 0;
-    arg.unk2C = 0;
-    arg.unk40 = 0;
-    arg.unk41 = 10;
-    arg.combineMode = 7;
-    arg.unk34 = 60;
-    arg.unk38 = 0x80;
-    arg.unk3C = 0x20;
+    arg.colorLevel = unk23;
+    arg.render.otherModeH = 1;
+    arg.render.setGeometryMode = 0;
+    arg.render.clearGeometryMode = 0;
+    arg.render.primMode = 0;
+    arg.render.envMode = 10;
+    arg.render.renderMode = 7;
+    arg.render.combiner = 60;
+    arg.render.colorDither = 0x80;
+    arg.render.alphaDither = 0x20;
     arg.halfHeight = size;
     arg.halfWidth = size;
 

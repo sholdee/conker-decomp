@@ -143,13 +143,13 @@ void trail_updateEmitter(TrailEmitter *emitter) {
                 cosA = math_cosBinAngleMasked(angle - 0x40);
                 speed = math_randomFloat() * emitter->params.speedRange + emitter->params.speedMin;
                 emitter->timers[i] = math_random() % 23U + 5;
-                render.unk0 = 0;
+                render.otherModeH = 0;
                 render.setGeometryMode = 1;
                 render.clearGeometryMode = 0x160600;
                 render.renderMode = 3;
-                render.unk10 = 0x10;
-                render.unk14 = 0x80;
-                render.unk18 = 0x20;
+                render.combiner = 0x10;
+                render.colorDither = 0x80;
+                render.alphaDither = 0x20;
                 render.primMode = 0;
                 render.envMode = 9;
                 spawn.itemCount = math_random() % (emitter->params.pointRange + 1) + 3;

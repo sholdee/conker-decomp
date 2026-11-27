@@ -98,13 +98,13 @@ void effect_updateAttachedBurst(AttachedEffect *effect) {
         motion.flags = 8;
         motion.alpha = 0xFF;
         count = math_random() % 9U + 12;
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
         style.renderMode = 3;
-        style.unk10 = 0x10;
-        style.unk14 = 0x80;
-        style.unk18 = 0x20;
+        style.combiner = 0x10;
+        style.colorDither = 0x80;
+        style.alphaDither = 0x20;
         style.primMode = 0;
         style.envMode = 9;
         for (; count != 0; count--) {

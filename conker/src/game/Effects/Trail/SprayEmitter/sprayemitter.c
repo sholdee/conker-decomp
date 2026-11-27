@@ -87,13 +87,13 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
         motion.flags = 0x48;
         motion.texture = 3;
         motion.shade = 0xFF;
-        render.unk0 = 0;
+        render.otherModeH = 0;
         render.setGeometryMode = 1;
         render.clearGeometryMode = 0x160600;
         render.renderMode = 3;
-        render.unk10 = 0x22;
-        render.unk14 = 0x80;
-        render.unk18 = 0x20;
+        render.combiner = 0x22;
+        render.colorDither = 0x80;
+        render.alphaDither = 0x20;
         render.primMode = 0;
         render.envMode = 7;
         do {

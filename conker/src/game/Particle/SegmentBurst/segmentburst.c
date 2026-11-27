@@ -131,11 +131,11 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.render.clearGeometryMode = 0x40200;
     params.render.envMode = 8;
     params.render.renderMode = 1;
-    params.render.unk10 = 0x38;
-    params.render.unk0 = 0;
+    params.render.combiner = 0x38;
+    params.render.otherModeH = 0;
     params.render.primMode = 0;
-    params.render.unk14 = 0x80;
-    params.render.unk18 = 0x20;
+    params.render.colorDither = 0x80;
+    params.render.alphaDither = 0x20;
     params.color0.red = 255;
     params.color0.green = 255;
     params.color0.blue = 255;

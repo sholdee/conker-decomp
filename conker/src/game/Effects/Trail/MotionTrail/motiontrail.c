@@ -167,8 +167,8 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 view) {
             gfx = math_gfxUpdateGeometryMode(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = math_gfxSetEnvColor(gfx, primR, primG, primB, primA, &update);
             gfx = math_gfxSetPrimColor(gfx, 0, 0, envR, envG, envB, envA, &update);
-            gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].cycle1 | gEffectRenderModes[params->render.renderMode].cycle2, &update);
+            gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.combiner)[3] /* matching: reads the low byte */, &update);
+            gfx = math_gfxSetOtherMode(gfx, params->render.otherModeH | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.colorDither | params->render.alphaDither, gEffectRenderModes[params->render.renderMode].cycle1 | gEffectRenderModes[params->render.renderMode].cycle2, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
@@ -505,13 +505,13 @@ void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw,
     spawn.itemCount = arg4 + 3;
     spawn.life = life;
 
-    render.unk0 = 0;
+    render.otherModeH = 0;
     render.setGeometryMode = 1;
     render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10 = 0x10;
-    render.unk14 = 0x80;
-    render.unk18 = 0x20;
+    render.combiner = 0x10;
+    render.colorDither = 0x80;
+    render.alphaDither = 0x20;
     render.primMode = 0;
     render.envMode = 9;
     trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, owner, 1);

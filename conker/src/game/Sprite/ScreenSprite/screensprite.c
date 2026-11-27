@@ -132,22 +132,22 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
         gfx = math_gfxLoadTextureFrame(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
-    gfx = math_gfxUpdateGeometryMode(gfx, sprite->info.unk28, sprite->info.unk2C);
+    gfx = math_gfxUpdateGeometryMode(gfx, sprite->info.render.setGeometryMode, sprite->info.render.clearGeometryMode);
     math_pickPrimColour(&primR, &primG, &primB, &primA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
-                  sprite->info.unk23, sprite->info.unk40);
+                  sprite->info.colorLevel, sprite->info.render.primMode);
     math_pickEnvColour(&envR, &envG, &envB, &envA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
-                  sprite->info.unk23, sprite->info.unk41);
+                  sprite->info.colorLevel, sprite->info.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
     // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
-    gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
-    gfx = math_gfxSetOtherMode(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
-                            sprite->info.unk38 | sprite->info.unk3C,
-                        gEffectRenderModes[sprite->info.combineMode].cycle1 | gEffectRenderModes[sprite->info.combineMode].cycle2, &update);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.render.combiner)[3], &update);
+    gfx = math_gfxSetOtherMode(gfx, sprite->info.render.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
+                            sprite->info.render.colorDither | sprite->info.render.alphaDither,
+                        gEffectRenderModes[sprite->info.render.renderMode].cycle1 | gEffectRenderModes[sprite->info.render.renderMode].cycle2, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
     y = vp->centerY + sprite->info.y * vp->scaleY;
     while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register

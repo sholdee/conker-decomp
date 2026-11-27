@@ -201,13 +201,13 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
             burst.alphaRange = 0x64;
             burst.unk58 = 3;
             burst.unk5C = 0xFF;
-            burst.render.unk0 = 0;
+            burst.render.otherModeH = 0;
             burst.render.setGeometryMode = 0x220005;
             burst.render.clearGeometryMode = 0x1D0600;
             burst.render.renderMode = 1;
-            burst.render.unk10 = 0x3B;
-            burst.render.unk14 = 0x80;
-            burst.render.unk18 = 0x20;
+            burst.render.combiner = 0x3B;
+            burst.render.colorDither = 0x80;
+            burst.render.alphaDither = 0x20;
             burst.render.primMode = 0;
             burst.render.envMode = 7;
             burst.unk80 = 10;

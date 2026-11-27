@@ -710,6 +710,21 @@ typedef struct Color8 {
     /* 0x3 */ u8 alpha;
 } Color8;
 
+/* Render settings of a trail_createMotionTrail effect (game/Effects/Trail/MotionTrail/motiontrail.c), its 12th argument, copied into the effect;
+ * also ScreenSpriteInfo.render. */
+typedef struct TrailRender {
+    /* 0x00 */ s32 otherModeH;        /* ORed into the other-mode high word */
+    /* 0x04 */ s32 setGeometryMode;
+    /* 0x08 */ s32 clearGeometryMode;
+    /* 0x0C */ s32 renderMode;        /* index into gEffectRenderModes */
+    /* 0x10 */ s32 combiner;          /* its low byte is particle_setCombineMode's argument */
+    /* 0x14 */ s32 colorDither;       /* ORed into the other-mode high word */
+    /* 0x18 */ s32 alphaDither;       /* ORed into the other-mode high word */
+    /* 0x1C */ s8 primMode;           /* mode of math_pickPrimColour (prim color) */
+    /* 0x1D */ s8 envMode;            /* mode of math_pickEnvColour (env color) */
+    /* 0x1E */ u8 pad1E[2];
+} TrailRender; /* size 0x20 */
+
 /* Spawn parameters of a screen sprite, copied to ScreenSprite.info by sprite_newScreenSprite (game/Sprite/ScreenSprite/screensprite.c). */
 typedef struct ScreenSpriteInfo {
     /* 0x00 */ f32 x;           /* centre, in viewport units */
@@ -725,17 +740,8 @@ typedef struct ScreenSpriteInfo {
     /* 0x1A */ u8 kind;       /* index into gScreenSpriteMsgHandlers */
     /* 0x1B */ Color8 color1;
     /* 0x1F */ Color8 color2;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode; /* index into gEffectRenderModes */
-    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is particle_setCombineMode's combiner argument */
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ u8 pad42[2];
+    /* 0x23 */ u8 colorLevel;     /* weight of math_pickPrimColour / math_pickEnvColour */
+    /* 0x24 */ TrailRender render;
     /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
     /* 0x45 */ u8 pad45[3];
     /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
@@ -1036,20 +1042,6 @@ typedef struct SurfaceJetSpray {
     /* 0x00 */ TriangleSource source;
     /* 0x24 */ JetSpray spray;
 } SurfaceJetSpray; /* size 0x78 */
-
-/* Render settings of a trail_createMotionTrail effect (game/Effects/Trail/MotionTrail/motiontrail.c), its 12th argument, copied into the effect. */
-typedef struct TrailRender {
-    /* 0x00 */ s32 unk0;              /* ORed into the other-mode high word */
-    /* 0x04 */ s32 setGeometryMode;
-    /* 0x08 */ s32 clearGeometryMode;
-    /* 0x0C */ s32 renderMode;        /* index into gEffectRenderModes */
-    /* 0x10 */ s32 unk10;             /* its low byte is particle_setCombineMode's argument */
-    /* 0x14 */ s32 unk14;             /* ORed into the other-mode high word */
-    /* 0x18 */ s32 unk18;             /* ORed into the other-mode high word */
-    /* 0x1C */ s8 primMode;           /* mode of math_pickPrimColour (prim color) */
-    /* 0x1D */ s8 envMode;            /* mode of math_pickEnvColour (env color) */
-    /* 0x1E */ u8 pad1E[2];
-} TrailRender; /* size 0x20 */
 
 /* particle_spawnPuffSpray (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) puffs (trail_createMotionTrail effects) at pos,
  * each moving at a random yaw/pitch from `angles`, with random size, growth, speed, item count, life and

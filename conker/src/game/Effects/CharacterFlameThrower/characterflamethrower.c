@@ -1748,13 +1748,13 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
     motion.flags = 0x28;
     motion.alpha = 0x82;
     spawn.pos = actor->head.tmpl.pos;
-    style.unk0 = 0;
+    style.otherModeH = 0;
     style.setGeometryMode = 1;
     style.clearGeometryMode = 0x160600;
     style.renderMode = 3;
-    style.unk10 = 0x10;
-    style.unk14 = 0x80;
-    style.unk18 = 0x20;
+    style.combiner = 0x10;
+    style.colorDither = 0x80;
+    style.alphaDither = 0x20;
     style.primMode = 0;
     style.envMode = 9;
     do {
@@ -2287,10 +2287,10 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             style.setGeometryMode = 0x200005;
             style.clearGeometryMode = 0x1F0600;
             style.renderMode = 3;
-            style.unk10 = 0x22;
-            style.unk0 = 0;
-            style.unk14 = 0x80;
-            style.unk18 = 0x20;
+            style.combiner = 0x22;
+            style.otherModeH = 0;
+            style.colorDither = 0x80;
+            style.alphaDither = 0x20;
             style.primMode = 0;
             style.envMode = 7;
             spawn.flags = 0x15;

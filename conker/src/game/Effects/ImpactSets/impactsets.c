@@ -168,13 +168,13 @@ s32 effect_spawnImpactSprayParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f
         params = &gImpactSprays[gImpactSets[type].firstStyle];
         sinYaw = math_cosBinAngleMasked(yaw);
         cosYaw = math_cosBinAngleMasked(yaw - 0x40);
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
         style.renderMode = 1;
-        style.unk10 = 16;
-        style.unk14 = 128;
-        style.unk18 = 32;
+        style.combiner = 16;
+        style.colorDither = 128;
+        style.alphaDither = 32;
         style.primMode = 0;
         style.envMode = 9;
         spawn.kind = 1;

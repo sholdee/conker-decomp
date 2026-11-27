@@ -445,13 +445,13 @@ void trail_burstScatterTrail(ScatterTrail *trail) {
     state = trail->state;
     preset = &gScatterPresets[state->burstPreset];
 
-    style.unk0 = 0;
+    style.otherModeH = 0;
     style.setGeometryMode = 1;
     style.clearGeometryMode = 0x160600;
     style.renderMode = 3;
-    style.unk10 = 16;
-    style.unk14 = 128;
-    style.unk18 = 32;
+    style.combiner = 16;
+    style.colorDither = 128;
+    style.alphaDither = 32;
     style.primMode = 0;
     style.envMode = 9;
     spawn.flags = 1;

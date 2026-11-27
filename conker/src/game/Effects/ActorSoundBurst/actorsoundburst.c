@@ -102,13 +102,13 @@ void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2) {
             params.handlers[5] = 0;
             params.blue = 0;
             params.unk5C = 0xFF;
-            params.render.unk0 = 0;
+            params.render.otherModeH = 0;
             params.render.setGeometryMode = 0x220005;
             params.render.clearGeometryMode = 0x1D0600;
             params.render.renderMode = 3;
-            params.render.unk10 = 59;
-            params.render.unk14 = 0x80;
-            params.render.unk18 = 32;
+            params.render.combiner = 59;
+            params.render.colorDither = 0x80;
+            params.render.alphaDither = 32;
             params.render.primMode = 0;
             params.render.envMode = 7;
             params.unk80 = 12;

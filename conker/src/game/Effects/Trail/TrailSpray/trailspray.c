@@ -21,13 +21,13 @@ void trail_sprayFromRing(Actor *obj, u8 owner) {
     remaining = 30;
     ok = TRUE;
     if (obj != NULL) {
-        render.unk0 = 0;
+        render.otherModeH = 0;
         render.setGeometryMode = 1;
         render.clearGeometryMode = 0x160600;
         render.renderMode = 3;
-        render.unk10 = 0x10;
-        render.unk14 = 0x80;
-        render.unk18 = 0x20;
+        render.combiner = 0x10;
+        render.colorDither = 0x80;
+        render.alphaDither = 0x20;
         render.primMode = 0;
         render.envMode = 9;
         spawn.kind = 1;

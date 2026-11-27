@@ -1187,13 +1187,13 @@ void trail_breakApart(Actor *obj, u8 owner, s32 list) {
             cfg.alphaRange = 105;
             cfg.unk58 = 3;
             cfg.unk5C = 0xFF;
-            cfg.render.unk0 = 0;
+            cfg.render.otherModeH = 0;
             cfg.render.setGeometryMode = 0x220005;
             cfg.render.clearGeometryMode = 0x1D0600;
             cfg.render.renderMode = 3;
-            cfg.render.unk10 = 0x3B;
-            cfg.render.unk14 = 0x80;
-            cfg.render.unk18 = 0x20;
+            cfg.render.combiner = 0x3B;
+            cfg.render.colorDither = 0x80;
+            cfg.render.alphaDither = 0x20;
             cfg.render.primMode = 0;
             cfg.render.envMode = 7;
             cfg.unk80 = 10;

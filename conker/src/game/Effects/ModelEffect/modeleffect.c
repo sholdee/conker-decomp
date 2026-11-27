@@ -199,10 +199,10 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
                   fx->params.color1.alpha, 0xFF, fx->params.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-    gfx = particle_setCombineMode(gfx, ((u8 *)&fx->params.render.unk10)[3] /* matching: reads the low byte */, &needSync);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&fx->params.render.combiner)[3] /* matching: reads the low byte */, &needSync);
     gfx = math_gfxSetOtherMode(gfx,
-                        fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
-                            fx->params.render.unk18,
+                        fx->params.render.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.colorDither |
+                            fx->params.render.alphaDither,
                         gEffectRenderModes[fx->params.render.renderMode].cycle1 | gEffectRenderModes[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
         gfx = math_emitPointLights(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,

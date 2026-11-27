@@ -41,10 +41,10 @@ EffectActor *effect_spawnTumblingPiece(Vec3f *position, Vec3f *angle, f32 scale,
     template.render.clearGeometryMode = 0x40600;
     template.render.envMode = 7;
     template.render.renderMode = 1;
-    template.render.unk10 = 0x4A;
-    template.render.unk14 = 0x80;
-    template.render.unk18 = 0x20;
-    template.render.unk0 = 0;
+    template.render.combiner = 0x4A;
+    template.render.colorDither = 0x80;
+    template.render.alphaDither = 0x20;
+    template.render.otherModeH = 0;
     template.render.primMode = 0;
     template.unk01 = 1;
     template.color0.red = 255;

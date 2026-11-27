@@ -64,13 +64,13 @@ s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
     f32 speed;
     TrailRender render;
 
-    render.unk0 = 0;
+    render.otherModeH = 0;
     render.setGeometryMode = 1;
     render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10 = 0x10;
-    render.unk14 = 0x80;
-    render.unk18 = 0x20;
+    render.combiner = 0x10;
+    render.colorDither = 0x80;
+    render.alphaDither = 0x20;
     render.primMode = 0;
     render.envMode = 9;
     spawn.kind = 1;
