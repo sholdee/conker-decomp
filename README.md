@@ -42,8 +42,9 @@ badges from the committed files after each change to `master` (`tools/progress.p
   original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
   descriptive names.
 - **Source layout.** The files follow the pattern of the source paths in the game's own strings, for
-  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
-  other directory and file names are descriptive.
+  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only nine paths are known: five from the US
+  ROM and four from the prerelease builds (`tools/RENAMING.md` lists them). Those files are at Rare's
+  paths. The other directory and file names are descriptive.
 - **Clean C.** Each function and global is declared in the subsystem header of the file that defines
   it. Each C file includes the headers that it uses: there are no umbrella headers. About 70 local
   declarations remain in C files. Each is there because IDO needs it to reproduce the original code,

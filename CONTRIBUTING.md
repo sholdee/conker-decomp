@@ -115,7 +115,8 @@ remove its proof.
 
 [tools/RENAMING.md](tools/RENAMING.md) gives the conventions and the evidence order:
 
-1. original names (from the debug prototype's struct viewer and from source paths in the ROM),
+1. original names (from the debug prototype's struct viewer, and from source paths in the US ROM and in the
+   prerelease builds),
 2. names from the Nintendo SDK,
 3. descriptive names that the code supports.
 

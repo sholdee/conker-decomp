@@ -34,10 +34,21 @@ Other sources of facts:
   code.
 
 ## File names and layout (the owner's decision)
-- Files follow Rare's layout, as the five proven paths show: `src/game/<Area>/<Name>/<name>.c`. The
+- Files follow Rare's layout, as the proven paths show: `src/game/<Area>/<Name>/<name>.c`. The
   file name is lowercase. `<Area>` and `<Name>` are CamelCase words, for example
   `game/Effects/PipeExplode/pipeexplode`.
-- The five proven files are already in place under `src/game/Effects/`. Use the same pattern for the
+- Nine files have a proven path, from path strings in the US ROM and in the prerelease builds. Each is
+  at Rare's path under `src/game/`:
+  - US ROM: `Effects/PipeExplode/pipeexplode.c`, `Effects/Blood/blood.c`,
+    `Effects/ColourFrameBuffer/colourframebuffer.c`, `Effects/Light/light.c`,
+    `Effects/CharacterFlameThrower/characterflamethrower.c`.
+  - ECTS build (August 2000): `Effects/HoltenRope/holtenrope.c`,
+    `Effects/Sfx/effects_sfx_w1_bee_cavern.c`, `Effects/Sight/effects_sight.c`.
+  - Debug build (October 2000): `Camera/camera_camera.c`.
+
+  Some of Rare's file names start with the directory names (`camera_camera.c`, `effects_sight.c`),
+  and `camera_camera.c` is directly in its area directory. A file with a proven path keeps exactly
+  that path. Use the `<Area>/<Name>/<name>.c` pattern for the
   other files. Choose `<Area>` from the subsystem (for example `Effects`, `Camera`, `Collision`,
   `Audio`). Choose `<Name>` from what the file does.
 - The root is the file's ROM segment: `game/` for the game code, `init/` for the init segment

@@ -1,3 +1,9 @@
+/*
+ * Rare's ../Camera/camera_camera.c. The October 2000 debug build passes this path (line 1478) to a
+ * debug tunable from its version of camera_getTargetHeight. In that build and in the US ROM the unit
+ * has alignment padding before its first function (camera_updateAll) and after its last one, and no
+ * padding inside, so the file is these 45 functions (camera_placeAtObject is new in the US ROM).
+ */
 #include <ultra64.h>
 #include "structs.h"
 
