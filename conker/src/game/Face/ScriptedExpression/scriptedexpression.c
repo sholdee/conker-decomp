@@ -48,7 +48,7 @@ void face_processMessages(void) {
 
 /*
  * Per-frame update while mode gScriptedExpressionMode is set: mode 1 sets unk1FF from D_800427F0. Mode 2, once
- * D_800427F0 exceeds 1000 and morphDuration is below the frame step, moves unk134 to the next of
+ * D_800427F0 exceeds 1000 and morphDuration is below the frame step, moves morphTarget to the next of
  * the 5 gScriptedExpressionCycle values with a random morphDuration of 4-10. Both clear D_800427F0.
  */
 void face_updateScripted(Actor *actor) {
@@ -72,7 +72,7 @@ void face_updateScripted(Actor *actor) {
                     if (index >= 5) {
                         index = 0;
                     }
-                    actor->unk134 = gScriptedExpressionCycle[index];
+                    actor->morphTarget = gScriptedExpressionCycle[index];
                     actor->morphDuration = (math_rand() % 7) + 4;
                     gScriptedExpressionCycleIndex = index;
                 }

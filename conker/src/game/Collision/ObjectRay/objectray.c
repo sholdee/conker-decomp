@@ -44,8 +44,8 @@ s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f
     obj = movement_obj;
     for (i = 0; i < 25; i++, obj++) {
         if (obj->type != 0 && i != skipIndex && obj->energy != 0 && !obj->imune && i != sourceIndex) {
-            hit = math_isBoxInView(view, obj->xpos, obj->ypos + obj->unkD6, obj->zpos,
-                                obj->unkD2, obj->unkD4, 0.0f, length, 10.0f, 10.0f);
+            hit = math_isBoxInView(view, obj->xpos, obj->ypos + obj->hitOffsetY, obj->zpos,
+                                obj->hitRadius, obj->hitHeight, 0.0f, length, 10.0f, 10.0f);
             if (hit != 0 && (best == -1 || hit < bestHit)) {
                 best = i;
                 bestHit = hit;
@@ -55,7 +55,7 @@ s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f
 
     if (best != -1) {
         obj = &movement_obj[best];
-        result = actor_runAttackAt(obj->xpos, obj->unkD6 + obj->ypos, obj->zpos, effect,
+        result = actor_runAttackAt(obj->xpos, obj->hitOffsetY + obj->ypos, obj->zpos, effect,
                                dc_glbl_CharNum, 0, 0, 0);
         obj->angle = source->angle;
     }

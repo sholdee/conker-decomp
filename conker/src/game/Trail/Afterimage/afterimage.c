@@ -442,8 +442,8 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     if (index < 0 || index >= 25) {
         return gfx;
     }
-    saved = trail->owner.object->unk94;
-    trail->owner.object->unk94 = trail->unk14;
+    saved = trail->owner.object->hiddenParts;
+    trail->owner.object->hiddenParts = trail->unk14;
     bonesOverride = &gBoneTrailMtxs; // matching: IDO keeps the global's address in a register only via a pointer
     for (i = 0; i < numFilled; i++) {
         alphaScale = ((i + 3) * 32 * alpha) >> 8;
@@ -451,7 +451,7 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
         gAfterimageAlpha = alphaScale;
         gfx = actor_drawModel(gfx, index, player, 4, 1);
     }
-    trail->owner.object->unk94 = saved;
+    trail->owner.object->hiddenParts = saved;
     return gfx;
 }
 

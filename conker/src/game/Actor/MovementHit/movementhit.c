@@ -7,7 +7,7 @@
 #include "conker/trail.h"
 
 /* Bursts three debris pieces from the object's position. */
-void actor_hitBurstDebris(Actor *obj, s32 arg1) {
+void actor_hitBurstDebris(Actor *obj, s32 arg) {
     DebrisEmitter emitter;
 
     emitter.count = 3;
@@ -45,19 +45,19 @@ void actor_hitBurstDebris(Actor *obj, s32 arg1) {
 static Vec3f gHitOldPos;
 static Vec3f gHitNewPos;
 
-void actor_hitAttachBloodDrip(Actor *obj, s32 arg1) {
+void actor_hitAttachBloodDrip(Actor *obj, s32 arg) {
     effect_attachBloodDrip(obj, 0xFF, 1);
 }
 
-void actor_hitShotImpact(Actor *obj, s32 arg1) {
+void actor_hitShotImpact(Actor *obj, s32 arg) {
     effect_spawnShotImpact(obj, &gHitOldPos, &gHitNewPos, 0xFF, 1);
 }
 
-void actor_hitMidpointImpact(Actor *obj, s32 arg1) {
+void actor_hitMidpointImpact(Actor *obj, s32 arg) {
     effect_spawnMidpointImpact(obj, &gHitOldPos.x, &gHitNewPos.x, 0xFF, 1);
 }
 
-void func_1506A79C(Actor *obj, s32 arg1) {
+void func_1506A79C(Actor *obj, s32 arg) {
     Vec3f pos;
     Vec3f delta;
 
@@ -70,12 +70,12 @@ void func_1506A79C(Actor *obj, s32 arg1) {
     particle_spawnHitImpact(&pos, &delta, 0, 0, 0xFF, 1);
 }
 
-void func_1506A83C(Actor *obj, s32 arg1) {
+void func_1506A83C(Actor *obj, s32 arg) {
     func_151BC104(obj, 0xFF, 1);
 }
 
 /* Spawns a flash 50 units above the object. */
-void actor_hitSpawnFlash(Actor *obj, s32 arg1) {
+void actor_hitSpawnFlash(Actor *obj, s32 arg) {
     LightEffect *flash;
     LightEffectHeader header;
     f32 params[4];
@@ -99,7 +99,7 @@ void actor_hitSpawnFlash(Actor *obj, s32 arg1) {
     }
 }
 
-void func_1506A968(Actor *obj, s32 arg1) {
+void func_1506A968(Actor *obj, s32 arg) {
     Vec3f pos;
     Vec3f delta;
 
@@ -112,7 +112,7 @@ void func_1506A968(Actor *obj, s32 arg1) {
     particle_spawnHitImpact(&pos, &delta, 0, 1, 0xFF, 1);
 }
 
-void actor_hitSpawnTrails(Actor *obj, s32 arg1) {
+void actor_hitSpawnTrails(Actor *obj, s32 arg) {
     trail_spawnParticleAtTarget(obj, 0xFF, 1);
     trail_spawnFollowTrail(obj, 0xFF, 1);
 }
@@ -136,7 +136,7 @@ void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
 }
 
 /* Calls blood_spawnActorImpact for every object in the hit mask gAttackHitMask. */
-void actor_hitBloodImpacts(Actor *obj, s32 arg1) {
+void actor_hitBloodImpacts(Actor *obj, s32 arg) {
     s32 mask;
     Actor *hit;
 
@@ -148,14 +148,14 @@ void actor_hitBloodImpacts(Actor *obj, s32 arg1) {
 }
 
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
-    effect_spawnImpactBlast(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);
+    effect_spawnImpactBlast(obj, arg->source, &arg->pos, 1, arg->unk10, 0xFF, 1);
 }
 
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
-    effect_spawnImpactBlast(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
+    effect_spawnImpactBlast(obj, arg->source, &arg->pos, 2, arg->unk10, 0xFF, 1);
 }
 
-void actor_hitSpawnRibbon(Actor *obj, s32 arg1) {
+void actor_hitSpawnRibbon(Actor *obj, s32 arg) {
     ActorRef ref;
 
     ref.actor = obj;
@@ -163,7 +163,7 @@ void actor_hitSpawnRibbon(Actor *obj, s32 arg1) {
     trail_spawnRibbon(&ref, 0, 8, 0xFF, 1);
 }
 
-void actor_hitSpawnWaveTrail(Actor *obj, s32 arg1) {
+void actor_hitSpawnWaveTrail(Actor *obj, s32 arg) {
     trail_spawnWaveTrail(obj, 0, 1, 0xFF, 1);
 }
 
@@ -181,9 +181,9 @@ void actor_runHitHandler(Actor *obj, s32 type, void *arg) {
         gHitOldPos.x = obj->old_xpos;
         gHitOldPos.y = obj->old_ypos;
         gHitOldPos.z = obj->old_zpos;
-        gHitNewPos.x = D_800CC254;
-        gHitNewPos.y = D_800CC258;
-        gHitNewPos.z = D_800CC25C;
+        gHitNewPos.x = gPreCollisionX;
+        gHitNewPos.y = gPreCollisionY;
+        gHitNewPos.z = gPreCollisionZ;
         if (gActorHitHandlers[type] != NULL) {
             gActorHitHandlers[type](obj, arg);
         }

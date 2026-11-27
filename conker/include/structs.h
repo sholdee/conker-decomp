@@ -424,7 +424,7 @@ typedef struct ModelDef {
     /* 0x1A */ s16 unk1A;           // body cylinder (Actor.unkE4/E6/E8)
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;           // hit cylinder (Actor.unkD2/D4/D6)
+    /* 0x20 */ s16 unk20;           // hit cylinder (Actor.hitRadius/hitHeight/hitOffsetY)
     /* 0x22 */ s16 unk22;
     /* 0x24 */ s16 unk24;
     /* 0x26 */ u8  aimBone;
@@ -441,7 +441,7 @@ typedef struct ModelDef {
     /* 0x38 */ u8  extraModelCount;
     /* 0x39 */ u8  unk39;
     /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
-    /* 0x3B */ u8  eyeDefault[2];   // default Actor.unk68[0..1]
+    /* 0x3B */ u8  eyeDefault[2];   // default Actor.swapTexture[0..1]
     /* 0x3D */ u8  pad3D;
     /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by scale_xz
 } ModelDef;
@@ -790,7 +790,7 @@ typedef struct {
     /* 0x70 */ f32 bubbleX;
 } TextBox;
 
-/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
+/* Animation playback state (Actor.anim, ModelAttachment.anim). Every field pair is indexed by
  * channel: [0] is the current animation, [1] the previous one, kept for blending (actor_loadAnimFrames loads
  * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game/Collision/RayCast/raycast);
  * animated models (game/Anim/AnimInstance/animinstance, used by ModelAttachment) also use the fields past that (size 0x3F8). */
@@ -959,7 +959,7 @@ struct Actor {
     /* 0x000 */ s32 type;
     /* 0x004 */ u8  character_type;
     /* 0x005 */ u8  drawtype;
-    /* 0x006 */ u8  unk6;
+    /* 0x006 */ u8  baseCharacterType;
     /* 0x007 */ u8  alpha;
     /* 0x008 */ u8  targetAlpha;
     /* 0x009 */ u8  fadeStep;
@@ -967,7 +967,7 @@ struct Actor {
     /* 0x00B */ u8  playerAlphas[4]; // one per player
     /* 0x00F */ u8  playerFadeBits; // per-player bits (<< 4: seen by player i)
     /* 0x010 */ u16 cullDistance; // from the model definition, or the spawn record override (game/Collision/RayCast/raycast)
-    /* 0x012 */ u16 unk12;    // frame counter
+    /* 0x012 */ u16 updateCount; // updates while active (actor_updateAll)
     /* 0x014 */ f32 xpos;
     /* 0x018 */ f32 ypos;
     /* 0x01C */ f32 zpos;
@@ -977,8 +977,8 @@ struct Actor {
     /* 0x02C */ f32 old_xpos;
     /* 0x030 */ f32 old_ypos;
     /* 0x034 */ f32 old_zpos;
-    /* 0x038 */ s16 unk38;
-    /* 0x03A */ s8  unk3A;
+    /* 0x038 */ s16 killHeight;
+    /* 0x03A */ s8  hopSpeed;
     /* 0x03B */ u8  unique_id;
     /* 0x03C */ f32 speed;
     /* 0x040 */ f32 theta;
@@ -987,15 +987,15 @@ struct Actor {
     /* 0x04C */ f32 animsp;
     /* 0x050 */ f32 wantanimsp;   // not accessed in US code
     /* 0x054 */ f32 unk54;
-    /* 0x058 */ s32 unk58;
+    /* 0x058 */ u8 *animBankTable; // ROM table [2][bank] of the animation bank (rom_findPath)
     /* 0x05C */ s32 basemtx;
     /* 0x060 */ s16 texScroll;
     /* 0x062 */ s16 texScrollSpeed;
-    /* 0x064 */ s8  unk64;
+    /* 0x064 */ s8  eventWaitTimer;
     /* 0x065 */ u8  attach_char;
     /* 0x066 */ u8  unk66;      // flags
     /* 0x067 */ u8  pad67;
-    /* 0x068 */ u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
+    /* 0x068 */ u8  swapTexture[2]; // texture bound to segments 10 and 11 (actor_bindSwapTextures)
     /* 0x06A */ u8  eyeClosed[2]; // per eye, toggled by blinking
     /* 0x06C */ u8  eyeCode[2];   // >= 10: set by the current expression
     /* 0x06E */ u8  blinkTimer;
@@ -1028,10 +1028,10 @@ struct Actor {
     /* 0x08C */ u16 soundHandle1; /* sound handle of slot 1 (sound_playActorSound1) */
     /* 0x08E */ u16 soundHandle2; /* sound handle of slot 2 (sound_playActorSound2) */
     /* 0x090 */ s16 unk90;    // saved unkE4
-    /* 0x092 */ u16 unk92;
-    /* 0x094 */ s32 unk94;
+    /* 0x092 */ u16 attachedObject;
+    /* 0x094 */ s32 hiddenParts;
     /* 0x098 */ s32 unk98;     // blacked-out display-list mask
-    /* 0x09C */ u32 unk9C;
+    /* 0x09C */ u32 hiddenBones;
     /* 0x0A0 */ u32 fogColor;  // packed ARGB; in fog mode 1 a pointer to an f32 percentage
     /* 0x0A4 */ u8  fogMode;
     /* 0x0A5 */ u8  fogLevel;  // fade level, or pulse phase in modes 4/5
@@ -1039,13 +1039,13 @@ struct Actor {
     /* 0x0A7 */ u8  fogFade;   // pulse fade-out, 0xFF = full
     /* 0x0A8 */ u8  unkA8;
     /* 0x0A9 */ u8  unkA9;
-    /* 0x0AA */ u8  unkAA;
+    /* 0x0AA */ u8  speedPercent;
     /* 0x0AB */ u8  unkAB;
-    /* 0x0AC */ u8  unkAC;
+    /* 0x0AC */ u8  modelLoadFlags;
     /* 0x0AD */ u8  inwater;
     /* 0x0AE */ u8  unkAE;
     /* 0x0AF */ u8  padAF;
-    /* 0x0B0 */ s8  unkB0;
+    /* 0x0B0 */ s8  floatDepth;
     /* 0x0B1 */ u8  padB1;
     /* 0x0B2 */ u16 underwaterTime;  // time the head has been under water (drowning past 1560)
     /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (event_runTimedEvents)
@@ -1053,27 +1053,27 @@ struct Actor {
     /* 0x0BC */ f32 unkBC;
     /* 0x0C0 */ f32 wantspeed;
     /* 0x0C4 */ f32 lean_angle;
-    /* 0x0C8 */ f32 unkC8;
-    /* 0x0CC */ s16 unkCC;
-    /* 0x0CE */ s16 unkCE;
+    /* 0x0C8 */ f32 rootOffsetY;
+    /* 0x0CC */ s16 heightOffset;
+    /* 0x0CE */ s16 targetHeightOffset;
     /* 0x0D0 */ u8  doing_hit;
     /* 0x0D1 */ s8  padD1;
-    /* 0x0D2 */ s16 unkD2;    // first set of bounds (sprite_getActorBounds): radius,
-    /* 0x0D4 */ s16 unkD4;    // ...
-    /* 0x0D6 */ s16 unkD6;    // ... and centre height above the position
-    /* 0x0D8 */ s16 unkD8;
-    /* 0x0DA */ s16 unkDA;
-    /* 0x0DC */ f32 unkDC;
-    /* 0x0E0 */ f32 unkE0;
+    /* 0x0D2 */ s16 hitRadius;   // hit cylinder (actor_setScale, actor_testAttack): radius,
+    /* 0x0D4 */ s16 hitHeight;   // ... height,
+    /* 0x0D6 */ s16 hitOffsetY;  // ... centre height above the position,
+    /* 0x0D8 */ s16 hitOffsetZ;  // ... and centre offset on the actor's local axes (actor_rotateOffset)
+    /* 0x0DA */ s16 hitOffsetX;
+    /* 0x0DC */ f32 hitRadiusOverHeight;
+    /* 0x0E0 */ f32 hitHeightOverRadius;
     /* 0x0E4 */ s16 bodyRadius;  // body cylinder (actor_updateBodyRatios, collisions in game/Actor/ActorMotion/actormotion)
     /* 0x0E6 */ s16 bodyHeight;
     /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by scale_y)
     /* 0x0EA */ u16 unkEA;
-    /* 0x0EC */ f32 unkEC;
-    /* 0x0F0 */ f32 unkF0;
+    /* 0x0EC */ f32 bodyRadiusOverHeight;
+    /* 0x0F0 */ f32 bodyHeightOverRadius;
     /* 0x0F4 */ s32 mvmt_control;
     /* 0x0F8 */ s32 noshove;
-    /* 0x0FC */ s32 unkFC;
+    /* 0x0FC */ s32 hitSound;
     /* 0x100 */ u8  unk100;
     /* 0x101 */ u8  unk101;
     /* 0x102 */ u8  unk102;
@@ -1082,25 +1082,25 @@ struct Actor {
     /* 0x105 */ u8  stunnednum;
     /* 0x106 */ u8  stunnedseq;
     /* 0x107 */ u8  ivehitit;
-    /* 0x108 */ u8  unk108;  // attacker slot | 0x80
+    /* 0x108 */ u8  lastVictim;   // slot of the last actor hit | 0x80
     /* 0x109 */ u8  unk109;
-    /* 0x10A */ u8  unk10A;  // victim/attacker slot | 0x80
+    /* 0x10A */ u8  lastAttacker; // slot of the last attacker | 0x80
     /* 0x10B */ u8  unk10B;
-    /* 0x10C */ s16 unk10C;
+    /* 0x10C */ s16 reactionTimer; // also the carry height * 100 of a carried actor (actor_moveToHost)
     /* 0x10E */ u8  unk10E;
     /* 0x10F */ u8  unk10F;
-    /* 0x110 */ u8  unk110;
+    /* 0x110 */ u8  slideState;
     /* 0x111 */ u8  pad111;
-    /* 0x112 */ u16 unk112;
-    /* 0x114 */ f32 unk114;
+    /* 0x112 */ u16 slopeAngle; // downhill direction of the floor (a binary angle, not a steepness)
+    /* 0x114 */ f32 doingHitTimer;
     /* 0x118 */ f32 waterHeight;      // water surface height under the actor; -10000 when there is none
     /* 0x11C */ f32 prevWaterHeight;  // waterHeight of the previous frame
-    /* 0x120 */ s16 unk120;
-    /* 0x122 */ u8  unk122;
-    /* 0x123 */ u8  unk123;
+    /* 0x120 */ s16 zoneWaterHeight;
+    /* 0x122 */ u8  spriteSize;
+    /* 0x123 */ u8  noBlobShadow;
     /* 0x124 */ u8  owner;
     /* 0x125 */ u8  imune;
-    /* 0x126 */ u8  unk126;  // owner index into movement_obj
+    /* 0x126 */ u8  homingTarget; // movement_obj index that a homing projectile steers toward
     /* 0x127 */ u8  playernumber;
     /* 0x128 */ u8  team;
     /* 0x129 */ u8  unk129;
@@ -1109,17 +1109,17 @@ struct Actor {
     /* 0x12C */ s16 unk12C;
     /* 0x12E */ u16 pad12E;
     /* 0x130 */ u32 pad130;
-    /* 0x134 */ u8  unk134;
+    /* 0x134 */ u8  morphTarget;
     /* 0x135 */ u8  morphDuration;
-    /* 0x136 */ u8  unk136;  // sprite texture
+    /* 0x136 */ u8  spriteTexture;
     /* 0x137 */ u8  unk137;
     /* 0x138 */ u8  speccnt;
-    /* 0x139 */ u8  unk139;  // requested sequence
-    /* 0x13A */ u8  unk13A;  // its countdown
+    /* 0x139 */ u8  idleRequest;      // requested idle sequence (anim_pickIdleSequence)
+    /* 0x13A */ u8  idleRequestTimer; // its countdown
     /* 0x13B */ u8  unk13B;
     /* 0x13C */ u8  lifting;
     /* 0x13D */ u8  carried;
-    /* 0x13E */ u8  unk13E;
+    /* 0x13E */ u8  hostAngleOffset;
     /* 0x13F */ u8  listpos; // index of its spawn record in gSpawnRecords, 0xFF = none
     /* 0x140 */ u8  unk140;
     /* 0x141 */ u8  pad141[0x3];
@@ -1127,11 +1127,11 @@ struct Actor {
     /* 0x148 */ f32 unk148;
     /* 0x14C */ f32 scale_xz;
     /* 0x150 */ f32 scale_y;
-    /* 0x154 */ f32 unk154;
-    /* 0x158 */ f32 unk158;
-    /* 0x15C */ f32 unk15C;
+    /* 0x154 */ f32 targetScaleXz;
+    /* 0x158 */ f32 targetScaleY;
+    /* 0x15C */ f32 scaleStep;
     /* 0x160 */ u16 shadow_size;  // shadow size, scaled by scale_xz (game/Shadow/BlobShadow/blobshadow)
-    /* 0x162 */ u8  unk162;
+    /* 0x162 */ u8  sliding;
     /* 0x163 */ u8  pad163;
     /* 0x164 */ f32 ob_slopex;
     /* 0x168 */ f32 ob_slopey;
@@ -1148,14 +1148,14 @@ struct Actor {
     /* 0x1A0 */ u16 propNum;   // db_Object_array index + 1 of the prop stood on, 0 = none
     /* 0x1A2 */ s16 floorType;
     /* 0x1A4 */ ActorAimPoints aim;
-    /* 0x1BC */ s16 unk1BC[3];   // a bone position (game/Actor/ActorMotion/actormotion)
+    /* 0x1BC */ s16 headPos[3];   // head position (actor_updateHeadPos)
     /* 0x1C2 */ u8  pad1C2[0x2];
     /* 0x1C4 */ struct TimedEvent *events; // timed event list
     /* 0x1C8 */ u8  current_lod;       // current level of detail
     /* 0x1C9 */ u8  forced_lod; // requested LOD + 1, 0xFF = reset to 0
     /* 0x1CA */ u8  energy;
     /* 0x1CB */ u8  unk1CB;
-    /* 0x1CC */ f32 unk1CC;
+    /* 0x1CC */ f32 fallStartY;
     /* 0x1D0 */ s8  unk1D0;
     /* 0x1D1 */ s8  aimPitch;
     /* 0x1D2 */ u16 pad1D2;
@@ -1164,99 +1164,100 @@ struct Actor {
                                        // gBoneMatricesFlushed. math_transformOffset and math_transformOffsets read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
-    /* 0x1DD */ u8  unk1DD[3];
+    /* 0x1DD */ u8  ambientColor[3];
     /* 0x1E0 */ u8  unk1E0[3];
-    /* 0x1E3 */ u8  unk1E3;
+    /* 0x1E3 */ u8  textBoxOpen;
     /* 0x1E4 */ u8  family;
-    /* 0x1E5 */ u8  unk1E5;
-    /* 0x1E6 */ u8  unk1E6;
-    /* 0x1E7 */ u8  unk1E7;
-    /* 0x1E8 */ u8  unk1E8;
+    /* 0x1E5 */ u8  moveTurnRate;
+    /* 0x1E6 */ u8  faceTurnRate;
+    /* 0x1E7 */ u8  moveTurnFrac;
+    /* 0x1E8 */ u8  faceTurnFrac;
     /* 0x1E9 */ u8  pad1E9;
-    /* 0x1EA */ u16 unk1EA;
-    /* 0x1EC */ u16 unk1EC;
+    /* 0x1EA */ u16 turnAccel;
+    /* 0x1EC */ u16 lastTurnStep;
     /* 0x1EE */ u8  pad1EE[0x2];
     /* 0x1F0 */ u32 pad1F0;
     /* 0x1F4 */ f32 unk1F4;
     /* 0x1F8 */ f32 unk1F8;
     /* 0x1FC */ u8  unk1FC;
-    /* 0x1FD */ u8  unk1FD;
+    /* 0x1FD */ u8  animEndTurn;
     /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (bone_addLevelCommands)
     /* 0x1FF */ u8  levelMode;   // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
     /* 0x200 */ u8  levelTimer;
-    /* 0x201 */ u8  unk201;
-    /* 0x202 */ s8  unk202;
+    /* 0x201 */ u8  levelRange;
+    /* 0x202 */ s8  levelJitter;
     /* 0x203 */ s8  levelStep;
-    /* 0x204 */ s16 level2;      // -255..255 (direction set by the sign of unk208)
+    /* 0x204 */ s16 level2;      // -255..255 (direction set by the sign of level2Range)
     /* 0x206 */ u8  level2Mode;  // same encoding as levelMode
     /* 0x207 */ u8  level2Timer;
-    /* 0x208 */ s8  unk208;
+    /* 0x208 */ s8  level2Range;
     /* 0x209 */ s8  level2Step;
     /* 0x20A */ u8  unk20A;
-    /* 0x20B */ u8  unk20B[4];   // script variables (command 0x59)
-    /* 0x20F */ u8  unk20F;
-    /* 0x210 */ u8  unk210;
-    /* 0x211 */ u8  unk211;
-    /* 0x212 */ u8  unk212[0x2];
+    /* 0x20B */ u8  visibleWith[4]; // unique_ids of actors whose visibility makes this one visible (command 0x59)
+    /* 0x20F */ u8  pathNode;
+    /* 0x210 */ u8  prevPathNode;
+    /* 0x211 */ u8  pathGoal;
+    /* 0x212 */ u8  pathAvoid;   // path node to avoid, 0xFF = none
+    /* 0x213 */ u8  lastNearNode;
     /* 0x214 */ s16 unk214;
-    /* 0x216 */ s16 unk216;      // distance bias (game/Script/ActorCmd/actorcmd)
+    /* 0x216 */ s16 pathDistance; // route length to the goal (path_search)
     /* 0x218 */ const ObjScriptCmd *scriptCmd; // current script command
-    /* 0x21C */ u16 unk21C;
-    /* 0x21E */ u8  unk21E;
-    /* 0x21F */ u8  unk21F;
-    /* 0x220 */ u8  unk220;
-    /* 0x221 */ s8  unk221;
-    /* 0x222 */ u8  unk222;
-    /* 0x223 */ u8  unk223;
+    /* 0x21C */ u16 scriptTimer; // script wait * 100 (25500 = forever); some states reuse it (carry frames, an angle)
+    /* 0x21E */ u8  waypoint;
+    /* 0x21F */ u8  waypointEnd;
+    /* 0x220 */ u8  waypointStart;
+    /* 0x221 */ s8  waypointStep;
+    /* 0x222 */ u8  targetIndex;
+    /* 0x223 */ u8  moveMode;
     /* 0x224 */ s16 unk224;
     /* 0x226 */ u8  unk226;
     /* 0x227 */ u8  pad227;
-    /* 0x228 */ u8  unk228;
-    /* 0x229 */ u8  unk229;
+    /* 0x228 */ u8  inputLockTimer;
+    /* 0x229 */ u8  spotHeight;
     /* 0x22A */ u8  unk22A;
     /* 0x22B */ u8  unk22B;
     /* 0x22C */ u16 unk22C;
-    /* 0x22E */ u16 unk22E;   // cooldown
+    /* 0x22E */ u16 alertCooldown;
     /* 0x230 */ u8  pad230;
-    /* 0x231 */ u8  unk231;
+    /* 0x231 */ u8  interceptSpeed;
     /* 0x232 */ u8  intelwalk;
-    /* 0x233 */ u8  unk233;
-    /* 0x234 */ u8  unk234;
-    /* 0x235 */ u8  unk235;
-    /* 0x236 */ u8  unk236;
-    /* 0x237 */ u8  unk237;
-    /* 0x238 */ u8  unk238;
+    /* 0x233 */ u8  spotScript;
+    /* 0x234 */ u8  nearScript;
+    /* 0x235 */ u8  spotWideScript;
+    /* 0x236 */ u8  nearRange;
+    /* 0x237 */ u8  nearCone;
+    /* 0x238 */ u8  stunEndScript;
     /* 0x239 */ s8  intelhitroute;
-    /* 0x23A */ u8  unk23A;
+    /* 0x23A */ u8  pendingScript;
     /* 0x23B */ u8  unk23B;
-    /* 0x23C */ u8  unk23C;
-    /* 0x23D */ u8  unk23D;
-    /* 0x23E */ u8  unk23E;
-    /* 0x23F */ u8  unk23F;
-    /* 0x240 */ u8  unk240;
-    /* 0x241 */ u8  unk241;
-    /* 0x242 */ u8  unk242;
+    /* 0x23C */ u8  nearRangeDefault;
+    /* 0x23D */ u8  sightRange;
+    /* 0x23E */ u8  arriveRange;
+    /* 0x23F */ u8  typeSpotRange;
+    /* 0x240 */ u8  typeSpotKind;
+    /* 0x241 */ u8  typeSpotScript;
+    /* 0x242 */ u8  typeSpotReplyScript;
     /* 0x243 */ u8  pad243;
     /* 0x244 */ s16 intel_animseq;
     /* 0x246 */ u8  intel_animspd;
     /* 0x247 */ u8  intel_accel;
     /* 0x248 */ u8  intel_decel;
-    /* 0x249 */ u8  unk249;
-    /* 0x24A */ u8  unk24A;
+    /* 0x249 */ u8  animSpeedFrac;
+    /* 0x24A */ u8  turnStopScript;
     /* 0x24B */ u8  pad24B;
-    /* 0x24C */ u8  unk24C;
+    /* 0x24C */ u8  standOnScript;
     /* 0x24D */ u8  unk24D;
-    /* 0x24E */ u8  unk24E;
-    /* 0x24F */ s8  unk24F;
-    /* 0x250 */ u8  unk250;
+    /* 0x24E */ u8  wallHitScript;
+    /* 0x24F */ s8  turnAnimRow;
+    /* 0x250 */ u8  turnAnimSpeed;
     /* 0x251 */ u8  unk251;
-    /* 0x252 */ u8  unk252;
-    /* 0x253 */ u8  unk253;
-    /* 0x254 */ u8  unk254;
-    /* 0x255 */ u8  unk255;
-    /* 0x256 */ u8  unk256;
-    /* 0x257 */ u8  unk257;
-    /* 0x258 */ u8  unk258;
+    /* 0x252 */ u8  fallReaction;
+    /* 0x253 */ u8  fallReactionHeight;
+    /* 0x254 */ u8  hitPlayerScript;
+    /* 0x255 */ u8  fallScript;
+    /* 0x256 */ u8  fallScriptDepth;
+    /* 0x257 */ u8  orbitStep;
+    /* 0x258 */ u8  orbitRadius;
     /* 0x259 */ u8  unk259[3];
     /* 0x25C */ s32 task_attrib;
     /* 0x260 */ VtxMorphState *morph; // vertex morph (game/Anim/VertexMorph/vertexmorph), NULL when the model has none
@@ -1272,20 +1273,17 @@ struct Actor {
     /* 0x27A */ s16 headYaw[2];   // yaw of head parts 1 and 0
     /* 0x27E */ s16 headPitch[2]; // pitch of head parts 1 and 0
     /* 0x282 */ u16 headEffectTimer; // effect frames left, 0xFFFF = endless
-    /* 0x284 */ s8  unk284;      // effect offset for headYaw[0]
-    /* 0x285 */ s8  unk285;      // ... for headPitch[0]
-    /* 0x286 */ s8  unk286;      // ... for headYaw[1]
-    /* 0x287 */ s8  unk287;      // ... for headPitch[1]
-    /* 0x288 */ u8  unk288;
+    /* 0x284 */ s8  headEffectOffset[2][2]; // per head part: [0] added to headYaw, [1] to headPitch
+    /* 0x288 */ u8  modelTypeIndex;
     /* 0x289 */ u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer
     /* 0x2C4 */ const u8 *modelIds;
     /* 0x2C8 */ u8  lodCount;   // models in modelIds that are LODs
     /* 0x2C9 */ u8  modelCount; // lodCount + extra sub-models
-    /* 0x2CA */ s8  unk2CA;
-    /* 0x2CB */ s8  unk2CB;
-    /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ AnimInstance *unk2D0;
+    /* 0x2CA */ s8  lookYaw;
+    /* 0x2CB */ s8  bouncePercent;
+    /* 0x2CC */ s32 impactSound;
+    /* 0x2D0 */ AnimInstance *anim;
     /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
@@ -1295,22 +1293,22 @@ struct Actor {
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
     /* 0x2F8 */ u16 unk2F8; // wait animation?
     /* 0x2FA */ u8  activeFlags;
-    /* 0x2FB */ u8  unk2FB;
+    /* 0x2FB */ u8  animFlags;
     /* 0x2FC */ u8  forcedCullMask;
-    /* 0x2FD */ u8  unk2FD;
-    /* 0x2FE */ u8  unk2FE;
-    /* 0x2FF */ u8  unk2FF;
-    /* 0x300 */ u8  unk300;
-    /* 0x301 */ u8  unk301;
-    /* 0x302 */ u8  unk302;
+    /* 0x2FD */ u8  snapTimer;
+    /* 0x2FE */ u8  modelDrawn;
+    /* 0x2FF */ u8  updatedOnce;
+    /* 0x300 */ u8  moved;
+    /* 0x301 */ u8  maxLights;
+    /* 0x302 */ u8  lightCount;
     /* 0x303 */ u8  unk303;
-    /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
-    /* 0x314 */ Ambient *unk314; // one per frame buffer (light_allocAmbients)
+    /* 0x304 */ struct PointLightGfx *gfxLights[4]; // one per view
+    /* 0x314 */ Ambient *ambients; // one per frame buffer (light_allocAmbients)
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;
     /* 0x324 */ struct CamData *camData; // aim easing state, one entry per aim slot
-    /* 0x328 */ s8  unk328;
+    /* 0x328 */ s8  radarColor;
     /* 0x329 */ u8  pad329[0x3];
 }; // size 0x32C => 812 bytes game_object
 
@@ -2180,14 +2178,14 @@ typedef struct {
 
 /* D_800CC298 (0x18 bytes): state of the per-type texture animations (actor_updateTypeAnims, game/Beam/AimedBeam/aimedbeam.c). */
 typedef struct TexAnimState {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ s8  unk8;
-    /* 0x09 */ s8  unk9;
-    /* 0x0A */ s8  unkA;
-    /* 0x0B */ u8  unkB[4];
-    /* 0x0F */ u8  unkF;
-    /* 0x10 */ u8  unk10;
+    /* 0x00 */ f32 fastAngle;     // degrees, -4 per tick: texcoord rotation of type 0x24's second vertex group
+    /* 0x04 */ f32 slowAngle;     // degrees, -0.5 per tick: texcoord rotation of type 0x24's first vertex group
+    /* 0x08 */ s8  scrollT;       // type 0x24: random T scroll step (-2..2) of tile 4
+    /* 0x09 */ s8  sweepS;        // type 0x2C: S position of tile 0xAA, swept back and forth over 0..41
+    /* 0x0A */ s8  sweepStep;     // +1 or -1: direction of sweepS
+    /* 0x0B */ u8  colourPhases[4]; // type 0x3A: binary angles of the four vertex-colour ramps
+    /* 0x0F */ u8  frameTimer;    // type 0x4B: ticks since its unk68 frame last stepped (steps at 4)
+    /* 0x10 */ u8  fadeLevel;     // type 0x54: vertex-colour ramp 0..255, +-20 per frame with taskint[2]
     /* 0x11 */ u8  pad11;
     /* 0x12 */ s16 tilt;
     /* 0x14 */ s16 pulse;
@@ -3293,34 +3291,34 @@ typedef struct ZoneNode {
 
 /* One hit-reaction entry (tables gDefaultHitReactions, gKnockbackReactions and AnimHeader.hits): what happens to an actor hit by an attack. */
 typedef struct HitReaction {
-    /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
+    /* 0x00 */ u8 kind;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ s32 unk4; /* sound to play */
-    /* 0x08 */ u8 unk8;  /* handler index into gHitReactionProcs */
+    /* 0x04 */ s32 sound; /* sound to play */
+    /* 0x08 */ u8 handler; /* index into gHitReactionProcs */
     /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
     /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
     /* 0x0B */ u8 padB;
     /* 0x0C */ s16 unkC; /* hit-volume height offset */
     /* 0x0E */ u8 unkE;  /* hit-volume radius / side offset */
     /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
-    /* 0x10 */ u8 unk10; /* added to the attacker's heading (high byte) */
+    /* 0x10 */ u8 headingOffset; /* added to the attacker's heading (high byte) for the victim's */
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 xzVelocity;
     /* 0x18 */ f32 yVelocity;
     /* 0x1C */ f32 gravity;
     /* 0x20 */ u8 unk20;
     /* 0x21 */ u8 pad21;
-    /* 0x22 */ u8 unk22; /* 0x80: sets immune to & 0x3F */
+    /* 0x22 */ u8 immunity; /* 0x80: sets the victim's imune to & 0x3F */
     /* 0x23 */ u8 pad23;
-    /* 0x24 */ u16 unk24; /* flags */
+    /* 0x24 */ u16 flags;
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
 /* One rule of a hit route (gHitRoutes, game/Anim/AnimPlayback/animplayback.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 typedef struct HitRule {
-    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
-    /* 0x1 */ u8 unk1; /* the reaction kind it matches */
-    /* 0x2 */ u8 unk2; /* bit 0x80: matches every other kind; & 0x7F: action */
+    /* 0x0 */ u8 condition; /* 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
+    /* 0x1 */ u8 kind; /* the reaction kind it matches */
+    /* 0x2 */ u8 action; /* bit 0x80: matches every other kind; & 0x7F: the action */
     /* 0x3 */ u8 unk3; /* the table entry to use */
 } HitRule;
 

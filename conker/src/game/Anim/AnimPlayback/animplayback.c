@@ -277,7 +277,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         if (((anim->numFrames[0] - 1.0f) <= time) && (anim->frame[0] < (anim->numFrames[0] - 1.0f)) && (anim->callback != NULL)) {
             oldAnimId = anim->frameRom[0];
             if ((obj != NULL) && (obj->mvmt_control & 8)) {
-                obj->unk10C = 0;
+                obj->reactionTimer = 0;
                 obj->events = NULL;
                 anim->speed[0] = 0.0f;
             }
@@ -290,13 +290,13 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
             }
         }
 
-        if ((obj != NULL) && (obj->unk1FD != 0) && ((anim->numFrames[0] - 1.0f) <= time)) {
-            obj->angle += obj->unk1FD << 8;
+        if ((obj != NULL) && (obj->animEndTurn != 0) && ((anim->numFrames[0] - 1.0f) <= time)) {
+            obj->angle += obj->animEndTurn << 8;
             obj->langle = obj->angle;
             obj->fangle = obj->angle;
             anim->frame[0] = anim->start[0];
             if (obj->mvmt_control & 4) {
-                obj->unk21C = 0;
+                obj->scriptTimer = 0;
             }
         } else if ((hold == 0) && (anim->numFrames[0] <= time)) {
             anim->frame[0] = anim->start[0] + (time - anim->numFrames[0]);
@@ -310,7 +310,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
             } else if (anim->frame[0] < (anim->numFrames[0] - 1.0f)) {
                 anim->frame[0] = anim->numFrames[0] - 1.0f;
                 if ((obj != NULL) && (obj->mvmt_control & 4)) {
-                    obj->unk21C = 0;
+                    obj->scriptTimer = 0;
                 }
             } else {
                 anim->frame[0] = anim->start[0];
@@ -320,7 +320,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
                 }
             }
             if ((obj != NULL) && (obj->mvmt_control & 8)) {
-                obj->unk10C = 0;
+                obj->reactionTimer = 0;
                 obj->events = NULL;
                 anim->speed[0] = 0.0f;
             }
@@ -360,7 +360,7 @@ void anim_advanceObjects(s32 onlyType4) {
         if (obj->task_attrib & 0x200) continue;
         if (onlyType4 && (obj->drawtype != 4)) continue;
         if (gCutsceneActorLock && (gCutsceneUpdateUnboundActors[0] == 0) && (cutscene_isActorBound(obj) == 0)) continue;
-        anim = obj->unk2D0;
+        anim = obj->anim;
         if ((anim != NULL) && obj->activeFlags) {
             anim_advance(anim, obj->speedup, obj, onlyType4);
         }
@@ -369,8 +369,8 @@ void anim_advanceObjects(s32 onlyType4) {
 
 /* Copies src's animation time onto dst, clamped to dst's last frame. */
 void anim_copyTime(Actor *dst, Actor *src) {
-    AnimInstance *dstAnim = dst->unk2D0;
-    AnimInstance *srcAnim = src->unk2D0;
+    AnimInstance *dstAnim = dst->anim;
+    AnimInstance *srcAnim = src->anim;
     f32 lastFrame;
 
     if (dstAnim != NULL && srcAnim != NULL) {

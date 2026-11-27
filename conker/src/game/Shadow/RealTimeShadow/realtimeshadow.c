@@ -344,12 +344,12 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
     }
     /* The shadow texture lives in gShadowTexBuffer, 64-byte aligned. */
     gShadowTex = ((s32)gShadowTexBuffer + 0x3F) & ~0x3F;
-    gShadowAlpha = 0xFF - (movement_obj[objIndex].unk1DD[0] >> 1);
+    gShadowAlpha = 0xFF - (movement_obj[objIndex].ambientColor[0] >> 1);
     if (gShadowAlpha > 185.0f) {
         gShadowAlpha = 185.0f;
     }
-    if (movement_obj[objIndex].unkCC < -10.0f) {
-        gShadowAlpha += gShadowAlpha * (movement_obj[objIndex].unkCC + 10.0f) * 0.02f;
+    if (movement_obj[objIndex].heightOffset < -10.0f) {
+        gShadowAlpha += gShadowAlpha * (movement_obj[objIndex].heightOffset + 10.0f) * 0.02f;
         if (gShadowAlpha <= 5.0f) {
             return 0.0f;
         }
@@ -430,7 +430,7 @@ Gfx *shadow_renderSilhouette(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
     gfx = view_setScissor(view_setColorImage(gfx), gCurrentView, 0, 0, 0, 0);
     gfx = view_emitRspSetup(gfx, view);
-    movement_obj[objIndex].unk123 = 1;
+    movement_obj[objIndex].noBlobShadow = 1;
     return gfx;
 }
 

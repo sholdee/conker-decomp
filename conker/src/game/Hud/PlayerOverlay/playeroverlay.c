@@ -1347,7 +1347,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
                 for (k = 0, player = movement_obj; k != 25; k++, player++) {
-                    if (k == i || (k < gPlayerCount && player_getStat(k, 3) > 0) || player->unk328 != 0) {
+                    if (k == i || (k < gPlayerCount && player_getStat(k, 3) > 0) || player->radarColor != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
@@ -1552,8 +1552,8 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 }
                 other = &movement_obj[j];
                 if (other->type != 0) {
-                    if (other->unk328 != 0) {
-                        color = other->unk328 - 1;
+                    if (other->radarColor != 0) {
+                        color = other->radarColor - 1;
                         if (j < gPlayerCount) {
                             if (player_getStat(j, 3) <= 0) {
                                 color = -1;

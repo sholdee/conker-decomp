@@ -22,7 +22,7 @@ void attach_emptyLevelUpdateHook1(s32 arg0) {
 /* Model attachment hook 1 (gAttachHooks[1]). While the actor runs action 13 with anim->unk8 in 23..40,
  * scrolls the texture of the first G_SETTILESIZE command in the display list horizontally. */
 s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor) {
-    AnimInstance *anim = actor->unk2D0;
+    AnimInstance *anim = actor->anim;
     Gfx *list;
     s32 i;
     s32 uls;
@@ -65,7 +65,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
         case 0:
             att->hookState2 = 50;
             att->seg6Id = D_80090298[27];
-            if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame[0]) {
+            if (actor->animseq.uh == 0x18D && 46.0f <= actor->anim->frame[0]) {
                 att->hookState = 1;
                 att->seg6Id = D_80090298[28];
             }
@@ -78,7 +78,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 2:
-            if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame[0]) {
+            if (actor->animseq.uh == 0x18E && 34.0f <= actor->anim->frame[0]) {
                 att->hookState = 3;
             }
             break;

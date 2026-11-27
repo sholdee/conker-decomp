@@ -342,10 +342,10 @@ void anim_pickIdleSequence(void) {
 
     idle = &gCurrentActor->mv->idle;
     count = 0;
-    /* unk139: a requested sequence, unk13A: its countdown */
-    if (gCurrentActor->unk13A != 0) {
-        if (gCurrentActor->unk139 < 0x21) {
-            anim_addIdleCandidate(candidates, &count, gCurrentActor->unk139);
+    /* idleRequest: a requested sequence, idleRequestTimer: its countdown */
+    if (gCurrentActor->idleRequestTimer != 0) {
+        if (gCurrentActor->idleRequest < 0x21) {
+            anim_addIdleCandidate(candidates, &count, gCurrentActor->idleRequest);
         }
     } else if (gIdleRequestFlags & 2) {
         anim_addIdleCandidate(candidates, &count, 3);
@@ -556,7 +556,7 @@ void anim_updateIdle(void) {
         gCurrentActor->nojump = 0;
     }
     gCurrentActor->count5 = 0;
-    gCurrentActor->unkAA = 0;
+    gCurrentActor->speedPercent = 0;
     gCurrentActor->angle = gCurrentActor->langle;
     gCurrentActor->unk100 &= 0xFE;
     gCurrentActor->unk2F8 &= ~7;
@@ -754,7 +754,7 @@ void anim_applyIdleFrameFlags(Actor *actor) {
     if (flags & 0x10) {
         intensity = gMusicEventLevels[gLastMarkerChannel][0];
         if (intensity >= 0.0f) {
-            sound = actor->unk2D0;
+            sound = actor->anim;
             sound->frame[0] = (sound->numFrames[0] * (32768.0f - intensity)) / 32768.0f;
         }
     }
@@ -794,7 +794,7 @@ void anim_applyIdleFrameFlags(Actor *actor) {
     }
 }
 
-/* Per-frame idle bookkeeping for an actor: counts down unk13A, advances the idle timer while
+/* Per-frame idle bookkeeping for an actor: counts down idleRequestTimer, advances the idle timer while
  * idle (resetting the state otherwise), runs the delay, then applies the frame flags. */
 void anim_updateIdleTimer(Actor *actor) {
     IdleState *idle;
@@ -806,10 +806,10 @@ void anim_updateIdleTimer(Actor *actor) {
     if (actor->mv == NULL || actor->playernumber == 0xFF) {
         return;
     }
-    countdown = actor->unk13A;
+    countdown = actor->idleRequestTimer;
     idle = &actor->mv->idle;
     if (countdown != 0) {
-        actor->unk13A = countdown - 1;
+        actor->idleRequestTimer = countdown - 1;
     }
     if (idle->active == TRUE && gCutsceneStates[0] != 1) {
         limit = 0xFFFF - gFrameTicks;

@@ -1385,7 +1385,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
             if (character->type == 0 || character->energy <= 0 || character->playernumber == 0xFF) {
                 continue;
             }
-            if (character->unk300 == 0) {
+            if (character->moved == 0) {
                 continue;
             }
             if ((WORK(obj)->w1511DF6C.filter == 1 && character->team != 0) || (WORK(obj)->w1511DF6C.filter == 2 && character->team == 0) || (WORK(obj)->w1511DF6C.filter == 3 && (character->team & 1))) {

@@ -64,7 +64,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
 void func_150E0BE0(Actor *obj) {
     s32 counter;
 
-    obj->unkB0 = 15;
+    obj->floatDepth = 15;
     obj->count2 = 10;
 
     if (obj->unk87 != 0) {

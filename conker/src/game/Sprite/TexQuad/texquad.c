@@ -207,15 +207,15 @@ void sprite_resetActorTrackers(void) {
 }
 
 /*
- * Gets an actor's collision bounds: for actor ids below 0xBB, radius unkD2, *arg3 unkD4 and a centre
- * raised by unkD6; for other ids, 1.0 and 1.0 at the actor's position.
+ * Gets an actor's collision bounds: for actor ids below 0xBB, radius hitRadius, *arg3 hitHeight and a centre
+ * raised by hitOffsetY; for other ids, 1.0 and 1.0 at the actor's position.
  */
 void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     if ((actor->character_type < 0xBB) && (actor->character_type != 0xFF)) {
-        *radius = actor->unkD2;
-        *arg3 = actor->unkD4;
+        *radius = actor->hitRadius;
+        *arg3 = actor->hitHeight;
         center->x = actor->xpos;
-        center->y = actor->ypos + actor->unkD6;
+        center->y = actor->ypos + actor->hitOffsetY;
         center->z = actor->zpos;
     } else {
         *radius = 1.0f;

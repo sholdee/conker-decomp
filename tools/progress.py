@@ -5,7 +5,7 @@
 
 Reads tools/accounting.tsv (every function: size, origin, object) and conker/conker.us.yaml (every data
 slice). No ROM and no build are needed. Writes into OUTDIR:
-  progress.json          the figures
+  progress.json          the figures (code, function names, field names, data names, data in source)
   treemap.svg            one rectangle per source file, sized by its code bytes, grouped by segment and
                          area, coloured by how it matches (C or hand-written asm)
   badge-*.svg            code matched, fully linked, functions named, data in source
@@ -102,6 +102,154 @@ def data_figures():
             "data_asm_bytes": out["asm"], "data_asset_bytes": out["asset"], "data_padding_bytes": out["padding"]}
 
 
+# ---------------------------------------------------------------- names of fields and data
+# an unnamed field: unk, unk_1C, unk1C, unknown, unk1CRange (a guess on top of an offset is still unknown)
+UNK_FIELD = re.compile(r"^unk(?:nown)?(?:_?[0-9A-Fa-f]|$|_?$)")
+PAD_FIELD = re.compile(r"^pad")
+
+
+def strip_c(text):
+    """The text with comments, strings and character constants blanked, and continued lines joined."""
+    text = re.sub(r"(\\|\?\?/)\r?\n", "", text)
+    text = re.sub(r"^[ \t]*#.*$", "", text, flags=re.M)  # preprocessor lines
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            out.append(" " + "\n" * text.count("\n", i, j))
+            i = j
+        elif text.startswith("//", i):
+            j = text.find("\n", i)
+            i = n if j < 0 else j
+        elif text[i] in "\"'":
+            q, j = text[i], i + 1
+            while j < n and text[j] != q and text[j] != "\n":
+                j += 2 if text[j] == "\\" else 1
+            out.append(q + q)
+            i = j + 1
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
+
+
+TAG_ONLY = re.compile(r"^\s*(?:(?:static|const|volatile|typedef)\s+)*(?:struct|union|enum)\s+\w+\s*$")
+
+
+def declarator_names(stmt):
+    """The names that a declaration statement (without its ';') declares, at its top level. A struct,
+    union or enum definition without a declarator (`struct Tag { ... };`) declares none."""
+    if TAG_ONLY.match(stmt):
+        return []
+    depth, parts, cur = 0, [], []
+    for c in stmt:
+        if c in "([{":
+            depth += 1
+        elif c in ")]}":
+            depth -= 1
+        if c == "," and depth == 0:
+            parts.append("".join(cur))
+            cur = []
+        else:
+            cur.append(c)
+    parts.append("".join(cur))
+    names = []
+    for part in parts:
+        part = part.split("=", 1)[0]
+        m = re.search(r"\(\s*\*+\s*(\w+)\s*(?:\[[^\]]*\]\s*)*\)", part)  # (*name)(...) or (*name[4])(...)
+        if m:
+            names.append(m.group(1))
+            continue
+        part = re.sub(r"\[[^\]]*\]", "", part.split(":", 1)[0])
+        ids = re.findall(r"[A-Za-z_]\w*", part)
+        if ids:
+            names.append(ids[-1])
+    return names
+
+
+def statements(text):
+    """(kind of the innermost block, statement) for each ';'-terminated statement of C text, where the kind
+    is 'file', 'aggregate' (a struct or union body), 'enum' or 'other' (a function body or initializer).
+    A statement after a struct body (`} name;`) keeps the head before the body (`typedef struct X`), and the
+    parameter declarations of a K&R definition are not file-level statements."""
+    stack, out, start, prefix, kr = [("file", "")], [], 0, "", []
+    for i, c in enumerate(text):
+        if c == "{":
+            head = prefix + text[start:i]
+            outer = stack[-1][0]
+            kind = ("other" if outer in ("enum", "other") or (outer == "file" and "=" in head) else
+                    "aggregate" if re.search(r"\b(struct|union)\b[^;{}()]*$", head) else
+                    "enum" if re.search(r"\benum\b[^;{}()]*$", head) else "other")
+            if outer == "file" and kind == "other" and kr:
+                out = out[:len(out) - len(kr)]  # the K&R parameter declarations of this function
+            kr = []
+            stack.append((kind, head))
+            start, prefix = i + 1, ""
+        elif c == "}":
+            kind, head = stack.pop() if len(stack) > 1 else ("file", "")
+            start, prefix = i + 1, (re.sub(r"\{.*", "", head, flags=re.S) + " " if kind == "aggregate" else "")
+        elif c == ";":
+            stmt = prefix + text[start:i]
+            out.append((stack[-1][0], stmt))
+            if stack[-1][0] == "file" and (kr or re.search(r"\)\s*[A-Za-z_]", stmt)):
+                kr.append(stmt)  # declarator `f(a, b)` followed by a type: a K&R parameter list
+            start, prefix = i + 1, ""
+    return out
+
+
+def field_figures():
+    """Members of the game's structs and unions (the SDK headers excluded). A field named pad* that no
+    source file uses is padding and is not counted."""
+    inc = REPO / "conker" / "include"
+    headers = [inc / "structs.h", inc / "effects.h"] + sorted((inc / "conker").glob("*.h"))
+    fields = []
+    for h in headers:
+        for kind, stmt in statements(strip_c(h.read_text())):
+            if kind == "aggregate" and not stmt.lstrip().startswith("#"):
+                fields += declarator_names(stmt)
+    used = set()
+    for p in (REPO / "conker" / "src").rglob("*"):
+        if p.suffix in (".c", ".h"):
+            used |= set(re.findall(r"(?:\.|->)\s*(pad\w*)", strip_c(p.read_text(errors="replace"))))
+    counted = [f for f in fields if not (PAD_FIELD.match(f) and f not in used)]
+    named = sum(1 for f in counted if not UNK_FIELD.match(f))
+    return {"fields": len(counted), "fields_named": named}
+
+
+def data_symbols():
+    """{source file: [data symbols it defines]}: file-scope variables of the C files and the labels in the
+    .data, .rodata and .bss sections of the hand-written .s files (the extracted assets are not source)."""
+    out = {}
+    src = REPO / "conker" / "src"
+    for p in sorted(src.rglob("*")):
+        rel = str(p.relative_to(src)).rsplit(".", 1)[0]
+        if p.suffix == ".c":
+            names = []
+            for kind, stmt in statements(strip_c(p.read_text(errors="replace"))):
+                s = stmt.strip()
+                if kind != "file" or not s or s.startswith("#") or re.match(r"(typedef|extern)\b", s):
+                    continue
+                s = s.split("=", 1)[0]
+                if re.search(r"\b\w+\s*\((?!\s*\*)", s):  # a function prototype, not a pointer to one
+                    continue
+                names += [n for n in declarator_names(s) if n not in ("struct", "union", "enum")]
+            if names:
+                out[rel] = names
+        elif p.suffix == ".s":
+            section, names = None, []
+            for line in p.read_text(errors="replace").splitlines():
+                m = re.match(r"\s*\.section\s+(\.\w+)", line)
+                if m:
+                    section = m.group(1)
+                m = re.match(r"\s*glabel\s+(\w+)", line)
+                if m and section in (".data", ".rodata", ".bss"):
+                    names.append(m.group(1))
+            if names:
+                out[rel] = names
+    return out
+
+
 # ---------------------------------------------------------------- treemap
 def squarify(items, x, y, w, h):
     """items: [(value, payload)] sorted descending. Returns [(x, y, w, h, payload)]."""
@@ -143,15 +291,16 @@ def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def treemap(rows, figures, width=1200, height=720):
+def treemap(rows, figures, syms=None, width=1200, height=720):
     files = {}
     for name, size, seg, origin, obj in rows:
         if origin not in ("c", "hasm"):
             continue
         path = re.sub(r"^build/src/|\.[cs]\.o$", "", obj)
-        f = files.setdefault(path, {"bytes": 0, "origin": origin, "funcs": 0})
+        f = files.setdefault(path, {"bytes": 0, "origin": origin, "funcs": 0, "named": 0})
         f["bytes"] += size
         f["funcs"] += 1
+        f["named"] += not ADDR_NAME.match(name)
 
     def group(path):
         parts = path.split("/")
@@ -160,6 +309,12 @@ def treemap(rows, figures, width=1200, height=720):
         if parts[0] == "libultra":
             return "libultra"
         return f"{parts[0]}" if len(parts) > 1 else "address-named files"
+
+    def data_note(path):
+        ds = (syms or {}).get(path)
+        if not ds:
+            return ""
+        return f', {len(ds)} data symbols ({sum(1 for n in ds if not ADDR_NAME.match(n))} named)'
 
     groups = {}
     for p, f in files.items():
@@ -186,7 +341,7 @@ def treemap(rows, figures, width=1200, height=720):
                                                   gx + 1, gy + pad, gw - 2, gh - pad - 1):
             svg.append(f'<rect x="{fx:.1f}" y="{fy:.1f}" width="{max(fw - 1, 0):.1f}" height="{max(fh - 1, 0):.1f}" '
                        f'fill="{COLOURS[f["origin"]]}"><title>{esc(path)}: {f["bytes"]:,} bytes, '
-                       f'{f["funcs"]} functions</title></rect>')
+                       f'{f["funcs"]} functions ({f["named"]} named){data_note(path)}</title></rect>')
             label = path.split("/")[-1]
             if fw > 7 * len(label) + 6 and fh > 14:
                 svg.append(f'<text x="{fx + 3:.1f}" y="{fy + 11:.1f}" font-size="9" fill="#0d1117">{esc(label)}</text>')
@@ -226,13 +381,19 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     rows, code = code_figures()
     data = data_figures()
-    fig = {**code, **data, "linked": a.linked == "yes"}
+    syms = data_symbols()
+    names = [n for ns in syms.values() for n in ns]
+    fig = {**code, **data, **field_figures(), "data_symbols": len(names),
+           "data_symbols_named": sum(1 for n in names if not ADDR_NAME.match(n)), "linked": a.linked == "yes"}
     fig["matched_pct"] = round(100 * code["matched_bytes"] / code["code_bytes"], 2)
     fig["named_pct"] = round(100 * code["functions_named"] / code["functions"], 1)
+    fig["fields_named_pct"] = round(100 * fig["fields_named"] / fig["fields"], 1) if fig["fields"] else 100.0
+    fig["data_named_pct"] = (round(100 * fig["data_symbols_named"] / fig["data_symbols"], 1)
+                             if fig["data_symbols"] else 100.0)
     denom = data["data_in_source_bytes"] + data["data_asm_bytes"]
     fig["data_in_source_pct"] = round(100 * data["data_in_source_bytes"] / denom, 1) if denom else 100.0
     (out / "progress.json").write_text(json.dumps(fig, indent=2) + "\n")
-    (out / "treemap.svg").write_text(treemap(rows, code))
+    (out / "treemap.svg").write_text(treemap(rows, code, syms))
     m = fig["matched_pct"]
     (out / "badge-matched.svg").write_text(badge("code matched", f"{m:g}%", pct_colour(m)))
     (out / "badge-linked.svg").write_text(badge("fully linked", "yes" if fig["linked"] else "no",
@@ -241,7 +402,8 @@ def main():
     (out / "badge-named.svg").write_text(badge("functions named", f"{n:g}%", pct_colour(n)))
     d = fig["data_in_source_pct"]
     (out / "badge-data.svg").write_text(badge("data in source (excl. assets)", f"{d:g}%", pct_colour(d)))
-    print(json.dumps({k: fig[k] for k in ("matched_pct", "named_pct", "data_in_source_pct", "linked")}))
+    print(json.dumps({k: fig[k] for k in ("matched_pct", "named_pct", "fields_named_pct", "data_named_pct",
+                                          "data_in_source_pct", "linked")}))
 
 
 if __name__ == "__main__":

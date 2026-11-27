@@ -884,8 +884,8 @@ void func_151DF1BC(void) {
                 gCurrentActor = obj;
                 dc_glbl_CharNum = gCurrentActor - movement_obj;
                 obj->scriptCmd = script_getScript(0, obj->intelwalk);
-                obj->unk21C = 0;
-                obj->unk201 = 0x14;
+                obj->scriptTimer = 0;
+                obj->levelRange = 0x14;
             }
             gMenuPendingPage = -1;
         }
@@ -4352,7 +4352,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
             bzero(obj->mv, 0x1C0);
         }
         if (kind == 0x3B) {
-            obj->unk68[0] = slotIdx + 1;
+            obj->swapTexture[0] = slotIdx + 1;
         }
         func_15083384(obj, gMenuCharacterTypes[charIdx].unk6);
         actor_playAnim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);

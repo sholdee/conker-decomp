@@ -20,6 +20,6 @@ void actor_clearAll(void) {
     }
     gActionsPending = 0;
     bzero(&D_800CC298, 24);
-    D_800CC298.unkA = 1;
+    D_800CC298.sweepStep = 1;
     gExpressionTarget = 0;
 }

@@ -235,7 +235,7 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     if (obj->mv != NULL) {
         actor_computeSize(obj, &obj->mv->height, &obj->mv->width, &obj->mv->depth);
     }
-    obj->unk1CC = obj->ypos;
+    obj->fallStartY = obj->ypos;
     obj->unk2F8 &= ~0x10;
     obj->unk22C |= 0x200;
     obj->ob_slopex = 0.0f;

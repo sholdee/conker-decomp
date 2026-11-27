@@ -2,8 +2,8 @@
 
 /* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
 u16 gEliminatedPlayers;
-u16 D_800D18A2;
-u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+u16 gTakeoverPlayers;
+u8 gEliminatedSquareSizes[4]; // per player: half-size of the square, minus 4
 u8 gRespawnPending;
 u8 gLastDeathKind;
 
@@ -32,10 +32,10 @@ u8 gLastDeathKind;
 #include "conker/trail.h"
 #include "conker/view.h"
 
-/* Puts obj into state 2 with the given timer. */
-void actor_startDeathCountdown(Actor *obj, s32 timer) {
-    obj->mv->death_State = 2;
-    obj->mv->deathTimer = timer;
+/* Puts actor into state 2 with the given timer. */
+void actor_startDeathCountdown(Actor *actor, s32 timer) {
+    actor->mv->death_State = 2;
+    actor->mv->deathTimer = timer;
 }
 
 /* Per-frame update of every active player's state machine. */
@@ -60,7 +60,7 @@ void actor_updatePlayerStates(void) {
                 continue;
             }
             if (i <= gScreenLayout) {
-                if (gIsMultiplayer != 0 && (D_800D18A2 & (1 << i))) {
+                if (gIsMultiplayer != 0 && (gTakeoverPlayers & (1 << i))) {
                     player->mv->death_State = 2;
                     player->mv->deathTimer = 60;
                 }
@@ -128,19 +128,19 @@ void actor_updatePlayerStates(void) {
     }
 }
 
-/* Puts obj into state 3 and, for a local player slot, calls screen_closeIris on it. */
-void actor_closeDeathIris(Actor *obj) {
-    s32 slot = obj - movement_obj;
+/* Puts actor into state 3 and, for a local player slot, calls screen_closeIris on it. */
+void actor_closeDeathIris(Actor *actor) {
+    s32 slot = actor - movement_obj;
 
-    obj->mv->death_State = 3;
+    actor->mv->death_State = 3;
 
     if (slot <= gScreenLayout) {
         screen_closeIris(slot);
     }
 }
 
-/* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
-void actor_kill(Actor *obj, s32 cause) {
+/* Kills actor with the given cause: plays its sound, resets movement and moves it to a dead state. */
+void actor_kill(Actor *actor, s32 cause) {
     f32 f;
     s32 sound;
     u32 r;
@@ -151,39 +151,39 @@ void actor_kill(Actor *obj, s32 cause) {
     s32 again;
     s32 flag;
 
-    if (obj->mv == NULL) {
+    if (actor->mv == NULL) {
         return;
     }
-    slot = obj - movement_obj;
+    slot = actor - movement_obj;
     if (slot >= gPlayerCount) {
         return;
     }
-    if (obj->mv->death_State != 0) {
-        if (cause != 9 || cause == obj->mv->unk121) {
+    if (actor->mv->death_State != 0) {
+        if (cause != 9 || cause == actor->mv->unk121) {
             return;
         }
         again = TRUE;
     } else {
         again = FALSE;
     }
-    obj->mv->unk121 = cause;
+    actor->mv->unk121 = cause;
     if (gIsMultiplayer != 0 && !again) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
-        if ((gMatchFlags & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
+        if ((gMatchFlags & 0x20) && actor->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
             player_setStat(1, 10, 1);
         }
     }
-    msg.actor = obj;
-    msg.uniqueId = obj->unique_id;
+    msg.actor = actor;
+    msg.uniqueId = actor->unique_id;
     effect_broadcastEvent((s32)&msg, 3);
     gLastDeathKind = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;
     flag = 0;
     mode = 0;
-    if (obj->mv->on_fire) {
+    if (actor->mv->on_fire) {
         gLastDeathKind = 2;
     }
     switch (cause) {
@@ -219,8 +219,8 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         gLastDeathKind = 3;
         break;
     case 6:
-        if (obj->type == 1 || obj->type == 0x15 || obj->drawtype == 3 ||
-            obj->attach_char != 0) {
+        if (actor->type == 1 || actor->type == 0x15 || actor->drawtype == 3 ||
+            actor->attach_char != 0) {
             sound = 0x170;
         }
         mode = 1;
@@ -259,30 +259,30 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         break;
     }
     if (sound != -1) {
-        actor_playAnim(obj, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
+        actor_playAnim(actor, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
     }
-    obj->energy = 0;
-    obj->imune = 0xFF;
-    obj->stunned = 0xFF;
-    obj->norun = 0xFF;
-    obj->noshove |= 0x200;
-    obj->bodyRadius = 0;
-    obj->bodyHeight = 0;
-    obj->speed = 0.0f;
-    obj->mv->bitten = 0;
-    if (obj->lifting != 0) {
+    actor->energy = 0;
+    actor->imune = 0xFF;
+    actor->stunned = 0xFF;
+    actor->norun = 0xFF;
+    actor->noshove |= 0x200;
+    actor->bodyRadius = 0;
+    actor->bodyHeight = 0;
+    actor->speed = 0.0f;
+    actor->mv->bitten = 0;
+    if (actor->lifting != 0) {
         saved = gCurrentActor;
-        gCurrentActor = obj;
-        actor_dropLiftedObject(obj);
+        gCurrentActor = actor;
+        actor_dropLiftedObject(actor);
         gCurrentActor = saved;
     }
     if (mode == 0 || mode == 3) {
-        obj->mv->death_State = 1;
+        actor->mv->death_State = 1;
     } else {
-        actor_startDeathCountdown(obj, 0);
+        actor_startDeathCountdown(actor, 0);
     }
     if (mode == 2) {
-        obj->mv->death_State = 11;
+        actor->mv->death_State = 11;
     } else if (mode == 3) {
         actor_finishDeath(slot);
     }
@@ -293,15 +293,15 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     }
 }
 
-/* Forwards four arguments to script_command(3, ...) keyed by object slot's unk13F | 0x2000. */
-void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* Sends script command listpos | 0x2000 of actor `slot` with argument `arg` and three extra words (script_command). */
+void func_1507D158(s32 slot, s32 arg, s32 extra0, s32 extra1, s32 extra2) {
     s32 value = movement_obj[slot].listpos;
 
-    script_command(3, value | 0x2000, arg1, arg2, arg3, arg4);
+    script_command(3, value | 0x2000, arg, extra0, extra1, extra2);
 }
 
-/* Re-initialises obj through actor_remove/collision_spawnObject (health back to gDefaultHealth), keeping a few state bytes. */
-void actor_respawn(Actor *obj) {
+/* Re-initialises actor through actor_remove/collision_spawnObject (health back to gDefaultHealth), keeping a few state bytes. */
+void actor_respawn(Actor *actor) {
     s32 value;
     s32 saved1AA;
     s8 player;
@@ -311,17 +311,17 @@ void actor_respawn(Actor *obj) {
     s32 choice;
     s32 slot;
 
-    saved1AA = obj->mv->shotsfired;
-    saved1B0 = obj->mv->lastSpawnIndex;
-    saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
-    saved1AF = obj->mv->unk1AF;
+    saved1AA = actor->mv->shotsfired;
+    saved1B0 = actor->mv->lastSpawnIndex;
+    saved328 = actor->radarColor;
+    saved1AF = actor->mv->unk1AF;
     if (gIsMultiplayer != 0) {
-        player = obj->mv->spawnIndex;
+        player = actor->mv->spawnIndex;
     } else {
         player = -1;
     }
     if (level == LEVEL_WMP_BEACH) {
-        slot = obj - movement_obj;
+        slot = actor - movement_obj;
         value = player_getStat(slot, 1);
         if (value >= 0x11 && value < 0x21) {
             choice = (math_random() & 0xF) + 0x11;
@@ -333,48 +333,48 @@ void actor_respawn(Actor *obj) {
             }
         }
     }
-    slot = obj - movement_obj;
-    actor_remove(obj, 0);
+    slot = actor - movement_obj;
+    actor_remove(actor, 0);
     gRespawnPending = 1;
     collision_spawnObject(&gSpawnRecords[slot], slot, 0, 0, 0);
-    obj->mv->lastSpawnIndex = saved1B0;
-    obj->mv->unk1AF = saved1AF;
-    obj->unk328 = saved328;
+    actor->mv->lastSpawnIndex = saved1B0;
+    actor->mv->unk1AF = saved1AF;
+    actor->radarColor = saved328;
     if (gScreenLayout >= slot) {
         camera_resetView(&camera_global_Cameras[slot], slot, level, player);
         screen_openIris(slot);
         screen_startViewFade(0, 0, 0, 0, 1, slot);
         screen_startViewFade(0, 0, 0, 30, 0, slot);
     } else {
-        player_moveToSpawn(obj, player, 0);
+        player_moveToSpawn(actor, player, 0);
     }
     gRespawnPending = 0;
-    obj->mv->death_State = 0;
-    obj->mv->respawnReady = FALSE;
-    obj->mv->deathTimer = 0;
-    obj->mv->shotsfired = saved1AA;
-    obj->energy = gDefaultHealth;
-    obj->unk22C |= 0x100;
-    obj->mv->context_b = 0;
-    obj->unk20F = 0xFF;
-    obj->unk210 = 0xFF;
-    obj->unk211 = 0xFF;
-    obj->intelwalk = 1;
-    obj->scriptCmd = NULL;
-    obj->mv->spawnIndex = player;
+    actor->mv->death_State = 0;
+    actor->mv->respawnReady = FALSE;
+    actor->mv->deathTimer = 0;
+    actor->mv->shotsfired = saved1AA;
+    actor->energy = gDefaultHealth;
+    actor->unk22C |= 0x100;
+    actor->mv->context_b = 0;
+    actor->pathNode = 0xFF;
+    actor->prevPathNode = 0xFF;
+    actor->pathGoal = 0xFF;
+    actor->intelwalk = 1;
+    actor->scriptCmd = NULL;
+    actor->mv->spawnIndex = player;
     if (gIsMultiplayer != 0) {
-        obj->imune = 150;
-        obj->mv->unk1B1 = obj->imune;
+        actor->imune = 150;
+        actor->mv->unk1B1 = actor->imune;
         if (level == LEVEL_WMP_VOLCANO_RACE) {
             func_1507D158(slot, 120, 0, 0, 0);
-            mp_placeAtStart(obj);
+            mp_placeAtStart(actor);
         }
     }
 }
 
 /* Ends slot's current run: re-initialises it if player_getStat(slot, 3) allows, else retires it (state 10). */
 void actor_finishDeath(s32 slot) {
-    Actor *obj;
+    Actor *actor;
     ActorCtl *state;
 
     if (!(gMatchFlags & 1)) {
@@ -383,15 +383,15 @@ void actor_finishDeath(s32 slot) {
 
     if (player_getStat(slot, 3) != 0) {
         player_setStat(slot, 5, gDefaultHealth);
-        obj = &movement_obj[slot];
-        obj->underwaterTime = 0;
+        actor = &movement_obj[slot];
+        actor->underwaterTime = 0;
 
         if (gIsMultiplayer != 0) {
             if (gMatchResult == 0) {
-                actor_respawn(obj);
+                actor_respawn(actor);
                 return;
             }
-            obj->mv->death_State = 10;
+            actor->mv->death_State = 10;
             return;
         }
 
@@ -415,96 +415,96 @@ void actor_finishDeath(s32 slot) {
         gEliminatedPlayers |= 1 << slot;
     }
 
-    obj = &movement_obj[slot];
-    state = obj->mv;
+    actor = &movement_obj[slot];
+    state = actor->mv;
     if (state->bot == 0) {
         // matching: the volatile store and load make IDO reload mv after the decrement, as the original does
         *(volatile s8 *)&gHumansRemaining = gHumansRemaining - 1;
-        state = *(ActorCtl *volatile *)&obj->mv;
+        state = *(ActorCtl *volatile *)&actor->mv;
     }
     state->death_State = 10;
     D_800BE618--;
 }
 
 
-/* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
-/* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
-s32 actor_runDeathEffect(Actor *obj) {
+/* Death handler: dispatches on actor->id; returns 1 or 2 when the object was handled specially, else 0. */
+/* Runs the per-id handler for actor (mostly id handler(actor, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
+s32 actor_runDeathEffect(Actor *actor) {
     WorldObject *spawned;
     void *handle;
 
-    switch (obj->character_type) {
+    switch (actor->character_type) {
     case 0x7F:
-        particle_spawnObjDebrisBurst(obj, 0xFF, 1);
+        particle_spawnObjDebrisBurst(actor, 0xFF, 1);
         break;
     case 0x10:
     case 0x38:
     case 0x91:
-        func_150BFFE0(obj);
+        func_150BFFE0(actor);
         break;
     case 0x3A:
     case 0x3D:
-        attach_spawnFootImpact(obj);
+        attach_spawnFootImpact(actor);
         break;
     case 0x4A:
-        beam_spawnActorExplosion(obj, 0xFF, 1);
+        beam_spawnActorExplosion(actor, 0xFF, 1);
         break;
     case 0x47:
-        sight_explodeAtActor(obj, 0xFF, 1);
+        sight_explodeAtActor(actor, 0xFF, 1);
         break;
     case 0x25:
-        if (obj->taskint[2] != 0 || level == LEVEL_THE_WINDMILL || level == LEVEL_W1_WINDMILL_EXPLODED) {
-            trail_breakApart(obj, 0xFF, 1);
+        if (actor->taskint[2] != 0 || level == LEVEL_THE_WINDMILL || level == LEVEL_W1_WINDMILL_EXPLODED) {
+            trail_breakApart(actor, 0xFF, 1);
         }
         return 0;
     case 0x79:
-        func_150BE494(obj, 0xFF, 1);
+        func_150BE494(actor, 0xFF, 1);
         break;
     case 0x05:
     case 0xAD:
     case 0xAE:
     case 0xAF:
-        obj->unk328 = 0;
-        actor_breakIntoParts(obj, 0);
-        effect_spawnAttachedBursts(obj);
+        actor->radarColor = 0;
+        actor_breakIntoParts(actor, 0);
+        effect_spawnAttachedBursts(actor);
         return 1;
     case 0x53:
         if (gIsMultiplayer != 0) {
-            actor_kill(obj, 10);
+            actor_kill(actor, 10);
             return 2;
         }
         break;
     case 0x90:
         if (gIsMultiplayer != 0 && level == LEVEL_WMP_VOLCANO_RACE) {
-            actor_kill(obj, 8);
+            actor_kill(actor, 8);
             return 2;
         }
         break;
     case 0x28:
     case 0x77:
         spawned = NULL;
-        effect_spawnTankExplosion(obj, 0xFF, 1);
-        func_15145A50(obj);
+        effect_spawnTankExplosion(actor, 0xFF, 1);
+        func_15145A50(actor);
         if (gIsMultiplayer != 0) {
-            actor_kill(obj, 6);
-            spawned = gfx_findObjectById((obj->playernumber + 11));
+            actor_kill(actor, 6);
+            spawned = gfx_findObjectById((actor->playernumber + 11));
         } else {
             if (level == LEVEL_W2_WARBOSS) {
                 spawned = gfx_findObjectById(1);
             }
-            handle = event_getFirstLiveOwnedObject(obj);
+            handle = event_getFirstLiveOwnedObject(actor);
             if (handle != NULL && gCutsceneStates[0] != 1) {
                 blood_spawnHitEffects(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
         if (spawned != NULL) {
             spawned->inactive = 0;
-            spawned->x = obj->xpos;
-            spawned->y = obj->ypos;
-            spawned->z = obj->zpos;
-            spawned->t = obj->vtilt;
-            spawned->u = obj->theta;
-            spawned->v = obj->lean_angle;
+            spawned->x = actor->xpos;
+            spawned->y = actor->ypos;
+            spawned->z = actor->zpos;
+            spawned->t = actor->vtilt;
+            spawned->u = actor->theta;
+            spawned->v = actor->lean_angle;
             spawned->alpha = 0xFF;
             spawned->touch.i.a = 0;
             spawned->touch.i.b = 0;
@@ -515,24 +515,24 @@ s32 actor_runDeathEffect(Actor *obj) {
         }
         break;
     case 0x0D:
-        effect_spawnBreakUp(obj, 0xFF, 1);
+        effect_spawnBreakUp(actor, 0xFF, 1);
         break;
     case 0x20:
-        if (obj->yspd < -20.0f) {
-            func_150BC488(obj);
+        if (actor->yspd < -20.0f) {
+            func_150BC488(actor);
         } else {
-            func_150BBB5C(obj);
+            func_150BBB5C(actor);
         }
         break;
     case 0x4F:
     case 0x83:
-        func_151A6C90(obj, 0xFF, 1);
+        func_151A6C90(actor, 0xFF, 1);
         break;
     case 0x34:
-        func_150E0870(obj, 0xFF, 1);
+        func_150E0870(actor, 0xFF, 1);
         break;
     case 0x44:
-        effect_spawnDeathDebrisBurst(obj, 0xFF, 1);
+        effect_spawnDeathDebrisBurst(actor, 0xFF, 1);
         break;
     }
     return 0;
@@ -544,15 +544,15 @@ void func_1507DB34(void) {
 void func_1507DB3C(void) {
 }
 
-void actor_breakIntoParts(Actor *obj, s32 arg1) {
-    model_breakIntoParts(obj, arg1, -1);
+void actor_breakIntoParts(Actor *actor, s32 kind) {
+    model_breakIntoParts(actor, kind, -1);
 }
 
 void func_1507DB64(void) {
 }
 
 /* Sets up the textured square of func_1507DB6C. */
-static Gfx D_80086B80[] = {
+static Gfx gEliminatedSquareDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
@@ -561,7 +561,7 @@ static Gfx D_80086B80[] = {
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the
- * player's D_800D18A2 bit is set the square shrinks each frame and, once gone, the bit is cleared; otherwise it
+ * player's gTakeoverPlayers bit is set the square shrinks each frame and, once gone, the bit is cleared; otherwise it
  * grows back to its full size.
  */
 Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
@@ -571,7 +571,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     s32 right, left, bottom, top;
     s32 scale;
 
-    gSPDisplayList(gfx++, D_80086B80);
+    gSPDisplayList(gfx++, gEliminatedSquareDl);
     texture = texture_getAddress((s32)&D_D0F, NULL, 3, 0);
     gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, texture);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
@@ -584,22 +584,22 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
                     0xF /* blend mask bits */ | G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE |
                         G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE,
                     G_AC_NONE | G_ZS_PRIM | G_RM_OPA_SURF | G_RM_OPA_SURF2);
-    if (D_800D18A2 & (1 << player)) {
-        if (D_800D18A4[player] >= 4) {
-            D_800D18A4[player] -= 4;
+    if (gTakeoverPlayers & (1 << player)) {
+        if (gEliminatedSquareSizes[player] >= 4) {
+            gEliminatedSquareSizes[player] -= 4;
         } else {
-            D_800D18A2 &= ~(1 << player);
+            gTakeoverPlayers &= ~(1 << player);
             screen_openIris(player);
             screen_startViewFade(0, 0, 0, 120, 0, player);
             return gfx;
         }
     } else {
-        D_800D18A4[player] += 4;
-        if (D_800D18A4[player] > 60) {
-            D_800D18A4[player] = 60;
+        gEliminatedSquareSizes[player] += 4;
+        if (gEliminatedSquareSizes[player] > 60) {
+            gEliminatedSquareSizes[player] = 60;
         }
     }
-    size = D_800D18A4[player] + 4;
+    size = gEliminatedSquareSizes[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
     view = &((RenderView *)gViews)[player]; // matching: the no-op cast changes the code
     left = right = (s32)(view->right + view->left) * 2;
@@ -614,56 +614,56 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
 }
 
 
-/* Sets bits in obj->unk9C (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
-void actor_applyHeadShot(Actor *obj) {
-    if (obj->type == 1) {
-        collision_removePartSet(obj, 0x44);
-        collision_removePartSet(obj, 0x23);
-        obj->unk9C |= 0xF000;
-        collision_removePartSet(obj, 0x44);
-        collision_removePartSet(obj, 0x23);
+/* Sets bits in actor->hiddenBones (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
+void actor_applyHeadShot(Actor *actor) {
+    if (actor->type == 1) {
+        collision_removePartSet(actor, 0x44);
+        collision_removePartSet(actor, 0x23);
+        actor->hiddenBones |= 0xF000;
+        collision_removePartSet(actor, 0x44);
+        collision_removePartSet(actor, 0x23);
         return;
     }
 
-    switch (obj->character_type) {
+    switch (actor->character_type) {
     case 0x9F:
     case 0xA0:
-        obj->unk9C |= 0xF000;
+        actor->hiddenBones |= 0xF000;
         break;
     case 0x5A:
     case 0x74:
     case 0x7A:
-        obj->unk9C |= 0xFF8;
+        actor->hiddenBones |= 0xFF8;
         break;
     }
 }
 
-/* Sets obj's unk94/unk9C flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
-void actor_applyPartHit(Actor *obj, s32 part) {
+/* Sets actor's hiddenParts/hiddenBones flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
+void actor_applyPartHit(Actor *actor, s32 part) {
     switch (part) {
     case 9:
-        obj->unk94 |= 0x20;
-        obj->unk9C |= 0x78;
-        obj->taskint[0] = 1;
+        actor->hiddenParts |= 0x20;
+        actor->hiddenBones |= 0x78;
+        actor->taskint[0] = 1;
         return;
     case 8:
-        obj->unk94 |= 0x40;
-        obj->unk94 &= ~0x200;
-        obj->unk9C |= 0xF00;
-        obj->taskint[0] = 2;
+        actor->hiddenParts |= 0x40;
+        actor->hiddenParts &= ~0x200;
+        actor->hiddenBones |= 0xF00;
+        actor->taskint[0] = 2;
         return;
     case 6:
     case 7:
-        obj->unk94 |= 0xE;
-        obj->unk94 &= ~0x410;
-        obj->unk9C |= 0xEE0000;
-        obj->taskint[0] = 4;
+        actor->hiddenParts |= 0xE;
+        actor->hiddenParts &= ~0x410;
+        actor->hiddenBones |= 0xEE0000;
+        actor->taskint[0] = 4;
         return;
     case 4:
     case 5:
-        obj->unk94 |= 0x80;
-        obj->unk94 &= ~0x500;
-        obj->taskint[0] = 8;
+        actor->hiddenParts |= 0x80;
+        actor->hiddenParts &= ~0x500;
+        actor->taskint[0] = 8;
         return;
     }
 }
@@ -672,17 +672,17 @@ void actor_applyPartHit(Actor *obj, s32 part) {
 void actor_startSpawnCutscene(s32 resource, s32 arg1) {
     s32 savedLevel;
     s16 pos[3];
-    Vec3f vec;
-    u8 unk4F;
+    Vec3f cameraEye;
+    u8 tilt;
     u8 angle;
-    s32 unk48;
-    s32 unk44;
+    s32 doorWalkTime;
+    s32 unk14;
     f32 yaw;
     s32 kind;
     s32 type;
 
     if (gCutsceneStates[0] != 1) {
-        player_getSpawnPoint(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
+        player_getSpawnPoint(0, resource, 1, pos, &cameraEye, &tilt, &angle, &unk14, &doorWalkTime, 1, &type);
         yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
             kind = 1;
@@ -705,11 +705,11 @@ void actor_startSpawnCutscene(s32 resource, s32 arg1) {
 s32 actor_resumeAtCheckpoint(s32 *arg0) {
     s32 type;
     s16 pos[3];
-    Vec3f vec;
-    s32 unk44;
-    u8 unk43;
-    u8 unk42;
-    s32 unk3C;
+    Vec3f cameraEye;
+    s32 unk14;
+    u8 tilt;
+    u8 angle;
+    s32 doorWalkTime;
     s32 next;
 
     if (gRespawnPending == 0) {
@@ -720,24 +720,24 @@ s32 actor_resumeAtCheckpoint(s32 *arg0) {
         return 0;
     }
     gNextLevel = gCheckpointLevel;
-    player_getSpawnPoint(0, gCheckpointSpawn, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    player_getSpawnPoint(0, gCheckpointSpawn, 1, pos, &cameraEye, &tilt, &angle, &unk14, &doorWalkTime, 1, &type);
     return type + 1;
 }
 
-/* Gets obj's tracking point: 30 * scale_y up through bone 0 (12 or 3 in some states), or its position. */
-void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z) {
-    if (obj->ob_matrix_ptr != NULL) {
+/* Gets actor's tracking point: 30 * scale_y up through bone 0 (12 or 3 in some states), or its position. */
+void actor_getTrackPoint(Actor *actor, f32 *x, f32 *y, f32 *z) {
+    if (actor->ob_matrix_ptr != NULL) {
         MtxF *bone;
         Vec3f in;
         Vec3f out;
 
         in.x = 0.0f;
-        in.y = obj->scale_y * 30.0f;
+        in.y = actor->scale_y * 30.0f;
         in.z = 0.0f;
-        bone = obj->ob_matrix_ptr;
-        if (obj->type == 1) {
+        bone = actor->ob_matrix_ptr;
+        if (actor->type == 1) {
             bone += 12;
-        } else if (obj->type == 0x1E) {
+        } else if (actor->type == 0x1E) {
             bone += 3;
         }
         math_transformOffset(&in, &out, bone);
@@ -745,8 +745,8 @@ void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z) {
         *y = out.y;
         *z = out.z;
     } else {
-        *x = obj->xpos;
-        *y = obj->ypos;
-        *z = obj->zpos;
+        *x = actor->xpos;
+        *y = actor->ypos;
+        *z = actor->zpos;
     }
 }

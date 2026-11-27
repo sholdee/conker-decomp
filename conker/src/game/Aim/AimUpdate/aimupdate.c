@@ -921,7 +921,7 @@ s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 ran
         excludedId = 44;
     }
     if (!anyRange) {
-        maxDist = movement_obj[objIndex].unk23D * 8;
+        maxDist = movement_obj[objIndex].sightRange * 8;
         maxDist = maxDist * maxDist;
     } else {
         maxDist = 1600000000.0f;
@@ -961,8 +961,8 @@ s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 ran
         dz = dz * dz;
         dy = dy * dy;
         dist = dx + dz + dy;
-        if (i == movement_obj[objIndex].unk222 &&
-            (movement_obj[objIndex].unk223 == 1 || movement_obj[objIndex].unk223 == 12)) {
+        if (i == movement_obj[objIndex].targetIndex &&
+            (movement_obj[objIndex].moveMode == 1 || movement_obj[objIndex].moveMode == 12)) {
             dist = 0.0f;
         }
         if ((dist < maxDist && dist < *bestDist) || preferId == movement_obj[i].character_type) {
@@ -1088,7 +1088,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
     pitch = 0.0f;
     roll = 0.0f;
     if (gAimPass == 0) {
-        obj->unk2CA = 0;
+        obj->lookYaw = 0;
     }
     hasOverride = cutscene_getLookTarget(&yaw, &pitch, &roll, target, objIndex, 0);
     if (hasOverride) {
@@ -1116,7 +1116,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
             return;
         }
     }
-    locked = obj->unk2FB & 4;
+    locked = obj->animFlags & 4;
     if (!hasOverride && locked) {
         if (data->flag[slot] == 0) {
             data->blend[slot] = 10;
@@ -1196,7 +1196,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         data->pitchVel[slot] = 0.0f;
     }
     if (gAimPass == 0) {
-        obj->unk2CA = yaw * 0.7111111283f;
+        obj->lookYaw = yaw * 0.7111111283f;
     }
     origYaw = yaw;
     origPitch = pitch;
@@ -1324,7 +1324,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         pitch = overrideAngles[1];
     }
     if (gAimPass == 0) {
-        obj->unk2CA = yaw * 0.7111111283f;
+        obj->lookYaw = yaw * 0.7111111283f;
     }
     finalYaw = data->offYaw[slot] + yaw;
     finalPitch = data->offPitch[slot] + pitch;
@@ -1472,7 +1472,7 @@ void aim_clampAngles(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fal
 
 /*
  * Per-frame aim bookkeeping: object 0x53 in anim 0x15 (or any object while gLevelLoadState is set) resets all aim
- * slots, and an object whose type has an "aim-locked" anim list gets unk2FB bit 2 set while it plays one of
+ * slots, and an object whose type has an "aim-locked" anim list gets animFlags bit 2 set while it plays one of
  * them, or (for interaction state 1) while dead, slow in water, flagged in mv, or moving fast.
  */
 void aim_updateLock(Actor *obj) {
@@ -1501,7 +1501,7 @@ void aim_updateLock(Actor *obj) {
             count = gNoAimAnimCounts[group];
             for (i = 0; i < count; i++) {
                 if (obj->animseq.uh == anims[i]) {
-                    obj->unk2FB |= 4;
+                    obj->animFlags |= 4;
                     return;
                 }
             }
@@ -1509,10 +1509,10 @@ void aim_updateLock(Actor *obj) {
             if (obj->type == 1) {
                 if (obj->energy == 0 || (obj->inwater != 0 && obj->speed < 5.0f) ||
                     obj->mv->SniperState != 0 || obj->speed > 20.0f) {
-                    obj->unk2FB |= 4;
+                    obj->animFlags |= 4;
                 }
             } else if (obj->energy == 0) {
-                obj->unk2FB |= 4;
+                obj->animFlags |= 4;
             }
         }
     }
@@ -1674,7 +1674,7 @@ void aim_updatePoints(Actor *obj) {
             obj->aim.side[1][1] = obj->aim.topY;
             obj->aim.side[0][2] = obj->aim.z;
             obj->aim.side[1][2] = obj->aim.z;
-            obj->unk2CA = 0;
+            obj->lookYaw = 0;
         }
     }
 }
@@ -1859,10 +1859,10 @@ void aim_turnHead(Actor *obj) {
     yaw[0] = pitch[0] = 0.0f;
     if (obj->headEffectTimer == 0) {
         obj->headEffectState = 0;
-        obj->unk284 = 0;
-        obj->unk285 = 0;
-        obj->unk286 = 0;
-        obj->unk287 = 0;
+        obj->headEffectOffset[0][0] = 0;
+        obj->headEffectOffset[0][1] = 0;
+        obj->headEffectOffset[1][0] = 0;
+        obj->headEffectOffset[1][1] = 0;
     }
     if (obj->headEffectTimer != 0) {
         aim = 0;
@@ -1874,10 +1874,10 @@ void aim_turnHead(Actor *obj) {
             s32 pad68; // matching: -g3 stack slot
             f32 scale;
             f32 amp;
-            obj->headYaw[0] -= obj->unk284;
-            obj->headPitch[0] -= obj->unk285;
-            obj->headYaw[1] -= obj->unk286;
-            obj->headPitch[1] -= obj->unk287;
+            obj->headYaw[0] -= obj->headEffectOffset[0][0];
+            obj->headPitch[0] -= obj->headEffectOffset[0][1];
+            obj->headYaw[1] -= obj->headEffectOffset[1][0];
+            obj->headPitch[1] -= obj->headEffectOffset[1][1];
             phase0 = obj->headEffectState & 0xFF;
             phase1 = obj->headEffectState >> 8;
             phase0 += gFrameTicks * 3;
@@ -1891,31 +1891,31 @@ void aim_turnHead(Actor *obj) {
             sinV = math_sinBinAngle(phase0);
             cosV = math_cosBinAngle(phase0);
             amp = 11.0f * scale;
-            obj->unk284 = sinV * amp;
-            obj->unk285 = cosV * amp;
+            obj->headEffectOffset[0][0] = sinV * amp;
+            obj->headEffectOffset[0][1] = cosV * amp;
             sinV = math_sinBinAngle(phase1);
             cosV = math_cosBinAngle(phase1);
-            obj->unk286 = sinV * amp;
-            obj->unk287 = cosV * amp;
+            obj->headEffectOffset[1][0] = sinV * amp;
+            obj->headEffectOffset[1][1] = cosV * amp;
         } else if (obj->headEffect == 1) {
             if (obj->headEffectState == 0) {
                 obj->headEffectState = 1;
-                obj->unk287 += math_randomU8() % 20U;
+                obj->headEffectOffset[1][1] += math_randomU8() % 20U;
             }
             if (obj->headEffectTimer < 0xAE) {
                 speed = obj->headEffectTimer / 6 + 1;
             } else {
                 speed = 30;
             }
-            obj->unk284 = 0;
-            obj->unk285 += speed;
-            obj->unk287 += speed;
-            obj->unk286 = obj->unk284;
+            obj->headEffectOffset[0][0] = 0;
+            obj->headEffectOffset[0][1] += speed;
+            obj->headEffectOffset[1][1] += speed;
+            obj->headEffectOffset[1][0] = obj->headEffectOffset[0][0];
             snap = 1;
-            yaw[0] = obj->unk284;
-            pitch[0] = obj->unk285;
-            yaw[1] = obj->unk286;
-            pitch[1] = obj->unk287;
+            yaw[0] = obj->headEffectOffset[0][0];
+            pitch[0] = obj->headEffectOffset[0][1];
+            yaw[1] = obj->headEffectOffset[1][0];
+            pitch[1] = obj->headEffectOffset[1][1];
         } else if (obj->headEffect == 2) {
             Mtx *model;
 
@@ -1947,21 +1947,21 @@ void aim_turnHead(Actor *obj) {
         } else if (obj->headEffect == 4) {
             if (obj->animseq.uh == 0x26) {
                 if (obj->headEffectState == 0) {
-                    obj->unk284 -= gFrameTicks;
-                    if (obj->unk284 < -20) {
-                        obj->unk284 = -20;
+                    obj->headEffectOffset[0][0] -= gFrameTicks;
+                    if (obj->headEffectOffset[0][0] < -20) {
+                        obj->headEffectOffset[0][0] = -20;
                         obj->headEffectState = 1;
                     }
                 } else {
-                    obj->unk284 += gFrameTicks * 3;
-                    if (obj->unk284 > 20) {
-                        obj->unk284 = 20;
+                    obj->headEffectOffset[0][0] += gFrameTicks * 3;
+                    if (obj->headEffectOffset[0][0] > 20) {
+                        obj->headEffectOffset[0][0] = 20;
                         obj->headEffectState = 0;
                     }
                 }
-                obj->unk287 = 0;
-                obj->unk286 = obj->unk284;
-                obj->unk285 = obj->unk287;
+                obj->headEffectOffset[1][1] = 0;
+                obj->headEffectOffset[1][0] = obj->headEffectOffset[0][0];
+                obj->headEffectOffset[0][1] = obj->headEffectOffset[1][1];
                 snap = 1;
             } else {
                 obj->headEffectTimer = 0;
@@ -1971,10 +1971,10 @@ void aim_turnHead(Actor *obj) {
             f32 kx = 0.3543307185f;
             f32 ky = 0.236220479f;
 
-            yaw[0] = obj->unk284 * kx;
-            yaw[1] = obj->unk286 * kx;
-            pitch[0] = obj->unk285 * ky;
-            pitch[1] = obj->unk287 * ky;
+            yaw[0] = obj->headEffectOffset[0][0] * kx;
+            yaw[1] = obj->headEffectOffset[1][0] * kx;
+            pitch[0] = obj->headEffectOffset[0][1] * ky;
+            pitch[1] = obj->headEffectOffset[1][1] * ky;
             clamp = 0;
             mirror = 0;
         } else if (obj->headEffect == 6) {
@@ -2002,7 +2002,7 @@ void aim_turnHead(Actor *obj) {
         }
     }
     if (aim) {
-        if (!(obj->unk2FB & 4) || !noHolderTarget) {
+        if (!(obj->animFlags & 4) || !noHolderTarget) {
             if (gAimTarget[0] != -99999.0f || gAimTarget[1] != -99999.0f || gAimTarget[2] != -99999.0f) {
                 if (gAimHasOverride != 0) {
                     gAimHasOverride = 0;
@@ -2062,16 +2062,16 @@ void aim_turnHead(Actor *obj) {
     APPROACH(obj->headPitch[0], (s32)pitch1);
     APPROACH(obj->headPitch[1], (s32)pitch0);
     if (snap) {
-        obj->headYaw[0] = obj->unk284;
-        obj->headPitch[0] = obj->unk285;
-        obj->headYaw[1] = obj->unk286;
-        obj->headPitch[1] = obj->unk287;
+        obj->headYaw[0] = obj->headEffectOffset[0][0];
+        obj->headPitch[0] = obj->headEffectOffset[0][1];
+        obj->headYaw[1] = obj->headEffectOffset[1][0];
+        obj->headPitch[1] = obj->headEffectOffset[1][1];
     }
     if (obj->headEffectTimer != 0 && obj->headEffect == 0) {
-        obj->headYaw[0] += obj->unk284;
-        obj->headPitch[0] += obj->unk285;
-        obj->headYaw[1] += obj->unk286;
-        obj->headPitch[1] += obj->unk287;
+        obj->headYaw[0] += obj->headEffectOffset[0][0];
+        obj->headPitch[0] += obj->headEffectOffset[0][1];
+        obj->headYaw[1] += obj->headEffectOffset[1][0];
+        obj->headPitch[1] += obj->headEffectOffset[1][1];
     }
 }
 

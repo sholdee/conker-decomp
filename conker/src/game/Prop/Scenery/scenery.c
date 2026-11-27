@@ -243,7 +243,7 @@ void func_150BF760(WorldObject *obj) {
         actor = collision_findObjectById(0x14);
         mode = obj->task_flag & TASK_FLAG_STATE;
         if (actor != NULL) {
-            anim = actor->unk2D0;
+            anim = actor->anim;
             progress = anim->frame[0] / (anim->numFrames[0] - 2.0f);
         }
         obj[1].v = 0.0f;

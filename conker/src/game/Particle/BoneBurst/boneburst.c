@@ -82,7 +82,7 @@ void particle_spawnBoneBurstEmitter(Actor *target) {
     }
 }
 
-/* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
+/* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its targetIndex
  * changes to a nonzero value. */
 void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
     BoneBurstState *state;
@@ -100,13 +100,13 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
         emitter->base.header.state = -1;
         return;
     }
-    if (state->prevUnk222 != target->unk222 && target->unk222 != 0) {
+    if (state->prevUnk222 != target->targetIndex && target->targetIndex != 0) {
         state->count = 3;
         state->timer = 0.0f;
     }
-    state->prevUnk222 = target->unk222;
-    if (target->unk222 != 0) {
-        actor_flashFog(&movement_obj[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
+    state->prevUnk222 = target->targetIndex;
+    if (target->targetIndex != 0) {
+        actor_flashFog(&movement_obj[target->targetIndex], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
     if (target->ob_matrix_ptr != NULL && state->count > 0) {
         state->timer += 0.148f * gFrameDelta;

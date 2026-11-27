@@ -37,8 +37,9 @@ badges from the committed files after each change to `master` (`tools/progress.p
   `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
   Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
   extracts from your ROM.
-- **Names.** About 80% of the functions have names. The rest keep address names (`func_XXXXXXXX`)
-  because no evidence makes their meaning clear yet. Names follow [tools/RENAMING.md](tools/RENAMING.md):
+- **Names.** About 85% of the functions have names. The rest keep address names (`func_XXXXXXXX`)
+  because no evidence makes their meaning clear yet. `progress.json` on the `progress` branch also
+  counts the named struct fields and data symbols. Names follow [tools/RENAMING.md](tools/RENAMING.md):
   original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
   descriptive names.
 - **Source layout.** The files follow the pattern of the source paths in the game's own strings, for

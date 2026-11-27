@@ -1803,7 +1803,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->xpos = gSeqTrackStates[scene][track].x;
                     obj->ypos = gSeqTrackStates[scene][track].y + gSeqTrackStates[scene][track].yOffset;
                     obj->zpos = gSeqTrackStates[scene][track].z;
-                    obj->unk1CC = obj->ypos;
+                    obj->fallStartY = obj->ypos;
                     if (gCutsceneSkipState == 0) {
                         obj->speed = (obj->xpos - oldPos[0]) * (obj->xpos - oldPos[0]) + (obj->zpos - oldPos[2]) * (obj->zpos - oldPos[2]);
                         if (obj->speed) {
@@ -1816,7 +1816,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                         obj->mv->actual_speed = obj->speed * 2.0f;
                     }
                     obj->unk54 = 0.0f;
-                    obj->unkCC = 0;
+                    obj->heightOffset = 0;
                     rescaled = 0;
                     gCurrentActorSlot = (target - movement_obj) + 1;
                     collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->waterHeight, &obj->floorMaterial, &obj->floorType,
@@ -1837,12 +1837,12 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     if (gSeqTrackStates[scene][track].unk18 != -9999.0f) {
                         rescaled = 1;
                         obj->scale_xz = gSeqTrackStates[scene][track].unk18 * 0.009999999776f;
-                        obj->unk154 = gSeqTrackStates[scene][track].unk18 * 0.009999999776f;
+                        obj->targetScaleXz = gSeqTrackStates[scene][track].unk18 * 0.009999999776f;
                     }
                     if (gSeqTrackStates[scene][track].unk1C != -9999.0f) {
                         rescaled = 1;
                         obj->scale_y = gSeqTrackStates[scene][track].unk1C * 0.009999999776f;
-                        obj->unk158 = gSeqTrackStates[scene][track].unk1C * 0.009999999776f;
+                        obj->targetScaleY = gSeqTrackStates[scene][track].unk1C * 0.009999999776f;
                     }
                     if (rescaled) {
                         actor_setScale(obj, obj->scale_xz, obj->scale_y);
@@ -2513,7 +2513,7 @@ s32 cutscene_releasePlayer(s32 scene) {
                 ctl->actual_speed = 0.0f;
             }
             obj->unk54 = 0.0f;
-            obj->unkCC = 0;
+            obj->heightOffset = 0;
             obj->doing_hit = 0;
 
             if ((-10000.0f != obj->waterHeight) && (obj->ypos < obj->waterHeight)) {
@@ -2529,7 +2529,7 @@ s32 cutscene_releasePlayer(s32 scene) {
                 obj->underwaterTime = 0;
                 obj->yspd = -4.0f;
                 obj->ypos = obj->floorY;
-                obj->unk1CC = obj->floorY;
+                obj->fallStartY = obj->floorY;
                 obj->ygrav = 5.0f;
             }
 
@@ -2542,15 +2542,15 @@ s32 cutscene_releasePlayer(s32 scene) {
             gCurrentActor = obj;
             anim_updateIdle();
             obj->mv->door_walkf_time = 0;
-            obj->unk287 = 0;
-            zero = obj->unk287;
+            obj->headEffectOffset[1][1] = 0;
+            zero = obj->headEffectOffset[1][1];
             obj->headEffect = 0;
             obj->headEffectTimer = 0;
             obj->headEffectState = 0;
             // matching: the (u8) casts keep the register allocation of the u8 view this was matched with
-            obj->unk286 = (u8)zero;
-            obj->unk285 = (u8)zero;
-            obj->unk284 = (u8)zero;
+            obj->headEffectOffset[1][0] = (u8)zero;
+            obj->headEffectOffset[0][1] = (u8)zero;
+            obj->headEffectOffset[0][0] = (u8)zero;
             return zero;
         }
     }
@@ -2584,7 +2584,7 @@ void cutscene_updateActors(void) {
                 cutscene_applyObjectTrack(obj, 0, -1);
                 actor_onAnimChanged(obj);
                 anim_updateIdleTimer(obj);
-                obj->unk2FF = one & 0xFFFFFFFF;
+                obj->updatedOnce = one & 0xFFFFFFFF;
             }
         }
         i++;

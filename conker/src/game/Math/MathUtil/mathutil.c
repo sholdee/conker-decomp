@@ -249,7 +249,7 @@ typedef struct {
 } Unk2D0View;
 
 s32 func_15142A5C(Actor *actor) {
-    Unk2D0View *unk2D0 = (Unk2D0View *)actor->unk2D0;
+    Unk2D0View *unk2D0 = (Unk2D0View *)actor->anim;
     s32 ret = 0;
 
     if (unk2D0->unk3C > 0) {
@@ -1601,7 +1601,7 @@ void func_15145A50(Actor *actor) {
 
 /*
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from sprite_getActorBounds, y squashed
- * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
+ * by hitRadiusOverHeight); writes the near and far hits, unsquashed by hitHeightOverRadius. Returns 0 on a miss.
  */
 s32 math_rayActorEllipsoid(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar,
                   f32 *radius, f32 *arg6, Vec3f *center) {
@@ -1635,8 +1635,8 @@ s32 math_rayActorEllipsoid(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNea
     f32 tFar;
     f32 squash;
     f32 unsquash;
-    squash = actor->unkDC;
-    unsquash = actor->unkE0;
+    squash = actor->hitRadiusOverHeight;
+    unsquash = actor->hitHeightOverRadius;
     s.x = start->x;
     s.y = start->y * squash;
     s.z = start->z;
@@ -1859,7 +1859,7 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
             if (mode == 1) {
                 if (actor != NULL) {
                     if ((actor->type == 0) || (actor->unique_id != uniqueId) ||
-                        (actor->character_type == 0xFF) || (actor->unk302 == 0)) {
+                        (actor->character_type == 0xFF) || (actor->lightCount == 0)) {
                         mode = 2;
                     }
                 } else {
@@ -1868,9 +1868,9 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
             }
             switch (mode) {
             case 1:
-                gfx = light_reemitLights(gfx, actor->unk304[slot],
-                                    actor->unk301, actor->unk302,
-                                    actor->unk314);
+                gfx = light_reemitLights(gfx, actor->gfxLights[slot],
+                                    actor->maxLights, actor->lightCount,
+                                    actor->ambients);
                 break;
             case 2:
                 gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, gViewGfxLightCount, &gViewAmbients[slot][gDrawBufferIndex]);

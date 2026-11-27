@@ -14,8 +14,8 @@
 #include "conker/weapon.h"
 
 /* matching: no header declares actor_seatRider (movement.c): tintedobject.c was compiled with an s32 return */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
@@ -225,7 +225,7 @@ void weapon_updateTank(Actor *obj) {
             velocity = obj->speed;
             if (fabsf(velocity) > 5.0f) {
                 obj->doing_hit = 1;
-                obj->unk114 = 2.0f;
+                obj->doingHitTimer = 2.0f;
                 if (velocity < 0.0f) {
                     obj->doing_hit = 2;
                 }
@@ -311,7 +311,7 @@ void weapon_updateTank(Actor *obj) {
                 }
             }
             if (gButtonsPressed[buttonPad] & Z_TRIG) {
-                obj->unk21C = 0;
+                obj->scriptTimer = 0;
                 obj->scriptCmd = script_getScript(0, 2);
             }
         }
@@ -610,7 +610,7 @@ void weapon_releaseTankCamera(Actor *obj) {
     obj->drawtype = 3;
     obj->bodyRadius = 0;
     obj->imune = 0xFF;
-    obj->unk328 = 0;
+    obj->radarColor = 0;
     if (obj->CameraPtr != NULL) {
         camera = obj->CameraPtr;
         index = 0;
@@ -622,9 +622,9 @@ void weapon_releaseTankCamera(Actor *obj) {
         gPads[index].button &= ~R_TRIG;
         player = &movement_obj[index];
         player->forcedCullMask |= 1 << camera->CNumber;
-        if (player->unk10A != 0) {
+        if (player->lastAttacker != 0) {
             screen_startViewFlash(0xFF, 0, 0, 180, 20, camera->CNumber);
-            player->unk10A = 0;
+            player->lastAttacker = 0;
         }
     }
 }

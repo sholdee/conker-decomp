@@ -185,12 +185,12 @@ s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter) {
     return 1;
 }
 
-/* Condition 0: the anchor is invalid while unk94 bit 1 is set or unk84 is 4, 10 or 12. */
+/* Condition 0: the anchor is invalid while hiddenParts bit 1 is set or unk84 is 4, 10 or 12. */
 s32 func_151D7724(AnchoredTrailEmitter *emitter) {
     Actor *actor = emitter->link.actor;
     TrailAnchor *anchor = &emitter->anchor;
 
-    if ((actor->unk94 & 2) || actor->animseq.uh == 4 || actor->animseq.uh == 10 || actor->animseq.uh == 12) {
+    if ((actor->hiddenParts & 2) || actor->animseq.uh == 4 || actor->animseq.uh == 10 || actor->animseq.uh == 12) {
         anchor->flags &= ~1;
     }
     return 1;

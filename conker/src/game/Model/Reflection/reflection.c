@@ -122,7 +122,7 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
     } else {
         return;
     }
-    if (obj != NULL && obj->unk9C != 0) {
+    if (obj != NULL && obj->hiddenBones != 0) {
         savedMtx = obj->ob_matrix_ptr;
         obj->ob_matrix_ptr = dstMtx;
         bone_collapseMaskedBones(obj);
