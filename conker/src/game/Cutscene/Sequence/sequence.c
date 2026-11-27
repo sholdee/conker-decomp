@@ -744,7 +744,7 @@ s32 cutscene_canSkip(s32 scene) {
 
     if (gButtonsPressed[0] & 0x20) {
         if (gCutsceneNoSkip == 0) {
-            if (D_800D2E40 != 0) {
+            if (gStartedFromListSelection != 0) {
                 return 1;
             }
             if (cutscene_isPlayed(map, gCutsceneIds[scene]) != 0) {

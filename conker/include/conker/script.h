@@ -297,7 +297,7 @@ typedef struct {
     u8 unk1;
 } Struct_80087410;
 
-extern u8 D_800D2E40;
+extern u8 gStartedFromListSelection;
 extern u8 D_800D2E41;
 extern u8 D_800D2E42;
 extern u8 gAutoSavePending;
@@ -338,10 +338,10 @@ s32 script_cutsceneCommand(s32 cutscene, s32 opcode, ScriptCmd *cmd);
 s32 script_cutsceneQuery(s32 cutscene, s32 opcode, s32 cmd);
 void script_setAnchorAtObject(s32 ref, s32 alt);
 
-/* The resource manifest D_80087430 (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
+/* The resource manifest gTaskManifest (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
  * (.rodata 0x242F30) stay data extracted from the ROM: the names are game text, which stays out of the
  * repository. */
-/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
+/* One 0x14-byte record per resource/task; gTaskManifest holds RESOURCE_COUNT of them. */
 typedef struct ResourceDescriptor {
     /* 0x00 */ const char *name;                 // NULL for unused slots
     /* 0x04 */ s32 packedId;                     // low 29 bits: id - 1
@@ -354,7 +354,7 @@ typedef struct ResourceDescriptor {
 #define RESOURCE_COUNT 204
 #define RESOURCE_LIST_END 0xFFFF
 
-extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
+extern ResourceDescriptor gTaskManifest[RESOURCE_COUNT];
 
 /* game/Script/CmdTables/cmdtables.c: the script command handlers by class (bits 12-15 of the command word, minus one): start,
  * end, query and command. Declared without a prototype: the handlers take different parameter types. */

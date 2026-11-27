@@ -7830,3 +7830,5 @@ script_setFloatDepth = 0x1507B958; // type:func
 script_setHitSound = 0x1507BAD0; // type:func
 script_setImpactSound = 0x1507BAF8; // type:func
 script_updateDiveLock = 0x1509C228; // type:func
+gTaskManifest = 0x80087430;
+gStartedFromListSelection = 0x800D2E40;

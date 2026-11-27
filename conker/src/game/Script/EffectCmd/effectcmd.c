@@ -55,19 +55,19 @@ static ResourceSlot *gResourceTable;
 
 /* Returns the name of resource `index`, or NULL for an empty slot. */
 const char *script_getTaskName(s32 index) {
-    return D_80087430[index].name;
+    return gTaskManifest[index].name;
 }
 
 u16 script_getTaskLevel(s32 index) {
-    return D_80087430[index].levelId;
+    return gTaskManifest[index].levelId;
 }
 
 s32 script_getTaskSpawnPoint(s32 index) {
-    return D_80087430[index].packedSpawnPoint & 0xFFF;
+    return gTaskManifest[index].packedSpawnPoint & 0xFFF;
 }
 
 s32 script_getTaskPackedId(s32 index) {
-    return D_80087430[index].packedId;
+    return gTaskManifest[index].packedId;
 }
 
 /* Finds the resource whose id is `id`; returns RESOURCE_COUNT if none. */
@@ -75,7 +75,7 @@ s32 script_findTaskIndex(s32 id) {
     s32 i = 0; // matching: initialising here schedules the i = 0 move before the loop setup
 
     for (; i < RESOURCE_COUNT; i++) {
-        if (D_80087430[i].name != NULL && id == (D_80087430[i].packedId & 0x1FFFFFFF) + 1) {
+        if (gTaskManifest[i].name != NULL && id == (gTaskManifest[i].packedId & 0x1FFFFFFF) + 1) {
             return i;
         }
     }
@@ -89,7 +89,7 @@ s32 script_countTasks(void) {
 
     count = 0;
     for (i = 0; i < RESOURCE_COUNT; i++) {
-        if (D_80087430[i].name != NULL) {
+        if (gTaskManifest[i].name != NULL) {
             count++;
         }
     }
@@ -102,7 +102,7 @@ s32 script_areTaskDepsDone(s32 index) {
     s32 depsLoaded;
     s32 i;
 
-    deps = D_80087430[index].dependencies;
+    deps = gTaskManifest[index].dependencies;
     for (i = 0; deps[i] != RESOURCE_LIST_END; i++) {
         depsLoaded = script_areTaskDepsDone(deps[i]);
         if (!RESOURCE_IS_LOADED(deps[i]) || depsLoaded == 0) {
@@ -119,7 +119,7 @@ void func_1509CC94(s32 index) {
 
 /* Marks every dependency of `index` loaded, depth first. */
 void script_markTaskDepsDone(s32 index) {
-    script_markTasksDone(D_80087430[index].dependencies, script_markTaskDepsDone);
+    script_markTasksDone(gTaskManifest[index].dependencies, script_markTaskDepsDone);
 }
 
 /*
@@ -131,7 +131,7 @@ s32 script_markRelatedTasksDone(s32 index) {
     s32 count;
 
     count = 0;
-    p = D_80087430[index].relatedDependencies;
+    p = gTaskManifest[index].relatedDependencies;
     while (*p != RESOURCE_LIST_END) {
         gResourceLoadedBits[*p >> 3] |= 1 << (*p & 7);
         if (gResourceStates[*p] != RESOURCE_STATE_LOADED) {

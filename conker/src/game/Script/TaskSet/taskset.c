@@ -3,7 +3,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-u8 D_800D2E40;
+u8 gStartedFromListSelection;
 u8 D_800D2E41;
 u8 D_800D2E42;
 u8 gAutoSavePending;

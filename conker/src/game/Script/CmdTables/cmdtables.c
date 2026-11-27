@@ -80,7 +80,7 @@ extern const char D_8009F02C[], D_8009F03C[], D_8009F04C[], D_8009F060[], D_8009
 extern const char D_8009F0A4[], D_8009F0B0[];
 
 /* The manifest: { name, packed id, level, packed spawn point, dependencies, related dependencies }. */
-ResourceDescriptor D_80087430[RESOURCE_COUNT] = {
+ResourceDescriptor gTaskManifest[RESOURCE_COUNT] = {
     /*   0 */ { D_8009E834, 0xA0000002, 0x29, 0xD000, D_8009E474, D_8009E470 },
     /*   1 */ { NULL, 0x60000000, 0x29, 0xD000, D_8009E480, D_8009E470 },
     /*   2 */ { NULL, 0x60000000, 0x29, 0xD000, D_8009E484, D_8009E470 },

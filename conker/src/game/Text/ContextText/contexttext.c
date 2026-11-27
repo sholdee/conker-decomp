@@ -180,7 +180,7 @@ void text_openContextText(s32 arg0) {
             text = gContextText->text;
         }
         gContextTextBoxConfig.flags = 0x38013;
-        if ((withHeader || arg0 || !BIT_IS_SET(gSeenTextBits, gContextTextId)) && D_800D2E40 == 0) {
+        if ((withHeader || arg0 || !BIT_IS_SET(gSeenTextBits, gContextTextId)) && gStartedFromListSelection == 0) {
             gContextTextBoxConfig.flags |= 0x60;
         }
         if (arg0 || gContextTextId == 0x42) {

@@ -282,7 +282,7 @@ s32 script_taskQuery(s32 id, s32 opcode, QueryArgs *cmd) {
     case 44:
         return screen_isViewFadedOut(gScriptCmdWordCount == 3 ? cmd->unk8 : 0);
     case 45:
-        return D_800D2E40;
+        return gStartedFromListSelection;
     }
     return 0;
 }
