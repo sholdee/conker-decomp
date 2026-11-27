@@ -277,8 +277,8 @@ void sprite_place(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 
     scaleY *= gScreenScaleY;
     if (projected) { // matching: the view address is computed in each branch
         view = &VIEWS[gCurrentView];
-        scaleX *= view->unk1C;
-        scaleY *= view->unk20;
+        scaleX *= view->projScaleX;
+        scaleY *= view->projScaleY;
     } else {
         view = &VIEWS[gCurrentView];
         scaleX *= view->scaleX;

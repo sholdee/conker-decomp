@@ -2919,8 +2919,8 @@ typedef struct RenderView {
     /* 0x010 */ f32 halfHeight; // also the screen centre y
     /* 0x014 */ f32 scaleX;     // sprite x scale (unscaled sprites)
     /* 0x018 */ f32 scaleY;
-    /* 0x01C */ f32 unk1C;      // sprite x scale (perspective sprites)
-    /* 0x020 */ f32 unk20;
+    /* 0x01C */ f32 projScaleX;      // sprite x scale (perspective sprites)
+    /* 0x020 */ f32 projScaleY;
     /* 0x024 */ f32 top;
     /* 0x028 */ f32 bottom;
     /* 0x02C */ f32 left;

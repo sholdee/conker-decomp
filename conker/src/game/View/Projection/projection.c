@@ -49,7 +49,7 @@ void view_initDefaultProjection(s32 arg0) {
                   gViews->halfHeight, 1.0f, 10000.0f, 1.0f);
 }
 
-/* Widens a view's frustum FOVs by (fovXDelta, fovYDelta) plus the global gViewFovOffset, updates unk1C/unk20 and
+/* Widens a view's frustum FOVs by (fovXDelta, fovYDelta) plus the global gViewFovOffset, updates projScaleX/projScaleY and
  * rebuilds its projection. The near plane is gNearPlaneOverride, else `near`, else the default gDefaultNear. */
 void view_widenFov(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near) {
     f32 nearPlane;
@@ -67,12 +67,12 @@ void view_widenFov(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
         angle = gViews[viewIndex].frustumFovX * 0.008726646192f;
         cosine = cosf(angle);
         dist = (cosine * gViews[viewIndex].halfWidth) / sinf(angle);
-        gViews[viewIndex].unk1C =
+        gViews[viewIndex].projScaleX =
             (gViews[viewIndex].scaleX * dist) * gViews[viewIndex].pixelTanX * scale;
         angle = gViews[viewIndex].frustumFovY * 0.008726646192f;
         cosine = cosf(angle);
         dist = (cosine * gViews[viewIndex].halfHeight) / sinf(angle);
-        gViews[viewIndex].unk20 =
+        gViews[viewIndex].projScaleY =
             (gViews[viewIndex].scaleY * dist) * gViews[viewIndex].pixelTanY * scale;
     }
     if (gNearPlaneOverride != 0.0f) {

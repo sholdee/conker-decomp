@@ -34,7 +34,7 @@ Gfx gScreenSpriteTeardownDl[] = {
     gsSPEndDisplayList(),
 };
 
-/* The update callback of each sprite kind (ScreenSprite.unk68 & 0xF; nonzero: keep the sprite) and the
+/* The update callback of each sprite kind (ScreenSprite.updateFunc & 0xF; nonzero: keep the sprite) and the
    message handler of each kind (ScreenSprite.info.kind). The callbacks take their own sprite types, so
    their table is declared without a prototype. The handler table keeps the prototype of its call
    (sprite_screenSpriteMessage narrows the u8 message id for it), and its entries take their own sprite and payload
@@ -66,7 +66,7 @@ void sprite_updateScreenSprite(ScreenSprite *sprite) {
             finished = 1;
         }
     }
-    index = sprite->unk68 & 0xF;
+    index = sprite->updateFunc & 0xF;
     if (index != 0 && !finished) {
         if (gScreenSpriteUpdates[index](sprite) == 0) {
             finished = 1;
@@ -215,8 +215,8 @@ void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 k
         return NULL;
     }
     memcpy(&sprite->info, info, sizeof(ScreenSpriteInfo));
-    sprite->unk68 = 0;
-    sprite->unk68 |= flags;
+    sprite->updateFunc = 0;
+    sprite->updateFunc |= flags;
     return sprite;
 }
 
