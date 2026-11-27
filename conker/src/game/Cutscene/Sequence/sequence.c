@@ -30,12 +30,12 @@ typedef struct {
 
 /* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
    numTracks path-key lists, numTracks entries starting with the SeqTrackInfo table, numChannelLists channel-key lists,
-   numEventLists event lists and numUnkLists gSeqTextLists lists. */
+   numEventLists event lists and numTexts gSeqTextLists texts. */
 typedef struct {
-    u16 numTracks;
-    u16 numChannelLists;
-    u16 numEventLists;
-    u16 numUnkLists;
+    /* 0x0 */ u16 numTracks;
+    /* 0x2 */ u16 numChannelLists;
+    /* 0x4 */ u16 numEventLists;
+    /* 0x6 */ u16 numTexts;
 } SeqFileHeader;
 
 /* A block of the cutscene file; size >> 3 is its count of 8-byte elements. */
@@ -505,7 +505,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
             }
             gSeqTrackEventCounts[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
             bzero(gSeqTrackEventCounts[scene], size * sizeof(u16));
-            gSeqTextLists[scene] = allocate_memory(hdr->numUnkLists * sizeof(s32 *), 1, 0, 0);
+            gSeqTextLists[scene] = allocate_memory(hdr->numTexts * sizeof(s32 *), 1, 0, 0);
             gSeqTrackPaths[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackPath), 1, 0, 0);
             for (i = 0; i < hdr->numTracks; i++) {
                 if (gSeqPathKeyCounts[scene][i] != 0) {
@@ -541,7 +541,7 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
                 gSeqEventTracks[scene][i] = file[k].data;
                 k++;
             }
-            for (i = 0; i < hdr->numUnkLists; i++) {
+            for (i = 0; i < hdr->numTexts; i++) {
                 gSeqTextLists[scene][i] = file[k].data;
                 k++;
             }
