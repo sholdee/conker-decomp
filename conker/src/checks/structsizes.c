@@ -106,6 +106,7 @@ STATIC_ASSERT(sizeof(LightStorm) == 0x34, LightStorm_size);
 STATIC_ASSERT(sizeof(LightTrack) == 0x10, LightTrack_size);
 STATIC_ASSERT(sizeof(LightFollow) == 0xC, LightFollow_size);
 STATIC_ASSERT(sizeof(LightFlash) == 0x8, LightFlash_size);
+STATIC_ASSERT(sizeof(LightFlashEvent) == 0x8, LightFlashEvent_size);
 STATIC_ASSERT(sizeof(LightTransformed) == 0x10, LightTransformed_size);
 STATIC_ASSERT(sizeof(LightSwing) == 0x18, LightSwing_size);
 STATIC_ASSERT(sizeof(struct GroundFlash) == 0x40, GroundFlash_size);

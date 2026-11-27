@@ -76,7 +76,7 @@ typedef struct {
     u8 r;
     u8 g;
     u8 b;
-} LightFlashEvent;
+} LightFlashEvent; /* size 0x8 */
 
 /* Extra data of the swinging lamp particle: a sine swing whose amplitude and speed ramp at their rates
  * while `timer` runs (started by light_startLampSwing), then ease back toward their targets. */
