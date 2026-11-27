@@ -2542,15 +2542,15 @@ s32 cutscene_releasePlayer(s32 scene) {
             gCurrentActor = obj;
             anim_updateIdle();
             obj->mv->door_walkf_time = 0;
-            obj->unk287 = 0;
-            zero = obj->unk287;
+            obj->headEffectOffset[1][1] = 0;
+            zero = obj->headEffectOffset[1][1];
             obj->headEffect = 0;
             obj->headEffectTimer = 0;
             obj->headEffectState = 0;
             // matching: the (u8) casts keep the register allocation of the u8 view this was matched with
-            obj->unk286 = (u8)zero;
-            obj->unk285 = (u8)zero;
-            obj->unk284 = (u8)zero;
+            obj->headEffectOffset[1][0] = (u8)zero;
+            obj->headEffectOffset[0][1] = (u8)zero;
+            obj->headEffectOffset[0][0] = (u8)zero;
             return zero;
         }
     }

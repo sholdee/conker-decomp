@@ -1033,7 +1033,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     obj->scale_y = scale;
     obj->unk66 = gCurrentActor->unk66 & 0xC;
     obj->headEffectState = kind;
-    obj->unk284 = arg10;
+    obj->headEffectOffset[0][0] = arg10;
     if (kind == 2 || kind == 18) {
         obj->headEffectTimer = 60;
     }
@@ -1902,13 +1902,13 @@ void event_startHeadEffect(void) {
     gCurrentActor->headEffect = (gEventParam >> 16) & 0xFFFF;
     gCurrentActor->headEffectState = (gEventParam >> 24) & 0xFF;
     gCurrentActor->headEffectTimer = gEventParam & 0xFFFF;
-    gCurrentActor->unk284 = 0;
-    gCurrentActor->unk285 = 0;
-    gCurrentActor->unk286 = 0;
-    gCurrentActor->unk287 = 0;
+    gCurrentActor->headEffectOffset[0][0] = 0;
+    gCurrentActor->headEffectOffset[0][1] = 0;
+    gCurrentActor->headEffectOffset[1][0] = 0;
+    gCurrentActor->headEffectOffset[1][1] = 0;
 }
 
-/* Stores the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of the unk284 pair array. */
+/* Stores the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of headEffectOffset. */
 void func_1506EF5C(void) {
     s32 index;
     s16 first;
@@ -1920,8 +1920,8 @@ void func_1506EF5C(void) {
     gCurrentActor->headEffectTimer = 0xFFFF;
     gCurrentActor->headEffect = 5;
     index *= 2;
-    (&gCurrentActor->unk284)[index] = first;
-    (&gCurrentActor->unk285)[index] = second;
+    (&gCurrentActor->headEffectOffset[0][0])[index] = first;
+    (&gCurrentActor->headEffectOffset[0][1])[index] = second;
 }
 
 void event_stopHeadEffect(void) {

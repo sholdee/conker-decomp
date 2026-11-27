@@ -2540,7 +2540,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                 actor->headEffect = 6;
                 actor->headEffectTimer = 0x64;
                 actor->headEffectState = 0;
-                actor->unk284 = 0;
+                actor->headEffectOffset[0][0] = 0;
                 text_openContextText(1);
             }
         } else if (isStunned != 0) {
@@ -2555,15 +2555,15 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             s32 sounds[2] = { 0x39, 0x35 };
 
             actor->headEffectTimer = 0x64;
-            if ((s8)actor->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
+            if (actor->headEffectOffset[0][0] == 0) {
                 actor->headEffectState = actor->headEffectState + gFrameTicks;
                 if (((math_random() % 120U) + 0xB4) < actor->headEffectState) {
                     face_requestExpression(actor, sounds[math_random() & 1], 1, (math_random() % 180U) + 0x1A4, 0);
                     actor->headEffectState = 0;
-                    actor->unk284 = 1;
+                    actor->headEffectOffset[0][0] = 1;
                 }
-            } else if ((actor->unk284 != 0) && (actor->expression == actor->defaultExpression)) {
-                actor->unk284 = 0;
+            } else if ((actor->headEffectOffset[0][0] != 0) && (actor->expression == actor->defaultExpression)) {
+                actor->headEffectOffset[0][0] = 0;
             }
             actor->norun = 0xA;
             actor->nojump = 0xA;

@@ -1273,10 +1273,7 @@ struct Actor {
     /* 0x27A */ s16 headYaw[2];   // yaw of head parts 1 and 0
     /* 0x27E */ s16 headPitch[2]; // pitch of head parts 1 and 0
     /* 0x282 */ u16 headEffectTimer; // effect frames left, 0xFFFF = endless
-    /* 0x284 */ s8  unk284;      // effect offset for headYaw[0]
-    /* 0x285 */ s8  unk285;      // ... for headPitch[0]
-    /* 0x286 */ s8  unk286;      // ... for headYaw[1]
-    /* 0x287 */ s8  unk287;      // ... for headPitch[1]
+    /* 0x284 */ s8  headEffectOffset[2][2]; // per head part: [0] added to headYaw, [1] to headPitch
     /* 0x288 */ u8  modelTypeIndex;
     /* 0x289 */ u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer

@@ -3301,7 +3301,7 @@ void func_150538CC(Actor *obj) {
 
     done = 0;
     kind = obj->headEffectState;
-    sweep = obj->unk284;
+    sweep = obj->headEffectOffset[0][0];
     hitFlags = 0;
     if (((kind == 2) || (kind == 18)) && obj->headEffectTimer) {
         if (gFrameTicks < obj->headEffectTimer) {
