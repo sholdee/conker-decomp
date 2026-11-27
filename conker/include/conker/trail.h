@@ -8,6 +8,7 @@
 /*
  * Subsystem "trail": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
+ *   game_data_800D9860.c (data only, owner unknown; linked after game/Script/ScriptInterp/scriptinterp)
  *   game/Trail/TrailSpray/trailspray.c
  *   game/Trail/ScatterTrail/scattertrail.c
  *   game/Trail/TrailRing/trailring.c
@@ -1088,9 +1089,9 @@ void trail_freeTracker(TrackerEffect *effect);
 void trail_dropTrackerTrail(TrackerEffect *effect);
 void trail_spawnTrackerTrail(TrackerEffect *effect);
 
-/* bss_800D9860: a .bss slice of conker.us.yaml (between game/Script/ScriptInterp and game/Sprite/SpriteRoutines) that only
- * game/Trail/LevelStream/levelstream.c uses */
-extern CollisionHit D_800D9860; /* the floor under the last spawn point */
+/* game_data_800D9860.c (data only, owner unknown; linked after game/Script/ScriptInterp/scriptinterp) */
+extern CollisionHit D_800D9860; /* the floor under the last spawn point of levelstream.c; a zone trigger of
+                                 * game/Level/ZoneSpawn/zonespawn.c clears its flags */
 
 /* game/Trail/TrackerTrail/trackertrail.c */
 s32 trail_sampleTrackerTrail(TrackerTrail *actor);

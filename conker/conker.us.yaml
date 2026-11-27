@@ -314,7 +314,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042850, name: libultra/audio/init_15550}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
-      - {start: 0x2D4B0, type: bss, vram: 0x800428D0, name: bss_800428D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428D0, name: libultra/audio/n_synthesizer}
       # libultra objects that link their own .bss
       - {start: 0x2D4B0, type: .bss, vram: 0x800428E0, name: libultra/os/initialize}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428F0, name: libultra/os/piacs}
@@ -1072,7 +1072,7 @@ segments:
       - {start: 0x22D070, type: .data, name: game/Math/Rand64/rand64, linker_section_order: .rodata}
       - {start: 0x22D080, type: .data, name: game/Script/ScriptInterp/scriptinterp, linker_section_order: .rodata}
       - {start: 0x22D1A0, type: .data, name: game/Effects/AttachedBurst/attachedburst, linker_section_order: .rodata}
-      - [0x22D1B0, rodata]
+      - {start: 0x22D1B0, type: .data, name: game_22D1B0, linker_section_order: .rodata}
       - {start: 0x22D1C0, type: .data, name: game/Effects/PipeExplode/pipeexplode, linker_section_order: .rodata}
       - {start: 0x22D1D0, type: .data, name: game/Camera/LevelHook07/levelhook07, linker_section_order: .rodata}
       - {start: 0x22D1E0, type: .data, name: game/Particle/ShatterPieces/shatterpieces, linker_section_order: .rodata}
@@ -1672,7 +1672,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C68B0, name: game/Text/FontDraw/fontdraw}
       - {start: 0x255880, type: .bss, vram: 0x800CBD60, name: game/Text/TextQueue/textqueue}
       - {start: 0x255880, type: .bss, vram: 0x800CBD90, name: game/Collision/Probe/probe}
-      - {start: 0x255880, type: bss, vram: 0x800CBE10, name: bss_800CBE10}
+      - {start: 0x255880, type: .bss, vram: 0x800CBE10, name: game_data_800CBE10}
       - {start: 0x255880, type: .bss, vram: 0x800CC210, name: game/Math/TriBox/tribox}
       - {start: 0x255880, type: .bss, vram: 0x800CC250, name: game/Actor/Movement/movement}
       - {start: 0x255880, type: .bss, vram: 0x800D1560, name: game/Actor/MovementHit/movementhit}
@@ -1705,14 +1705,14 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game/Shadow/ShadowFaces/shadowfaces}
       - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game/Collision/PropBoxQuery/propboxquery}
       - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game/Script/ScriptInterp/scriptinterp}
-      - {start: 0x255880, type: bss, vram: 0x800D9860, name: bss_800D9860}
+      - {start: 0x255880, type: .bss, vram: 0x800D9860, name: game_data_800D9860}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game/Sprite/SpriteRoutines/spriteroutines}
       - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game/Prop/Pendulum/pendulum}
       - {start: 0x255880, type: .bss, vram: 0x800D98E0, name: game/Particle/SideDust/sidedust}
       - {start: 0x255880, type: .bss, vram: 0x800D98F0, name: game/Effects/ZoneSounds/zonesounds}
       - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game/Screen/Strobe/strobe}
       - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game/Effects/TintedObject/tintedobject}
-      - {start: 0x255880, type: bss, vram: 0x800D9920, name: bss_800D9920}
+      - {start: 0x255880, type: .bss, vram: 0x800D9920, name: game_data_800D9920}
       - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game_10CD70}
       - {start: 0x255880, type: .bss, vram: 0x800D9960, name: game/Beam/Tracer/tracer}
       - {start: 0x255880, type: .bss, vram: 0x800D99D0, name: game/Effects/HomingEffect/homingeffect}
@@ -1745,7 +1745,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DC460, name: game/Particle/ModelParticle/modelparticle}
       - {start: 0x255880, type: .bss, vram: 0x800DC9F0, name: game/Flare/Glow/glow}
       - {start: 0x255880, type: .bss, vram: 0x800DCA00, name: game/Math/MathUtil/mathutil}
-      - {start: 0x255880, type: bss, vram: 0x800DCA20, name: bss_800DCA20}
+      - {start: 0x255880, type: .bss, vram: 0x800DCA20, name: game_data_800DCA20}
       - {start: 0x255880, type: .bss, vram: 0x800DCA30, name: game/Particle/StreakParticle/streakparticle}
       - {start: 0x255880, type: .bss, vram: 0x800DCC10, name: game/Effects/ModelEffect/modeleffect}
       - {start: 0x255880, type: .bss, vram: 0x800DCD10, name: game/Lighting/PointLight/pointlight}
@@ -1754,7 +1754,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DCDE0, name: game/Camera/CameraWobble/camerawobble}
       - {start: 0x255880, type: .bss, vram: 0x800DCE40, name: game/Effects/QuadEffect/quadeffect}
       - {start: 0x255880, type: .bss, vram: 0x800DCE50, name: game/Effects/ObjectList/objectlist}
-      - {start: 0x255880, type: bss, vram: 0x800DD230, name: bss_800DD230}
+      - {start: 0x255880, type: .bss, vram: 0x800DD250, name: game/Text/TextBoxCreate/textboxcreate}
       - {start: 0x255880, type: .bss, vram: 0x800DD2A0, name: game/Particle/StyleParticle/styleparticle}
       - {start: 0x255880, type: .bss, vram: 0x800DD2B0, name: game/Player/PlayerWarp/playerwarp}
       - {start: 0x255880, type: .bss, vram: 0x800DD2D0, name: game/Flare/ScreenFlash/screenflash}
@@ -1762,7 +1762,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DD300, name: game/Flare/VisProbe/visprobe}
       - {start: 0x255880, type: .bss, vram: 0x800DD400, name: game/Effects/LevelUpdate/levelupdate}
       - {start: 0x255880, type: .bss, vram: 0x800DD410, name: game/Prop/WaveDeformer/wavedeformer}
-      - {start: 0x255880, type: bss, vram: 0x800DD420, name: bss_800DD420}
+      - {start: 0x255880, type: .bss, vram: 0x800DD420, name: game/Swarm/SwarmCentre/swarmcentre}
       - {start: 0x255880, type: .bss, vram: 0x800DD430, name: game/Effects/Rain/rain}
       - {start: 0x255880, type: .bss, vram: 0x800DD450, name: game/Particle/SpinDebris/spindebris}
       - {start: 0x255880, type: .bss, vram: 0x800DD460, name: game/Anim/VertexMorph/vertexmorph}

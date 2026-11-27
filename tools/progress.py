@@ -31,6 +31,12 @@ ASSET_DATA = {
     0x259560: "debugger font",
     0x242F30: "resource manifest lists and names",
 }
+# Gaps that are padding, not data (reviewed): ROM start for .data/.rodata, address for .bss
+PADDING_DATA = {
+    0x24CAC8: "unit padding at the end of the actoremitter unit's .rodata",
+    0x25A1E0: "ROM fill between the debugger code and the 8-aligned spawn tables",
+    0x8003BC28: "unit padding in the .bss of the scheduler unit",
+}
 COLOURS = {"c": "#3fb950", "hasm": "#388bfd"}
 
 
@@ -59,7 +65,7 @@ def data_figures():
     y = yaml.safe_load((REPO / "conker" / "conker.us.yaml").read_text())
     segs = y["segments"]
     starts = [s["start"] if isinstance(s, dict) else s[0] for s in segs]
-    out = {"in_source": 0, "asm": 0, "asset": 0}
+    out = {"in_source": 0, "asm": 0, "asset": 0, "padding": 0}
     for i, s in enumerate(segs):
         if not isinstance(s, dict) or "subsegments" not in s:
             continue
@@ -80,7 +86,8 @@ def data_figures():
             nxt = next((a for a in all_starts if a > start), None)
             if nxt is None:
                 continue
-            kind = "asset" if start in ASSET_DATA else ("in_source" if str(typ).startswith(".") else "asm")
+            kind = "asset" if start in ASSET_DATA else "padding" if start in PADDING_DATA else (
+                "in_source" if str(typ).startswith(".") else "asm")
             out[kind] += nxt - start
         # .bss: a slice runs to the next bss vram, the last one to vram + bss_size
         if bss and "bss_size" in s:
@@ -89,10 +96,10 @@ def data_figures():
             vrams = sorted(x[2] for x in bss)
             for _start, typ, vram, _name in bss:
                 nxt = next((v for v in vrams if v > vram), end)
-                out["in_source" if str(typ).startswith(".") else "asm"] += nxt - vram
+                out["padding" if vram in PADDING_DATA else "in_source" if str(typ).startswith(".") else "asm"] += nxt - vram
     total = out["in_source"] + out["asm"]
-    return {"data_bytes": total + out["asset"], "data_in_source_bytes": out["in_source"],
-            "data_asm_bytes": out["asm"], "data_asset_bytes": out["asset"]}
+    return {"data_bytes": total + out["asset"] + out["padding"], "data_in_source_bytes": out["in_source"],
+            "data_asm_bytes": out["asm"], "data_asset_bytes": out["asset"], "data_padding_bytes": out["padding"]}
 
 
 # ---------------------------------------------------------------- treemap

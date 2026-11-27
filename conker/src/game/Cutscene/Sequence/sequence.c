@@ -190,7 +190,7 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
     }
     gCurGfxTask->list.t.ucode_data_size = 0x800;
     gCurGfxTask->list.t.dram_stack = D_800CBE10;
-    gCurGfxTask->list.t.dram_stack_size = 0x400;
+    gCurGfxTask->list.t.dram_stack_size = SP_DRAM_STACK_SIZE8;
     gCurGfxTask->list.t.output_buff = (u64 *)gRdpOutputBuffer;
     gCurGfxTask->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
     gCurGfxTask->list.t.yield_data_ptr = gGfxYieldBuffer;

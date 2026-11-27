@@ -122,27 +122,12 @@ extern u16 gSurfSetB[]; // second grid-query triangle index buffer
 extern s32 gScriptCmdWordCount;
 extern s32 gScriptSavedSp;
 
-extern u8  D_800D987C;
-
-/* One unit's whole .bss (0x800D9920..0x800D994F: two bytes, two 8-aligned u8[14] and the unit's padding). It lies
- * between game/Effects/TintedObject/tintedobject's .bss and game_10CD70's; no file of that range uses it, so it stays in asm. Set by script
- * command 2 (game/Script/EffectCmd/effectcmd.c), cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c; nothing reads it. */
-extern u8  D_800D9920;
-extern u8  D_800D9921;
-extern u8  D_800D9928[14];
-extern u8  D_800D9938[14];
 
 
 
 
 
-extern u8 D_800DCA20;
-extern f32 D_800DCA24;
-extern u8 D_800DCA28;
-extern f32 D_800DCA2C;
-extern SpriteParams D_800DD230;
-extern MessageEntry *D_800DD254;
-extern MessageEntry *D_800DD258;
+
 
 
 

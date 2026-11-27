@@ -53,6 +53,7 @@
  *   game/Level/SpawnTable/spawntable.c
  *   game/Level/LevelHook30/levelhook30.c
  *   game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock)
+ *   game_data_800D9920.c (data only, owner unknown; linked after game/Effects/TintedObject/tintedobject)
  *   game/Level/LevelHooks/levelhooks.c
  *   game/Level/HeightCheck/heightcheck.c
  */
@@ -357,6 +358,12 @@ void level_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA
 /* game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock) */
 extern ObjectBehavior gObjectBehaviors[89];               // level-object behaviour handlers
 extern const GroupedObjectDefaults gGroupedObjectDefaults[114];
+
+/* game_data_800D9920.c (data only, owner unknown; linked after game/Effects/TintedObject/tintedobject) */
+extern u8 D_800D9920;
+extern u8 D_800D9921;
+extern u8 D_800D9928[14];
+extern u8 D_800D9938[14];
 
 /* game/Level/LevelHooks/levelhooks.c */
 void level_runHook(void *arg0, s32 arg1);

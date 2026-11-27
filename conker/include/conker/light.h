@@ -16,6 +16,7 @@
  *   game/Lighting/PointLight/pointlight.c
  *   game/Lighting/AmbientZone/ambientzone.c
  *   game/Effects/Light/light.c
+ *   game_22D1B0.c (data only, owner unknown; linked after game/Effects/AttachedBurst/attachedburst)
  *   game/Effects/ActorFlicker/actorflicker.c
  *   game/Effects/LampParticle/lampparticle.c
  */
@@ -366,10 +367,11 @@ extern const f32 gLightJitterLows[24];
 extern const f32 gLightJitterMids[24];
 extern const f32 gLightJitterHighs[24];
 
-/* rodata 0x22D1B0 (a slice of conker.us.yaml without a unit): the light colours that light.c sets for levels 6 and 57 */
-extern u8 D_800886F0[];
-extern u8 D_800886F4[];
-extern u8 D_800886F8[];
+/* game_22D1B0.c (data only, owner unknown; linked after game/Effects/AttachedBurst/attachedburst): the colours that
+ * light_setDaylight sets for levels 6 and 57 */
+extern u8 D_800886F0[3];
+extern u8 D_800886F4[3];
+extern u8 D_800886F8[3];
 
 /* game/Effects/ActorFlicker/actorflicker.c */
 void light_updateActorFlicker(LightEffect *effect);

@@ -93,6 +93,8 @@ extern u8 gContextSoundCount;
 extern u16 *gContextSounds; // sound effects voiced while the text types out
 
 /* game/Text/TextBoxCreate/textboxcreate.c */
+extern MessageEntry *D_800DD254; /* message table: text box configs and page texts; nothing sets it */
+extern MessageEntry *D_800DD258; /* the same for messages 0x100 and up */
 s32 text_splitPages(u8 *text);
 TextBox *text_createBox(u32 msgIndex, s32 objIndex, s32 arg2,
                        void (*callback)(TextBoxConfig *config, s32 page, s32 state),
