@@ -55,7 +55,7 @@ void particle_updateSparkEmitterEffect(SparkEmitterEffect *effect) {
 static u8 gSparkGreyLevels[] = { 128, 128 };
 
 /*
- * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random
+ * Particle kind 4 spawn callback (gParticleKindCallbacks): a fast spark thrown out in a random
  * direction around `angle`, grey level and sprite chosen by `variant`.
  */
 s32 particle_spawnFastSpark(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,

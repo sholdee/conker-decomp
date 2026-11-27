@@ -128,7 +128,7 @@ const u8 D_800A7B10[4] = { 0 };
  */
 static EmitterTable *gActorEmitterTables[] = {
     &D_8008F780, &gAllOverFireEmitterTable, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &gTailFireEmitterTable,
-    &gAllOverSmokeEmitterTable, &gTailSmokeEmitterTable, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
+    &gAllOverSmokeEmitterTable, &gTailSmokeEmitterTable, &gLavaBoulderImpactEmitterTable, &D_8008F804, &gFireImpImpactEmitterTable, &D_8008F81C, &D_8008F828, &D_8008F834,
 };
 /* Particle spawn callbacks, by ParticleTemplate.spawnCb (game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
 static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { particle_pickBlackTexture, particle_pickPaletteTexture };

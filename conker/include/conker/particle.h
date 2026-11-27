@@ -1386,7 +1386,7 @@ Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 lifetime);
 Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 view);
 
 /* game/Particle/ParticleModelIds/particlemodelids.c (a data-only unit) */
-extern const s32 D_800A3880[233]; /* the model ids by particle model (bank 9) */
+extern const s32 gParticleModelIds[233]; /* the model ids by particle model (bank 9) */
 
 /* game/Particle/QuadParticle/quadparticle.c */
 extern Gfx gQuadParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -1574,14 +1574,14 @@ s32 particle_relaunchJitterParticle(JitterParticle *p);
 
 /* game/Particle/SpawnShapes/spawnshapes.c */
 /*
- * Per-kind particle spawn callback, indexed by `kind` in D_8008AA00. `shape` is 0 line,
+ * Per-kind particle spawn callback, indexed by `kind` in gParticleKindCallbacks. `shape` is 0 line,
  * 1 even circle, 2 random circle, 3 random vertical arc; returning 0 stops the emitter.
  */
 typedef s32 (*EmitterCallback)(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX,
                                f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
                                s32 arg11, f32 arg12, void *data, u8 arg14);
 /* The callbacks by kind: the .rodata at 0x22F4C0 (no file yet). */
-extern EmitterCallback D_8008AA00[];
+extern EmitterCallback gParticleKindCallbacks[];
 void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count, u8 kind, s32 arg8, f32 arg9,
                    void *data, u8 owner);
 void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, void *data,
@@ -2402,7 +2402,7 @@ void particle_sendActorGoneToEmitters(Actor *actor);
 /* game/Particle/ActorEmitterData/actoremitterdata.c (data only, linked after the game/Particle/ActorEmitter/actoremitter..game/Effects/BurnDamage/burndamage unit) */
 /* The emitter tables of game/Particle/ActorEmitter/actoremitter.c (its gActorEmitterTables). */
 extern EmitterTable D_8008F780, gAllOverFireEmitterTable, gTailFireEmitterTable, D_8008F7A4, D_8008F7B0, D_8008F7BC, D_8008F7C8, D_8008F7D4;
-extern EmitterTable gAllOverSmokeEmitterTable, gTailSmokeEmitterTable, D_8008F7F8, D_8008F804, D_8008F810, D_8008F81C, D_8008F828, D_8008F834;
+extern EmitterTable gAllOverSmokeEmitterTable, gTailSmokeEmitterTable, gLavaBoulderImpactEmitterTable, D_8008F804, gFireImpImpactEmitterTable, D_8008F81C, D_8008F828, D_8008F834;
 
 /* game/Particle/Drips/drips.c */
 #define DRIP_SLOT_COUNT 60

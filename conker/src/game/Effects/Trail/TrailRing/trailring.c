@@ -10,7 +10,7 @@ void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 owner) {
 }
 
 /*
- * Particle kind 2 spawn callback (D_8008AA00[2]): launches one trail from (x, y, z)
+ * Particle kind 2 spawn callback (gParticleKindCallbacks[2]): launches one trail from (x, y, z)
  * outward along `angle` and upward at a random pitch, faded out by trail_fadeKind2Trail.
  */
 s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,

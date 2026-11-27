@@ -27,7 +27,7 @@ s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 he
 }
 
 /*
- * Emitter callback (see D_8008AA00): spawns one particle_spawnSteamParticle particle at (x, y, z) moving
+ * Emitter callback (see gParticleKindCallbacks): spawns one particle_spawnSteamParticle particle at (x, y, z) moving
  * along `yaw` with a random pitch and speed, using the randomized parameters of `kind`.
  */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,

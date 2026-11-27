@@ -620,12 +620,12 @@ void particle_onModelParticleEvent(ModelParticle *particle, void *data, u8 event
     }
 }
 
-/* Load model `model` (D_800A3880 table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
+/* Load model `model` (gParticleModelIds table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
 s32 particle_loadModel(s32 model, ParticleNode *node, ModelParticle *particle) {
     u32 out1;
     s32 out2;
 
-    node->resource = rom_loadPathTable(&out1, 0, &out2, 2, 9, D_800A3880[model]);
+    node->resource = rom_loadPathTable(&out1, 0, &out2, 2, 9, gParticleModelIds[model]);
     if (node->resource == NULL) {
         return FALSE;
     }

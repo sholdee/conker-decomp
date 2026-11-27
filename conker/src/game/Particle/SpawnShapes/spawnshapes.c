@@ -7,7 +7,7 @@
 
 /* The particle spawn callback of each kind (EmitterCallback; the callbacks take their own parameter types,
  * so each entry gives IDO warning 709, as the other handler tables do). */
-EmitterCallback D_8008AA00[28] = {
+EmitterCallback gParticleKindCallbacks[28] = {
     effect_emitStompPuff, func_150C2558, trail_spawnKind2Trail,
     func_150C2700, particle_spawnFastSpark, effect_spawnJointSpark,
     effect_spawnJointPiece, particle_spawnYawStreak, effect_spawnPitchYawStreak,
@@ -42,7 +42,7 @@ void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 an
         dirZ = math_cosBinAngleMasked(angle);
         px = radius * dirX + x;
         pz = radius * dirZ + z;
-        callback = D_8008AA00[kind];
+        callback = gParticleKindCallbacks[kind];
         if (callback != NULL &&
             callback(1, i, px, py, pz, x, y, z, angle, startAngle, radius, arg8, arg9, data,
                      owner) == 0) {
@@ -85,8 +85,8 @@ void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 cou
     py = y0;
     pz = z0;
     do {
-        if (D_8008AA00[kind] != NULL &&
-            D_8008AA00[kind](0, i, px, py, pz, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, data,
+        if (gParticleKindCallbacks[kind] != NULL &&
+            gParticleKindCallbacks[kind](0, i, px, py, pz, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, data,
                              owner) == 0) {
             return;
         }
@@ -130,7 +130,7 @@ void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s1
         dirZ = math_cosBinAngleMasked(angle);
         px = radius * dirX + x;
         pz = radius * dirZ + z;
-        callback = D_8008AA00[kind];
+        callback = gParticleKindCallbacks[kind];
         if (callback != NULL &&
             callback(2, i, px, py, pz, x, y, z, angle, angleA, radius, arg8, arg9, data,
                      owner) == 0) {
@@ -174,8 +174,8 @@ void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angl
         px = radius * yawX * elevH + x;
         py = y - radius * elevY;
         pz = radius * yawZ * elevH + z;
-        if (D_8008AA00[kind] != NULL &&
-            D_8008AA00[kind](3, i, px, py, pz, x, y, z, angle, yaw, radius, arg9, arg10, data,
+        if (gParticleKindCallbacks[kind] != NULL &&
+            gParticleKindCallbacks[kind](3, i, px, py, pz, x, y, z, angle, yaw, radius, arg9, arg10, data,
                              owner) == 0) {
             return;
         }

@@ -203,7 +203,7 @@ void particle_randomPointInSourceZones(Vec3f *out) {
     math_randomPointInZone(gEmissionSourceZones[math_random() & 1], out);
 }
 
-static const Game113D60Segment D_800A1200[6] = {
+static const Game113D60Segment gEmissionPathSegments[6] = {
     { { -5626.0f, 194.0f, 4084.0f }, { -6566.0f, 207.0f, 5929.0f } },
     { { -6566.0f, 207.0f, 5929.0f }, { -6830.0f, -231.0f, 8012.0f } },
     { { -6830.0f, -231.0f, 8012.0f }, { -6615.0f, -781.0f, 9425.0f } },
@@ -211,8 +211,8 @@ static const Game113D60Segment D_800A1200[6] = {
     { { 3843.0f, 240.0f, 6531.0f }, { 3730.0f, -266.0f, 8330.0f } },
     { { 3730.0f, -266.0f, 8330.0f }, { 3603.0f, -866.0f, 9595.0f } },
 };
-static const Game113D60Segment *D_80088A44[] = {
-    &D_800A1200[0], &D_800A1200[1], &D_800A1200[2], &D_800A1200[3], &D_800A1200[4], &D_800A1200[5],
+static const Game113D60Segment *gEmissionPathSegmentPtrs[] = {
+    &gEmissionPathSegments[0], &gEmissionPathSegments[1], &gEmissionPathSegments[2], &gEmissionPathSegments[3], &gEmissionPathSegments[4], &gEmissionPathSegments[5],
 };
 
 /* Start callback: a random point on one of six segments. */
@@ -220,7 +220,7 @@ void particle_randomPointOnSixSegments(Vec3f *out) {
     const Game113D60Segment *segment;
     f32 t;
 
-    segment = D_80088A44[math_random() % 6];
+    segment = gEmissionPathSegmentPtrs[math_random() % 6];
     t = math_randomFloat();
     out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
     out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
@@ -579,7 +579,7 @@ void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *
 }
 
 /* Effect points; particle_spawnFlashAndJetSprayAtPoint uses 4-7. */
-static const Vec3f D_800A1290[8] = {
+static const Vec3f gEmissionFlashPoints[8] = {
     { -780.8950195f, -32.0f, 2153.626953f },
     { -172.0f, -32.0f, 942.0f },
     { -852.0f, -32.0f, -638.0f },
@@ -590,7 +590,7 @@ static const Vec3f D_800A1290[8] = {
     { 610.0f, -452.0f, 5605.0f },
 };
 
-/* For points 4-7 of the D_800A1290 table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
+/* For points 4-7 of the gEmissionFlashPoints table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
  * 200 units above the point, plus a rumble. Other indices do nothing. */
 void particle_spawnFlashAndJetSprayAtPoint(index, owner, list)
     u8 index;
@@ -602,7 +602,7 @@ void particle_spawnFlashAndJetSprayAtPoint(index, owner, list)
     RumbleParams event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
-        position = D_800A1290[index];
+        position = gEmissionFlashPoints[index];
         position.y += 200.0f;
         particle_spawnLightFlash(&position, owner, list);
 

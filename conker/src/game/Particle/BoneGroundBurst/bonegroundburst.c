@@ -6,7 +6,7 @@
 #include "conker/particle.h"
 #include "libc/string.h"
 
-/* One entry of the D_800A0640 table: where on the owner's skeleton particle_spawnBoneGroundBurst spawns, and its random ranges. */
+/* One entry of the gBoneGroundBurstDefs table: where on the owner's skeleton particle_spawnBoneGroundBurst spawns, and its random ranges. */
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 bone;
@@ -32,7 +32,7 @@ typedef struct {
 } CornerColor;
 
 /* This file's .rodata front-end data. */
-static const GroundBurstDef D_800A0640[] = {
+static const GroundBurstDef gBoneGroundBurstDefs[] = {
     { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 12, 6, 0.18f, 0.040000003f, 0.1f, 0.060000002f, -114 },
     { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 17, 6, 0.18f, 0.040000003f, 0.09f, 0.05f, -114 },
     { 0x4D, 27, { 0.0f, 0.0f, 40.0f }, 150, 50, 15, 8, 0.2f, 0.1f, 0.080000006f, 0.040000003f, 0 },
@@ -55,7 +55,7 @@ void particle_spawnBoneGroundBurst(Actor *owner, u8 index, s32 fxList, u8 fxOwne
         return;
     }
     collision_initHitFromObject(&ground, owner);
-    def = &D_800A0640[index];
+    def = &gBoneGroundBurstDefs[index];
     math_transformOffset(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
     {
         Vec3f ray;

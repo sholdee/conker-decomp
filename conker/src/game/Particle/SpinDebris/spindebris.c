@@ -281,7 +281,7 @@ Gfx *particle_loadDebrisTexture(Gfx *gfx, s32 texture) {
 
     if (texture != gCachedTextureId) {
         // matching: the unsigned shift changes IDO's code
-        gfx = sprite_loadDescFrame(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gDebrisTexture, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
         gCachedTextureId = texture;
     }
     return gfx;
