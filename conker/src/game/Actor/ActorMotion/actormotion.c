@@ -2695,7 +2695,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
         radius = hit->unkE;
         radius = attacker->scale_xz * 4.0f * radius;
     }
-    dist = hit->unkC;
+    dist = hit->offsetY;
     y += dist * (attacker->scale_y / 0.25f);
     if (attacker->noshove & 0x100) {
         slotEnd = 4;

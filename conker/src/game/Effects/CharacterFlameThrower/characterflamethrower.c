@@ -2300,12 +2300,12 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             motion.texture = 0xA;
             motion.shade = 0xFF;
             motion.unk14 = -10000.0f;
-            motion.unk1C = flame->scatter.unk40;
-            motion.unk1E = flame->scatter.unk42;
+            motion.unk1C = flame->scatter.fadeStart;
+            motion.unk1E = flame->scatter.fadeRate;
             do {
-                spawn.itemCount = (math_random() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
-                spawn.life = (math_random() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
-                motion.halfWidth = math_randomFloat() * flame->scatter.unk24 + flame->scatter.unk20;
+                spawn.itemCount = (math_random() % (flame->scatter.itemCountRange + 1)) + flame->scatter.itemCountMin;
+                spawn.life = (math_random() % (flame->scatter.lifeRange + 1)) + flame->scatter.lifeMin;
+                motion.halfWidth = math_randomFloat() * flame->scatter.halfWidthRange + flame->scatter.halfWidthMin;
                 {
                     Vec3f delta;
                     Vec3f axisA;
@@ -2325,8 +2325,8 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                         motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                         motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                         motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                        motion.gravity = math_randomFloat() * flame->scatter.unk38 + flame->scatter.unk34;
-                        motion.alpha = math_randomFloat() * flame->scatter.unk3E + flame->scatter.unk3C;
+                        motion.gravity = math_randomFloat() * flame->scatter.gravityRange + flame->scatter.gravityMin;
+                        motion.alpha = math_randomFloat() * flame->scatter.alphaRange + flame->scatter.alphaMin;
                         trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                     }
                 }
@@ -2356,8 +2356,8 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             part.offset.x = 0.0f;
             part.offset.y = 0.0f;
             part.offset.z = 0.0f;
-            part.fadeStart = flame->emit.unk38;
-            part.fadeRate = flame->emit.unk3A;
+            part.fadeStart = flame->emit.fadeStart;
+            part.fadeRate = flame->emit.fadeRate;
             part.scaleStart = 1;
             part.scaleRate = 1.0f;
             part.flags = 0xC207;
@@ -2368,9 +2368,9 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             part.drawFunc = -1;
             part.handlerSet = 0;
             do {
-                part.timer = (math_random() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
-                part.alpha = (math_random() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
-                part.width = part.height = math_randomFloat() * flame->emit.unk20 + flame->emit.unk1C;
+                part.timer = (math_random() % (flame->emit.lifeRange + 1)) + flame->emit.lifeMin;
+                part.alpha = (math_random() % (flame->emit.alphaRange + 1)) + flame->emit.alphaMin;
+                part.width = part.height = math_randomFloat() * flame->emit.sizeRange + flame->emit.sizeMin;
                 {
                     Vec3f delta;
                     Vec3f axisA;
@@ -2389,7 +2389,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                         part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                         part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                         part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                        part.gravity = math_randomFloat() * flame->emit.unk34 + flame->emit.unk30;
+                        part.gravity = math_randomFloat() * flame->emit.gravityRange + flame->emit.gravityMin;
                         particle_newSpriteParticleWithFloor(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
                     }
                 }
@@ -2663,8 +2663,8 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 s32 r;
                 Vec3f vel;
 
-                r1 = math_randomFloat() * flame->line.unk14 + flame->line.unkC;
-                r2 = math_randomFloat() * flame->line.unk18 + flame->line.unk10;
+                r1 = math_randomFloat() * flame->line.widthRange + flame->line.widthMin;
+                r2 = math_randomFloat() * flame->line.heightRange + flame->line.heightMin;
                 r3 = math_randomFloat() * flame->line.speedRange + flame->line.speedMin;
                 spawn.width = 24.22288895f * r1;
                 spawn.height = 3.440458536f * r2;
@@ -2688,7 +2688,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 spawn.rot.x = spawn.pos.x + dir.x;
                 spawn.rot.y = spawn.pos.y + dir.y;
                 spawn.rot.z = spawn.pos.z + dir.z;
-                spawn.unk44 = math_random() % (flame->line.unk3D + 1) + flame->line.unk3C;
+                spawn.unk44 = math_random() % (flame->line.alphaRange + 1) + flame->line.alphaMin;
                 particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((math_random() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
@@ -3307,10 +3307,10 @@ void flamethrower_spawnControllerFlame(FlamethrowerController *ctrl) {
     setup.line.rateRange = 0.00699999975f;
     setup.line.lifeMin = 20;
     setup.line.lifeRange = 13;
-    setup.line.unkC = 0.503000021f;
-    setup.line.unk14 = 0.5120000243f;
-    setup.line.unk10 = 0.2990000248f;
-    setup.line.unk18 = 0.3920000196f;
+    setup.line.widthMin = 0.503000021f;
+    setup.line.widthRange = 0.5120000243f;
+    setup.line.heightMin = 0.2990000248f;
+    setup.line.heightRange = 0.3920000196f;
     setup.line.speedMin = 0.5550000072f;
     setup.line.speedRange = 0.7080000043f;
     setup.line.gravityMin = 0.04200000316f;
@@ -3320,47 +3320,47 @@ void flamethrower_spawnControllerFlame(FlamethrowerController *ctrl) {
     setup.line.fadeStart = 12;
     setup.line.alphaPerLife = 21;
     setup.line.position = 0.4360000193f;
-    setup.line.unk3C = 100;
-    setup.line.unk3D = 80;
+    setup.line.alphaMin = 100;
+    setup.line.alphaRange = 80;
     setup.line.shrinkRate = 0.006000000052f;
     setup.scatter.target.x = 7.0f;
     setup.scatter.target.y = -218.0f;
     setup.scatter.target.z = 150.0f;
     setup.scatter.rate = 0.2040000111f;
     setup.scatter.rateRange = 0.4030000269f;
-    setup.scatter.unk14 = 4;
-    setup.scatter.unk18 = 3;
-    setup.scatter.unk1C = 50;
-    setup.scatter.unk1E = 21;
-    setup.scatter.unk20 = 4.0f;
-    setup.scatter.unk24 = 6.0f;
+    setup.scatter.itemCountMin = 4;
+    setup.scatter.itemCountRange = 3;
+    setup.scatter.lifeMin = 50;
+    setup.scatter.lifeRange = 21;
+    setup.scatter.halfWidthMin = 4.0f;
+    setup.scatter.halfWidthRange = 6.0f;
     setup.scatter.speedMin = 0.1000000015f;
     setup.scatter.speedRange = 0.1000000015f;
     setup.scatter.spread = 50.0f;
-    setup.scatter.unk34 = 0.3110000193f;
-    setup.scatter.unk38 = 0.3080000281f;
-    setup.scatter.unk3C = 80;
-    setup.scatter.unk3E = 175;
-    setup.scatter.unk40 = 22;
-    setup.scatter.unk42 = 11;
+    setup.scatter.gravityMin = 0.3110000193f;
+    setup.scatter.gravityRange = 0.3080000281f;
+    setup.scatter.alphaMin = 80;
+    setup.scatter.alphaRange = 175;
+    setup.scatter.fadeStart = 22;
+    setup.scatter.fadeRate = 11;
     setup.emit.target.x = 7.0f;
     setup.emit.target.y = -218.0f;
     setup.emit.target.z = 150.0f;
     setup.emit.rate = 0.05000000075f;
     setup.emit.rateRange = 0.351000011f;
-    setup.emit.unk14 = 60;
-    setup.emit.unk16 = 20;
-    setup.emit.unk18 = 155;
-    setup.emit.unk1A = 100;
-    setup.emit.unk1C = 134.0f;
-    setup.emit.unk20 = 120.0f;
+    setup.emit.lifeMin = 60;
+    setup.emit.lifeRange = 20;
+    setup.emit.alphaMin = 155;
+    setup.emit.alphaRange = 100;
+    setup.emit.sizeMin = 134.0f;
+    setup.emit.sizeRange = 120.0f;
     setup.emit.speedMin = 0.05000000075f;
     setup.emit.speedRange = 0.06000000238f;
     setup.emit.spread = 43.0f;
-    setup.emit.unk30 = -0.25f;
-    setup.emit.unk34 = 0.1780000031f;
-    setup.emit.unk38 = 23;
-    setup.emit.unk3A = 11;
+    setup.emit.gravityMin = -0.25f;
+    setup.emit.gravityRange = 0.1780000031f;
+    setup.emit.fadeStart = 23;
+    setup.emit.fadeRate = 11;
     flame = flamethrower_spawnFlame(sizeof(ctrl->aliveState), &setup, ctrl->base.header.owner, ctrl->base.header.kind);
     if (flame != NULL) {
         state = flame->state;
