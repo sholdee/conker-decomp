@@ -314,7 +314,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042850, name: libultra/audio/init_15550}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
-      - {start: 0x2D4B0, type: bss, vram: 0x800428D0, name: bss_800428D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428D0, name: libultra/audio/n_synthesizer}
       # libultra objects that link their own .bss
       - {start: 0x2D4B0, type: .bss, vram: 0x800428E0, name: libultra/os/initialize}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428F0, name: libultra/os/piacs}

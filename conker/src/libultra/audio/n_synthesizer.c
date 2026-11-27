@@ -2,6 +2,11 @@
 
 static s32 __n_nextSampleTime(ALPlayer **client);
 
+/* Not referenced in this build. In the October 2000 debug prototype, __n_allocParam and _n_freeParam count the
+ * ALParam updates in use in the first word, and n_alSynNew stores the limit (c->maxUpdates) in the second. */
+static s32 D_800428D0;
+static s32 D_800428D4;
+
 typedef struct {
     u8    pad0[0x4];
     s32   unk4;     /* 0x04 */
