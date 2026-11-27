@@ -2520,7 +2520,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             arg0->norun = 0xFF;
             arg0->count5 = 0xFF;
-        } else if ((arg0->animseq.uh != 0x12C) && (gButtonsPressed[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->animseq.uh != 0x12C) && (gButtonsPressed[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (mp3_getPlayState() == 0))) {
             anim = 0x142;
         }
         break;

@@ -32,7 +32,7 @@ typedef struct {
 
 extern s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 
-void func_151F2960(s32 arg0, s32 arg1) {
+void mp3_playStream(s32 arg0, s32 arg1) {
     if (D_800E0D80.read == 0) {
         return;
     }
@@ -81,13 +81,13 @@ void func_151F2960(s32 arg0, s32 arg1) {
     D_800E0D80.unk84 = 5;
 }
 
-void func_151F2BA8(void) {
+void mp3_stop(void) {
     u32 mask = osSetIntMask(1);
     D_800E0D80.unk84 = 3;
     osSetIntMask(mask);
 }
 
-void func_151F2BE8(void) {
+void mp3_pause(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0D80.unk84 == 5) {
         D_800E0D80.unk84 = 6;
@@ -97,7 +97,7 @@ void func_151F2BE8(void) {
     osSetIntMask(mask);
 }
 
-void func_151F2C4C(void) {
+void mp3_resume(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0D80.unk84 == 2) {
         D_800E0D80.unk98 = 5;
@@ -109,7 +109,7 @@ void func_151F2C4C(void) {
     osSetIntMask(mask);
 }
 
-s32 func_151F2CDC(void) {
+s32 mp3_getPlayState(void) {
     s32 ret = 0;
     u32 mask = osSetIntMask(1);
 
@@ -120,7 +120,7 @@ s32 func_151F2CDC(void) {
     return ret;
 }
 
-void func_151F2D6C(s32 arg0, s32 arg1) {
+void mp3_setVolume(s32 arg0, s32 arg1) {
     u32 mask = osSetIntMask(1);
     if (arg0 < 0) {
         D_800E0D80.unk88 = 0;
@@ -133,7 +133,7 @@ void func_151F2D6C(s32 arg0, s32 arg1) {
     osSetIntMask(mask);
 }
 
-void func_151F2DFC(s32 arg0, s32 arg1) {
+void mp3_setPan(s32 arg0, s32 arg1) {
     if (arg0 >= 0x80) {
         arg0 = 0x7F;
     } else {
@@ -147,7 +147,7 @@ void func_151F2DFC(s32 arg0, s32 arg1) {
     }
 }
 
-void func_151F2E4C(s32 arg0, s32 arg1) {
+void mp3_setLowPass(s32 arg0, s32 arg1) {
     D_800E0D80.unk32 = arg0;
     D_800E0D80.unk30 = arg1;
     if (D_800E0D80.unk58 == 0) {
@@ -163,7 +163,7 @@ void func_151F2E4C(s32 arg0, s32 arg1) {
  * caller wants this frame; `cmdList` is the audio command pointer, advanced in place.
  * Returns 1 while the stream is still running, 0 otherwise.
  */
-s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
+s32 mp3_pullFrame(s32 nSamples, Acmd **cmdList) {
     s32 i;
     s32 diff;
     s32 count = 0;
@@ -186,14 +186,14 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
     }
 
     if (D_800E0D80.unk84 == 5) {
-        func_151F3D78();
+        mp3_prefetchStream();
         if (D_800E0D80.unk98 == 0) {
             D_800E0D80.decoder = mp3_open(0, D_800E0D80.read, D_800E0D80.streamSize);
             if (D_800E0D80.decoder == 0) {
                 D_800E0D80.streamPos = 0;
                 D_800E0D80.unk90 = 0;
                 D_800E0D80.unk98 = 5;
-                func_151F3D78();
+                mp3_prefetchStream();
                 D_800E0D80.unk84 = 5;
                 return 0;
             } else {
@@ -211,7 +211,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
     }
 
     if (D_800E0D80.unk84 == 7) {
-        func_151F3D78();
+        mp3_prefetchStream();
         if (D_800E0D80.unk98 == 0) {
             D_800E0D80.unk84 = 1;
         } else {
@@ -256,7 +256,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                  */
             }
         }
-        func_151F3D78();
+        mp3_prefetchStream();
         if (D_800E0D80.unk99 == 0) {
             dmemL = 0;
         }
@@ -296,7 +296,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             D_800E0D80.pcmPos = D_800E0D80.pcmPos + nSamples;
         }
-        func_151F39E4(&D_800E0D80);
+        mp3_updateVolumeRamp(&D_800E0D80);
         if (D_800E0D80.unk99 == 0) {
             {
                 Acmd *_a = (*cmdList)++;
@@ -393,7 +393,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
  * envmixer keeps mixing, latch the new volume/pan -- remapping the pan for the mono and
  * headphone output modes -- and start a fresh segment rounded up to a whole 184-sample frame.
  */
-void func_151F39E4(StreamVoice *v) {
+void mp3_updateVolumeRamp(StreamVoice *v) {
     if ((v->em_volume != v->unk88) || (v->em_pan != v->unk94)) {
         if (v->em_delta >= v->em_segEnd) {
             v->em_ltgt  = (n_eqpower[v->em_pan] * v->em_volume) >> 15;
@@ -413,7 +413,7 @@ void func_151F39E4(StreamVoice *v) {
         }
         v->em_volume = v->unk88;
         if ((v->em_volume == 0) && (v->unk90 != 0)) {
-            func_151F2BA8();
+            mp3_stop();
         }
         if (v->em_pan != v->unk94) {
             if (D_800428C2 != 0) {
@@ -430,11 +430,11 @@ void func_151F39E4(StreamVoice *v) {
     }
 }
 
-void func_151F3C1C(void (*callback)(s32, void *, s32)) {
+void mp3_setTagCallback(void (*callback)(s32, void *, s32)) {
     D_800E0D80.tagCallback = callback;
 }
 
-void func_151F3C34(read)
+void mp3_setReadFn(read)
     Mp3ReadFn read;
 {
     D_800E0D80.read = read;
@@ -445,7 +445,7 @@ void func_151F3C34(read)
  * stream (offset == -1 means "carry on from where the last read stopped").  Clamps the
  * request to what is left, returns the number of bytes actually copied, 0 if the DMA failed.
  */
-s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset) {
+s32 mp3_readStream(s32 arg0, void *dst, s32 len, s32 offset) {
     s32       addr;
     ALDMAproc dma;
 
@@ -469,7 +469,7 @@ s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset) {
 
 /* Prefetch the next 0x810 bytes of the stream; the data is not copied anywhere, the point is
    the DMA into the audio cache. */
-void func_151F3D78(void) {
+void mp3_prefetchStream(void) {
     s32       addr;
     ALDMAproc dma;
 

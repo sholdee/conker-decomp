@@ -923,7 +923,7 @@ void func_151DF1BC(void) {
         }
     }
     if (obj != NULL) {
-        if (func_151F2CDC() == 1) {
+        if (mp3_getPlayState() == 1) {
             if (obj->levelMode == 0) {
                 obj->levelMode = 1;
             }
@@ -2859,8 +2859,8 @@ void save_updateModeIntro(void) {
 
     save_updateFadeIn();
     if ((gFrontEndButtons != 0) || (gCutsceneStates[0] != 1)) {
-        if ((gCutsceneStates[0] == 1) && (func_151F2CDC() == 1)) {
-            func_151F2D6C(0, 0x2DE0);
+        if ((gCutsceneStates[0] == 1) && (mp3_getPlayState() == 1)) {
+            mp3_setVolume(0, 0x2DE0);
         }
         gFrontEndState = 7;
         gPendingTransition = save_setupMatch;
@@ -2997,8 +2997,8 @@ void save_updateResultsScreen(void) {
             text_printAt(213, 180, 1, "#", (gPauseCursor == 1) + 0xE);
             text_printAt(148, 180, 1, "#", 0x1A);
             if ((gFrontEndButtons & 0x8000) || gFrontEndTimer > 2400) {
-                if (gCutsceneStates[0] == 1 && func_151F2CDC() == 1) {
-                    func_151F2D6C(0, 0x2DE0);
+                if (gCutsceneStates[0] == 1 && mp3_getPlayState() == 1) {
+                    mp3_setVolume(0, 0x2DE0);
                 }
                 if (gFrontEndTimer > 2400) {
                     gPauseCursor = 1;

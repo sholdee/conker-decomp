@@ -29,7 +29,7 @@ Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *cmdList) {
     s32      bus;
 
     p = cmdList;
-    if ((D_800E0D80.unk84 == 0) || (func_151F2E88(0xB8, &p) == 0)) {
+    if ((D_800E0D80.unk84 == 0) || (mp3_pullFrame(0xB8, &p) == 0)) {
         aClearBuffer(p++, 0x4E0, 0x2E0);
         aClearBuffer(p++, 0x7C0, 0x2E0);
     }

@@ -1286,7 +1286,7 @@ void music_update(f32 x, f32 y, f32 z) {
         } else if (kind34Mask != 0) {
             music_setDuck(500, 0x400, kind34Mask ^ 0xFF);
             music_setDuck(0x8000, 0x800, kind34Mask);
-        } else if (func_151F2CDC() == 1 &&
+        } else if (mp3_getPlayState() == 1 &&
                    (gMp3LastTrack < 125 || gMp3LastTrack >= 129) &&
                    gMp3LastTrack < 457 && gMp3LastTrack != 368 &&
                    gMp3LastTrack != 369) {
