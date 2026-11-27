@@ -11,7 +11,7 @@
 /* Z-buffer scan parameters (gZScanParams[player][unk1B4], copied from gDefaultZScanParams by camera_resetZScans). */
 typedef struct {
     s16 halfWidth; // pixels scanned on each side of the target
-    s16 unk2;
+    s16 height;
     s16 threshold; // depth gap that counts as an occluder
     s16 altThreshold;
 } ZScanParams;
@@ -19,7 +19,7 @@ typedef struct {
 /* One set of scans per player. */
 typedef struct {
     /* 0x00 */ ZScan scan[4];
-    /* 0x30 */ u8 unk30;
+    /* 0x30 */ u8 lastBlockedScan;
     /* 0x31 */ u8 pad31[0x1B];
 } ZScanSet;
 
@@ -41,7 +41,7 @@ static f32 gOcclusionEyeDrop;
 static ZScanParams gZScanParams[4][4]; // per player
 
 /* Updates the camera's floor heights (floorY, unk360; -10000 means none found) and the height it aims for
- * (unk354), with special cases for the camera modes and the tracked objects. */
+ * (baseY), with special cases for the camera modes and the tracked objects. */
 void camera_updateFloorHeights(Camera *camera) {
     f32 unusedShad;
     s32 transport;
@@ -62,7 +62,7 @@ void camera_updateFloorHeights(Camera *camera) {
         targetHeight = height;
     }
     if (!camera->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
-        camera->floorY = camera->unk354 = camera->CharPtr->floorY;
+        camera->floorY = camera->baseY = camera->CharPtr->floorY;
         return;
     }
     if ((camera->Snap != 0) || (camera->AvailableModes & 0x400000) || (camera->SpecialFlags & 0x40) ||
@@ -99,35 +99,35 @@ void camera_updateFloorHeights(Camera *camera) {
         camera->waterY = camera->zoneWaterY;
     }
     if (camera->CharPtr->unk137 != 0) {
-        camera->floorY = camera->unk354 = camera->CharPtr->ypos;
+        camera->floorY = camera->baseY = camera->CharPtr->ypos;
     }
     if ((gSpawnCutsceneActive != 0) || (camera->transition.state != 0)) {
-        camera->floorY = camera->unk354 = camera->CharPtr->floorY;
+        camera->floorY = camera->baseY = camera->CharPtr->floorY;
         return;
     }
     if (((camera->Mode & 0x100) || (camera->Mode != 0x80)) && (camera->floorY < camera->waterY) &&
         (camera->waterY < camera->eye.y)) {
         camera->floorY = camera->waterY;
-        camera->unk354 = camera->waterY;
+        camera->baseY = camera->waterY;
     } else {
-        camera->unk354 = camera->floorY;
+        camera->baseY = camera->floorY;
     }
     if (camera->DoingRail != 0) {
-        if (((-10000.0f == camera->unk354) && (camera->unk354 < camera->CharPtr->floorY)) ||
-            (camera->RailMagY < fabsf(camera->unk354 - camera->CharPtr->floorY))) {
-            camera->unk354 = camera->CharPtr->floorY;
+        if (((-10000.0f == camera->baseY) && (camera->baseY < camera->CharPtr->floorY)) ||
+            (camera->RailMagY < fabsf(camera->baseY - camera->CharPtr->floorY))) {
+            camera->baseY = camera->CharPtr->floorY;
         }
     } else if (gSpawnCutsceneActive == 0) {
         if (!(camera->AvailableModes & 0x20000000)) {
             if (camera->AvailableModes & 0x10000000) {
-                if (camera->unk354 < camera->CharPtr->floorY) {
-                    camera->floorY = camera->unk354 = camera->CharPtr->floorY;
+                if (camera->baseY < camera->CharPtr->floorY) {
+                    camera->floorY = camera->baseY = camera->CharPtr->floorY;
                 }
             }
             if ((camera->Mode != 0x80) || ((camera->SpecialFlags & 0x80) && (camera->CharPtr->count3 != 0)) ||
                 (camera->AvailableModes & 0x800)) {
-                if (camera->unk354 < camera->focus.y) {
-                    camera->unk354 = camera->focus.y;
+                if (camera->baseY < camera->focus.y) {
+                    camera->baseY = camera->focus.y;
                 }
             }
         }
@@ -137,24 +137,24 @@ void camera_updateFloorHeights(Camera *camera) {
             camera->floorY = camera->CharPtr->waterHeight;
         }
         if (camera->Mode == 0x80) {
-            if (camera->eye.y < camera->unk354 + 30.0f) {
-                camera->eye.y = camera->unk354 + 30.0f;
+            if (camera->eye.y < camera->baseY + 30.0f) {
+                camera->eye.y = camera->baseY + 30.0f;
             }
             camera_updatePitch(camera);
             return;
         }
-        if ((camera->cmdRunning != 0) && (camera->cmd.unk34 != 0)) {
-            camera->height = camera->cmd.unk34;
+        if ((camera->cmdRunning != 0) && (camera->cmd.height != 0)) {
+            camera->height = camera->cmd.height;
         } else {
-            camera->height = camera->unk34C;
+            camera->height = camera->idealHeight;
         }
     } else {
-        camera->unk354 = camera->floorY;
+        camera->baseY = camera->floorY;
     }
-    camera->unk354 = camera->floorY + (camera->unk354 - camera->floorY);
+    camera->baseY = camera->floorY + (camera->baseY - camera->floorY);
     if (!(camera->AvailableModes & 0x4000) || (camera_isInDeepWater(camera) == 0)) {
         if ((camera->CharPtr->inwater == 1) && (camera->Mode != 0x80) && (-10000.0f != camera->waterY)) {
-            camera->unk354 = camera->waterY + 50.0f;
+            camera->baseY = camera->waterY + 50.0f;
         }
     }
     if ((camera->SpecialFlags & 0x40) && (camera->CharPtr->unk137 == 0)) {
@@ -170,10 +170,10 @@ void camera_updateFloorHeights(Camera *camera) {
         }
         camera->TargetRopeDisp = (camera->TargetRopeDisp < -300.0f) ? -300.0f : ((camera->TargetRopeDisp > 300.0f) ? 300.0f : camera->TargetRopeDisp);
         math_springTo(&camera->RopeDisp, camera->TargetRopeDisp, &camera->RopeDispVel, 1.0f, 1.5f, camera->SpringTime);
-        camera->unk354 = camera->focus.y + camera->RopeDisp + (targetHeight * 0.8500000238f);
-        camera->unk354 = (camera->unk354 < camera->CharPtr->floorY + camera->height) ? camera->CharPtr->floorY + camera->height : camera->unk354;
-        camera->unk354 = (camera->unk354 < camera->floorY + 50.0f) ? camera->floorY + 50.0f : camera->unk354;
-        camera->unk354 = (camera->unk354 < camera->waterY + 50.0f) ? camera->waterY + 50.0f : camera->unk354;
+        camera->baseY = camera->focus.y + camera->RopeDisp + (targetHeight * 0.8500000238f);
+        camera->baseY = (camera->baseY < camera->CharPtr->floorY + camera->height) ? camera->CharPtr->floorY + camera->height : camera->baseY;
+        camera->baseY = (camera->baseY < camera->floorY + 50.0f) ? camera->floorY + 50.0f : camera->baseY;
+        camera->baseY = (camera->baseY < camera->waterY + 50.0f) ? camera->waterY + 50.0f : camera->baseY;
         camera->CharTrackingSpeedTarget = 0.0f;
         camera->AvailableModes |= 0x10000000;
         camera->ropeActive = 1;
@@ -203,11 +203,11 @@ void camera_resetZScans(void) {
             gZScanParams[i][j] = gDefaultZScanParams[j];
             if ((gScreenLayout > 0) && (gScreenLayout < 4)) {
                 gZScanParams[i][j].halfWidth *= 0.5f;
-                gZScanParams[i][j].unk2 *= 0.5f;
+                gZScanParams[i][j].height *= 0.5f;
             }
             if ((level == LEVEL_W2_LIFTTUNNEL) || (level == LEVEL_W2_FLAMETUNNEL)) {
                 gZScanParams[i][j].halfWidth *= 0.75f;
-                gZScanParams[i][j].unk2 *= 0.75f;
+                gZScanParams[i][j].height *= 0.75f;
             }
             j++;
         }
@@ -283,7 +283,7 @@ void camera_checkOcclusion(Camera *camera) {
 }
 
 /* Runs the z-buffer occlusion check (camera_checkOcclusion) when the camera mode allows it; otherwise marks the
- * check as off and arms the unk5FC/unk5FE countdowns. */
+ * check as off and arms the SHitsOffLastFrame/boxedInTimer countdowns. */
 void camera_updateOcclusion(Camera *camera) {
     if ((camera->Mode & ~0x100) && (gPaused == 0) && (gSpawnCutsceneActive == 0)) {
         if (camera->Mode != 0x40) {
@@ -296,7 +296,7 @@ void camera_updateOcclusion(Camera *camera) {
         }
         camera->SideHitsClear = 1;
         camera->SHitsOffLastFrame = 2;
-        camera->unk5FE = 60;
+        camera->boxedInTimer = 60;
     }
 }
 
@@ -315,7 +315,7 @@ void camera_scanZRow(Camera *camera, s32 screenX, s32 screenY, s32 depth) {
 
     params = &gZScanParams[camera->CNumber][camera->DistIndex];
     halfWidth = params->halfWidth;
-    height = params->unk2;
+    height = params->height;
     camera->CurrentHitsWidth += (halfWidth - camera->CurrentHitsWidth) * 0.05000000075f;
     halfWidth = (s16)camera->CurrentHitsWidth + 0.5f;
     camera->CurrentHitsHeight += (height - camera->CurrentHitsHeight) * 0.05000000075f;
@@ -436,22 +436,22 @@ s32 camera_getOcclusionOffset(Camera *camera, f32 *offset, f32 *unused) {
     edge0 = gZScanSets[camera->CNumber].scan[0].offset + 1.0f;
     edge1 = gZScanSets[camera->CNumber].scan[1].offset + 1.0f;
     if (state0 == 2 && state1 != 2) {
-        gZScanSets[camera->CNumber].unk30 = 0;
+        gZScanSets[camera->CNumber].lastBlockedScan = 0;
     } else if (state0 != 2 && state1 == 2) {
-        gZScanSets[camera->CNumber].unk30 = 1;
+        gZScanSets[camera->CNumber].lastBlockedScan = 1;
     }
     if (state2 == 2 && state3 != 2) {
-        gZScanSets[camera->CNumber].unk30 = 2;
+        gZScanSets[camera->CNumber].lastBlockedScan = 2;
     } else if (state2 != 2 && state3 == 2) {
-        gZScanSets[camera->CNumber].unk30 = 3;
+        gZScanSets[camera->CNumber].lastBlockedScan = 3;
     }
     if (state0 == 2 || state1 == 2) {
         halfWidth = gZScanParams[camera->CNumber][camera->DistIndex].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
             if (camera->CharPtr->inwater != 1 && camera->mv->death_State == 0) {
-                camera->unk5FE -= gFrameTicks;
-                if (camera->unk5FE < 0) {
-                    camera->unk5FE = 0;
+                camera->boxedInTimer -= gFrameTicks;
+                if (camera->boxedInTimer < 0) {
+                    camera->boxedInTimer = 0;
                 }
             }
             if (camera->Mode != 0x80) {
@@ -461,14 +461,14 @@ s32 camera_getOcclusionOffset(Camera *camera, f32 *offset, f32 *unused) {
                 *offset = halfWidth - edge0;
             } else if (gZScanSets[camera->CNumber].scan[0].offset < gZScanSets[camera->CNumber].scan[1].offset) {
                 *offset = edge1 - halfWidth;
-            } else if (gZScanSets[camera->CNumber].unk30 == 0) {
+            } else if (gZScanSets[camera->CNumber].lastBlockedScan == 0) {
                 *offset = halfWidth - edge0;
             } else {
                 *offset = edge1 - halfWidth;
             }
         } else {
             camera->SHitsPIPOutTimer = 0;
-            camera->unk5FE = 60;
+            camera->boxedInTimer = 60;
             // matching: the unk23C tests below have identical branches in the original
             if (gZScanSets[camera->CNumber].scan[0].state == 2) {
                 if (camera->Snap != 0) {
@@ -493,7 +493,7 @@ s32 camera_getOcclusionOffset(Camera *camera, f32 *offset, f32 *unused) {
         gZScanSets[camera->CNumber].scan[0].state = 4;
         gZScanSets[camera->CNumber].scan[1].state = 4;
         *offset -= *offset * 0.1000000015f;
-        camera->unk5FE = 60;
+        camera->boxedInTimer = 60;
     }
     if (camera->SHitsPIPOutTimer != 0) {
         camera->SHitsPIPOutTimer -= gFrameTicks;
@@ -582,8 +582,8 @@ void camera_collide(Camera *camera) {
         }
         probe.zpos = camera->eye.z;
         probe.floorTriVerts = camera->TrianglePtr;
-        probe.shad = probe.ypos - camera->unk354;
-        probe.floorY = camera->unk354;
+        probe.shad = probe.ypos - camera->baseY;
+        probe.floorY = camera->baseY;
         probe.yspd = 0.0f;
         probe.theta = camera->CameraAngle;
         if ((camera->AvailableModes & 0x80000000) || (level == LEVEL_W1_U_BEND)) {

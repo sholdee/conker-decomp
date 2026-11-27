@@ -8,7 +8,7 @@ void camera_levelSetup15(Camera *camera) {
     camera->AvailableModes |= 0x1000000;
     camera->AvailableModes &= -5;
     camera->height = 500.0f;
-    camera->unk34C = 500.0f;
+    camera->idealHeight = 500.0f;
     camera->IdealTripodMagnitude = 800.0f;
     camera->DoingAim = 0;
 }

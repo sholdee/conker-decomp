@@ -9,7 +9,7 @@ void camera_levelSetup10(Camera *camera) {
     camera->DistIndex = 1;
     camera->DistMask = 2;
     camera->height = 117.0f;
-    camera->unk34C = 117.0f;
+    camera->idealHeight = 117.0f;
     camera->YOffsetTget = 0.0f;
     camera->YOffset = 0.0f;
     camera->Tightness = 0;

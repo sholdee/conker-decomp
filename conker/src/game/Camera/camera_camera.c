@@ -557,8 +557,8 @@ void camera_updateFollow(Camera *camera) {
                                 if (camera->CharContext == 3) {
                                     camera->height *= camera->IdealTripodMagnitude / prevDistance;
                                     if (camera->SpecialFlags & 0x10) {
-                                        camera->height = (camera->height < camera->target.y - camera->unk354)
-                                                          ? camera->target.y - camera->unk354
+                                        camera->height = (camera->height < camera->target.y - camera->baseY)
+                                                          ? camera->target.y - camera->baseY
                                                           : camera->height;
                                     }
                                 }
@@ -750,23 +750,23 @@ void camera_loadDistancePreset(Camera *camera) {
     mode80 = camera->Mode & 0x80;
     if (mode80 && (camera->PadPtr->button & R_TRIG)) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;
     } else if (mode80) {
-        camera->height = camera->eye.y - camera->unk354;
+        camera->height = camera->eye.y - camera->baseY;
     } else if (mode80 && (camera->CharPtr->unk102 == 0) && (level != LEVEL_W1_DOG_FISH_NURSERY_PART1)) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;
     } else if (camera->CharPtr->unk102 != 0) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 194.0f;
     } else {
         preset = gCameraDistancePresets[camera->DistIndex];
         camera->IdealTripodMagnitude = preset[0];
         camera->height = preset[1];
-        camera->unk34C = camera->height;
+        camera->idealHeight = camera->height;
     }
 }
 
@@ -1116,7 +1116,7 @@ void camera_updateDeepWater(Camera *camera) {
             }
             if (camera->SpecialFlags & 0x1000) {
                 camera->SpecialFlags &= ~0x1000;
-                camera->height = camera->unk344 = camera->eye.y - camera->unk354;
+                camera->height = camera->eyeHeight = camera->eye.y - camera->baseY;
             }
         }
     }
@@ -1417,8 +1417,8 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         camera->target.y = camera->CharPtr->ypos + (camera->mv->height * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
         ext->aimEye = camera->eye;
-        ext->unk18C = camera->CameraAngle;
-        ext->unk160 = camera->eye;
+        ext->savedCameraYaw = camera->CameraAngle;
+        ext->savedCameraEye = camera->eye;
         if (zone != ext->aimZone) {
             if (zone == 0x1B) {
                 t = 1.0f;
@@ -1957,8 +1957,8 @@ void camera_endUpdate(Camera *camera) {
         camera->Snap--;
     }
     if (camera->AvailableModes & 8) {
-        if (camera->unk5FE <= 0) {
-            camera->unk5FE = 60;
+        if (camera->boxedInTimer <= 0) {
+            camera->boxedInTimer = 60;
             camera_placeAtObject(camera, camera->CharPtr);
         }
     }
@@ -2052,6 +2052,6 @@ void camera_placeAtObject(Camera *camera, Actor *obj) {
     camera->prevEye.y = camera->eye.y = obj->ypos;
     camera->prevEye.z = camera->eye.z = obj->zpos;
     camera->CameraAngle = camera->CharPtr->theta - 180.0f;
-    camera->mv->unk18C = 999.0f;
+    camera->mv->savedCameraYaw = 999.0f;
     camera->Snap = 1;
 }

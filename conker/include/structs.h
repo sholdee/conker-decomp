@@ -613,7 +613,7 @@ typedef struct {
     /* 0x13C */ Vec3f aimEye;
     /* 0x148 */ Vec3f aimTarget;
     /* 0x154 */ u8  pad154[0xC];
-    /* 0x160 */ Vec3f unk160;
+    /* 0x160 */ Vec3f savedCameraEye;
     /* 0x16C */ f32 aimYaw;
     /* 0x170 */ f32 aimPitch;
     /* 0x174 */ f32 aimYawTarget;
@@ -622,7 +622,7 @@ typedef struct {
     /* 0x180 */ f32 aimPitchVel;
     /* 0x184 */ f32 aimZoom;
     /* 0x188 */ f32 aimZoomY;
-    /* 0x18C */ f32 unk18C;
+    /* 0x18C */ f32 savedCameraYaw;
     /* 0x190 */ s32 aimZone;
     /* 0x194 */ u8  aimReset;
     /* 0x195 */ s8  being_sniped;
@@ -1420,42 +1420,50 @@ struct WorldObject {
 
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
-    /* 0x00 */ s16 unk0;
+    /* 0x00 */ s16 cmdReceived;
     /* 0x02 */ s16 cmdId;                            /* id (cmd.id) of the command last started */
     /* 0x04 */ s16 lastType;                         /* cmd.type of the last command run */
-    /* 0x06 */ s16 unk6;
+    /* 0x06 */ s16 cancelled;
     /* 0x08 */ s16 blending;                         /* still easing back (blend < 1) after a type 1 command */
     /* 0x0A */ u8 padA[0x6];
     /* 0x10 */ f32 blend;                            /* 0..1 easing factor */
     /* 0x14 */ f32 pushRate;                         /* 0..0.04, scales the minimum-distance push */
-    /* 0x18 */ f32 unk18;
+    /* 0x18 */ f32 focusX;
     /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
+    /* 0x20 */ f32 focusZ;
     /* 0x24 */ f32 minHeight;
     /* 0x28 */ f32 maxHeight;
     /* 0x2C */ f32 maxDistance;
 } CamCmdState; // size 0x30
 
-/* Current camera command (Camera.cmd, at 0x6FC). Type 15 is a rail (see CamRail). */
+/* Current camera command (Camera.cmd, at 0x6FC), copied from a camera TriggerZone by camera_processMessages
+ * (message 1). Type 15 is a rail (see CamRail). data1..data3 are the zone's per-type parameters:
+ *   data1: types 0-3 Camera.IdealTripodMagnitude; type 5 FCameraIndex; type 7 RailMagXZ;
+ *          types 10/14 the spawn id of the object (collision_findSpawnById); type 11 minHeight;
+ *          type 15 rail.offsetMode
+ *   data2: types 0-3 height; type 5 FTgetRadius; type 7 RailMagY; types 10/14 IdealTripodMagnitude;
+ *          type 11 maxHeight; type 15 rail.offset
+ *   data3: the action for camera_startCommandMode (all types but 10); type 5 FToFromStatus;
+ *          type 7 RailFlags; types 10/14 height; type 11 maxDistance; type 15 rail.heightOffset */
 typedef struct CamCmd {
     /* 0x00 */ u32 type;
     /* 0x04 */ s16 id;
     /* 0x06 */ u8 pad6[0x2];
-    /* 0x08 */ u32 unk8;                             /* type 7: path options (copied to Camera.RailFlags); type 15: rail height offset */
+    /* 0x08 */ u32 data3;                            /* TriggerZone.data3 */
     /* 0x0C */ u8 padC[0x4];
     /* 0x10 */ s16 x;                                /* type 15: rail midpoint */
     /* 0x12 */ s16 y;
     /* 0x14 */ s16 z;
-    /* 0x16 */ s16 halfLength;                       /* type 15: half the rail length */
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ u32 unk1C;                            /* type 15: rail offset mode (copied to rail.offsetMode) */
-    /* 0x20 */ u32 unk20;                            /* type 15: rail offset (copied to rail.offset) */
-    /* 0x24 */ f32 unk24;                            /* type 15: unk24/unk28 split halfLength into horizontal/vertical parts, */
-    /* 0x28 */ f32 unk28;                            /* unk2C/unk30 split the horizontal part into x/z */
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s16 unk34;
+    /* 0x16 */ s16 halfLength;                       /* TriggerZone.xSize; type 15: half the rail length */
+    /* 0x18 */ s16 ySize;                            /* TriggerZone.ySize */
+    /* 0x1A */ s16 zSize;                            /* TriggerZone.zSize */
+    /* 0x1C */ u32 data1;                            /* TriggerZone.data1 */
+    /* 0x20 */ u32 data2;                            /* TriggerZone.data2 */
+    /* 0x24 */ f32 cosPitch;                         /* type 15: cosPitch/sinPitch split halfLength into horizontal/vertical parts, */
+    /* 0x28 */ f32 sinPitch;                         /* cosYaw/sinYaw split the horizontal part into x/z */
+    /* 0x2C */ f32 cosYaw;
+    /* 0x30 */ f32 sinYaw;
+    /* 0x34 */ s16 height;                           /* while the command runs, Camera.height is held at this when nonzero */
     /* 0x36 */ u8 pad36[0x2];
 } CamCmd; // size 0x38
 
@@ -1477,7 +1485,7 @@ typedef struct CamAim {
     /* 0x24 */ f32 savedTargetDistance;
     /* 0x28 */ f32 savedHeight;
     /* 0x2C */ f32 savedTightness;
-    /* 0x30 */ f32 savedUnk354;
+    /* 0x30 */ f32 savedBaseY;
     /* 0x34 */ f32 targetYaw;
     /* 0x38 */ f32 targetPitch;
     /* 0x3C */ f32 pitch;
@@ -1485,7 +1493,7 @@ typedef struct CamAim {
     /* 0x44 */ f32 distance;
     /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.TripodMagnitude passes this */
     /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
-    /* 0x4D */ u8 unk4D;
+    /* 0x4D */ u8 swing;
     /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
     /* 0x4F */ u8 pad4F[0x1];
     /* 0x50 */ f32 overridePitch;
@@ -1616,7 +1624,7 @@ struct Camera {
     /* 0x274 */ s16 FToFromStatus;
     /* 0x276 */ u8 pad276[0x2];
     /* 0x278 */ f32 FTgetRadius;
-    /* 0x27C */ Vec3f unk27C;
+    /* 0x27C */ Vec3f fixedEye;
     /* 0x288 */ Vec3f posePos;                         /* gCameraPoses[FCameraIndex], the fixed pose point (game/Camera/CameraCommands/cameracommands.c) */
     /* 0x294 */ f32 FixedVel;                         /* not accessed by US code */
     /* 0x298 */ s16 CharMoved;
@@ -1633,11 +1641,11 @@ struct Camera {
     /* 0x2F8 */ Vec3f eye;                            /* camera position */
     /* 0x304 */ Vec3f prevEye;
     /* 0x310 */ u8 pad310[0x34];
-    /* 0x344 */ f32 unk344;
+    /* 0x344 */ f32 eyeHeight;
     /* 0x348 */ f32 height;
-    /* 0x34C */ f32 unk34C;
+    /* 0x34C */ f32 idealHeight;
     /* 0x350 */ u8 pad350[0x4];
-    /* 0x354 */ f32 unk354;
+    /* 0x354 */ f32 baseY;
     /* 0x358 */ f32 unk358;
     /* 0x35C */ f32 floorY;
     /* 0x360 */ f32 waterY;                           /* water surface below the eye, -10000.0f = none; eye below it = underwater */
@@ -1701,7 +1709,7 @@ struct Camera {
     /* 0x5F8 */ s16 SideHitsClear;
     /* 0x5FA */ s16 UDHitsCounter;
     /* 0x5FC */ s16 SHitsOffLastFrame;
-    /* 0x5FE */ s16 unk5FE;
+    /* 0x5FE */ s16 boxedInTimer;
     /* 0x600 */ u8 blocked;                           /* wall between focus and eye this frame */
     /* 0x601 */ u8 pad601[0x3];
     /* 0x604 */ f32 blockedDistance;
@@ -1821,7 +1829,7 @@ struct Camera {
     /* 0x914 */ f32 RailAccelBTarget;
     /* 0x918 */ f32 RailAccelAVel;
     /* 0x91C */ f32 RailAccelBVel;
-    /* 0x920 */ u16 RailFlags;                        /* type 7 command options (cmd.unk8) */
+    /* 0x920 */ u16 RailFlags;                        /* type 7 command options (cmd.data3) */
     /* 0x922 */ u8 pad922[0x2];
     /* 0x924 */ f32 RailMagXZ;
     /* 0x928 */ f32 RailMagY;

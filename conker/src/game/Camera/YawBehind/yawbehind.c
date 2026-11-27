@@ -43,12 +43,12 @@ void camera_easeYawBehind(Camera *camera, f32 yawOffset) {
         }
         math_normalizeDegrees(&angle);
         if (camera->Snap) {
-            if (camera->mv->unk18C != 999.0f) { // 999.0f: "no saved yaw" sentinel
-                camera->CameraAngle = camera->mv->unk18C;
-                position = camera->mv->unk160;
+            if (camera->mv->savedCameraYaw != 999.0f) { // 999.0f: "no saved yaw" sentinel
+                camera->CameraAngle = camera->mv->savedCameraYaw;
+                position = camera->mv->savedCameraEye;
                 camera->eye = position;
                 camera->prevEye = position;
-                camera->mv->unk18C = 999.0f;
+                camera->mv->savedCameraYaw = 999.0f;
             } else {
                 camera->CameraAngle = angle;
             }

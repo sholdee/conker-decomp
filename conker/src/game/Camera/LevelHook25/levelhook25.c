@@ -13,7 +13,7 @@ void camera_levelHook25(Camera *camera) {
             camera_updatePlayerAngle(camera);
         }
         camera->height = 150.0f;
-        camera->unk34C = 150.0f;
+        camera->idealHeight = 150.0f;
         camera->IdealTripodMagnitude = 340.0f;
         camera->SpecialFlags |= 0x800;
         camera->YOffsetTget = -6.0f;

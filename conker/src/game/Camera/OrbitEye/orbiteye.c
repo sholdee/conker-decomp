@@ -112,5 +112,5 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
     }
     camera->YawAngle += (camera->Roll - camera->YawAngle) * 0.150000006f;
     camera->TripodMagnitude = sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.z - camera->target.z));
-    camera->height = camera->unk344 = camera->eye.y - camera->unk354;
+    camera->height = camera->eyeHeight = camera->eye.y - camera->baseY;
 }

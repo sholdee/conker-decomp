@@ -8,11 +8,11 @@
 
 /* Per-preset coefficients for camera_updateAngleOffsets, indexed by Camera.Tightness. */
 typedef struct {
-    /* 0x00 */ f32 unk3A8Scale;
-    /* 0x04 */ f32 unk5E8Scale;
-    /* 0x08 */ f32 unk3A8SpeedScale;
-    /* 0x0C */ f32 unk5E8SpeedScale;
-    /* 0x10 */ f32 unk3A8Bias;
+    /* 0x00 */ f32 pitchScale;
+    /* 0x04 */ f32 yawScale;
+    /* 0x08 */ f32 pitchSpeedScale;
+    /* 0x0C */ f32 yawSpeedScale;
+    /* 0x10 */ f32 pitchBias;
 } CamTiltPreset; // size 0x14
 
 static CamTiltPreset gCameraAngleOffsetPresets[] = {
@@ -49,11 +49,11 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outYawAngle, f32 *outPitchAn
         math_springTo(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
         return;
     }
-    pitchScale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Scale;
-    yawScale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8Scale;
-    pitchSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8SpeedScale;
-    yawSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8SpeedScale;
-    pitchBias = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Bias;
+    pitchScale = gCameraAngleOffsetPresets[camera->Tightness].pitchScale;
+    yawScale = gCameraAngleOffsetPresets[camera->Tightness].yawScale;
+    pitchSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].pitchSpeedScale;
+    yawSpeedScale = gCameraAngleOffsetPresets[camera->Tightness].yawSpeedScale;
+    pitchBias = gCameraAngleOffsetPresets[camera->Tightness].pitchBias;
     snap = camera->Snap;
     if ((snap != 0) || (pitchScale == pitchSpeedScale)) {
         speed = 0.0f;

@@ -32,7 +32,7 @@ void camera_levelHook04(Camera *camera)
             }
             camera->IdealTripodMagnitude = 550.0f;
             camera->Tightness = 0;
-            camera->height = camera->unk34C = 320.0f;
+            camera->height = camera->idealHeight = 320.0f;
             camera->YOffsetTget = 180.0f;
             gLevelHook04TransportOn = 1;
             script_command(0, 0x405C, 0);

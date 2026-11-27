@@ -133,7 +133,7 @@ void camera_updateFreeFly(Camera *cam) {
         cam->eye.z += dirZ * forward;
         cam->eye.x += -dirZ * strafe;
         cam->eye.z += dirX * strafe;
-        cam->unk344 = 0.0f;
+        cam->eyeHeight = 0.0f;
 
         dirX *= 600.0f;
         dirZ *= 600.0f;

@@ -51,7 +51,7 @@ static Vec3f gCamShotFocusOffset = { 0.0f, 0.0f, -400.0f };
 void camera_processMessages(Camera *cam) {
     CamMsg *msg;
 
-    cam->cmdState.unk0 = 0;
+    cam->cmdState.cmdReceived = 0;
     if (cam->LastMagsZone != 0 && camera_isQueueEmpty(cam)) {
         if (script_query(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
             camera_queueMessage(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
@@ -284,20 +284,20 @@ void camera_processMessages(Camera *cam) {
             break;
         case 1:
             cam->cmd.type = msg->arg.cfg->unk17;
-            cam->cmd.unk1C = msg->arg.cfg->unk18;
-            cam->cmd.unk20 = msg->arg.cfg->unk1C;
-            cam->cmd.unk8 = msg->arg.cfg->unk20;
+            cam->cmd.data1 = msg->arg.cfg->unk18;
+            cam->cmd.data2 = msg->arg.cfg->unk1C;
+            cam->cmd.data3 = msg->arg.cfg->unk20;
             cam->cmd.x = msg->arg.cfg->unk0;
             cam->cmd.y = msg->arg.cfg->unk2;
             cam->cmd.z = msg->arg.cfg->unk4;
             cam->cmd.halfLength = msg->arg.cfg->unk6;
-            cam->cmd.unk18 = msg->arg.cfg->unk8;
-            cam->cmd.unk1A = msg->arg.cfg->unkA;
-            cam->cmd.unk24 = msg->arg.cfg->unk28;
-            cam->cmd.unk28 = msg->arg.cfg->unk24;
-            cam->cmd.unk2C = msg->arg.cfg->unk30;
-            cam->cmd.unk30 = msg->arg.cfg->unk2C;
-            cam->cmdState.unk0 = 1;
+            cam->cmd.ySize = msg->arg.cfg->unk8;
+            cam->cmd.zSize = msg->arg.cfg->unkA;
+            cam->cmd.cosPitch = msg->arg.cfg->unk28;
+            cam->cmd.sinPitch = msg->arg.cfg->unk24;
+            cam->cmd.cosYaw = msg->arg.cfg->unk30;
+            cam->cmd.sinYaw = msg->arg.cfg->unk2C;
+            cam->cmdState.cmdReceived = 1;
             break;
         }
     }

@@ -24,7 +24,7 @@ void camera_levelHook07(Camera *camera) {
         }
         camera->IdealTripodMagnitude = 650.0f;
         camera->height = 450.0f;
-        camera->unk34C = 450.0f;
+        camera->idealHeight = 450.0f;
     } else {
         script_command(0, 0x4000, 0);
         if (camera->Mode == 1 && camera_popMode(camera, CAMERA_MODE_NORMAL)) {
@@ -76,7 +76,7 @@ void camera_levelHook07(Camera *camera) {
             camera->Tightness = 0;
         }
         camera->IdealTripodMagnitude = 650.0f;
-        camera->unk34C = 450.0f;
+        camera->idealHeight = 450.0f;
         camera->height = 450.0f;
         if (camera->PadPtr->button & D_CBUTTONS) {
             camera->YOffsetTget = 0.0f;

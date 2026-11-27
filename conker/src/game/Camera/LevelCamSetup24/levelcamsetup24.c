@@ -13,7 +13,7 @@ void camera_levelSetup24(Camera *camera) {
             camera_loadDistancePreset(camera);
         }
         camera->height = 143.0f;
-        camera->unk34C = 143.0f;
+        camera->idealHeight = 143.0f;
         camera->IdealTripodMagnitude = 150.0f;
         camera->YOffsetTget = -38.0f;
         return;
@@ -24,7 +24,7 @@ void camera_levelSetup24(Camera *camera) {
             camera->AvailableModes |= 0x100000;
             camera->AvailableModes &= ~4;
             camera->height = 155.0f;
-            camera->unk34C = 155.0f;
+            camera->idealHeight = 155.0f;
             camera->YOffsetTget = 30.0f;
             camera->YOffset = 30.0f;
             camera->IdealTripodMagnitude = 178.0f;

@@ -4,7 +4,7 @@
 #include "conker/script.h"
 
 // While the values queried through script_query allow it, sets 0x400E to 1 and resets the
-// camera's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds.
+// camera's height/idealHeight/IdealTripodMagnitude; otherwise sets 0x400E back to 0 once camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds.
 void camera_levelHook18(Camera *camera) {
     s32 flagValue;
     s32 flagSet;
@@ -25,7 +25,7 @@ void camera_levelHook18(Camera *camera) {
         }
         camera->IdealTripodMagnitude = 778.0f;
         camera->height = 575.0f;
-        camera->unk34C = 575.0f;
+        camera->idealHeight = 575.0f;
         camera->YOffsetTget = 0.0f;
         camera_updatePlayerAngle(camera);
     } else if (camera_popMode(camera, CAMERA_MODE_TRANSPORT)) {

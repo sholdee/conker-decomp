@@ -179,7 +179,7 @@ s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd) {
     case 8:
         if (cam->mv->death_State == 0) {
             cam->IdealTripodMagnitude = cmd[2];
-            cam->unk34C = cmd[3];
+            cam->idealHeight = cmd[3];
             cam->height = cmd[3];
         }
         return 1;

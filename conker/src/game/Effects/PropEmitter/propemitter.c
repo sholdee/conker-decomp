@@ -42,7 +42,7 @@ void effect_levelHook12(Camera *camera) {
                 camera_loadDistancePreset(camera);
             }
             camera->height = 125.0f;
-            camera->unk34C = 125.0f;
+            camera->idealHeight = 125.0f;
             camera->IdealTripodMagnitude = 220.0f;
             camera->YOffsetTget = 30.0f;
         } else {
@@ -50,7 +50,7 @@ void effect_levelHook12(Camera *camera) {
         }
     } else {
         if ((camera->Mode == 8) && (camera->cmdRunning == 0) && (camera_popMode(camera, CAMERA_MODE_NORMAL) != 0)) {
-            camera->unk34C = 110.0f;
+            camera->idealHeight = 110.0f;
             camera->height = 110.0f;
             camera->IdealTripodMagnitude = 300.0f;
         }
