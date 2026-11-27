@@ -58,7 +58,7 @@ void text_updateBox(TextBox *box) {
 
     player = camera_global_Cameras;
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
-    if (box->config->unk2B != 0 && gCutsceneStates[0] != 1) {
+    if (box->config->cutsceneOnly != 0 && gCutsceneStates[0] != 1) {
         box->config->numPages = 0;
         effect_destroyObject(box);
         return;

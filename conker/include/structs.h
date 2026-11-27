@@ -746,7 +746,7 @@ typedef struct TextBoxConfig {
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;
-    /* 0x2B */ u8 unk2B;            /* box is removed unless gCutsceneStates == 1 */
+    /* 0x2B */ u8 cutsceneOnly;     /* box is removed unless gCutsceneStates[0] == 1 */
     /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
 } TextBoxConfig;
 
