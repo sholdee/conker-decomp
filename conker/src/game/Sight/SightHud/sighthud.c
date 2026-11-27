@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/colourfb.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/screen.h"
+#include "conker/sight.h"
+#include "conker/sprite.h"
+#include "conker/view.h"
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
 void sight_startPlayerEffects(Camera *player, s32 state) {

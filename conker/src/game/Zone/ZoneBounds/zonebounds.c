@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/rom.h"
+#include "conker/script.h"
+#include "conker/zone.h"
 
 
 

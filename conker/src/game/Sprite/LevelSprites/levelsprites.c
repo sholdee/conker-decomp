@@ -43,8 +43,20 @@ s32 gBillboardTexture; /* texture strip of the billboards */
 struct Entry1517D578 gBillboardQueue[3];
 s32 gSpriteVtxCount; /* sprites in this frame's vertex buffer */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/rom.h"
+#include "conker/sprite.h"
+#include "conker/swarm.h"
+#include "conker/texture.h"
 
 u8 gBillboardQueueCount = 0;
 s32 gLevelSpriteSortAxis = 0;

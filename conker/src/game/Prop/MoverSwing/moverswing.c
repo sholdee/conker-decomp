@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/zone.h"
 
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
    zone_segmentHitsCylinder in game/Zone/ZoneState/zonestate.c). */

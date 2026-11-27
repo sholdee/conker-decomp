@@ -1,7 +1,14 @@
 #include <ultra64.h>
-/* functions.h declares these with signatures that don't match their real ones; rename them out of the way. */
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/sound.h"
+#include "conker/swarm.h"
+#include "conker/view.h"
 
 /* Not referenced in this build. In the ECTS build (August 2000) swarm_updateSwarm sets this flag and returns when it
  * is already set, and the per-frame hook that is swarm_doNothing here clears it. */

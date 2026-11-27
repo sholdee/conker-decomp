@@ -1,7 +1,11 @@
 #include <ultra64.h>
 // matching: weapon_spawnBulletSprite's spill slot needs math_random declared returning s32, not u8
-#include "functions.h"
-#include "variables.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* The four vertex colours of the bullet particle. */
 static const VtxColor gBulletParticleColors[4] = {

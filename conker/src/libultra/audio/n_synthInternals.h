@@ -197,7 +197,7 @@ void init_lpfilter(LowPass *lp);
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
 
-/* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/functions.h). */
+/* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/conker/math.h). */
 f32     math_atan2(f32 arg0, f32 arg1);
 
 #endif /*  __N_SYNTHINTERNALS__ */

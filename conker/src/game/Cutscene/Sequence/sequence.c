@@ -137,8 +137,34 @@ SeqSubtitle gSubtitles[3];
 u8 D_800C3D48[8]; // not referenced, but cutscene_closeSubtitles stops at its address: the end of gSubtitles
 struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/os.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/sched.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/view.h"
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head gDisplayListHead. */
 #define GFX_APPEND_NOPARAM(cmd)                 \

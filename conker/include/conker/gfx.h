@@ -88,4 +88,12 @@ extern Vtx *D_800DBF90; // its source vertices
 extern s32 *gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 extern s32 gGroupedObjectCount; // grouped objects, kept at the end of db_Object_array
 
+/* game/Gfx/CullDl/culldl.s */
+extern f32 gFrustumSlopeX;
+extern f32 gCullVtxFlags; /* 0x800D35E4 == (&gCullVtxFlags)[-1]; it has no symbol of its own */
+extern u8 *gShadowFaceFlags; // per-face shadow flag table
+extern u8 *gShadowFaceFlagsEnd; // end of gShadowFaceFlags
+extern f32 gCullFarZ;
+extern s16 D_800D3674;
+
 #endif

@@ -19,8 +19,13 @@ u8 gSpritePrimG;
 u8 gSpritePrimB;
 u8 gSpriteKeepPrimColor;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* Per G_IM_SIZ (4b, 8b, 16b, 32b): as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits factor and _LOAD_BLOCK. */
 const u8 gImSizIncr[4] = { 3, 1, 0, 0 };

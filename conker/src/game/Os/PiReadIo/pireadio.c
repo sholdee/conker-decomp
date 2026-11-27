@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/os.h"
 #include "piint.h"
 
 /* osPiReadIo.  `register` is load-bearing and only bites at -O1: without it `status` spills to

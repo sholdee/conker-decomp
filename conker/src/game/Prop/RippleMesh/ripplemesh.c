@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/prop.h"
 
 typedef struct {
     u8 *phaseOffsets;  /* per-vertex wobble angle offset */

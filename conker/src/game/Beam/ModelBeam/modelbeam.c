@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Points in bone space: the ends of the beam_updateBoneSparks spark segment (bone 5), of the beam_updateModelBeam beam,
  * and the origin of the beam_updateFlashBurst bolts. */

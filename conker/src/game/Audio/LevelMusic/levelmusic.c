@@ -1,7 +1,13 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/music.h"
+#include "conker/script.h"
+#include "conker/view.h"
 
 void music_init(void) {
     OSMesgQueue *msgQueue;

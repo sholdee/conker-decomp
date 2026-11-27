@@ -1,8 +1,8 @@
 #include <ultra64.h>
 
 /*
- * Collision state, linked at 0x800B0DC0..0x800B0DF0 in this order. It is defined before functions.h
- * and variables.h: an earlier declaration changes IDO's .bss order.
+ * Collision state, linked at 0x800B0DC0..0x800B0DF0 in this order. It is defined before the subsystem
+ * headers: an earlier declaration changes IDO's .bss order.
  */
 u8 *gTriArenaCursor;         /* triangle-data arena: cursor */
 static u8 *gTriArenaStart;  /* triangle-data arena: start */
@@ -15,8 +15,20 @@ static u8 *gQuadBuffer;  /* quadtree buffer */
 static u8 *gQuadCursor;  /* quadtree buffer cursor */
 static s32 gAllMapsTriCount;  /* triangles added for all maps */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/os.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/sprite.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 #include "macros.h"
 #include "piint.h"

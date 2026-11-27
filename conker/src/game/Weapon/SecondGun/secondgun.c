@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/weapon.h"
 
 /*
  * A data-only unit between game/Player/FlyControl/flycontrol and game/Particle/Spiral/spiral in the link: its .data (0x22D5D0) follows

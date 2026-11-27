@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/boot.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/screen.h"
+#include "conker/sight.h"
+#include "conker/view.h"
 
 
 /* Spawns a tint effect with extraSize bytes of the caller's data after it (SightOwnedEffect); returns NULL if the

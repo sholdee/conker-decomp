@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/zone.h"
 
 
 void zone_resetObjectCursor(void) {

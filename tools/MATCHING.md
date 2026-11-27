@@ -52,7 +52,7 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
 ## Rules
 - Edit ONLY files under `$CONKER_WS/FUNC/conker/src/` and (sparingly) `include/`. Prefer
   local `extern`/prototype/struct declarations at the top of your own `.c` file. A shared
-  prototype in `include/functions.h` that is provably wrong (the callee's asm shows the real
+  prototype in a header that is provably wrong (the callee's asm shows the real
   param widths) may be corrected there — `land` re-gates the whole ROM, so a change that alters
   any other function is rejected. Never edit asm/, Makefile, yaml, tools.
 - Never add a `#pragma GLOBAL_ASM`. Other stubs in the same file stay as they are.

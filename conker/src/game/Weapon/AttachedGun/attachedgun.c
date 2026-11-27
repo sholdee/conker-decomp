@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* Local point of the gun's muzzle in its attachment's space. */
 const Vec3f gAttachedGunMuzzle = { 9.574001f, -124.071396f, 91.0238f };

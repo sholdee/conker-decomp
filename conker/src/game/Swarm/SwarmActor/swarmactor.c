@@ -1,6 +1,18 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/player.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
+#include "conker/swarm.h"
+#include "conker/view.h"
 
 /* Brightness of a grounded swarm actor, by bits 5-6 of its surface flags. */
 static const u8 gSwarmGroundBrightness[4] = { 0x00, 0x2A, 0x54, 0x7F };

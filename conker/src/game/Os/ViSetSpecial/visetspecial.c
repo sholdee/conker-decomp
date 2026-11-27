@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
 
 /* Rare linked a private copy of the libultra VI code into the game binary; this TU is
  * osViSetSpecialFeatures().  Like the rest of that embedded copy (see game/Math/Random/random) it was

@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/model.h"
+#include "conker/rom.h"
 
 /* The models whose vertices morph between keyframes: model kind, keyframe count and the vertex count
  * of each part. */

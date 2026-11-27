@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/level.h"
 
 u8 gFlagLightStates[5]; /* level flags (game/Effects/FlagLights/flaglights toggles them) */
 

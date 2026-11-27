@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/anim.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 s16 gDebrisPrimAlpha; /* primitive alpha last set in the display list; -1 = unknown */
 

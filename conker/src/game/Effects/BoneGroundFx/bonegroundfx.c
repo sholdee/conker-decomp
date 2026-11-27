@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/script.h"
 
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`

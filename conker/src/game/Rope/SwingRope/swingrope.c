@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/rope.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /*
  * Swinging ropes. A rope is a chain of up to 20 nodes hanging from a fixed top node; an

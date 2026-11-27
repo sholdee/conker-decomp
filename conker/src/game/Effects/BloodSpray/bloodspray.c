@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
 
 /* One entry per spray type: a bone and two points in its local space. */
 typedef struct {

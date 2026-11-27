@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
 
 /* The variant ids and scales of the debris that effect_spawnDeathDebrisBurst sprays (particle_spawnDebrisSpray). */
 static const s32 gDeathDebrisSprayIds[12] = { 0x3F, 0x40, 0x40, 0x41, 0x42, 0x42, 0x42, 0x42, 0x43, 0x43, 0x02, 0x03 };

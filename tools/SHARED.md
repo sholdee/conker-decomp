@@ -3,7 +3,7 @@
 Wave 1 cleaned each file on its own, so shared declarations were out of scope. As a result, many files
 carry file-local partial views of shared structs (for example `Camera` over struct108, or `Actor` and
 `CamPlayer` over struct127), offset macros into header padding, `#define X X_hdr` tricks around a wrong
-prototype in functions.h, and casts caused by a wrong global type in variables.h. Wave 2 fixes these
+prototype in a header, and casts caused by a wrong global type in a header. Wave 2 fixes these
 centrally. Each agent owns **one** shared area across the whole tree. The ROM stays byte-identical, exactly
 as before.
 
@@ -43,7 +43,7 @@ python3 tools/cw.py land  clean.ITEM -m "what changed"
   - Delete duplicate local typedefs.
   - If a local view's layout disagrees with the shared struct, check which is right against the code;
     `check` will tell you if a change moves bytes.
-- **Prototypes and global types (functions.h / variables.h items).**
+- **Prototypes and global types (header items).**
   - Make each declaration match the definition and its real use, then remove the `#define X X_hdr` tricks
     and casts that worked around it.
   - Changing a prototype can change caller code (argument promotion, return-value handling), so check

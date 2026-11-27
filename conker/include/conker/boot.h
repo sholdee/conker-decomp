@@ -84,4 +84,10 @@ extern u32 gFaultTlbEntry[4]; // TLB entry 15 as it was when the exception hit: 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);
 
+/* past the end of the init .bss (undefined_syms.us.txt) */
+extern s32  gPageSlots[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
+
+/* past the end of the game .bss (undefined_syms.us.txt) */
+extern s32  D_800E9D00;
+
 #endif

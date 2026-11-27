@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 
 #define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
 #define TRAIL_FADE_TAIL 2

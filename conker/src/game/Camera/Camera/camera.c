@@ -1,12 +1,28 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* .bss, defined before variables.h and conker/camera.h declare it (an earlier extern changes the order). */
+/* .bss, defined before conker/camera.h declare it (an earlier extern changes the order). */
 f32 gCameraTransitionDist; // camera transition distance (see camera_updateTransition)
 f32 gCameraTransitionHeight; // camera transition height
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/debug.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
+#include "conker/text.h"
+#include "conker/view.h"
 
 
 #define CAM_C_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)

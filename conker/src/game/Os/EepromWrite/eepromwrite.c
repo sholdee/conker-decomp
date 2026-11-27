@@ -15,8 +15,10 @@ OSPifRam __osEepPifRam; /* __osEepPifRam */
 void *gDemoInput; /* the recorded input: 500 struct DemoInput frames */
 s32 gDemoInputIndex;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
+#include "conker/game.h"
+#include "conker/os.h"
+#include "conker/save.h"
 
 /*
  * osEepromWrite = osEepromWrite: the osEepromRead shape (game/Os/EepromRead/eepromread) with `ptr += 4`

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/math.h"
 
 /*
  * This unit's .data and .bss, by their place between game/Mp/MpGame/mpgame's and game/Hud/PlayerOverlay/playeroverlay's: no function

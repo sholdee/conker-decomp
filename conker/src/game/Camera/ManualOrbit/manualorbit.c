@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/math.h"
 
 /* Camera.orbitCounter / Camera.orbitSpeed seen from Camera + 0x69C.
    matching: the original reaches them through one base pointer; plain camera->orbitSpeed is 0x10 bytes shorter. */

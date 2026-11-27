@@ -56,4 +56,23 @@ void osViSetSpecialFeatures(u32 func);
 
 /* game/Os/MtxCatF/mtxcatf.c: guMtxXFMF and guMtxCatF, declared by PR/gu.h */
 
+/* libultra/os/thread.c */
+extern OSThread *__osRunningThread;
+
+/* libultra/os/initialize.c */
+extern u32  __osShutdown;
+
+/* libultra/io/pimgr.c */
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which defines it); stopped by the PI manager in init/Os/DevMgr/devmgr
+
+/* libultra/io/controller.c */
+extern OSMesg __osEepromTimerMsg;
+
+/* low memory: the boot globals that IPL3 and the OS write at 0x80000300 */
+extern s32  D_80000300;
+extern s32  D_80000308;
+extern s32  D_8000030C; // osResetType; libultra's declaration is in src/libultra/os/osint.h
+extern u32  D_80000310;
+extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration is in src/libultra/os/osint.h
+
 #endif

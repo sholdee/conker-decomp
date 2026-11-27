@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
+#include "conker/save.h"
 
 
 /* Rare's copy of the SDK's EEPROM long read (2.0I and later: no address check and no delay between blocks). It

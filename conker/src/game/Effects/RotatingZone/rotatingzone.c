@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/zone.h"
 
 
 struct CPad150CEF60 {

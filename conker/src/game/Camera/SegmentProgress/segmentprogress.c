@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/math.h"
+#include "conker/script.h"
 
 /* The ends of the segment that camera_levelHook23 measures progress along. */
 static const Vec3f gSegmentProgressStart = { 0.0f, 98.0f, -5530.0f };

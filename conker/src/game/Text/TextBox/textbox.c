@@ -1,6 +1,18 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/mp3.h"
+#include "conker/particle.h"
+#include "conker/save.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 #define OBJTYPE_TEXTBOX 0x51
 

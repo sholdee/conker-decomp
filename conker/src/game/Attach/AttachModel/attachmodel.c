@@ -6,8 +6,11 @@ u8 gAttachModelRefCounts[0x1E4];                  /* per-model load reference co
 s16 *gAttachModelTexIds[0x1E4];                /* per model: written by texture_resolveDl */
 AttachModelHeader *gAttachModelHeaders[0x1E4];  /* per model: loaded attachment model header */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/effect.h"
+#include "conker/heap.h"
+#include "conker/rom.h"
+#include "conker/texture.h"
 
 // NEAR-MISS 16 -> MATCH (wave 61). The parked candidate carried a `u8 c` local that the
 // original never had. Frame-layout law measured here (game/Attach/AttachModel/attachmodel, -O2 -g3):

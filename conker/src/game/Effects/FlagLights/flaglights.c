@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/texture.h"
 
 typedef struct {
     u8 unk0[5];

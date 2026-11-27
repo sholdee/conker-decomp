@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/sound.h"
+#include "conker/weapon.h"
 
 
 void effect_levelUpdateCutsceneTreads(s32 arg0) {

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
+#include "conker/rom.h"
 
 /* libultra code (with Rare additions). */
 

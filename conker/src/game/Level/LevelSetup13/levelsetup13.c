@@ -1,7 +1,11 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 /* Extra data copied to offset 0x170 of each emitter level_setup13 spawns. */
 typedef struct {

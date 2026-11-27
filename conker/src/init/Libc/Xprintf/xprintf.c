@@ -4,8 +4,7 @@
 static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
 
 #include "libc/stdarg.h"
-#include "functions.h"
-#include "variables.h"
+#include "conker/libc.h"
 #include "libc/string.h"
 
 

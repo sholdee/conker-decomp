@@ -1,6 +1,20 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
 static u8 gColourPalettes[9 * 12] = {

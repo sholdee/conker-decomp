@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/heap.h"
+#include "conker/prop.h"
 
 
 

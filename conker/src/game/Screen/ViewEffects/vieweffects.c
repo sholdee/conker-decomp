@@ -42,8 +42,16 @@ f32 *gCutsceneIrisClosure;          // cutscene iris: closure, percent
 f32 *gCutsceneIrisX;          // cutscene iris: hole x, percent of the view width
 f32 *gCutsceneIrisY;          // cutscene iris: hole y, percent of the view height
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/screen.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast

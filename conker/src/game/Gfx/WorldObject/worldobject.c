@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /*
- * .bss, linked at 0x800DBED0..0x800DBFC0 in this order. Defined before variables.h and conker/gfx.h
+ * .bss, linked at 0x800DBED0..0x800DBFC0 in this order. Defined before conker/gfx.h
  * declare them: IDO lays out .bss in first-declaration order, and an extern there would count. The statics
  * come before the headers too: after them, their place would change with the number of declarations in them.
  */
@@ -28,8 +28,25 @@ static s32 D_800DBFA0;
 static s32 D_800DBFA4;
 static u8 D_800DBFA8[0x18]; /* not referenced */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/player.h"
+#include "conker/prop.h"
+#include "conker/shadow.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* .data: per view, the draw list; per frame buffer, the model matrices. */
 DrawEntry **gViewDrawListPtrs[4] = { &gViewDrawLists[0], &gViewDrawLists[1], &gViewDrawLists[2], &gViewDrawLists[3] };

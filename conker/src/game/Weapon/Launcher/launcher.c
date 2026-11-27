@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* This file's .rodata: the muzzle point, the end of the muzzle flash beam and the launch point, in bone space. */
 static const Vec3f gLauncherMuzzle = { 7.0f, -136.0f, 45.0f };

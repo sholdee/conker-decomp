@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/particle.h"
 
 /*
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.

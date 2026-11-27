@@ -87,7 +87,7 @@ python3 tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
   count. Each extra declaration moves the start back by one place.
 - **An earlier extern moves a variable.** A `.bss` variable with an `extern` before its definition
   (for example in a subsystem header) goes after the others. A file whose globals have header externs
-  defines its `.bss` before `#include "functions.h"`, after the includes that its types need.
+  defines its `.bss` before its subsystem includes, after the includes that its types need.
 - **Statics come last.** A `static` variable defined after the includes is placed after all the
   globals.
 - **Alignment.** In `.bss`, an object larger than 4 bytes is 8-aligned. A 4-byte gap before such an
@@ -105,5 +105,5 @@ python3 tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
 ## Rules
 - Do not rename `func_` or `D_` symbols. Do not change the Makefile or `tools/`.
 - The `.bss` order depends on the declarations before it. Read the comment at the top of
-  `src/init_50A0.c`.
+  `src/init/Sched/SchedInit/schedinit.c`.
 - If something cannot be done cleanly, stop and write the reason in the `notes.md` of the workspace.

@@ -17,8 +17,8 @@ vu8 gPiDmaReadBusy;
 u8 D_8003A574; // not referenced
 vu8 gPiThreadStopped;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
+#include "conker/rom.h"
 
 
 /* Starts the PI manager and creates the DMA message queues. */

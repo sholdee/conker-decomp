@@ -1,6 +1,20 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 /* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is

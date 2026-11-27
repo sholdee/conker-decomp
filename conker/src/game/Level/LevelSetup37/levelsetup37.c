@@ -1,7 +1,10 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 
 void level_setup37(void) {

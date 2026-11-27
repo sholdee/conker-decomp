@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/trail.h"
 
 /* Zone handler gNeutralZoneSpawnHandlers[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;
    data1 selects the spray style. */

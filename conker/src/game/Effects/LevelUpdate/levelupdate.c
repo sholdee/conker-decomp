@@ -6,8 +6,18 @@ u8 D_800DD404;
 u8 gLevelTexFrame;
 u8 gLevelTexFrameTime;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
 
 u8 D_8008CD00 = 0;
 

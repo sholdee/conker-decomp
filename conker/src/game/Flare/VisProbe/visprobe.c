@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/view.h"
 
 /* Copies 4 pixels starting at (x, y) of the z-buffer into zDest and of the current frame buffer into
  * colorDest, using copy-mode texture rectangles that load one screen row of view's width. */

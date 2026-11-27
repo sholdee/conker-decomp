@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/script.h"
 
 static s32 gLevelHook04TransportOn = 0; /* 1 while the camera is in the transport mode this hook set */
 

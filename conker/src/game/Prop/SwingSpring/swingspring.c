@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/prop.h"
 
 /*
  * Behaviour handlers for scenery objects (WorldObject) that swing one rotation axis toward a target angle.

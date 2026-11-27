@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/level.h"
 
 /*
  * A unit that holds one variable, between game/Collision/QuadTree/quadtree and game/Level/LevelModels/levelmodels in

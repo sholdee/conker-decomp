@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* While params[0] bit 0 is set, spawns a spark emitter after each random delay. */
 void particle_updateSparkSpawner(SparkEffect *obj) {

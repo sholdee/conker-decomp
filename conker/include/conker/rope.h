@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "effects.h"
 
 /*
  * Subsystem "rope": prototypes of the non-static functions and declarations of the globals

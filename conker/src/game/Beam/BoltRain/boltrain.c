@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/trail.h"
+#include "conker/weapon.h"
 
 typedef struct {
     s32 count;

@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/hud.h"
 
 /* Destructor of a counter effect: frees its panel and digits, then the effect itself. */
 void hud_freeCounter(CounterEffect *effect) {

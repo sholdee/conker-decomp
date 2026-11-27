@@ -17,8 +17,14 @@ u8 gContextSoundCount;
 u16 *gContextSounds;          // sound effects voiced while the text types out
 static TriggerZone *gContextTextZone; /* zone to disable once the text box closes */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/mp3.h"
+#include "conker/rom.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/zone.h"
 #include "libc/string.h"
 
 /* Byte-wide character in a text resource that separates two pages (see text_splitPages). */

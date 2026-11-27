@@ -3,7 +3,7 @@
 
 /*
  * Per-model tables, indexed by model id (0..186), linked at 0x800C4020..0x800C6650 in this order. They are
- * defined before functions.h and variables.h declare them (conker/model.h): IDO lays out .bss in the order
+ * defined before the headers that declare them (conker/model.h): IDO lays out .bss in the order
  * it first sees each name, and that order also depends on the declarations before it (see init/Sched/SchedInit/schedinit.c).
  */
 s32 *gModelVtxIndices[187];                 // per model: first vertex of each part
@@ -24,8 +24,12 @@ u16 gModelVtxRunCounts[187];                  // per model: vertex run count
 VtxTri *gModelTris[187];              // per model: triangles
 TexCoord *gModelSavedTexCoords[187];            // per model: saved texture coordinates (model_saveTexCoords)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/event.h"
+#include "conker/heap.h"
+#include "conker/model.h"
+#include "conker/rom.h"
+#include "conker/texture.h"
 
 /*
  * A model file, as loaded by model_load: seven (data, byte size) sections whose offsets

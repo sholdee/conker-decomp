@@ -5,8 +5,13 @@
 WaveDeformer *gWaveDeformers[2];
 u8 gNumWaveDeformers;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/prop.h"
 
 /* WaveDeformer.flags */
 #define WAVE_MODE_MASK 3     // which vertex routine runs (0, 1 or 2)

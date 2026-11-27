@@ -4,8 +4,10 @@
 /* This file's .bss. */
 ViewEnvelope gViewEnvelopes[4]; // per-view camera wobble envelope
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
 
 
 /* Stops the view's envelope and zeroes its outputs. */

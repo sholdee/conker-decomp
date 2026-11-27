@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 /**
  * Natural logarithm. Scales x into [1, 2) by powers of two (adding or subtracting ln 2 each step),

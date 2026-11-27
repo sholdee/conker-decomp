@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/pipeexplode.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 
 /* Creates a trail object from a spawn description, motion block and render settings. Returns the MotionTrail
  * as void *: callers whose params extend TrailParams (extraSize bytes) keep it in their own view. */

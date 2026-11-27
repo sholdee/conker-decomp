@@ -1,14 +1,20 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 u8 gSpawnModelTypeCount;      // number of distinct spawn model types in gSpawnModelTypes
 u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of the level
 s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the data rom_loadPathTo loads for each. */
 void level_collectSpawnModelTypes(void) {

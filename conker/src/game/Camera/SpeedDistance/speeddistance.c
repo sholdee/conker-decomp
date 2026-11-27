@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/game.h"
+#include "conker/script.h"
 
 /* This file's .rodata front-end data (as literals, IDO allocates the FP registers of camera_scaleBySpeed differently). */
 static const struct {

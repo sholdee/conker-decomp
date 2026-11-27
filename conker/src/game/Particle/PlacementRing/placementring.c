@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/heap.h"
+#include "conker/particle.h"
 #include "libc/string.h"
 
 /* Spawns 25-35 particles on a ring around (111, -90, 0) in placement space, flying outward from its center. */

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 
 f32 math_lerpAngle(f32 arg0, f32 arg1, f32 arg2) {

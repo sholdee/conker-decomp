@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
 void particle_updateWobbleStream(Game1F1CD0Actor *actor) {

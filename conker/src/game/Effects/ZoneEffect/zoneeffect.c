@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/actor.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 void effect_destroyZoneEmitter(ZoneEmitter *obj) {
     particle_shutZoneEmitter(obj);

@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/light.h"
+#include "conker/weapon.h"
 
 /* Points on bone 2 that give the aim: its start and a point further along it. */
 static const Vec3f gTwinAimStart = { -40.0f, 0.0f, 57.0f };

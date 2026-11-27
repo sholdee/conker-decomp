@@ -45,9 +45,10 @@ badges from the committed files after each change to `master` (`tools/progress.p
   example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
   other directory and file names are descriptive.
 - **Clean C.** Each function and global is declared in the subsystem header of the file that defines
-  it, or in the shared `variables.h`. About 70 local declarations remain in C files. Each is there
-  because IDO needs it to reproduce the original code, and a `/* matching: */` comment says why. Most are callers that saw a different
-  prototype than the definition, or block-scope declarations that shape the generated code. The number
+  it. Each C file includes the headers that it uses: there are no umbrella headers. About 70 local
+  declarations remain in C files. Each is there because IDO needs it to reproduce the original code,
+  and a `/* matching: */` comment says why. Most are callers that saw a different prototype than the
+  definition, or block-scope declarations that shape the generated code. The number
   of compiler type warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails
   above it.
 - **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are

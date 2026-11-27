@@ -1,7 +1,11 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/zone.h"
 #include "libc/string.h"
 
 /* The area effects of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c), indexed by the zone's data1. */

@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
 
 /* Sets the colour passed to light_setAmbient from the object's colour wave and advances each channel's phase. */
 void light_updateColourWave(ColourWaveEffect *object) {

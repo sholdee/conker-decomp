@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/bone.h"
+#include "conker/model.h"
 
 
 void model_resetAttachments(void) {

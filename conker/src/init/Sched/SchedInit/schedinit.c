@@ -3,13 +3,13 @@
 
 /*
  * IDO lays out this file's .bss in an order that depends on the declarations before it, and the static
- * gPreNmiTime of sched_preNmiThread must come last. So this file does not include functions.h or variables.h,
+ * gPreNmiTime of sched_preNmiThread must come last. So this file does not include the other subsystems' headers,
  * which change often. It declares what it needs from other subsystems here, defines its .bss, and
  * includes its own header after the .bss. A new type in conker/sched.h can still change the order.
  */
 
-/* From other subsystems: conker/boot.h, cont.h and sched.h declare them too, and variables.h declares libultra's
- * __osShutdown and piThread (D_80035910) for the files that include it. */
+/* From other subsystems: conker/boot.h, cont.h and sched.h declare them too, and conker/os.h declares libultra's
+ * __osShutdown and piThread (D_80035910). */
 /* matching: these lines also set the .bss order; with fewer declarations here the .bss moves */
 extern u32 __osShutdown;
 extern u8 gPageFaultsDisabled;

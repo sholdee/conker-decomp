@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/screen.h"
 
 /* This file's .bss. */
 u8 gStrobeCount; /* number of live strobe effects (read by game/Actor/ObjectUpdate/objectupdate.c) */

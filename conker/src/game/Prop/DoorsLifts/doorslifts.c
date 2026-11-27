@@ -1,6 +1,19 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/save.h"
+#include "conker/sound.h"
 
 /* One F3DEX2 display-list command, read a byte at a time. */
 typedef struct PropGfx {

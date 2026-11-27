@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/math.h"
 
 /**
  * Turns the heading (unk37C) towards the point at 0x614, offset by the angle at 0x5DC,

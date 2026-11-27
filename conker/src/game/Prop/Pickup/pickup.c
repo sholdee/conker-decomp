@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/mp.h"
+#include "conker/prop.h"
+#include "conker/save.h"
+#include "conker/sound.h"
+#include "conker/text.h"
 
 /*
  * A spinning, bobbing pickup that the player collects by walking into it. Its param word is < 0 while

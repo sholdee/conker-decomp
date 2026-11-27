@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/math.h"
+#include "conker/script.h"
 
 /* Four channels: the current and target values (255, or 192 while the gLevelHook35QueryIds query holds), the
  * math_springTo spring velocity, the command words queried with script_query and those that receive

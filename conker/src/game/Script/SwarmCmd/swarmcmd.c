@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/script.h"
+#include "conker/swarm.h"
 
 
 s32 script_alwaysTrue0(s32 arg0) {

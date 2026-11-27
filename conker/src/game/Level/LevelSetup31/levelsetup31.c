@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/level.h"
+#include "conker/prop.h"
+#include "conker/script.h"
 
 
 void level_setup31(void) {

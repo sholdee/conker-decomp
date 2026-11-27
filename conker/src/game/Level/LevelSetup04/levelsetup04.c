@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/level.h"
 
 
 void level_queueObjectDrop04(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {

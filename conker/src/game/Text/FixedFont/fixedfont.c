@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/text.h"
 
 #define FONT_CHAR_COUNT 80
 #define FONT_GLYPH_WIDTH 8

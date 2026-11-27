@@ -1,13 +1,20 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 Vtx *gActorQuadVtx[1];          // per actor: its 5-vertex quad buffer; [0] is gActorQuadVtxTemplate
 static s16 gActorQuadAnchor[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Per actor: the 5 quad vertices. Actor 0 uses the template gActorQuadVtxTemplate; game/Model/ActorQuadAlloc/actorquadalloc copies it for the others. */
 Vtx gActorQuadVtxTemplate[5] = {

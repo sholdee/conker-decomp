@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/script.h"
 
 /*
  * A data-only unit: the resource (task) manifest and the handler tables of the script commands.

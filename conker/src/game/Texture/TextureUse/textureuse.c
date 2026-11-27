@@ -19,8 +19,9 @@ u8 gTexUseCounts[7762]; // per texture: use count; gTextureLifetimes holds each 
 u8 gTexLoadCooldown;       // set to 5 when texture_getAddress loads a texture; texture_updateAging counts it down
 s32 gTexLastFreed;      // last texture id freed by texture_updateAging (-1 while it runs, -2 after)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/texture.h"
 
 
 /*

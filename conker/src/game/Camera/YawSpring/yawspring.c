@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/math.h"
 
 /**
  * Springs the camera yaw (degrees) towards targetYaw with math_springAngleTo, using yawSpringVel as its

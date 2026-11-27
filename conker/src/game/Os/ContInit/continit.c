@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/os.h"
 #include "controller.h"
 #include "siint.h"
 

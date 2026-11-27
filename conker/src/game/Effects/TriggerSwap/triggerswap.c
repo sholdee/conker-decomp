@@ -1,5 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 /* Payload of message 0x2D: two objects whose references are exchanged. */
 struct ObjectPair {

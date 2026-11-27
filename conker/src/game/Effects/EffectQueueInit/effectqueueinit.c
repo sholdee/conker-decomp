@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
 
 
 void effect_initQueue(void) {

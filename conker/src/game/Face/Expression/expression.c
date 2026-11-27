@@ -8,8 +8,11 @@
  */
 BoundCylinderSet *gCylinderSets; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/face.h"
+#include "conker/game.h"
 
 /*
  * Character expressions and eye blinking.

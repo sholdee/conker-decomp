@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
 
 /*
  * Subsystem "particle": prototypes of the non-static functions and declarations of the globals

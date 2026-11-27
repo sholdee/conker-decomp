@@ -1,7 +1,11 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/hud.h"
+#include "conker/math.h"
+#include "conker/player.h"
+#include "conker/rom.h"
 
 
 void player_initMatch(s16 arg0, s16 arg1) {

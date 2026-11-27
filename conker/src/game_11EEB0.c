@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/weapon.h"
 
 static const s32 gExplosionSprayModels[3] = { 0xBD, 0xBE, 0xBF };
 static const f32 gExplosionSprayScales[3] = { 1.0f, 1.0f, 1.0f };

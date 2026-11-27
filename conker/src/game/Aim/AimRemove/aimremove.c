@@ -1,12 +1,11 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals (conker/aim.h): IDO lays
+// This file's .bss, defined before the headers that declare the globals (conker/aim.h): IDO lays
 // out .bss in the order it first sees each name.
 struct AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 s32 gAimPointCount;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/aim.h"
 
 
 /* Removes aim point `arg0`, then drops removed points from the end of the table. */

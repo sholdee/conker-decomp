@@ -4,8 +4,7 @@
 static u32 D_80038070;
 static u16 D_80038074;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
 
 
 // permuter MATCHED (was best 140): forcing v addressable (p = &v; return *p) keeps v

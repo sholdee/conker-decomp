@@ -7,8 +7,11 @@ static s32 gScriptedExpressionMode;
 static s32 gScriptedExpressionCycleIndex;
 static s32 D_800D1930;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/mp3.h"
 
 /*
  * Scripted expression control for the current object.

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
+#include "conker/view.h"
 
 void view_buildOrthoMatrices(void) {
     f32 temp_f0;

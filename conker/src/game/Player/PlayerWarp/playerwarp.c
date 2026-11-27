@@ -4,8 +4,10 @@
 s8 gPendingWarpLevels[16];
 u8 gPlayerSpawnPoints[16];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/player.h"
+#include "conker/screen.h"
 
 /*
  * Per-player pending warps: a warp zone fades the player's view out, and once the fade has run its course

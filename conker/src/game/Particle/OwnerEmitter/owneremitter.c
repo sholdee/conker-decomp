@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
 
 /* Spawns an effect attached to `owner`. */
 void particle_attachOwnerEmitter(Actor *owner, u8 arg1, s32 arg2) {

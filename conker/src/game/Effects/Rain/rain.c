@@ -14,8 +14,15 @@ s32 gRainDrops;
 s16 gRainStateTimer;      /* state timer */
 s8 gRainState;       /* rain state */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/sound.h"
 
 #define RAIN_MAX_DROPS 300
 #define RAIN_DROP(i) (*(QuadFx **)(gRainDrops + (i) * sizeof(QuadFx *)))

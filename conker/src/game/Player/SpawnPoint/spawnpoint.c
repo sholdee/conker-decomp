@@ -8,8 +8,16 @@ s32 gTeam1SpawnMask;          // team 1 spawn mask
 s32 gSpawnPointCount;          // number of entries in gSpawnPoints
 SpawnPoint *gSpawnPoints;  // the level's spawn point table
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/player.h"
+#include "conker/save.h"
+#include "conker/screen.h"
 
 /* The 7 model-id rows of gCharacterTypeGroups (a pointer table in .data); the first id of a row stands for the row. */
 const u8 D_8009D920[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x75, 0x80, 0x82, 0x88, 0x90,

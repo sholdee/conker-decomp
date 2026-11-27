@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/mp3.h"
 
 
 

@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/bone.h"
 
 /*
  * A data-only unit between game/Attach/Attachment/attachment and game/Bone/BoneCommands/bonecommands in the link: its .rodata (0x23C630) and its .data

@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/view.h"
 
 struct Queue *gGroundDecalQueue = NULL; /* ground decals (effect_spawnJointStepEffects); game/View/ViewOrtho/viewortho.c makes it at level setup */
 

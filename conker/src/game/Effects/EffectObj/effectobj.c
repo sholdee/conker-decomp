@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 /* This file's .rodata: the two object types of the effect objects (effect_newEffectObj), read by game/Trail/LevelStream/levelstream.c too. */
 const s32 gEffectObjTypes[2] = { 0x4D, 0x22 };

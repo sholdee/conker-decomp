@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/script.h"
 
 // While the values queried through script_query allow it, sets 0x400E to 1 and resets the
 // actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once camera_popMode(actor, CAMERA_MODE_TRANSPORT) succeeds.

@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /*
  * Bobbing update callbacks for four particle/effect systems. Each one sets the object's Y position to

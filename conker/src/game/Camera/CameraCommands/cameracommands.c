@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/math.h"
+#include "conker/path.h"
 
 
 // Runs one frame of the camera's current command; cmd.type selects the behaviour.

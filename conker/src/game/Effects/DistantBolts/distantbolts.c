@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
 
 s32 D_80088A00 = 0; /* not referenced */
 static s32 gDistantTracersActive = 0; /* 1 while the effect runs */

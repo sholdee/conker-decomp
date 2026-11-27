@@ -4,8 +4,19 @@
 /* This file's .bss. */
 Camera *gSavedCameras; // saved cameras (one per view)
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 typedef struct Cfg15128CB0 {
     /* 0x00 */ s16 unk0;

@@ -9,8 +9,9 @@ MessageEntry *D_800DD258;
 s32 D_800DD25C;           /* not referenced */
 u8 D_800DD260[0x40];      /* not referenced */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/effect.h"
+#include "conker/text.h"
 
 /* Text box types: copies of the definitions in game/Text/TextBox/textbox.c, which holds the rest of the text box code. */
 

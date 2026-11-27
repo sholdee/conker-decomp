@@ -68,8 +68,33 @@ s16 D_800E0C10[4];
 s32 D_800E0C18[2];
 s8 gMatchResult;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/audio.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/os.h"
+#include "conker/path.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/text.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /*
  * .rodata front-end data, linked at 0x800AB570 in this order (before the format strings of the functions).

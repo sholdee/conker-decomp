@@ -1,6 +1,25 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/math.h"
+#include "conker/pipeexplode.h"
+#include "conker/prop.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
 
 /*
  * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low

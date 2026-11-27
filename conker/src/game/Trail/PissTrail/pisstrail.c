@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
 
 /* Trail anchor point: 20 units above the actor. */
 void trail_getPissAnchor(Actor *actor, Vec3f *out) {

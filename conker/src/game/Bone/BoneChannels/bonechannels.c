@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/bone.h"
+#include "conker/collision.h"
+#include "conker/game.h"
 
 static s16 gBoneLastChannelLevel; // the last channel level that bone_addLevelCommands wrote; bone_lowerBones lowers bones by it
 

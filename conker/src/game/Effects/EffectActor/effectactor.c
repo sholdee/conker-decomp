@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 /* The effect actor type's render setup and teardown display lists (object type table). */

@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c), which the subsystem headers change often.
 u8 gStepTicks;      // the ticks of this frame; bit 0 carries over to the next
@@ -14,8 +14,46 @@ s8 D_800BE618;
 u8 gFrameDeltaHistoryNext; // the next slot of gFrameDeltaHistory
 u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/audio.h"
+#include "conker/bone.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/debug.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/level.h"
+#include "conker/libc.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/player.h"
+#include "conker/prop.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/sched.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/shadow.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/swarm.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {

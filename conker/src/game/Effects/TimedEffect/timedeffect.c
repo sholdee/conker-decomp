@@ -1,6 +1,16 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/hud.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/screen.h"
+#include "conker/trail.h"
+#include "conker/weapon.h"
 
 /* This file's .rodata: the two object types of the timed effects (effect_newTimedEffect), read by game/Beam/BoltRain/boltrain.c and
  * game/Effects/ZoneEffect/zoneeffect.c too. */

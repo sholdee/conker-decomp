@@ -1,14 +1,32 @@
 #include <ultra64.h>
 
-// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// This file's .bss, defined before the headers that declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
 u16 *gScreenCopy; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 u8 gScreenCopyAlpha;
 u8 gFrameEchoPass;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
 static s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {

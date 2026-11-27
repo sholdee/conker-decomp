@@ -17,8 +17,14 @@ s32 gTextureAddrs[NUM_TEXTURES];
 u16 gTextureSizes[NUM_TEXTURES];
 s8 gTextureLifetimes[NUM_TEXTURES];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/rom.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 /* Per level (LevelHeader.assetList, 0 = none): a zero-terminated list of asset ids to load. */
 s32 *gLevelAssetLists[] = { NULL, D_8009016C, D_80090184, D_800901C4, D_80090150 };

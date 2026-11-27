@@ -1,7 +1,14 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/rope.h"
+#include "conker/script.h"
+#include "conker/weapon.h"
+#include "conker/zone.h"
 
 /* The level's rope (higher end first). */
 static const RopeEnds gSetup22RopeEnds = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };

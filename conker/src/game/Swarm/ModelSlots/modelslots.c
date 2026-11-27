@@ -8,8 +8,15 @@ u8 gSwarmGroupSoundTimers[4];
 s8 gEffectModelSlotStates[11];
 Gfx *gEffectModelSecondDls[11];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/particle.h"
+#include "conker/rom.h"
+#include "conker/swarm.h"
+#include "conker/texture.h"
 
 /*
  * Effect model slots.

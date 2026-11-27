@@ -1,7 +1,10 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/level.h"
+#include "conker/particle.h"
 
 
 /* Starts a global colour cycle (timed effect 30, light_updateColourCycle) around grey 50. */

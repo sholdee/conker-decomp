@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "effects.h"
 
 /*
  * Subsystem "level": prototypes of the non-static functions and declarations of the globals
@@ -370,5 +371,8 @@ void level_runHook(void *arg0, s32 arg1);
 
 /* game_1A6300.c */
 s32 level_isCameraAboveLimit(s32 arg0);
+
+/* game/Level/LevelHeader/levelheader.c */
+extern LevelHeader *gLevelHeader; // game/Level/LevelHeader/levelheader.c
 
 #endif

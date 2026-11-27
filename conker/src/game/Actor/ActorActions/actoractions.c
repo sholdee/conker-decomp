@@ -1,6 +1,25 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/mp3.h"
+#include "conker/particle.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/text.h"
+#include "conker/trail.h"
+#include "conker/weapon.h"
+#include "conker/zone.h"
 
 /* Packet handed to actor_runHitHandler by actor_throwGrenade. */
 typedef struct ThrowPacket {

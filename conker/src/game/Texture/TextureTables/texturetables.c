@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/texture.h"
 
 /*
  * A data-only unit: the shared texture tables. Its .data lies at 0x80090150..0x80091970, after the

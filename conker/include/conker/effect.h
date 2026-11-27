@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/blood.h"
+#include "conker/particle.h"
+#include "conker/trail.h"
 
 /*
  * Subsystem "effect": prototypes of the non-static functions and declarations of the globals

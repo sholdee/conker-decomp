@@ -11,8 +11,39 @@ static f32 gEventResult;
 static s32 gDeferredSound;
 static s32 gEventLoopRunning;
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/audio.h"
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/flamethrower.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/mp3.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
+#include "conker/text.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 
 /* matching: not in particle.h, as game/Effects/ModelBurst/modelburst.c passes an s32 style (definition: game/Particle/StyleParticle/styleparticle.c) */
 void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,

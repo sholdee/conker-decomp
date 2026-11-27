@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* This file's .rodata front-end data: the point of each side (2, 1) in its bone's space. */
 static const Vec3f gDustSide2Offset = { 7.0f, 0.0f, 0.0f };

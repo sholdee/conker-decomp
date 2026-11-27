@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
 
 
 void func_151045E0(void *arg0, s32 arg1, f32 arg2) {

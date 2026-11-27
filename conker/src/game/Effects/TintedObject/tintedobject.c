@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/mp.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
 
 /* matching: movement.c defines actor_seatRider as void, but this file was compiled with an s32 return and tests it */
 s32 actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,

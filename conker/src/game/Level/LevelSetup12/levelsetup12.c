@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 
 BounceRecord *gBounceRecords; /* ten bouncing cursors */
 

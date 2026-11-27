@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
 
 
 void camera_levelSetup17(Camera *arg0) {

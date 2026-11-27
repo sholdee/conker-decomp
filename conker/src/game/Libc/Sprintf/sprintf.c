@@ -2,8 +2,7 @@
 
 #include "libc/stdarg.h"
 #include "libc/string.h"
-#include "functions.h"
-#include "variables.h"
+#include "conker/libc.h"
 
 /** sprintf output callback (libultra proutSprintf): append `count` bytes to `dst`, return the new end. */
 u8 *proutSprintf(u8 *dst, u8 *src, u32 count) {

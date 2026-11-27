@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/prop.h"
+#include "conker/sound.h"
 
 /*
  * Per-type update routines for world objects (WorldObject): moving platforms, a seesaw and a

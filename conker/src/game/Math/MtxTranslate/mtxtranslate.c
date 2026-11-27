@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 
 void math_mtxTranslateLocal(MtxF arg0, f32 x, f32 y, f32 z) {

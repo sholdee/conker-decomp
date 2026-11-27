@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 
 void math_mtxAffineInverse(MtxF m, MtxF out) {

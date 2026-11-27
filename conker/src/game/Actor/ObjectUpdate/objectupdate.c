@@ -15,8 +15,34 @@ u8 *gBonePoolStart;
 u8 gBoneMatricesFlushed;
 static Mtx gObjectIdentityMtx; // the modelview matrix of the object being drawn
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/bone.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/screen.h"
+#include "conker/shadow.h"
+#include "conker/sprite.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 Gfx gObjectPassBeginDL[] = {
     gsDPPipeSync(),

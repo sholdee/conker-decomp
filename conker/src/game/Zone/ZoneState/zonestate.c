@@ -15,8 +15,28 @@ s32 gCharFlagZoneCount;               // number of entries in gCharFlagZones
 static s32 D_800D3278;        // cleared by zone_updateActor, otherwise unused
 static u8 D_800D3280[0x80];   /* not referenced; neither this build nor the October 2000 debug build reads it */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/rope.h"
+#include "conker/save.h"
+#include "conker/shadow.h"
+#include "conker/sight.h"
+#include "conker/sound.h"
+#include "conker/swarm.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 #include "piint.h"
 
 

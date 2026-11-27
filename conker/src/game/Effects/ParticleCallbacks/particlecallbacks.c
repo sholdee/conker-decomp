@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
 
 
 /* Near-miss at 160/6300; see tools/nearmiss/func_150C7670.c */

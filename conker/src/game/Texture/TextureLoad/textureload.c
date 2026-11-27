@@ -9,8 +9,16 @@ u8 gTintLevels[4][3];  // current level
 u8 gTintDefaultTargets[3];     // default target level
 u8 gTintTargetOverrides[4][3];  // override target level ([0] != 0: use it for this frame)
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/rom.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* Tint presets, chosen per level by level_initTintWaves: an entry's three indices pick the phase step,
  * amplitude and target level rows. */

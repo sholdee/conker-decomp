@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/gfx.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/particle.h"
+#include "conker/prop.h"
+#include "conker/script.h"
 
 /* An 8-byte entry of the list at WorldObject.displayList; the list ends with an entry whose kind is -14. */
 typedef struct {

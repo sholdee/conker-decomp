@@ -55,4 +55,7 @@ void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 u8 *proutSprintf(u8 *dst, u8 *src, u32 count);
 s32 func_151EFF94(u8 *buf, u8 *fmt, ...);
 
+/* in the rspboot data (undefined_syms.us.txt) */
+extern s32 *D_1002AAD0;
+
 #endif

@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* This file's .rodata: the ends of a bone beam that func_15071888 (game/Event/TimedEvent/timedevent.c) draws, then the effect
  * points of this file, in the local space of bone D_80088B94. */

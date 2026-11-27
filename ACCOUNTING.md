@@ -100,7 +100,7 @@ Two exact C matches exist. Both are forced, and neither is evidence that the cod
   statement order.
 - math_mtxScaleF matches IDO 5.3 with the game's own flags (`-O2 -g3`), but only from a source with three
   devices. It declares the three float arguments as `s32`, although every caller passes floats under the
-  `f32` prototype in `functions.h`. It puts the first 15 stores in a block that has a dummy local. It
+  `f32` prototype in its header. It puts the first 15 stores in a block that has a dummy local. It
   returns from inside `while (1)` after the last store. The function stays asm: C with the real argument
   types does not match.
 

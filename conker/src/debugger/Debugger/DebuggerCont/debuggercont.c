@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/debugger.h"
 #include "controller.h"
 
 s32 debugger_contStartReadData(void)

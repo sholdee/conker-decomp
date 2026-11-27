@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/effect.h"
 
 /* User data of this effect kind: an object the effect owns. */
 typedef struct EffectUserData1E5820 {

@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/sprite.h"
+#include "conker/texture.h"
 
 #define ROPE_FLAG_TIMED    1 // removed when `timer` runs out
 #define ROPE_FLAG_RESET    2 // points are re-laid at rest by the next update callback

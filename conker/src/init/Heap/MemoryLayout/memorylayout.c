@@ -6,8 +6,7 @@ u32 gRdpOutputBufferEnd; // its end address (same as gRdpOutputBuffer)
 u32 gHeapEnd;
 u32 gDecompressWork;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/heap.h"
 
 void heap_initMemoryLayout(void) {
     if (gExpansionPak) {

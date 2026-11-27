@@ -440,4 +440,8 @@ s32 script_timerQuery(s32 arg0, s32 arg1, s32 arg2);
 s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg);
 s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg);
 
+/* game/Script/ScriptInterp/scriptinterp.s */
+extern s32 gScriptCmdWordCount;
+extern s32 gScriptSavedSp;
+
 #endif

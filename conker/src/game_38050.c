@@ -1,7 +1,15 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/rom.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/swarm.h"
 
 /* Particle slot state (15 slots). */
 static u16 gParticleSlotParity;               /* parity bits of light_placeParticlePattern, one per slot */

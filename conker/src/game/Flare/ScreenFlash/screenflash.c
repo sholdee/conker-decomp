@@ -3,8 +3,8 @@
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/flare.h describes it. */
 u8 gScreenFlash;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/flare.h"
+#include "conker/view.h"
 
 #define WGFX15172F70(pkt, a, b)     \
 {                                   \

@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 /* Spawn-variant tables, reached through gSpiralVariantLists (VariantList: count, ids, scales). */
 const s16 gSpiralVariant0Ids[3] = { 9, 10, 11 };

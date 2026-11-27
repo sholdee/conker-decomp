@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/swarm.h"
 
 /* Texture of each particle resource: flags, frame count, frame size, x and y scale, width, unk9. */
 const ParticleTexInfo gParticleTexInfos[69] = {

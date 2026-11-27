@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 
 
 /* The timer task effect_newTimedEffectNoDraw creates; effect_updatePuffTimer is its tick callback. */

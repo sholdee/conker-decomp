@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* Sets unk40 to the point 100 units above the particle's position. */
 void particle_resetBendTarget(JitterParticle *p) {

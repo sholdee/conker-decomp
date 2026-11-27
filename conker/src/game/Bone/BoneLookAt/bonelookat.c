@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/bone.h"
+#include "conker/camera.h"
+#include "conker/math.h"
 
 
 /*

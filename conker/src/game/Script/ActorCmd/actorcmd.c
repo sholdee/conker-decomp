@@ -1,6 +1,31 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/face.h"
+#include "conker/game.h"
+#include "conker/hud.h"
+#include "conker/math.h"
+#include "conker/model.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/path.h"
+#include "conker/player.h"
+#include "conker/save.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/text.h"
+#include "conker/trail.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 /* matching: no header declares actor_seatRider (movement.c): tintedobject.c was compiled with an s32 return */
 void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,

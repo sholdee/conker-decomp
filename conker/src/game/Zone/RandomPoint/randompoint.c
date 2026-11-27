@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/zone.h"
 
 
 /* Uniform random value in [0, 1], from the CPU counter times the RNG byte. */

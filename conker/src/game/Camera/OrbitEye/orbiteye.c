@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/math.h"
 #include "macros.h"
 
 static f32 gOrbitHeldPitch = 0.0f; // the last pitch that moved by 10 degrees or more

@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
 
 /* Per-type beam parameters (one type): the two bone-relative end points, the bone, the speed scale,
  * the lifetime, the size and its rate, the damping, the fade rate and the two scale rates. */

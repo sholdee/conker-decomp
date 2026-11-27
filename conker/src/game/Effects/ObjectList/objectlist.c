@@ -37,8 +37,29 @@ s32 gDrawHookTextureCm;
 TextureDesc *gDrawHookTexture;
 SpriteParams D_800DD230; /* the sprite of the current draw hook: quadeffect.c and puffquad.c load the texture frame through it */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/beam.h"
+#include "conker/blood.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/colourfb.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/rope.h"
+#include "conker/screen.h"
+#include "conker/shadow.h"
+#include "conker/sprite.h"
+#include "conker/swarm.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/trail.h"
+#include "conker/view.h"
 
 
 /*

@@ -1,6 +1,13 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/music.h"
+#include "conker/sound.h"
+#include "conker/weapon.h"
 
 /*
  * Object type 0x27: moves from pos toward target (a fixed point, a Actor or a followed f32[3]) at

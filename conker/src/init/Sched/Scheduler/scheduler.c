@@ -14,8 +14,11 @@ static u8 D_8003A5A8[0x20]; // not referenced
 static OSScMsg gSchedPreNmiMsg; // pre-NMI message
 u64 gGfxYieldBuffer[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/colourfb.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/sched.h"
 
 static OSScTask *gSchedGfxTask = NULL; // the current graphics task
 static OSScTask *gSchedAudioTask = NULL; // the audio task (from the gSchedAudioTaskQueue queue)

@@ -1,7 +1,20 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/mp.h"
+#include "conker/os.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
+#include "conker/trail.h"
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {

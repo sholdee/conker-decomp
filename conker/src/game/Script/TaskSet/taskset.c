@@ -24,8 +24,14 @@ s32 gLevelTasksDirty;
 // dispatchers (script_query)
 s32 gScriptCmdBuffer[16];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/script.h"
 
 Struct_80087410 D_80087410 = { 0, 0 };
 char gNoTaskNameString[] = "<NO TASK NAME SET!>"; /* not referenced */

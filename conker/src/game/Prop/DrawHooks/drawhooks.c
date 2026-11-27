@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/prop.h"
 
 
 void prop_emptyFrameHook(s32 arg0) {

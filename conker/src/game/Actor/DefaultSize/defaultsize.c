@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/save.h"
 
 
 void actor_setDefaultSizes(void) {

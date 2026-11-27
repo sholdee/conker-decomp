@@ -4,8 +4,7 @@
 u8 _MotorStopData[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
 u8 _MotorStartData[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/cont.h"
 #include "controller.h"
 #include "siint.h"
 

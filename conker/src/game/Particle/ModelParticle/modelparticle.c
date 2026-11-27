@@ -8,8 +8,24 @@ s16 gParticleModelUseCounts[233];      // per model: live particles that use it
 s32 gModelParticleCount;           // live particles (at most 300)
 s16 *gParticleModelTextures[233];     // per model: the textures its display list uses (texture_resolveDl)
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/blood.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/light.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/pipeexplode.h"
+#include "conker/prop.h"
+#include "conker/rom.h"
+#include "conker/sound.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/weapon.h"
 #include "libc/string.h"
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/math.h"
 
 // acos(x) for x in steps of 512 from 0 to 30720, steps of 32 from 30720 to 32736, and steps
 // of 8 from 32736 to 32760.

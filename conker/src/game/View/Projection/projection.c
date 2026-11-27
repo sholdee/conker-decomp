@@ -24,8 +24,20 @@ u8 gViewGfxLightMax;
 u8 gViewGfxLightCount;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/env.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* Loads the default near/far planes from gFogNear/gFogFar and builds the matrix gView0Projection spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

@@ -1,6 +1,15 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/effect.h"
+#include "conker/flare.h"
+#include "conker/game.h"
+#include "conker/light.h"
+#include "conker/particle.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/weapon.h"
+#include "conker/zone.h"
 
 static const Vec3f gDelayedBurstLightOffset = { 0.0f, -8.0f, -85.0f };
 static const Vec3f gDelayedBurstPosOffset0 = { 24.0f, -8.0f, -85.0f };

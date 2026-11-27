@@ -1,6 +1,8 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/attach.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/model.h"
 
 /*
  * Model attachment hook 10 (gAttachHooks[10]). While the actor is in state 0x14 past animation frame 10,

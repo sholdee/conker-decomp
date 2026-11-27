@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/camera.h"
+#include "conker/level.h"
 
 
 s32 level_isCameraAboveLimit(s32 arg0) {

@@ -140,4 +140,13 @@ extern ObjGroup *gLinkGroups;  /* the level's link groups (player_loadLinkGroups
 /* game/Math/Random/random.c */
 s32 math_rand(void);
 
+/* game/Math/Rand64/rand64.s */
+extern u64 gRandomState;
+
+/* game/Math/MtxRotateRPYF/mtxrotaterpyf.s */
+extern f32 gRotateRPYFDegToRad; // 0.01745329238474369f
+
+/* game/Math/MtxScaleF/mtxscalef.s */
+void math_mtxScaleF(MtxF mtx, f32 x, f32 y, f32 z);
+
 #endif

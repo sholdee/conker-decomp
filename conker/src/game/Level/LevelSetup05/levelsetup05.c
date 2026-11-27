@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/flamethrower.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/texture.h"
 
 /* Timed effect (expire callback 5, particle_emitDiscParticle) carrying a DiscEmitter at 0x28. */
 typedef struct {

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "effects.h"
 
 /*
  * Subsystem "text": prototypes of the non-static functions and declarations of the globals
@@ -121,5 +122,9 @@ s32 text_updateCashModel(ModelEffect *fx);
 s32 text_updateAmount(TextObj *obj);
 void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type);
 Gfx *text_preDrawCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
+
+/* game/Text/FontDraw/fontdraw.c */
+extern u8 (*gFontBitmaps[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
+extern FontGlyph *gFontGlyphs[];
 
 #endif

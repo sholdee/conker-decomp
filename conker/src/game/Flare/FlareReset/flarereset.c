@@ -1,7 +1,8 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/flare.h"
+#include "conker/level.h"
+#include "conker/light.h"
 
 
 /* Clears the lens flares and, when the level has a sun position, adds the sun flare. */

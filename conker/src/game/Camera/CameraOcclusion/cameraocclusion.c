@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/view.h"
 
 /* Z-buffer scan parameters (gZScanParams[player][unk1B4], copied from gDefaultZScanParams by camera_resetZScans). */
 typedef struct {

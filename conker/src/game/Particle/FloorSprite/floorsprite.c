@@ -1,6 +1,12 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/shadow.h"
+#include "conker/sprite.h"
 
 /* Render setup and teardown of the sprite particles (object types 15 and 67 of gObjectTypes). */
 Gfx gFloorSpriteSetupDl[] = {

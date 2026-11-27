@@ -1,6 +1,9 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/particle.h"
+#include "conker/weapon.h"
 
 /* This file's .rodata: the projectile's start point, the end of its flash beam, its origin and its
  * direction point, in the local space of bone gForwardShotBone. */

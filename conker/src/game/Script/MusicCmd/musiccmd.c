@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/mp3.h"
+#include "conker/music.h"
+#include "conker/script.h"
 
 /* Script command handler (gScriptCommandHandlers[5]): opcode 0 starts `id` via mp3_startTrack at volume a[0]
  * (0x7FFF when omitted), 1 passes a[0] (and a[1] when given) to func_151F2D6C, 2 calls func_151F2BA8.

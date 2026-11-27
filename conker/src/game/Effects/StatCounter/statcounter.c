@@ -1,6 +1,17 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/hud.h"
+#include "conker/particle.h"
+#include "conker/player.h"
+#include "conker/screen.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
 
 /* Extension block copied into the spawned effect at 0x120. */
 typedef struct {

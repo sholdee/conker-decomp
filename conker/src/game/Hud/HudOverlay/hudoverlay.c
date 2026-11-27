@@ -14,8 +14,32 @@ static s8 gCodeEntryRepeatCount;
 static u8 gHudImagePanelImage; /* not referenced */
 static u8 gHudSlotAlphas[4]; /* alpha of each player slot */
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/anim.h"
+#include "conker/boot.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cont.h"
+#include "conker/cutscene.h"
+#include "conker/env.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/hud.h"
+#include "conker/level.h"
+#include "conker/math.h"
+#include "conker/mp.h"
+#include "conker/mp3.h"
+#include "conker/os.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/script.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
+#include "conker/text.h"
+#include "conker/texture.h"
+#include "conker/view.h"
 
 /* Per-mode (gFrontEndState) overlay drawers, called by hud_drawModeOverlay. */
 Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {

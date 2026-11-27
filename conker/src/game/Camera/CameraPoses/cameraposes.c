@@ -14,8 +14,10 @@ struct Entry151298C0 {
 };
 static struct Entry151298C0 D_800DC028[4];
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/math.h"
 
 s16 gNumCameraPoses = 0; // number of entries in gCameraPoses
 

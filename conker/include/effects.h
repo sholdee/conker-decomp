@@ -1,6 +1,8 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
+#include "structs.h"
+
 /* Particle / effect spawn descriptors shared by the spawn functions and their callers. */
 
 /* EffectHeader (the common object head) is in structs.h. */

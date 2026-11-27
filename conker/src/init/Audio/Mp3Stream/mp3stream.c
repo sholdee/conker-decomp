@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /*
- * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * This file's .bss. It is defined before the subsystem headers: IDO places a variable that an
  * extern declared earlier (conker/mp3.h) after the others.
  */
 static MsgRing gMp3MessageRing;
@@ -10,8 +10,11 @@ static u8 gMp3MessageBuffer[64]; /* gMp3MessageRing's buffer */
 s32 D_800427F0;           /* read and cleared by game/Face/ScriptedExpression/scriptedexpression.c */
 u16 gMp3LastTrack;           /* the track last started */
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/game.h"
+#include "conker/mp3.h"
+#include "conker/rom.h"
+#include "conker/sound.h"
+#include "conker/text.h"
 
 /*
  * Streamed-audio front end: a 64-byte message ring (gMp3MessageRing over gMp3MessageBuffer) that the stream

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/shadow.h"
 
 /*
  * Subsystem "collision": prototypes of the non-static functions and declarations of the globals
@@ -422,5 +423,13 @@ s32 collision_findMeshFloorNear(s32 x, s32 y, s32 z, s32 *outTri);
 void collision_updateCameraZone(s32 index);
 ZoneNode *collision_findZoneLeaf(s32 x, s32 z);
 s32 collision_getZoneLeafIndex(ZoneNode *zone);
+
+/* game/Collision/GroundQuery/groundquery.s */
+extern GroundCandidate gGroundCandidates[]; // ground-probe hits
+extern u8  gCurrentActorSlot; // 1-based slot of the actor being updated (0 = none)
+
+/* game/Collision/PropBoxQuery/propboxquery.s */
+extern u16 gSurfSetA[40]; // grid-query result: triangle indices (u16 list for collision_gatherPropGroundTris / collision_transformPropTris)
+extern u16 gSurfSetB[]; // second grid-query triangle index buffer
 
 #endif

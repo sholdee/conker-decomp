@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/attach.h"
+#include "conker/bone.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/model.h"
+#include "conker/view.h"
 
 static u8 gReflectionCount;                 // number of queued reflections
 static ReflectionEntry gReflections[15]; // reflection queue

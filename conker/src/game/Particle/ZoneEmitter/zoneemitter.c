@@ -1,6 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/mp.h"
+#include "conker/particle.h"
+#include "conker/sound.h"
 
 /* Spins the emitter and, while math_isZoneHiddenFromViews allows it, throws particles from random points of its region. */
 s32 particle_updateZoneEmitter(ZoneEmitter *obj) {

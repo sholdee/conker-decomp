@@ -1,6 +1,14 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/actor.h"
+#include "conker/beam.h"
+#include "conker/camera.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/sound.h"
+#include "conker/sprite.h"
 
 /* The render setup of the tracer effect type (the effect type table entry of beam_updateTracer points to it). */
 Gfx gTracerRenderSetupDl[] = {
@@ -381,7 +389,7 @@ void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 
 }
 
 /* Like beam_spawnBoneTracer with a caller-chosen width, length and speed. */
-// matching: functions.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
+// matching: conker/beam.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
 void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
                    s32 unkFE, f32 speed) {

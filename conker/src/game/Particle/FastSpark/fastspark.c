@@ -1,6 +1,10 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/particle.h"
+#include "conker/texture.h"
 #include "libc/string.h"
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */

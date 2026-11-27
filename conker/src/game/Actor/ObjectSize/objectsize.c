@@ -1,6 +1,7 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/game.h"
+#include "conker/save.h"
 
 /* Refreshes the cached height/width/depth (ActorCtl height, width, depth) of every object that has one. */
 void actor_updateSizes(void) {

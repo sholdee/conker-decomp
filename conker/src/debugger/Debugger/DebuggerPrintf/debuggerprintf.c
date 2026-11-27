@@ -3,8 +3,7 @@
 #include "libc/stdarg.h"
 #include "libc/stdlib.h"
 #include "libc/string.h"
-#include "functions.h"
-#include "variables.h"
+#include "conker/debugger.h"
 
 
 #define FLAGS_SPACE 1

@@ -90,7 +90,7 @@ typedef struct {
 } AudioInstrument;
 
 /*
- * This file's .bss, 0x8003E380-0x800417B0. It is defined before functions.h and variables.h: IDO places a
+ * This file's .bss, 0x8003E380-0x800417B0. It is defined before the subsystem headers: IDO places a
  * variable that an extern declared earlier (gReleaseRawBanksPending, of conker/audio.h) after the others. The types
  * above are defined before it on purpose: IDO rotates the .bss order by the number of types and externs
  * declared before the definitions, and with fewer of them gAudioGlobalsPtr is no longer first.
@@ -136,8 +136,19 @@ static OSIoMesg gBankDmaMsgs[MAX_BANK_DMAS];
 static OSMesgQueue gBankDmaQueue;      /* bank DMA completions */
 static OSMesg gBankDmaMesgBuf[MAX_BANK_DMAS];
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/audio.h"
+#include "conker/boot.h"
+#include "conker/collision.h"
+#include "conker/heap.h"
+#include "conker/mp3.h"
+#include "conker/sched.h"
+
+/* The synthesis driver (libultra/audio/n_sl.c, n_synthesizer.c). n_libaudio.h declares n_alInit with an
+ * ALSynConfig, but this file passes its SynDriverConfig (the same layout, with Conker's bank hooks), so it
+ * declares the three functions itself and does not include n_libaudio.h. */
+void n_alInit(void *globals, void *config);
+void n_alClose(void *globals);
+Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
 
 
 typedef union {

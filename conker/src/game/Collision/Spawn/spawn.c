@@ -14,8 +14,25 @@ u8 *gSpawnPathCounts;
 u8 *gSpawnInUse;
 u16 *gSpawnDelays;
 
-#include "functions.h"
-#include "variables.h"
+#include "conker/actor.h"
+#include "conker/aim.h"
+#include "conker/anim.h"
+#include "conker/attach.h"
+#include "conker/collision.h"
+#include "conker/cutscene.h"
+#include "conker/effect.h"
+#include "conker/event.h"
+#include "conker/game.h"
+#include "conker/heap.h"
+#include "conker/level.h"
+#include "conker/light.h"
+#include "conker/model.h"
+#include "conker/player.h"
+#include "conker/rom.h"
+#include "conker/save.h"
+#include "conker/texture.h"
+#include "conker/view.h"
+#include "conker/zone.h"
 
 
 

@@ -12,16 +12,18 @@ Readers see this as repeated definitions.
 - One header for each subsystem: `include/conker/<prefix>.h`. All 58 exist. The comment at the top of
   each lists the files of that subsystem in address order. `tools/subsystems.tsv` maps each file to its
   subsystem.
-- `include/subsystems.h` includes the 58 headers. `functions.h` and `variables.h` include it at their
-  end. Thus each C file still sees every declaration. Do not add `#include "conker/..."` lines to C
-  files.
+- Each C file includes the headers that declare what it uses, and nothing else: its own subsystem
+  header, the headers of the other subsystems it calls, and `structs.h` or `effects.h` when none of
+  those already includes them. There are no umbrella headers. `tools/warncheck.py` fails the build
+  when a file includes `functions.h`, `variables.h` or `subsystems.h`.
 - A subsystem header holds the prototypes of the non-static functions and the `extern` declarations of
   the globals that its files define. Group them by file, in address order, with a one-line comment that
   names the file.
 - A type that only one subsystem uses goes into that subsystem's header. A type that several subsystems
   use goes into `include/structs.h`, or into `include/effects.h` for effect types. A type that
-  `functions.h`, `variables.h` or `structs.h` needs must be in `structs.h`, because the subsystem
-  headers come after them. A subsystem header includes the other headers that it needs.
+  `structs.h` needs must be in `structs.h`. Each header includes the headers that it needs and compiles
+  on its own. A pointer to a struct that another header defines can use the struct tag
+  (`struct ZoneEmitter *`) and needs no include.
 
 ## Phase 1: types
 Each agent takes a family of type names. For each name:
@@ -40,13 +42,12 @@ Each agent takes a family of type names. For each name:
 Each agent takes a list of subsystems. For each subsystem:
 1. Write the prototypes and the `extern` declarations into `include/conker/<prefix>.h`, from the
    definitions in its files.
-2. Move the declarations of those symbols out of `functions.h` and `variables.h`.
+2. Remove any other declaration of those symbols (phase 2 is done: the umbrella headers are gone).
 3. Remove the local copies from every C file, in all subsystems.
-4. `effects.h` is in the umbrella now. Remove `#include "effects.h"` from the C files of the subsystem.
 
 Notes for phase 2:
-- `sched` is done. Use it as the example. `init_50A0.c` does not include the umbrella headers (see the
-  comment at its top). Do not change that.
+- `sched` is done. Use it as the example. `schedinit.c` includes only its own header, after its `.bss`
+  (see the comment at its top). Do not change that.
 - **libultra.** The files under `src/libultra/` are SDK code. Their declarations come from the SDK
   headers (`include/2.0L/PR/*.h` and the internal headers next to the files, for example
   `controller.h`, `n_synthInternals.h`). Do not put libultra symbols into `include/conker/`. A Rare
@@ -54,7 +55,7 @@ Notes for phase 2:
 - **The .bss order can change in other files too.** IDO lays out a file's .bss in an order that
   depends on the number of types and variables that the file declares before the .bss. Sometimes
   a land fails because the .bss of a file that you did not edit moved. Then read the comment at the
-  top of `init_50A0.c`. Write the case in `notes.md` and skip the edit.
+  top of `schedinit.c`. Write the case in `notes.md` and skip the edit.
 
 ## Callers that disagree with the definition
 The owner's rule: the code must be clean, and faithful to the original source. If the original form
@@ -101,8 +102,8 @@ python3 tools/cw.py land  clean.hdr.<name> -m "headers: <name>"
   `// matching:` comment that tells why.
 - **The .bss order depends on declarations.** IDO lays out a file's `.bss` in the order of the first
   declaration of each variable, and an `extern` in a header counts. Keep the externs of each file in
-  address order. 16 files define their `.bss` before they include `functions.h` and `variables.h`
-  (for example `game_20AE20.c`). Keep that order of lines.
+  address order. About 30 files define their `.bss` before their subsystem includes
+  (for example `movement.c`). Keep that order of lines.
 - **K&R definitions** (`void f(a) u8 a; {...}`) stay as they are. Their prototype in the header is the
   one that the callers used.
 - **Unused declarations:** remove them. An unused `extern` costs nothing in the ROM, but it is noise.

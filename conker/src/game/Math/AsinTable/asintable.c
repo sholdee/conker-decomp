@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include <math.h>
+#include "conker/math.h"
 
 /* asin(i / 256) scaled so that 65536 is pi/2, for i = 0..255. */
 static const u16 gAsinTable[256] = {

@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+#include "conker/particle.h"
+#include "conker/view.h"
 #include "libc/string.h"
 
 void particle_emitDiscParticle(Struct150C29F0 *emitter) {
