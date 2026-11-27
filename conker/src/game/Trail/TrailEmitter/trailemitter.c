@@ -194,14 +194,6 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
     f32 lenSq;
     f32 cosA;
     f32 sinA;
-    f32 invLen;
-    u16 phase;
-    u16 phaseStep;
-    f32 ownerVelX;
-    f32 ownerVelZ;
-    f32 invDt;
-    f32 velX;
-    f32 velZ;
 
     points = trail->points;
     params = (EmitterTrailParams *)trail->params;
@@ -220,8 +212,7 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
     dirZ = link->emitter->params.owner->aim.dir[2] * (1.0f / 256);
     lenSq = dirX * dirX + dirZ * dirZ;
     if (lenSq) {
-        /* matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s */
-        extern f32 sqrtf(f32);
+        f32 invLen;
 
         invLen = 1.0f / sqrtf(lenSq);
         cosA = dirX * invLen;
@@ -243,6 +234,9 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
         }
     }
     if (trail->head.count < trail->head.tmpl.itemCount - 1) {
+        u16 phase;
+        u16 phaseStep;
+
         phase = 0;
         phaseStep = 0;
         if (trail->head.count != 0) {
@@ -267,6 +261,12 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
             }
         }
     } else {
+        f32 ownerVelX;
+        f32 ownerVelZ;
+        f32 invDt;
+        f32 velX;
+        f32 velZ;
+
         invDt = 1.0f / gFrameDelta;
         velX = params->base.motion.velocity.x * sinA + params->base.motion.velocity.z * cosA;
         velZ = params->base.motion.velocity.z * sinA - params->base.motion.velocity.x * cosA;

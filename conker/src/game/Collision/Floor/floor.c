@@ -146,10 +146,10 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
     s32 objectNum;
     u32 dummyFlags;
     s32 triIndex;
-    s32 propNum;
+    f32 fallbackY;
     GroundCandidate *hit;
     s32 *tri;
-    s16 *vtx;
+    s16 *propVtx;
     s32 vtxBase;
     s32 fallbackHit;
     s32 fallbackType;
@@ -174,6 +174,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
     gFloorQueryX = x;
     gFloorQueryY = y;
     haveFallback = FALSE;
+    fallbackY = noFloor;
     gFloorQueryZ = z;
     *outFloorY = noFloor;
     if (outFlags == NULL) {
@@ -209,7 +210,6 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                 s32 bestPropHit;
                 f32 bestPropY;
                 s32 propVtxBase;
-                s16 *propVtx;
 
                 floorProps = collision_findPropsInBox(ix, iz, &allProps, group, ix, iz, minY, maxY);
                 collision_transformPropTris(floorProps, gSurfSetA, 0);
@@ -257,7 +257,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
 
                 height = gGroundCandidates[i].height / 256.0f;
                 if (noFallback == 0 && allowFallback != 0 && *outFloorY == noFloor
-                    && (noFloor == noFloor || height < noFloor)) { // matching: tautology IDO still compiles
+                    && (fallbackY == noFloor || height < fallbackY)) {
                     s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
                     if (collision_isHitFacingUp(i)) {
                         haveFallback = TRUE;
@@ -380,7 +380,8 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                                     ceilingFlags = 0;
                                 }
                             } else if (type == PROBE_PROP) {
-                                s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
+                                s32 propNum;
+
                                 propNum = gGroundCandidates[i].owner + 1;
                                 if (db_Object_array[propNum - 1].materials != NULL) {
                                     ceilingFlags = db_Object_array[propNum - 1].materials[triIndex - db_Object_array[propNum - 1].firstTri];
@@ -405,8 +406,8 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
         }
     }
     if (floorTri != 0 && outVerts != NULL) {
-        /* matching: a declaration here keeps IDO from using beqzl on this test */
-        extern MeshTri *gCurMapTris;
+        s16 *vtx;
+
         for (i = 0; i < 3; i++) {
             vtx = (s16 *)(((s32 *)floorTri)[i] + floorVtxBase);
             outVerts[i].x = vtx[0];
