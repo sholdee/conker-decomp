@@ -2,6 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The particle spawn callback of each kind (EmitterCallback; the callbacks take their own parameter types,
+ * so each entry gives IDO warning 709, as the other handler tables do). */
+EmitterCallback D_8008AA00[28] = {
+    effect_emitStompPuff, func_150C2558, trail_spawnKind2Trail,
+    func_150C2700, particle_spawnFastSpark, effect_spawnJointSpark,
+    effect_spawnJointPiece, particle_spawnYawStreak, func_150B3C0C,
+    pipeexplode_spawnChunk, pipeexplode_spawnTunableChunk, effect_spawnImpactSprayParticle,
+    particle_spawnYawSteam, func_150BD954, particle_spawnYawSpark,
+    particle_spawnYawModelParticle, particle_spawnYawSpraySpark, particle_spawnYawDampedSprite,
+    particle_spawnYawTumbler, effect_spawnDampedParticle, effect_spawnTumblingBurst,
+    func_151B0050, func_151470FC, particle_spawnYawColorSprite,
+    particle_spawnYawSpinModel, func_150B879C, NULL,
+    NULL,
+};
+
 /*
  * Spawns `count` particles of `kind` evenly spaced on a horizontal circle of `radius`
  * around (x, y, z), starting at `startAngle` and stepping by `angleStep` (256 = full turn).
