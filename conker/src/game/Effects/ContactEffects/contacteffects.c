@@ -161,7 +161,7 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         collision_initHitFromObject(&ground, other);
         kind = blood_getProfile(other);
         if (kind != 0x63) {
-            profile = gBloodProfiles[kind].unkE;
+            profile = gBloodProfiles[kind].bloodKind;
             if (profile != 2) {
                 burst.spray.pos = pos;
                 burst.spray.scaleBase = 6.699999809f;

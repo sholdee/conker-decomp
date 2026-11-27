@@ -1333,7 +1333,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                       scale, kind, D_800A3F64[kind], actor, &hit, arg6,
                       arg7);
     }
-    if (gBloodProfiles[kind].unkE == 2) {
+    if (gBloodProfiles[kind].bloodKind == 2) {
         return;
     }
     if (arg1 != 0) {
@@ -1614,7 +1614,7 @@ void blood_spawnDeathEffects(Actor *actor, u8 arg1, s32 arg2) {
     blood_spawnProfileBurst(&position, gBloodModelLists[kind] + 2, gBloodBurstScales,
                   gBloodModelCounts[kind] - 2, scale, kind, D_800A3F64[kind],
                   actor, &hit, arg1, arg2);
-    if (gBloodProfiles[kind].unkE != 2) {
+    if (gBloodProfiles[kind].bloodKind != 2) {
         blood_spawnSmallSplash(&position, arg1, arg2);
         if (pool != 0) {
             blood_spawnGrowingParticle(((math_randomFloat() * 25.0f) + 75.0f) * 0.001000000047f,
@@ -1753,7 +1753,7 @@ s32 blood_getBloodPoint(Actor *actor, s32 kind, Vec3f *out) {
 void blood_startBleeding(Actor *actor, s32 kind, u8 arg2) {
     BloodStripDesc desc;
 
-    if (gBloodProfiles[kind].unkE != 2) {
+    if (gBloodProfiles[kind].bloodKind != 2) {
         desc.ownerId = actor->unique_id;
         desc.owner = actor;
         if (arg2) {
@@ -1776,7 +1776,7 @@ void blood_startBleeding(Actor *actor, s32 kind, u8 arg2) {
             desc.lifetime = 600;
         }
         desc.sampleCallback = 5;
-        if (gBloodProfiles[kind].unkE == 0) {
+        if (gBloodProfiles[kind].bloodKind == 0) {
             desc.emitCallback = 5;
         } else {
             desc.emitCallback = 6;
@@ -1799,7 +1799,7 @@ void blood_spawnBurst(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) 
     SplashSpraySpec burst;
     s32 type;
 
-    type = gBloodProfiles[kind].unkE;
+    type = gBloodProfiles[kind].bloodKind;
     if (type != 2) {
         burst.spray.pos = *position;
         burst.spray.scaleBase = 1.9799999f;
@@ -1847,12 +1847,12 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 a
     spawn.scale.x = 1.0f;
     spawn.radius = 20.0f;
     spawn.elasticity = 0.5610000491f;
-    if (gBloodProfiles[kind].unkE == 1) {
+    if (gBloodProfiles[kind].bloodKind == 1) {
         spawn.scale.y = 1.0f;
     } else {
         spawn.scale.y = 0.0f;
     }
-    if (gBloodProfiles[kind].unkE == 2) {
+    if (gBloodProfiles[kind].bloodKind == 2) {
         spawn.scale.y = 2.0f;
     }
     spawn.scale.z = 1.0f;

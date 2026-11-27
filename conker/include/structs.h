@@ -1989,7 +1989,7 @@ typedef struct ParticleTexFile {
 typedef struct BloodProfile {
     /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
     /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (particle_newModelParticleWithFloor)
-    /* 0xE */ u8 unkE; // 2: no blood (sprays and drips are skipped)
+    /* 0xE */ u8 bloodKind; // 0 or 1: the spray kind (blood_spawnBurst copies 1 to spray.kind); 2: no blood (sprays and drips are skipped)
     /* 0xF */ u8 padF;
 } BloodProfile; /* size 0x10 */
 

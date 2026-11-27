@@ -50,7 +50,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
         collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
-            if (gBloodProfiles[profile].unkE != 2) {
+            if (gBloodProfiles[profile].bloodKind != 2) {
                 shade = (actor->langle >> 8) + 0x40;
                 math_transformOffset(&gJointImpactPoint, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
@@ -72,7 +72,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.speedBase = 6.0f;
                 impact.spray.speedRange = 13.90000057f;
                 impact.spray.unk38 = 0.5f;
-                if (gBloodProfiles[profile].unkE == 1) {
+                if (gBloodProfiles[profile].bloodKind == 1) {
                     impact.spray.kind = 1;
                 } else {
                     impact.spray.kind = 0;
@@ -249,10 +249,10 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
     if (profile == 99) {
         return NULL;
     }
-    if (gBloodProfiles[profile].unkE == 2) {
+    if (gBloodProfiles[profile].bloodKind == 2) {
         return NULL;
     }
-    if (gBloodProfiles[profile].unkE == 1) {
+    if (gBloodProfiles[profile].bloodKind == 1) {
         emitter.profileFlag = 1;
     } else {
         emitter.profileFlag = 0;

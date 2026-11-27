@@ -27,7 +27,7 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
         return NULL;
     }
 
-    if (gBloodProfiles[profile].unkE == 2) {
+    if (gBloodProfiles[profile].bloodKind == 2) {
         return NULL;
     }
 
@@ -49,7 +49,7 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     desc.callback = -1;
     desc.unk2D = 7;
 
-    if (gBloodProfiles[profile].unkE == 1) {
+    if (gBloodProfiles[profile].bloodKind == 1) {
         payload[0] = 1;
     } else {
         payload[0] = 0;
