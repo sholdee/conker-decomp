@@ -9,8 +9,8 @@
 #include "conker/weapon.h"
 
 /*
- * Effects of the W2_WARBOSS level. effect_levelUpdateRandomSounds is level update hook 25, which only that level's
- * header selects.
+ * Placed among the LEVEL_W2_WARBOSS files: effect_levelUpdateRandomSounds is level update hook 25, which only that
+ * level's header selects. No table ties the other functions of the file to a level.
  */
 
 static const s32 gExplosionSprayModels[3] = { 0xBD, 0xBE, 0xBF };

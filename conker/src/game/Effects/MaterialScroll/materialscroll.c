@@ -13,8 +13,9 @@
 #include "conker/zone.h"
 
 /*
- * Effects of the W2_HARBOUR level. effect_levelUpdateMaterialScroll is level update hook 7, which only that level's
- * header selects, and the level's setup (level_setup15) clears gMaterialGlowLevels and gWarpModelSetupDone.
+ * Placed among the LEVEL_W2_HARBOUR files: effect_levelUpdateMaterialScroll is level update hook 7, which only that
+ * level's header selects, and that level's setup (level_setup15) clears gMaterialGlowLevels and gWarpModelSetupDone.
+ * No table ties the other functions of the file to a level.
  */
 
 /* One display-list command, with the opcode byte of its first word addressable. */
@@ -29,20 +30,21 @@ typedef struct {
 /* matching: the scan loops address dl by (j << 3) bytes; dl[j] would be strength-reduced */
 #define GFX_CMD(dl, j) ((GfxCmd *)(((j) << 3) + (u8 *)(dl)))
 
+/* The indices into zones of the three scrolling materials (a struct: effect_isMaterialZoneActive copies it). */
 typedef struct {
     u8 values[3];
-} Game10CD70Indices;
+} MaterialZoneIds;
 
 /* Set once the one-time setup of effect_setupWarpModelOnce has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 gWarpModelSetupDone = 0;
-static Game10CD70Indices gMaterialZoneIds = { { 0x3B, 0x3C, 0x3D } };
+static MaterialZoneIds gMaterialZoneIds = { { 0x3B, 0x3C, 0x3D } };
 
 /* Per zone (gMaterialZoneIds): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 gMaterialGlowLevels[3];
 
 /* Returns whether the zones record selected by gMaterialZoneIds[index] is active. */
 s32 effect_isMaterialZoneActive(s32 index) {
-    Game10CD70Indices indices = gMaterialZoneIds;
+    MaterialZoneIds indices = gMaterialZoneIds;
 
     if (zones[indices.values[index]].inactive != 0) {
         return 1;

@@ -5,8 +5,8 @@
  * to game/Camera/LevelHook09/levelhook09; none uses it). Script command 2 of game/Script/EffectCmd/effectcmd.c sets
  * D_800D9920, game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c clear all four,
  * and nothing reads them.
- * level_setup02 is the setup of W2_BOILERROOM only (from the level headers in the ROM), and that level's update hook
- * is in texturescroll, the first of the 12 units. materialscroll does not define the block: a gap of 10 bytes
+ * Of the per-level setups, only that of LEVEL_W2_BOILERROOM (level_setup02, from the level headers in the ROM) clears
+ * them, and that level's update hook is in texturescroll, the first of the 12 units. materialscroll does not define the block: a gap of 10 bytes
  * separates D_800D9938 from materialscroll's gMaterialGlowLevels. In the debug and ECTS builds 16 more bytes that
  * nothing uses lie in that gap. */
 u8 D_800D9920;
