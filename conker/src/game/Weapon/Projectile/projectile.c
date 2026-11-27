@@ -100,9 +100,9 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     ext.flags = (hitCallback ? TRAIL_HIT_CALLBACK : 0) | (expireHandler ? TRAIL_EXPIRE_HANDLER : 0) |
                 (collide ? TRAIL_COLLIDE : 0) | (arg15 ? TRAIL_FLAG_8 : 0);
     ext.handle = 0;
-    ext.fieldA8 = arg23;
+    ext.filter = arg23;
     ext.expireHandler = handlerIndex;
-    ext.fieldA4 = arg20;
+    ext.hitFlags = arg20;
     ext.soundEnabled = (math_random() & 0xFFU) < soundChance ? TRUE : FALSE;
     ext.sound = 0;
     ext.listener = 0;
@@ -386,7 +386,7 @@ s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
 s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit) {
-    return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
+    return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.hitFlags, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
@@ -834,7 +834,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.deathFunc = -1;
         smoke.primColorMode = 8;
         smoke.envColorMode = 6;
-        smoke.unk64 = 1;
+        smoke.kind = 1;
         smoke.extra = 0.8702070117f;
         particle_spawnSpriteBurst(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
@@ -893,7 +893,7 @@ u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 d
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             collision_castRay(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
-                          &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
+                          &ray, length, 1, 0, solid, ext->filter, 0, ext->handle);
             if (ray.hitType >= 2) {
                 weapon_onProjectileImpact(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);
                 result = FALSE;

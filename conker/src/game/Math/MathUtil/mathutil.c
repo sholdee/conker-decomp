@@ -1933,7 +1933,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
         return 0;
     }
     if (point->anim != NULL) {
-        if (point->anim->unk3F6 == 0) {
+        if (point->anim->partMtxReady == 0) {
             return 0;
         }
         mtx = point->anim->partMtx[gDrawBufferIndex] + index;

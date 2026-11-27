@@ -101,7 +101,7 @@ typedef struct StripTarget {
 /* A camera-facing textured strip drawn from p0 to p1 (object type 0x46). */
 typedef struct StripObj {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
+    /* 0x10 */ s32 active;   // bit 0: updated and drawn (set by beam_newStrip)
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Vec3f p0;
     /* 0x24 */ Vec3f p1;
@@ -186,7 +186,7 @@ typedef struct {
     f32 endOffset[3];
     u8 impactEffect;
     u8 fireCounter;
-    u8 unkFE;
+    u8 hitsObjects; // 1: collision_castRayAtObjects along each step
     u8 padFF;
 } Game10EF60Effect;
 
@@ -616,17 +616,17 @@ typedef struct {
 
 /* User data of a type 2 emitter: the particles spawn hook 1 (beam_launchJitterParticle) launches. */
 typedef struct {
-    /* 0x00 */ f32 vec0Base;         /* the two floats passed to particle_spawnJitterParticle: base + rand * range */
-    /* 0x04 */ f32 vec1Base;
-    /* 0x08 */ f32 vec0Range;
-    /* 0x0C */ f32 vec1Range;
+    /* 0x00 */ f32 widthBase;        /* the particle's size (particle_spawnJitterParticle's ParticleSize): base + rand * range */
+    /* 0x04 */ f32 heightBase;
+    /* 0x08 */ f32 widthRange;
+    /* 0x0C */ f32 heightRange;
     /* 0x10 */ RangeS16 life;        /* the particle's life (particle_spawnJitterParticle) */
     /* 0x14 */ RangeS16 relaunchLifetime; /* goes into the particle's extra data (JitterRelaunch.lifetime) */
-    /* 0x18 */ RangeS16 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
-    /* 0x24 */ f32 unk20Range;
+    /* 0x18 */ RangeS16 alpha;       /* particle_spawnJitterParticle's alpha */
+    /* 0x1C */ s16 fadeStart;
+    /* 0x1E */ s16 fadeRate;
+    /* 0x20 */ f32 relaunchGravityBase; /* JitterRelaunch.gravity in the particle's extra data: base + rand * range */
+    /* 0x24 */ f32 relaunchGravityRange;
     /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
 } ParticleSettings; /* size 0x2C */
 

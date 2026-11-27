@@ -1162,9 +1162,9 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                     }
                     if (icon >= 0 && icon != 3) {
                         if (barShift > 0) {
-                            barLen.b[i] = movement_obj[i].mv->unk12C >> barShift;
+                            barLen.b[i] = movement_obj[i].mv->itemRemaining >> barShift;
                         } else {
-                            barLen.b[i] = movement_obj[i].mv->unk12C << -barShift;
+                            barLen.b[i] = movement_obj[i].mv->itemRemaining << -barShift;
                         }
                         barMode = 1;
                     }
@@ -1186,7 +1186,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         icon = 6;
                         break;
                     case 0x3E:
-                        barLen.b[i] = movement_obj[i].mv->unk12C >> 4;
+                        barLen.b[i] = movement_obj[i].mv->itemRemaining >> 4;
                         barMode = 2;
                         break;
                     }

@@ -366,7 +366,7 @@ void effect_spawnStatPickupBurst(Vec3f *pos) {
     second.deathFunc = -1;
     second.primColorMode = 8;
     second.envColorMode = 6;
-    second.unk64 = 1;
+    second.kind = 1;
     second.extra = 0.9411770105f;
     particle_spawnSpriteBurst(&second, 0xFF, 0xFF, 1);
 }

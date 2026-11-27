@@ -1191,7 +1191,7 @@ typedef struct SpriteBurst {
     /* 0x61 */ s8 deathFunc;
     /* 0x62 */ u8 primColorMode;
     /* 0x63 */ u8 envColorMode;
-    /* 0x64 */ u8 unk64;            /* particle_newSpriteParticleWithFloor's second argument */
+    /* 0x64 */ u8 kind;             /* particle_newSpriteParticleWithFloor's kind: 0, 1 or 2 */
     /* 0x65 */ u8 pad65[3];
     /* 0x68 */ f32 extra;           /* copied into each particle at +0xA8 */
 } SpriteBurst; /* size 0x6C */
@@ -1501,7 +1501,7 @@ typedef struct ParticleBurst {
     /* 0x14 */ f32 speedRange;
     /* 0x18 */ f32 gravityBase;     /* ParticleDesc.gravity */
     /* 0x1C */ f32 gravityRange;
-    /* 0x20 */ f32 unk20;           /* copied to the particle's data */
+    /* 0x20 */ f32 drag;            /* weapon_spawnDragSprite: the particle's data.dragBounce.drag */
     /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha */
     /* 0x25 */ u8 alphaRange;
     /* 0x26 */ s16 timerBase;       /* ParticleDesc.timer; -1 = 300 */
@@ -2473,7 +2473,7 @@ typedef struct Sprite2DParams {
     /* 0x34 */ u8 blue;
     /* 0x35 */ u8 alpha;
     /* 0x36 */ u8 renderMode;     /* index into gEffectRenderModes */
-    /* 0x37 */ u8 unk37;
+    /* 0x37 */ u8 combiner;       /* particle_setCombineMode's combiner */
     /* 0x38 */ u8 cycleType;      /* 2 = two-cycle */
     /* 0x39 */ u8 flags;
 } Sprite2DParams; /* size 0x3C */

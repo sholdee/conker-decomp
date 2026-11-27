@@ -234,7 +234,7 @@ void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     if (y) {} // matching: steers IDO's s1/s2 choice for y and r
     desc.alpha = 0xFF;
     desc.renderMode = 7;
-    desc.unk37 = 0x11;
+    desc.combiner = 0x11;
     if (x < (gLayoutViewWidths[0] >> 1)) {
         do { // matching: the loop's -g3 markers steer IDO's register choice for r
             r = gLayoutViewWidths[0] - x;
@@ -307,7 +307,7 @@ void func_150B7484(void) {
     desc.extraWidth = 0;
     desc.flags = 0;
     desc.renderMode = 7;
-    desc.unk37 = 0x15;
+    desc.combiner = 0x15;
     desc.cycleType = 1;
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
@@ -341,7 +341,7 @@ void func_150B7560(void) {
     desc.blue = 0;
     desc.alpha = 0xFF;
     desc.renderMode = 7;
-    desc.unk37 = 0x11;
+    desc.combiner = 0x11;
     desc.cycleType = 1;
     desc.flags = 0;
     desc.scaleX = 0x1000;
@@ -389,7 +389,7 @@ void sprite_spawnGrowing(s32 x, s32 slot) {
     desc.extraWidth = 0;
     desc.flags = 0;
     desc.renderMode = 7;
-    desc.unk37 = 0x15;
+    desc.combiner = 0x15;
     desc.cycleType = 1;
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
@@ -427,7 +427,7 @@ void func_150B77A8(void) {
     desc.blue = 0;
     desc.alpha = 0xFF;
     desc.renderMode = 0xD;
-    desc.unk37 = 0x12;
+    desc.combiner = 0x12;
     desc.cycleType = 2;
     desc.flags = 3;
     desc.scaleX = 0x1000;
@@ -443,7 +443,7 @@ void func_150B77A8(void) {
     desc.height = 64;
     desc.behavior = 0;
     desc.renderMode = 7;
-    desc.unk37 = 0x11;
+    desc.combiner = 0x11;
     desc.texture = &D_800918E8;
     desc.cycleType = 1;
     if (gSpriteSlots[8] != NULL) {
@@ -484,7 +484,7 @@ void func_150B791C(void) {
     desc.blue = 0;
     desc.alpha = 0x80;
     desc.renderMode = 7;
-    desc.unk37 = 0x11;
+    desc.combiner = 0x11;
     desc.cycleType = 1;
     desc.flags = 0;
     desc.scaleX = 0x1000;

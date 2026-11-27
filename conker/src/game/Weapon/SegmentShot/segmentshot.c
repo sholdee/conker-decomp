@@ -346,7 +346,7 @@ void weapon_spawnTedizSplash(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3)
     desc.speedRange = 7.0f;
     desc.gravityBase = -0.2080000043f;
     desc.gravityRange = 0.08500000089f;
-    desc.unk20 = 0.9706320167f;
+    desc.drag = 0.9706320167f;
     desc.alphaBase = 190;
     desc.alphaRange = 65;
     desc.timerBase = 200;

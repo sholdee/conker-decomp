@@ -608,9 +608,9 @@ typedef struct {
     /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
     /* 0x129 */ s8  targetIndex;  // index into movement_obj, < 0 for none
-    /* 0x12A */ s8  unk12A;
+    /* 0x12A */ s8  aimMiss;
     /* 0x12B */ u8  pad12B;
-    /* 0x12C */ u16 unk12C;
+    /* 0x12C */ u16 itemRemaining;
     /* 0x12E */ u8  pad12E[2];
     /* 0x130 */ Vec3f aimDir;
     /* 0x13C */ Vec3f aimEye;
@@ -640,7 +640,7 @@ typedef struct {
     /* 0x1A0 */ u16 unk1A0;
     /* 0x1A2 */ u16 gunRecoil;       // >> 8 = recoil pitch kick (Camera.LastGunRecoil, walk lean)
     /* 0x1A4 */ u16 gunRecoilVel;    // added to gunRecoil each tick while firing
-    /* 0x1A6 */ u16 unk1A6;
+    /* 0x1A6 */ u16 extraHeight;
     /* 0x1A8 */ u8  skippedTime;
     /* 0x1A9 */ u8  unk1A9;
     /* 0x1AA */ s16 shotsfired;
@@ -703,13 +703,13 @@ typedef struct PathPoint {
 
 /* Per-player stats, read and written through player_getStat / player_setStat (game/Player/PlayerStats/playerstats). */
 typedef struct PlayerStats {
-    /* 0x00 */ s32 unk0;
+    /* 0x00 */ s32 character; /* the player's character choice (it picks the spawn type, game/Level/SpawnTable/spawntable) */
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ s8 unk8;   /* 0..100 */
+    /* 0x08 */ s8 lives;  /* 0..100; one is lost on each death (game/Actor/KillRespawn/killrespawn) */
     /* 0x09 */ s8 health; /* 0..99 */
     /* 0x0A */ u8 unkA;
     /* 0x0B */ u8 padB;
-    /* 0x0C */ s32 unkC;  /* >= 0 */
+    /* 0x0C */ s32 score; /* >= 0; multiplayer: kills and points; single player: Conker's cash */
     /* 0x10 */ u8 pad10[0xC];
 } PlayerStats; // size 0x1C
 
@@ -807,16 +807,16 @@ typedef struct AnimInstance {
     /* 0x028 */ s32 frameRom[2];    // ROM address of the frame data; 0: no animation loaded
     /* 0x030 */ u8 *frameBuf[2];    // this frame's data, DMAed by actor_loadAnimFrames
     /* 0x038 */ s8  nextFrameOffset[2]; // offset of the next frame in frameBuf (0: none)
-    /* 0x03A */ s16 unk3A;          // blend step
-    /* 0x03C */ s16 unk3C;          // blend countdown
+    /* 0x03A */ s16 blendStep;      // blend step: 500 / blend frames
+    /* 0x03C */ s16 blendTimer;     // blend countdown from 0x3FF; both channels are used while > 0
     /* 0x03E */ u8  pad3E[2];
     /* 0x040 */ u8  header[2][0x1D0]; // the animation's data header: [3] frame count, [5] frame size, [8] frame step - 1
     /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
-    /* 0x3F0 */ s32 unk3F0;
+    /* 0x3F0 */ s32 bones;        // bone table (AttachModelHeader.bones; anim_buildBoneMatrices)
     /* 0x3F4 */ u8  numParts;
     /* 0x3F5 */ u8  bank;           // animation bank passed to actor_startAnimState
-    /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
+    /* 0x3F6 */ u8  partMtxReady;   // set once the part matrices have been built
 } AnimInstance; // size 0x3F8
 
 /* One animation of a model's animation table (gModelAnimTables[id]); unk0 == 999 ends the table. */
@@ -881,7 +881,7 @@ typedef struct ModelAttachment {
     /* 0x14 */ u8 numDLists;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
-    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to anim_createInstance
+    /* 0x17 */ s8 animBank;           // -1, or the animation set passed to anim_createInstance
     /* 0x18 */ u16 seg6Id;            // resolved by texture_getAddress into segment 6
     /* 0x1A */ u16 seg7Id;            // resolved by texture_getAddress into segment 7
     /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
@@ -2965,8 +2965,8 @@ typedef struct {
 
 /* An aim-impact slot (gAimImpacts): where a shot from an owner at a given angle lands; tracers snap to it. */
 typedef struct {
-    /* 0x00 */ s16 unk0;           // compared with the owner's angle
-    /* 0x02 */ s8 unk2;            // compared with owner->unk1D1
+    /* 0x00 */ s16 aimYaw;         // the shot direction: owner->angle - owner->mv->pssd_waist_tilt
+    /* 0x02 */ s8 aimPitch;        // compared with owner->aimPitch
     /* 0x03 */ u8 ricochetChance;  // percent
     /* 0x04 */ f32 x, y, z;
     /* 0x10 */ f32 normal[3];      // surface normal at the hit
@@ -3330,8 +3330,8 @@ typedef struct HitRule {
 typedef struct AttachModelHeader {
     /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)
     /* 0x04 */ u32 dlistsSize;  // size of the table in bytes
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u32 unkC;
+    /* 0x08 */ s32 bones;        // bone table (16-byte entries), kept in AnimInstance.bones
+    /* 0x0C */ u32 bonesSize;    // size of the bone table in bytes (>> 4: the number of parts)
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table

@@ -143,9 +143,9 @@ Gfx *effect_bindAnimatedTextures(Gfx *gdl) {
 }
 
 
-/* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set unk12C to 120; 0x32/0x33 fire a
+/* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set itemRemaining to 120; 0x32/0x33 fire a
  * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
- * slot). Each spends one use of unk1AE, and nothing happens once those run out. */
+ * slot). Each spends one use of ammo_count, and nothing happens once those run out. */
 void func_150D7790(Actor *obj, s32 action) {
     s32 newRacer;
     s32 oldRacer;
@@ -160,7 +160,7 @@ void func_150D7790(Actor *obj, s32 action) {
     case 0x30:
     case 0x31:
         if (obj->mv != NULL) {
-            obj->mv->unk12C = 120;
+            obj->mv->itemRemaining = 120;
             obj->mv->ammo_count -= 1;
             sound_playActorSound2(0x628, obj, 0x7FFF, 500, 1000);
         }

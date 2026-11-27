@@ -59,15 +59,15 @@ typedef struct Game1EF500TrailExt {
     /* 0xA0 */ u8 soundEnabled;
     /* 0xA1 */ u8 listener; /* index into camera_global_Cameras of the player the sound follows */
     /* 0xA2 */ u8 padA2[2];
-    /* 0xA4 */ s32 fieldA4;
-    /* 0xA8 */ s8 fieldA8;
+    /* 0xA4 */ s32 hitFlags; /* particle_applyShotHit's flags */
+    /* 0xA8 */ s8 filter; /* collision_castRay's filter */
     /* 0xA9 */ u8 padA9[3];
     /* 0xAC */ s32 handle;
 } Game1EF500TrailExt; /* 0xB0 */
 
 /* The projectile object (allocated by particle_newQuadParticle). */
 typedef struct Game1EF500Trail {
-    /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;
 

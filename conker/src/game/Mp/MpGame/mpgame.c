@@ -1430,7 +1430,8 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
 /*
  * Copies player's target to its state (mv->targetIndex). Once its attackTimer passes the limit for
  * this level and distance it is reset, with mp_sendPlayerCommand(player, 0x61, 0x2000) if the target
- * is in sight; while the timer is 0, unk12A is set at random.
+ * is in sight; while the timer is 0, aimMiss is set at random
+ * (1 when the bot misses this round, with chance 100 - gBotAimAccuracy[gBotDifficulty]).
  */
 s32 mp_updateBotAttack(s32 player) {
     s8 *timers;
@@ -1472,9 +1473,9 @@ s32 mp_updateBotAttack(s32 player) {
         }
     }
     if (*(s32 *)(timers + off) == 0) {
-        obj->mv->unk12A = 0;
+        obj->mv->aimMiss = 0;
         if (gBotAimAccuracy[gBotDifficulty] < (s32)(math_randomFloat() * 100.0f)) {
-            obj->mv->unk12A = 1;
+            obj->mv->aimMiss = 1;
         }
     }
 }
@@ -1649,12 +1650,12 @@ s32 mp_updatePickups(void) {
                 }
                 movement_obj[i].mv->unk128 = cur;
                 if (cur == 1) {
-                    movement_obj[i].mv->unk12C = 600;
+                    movement_obj[i].mv->itemRemaining = 600;
                 } else if (cur == 0x80) {
-                    movement_obj[i].mv->unk12C = 1800;
+                    movement_obj[i].mv->itemRemaining = 1800;
                     actor_startFogPulse(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
-                    movement_obj[i].mv->unk12C = 3;
+                    movement_obj[i].mv->itemRemaining = 3;
                 }
             } else {
                 text_lockObjectText(i, 1, cur, 0);
@@ -1816,17 +1817,17 @@ s32 mp_updatePickups(void) {
                 }
                 kind = gMpGame->gameType;
                 if (kind == 0xB9) {
-                    movement_obj[j].mv->unk12C = 600;
+                    movement_obj[j].mv->itemRemaining = 600;
                 }
                 kind = gMpGame->gameType;
                 if (kind == 0xB8) {
                     if (items[i] == (pp = movement_obj[j].mv->unk128)) { // matching: the u16 temporary
                         if (items[i] == 1) {
-                            movement_obj[j].mv->unk12C = 600;
+                            movement_obj[j].mv->itemRemaining = 600;
                         } else if (items[i] == 0x80) {
-                            movement_obj[j].mv->unk12C = 1800;
+                            movement_obj[j].mv->itemRemaining = 1800;
                         } else if (items[i] == 0x10) {
-                            movement_obj[j].mv->unk12C = 3;
+                            movement_obj[j].mv->itemRemaining = 3;
                         }
                     }
                 }

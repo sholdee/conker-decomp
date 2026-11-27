@@ -66,7 +66,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
         return gfx;
     }
     update = TRUE;
-    gfx = particle_setCombineMode(gfx, sprite->params.unk37, &update);
+    gfx = particle_setCombineMode(gfx, sprite->params.combiner, &update);
     gDPSetPrimColor(gfx++, 1, 0, sprite->params.red, sprite->params.green, sprite->params.blue,
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {

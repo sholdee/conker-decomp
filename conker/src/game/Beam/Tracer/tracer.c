@@ -52,7 +52,7 @@ void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
         effect->attachDelay = 0;
         effect->impactEffect = impactEffect;
         effect->fireCounter = 0;
-        effect->unkFE = unkFE;
+        effect->hitsObjects = unkFE;
         effect->owner = owner;
         effect->texture = texture;
         effect->mode = mode;
@@ -173,7 +173,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->aimPitch == gAimImpacts[aim].unk2) {
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].aimYaw && effect->owner->aimPitch == gAimImpacts[aim].aimPitch) {
                         effect->target_x = gAimImpacts[aim].x;
                         effect->target_y = gAimImpacts[aim].y;
                         effect->target_z = gAimImpacts[aim].z;
@@ -225,7 +225,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 effect->dy = 0.0f;
                 effect->dz = 0.0f;
                 if (fire) {
-                    beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->hitsObjects, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
                 effect_destroyObject(&effect->header);
@@ -269,7 +269,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
             vy *= len;
             vz *= len;
         }
-        if (effect->unkFE == 1) {
+        if (effect->hitsObjects == 1) {
             i = effect->owner != NULL ? effect->owner - movement_obj : 0;
             collision_castRayAtObjects(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
         }

@@ -2391,7 +2391,7 @@ void func_15070300(s32 cmd) {
         if (gCurrentActor->mv->unk128 & 0x10) {
             gEventParam = 10;
             impactType = 2;
-            gCurrentActor->mv->unk12C--;
+            gCurrentActor->mv->itemRemaining--;
         } else {
             gEventParam = 9;
         }

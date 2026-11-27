@@ -56,9 +56,9 @@ s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *ar
         *arg4 = header->unk10;
     }
     if (arg5 != NULL) {
-        *arg5 = header->unk8;
+        *arg5 = header->bones;
         if (arg6 != NULL) {
-            *arg6 = header->unkC >> 4;
+            *arg6 = header->bonesSize >> 4;
         }
     }
     return 0;
@@ -75,12 +75,12 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
     s32 size;
 
     if (att->dlists == NULL) {
-        if (att->unk17 == -1) {
+        if (att->animBank == -1) {
             if (attach_loadModel(att->model, &att->dlists, &att->numDLists, &data, &att->unk30, NULL, NULL) != 0) {
                 return 1;
             }
         } else {
-            if (anim_createInstance(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
+            if (anim_createInstance(att->model, att->animBank, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
                 return 1;
             }
         }
@@ -513,7 +513,7 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
     att->ownerStates[0] = ownerStates[0];
     att->ownerStates[1] = ownerStates[1];
     att->ownerStates[2] = ownerStates[2];
-    att->unk17 = unk17;
+    att->animBank = unk17;
     att->anim = NULL;
     att->unk15 = unk15;
     att->unk16 = unk16;
@@ -634,7 +634,7 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
     ModelAttachment *parent;
 
     if (att->anim != NULL) {
-        if (att->anim->unk3F6 == 0) {
+        if (att->anim->partMtxReady == 0) {
             return 0;
         }
         *mtx = att->anim->partMtx[gDrawBufferIndex];
@@ -878,7 +878,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
     case 0x5A:
         unk = owner->mv;
         if (unk != NULL) {
-            unk->unk1A6 += 0xAA;
+            unk->extraHeight += 0xAA;
         }
         break;
     case 0x90:
@@ -932,7 +932,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x5A:
             unk = owner->mv;
             if (unk != NULL) {
-                unk->unk1A6 -= 0xAA;
+                unk->extraHeight -= 0xAA;
             }
             break;
         case 0x90:
@@ -2259,7 +2259,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         if (animId != curAnimId) {
             goto copy_frame;
         }
-        if (ownerAnim->unk3C != 0x3FF) {
+        if (ownerAnim->blendTimer != 0x3FF) {
             goto copy_frame;
         }
         actor_saveBlendAnim(anim);
@@ -2268,8 +2268,8 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         anim->frame[0] = ownerAnim->frame[0];
         anim = att->anim;
         if (syncAll && (anim->nextFrameOffset[1] != 0 || anim->header[1][5] == 0)) {
-            anim->unk3A = ownerAnim->unk3A;
-            att->anim->unk3C = ownerAnim->unk3C;
+            anim->blendStep = ownerAnim->blendStep;
+            att->anim->blendTimer = ownerAnim->blendTimer;
             anim = att->anim;
         }
         lastFrame = anim->numFrames[0] - 1.0f;

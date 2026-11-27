@@ -52,7 +52,7 @@ StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
         diff.z = strip->p0.z - strip->p1.z;
         strip->length = math_vec3Length(&diff);
     }
-    strip->unk10 = 1;
+    strip->active = 1;
     strip->unk14 = 0;
     return strip;
 }
@@ -109,7 +109,7 @@ void beam_updateStrip(StripObj *strip) {
     u8 remove;
     Vec3f prev;
 
-    if (strip->unk10 & 1) {
+    if (strip->active & 1) {
         remove = FALSE;
         idx = strip->updateIdx;
         prev.x = strip->p0.x - strip->p1.x;
@@ -151,7 +151,7 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
     f32 scale;
     s32 texV;
 
-    if (strip->unk10 & 1) {
+    if (strip->active & 1) {
         // matching: dead reads/stores; they fix the order of IDO's FP spill slots
         side.z = dir.z;
         scale = dir.y * toEye.z - toEye.y * dir.z;

@@ -476,7 +476,7 @@ void func_150BFFE0(Actor *obj) {
     spawn.deathFunc = -1;
     spawn.primColorMode = 8;
     spawn.envColorMode = 6;
-    spawn.unk64 = 1;
+    spawn.kind = 1;
     spawn.extra = 0.8775510192f;
     particle_spawnSpriteBurst(&spawn, 0xFF, 0xFF, 1);
 }
@@ -554,7 +554,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     spawn.deathFunc = -1;
     spawn.primColorMode = 8;
     spawn.envColorMode = 6;
-    spawn.unk64 = 1;
+    spawn.kind = 1;
     spawn.extra = 0.8977670074f;
     particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
     }
@@ -706,7 +706,7 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             spawn.deathFunc = -1;
             spawn.primColorMode = 8;
             spawn.envColorMode = 6;
-            spawn.unk64 = 1;
+            spawn.kind = 1;
             spawn.extra = 0.9535999894f;
             particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
             }

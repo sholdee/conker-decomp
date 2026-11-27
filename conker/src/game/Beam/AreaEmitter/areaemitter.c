@@ -303,11 +303,11 @@ void beam_switchEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType) {
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 rateRange;
-    /* 0x08 */ u8 unk8;              /* unk8..unkC go to light_createJitterAt */
-    /* 0x09 */ u8 unk9;
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
+    /* 0x08 */ u8 lightR;            /* lightR..jitterKind go to light_createJitterAt */
+    /* 0x09 */ u8 lightG;
+    /* 0x0A */ u8 lightB;
+    /* 0x0B */ u8 lightType;
+    /* 0x0C */ u8 jitterKind;
     /* 0x10 */ const ParticleSettings *settings;
 } EmitterPreset;
 
@@ -386,7 +386,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
         spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.update = 2;
         spawn.lifetime = (lifetime == -1) ? 300 : lifetime;
-        spawn.lightType = gEmitterPresets[preset].unkB;
+        spawn.lightType = gEmitterPresets[preset].lightType;
 
         if (pos != NULL) {
             spawnPos.x = pos->x;
@@ -398,8 +398,8 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
             spawnPos.z = obj->z;
         }
 
-        light_createJitterAt(&spawn, &spawnPos, gEmitterPresets[preset].unk8, gEmitterPresets[preset].unk9,
-                      gEmitterPresets[preset].unkA, 0xFF, 0, 0, gEmitterPresets[preset].unkC,
+        light_createJitterAt(&spawn, &spawnPos, gEmitterPresets[preset].lightR, gEmitterPresets[preset].lightG,
+                      gEmitterPresets[preset].lightB, 0xFF, 0, 0, gEmitterPresets[preset].jitterKind,
                       0xFF, 1);
     }
 }
@@ -421,9 +421,9 @@ void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGroun
     u32 rand1;
 
     settings = (ParticleSettings *)emitter->data;
-    vec[0] = math_randomFloat() * settings->vec0Range + settings->vec0Base;
-    vec[1] = math_randomFloat() * settings->vec1Range + settings->vec1Base;
-    extra.gravity = math_randomFloat() * settings->unk20Range + settings->unk20Base;
+    vec[0] = math_randomFloat() * settings->widthRange + settings->widthBase;
+    vec[1] = math_randomFloat() * settings->heightRange + settings->heightBase;
+    extra.gravity = math_randomFloat() * settings->relaunchGravityRange + settings->relaunchGravityBase;
     extra.lifetime = math_random() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
     rand1 = math_random();
     rand2 = math_random();
@@ -440,9 +440,9 @@ void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGroun
     flags = (settings->flags & 2) ? 0 : 2;
     particle = particle_spawnJitterParticle(pos, vec,
         (s16)(rand1 % (settings->life.range + 1) + settings->life.base),
-        (rand2 % (settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
+        (rand2 % (settings->alpha.range + 1) + settings->alpha.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
+        settings->fadeStart, settings->fadeRate, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {
         memcpy(particle + 0x160, &extra, sizeof(extra));
     }

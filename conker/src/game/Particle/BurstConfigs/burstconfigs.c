@@ -1112,7 +1112,7 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 views, u8 owner, s32 list
         spawn.vel.z = horizontal * cosYaw;
         spawn.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
         spawn.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
-        object = particle_newSpriteParticleWithFloor(&spawn, config->unk64, 0, 4, owner, list);
+        object = particle_newSpriteParticleWithFloor(&spawn, config->kind, 0, 4, owner, list);
         if (object != NULL) {
             memcpy((u8 *)object + 0xA8, &extra, sizeof(extra));
         }
@@ -1351,7 +1351,7 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
                       &velocity);
         weapon_spawnDragSprite(config->pos, &velocity,
                       (math_randomFloat() * config->gravityRange) + config->gravityBase,
-                      config->unk20,
+                      config->drag,
                       (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                       (math_random() % (config->timerRange + 1)) + config->timerBase,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,

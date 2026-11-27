@@ -754,7 +754,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         Actor *held;
 
         if ((holder = attach_findInSet(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
-            holderData->unk3F6 != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
+            holderData->partMtxReady != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
             (held = collision_findObjectById(holder->ownerId)) != NULL) {
             if (held->drawtype == 5) {
                 target.x = held->xpos;
