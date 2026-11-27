@@ -20,7 +20,7 @@ typedef struct {
 /* Whatever an object's work word points to in prop_scrollTextureByObject3. */
 typedef struct {
     /* 0x00 */ u8 pad00[0x13];
-    /* 0x13 */ s8 unk13;
+    /* 0x13 */ s8 speedT;
 } LinkedObj;
 
 /* Behaviour scratch state of the objects in this file (WorldObject.touch). */
@@ -67,7 +67,7 @@ void prop_spinWithObject3(WorldObject *obj) {
     prop_spinZ(obj);
 }
 
-/* After prop_registerTextureScroll, copies object 3's spin speed / 16 into the linked object's unk13. */
+/* After prop_registerTextureScroll, copies object 3's spin speed / 16 into the linked object's speedT. */
 void prop_scrollTextureByObject3(WorldObject *obj) {
     WorldObject *obj3;
     LinkedObj *link;
@@ -79,7 +79,7 @@ void prop_scrollTextureByObject3(WorldObject *obj) {
         link = WORK(obj)->link;
         speed = obj3->moveData.half.hi >> 4;
         if (link != NULL) {
-            link->unk13 = speed;
+            link->speedT = speed;
         }
     }
 }

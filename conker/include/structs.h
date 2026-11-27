@@ -552,7 +552,7 @@ typedef struct {
     /* 0x058 */ IdleState idle;
     /* 0x068 */ u16 unk68;
     /* 0x06A */ u8  pad6A;
-    /* 0x06B */ u8  unk6B;      // grab state
+    /* 0x06B */ u8  grabState;      // stage of being held by a grabbing prop (prop_grabAndSwingCharacter, prop_grabAndLowerCharacter); 0 = not held
     /* 0x06C */ s16 holdX;      // held position (s16 world units)
     /* 0x06E */ s16 holdY;
     /* 0x070 */ s16 holdZ;
@@ -2816,7 +2816,7 @@ typedef struct {
     /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
     /* 0x12 */ s8 speed;
     /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
-    /* 0x14 */ u8 unk14[6];   // only used by mode 1
+    /* 0x14 */ u8 colorWave[6];   // only used by mode 1: r, rAmp, g, gAmp, b, bAmp (vertex colour base and amplitude)
     /* 0x1A */ u8 pad1A[2];
 } WaveParams;
 

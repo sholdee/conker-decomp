@@ -2296,7 +2296,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         dc_glbl_CharNum = savedIdx;
         victim->noshove &= 0xFEFF7FFF;
         victim->mv->ladder = 0;
-        victim->mv->unk6B = 0;
+        victim->mv->grabState = 0;
         if (victim->mv->rope != 0) {
             rope_release(victim);
         }
@@ -3803,7 +3803,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         actor->wantspeed = 0.0f;
         return;
     }
-    if ((actor->mv->bitten > 0) || (actor->mv->over_edge >= 0x64) || (actor->mv->unk6B != 0)) {
+    if ((actor->mv->bitten > 0) || (actor->mv->over_edge >= 0x64) || (actor->mv->grabState != 0)) {
         return;
     }
     height = actor->shad;

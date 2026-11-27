@@ -116,8 +116,7 @@ void particle_newStyleParticle(x, y, z, texture, frame, r, g, b, alpha, envR, en
     }
 }
 
-/* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype: two of them
- * take other particle types. */
+/* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype. */
 static s32 (*gStyleUpdateFuncs[])() = {
     particle_updateStyleColorRamp, particle_updateStylePulse, particle_updateStyleDrift, particle_updateStyleDamped, particle_updateStyleTint,
     particle_updateStyleAccelY, particle_updateStyleSlide, particle_updateStyleBounce, prop_updateStyleFadeGrow,

@@ -1885,9 +1885,20 @@ typedef struct StyleParticle {
         struct {
             /* 0x26 */ u8 start;
         } ramp;
+        /* prop_updateStyleFadeGrow (game/Prop/Scenery/scenery.c): fades in to maxAlpha while lifetime is nonzero, then
+           out, growing by growX / growY per tick */
+        struct {
+            /* 0x26 */ u8 maxAlpha;
+            /* 0x27 */ u8 fadeInRate;
+            /* 0x28 */ u8 pad28[4];
+            /* 0x2C */ u8 age;
+            /* 0x2D */ s8 growX;
+            /* 0x2E */ s8 growY;
+            /* 0x2F */ u8 fadeOutRate;
+        } fade;
     } u;
     /* 0x30 */ TriggerVolume *link; /* the volume that follows the particle (linkArg), or NULL */
-} StyleParticle;
+} StyleParticle; /* size 0x34 */
 
 /* A 0x4C-byte particle emitter, spawned by particle_newSpriteEmitter and run by particle_updateSpriteEmitter. Most of
  * its bytes are the template that particle_newStyleParticle gets for each particle it spawns. */

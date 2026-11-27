@@ -76,12 +76,12 @@ void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 hea
             deformer->params.falloff = 0.0f;
         }
         if ((flags & WAVE_MODE_MASK) == 1) {
-            deformer->params.unk14[0] = argA;
-            deformer->params.unk14[1] = argB;
-            deformer->params.unk14[2] = argC;
-            deformer->params.unk14[3] = argD;
-            deformer->params.unk14[4] = argE;
-            deformer->params.unk14[5] = argF;
+            deformer->params.colorWave[0] = argA;
+            deformer->params.colorWave[1] = argB;
+            deformer->params.colorWave[2] = argC;
+            deformer->params.colorWave[3] = argD;
+            deformer->params.colorWave[4] = argE;
+            deformer->params.colorWave[5] = argF;
         }
         deformer->vertexPhase = allocate_memory(obj->numVertices, 1, 0, 0);
         if ((flags & WAVE_MODE_MASK) == 2) {
@@ -170,10 +170,10 @@ void prop_updateWaveDeformers(void) {
             if ((deformer->flags & WAVE_MODE_MASK) == 1) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
                     prop_waveVerticesMode1Weighted(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
-                                  deformer->params.unk14, deformer->vertexPhase, deformer->vertexWeight, src);
+                                  deformer->params.colorWave, deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
                     prop_waveVerticesMode1(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
-                                  deformer->params.unk14, deformer->vertexPhase, src);
+                                  deformer->params.colorWave, deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 0) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {

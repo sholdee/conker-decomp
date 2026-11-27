@@ -55,44 +55,6 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-/* A piece spawned by particle_spawnDebrisScatter, as the handlers below see it. */
-typedef struct {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[0x1C];
-    /* 0x038 */ Vec3f position;
-    /* 0x044 */ u8 pad44[0x1C];
-    /* 0x060 */ s32 unk60;
-    /* 0x064 */ u8 pad64[0x2];
-    /* 0x066 */ u16 unk66;
-    /* 0x068 */ u8 pad68[0xA8];
-    /* 0x110 */ u8 unk110[0x60];
-    /* 0x170 */ f32 burstChance; /* prop_scatterPieces's extraData */
-} Piece;
-
-/* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ u8 pad18[0x7];
-    /* 0x1F */ u8 level;
-    /* 0x20 */ u8 pad20[0x4];
-    /* 0x24 */ u8 rising;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ u8 maxLevel;
-    /* 0x27 */ u8 riseRate;
-    /* 0x28 */ u8 pad28[0x4];
-    /* 0x2C */ u8 age;
-    /* 0x2D */ s8 unk14Rate;
-    /* 0x2E */ s8 unk16Rate;
-    /* 0x2F */ u8 fallRate;
-} Struct150BF0F4;
-
 typedef struct {
     /* 0x00 */ u8  pad0[0x60];
     /* 0x60 */ s32 flags;
@@ -162,14 +124,16 @@ void prop_startWaveChain(s32 presetId);
 /* game/Prop/Scenery/scenery.c */
 void prop_emptyLevelUpdateHook2(s32 unused);
 void prop_startMirroredEmitters(s32 duration);
-s32 prop_updateStyleFadeGrow(Struct150BF0F4 *entry);
+struct StyleParticle; /* conker/particle.h */
+s32 prop_updateStyleFadeGrow(struct StyleParticle *entry);
 void prop_moveToHeightAndBob(WorldObject *obj);
 void func_150BF760(WorldObject *obj);
 void prop_updateSinkingPlatform(WorldObject *platform);
 void prop_spawnDeathBurst(Actor *obj);
-s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight);
+struct Piece; /* game/Prop/Scenery/scenery.c */
+s32 prop_burstPieceOnFloor(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight);
 void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list);
-s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
+s32 prop_onPieceFloorHit(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
 /* game/Prop/Pendulum/pendulum.c */
 extern EffectHeader *gLevelSprayEffects[4]; /* level spray effects (game/Level/LevelSetup08/levelsetup08.c), destroyed by prop_destroyLevelSprays */

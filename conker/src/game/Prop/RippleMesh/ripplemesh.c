@@ -18,8 +18,8 @@ typedef struct {
     u8 phase;
     u8 phaseStep;
     u8 active;
-    s32 unk20;
-    s32 unk24;
+    s32 texIndices;
+    s32 animState;
 } Game147C70Ripple;
 
 /* Behaviour scratch state (WorldObject.touch) of the rippling mesh. param bits 0-7: wobble size, 16-31: ripple radius. */
@@ -126,8 +126,8 @@ void prop_updateRippleMesh(WorldObject *mesh) {
         for (i = 0; i < mesh->numVertices; i++) {
             heights[i] = 0.0f;
         }
-        ripple->unk20 = 0;
-        ripple->unk24 = 0;
+        ripple->texIndices = 0;
+        ripple->animState = 0;
     }
     ripple = WORK(mesh)->ripple;
     phaseOffsets = ripple->phaseOffsets;
@@ -194,5 +194,5 @@ void prop_updateRippleMesh(WorldObject *mesh) {
     lanePhases[2] += 3;
     lanePhases[3] += 4;
     WORK(mesh)->wobblePhases = lanePhases[0] | (lanePhases[1] << 8) | (lanePhases[2] << 16) | (lanePhases[3] << 24);
-    prop_animateTexture(mesh, &ripple->unk20, &ripple->unk24);
+    prop_animateTexture(mesh, &ripple->texIndices, &ripple->animState);
 }

@@ -413,7 +413,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             if (control->jump_on_char) {
                 continue;
             }
-            if (control->unk6B >= 4) {
+            if (control->grabState >= 4) {
                 continue;
             }
             if (obj->ypos + 40.0f < anchor[1]) {
@@ -432,7 +432,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
     if (target == NULL && motion == TASK_FLAG_GOING_ON) {
         for (i = 0; i < gPlayerCount; i++) {
             obj = &movement_obj[i];
-            if (obj->mv->unk6B != 0) {
+            if (obj->mv->grabState != 0) {
                 target = obj;
                 break;
             }
@@ -451,9 +451,9 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
             if (target != NULL) {
                 if (timer != 0) {
-                    target->mv->unk6B = 1;
+                    target->mv->grabState = 1;
                 } else {
-                    target->mv->unk6B = 2;
+                    target->mv->grabState = 2;
                 }
             }
             if (timer != 0) {
@@ -482,7 +482,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
                     started = 0;
                     gfx_playObjectSound(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
-                        target->mv->unk6B = 0;
+                        target->mv->grabState = 0;
                     }
                 }
             }
@@ -494,14 +494,14 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
         } else {
             if (target != NULL && (control = target->mv) != NULL) {
-                if (started == 0 && control->unk6B == 0) {
+                if (started == 0 && control->grabState == 0) {
                     timer = 50;
                     started++;
                 }
                 if (timer != 0) {
-                    control->unk6B = 3;
-                } else if (control->unk6B == 3) {
-                    control->unk6B = 4;
+                    control->grabState = 3;
+                } else if (control->grabState == 3) {
+                    control->grabState = 4;
                     started = 0;
                 }
                 if (timer != 0) {
@@ -543,7 +543,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            target->mv->unk6B = 0;
+            target->mv->grabState = 0;
         }
     }
     PROP_SET_MOTION(prop, motion);

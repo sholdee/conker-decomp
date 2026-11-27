@@ -545,7 +545,7 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
         if (mode != TASK_FLAG_ON && mode != TASK_FLAG_GOING_OFF) {
             for (i = 0; i < gPlayerCount; i++) {
                 player = &camera_global_Cameras[i];
-                if (player->mv->unk6B >= 4) {
+                if (player->mv->grabState >= 4) {
                     continue;
                 }
                 character = player->CharPtr;
@@ -565,7 +565,7 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
         if (target == NULL && (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF)) {
             for (i = 0; i < gPlayerCount; i++) {
                 character = &movement_obj[i];
-                if (character->mv->unk6B != 0) {
+                if (character->mv->grabState != 0) {
                     target = character;
                     break;
                 }
@@ -586,9 +586,9 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
                 }
                 if (target != NULL) {
                     if (timer != 0) {
-                        target->mv->unk6B = 1;
+                        target->mv->grabState = 1;
                     } else {
-                        target->mv->unk6B = 2;
+                        target->mv->grabState = 2;
                     }
                 }
                 if (timer != 0) {
@@ -607,7 +607,7 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
                         triggered = 0;
                         velocity = 0.0f;
                         if (target != NULL) {
-                            target->mv->unk6B = 0;
+                            target->mv->grabState = 0;
                         }
                         sound_playAt(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
@@ -618,15 +618,15 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
                     target->mv->holdZ = pos[2];
                 }
             } else if (target != NULL) {
-                if (triggered == 0 && target->mv->unk6B == 0) {
+                if (triggered == 0 && target->mv->grabState == 0) {
                     timer = 50;
                     triggered++;
                 }
                 trap = target->mv;
                 if (timer != 0) {
-                    trap->unk6B = 3;
-                } else if (trap->unk6B == 3) {
-                    trap->unk6B = 4;
+                    trap->grabState = 3;
+                } else if (trap->grabState == 3) {
+                    trap->grabState = 4;
                     triggered = 0;
                 }
                 if (timer != 0) {
@@ -658,7 +658,7 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->mv->unk6B = 0;
+                target->mv->grabState = 0;
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
