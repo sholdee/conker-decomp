@@ -2331,23 +2331,6 @@ s32 particle_chainTailFireToSmoke(ActorEmitterProcess *emitter);
 Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp);
 
 /* game/Particle/AnchorEmitter/anchoremitter.c */
-/* Per-type state of a sprite effect, at sprite + 0x110. */
-typedef struct {
-    /* 0x00 */ f32 hi0;
-    /* 0x04 */ f32 lo0;
-    /* 0x08 */ f32 target0;
-    /* 0x0C */ f32 hi1;
-    /* 0x10 */ f32 lo1;
-    /* 0x14 */ f32 peak1;
-    /* 0x18 */ f32 target1;
-    /* 0x1C */ s16 timer0;
-    /* 0x1E */ s16 timer1;
-    /* 0x20 */ f32 hi2;
-    /* 0x24 */ f32 lo2;
-    /* 0x28 */ f32 target2;
-    /* 0x2C */ s16 timer2;
-} SpriteWobble;
-
 typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ SpriteWobble wobble;

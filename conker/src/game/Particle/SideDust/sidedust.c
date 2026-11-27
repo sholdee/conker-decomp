@@ -55,15 +55,6 @@ s32 particle_selectSideDust(s32 kind, Actor *actor) {
     return 0xB;
 }
 
-/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
-typedef struct {
-    s16 r;
-    s16 g;
-    s16 b;
-    s16 a;
-    s16 unk8;
-} DustColor;
-
 /* Spawns a dust puff (tinted by particle_getDepthTint) on the ground below the actor's bone on `side`. */
 void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     Vec3f pos;
@@ -92,7 +83,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     g = fg;
     b = fb;
     {
-        DustColor colors[4];
+        VtxColor colors[4];
         s16 roll;
         s16 roll2;
         Rgb8 rgb;
@@ -101,22 +92,22 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         colors[0].g = g;
         colors[0].b = b;
         colors[0].a = 0xFF;
-        colors[0].unk8 = 0;
+        colors[0].flag = 0;
         colors[1].r = r;
         colors[1].g = g;
         colors[1].b = b;
         colors[1].a = 0xFF;
-        colors[1].unk8 = 0;
+        colors[1].flag = 0;
         colors[2].r = r;
         colors[2].g = g;
         colors[2].b = b;
         colors[2].a = 0xFF;
-        colors[2].unk8 = 0;
+        colors[2].flag = 0;
         colors[3].r = r;
         colors[3].g = g;
         colors[3].b = b;
         colors[3].a = 0xFF;
-        colors[3].unk8 = 0;
+        colors[3].flag = 0;
         if (side == 1) {
             desc.texture = 0x4C;
         } else {

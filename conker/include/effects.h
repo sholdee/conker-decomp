@@ -2689,22 +2689,26 @@ typedef struct ActorEmitterParams {
     /* 0xB */ u8 padB;
 } ActorEmitterParams; /* size 0xC */
 
+/* Size wobble of a sprite: EffectSprite.wobble (at sprite + 0x110) and ActorEmitterParticleData.wobble. */
+typedef struct {
+    /* 0x00 */ f32 hi0;
+    /* 0x04 */ f32 lo0;
+    /* 0x08 */ f32 target0;
+    /* 0x0C */ f32 hi1;
+    /* 0x10 */ f32 lo1;
+    /* 0x14 */ f32 peak1;
+    /* 0x18 */ f32 target1;
+    /* 0x1C */ s16 timer0;
+    /* 0x1E */ s16 timer1;
+    /* 0x20 */ f32 hi2;
+    /* 0x24 */ f32 lo2;
+    /* 0x28 */ f32 target2;
+    /* 0x2C */ s16 timer2;
+} SpriteWobble;
+
 /* Per-particle data that an actor emitter (game/Particle/ActorEmitter/actoremitter.c) copies to 0x110 of each particle it spawns. */
 typedef struct ActorEmitterParticleData {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ u8 pad28[4];
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8 pad2E[2];
+    /* 0x00 */ SpriteWobble wobble;
     /* 0x30 */ Vec3f vel;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 drag;

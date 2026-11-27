@@ -22,15 +22,6 @@ typedef struct {
     /* 0x28 */ s16 yawOffset;
 } GroundBurstDef;
 
-/* Per-corner colour passed to particle_spawnAxisQuadParticleNoModel. */
-typedef struct {
-    /* 0x0 */ s16 r;
-    /* 0x2 */ s16 g;
-    /* 0x4 */ s16 b;
-    /* 0x6 */ s16 a;
-    /* 0x8 */ s16 unk8;
-} CornerColor;
-
 /* This file's .rodata front-end data. */
 static const GroundBurstDef gBoneGroundBurstDefs[] = {
     { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 12, 6, 0.18f, 0.040000003f, 0.1f, 0.060000002f, -114 },
@@ -77,29 +68,29 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         GrowParticleExtra extra;
         ParticleDef spawn;
         s16 rnd;
-        CornerColor colors[4];
+        VtxColor colors[4];
         GrowParticle *particle;
 
         colors[0].r = r;
         colors[0].g = g;
         colors[0].b = b;
         colors[0].a = 0xFF;
-        colors[0].unk8 = 0;
+        colors[0].flag = 0;
         colors[1].r = r;
         colors[1].g = g;
         colors[1].b = b;
         colors[1].a = 0xFF;
-        colors[1].unk8 = 0;
+        colors[1].flag = 0;
         colors[2].r = r;
         colors[2].g = g;
         colors[2].b = b;
         colors[2].a = 0xFF;
-        colors[2].unk8 = 0;
+        colors[2].flag = 0;
         colors[3].r = r;
         colors[3].g = g;
         colors[3].b = b;
         colors[3].a = 0xFF;
-        colors[3].unk8 = 0;
+        colors[3].flag = 0;
         spawn.texture = def->type;
         spawn.renderModes = 0x2601;
         spawn.lifetime = (math_random() % 51U) + 132;

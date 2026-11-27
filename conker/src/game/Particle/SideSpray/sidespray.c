@@ -52,15 +52,6 @@ s32 particle_selectSideSpray(s32 kind, Actor *actor) {
     return 12;
 }
 
-/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
-typedef struct {
-    s16 r;
-    s16 g;
-    s16 b;
-    s16 a;
-    s16 unk8;
-} SprayColor;
-
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
  * particle_emitOnRandomCircle puff there. The colour is tinted by particle_getDepthTint when level is 20.
@@ -75,7 +66,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     SprayGrowth growth;
     ParticleDef desc;
     s32 lifeRoll; // matching: IDO schedules the first roll differently when it is inlined
-    SprayColor colors[4];
+    VtxColor colors[4];
     s16 roll;
     u8 r;
     u8 g;
@@ -102,22 +93,22 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     colors[0].g = g;
     colors[0].b = b;
     colors[0].a = 180;
-    colors[0].unk8 = 0;
+    colors[0].flag = 0;
     colors[1].r = r;
     colors[1].g = g;
     colors[1].b = b;
     colors[1].a = 180;
-    colors[1].unk8 = 0;
+    colors[1].flag = 0;
     colors[2].r = r;
     colors[2].g = g;
     colors[2].b = b;
     colors[2].a = 180;
-    colors[2].unk8 = 0;
+    colors[2].flag = 0;
     colors[3].r = r;
     colors[3].g = g;
     colors[3].b = b;
     colors[3].a = 180;
-    colors[3].unk8 = 0;
+    colors[3].flag = 0;
     desc.texture = 0x50;
     desc.renderModes = 0x2502;
     lifeRoll = math_random();
