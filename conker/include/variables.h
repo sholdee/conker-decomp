@@ -44,7 +44,7 @@ extern u32  __osShutdown;
 /* BSS STARTS at gIdleThreadStack */
 
 /* 80030000 */
-extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init/Os/DevMgr/devmgr
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which defines it); stopped by the PI manager in init/Os/DevMgr/devmgr
 
 
 

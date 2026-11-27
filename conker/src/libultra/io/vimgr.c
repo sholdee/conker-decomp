@@ -16,7 +16,10 @@ OSDevMgr __osViDevMgr = { 0 };
 #if BUILD_VERSION >= VERSION_J
 u32 __additional_scanline = 0;
 #endif
-extern OSThread D_80036BA0; // the VI manager's thread: outside this unit, not in its .bss
+static OSThread viThread ALIGNED(0x8);
+// Rare's thread object is 0x230 bytes: init/Boot/Exception/exceptasm.s saves all 32 FP registers (the SDK's
+// OSThread ends at 0x1B0). C does not reference the other 0x80 bytes.
+static u8 D_80036D50[0x80];
 static STACK(viThreadStack, OS_VIM_STACKSIZE) ALIGNED(0x10);
 static OSMesgQueue viEventQueue ALIGNED(0x8);
 static OSMesg viEventBuf[5] ALIGNED(0x8);
@@ -62,15 +65,15 @@ void osCreateViManager(OSPri pri) {
 
     savedMask = __osDisableInt();
     __osViDevMgr.active = TRUE;
-    __osViDevMgr.thread = &D_80036BA0;
+    __osViDevMgr.thread = &viThread;
     __osViDevMgr.cmdQueue = &viEventQueue;
     __osViDevMgr.evtQueue = &viEventQueue;
     __osViDevMgr.acsQueue = NULL;
     __osViDevMgr.dma = NULL;
     __osViDevMgr.edma = NULL;
-    osCreateThread(&D_80036BA0, 0, viMgrMain, &__osViDevMgr, STACK_START(viThreadStack), pri);
+    osCreateThread(&viThread, 0, viMgrMain, &__osViDevMgr, STACK_START(viThreadStack), pri);
     __osViInit();
-    osStartThread(&D_80036BA0);
+    osStartThread(&viThread);
     __osRestoreInt(savedMask);
 
     if (oldPri != -1) {

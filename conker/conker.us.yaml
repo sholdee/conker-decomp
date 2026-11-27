@@ -286,7 +286,9 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x8002D4B0, name: init/Boot/BootMain/bootmain}
       - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init/Libc/Xprintf/xprintf}
       - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80035910, name: libultra/io/pimgr}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80036B60, name: libultra/io/sptask}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80036BA0, name: libultra/io/vimgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init/Boot/Exception/exceptasm}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init/Heap/ExpansionPak/expansionpak}
