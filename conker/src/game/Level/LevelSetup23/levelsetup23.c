@@ -7,20 +7,6 @@
 #include "conker/light.h"
 #include "conker/particle.h"
 
-// fat struct to decipher
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ Vec3f unk18;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-} Struct3DF10Tail; /* size 0x2C */
-
 static const Vec3f gSetup23ModelPositions[6] = {
     { 3432.0f, 593.0f, -255.0f }, { 3627.0f, 593.0f, 291.0f }, { 3065.0f, 593.0f, 290.0f },
     { 2984.0f, 593.0f, -274.0f }, { 2489.0f, 593.0f, 298.0f }, { 2519.0f, 593.0f, -261.0f },
@@ -32,8 +18,8 @@ void level_setup23(void) {
     ParticleSpawn78 part;
     s32 i;
     DynModelDesc desc;
-    Struct3DF10Tail tail;
-    f32 sp[6];
+    SwayBlock tail;
+    Sway sp;
     f32 rnd;
     DynModel *ent;
     LightEffectHeader header;
@@ -88,50 +74,50 @@ void level_setup23(void) {
     part.rotVel.y = 0.0f;
     part.rotVel.z = 0.0f;
     part.gravity = 0.0f;
-    tail.unk24 = 0.0f;
-    tail.unk28 = 0.0f;
+    tail.rotX = 0.0f;
+    tail.rotZ = 0.0f;
 
     for (i = 0; i < 6; i++) {
         pos = gSetup23ModelPositions[i];
         part.pos = pos;
-        tail.unk18 = pos;
+        tail.pos = pos;
 
         collision_selectMap(0);
         part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[0] = (rnd + rnd) * 3.141592741f;
-        tail.unk00 = sp[0];
+        sp.phaseX = (rnd + rnd) * 3.141592741f;
+        tail.sway.phaseX = sp.phaseX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[1] = (rnd + rnd) * 3.141592741f;
-        tail.unk04 = sp[1];
+        sp.phaseZ = (rnd + rnd) * 3.141592741f;
+        tail.sway.phaseZ = sp.phaseZ;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[4] = rnd * 3.800000191f + 2.0f;
-        tail.unk10 = sp[4];
+        sp.amplitudeX = rnd * 3.800000191f + 2.0f;
+        tail.sway.amplitudeX = sp.amplitudeX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[5] = rnd * 3.800000191f + 2.0f;
-        tail.unk14 = sp[5];
+        sp.amplitudeZ = rnd * 3.800000191f + 2.0f;
+        tail.sway.amplitudeZ = sp.amplitudeZ;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[2] = rnd * 0.1100000069f + 0.05000000075f;
-        tail.unk08 = sp[2];
+        sp.speedX = rnd * 0.1100000069f + 0.05000000075f;
+        tail.sway.speedX = sp.speedX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp[3] = rnd * 0.1100000069f + 0.05000000075f;
-        tail.unk0C = sp[3];
+        sp.speedZ = rnd * 0.1100000069f + 0.05000000075f;
+        tail.sway.speedZ = sp.speedZ;
 
         result = particle_newModelParticle(&part, 3, 0xFF, 0x18, 0xFF, 1);
         if (result != NULL) {
-            memcpy(result + 1, sp, sizeof(sp));
+            memcpy(result + 1, &sp, sizeof(sp));
         }
 
         if (gSetup23ModelLights[i] != 0) {

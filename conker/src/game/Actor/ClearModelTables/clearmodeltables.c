@@ -9,7 +9,7 @@
 void actor_clearModelTables(void) {
     bzero(&gModelData, 748); // bzero
     bzero(&gModelDefs, 748);
-    bzero(&D_800D1F80, 187);
+    bzero(&gModelDataRefCounts, 187);
     bzero(&gModelUnloadTimers, 187);
     bzero(&gModelAnimTables, 748);
     bzero(&gModelAnimCounts, 374);

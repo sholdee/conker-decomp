@@ -463,7 +463,18 @@ void effect_updateAmbientPulse(AmbientPulse *arg0);
 
 /* game/Effects/RaySpinner/rayspinner.c */
 typedef struct FF0E0Object FF0E0Object;
-/* Payload of message 0x32 (passed as the s32 argument). */
+/* Per-object state stored at offset 0x28 of the object (spawned by level_spawnDiscoBallZone,
+ * game/Level/ZoneSpawn/zonespawn.c). */
+typedef struct FF0E0State {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ Vec3f rotation;        /* degrees */
+    /* 0x18 */ Vec3f angularVelocity; /* degrees per frame unit; message 0x32 replaces it */
+    /* 0x24 */ LightEffect *children[6]; /* light_createWithEffect lights, one per ray */
+    /* 0x3C */ f32 intensity;         /* light radius at a full-length ray */
+    /* 0x40 */ TriggerZone *zone;     /* messages 0x30/0x31 for this zone enable/disable it */
+    /* 0x44 */ u8 flags; // bit 0: enabled
+} FF0E0State; /* size 0x48 */
+/* Payload of message 0x32 (passed as the argument). */
 typedef struct {
     Vec3f angularVelocity;
     f32 intensity;
@@ -471,7 +482,7 @@ typedef struct {
 extern const u8 gRaySpinnerChildColors[13][3];
 extern const FF0E0SpinMsg gRaySpinnerSpinPresets[3];
 void effect_updateRaySpinner(FF0E0Object *obj);
-void effect_raySpinnerMessage(FF0E0Object *obj, s32 arg, u8 msg);
+void effect_raySpinnerMessage(FF0E0Object *obj, void *arg, u8 msg);
 void effect_destroyRaySpinnerChildren(FF0E0Object *obj);
 void effect_destroyRaySpinner(FF0E0Object *obj);
 void effect_freeRaySpinner(FF0E0Object *obj);
@@ -619,6 +630,22 @@ void func_150EA904(Vec3f *pos, s32 index);
 void func_150EA944(WorldObject *entry);
 
 /* game/Effects/GroundFlash/groundflash.c */
+/* Spawner state (spawned by level_spawnMissileZone, game/Level/ZoneSpawn/zonespawn.c): flashes run between a
+ * random point on the start line and one on the end line. */
+typedef struct FlashSpawner {
+    /* 0x00 */ Vec2fXZ startOrigin;
+    /* 0x08 */ Vec2fXZ endOrigin;
+    /* 0x10 */ Vec2fXZ startExtent;
+    /* 0x18 */ Vec2fXZ endExtent;
+    /* 0x20 */ f32 height;
+    /* 0x24 */ f32 probeHeight;
+    /* 0x28 */ f32 rate;        /* flashes per frame */
+    /* 0x2C */ f32 rateRange;
+    /* 0x30 */ f32 accumulator; /* flashes owed; one is spawned per whole unit */
+    /* 0x34 */ f32 speed;
+    /* 0x38 */ f32 speedRange;
+    /* 0x3C */ u8  colour[4];
+} FlashSpawner; /* size 0x40 */
 typedef struct struct_EAB10 struct_EAB10;
 void effect_spawnGroundFlashes(struct_EAB10 *actor);
 s32 effect_updateGroundFlash(LightEffect *obj);
@@ -638,6 +665,22 @@ void effect_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2);
 
 /* game/Effects/SwayObject/swayobject.c */
 typedef struct SwayObject SwayObject;
+/* A two-axis sine sway: each axis advances its phase (radians) by `speed` per frame and swings by `amplitude`. */
+typedef struct Sway {
+    /* 0x00 */ f32 phaseX;
+    /* 0x04 */ f32 phaseZ;
+    /* 0x08 */ f32 speedX;
+    /* 0x0C */ f32 speedZ;
+    /* 0x10 */ f32 amplitudeX;
+    /* 0x14 */ f32 amplitudeZ;
+} Sway; // size 0x18
+/* A swaying DynModel's user data (DYNMODEL_USERDATA; effect_updateModelSway, effect_buildSwayMatrix). */
+typedef struct SwayBlock {
+    /* 0x00 */ Sway sway;
+    /* 0x18 */ Vec3f pos;
+    /* 0x24 */ f32 rotX; /* amplitudeX * sin(phaseX) */
+    /* 0x28 */ f32 rotZ;
+} SwayBlock; // size 0x2C
 s32 effect_getLegBonePoint(Vec3f *out, Actor *owner, u8 slot);
 s32 effect_selectLegImpactEffect(s32 arg0, s32 arg1);
 void effect_spawnLegImpactBurst(Actor *owner, s32 slot, s32 arg2);
@@ -1147,6 +1190,19 @@ typedef struct Spawner Spawner;
 typedef struct RiseEmitterObject RiseEmitterObject;
 typedef struct EffectMotionParticle EffectMotionParticle;
 typedef struct DiskEmitterObject DiskEmitterObject;
+/* Emitter data at 0x28 of the effect_updateDiskEmitter emitter (spawned by level_spawnZoneBeam,
+ * game/Level/ZoneSpawn/zonespawn.c). */
+typedef struct DiskEmitter {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ Vec3f velocity;  /* a unit vector along the column */
+    /* 0x18 */ f32 height;      /* length of the column; height / speed is the particle lifetime */
+    /* 0x1C */ f32 radius;
+    /* 0x20 */ f32 angleX;
+    /* 0x24 */ f32 angleY;
+    /* 0x28 */ f32 pending; /* particles owed; one is spawned per whole unit */
+    /* 0x2C */ f32 rate;
+    /* 0x30 */ f32 rateRandom;
+} DiskEmitter; /* size 0x34 */
 extern Gfx *gEffectActorDisplayLists[]; /* effect actor display lists (EffectActorTemplate.displayList) */
 CharacterWatcher *effect_newCharacterWatcher(Actor *chr, u8 enableActions, s32 extraSize);
 void effect_destroyCharacterWatcher(CharacterWatcher *watcher);

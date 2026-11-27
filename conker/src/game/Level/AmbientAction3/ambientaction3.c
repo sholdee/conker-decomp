@@ -4,7 +4,7 @@
 #include "conker/level.h"
 
 
-void level_startAmbientRedDrift(s32 arg0) {
+void level_startAmbientRedDrift(s32 unused) {
     Vec3f tmp;
     TimedEffect *effect;
 

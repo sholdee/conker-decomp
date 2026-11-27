@@ -239,7 +239,8 @@ void collision_allocQuadTree(void) {
     }
 }
 
-void func_15001B08(void) {
+/* Empty: its address ends the tamper checksum over collision_allocQuadTree in effect_spawnAttachedBursts. */
+void collision_allocQuadTreeChecksumEnd(void) {
 }
 
 /** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
@@ -567,7 +568,7 @@ void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext) {
  * func_150183D0 with a row stride of ceil(gMap0QuadNodeCount / 8) bytes, rounded up to 16. Clears
  * D_800BE5D0 when the map has no such resource.
  */
-void func_150025FC(void) {
+void collision_loadQuadNodeBitmap(void) {
     s32 width;
     s32 height;
     u8 *res0;
@@ -849,7 +850,7 @@ s32 collision_xorScramble(s32 value) {
 /**
  * Loads map `map`'s settings resource into gLevelHeader (fatal error if it is missing) and
  * publishes its gLevelTaskCount/gLevelTaskIds table. If the cartridge word at 0xB0000A5C is not the
- * expected one, the table length unk12 is halved.
+ * expected one, the table length taskCount is halved.
  */
 void collision_loadMapSettings(s32 map) {
     LevelSettingsAsset *res;
@@ -875,12 +876,12 @@ void collision_loadMapSettings(s32 map) {
     romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
         info = gLevelHeader;
-        info->unk12 >>= 1;
+        info->taskCount >>= 1;
     }
 
     info = gLevelHeader;
-    if (info->unk12 != 0) {
-        gLevelTaskCount = info->unk12;
+    if (info->taskCount != 0) {
+        gLevelTaskCount = info->taskCount;
         gLevelTaskIds = res->idList;
     } else {
         gLevelTaskCount = 0;
@@ -892,5 +893,6 @@ void collision_loadMapSettings(s32 map) {
     }
 }
 
-void func_1500310C(void) {
+/* Empty: its address ends the tamper checksum over collision_loadMapSettings in particle_spawnSoundPulse. */
+void collision_loadMapSettingsChecksumEnd(void) {
 }

@@ -186,7 +186,7 @@ void func_150097CC(PointLight *light, s32 id) {
     LightEffect *effect = light_createFlicker(light, 0, 2, 14, 255, 1);
 
     if (effect != NULL) {
-        func_150121C0(effect);
+        level_spawnLightAlphaModel(effect);
     }
 }
 

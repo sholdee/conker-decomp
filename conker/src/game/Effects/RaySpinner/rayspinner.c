@@ -3,17 +3,6 @@
 #include "conker/effect.h"
 #include "conker/game.h"
 
-/* Per-object state stored at offset 0x28 of the object. */
-typedef struct {
-    Vec3f position;
-    Vec3f rotation;
-    Vec3f angularVelocity;
-    LightEffect *children[6]; /* light_createWithEffect lights, one per ray */
-    f32 intensity;
-    s32 unk40;
-    u8 flags; // bit 0: enabled
-} FF0E0State;
-
 struct FF0E0Object {
     TimedEffect base;
     FF0E0State state;
@@ -87,20 +76,20 @@ void effect_updateRaySpinner(FF0E0Object *obj) {
     }
 }
 /* Message handler: 0x32 sets the spin and intensity, 0x30/0x31 enable/disable the object when the
- * argument matches unk40, 0x4E resets the spin from gZeroVec3f, 0x4F passes the object to effect_destroyObject. */
-void effect_raySpinnerMessage(FF0E0Object *obj, s32 arg, u8 msg) {
+ * argument is its zone, 0x4E resets the spin from gZeroVec3f, 0x4F passes the object to effect_destroyObject. */
+void effect_raySpinnerMessage(FF0E0Object *obj, void *arg, u8 msg) {
     FF0E0State *state;
     FF0E0SpinMsg *msgData;
 
     state = &obj->state;
     if (msg == 0x32) {
-        msgData = (FF0E0SpinMsg *)arg;
+        msgData = arg;
         state->angularVelocity = msgData->angularVelocity;
         state->intensity = msgData->intensity;
     // matching: empty labelled block makes as1 fill the branch delay slot from the epilogue
     end_set: ;
     } else if (msg == 0x30 || msg == 0x31) {
-        if (arg == state->unk40) {
+        if (arg == state->zone) {
             if (msg == 0x30) {
                 state->flags |= 1;
             } else {

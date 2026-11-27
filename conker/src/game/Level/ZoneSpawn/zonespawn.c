@@ -58,39 +58,6 @@ static s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /* 25 */ NULL,
 };
 
-typedef struct {
-    TriggerZone *unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 pad43;
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 pad4C[0x14];
-    s32 unk60;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[2];
-    s32 unk68;
-    ZoneNode *zone;
-} Struct150139ACLocal;
 
 
 
@@ -118,14 +85,13 @@ start:
     }
 }
 
-
+/* GlowOrbit as level_spawnPointGlowZone fills it: the object whose t and v rotations GlowOrbit.angles
+ * points at (its first field, so object = angles). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    WorldObject *unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
+    /* 0x00 */ f32 distance;
+    /* 0x04 */ f32 spread;
+    /* 0x08 */ WorldObject *object;
+    /* 0x0C */ f32 pivot[3];
 } Payload18_150130B4;
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
@@ -196,16 +162,16 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     spawn.flags = 0x2006 | (((obj->data3 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
     switch (kind) {
     case 8: {
-        f32 extra[4];
-        void *particle;
+        GlowPulse pulse;
+        GlowObj *particle;
 
-        extra[0] = 0.9750000238f;
-        extra[1] = 0.3249999881f;
-        extra[2] = 0.0f;
-        extra[3] = 0.05959999934f;
+        pulse.base = 0.9750000238f;
+        pulse.amplitude = 0.3249999881f;
+        pulse.phase = 0.0f;
+        pulse.speed = 0.05959999934f;
         particle = flare_spawnGlow(&emit, 0x70, &spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
-            memcpy((u8 *)particle + 0x170, extra, sizeof(extra));
+            memcpy(&particle->params.anim.pulse, &pulse, sizeof(pulse));
         }
         break;
     }
@@ -244,23 +210,23 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     case 16:
     case 17:
     case 18: {
-        void *particle;
-        Payload18_150130B4 extra;
+        GlowObj *particle;
+        Payload18_150130B4 orbit;
         u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
 
-        extra.unk8 = gfx_findObjectById(ids[kind - 13]);
-        if (extra.unk8 == NULL) {
+        orbit.object = gfx_findObjectById(ids[kind - 13]);
+        if (orbit.object == NULL) {
             return 1;
         }
-        extra.unk0 = -80.0f;
-        extra.unk4 = fabsf(-0.01250000019f);
-        extra.unkC = extra.unk8->x;
-        extra.unk10 = extra.unk8->y;
-        extra.unk14 = extra.unk8->z;
+        orbit.distance = -80.0f;
+        orbit.spread = fabsf(-0.01250000019f);
+        orbit.pivot[0] = orbit.object->x;
+        orbit.pivot[1] = orbit.object->y;
+        orbit.pivot[2] = orbit.object->z;
         emit.type = 0;
         particle = flare_spawnGlow(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
-            memcpy((u8 *)particle + 0x170, &extra, sizeof(extra));
+            memcpy(&particle->params.anim.orbit, &orbit, sizeof(orbit));
         }
         break;
     }
@@ -282,7 +248,7 @@ const s32 gPointGlowTextures[5] = { 3, 0x15, 0x68, 0x69, 0x7E };
 const s32 gPointGlowRenderModes[5] = { 0x3400, 0x3400, 0x2200, 0x3400, 0x3400 };
 const s32 gPointGlowEmitterTypes[8] = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
-/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. */
+/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. */
 static s32 (*gEffectZoneSpawnHandlers[11])(TriggerZone *zone) = {
     NULL,
     NULL,
@@ -297,7 +263,7 @@ static s32 (*gEffectZoneSpawnHandlers[11])(TriggerZone *zone) = {
     level_spawnStreamZone,
 };
 
-/** Runs the object's handler from gEffectZoneSpawnHandlers, chosen by unk17. */
+/** Runs the object's handler from gEffectZoneSpawnHandlers, chosen by subTypeData. */
 s32 level_spawnEffectZone(TriggerZone *obj) {
     u8 index = obj->subTypeData;
     s32 (*handler)(TriggerZone *) = gEffectZoneSpawnHandlers[index];
@@ -314,21 +280,10 @@ s32 level_spawnTrailZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game40490BeamPacket {
-    f32 position[3];
-    f32 direction[3];
-    f32 height;
-    f32 width;
-    f32 rotation[2];
-    f32 zero;
-    f32 field2C;
-    f32 field30;
-} Game40490BeamPacket;
-
 /** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
 s32 level_spawnZoneBeam(TriggerZone *obj) {
     TimedEffect *effect;
-    Game40490BeamPacket packet;
+    DiskEmitter packet;
     MtxF matrix;
 
     if (obj->ySize != 0) {
@@ -337,21 +292,21 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
 
         packet.height = 2.0f * obj->ySize;
         inverse = 1.0f / packet.height;
-        packet.width = obj->xSize;
-        packet.rotation[0] = obj->pitch;
-        packet.rotation[1] = obj->yaw;
-        packet.zero = 0.0f;
-        packet.field2C = 0.2001999915f;
-        packet.field30 = 0.04999999702f;
-        packet.position[0] = obj->x;
-        packet.position[1] = obj->y;
-        packet.position[2] = obj->z;
+        packet.radius = obj->xSize;
+        packet.angleX = obj->pitch;
+        packet.angleY = obj->yaw;
+        packet.pending = 0.0f;
+        packet.rate = 0.2001999915f;
+        packet.rateRandom = 0.04999999702f;
+        packet.position.x = obj->x;
+        packet.position.y = obj->y;
+        packet.position.z = obj->z;
         math_mtxRotateRPYF(matrix, obj->pitch, obj->yaw, 0.0f);
         math_transformPoint(matrix, 0.0f, packet.height, 0.0f,
-                      &packet.direction[0], &packet.direction[1], &packet.direction[2]);
-        packet.direction[0] *= inverse;
-        packet.direction[1] *= inverse;
-        packet.direction[2] *= inverse;
+                      &packet.velocity.x, &packet.velocity.y, &packet.velocity.z);
+        packet.velocity.x *= inverse;
+        packet.velocity.y *= inverse;
+        packet.velocity.z *= inverse;
         effect = effect_newTimedEffect(300, -1, 0x19, -1, 0, 0x17, sizeof(packet), 0xFF, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
@@ -363,7 +318,7 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
     return 1;
 }
 
-/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. Declared without a
+/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. Declared without a
  * prototype: level_spawnZoneAreaEffect takes an extra argument and level_addDustRegionZone none. */
 static s32 (*gNeutralZoneSpawnHandlers[23])() = {
     NULL,
@@ -386,12 +341,12 @@ static s32 (*gNeutralZoneSpawnHandlers[23])() = {
     level_spawnRandomPointZone,
     level_spawnAreaEmitterZone,
     level_registerSprayAreaZone,
-    func_15015644,
+    level_spawnSparkRegionZone,
     NULL,
     level_spawnZoneSpray,
 };
 
-/** Runs the object's handler from gNeutralZoneSpawnHandlers, chosen by unk17. */
+/** Runs the object's handler from gNeutralZoneSpawnHandlers, chosen by subTypeData. */
 s32 level_spawnNeutralZone(TriggerZone *obj) {
     u8 index = obj->subTypeData;
     s32 (*handler)() = gNeutralZoneSpawnHandlers[index];
@@ -405,67 +360,67 @@ s32 level_spawnNeutralZone(TriggerZone *obj) {
 /** Spawns the area effect described by entry data1 of gAreaEffectDefs over the object's footprint. */
 // matching: index lives in the (unused) second argument register
 s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index) {
-    Struct150139ACLocal data;
-    const Struct150139ACEntry *entry;
+    RegionEmitterState data;
+    const AreaEffectDef *entry;
     TimedEffect *effect;
 
     index = obj->data1;
     obj->flags |= 4;
-    data.unk0 = obj;
-    data.unkC = 0.0f;
+    data.region = obj;
+    data.pending = 0.0f;
 
     switch (ZONE_AREA_TYPE(obj)) {
     default:
-        data.unk4 = 1.0f;
-        data.unk10 = 1000.0f;
+        data.rate = 1.0f;
+        data.maxHeight = 1000.0f;
         break;
     case ZONE_AREA_BOX:
         /* box: area of the footprint */
-        data.unk4 = (obj->xSize * obj->zSize) * 4.0f;
-        data.unk10 = obj->y + obj->ySize;
+        data.rate = (obj->xSize * obj->zSize) * 4.0f;
+        data.maxHeight = obj->y + obj->ySize;
         break;
     case ZONE_AREA_CYLINDER:
     case ZONE_AREA_SPHERE:
         /* cylinder: area of the circle */
-        data.unk4 = (obj->xSize * obj->xSize) * 3.141592741f;
-        data.unk10 = obj->y + obj->ySize;
+        data.rate = (obj->xSize * obj->xSize) * 3.141592741f;
+        data.maxHeight = obj->y + obj->ySize;
         break;
     }
 
     entry = &gAreaEffectDefs[index];
-    data.unk14 = entry->unk4;
-    data.unk18 = entry->unk8;
-    data.unk1C = entry->unkC;
-    data.unk20 = entry->unk10;
-    data.unk28 = entry->unk18;
-    data.unk2C = entry->unk1C;
-    data.unk60 = 0;
-    data.unk64 = 0;
-    data.unk65 = 0;
-    data.unk68 = 0;
-    data.unk24 = entry->unk14;
-    data.unk26 = entry->unk16;
-    data.unk30 = entry->unk20;
-    data.unk34 = entry->unk24;
-    data.unk38 = entry->unk28;
-    data.unk3C = entry->unk2C;
-    data.unk8 = entry->unk0;
-    data.unk40 = entry->unk30;
-    data.unk41 = entry->unk31;
-    data.unk42 = entry->unk32;
-    data.unk48 = -10000.0f;
+    data.xScaleBase = entry->xScaleBase;
+    data.xScaleRange = entry->xScaleRange;
+    data.yScaleBase = entry->yScaleBase;
+    data.yScaleRange = entry->yScaleRange;
+    data.scaleBase = entry->scaleBase;
+    data.scaleRange = entry->scaleRange;
+    data.ground.material = 0;
+    data.ground.flags = 0;
+    data.ground.source = 0;
+    data.ground.surface = 0;
+    data.lifeBase = entry->lifeBase;
+    data.lifeRange = entry->lifeRange;
+    data.shrinkRateBase = entry->shrinkRateBase;
+    data.shrinkRateRange = entry->shrinkRateRange;
+    data.growRateBase = entry->growRateBase;
+    data.growRateRange = entry->growRateRange;
+    data.scale = entry->density;
+    data.useGround = entry->useGround;
+    data.alphaBase = entry->alphaBase;
+    data.alphaRange = entry->alphaRange;
+    data.ground.height = -10000.0f;
 
-    if (entry->unk34 != 0) {
+    if (entry->useZone != 0) {
         collision_selectMap(0);
         data.zone = collision_findZoneLeaf(obj->x, obj->z);
     } else {
         data.zone = NULL;
     }
 
-    if (entry->unk33 != 0) {
-        data.unk44 = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
+    if (entry->hasSound != 0) {
+        data.soundHandle = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
     } else {
-        data.unk44 = 0;
+        data.soundHandle = 0;
     }
 
     effect = effect_newTimedEffectNoDraw(300, -1, 6, 0, 10, sizeof(data), 0xFF, 0);
@@ -637,25 +592,17 @@ s32 func_1501407C(TriggerZone *obj) {
 
 /* Declared s32 but returns no value; giving it a return value or void changes the code. */
 s32 level_spawnRandomPointZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        f32 unk8;
-        ZoneNode *zone;
-        u8 pad10[0x1C];
-        s8 unk2C;
-        u8 pad2D[7];
-    } data;
+    Game1FBB80Effect data;
     TimedEffect *effect;
 
     obj->flags |= 4;
-    data.unk0 = obj;
-    data.unk4 = math_getZoneArea(obj);
-    data.unk8 = 0.0f;
+    data.shape = obj;
+    data.rate = math_getZoneArea(obj);
+    data.accumulator = 0.0f;
 
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
-    data.unk2C = 0;
+    data.floor.flags = 0;
 
     effect = effect_newTimedEffect(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
@@ -684,17 +631,13 @@ s32 level_spawnFireZone(TriggerZone *obj) {
 }
 
 s32 level_spawnAreaEmitterZone(TriggerZone *obj) {
-    struct {
-        f32 unk0;
-        TriggerZone *unk4;
-        u8 unk8;
-    } data;
+    AreaEmitterData data;
     TimedEffect *effect;
 
     obj->flags |= 4;
-    data.unk8 = 1;
-    data.unk4 = obj;
-    data.unk0 = 0.0f;
+    data.flags = 1;
+    data.area = obj;
+    data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x26, -1, 0, 0x24, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -717,14 +660,7 @@ s32 level_registerSprayAreaZone(TriggerZone *obj) {
 }
 
 s32 level_spawnFlackZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-    } data;
+    BurstSpawner data;
     TimedEffect *effect;
     f32 a;
     f32 b;
@@ -749,12 +685,12 @@ s32 level_spawnFlackZone(TriggerZone *obj) {
 
     scale = math_getZoneVolume(obj);
 
-    data.unk0 = obj;
-    data.unk4 = (a * scale) * 1.271515948e-10f;
-    data.unk8 = (b * scale) * 1.271515948e-10f;
-    data.unkC = c;
-    data.unk10 = d;
-    data.unk14 = 0.0f;
+    data.source = obj;
+    data.rateBase = (a * scale) * 1.271515948e-10f;
+    data.rateRange = (b * scale) * 1.271515948e-10f;
+    data.scaleBase = c;
+    data.scaleRange = d;
+    data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x29, -1, 0, 0, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -802,30 +738,11 @@ s32 level_spawnBulletZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game40490PlanePoint {
-    f32 x;
-    f32 z;
-} Game40490PlanePoint;
-
-typedef struct Game40490PlanePacket {
-    Game40490PlanePoint start;
-    Game40490PlanePoint end;
-    f32 edge[4];
-    f32 top;
-    f32 bottom;
-    f32 scaleX;
-    f32 scaleZ;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    s8 bytes[4];
-} Game40490PlanePacket;
-
 /** Spawns an effect over the object's rotated rectangle (sizeX by sizeZ, sizeY high). */
 s32 level_spawnMissileZone(TriggerZone *obj) {
-    Game40490PlanePacket packet;
+    FlashSpawner packet;
     TimedEffect *effect;
-    Game40490PlanePoint corners[4];
+    Vec2fXZ corners[4];
     f32 s;
     f32 c;
     f32 z;
@@ -845,23 +762,23 @@ s32 level_spawnMissileZone(TriggerZone *obj) {
     corners[2].z = -obj->zSize * c + z - -obj->xSize * s;
     corners[3].x = -obj->xSize * c + x + obj->zSize * s;
     corners[3].z = obj->zSize * c + z - -obj->xSize * s;
-    packet.start = corners[1];
-    packet.end = corners[2];
-    packet.edge[0] = corners[0].x - corners[1].x;
-    packet.edge[1] = corners[0].z - corners[1].z;
-    packet.edge[2] = corners[3].x - corners[2].x;
-    packet.edge[3] = corners[3].z - corners[2].z;
-    packet.top = obj->y + obj->ySize;
-    packet.bottom = obj->y;
-    packet.scaleX = (obj->data2 & 0xFF) * 0.00390625f * 0.5f;
-    packet.scaleZ = ((obj->data2 >> 8) & 0xFF) * 0.00390625f * 0.5f;
-    packet.unk30 = 0.0f;
-    packet.unk34 = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 250.0f;
-    packet.unk38 = ((obj->data2 >> 24) & 0xFF) * 0.00390625f * 250.0f;
-    packet.bytes[0] = obj->data1 & 0xFF;
-    packet.bytes[1] = (obj->data1 >> 8) & 0xFF;
-    packet.bytes[2] = (obj->data1 >> 16) & 0xFF;
-    packet.bytes[3] = (obj->data1 >> 24) & 0xFF;
+    packet.startOrigin = corners[1];
+    packet.endOrigin = corners[2];
+    packet.startExtent.x = corners[0].x - corners[1].x;
+    packet.startExtent.z = corners[0].z - corners[1].z;
+    packet.endExtent.x = corners[3].x - corners[2].x;
+    packet.endExtent.z = corners[3].z - corners[2].z;
+    packet.height = obj->y + obj->ySize;
+    packet.probeHeight = obj->y;
+    packet.rate = (obj->data2 & 0xFF) * 0.00390625f * 0.5f;
+    packet.rateRange = ((obj->data2 >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    packet.accumulator = 0.0f;
+    packet.speed = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    packet.speedRange = ((obj->data2 >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    packet.colour[0] = obj->data1 & 0xFF;
+    packet.colour[1] = (obj->data1 >> 8) & 0xFF;
+    packet.colour[2] = (obj->data1 >> 16) & 0xFF;
+    packet.colour[3] = (obj->data1 >> 24) & 0xFF;
     effect = effect_newTimedEffect(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
@@ -869,22 +786,10 @@ s32 level_spawnMissileZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game4049014B60Packet {
-    f32 pos[3];
-    f32 rot[3];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    LightEffect *effects[6];
-    f32 unk3C;
-    void *owner;
-    u8 active;
-} Game4049014B60Packet;
-
 /** Creates six light_createWithEffect objects at the object's position, coloured from gRaySpinnerChildColors, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 level_spawnDiscoBallZone(TriggerZone *obj) {
-    Game4049014B60Packet packet;
+    FF0E0State packet;
     s32 i;
     TimedEffect *effect;
     Vec3i pos;
@@ -892,21 +797,21 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
     u32 count;
 
     obj->flags |= 4;
-    packet.active = 1;
-    packet.owner = obj;
-    packet.pos[0] = obj->x;
-    packet.pos[1] = obj->y;
-    packet.pos[2] = obj->z;
+    packet.flags = 1;
+    packet.zone = obj;
+    packet.position.x = obj->x;
+    packet.position.y = obj->y;
+    packet.position.z = obj->z;
     count = osGetCount();
-    packet.rot[0] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rotation.x = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[1] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rotation.y = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[2] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
-    packet.unk18 = (obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk1C = ((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk20 = (obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk3C = ((obj->data2 >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
+    packet.rotation.z = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.angularVelocity.x = (obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.angularVelocity.y = ((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.angularVelocity.z = (obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.intensity = ((obj->data2 >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
     pos.x = obj->x;
     pos.y = obj->y;
     pos.z = obj->z;
@@ -921,7 +826,7 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         r = (level == LEVEL_W5_END_ARENA) ? 0xFF : gRaySpinnerChildColors[i][0];
         g = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][1];
         count = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][2]; // matching: blue reuses count's register
-        packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
+        packet.children[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = effect_newTimedEffect(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
@@ -929,40 +834,32 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         return 1;
     }
     for (i = 0; i < 6; i++) {
-        if (packet.effects[i] != NULL) {
-            effect_destroyObject(packet.effects[i]);
+        if (packet.children[i] != NULL) {
+            effect_destroyObject(packet.children[i]);
         }
     }
     return 1;
 }
 
 s32 level_spawnLaserTubeZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        s32 unk4;
-        s32 unk8;
-        s32 unkC;
-        MtxF mtx;
-        u8 unk50;
-        u8 unk51;
-    } data;
+    EmitterTrigger data;
     TimedEffect *effect;
     s32 flag;
 
     obj->flags |= 4;
-    data.unk51 = obj->data3;
+    data.params[1] = obj->data3;
     flag = (obj->data2 & 1) ? 1 : 0;
-    data.unk50 = flag;
-    data.unk0 = obj;
-    /* data1 holds a minimum and a range: unkC is random in [min, min + range] */
-    data.unk4 = obj->data1 & 0xFFFF;
-    data.unk8 = (obj->data1 >> 16) & 0xFFFF;
-    data.unkC = (math_random() % (data.unk8 + 1)) + data.unk4;
-    math_mtxRotateRPYF(data.mtx, obj->pitch, obj->yaw, 0.0f);
+    data.params[0] = flag;
+    data.record = obj;
+    /* data1 holds a minimum and a range: countdown is random in [min, min + range] */
+    data.minDelay = obj->data1 & 0xFFFF;
+    data.delayRange = (obj->data1 >> 16) & 0xFFFF;
+    data.countdown = (math_random() % (data.delayRange + 1)) + data.minDelay;
+    math_mtxRotateRPYF(data.matrix, obj->pitch, obj->yaw, 0.0f);
 
-    data.mtx[3][0] = obj->x;
-    data.mtx[3][1] = obj->y;
-    data.mtx[3][2] = obj->z;
+    data.matrix[3][0] = obj->x;
+    data.matrix[3][1] = obj->y;
+    data.matrix[3][2] = obj->z;
 
     effect = effect_newTimedEffect(300, -1, 0x31, -1, 0, 0x2A, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -992,7 +889,7 @@ s32 level_spawnZoneEffect(TriggerZone *obj) {
 
     obj->inactive = 1;
     data.zone = obj;
-    data.unk4 = obj->data2;
+    data.id = obj->data2;
 
     collision_selectMap(0);
     data.node = collision_findZoneLeaf(obj->x, obj->z);
@@ -1010,41 +907,25 @@ s32 level_spawnZoneEffect(TriggerZone *obj) {
     return 1;
 }
 s32 level_spawnBoltRainZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        s16 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        u8 pad24[0x14];
-        s32 unk38;
-        s8 unk3C;
-        s8 unk3D;
-        s32 unk40;
-        ZoneNode *zone;
-    } data;
+    BoltRainState data;
     TimedEffect *effect;
 
     obj->flags |= 4;
     obj->inactive = 1;
 
-    data.unk0 = obj;
-    data.unk4 = 0.0f;
-    data.unk8 = -1;
-    data.unkC = obj->x;
-    data.unk10 = obj->y;
-    data.unk14 = obj->z;
-    data.unk18 = obj->xSize;
-    data.unk1C = obj->ySize;
-    data.unk20 = -10000.0f;
-    data.unk40 = 0;
-    data.unk3D = 0;
-    data.unk3C = 0;
-    data.unk38 = 0;
+    data.region = obj;
+    data.pending = 0.0f;
+    data.timer = -1;
+    data.pos.x = obj->x;
+    data.pos.y = obj->y;
+    data.pos.z = obj->z;
+    data.radius = obj->xSize;
+    data.height = obj->ySize;
+    data.ground.height = -10000.0f;
+    data.ground.surface = NULL;
+    data.ground.source = 0;
+    data.ground.flags = 0;
+    data.ground.material = 0;
 
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
@@ -1081,8 +962,8 @@ s32 level_spawnBoltZone(TriggerZone *obj) {
 
 /** Spawns an effect on the object's rotated rectangle: its four corners and the edge vectors between them. */
 void level_spawnBoltArcZone(TriggerZone *obj) {
-    ZoneRectData data;
-    ZoneRectEffect *effect;
+    BoltArcState data;
+    BoltArcObj *effect;
     f32 z;
     f32 y;
     f32 x;
@@ -1090,9 +971,9 @@ void level_spawnBoltArcZone(TriggerZone *obj) {
     MtxF mtx;
     u8 i;
 
-    data.zone = obj;
-    data.unk4 = -1;
-    data.unk8 = 0.0f;
+    data.region = obj;
+    data.timer = -1;
+    data.pending = 0.0f;
     obj->inactive = 1;
     x = obj->x;
     y = obj->y;
@@ -1119,49 +1000,44 @@ void level_spawnBoltArcZone(TriggerZone *obj) {
 
     for (i = 0; i < 4; i++) {
         math_transformPoint(mtx, corners[i][0], corners[i][1], corners[i][2],
-                      &data.points[i][0], &data.points[i][1], &data.points[i][2]);
+                      &data.edgeStart[i].x, &data.edgeStart[i].y, &data.edgeStart[i].z);
     }
 
-    data.edges[0][0] = data.points[1][0] - data.points[0][0];
-    data.edges[0][1] = data.points[1][1] - data.points[0][1];
-    data.edges[0][2] = data.points[1][2] - data.points[0][2];
-    data.edges[1][0] = data.points[2][0] - data.points[1][0];
-    data.edges[1][1] = data.points[2][1] - data.points[1][1];
-    data.edges[1][2] = data.points[2][2] - data.points[1][2];
-    data.edges[2][0] = data.points[3][0] - data.points[2][0];
-    data.edges[2][1] = data.points[3][1] - data.points[2][1];
-    data.edges[2][2] = data.points[3][2] - data.points[2][2];
-    data.edges[3][0] = data.points[0][0] - data.points[3][0];
-    data.edges[3][1] = data.points[0][1] - data.points[3][1];
-    data.edges[3][2] = data.points[0][2] - data.points[3][2];
+    data.edgeDelta[0].x = data.edgeStart[1].x - data.edgeStart[0].x;
+    data.edgeDelta[0].y = data.edgeStart[1].y - data.edgeStart[0].y;
+    data.edgeDelta[0].z = data.edgeStart[1].z - data.edgeStart[0].z;
+    data.edgeDelta[1].x = data.edgeStart[2].x - data.edgeStart[1].x;
+    data.edgeDelta[1].y = data.edgeStart[2].y - data.edgeStart[1].y;
+    data.edgeDelta[1].z = data.edgeStart[2].z - data.edgeStart[1].z;
+    data.edgeDelta[2].x = data.edgeStart[3].x - data.edgeStart[2].x;
+    data.edgeDelta[2].y = data.edgeStart[3].y - data.edgeStart[2].y;
+    data.edgeDelta[2].z = data.edgeStart[3].z - data.edgeStart[2].z;
+    data.edgeDelta[3].x = data.edgeStart[0].x - data.edgeStart[3].x;
+    data.edgeDelta[3].y = data.edgeStart[0].y - data.edgeStart[3].y;
+    data.edgeDelta[3].z = data.edgeStart[0].z - data.edgeStart[3].z;
 
     collision_selectMap(0);
-    data.node = collision_findZoneLeaf(obj->x, obj->z);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.actor = NULL;
 
     effect = effect_newTimedEffect(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &data, sizeof(data));
+        memcpy(&effect->state, &data, sizeof(data));
     }
 }
 
-s32 func_15015644(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        ZoneNode *zone;
-        s8 unkC;
-    } data;
+s32 level_spawnSparkRegionZone(TriggerZone *obj) {
+    SparkState data;
     TimedEffect *effect;
 
     obj->flags |= 4;
     obj->inactive = 1;
 
-    data.unk0 = obj;
-    data.unk4 = math_getZoneArea(obj);
+    data.region = obj;
+    data.rate = math_getZoneArea(obj);
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
-    data.unkC = 0;
+    data.flags = 0;
 
     effect = effect_newTimedEffect(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);
     if (effect != NULL) {

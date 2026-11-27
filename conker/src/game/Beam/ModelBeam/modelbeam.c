@@ -415,8 +415,8 @@ void beam_updateModelBeam(ModelBeamEffect *effect) {
     if (data->beam != NULL) {
         BeamPart *part = &data->beam->part;
 
-        part->unk48 = 4.0f;
-        part->unk4C = 8.0f;
+        part->beamWidthTarget = 4.0f;
+        part->beamLengthTarget = 8.0f;
     }
 }
 

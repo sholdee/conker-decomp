@@ -32,17 +32,17 @@ void func_1500FF9C(void) {
 }
 
 void level_setup12(void) {
-    f32 sp44;
+    f32 accum;
     TimedEffect *fx;
 
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902DC, 1, -1, 0, 0, 0, -4);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_800902DC, 1, -1, 0, 1, 0, -4);
     level_initBounceRecords();
     func_1500FF9C();
-    sp44 = 0.0f;
+    accum = 0.0f;
     fx = effect_newTimedEffectNoDraw(0x12C, -1, 0x12, 0, 0xE, 4, 0xFF, 0);
     if (fx != NULL) {
-        memcpy(fx + 1, &sp44, sizeof(sp44));
+        memcpy(fx + 1, &accum, sizeof(accum));
     }
     {
         BurstTimer timer;

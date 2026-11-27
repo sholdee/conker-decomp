@@ -8,7 +8,7 @@
 
 
 /* Starts a global colour cycle (timed effect 30, light_updateColourCycle) around grey 50. */
-void level_startAmbientColourCycle(s32 arg0) {
+void level_startAmbientColourCycle(s32 unused) {
     TimedEffect *effect;
     LightColourPulse tmp;
 
@@ -28,12 +28,12 @@ void level_startAmbientColourCycle(s32 arg0) {
 }
 
 /* Attaches a drip emitter (particle_newDripEmitter) to the actor, except in level 24. */
-void level_attachDripEmitter(Actor *arg0) {
+void level_attachDripEmitter(Actor *obj) {
     ActorLink tmp;
 
     if (level != LEVEL_W5_THRONE_ROOM) {
-        tmp.actor = arg0;
-        tmp.actorId = arg0->unique_id;
+        tmp.actor = obj;
+        tmp.actorId = obj->unique_id;
         tmp.timer = 300;
         tmp.flags = 0;
         tmp.unk9 = 0;

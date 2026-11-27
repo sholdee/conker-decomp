@@ -4961,7 +4961,7 @@ void actor_updateTypeAnims(void) {
 }
 
 /*
- * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
+ * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->cullRadius) or is a player, when
  * a player is inside its path area, or when it is inside some player's view; FALSE if fully faded.
  */
 s32 actor_isVisible(Actor *actor) {
@@ -4976,7 +4976,7 @@ s32 actor_isVisible(Actor *actor) {
     s32 id;
     u8 *p;
 
-    scale = (actor->listpos_ptr != NULL) ? actor->listpos_ptr->unk2A : 0.0f;
+    scale = (actor->listpos_ptr != NULL) ? actor->listpos_ptr->cullRadius : 0.0f;
     if (scale == 0.0f) {
         return 1;
     }
@@ -5158,9 +5158,9 @@ void actor_setScale(Actor *actor, f32 xzScale, f32 yScale) {
     actor->scale_y = yScale;
     if (actor->character_type != 255) {
         info = gModelDefs[actor->character_type];
-        actor->hitRadius =  (info->unk20 * actor->scale_xz);
-        actor->hitHeight =  (info->unk22 * actor->scale_y);
-        actor->hitOffsetY =  (info->unk24 * actor->scale_y);
+        actor->hitRadius =  (info->hitRadius * actor->scale_xz);
+        actor->hitHeight =  (info->hitHeight * actor->scale_y);
+        actor->hitOffsetY =  (info->hitOffsetY * actor->scale_y);
         actor->bodyRadius =  (info->unk1A * actor->scale_xz);
         actor->bodyHeight =  (info->unk1C * actor->scale_y);
         actor->bodyOffsetY =  (info->unk1E * actor->scale_y);

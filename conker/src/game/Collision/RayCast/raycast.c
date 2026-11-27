@@ -317,12 +317,12 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 }
             }
         }
-        if (hit->part == 10 && (obj->mv == NULL || obj->mv->unk1AD == 0) && longShot == 0) {
+        if (hit->part == 10 && (obj->mv == NULL || obj->mv->headShot == 0) && longShot == 0) {
             // matching: unsigned compares keep the constants as immediates
             if ((u32)kind != 2 && (u32)kind != 18 && (u32)kind != 11 && (u32)kind != 12) {
                 actor_applyHeadShot(obj);
                 if (obj->mv != NULL) {
-                    obj->mv->unk1AD = 1;
+                    obj->mv->headShot = 1;
                 }
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
                     actor_playUntrackedSound((math_random() & 7) + 0x2E3, obj);

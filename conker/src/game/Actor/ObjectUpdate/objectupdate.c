@@ -897,12 +897,12 @@ load:
             {
                 s32 k;
 
-                if (gModelDefs[id]->unk29 != 0) {
+                if (gModelDefs[id]->boneRemapList != 0) {
                     const u8 *p;
 
                     gAimPass = 0;
                     bzero(remapBuf, gModelBoneCounts[id]);
-                    p = gBoneRemapLists[gModelDefs[id]->unk29 - 1];
+                    p = gBoneRemapLists[gModelDefs[id]->boneRemapList - 1];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];

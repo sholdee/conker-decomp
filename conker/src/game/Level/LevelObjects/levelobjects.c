@@ -139,7 +139,7 @@ void level_spawnObjects(s32 levelId, s32 arg1) {
                 obj->materials = model->materials;
             }
             if (i >= gUngroupedObjectCount) {
-                obj->unk4C = gGroupedObjectDefaults[id].unk4C;
+                obj->hasShadow = gGroupedObjectDefaults[id].hasShadow;
                 obj->shadowSize = gGroupedObjectDefaults[id].shadowSize;
                 obj->cullRadiusXZ = gGroupedObjectDefaults[id].cullRadiusXZ;
                 obj->cullRadiusY = gGroupedObjectDefaults[id].cullRadiusY;
@@ -155,7 +155,7 @@ void level_spawnObjects(s32 levelId, s32 arg1) {
                 obj->cullRadiusXZ = base[i].cullRadiusXZ;
                 obj->cullRadiusY = base[i].cullRadiusY;
                 obj->object_status = base[i].flags;
-                obj->unk4C = base[i].unk4C;
+                obj->hasShadow = base[i].hasShadow;
                 obj->shadowSize = base[i].shadowSize;
                 obj->drawDistance = base[i].drawDistance;
                 if (base[i].id != 0) {
@@ -216,7 +216,7 @@ void level_spawnObjects(s32 levelId, s32 arg1) {
             obj->cullRadiusXZ = base[i].cullRadiusXZ;
             obj->cullRadiusY = base[i].cullRadiusY;
             obj->object_status = base[i].flags;
-            obj->unk4C = base[i].unk4C;
+            obj->hasShadow = base[i].hasShadow;
             obj->shadowSize = base[i].shadowSize;
             obj->drawDistance = base[i].drawDistance;
             if (base[i].id != 0) {
@@ -291,7 +291,7 @@ void func_150045BC(void) {
  * state bit 0, transforms its vertices into its per-frame copies), then probes the floor under objects
  * with view flag 0x20.
  */
-void level_prepareObjects(s32 arg0) {
+void level_prepareObjects(s32 levelId) {
     s32 i;
     WorldObject *obj;
     MtxF mtx;

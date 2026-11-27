@@ -1042,7 +1042,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             gCutsceneHoldEnd = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                obj->rootOffsetY = gModelDefs[obj->character_type]->unk6;
+                obj->rootOffsetY = gModelDefs[obj->character_type]->rootOffsetY;
             }
         } else if (event->value == 0x78) {
             gCutsceneNoSkipFadeIn = 1;

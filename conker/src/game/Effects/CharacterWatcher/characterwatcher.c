@@ -705,19 +705,6 @@ void effect_emitRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Effect
     effect_spawnRiseParticle(&pos, &velocity, obj->owner, obj->kind);
 }
 
-/* Emitter data at 0x28 of the effect_updateDiskEmitter emitter. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ Vec3f velocity;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 radius;
-    /* 0x20 */ f32 angleX;
-    /* 0x24 */ f32 angleY;
-    /* 0x28 */ f32 pending; /* particles owed; one is spawned per whole unit */
-    /* 0x2C */ f32 rate;
-    /* 0x30 */ f32 rateRandom;
-} DiskEmitter;
-
 struct DiskEmitterObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiskEmitter emitter;
@@ -788,7 +775,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
                     scale = ((math_randomFloat() * 161.0f) + 446.0f) * 0.009999999776f;
                     invScale = 1.0f / scale;
-                    dist = emitter->unk18 * invScale;
+                    dist = emitter->height * invScale;
                     fadeTime = ((math_randomFloat() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
                     spawn.vel.x = emitter->velocity.x * scale;
                     spawn.vel.y = emitter->velocity.y * scale;

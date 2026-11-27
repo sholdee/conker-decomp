@@ -4336,9 +4336,9 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     spawn->z = gMenuCharacterPositions[posIdx].z;
     spawn->angle = gMenuCharacterPositions[posIdx].angle;
     if (kind == 0x53) {
-        spawn->unkD = 0x24;
+        spawn->intelwalk = 0x24;
     } else {
-        spawn->unkD = 0xE;
+        spawn->intelwalk = 0xE;
     }
     objSlot = collision_spawnObject(spawn, spawnId, 0, 0, 0);
     if (objSlot != 0) {
@@ -4354,7 +4354,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
         if (kind == 0x3B) {
             obj->swapTexture[0] = slotIdx + 1;
         }
-        func_15083384(obj, gMenuCharacterTypes[charIdx].unk6);
+        collision_applyCharacterVariant(obj, gMenuCharacterTypes[charIdx].unk6);
         actor_playAnim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     }
 }

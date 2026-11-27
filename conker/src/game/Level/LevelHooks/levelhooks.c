@@ -19,8 +19,8 @@ static void (*gLevelHooks[])() = {
     camera_levelHook32, camera_levelHook33, camera_levelHook34, camera_levelHook35,
 };
 
-void level_runHook(void *arg0, s32 arg1) {
+void level_runHook(void *camera, s32 levelId) {
     if (gLevelHeader->hookCallback) {
-        gLevelHooks[gLevelHeader->hookCallback](arg0);
+        gLevelHooks[gLevelHeader->hookCallback](camera);
     }
 }

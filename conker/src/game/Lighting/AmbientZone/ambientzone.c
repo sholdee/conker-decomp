@@ -196,14 +196,14 @@ void func_1515FB94(Actor *obj, TriggerZone *zone) {
 
 /* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
 void func_1515FBC4(Actor *obj, TriggerZone *zone) {
-    ZoneRectEffect *link;
+    BoltArcObj *link;
     Actor *target;
     s32 targetIndex;
 
     target = NULL;
     link = beam_findZoneRectEffect(zone);
     if (link != NULL) {
-        target = link->data.actor;
+        target = link->state.actor;
     }
     if (target != NULL) {
         targetIndex = target - movement_obj;

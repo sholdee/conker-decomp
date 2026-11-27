@@ -19,7 +19,7 @@ void collision_clearUvWobbles(void) {
  * mode 4 allocates two vertex buffers per view (gScreenLayout + 1 views), mode 2 builds a
  * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
  */
-void collision_initMapBackground(s32 arg0) {
+void collision_initMapBackground(s32 levelId) {
     s32 i;
     s32 j;
     s32 end; // one past the last gradient entry of the current band

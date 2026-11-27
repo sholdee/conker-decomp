@@ -183,16 +183,16 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                     gSpawnRecords[i].interaction_state = 0xC;
                 }
                 gSpawnRecords[i].objFlags |= 4;
-                gSpawnRecords[i].unkD = 0xD;
+                gSpawnRecords[i].intelwalk = 0xD;
                 break;
             case 8:
                 gSpawnRecords[i].type = 0x77;
                 gSpawnRecords[i].interaction_state = 0x1E;
                 gSpawnRecords[i].unk10 = 0xAA;
                 if (i >= gHumanCount) {
-                    gSpawnRecords[i].unkD = 3;
+                    gSpawnRecords[i].intelwalk = 3;
                 } else {
-                    gSpawnRecords[i].unkD = 1;
+                    gSpawnRecords[i].intelwalk = 1;
                 }
                 gSpawnRecords[i].objFlags |= 0x180000;
                 gSpawnRecords[i].unkE |= 0x80;
@@ -201,14 +201,14 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                 gSpawnRecords[i].type = 0x77;
                 gSpawnRecords[i].interaction_state = 0x25;
                 gSpawnRecords[i].unk10 = 0xA8;
-                gSpawnRecords[i].unkD = 3;
+                gSpawnRecords[i].intelwalk = 3;
                 gSpawnRecords[i].objFlags |= 0x100000;
                 break;
             case 9:
                 gSpawnRecords[i].type = 0x53;
                 gSpawnRecords[i].interaction_state = 0x1F;
                 gSpawnRecords[i].unk10 = 0xA8;
-                gSpawnRecords[i].unkD = 2;
+                gSpawnRecords[i].intelwalk = 2;
                 gSpawnRecords[i].xz_scale = 0.6999999881f;
                 gSpawnRecords[i].y_scale = 0.6999999881f;
                 gSpawnRecords[i].objFlags |= 1;

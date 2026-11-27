@@ -8,23 +8,23 @@
 
 // ???
 void level_setup15(void) {
-    WorldObject *temp_v0;
+    WorldObject *prop;
 
     gMaterialGlowLevels[0] = (gMaterialGlowLevels[1] = (gMaterialGlowLevels[2] = 0));
-    temp_v0 = gfx_findObjectById(0xF6);
-    temp_v0->touch.f.a = 2.0f;
+    prop = gfx_findObjectById(0xF6);
+    prop->touch.f.a = 2.0f;
     gWarpModelSetupDone = 0;
 }
 
-void level_spawnBoltEmitter(Actor *arg0) {
+void level_spawnBoltEmitter(Actor *obj) {
     BoltSource tmp;
     TimedEffect *effect;
 
-    light_createAtActor(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
+    light_createAtActor(obj, 2, 2, 300, 30, 100, 200, 255, 255, 1);
 // FAKEMATCH but works...
 dummy_label_927029:
-    tmp.obj = arg0;
-    tmp.id = arg0->unique_id;
+    tmp.obj = obj;
+    tmp.id = obj->unique_id;
     tmp.flashTimer = 0;
     tmp.boltTimer = 0;
     tmp.timer2 = 0;

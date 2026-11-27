@@ -20,7 +20,7 @@ void level_setup18(void) {
 
 void level_setup20(void) {
     ZonePairEmitter tmp;
-    TimedEffect *temp_v0;
+    TimedEffect *effect;
     TriggerZone *base;
 
     prop_createWaveDeformer(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
@@ -32,9 +32,9 @@ dummy_label_15010880:
     tmp.source = &base[72];
     tmp.target = &base[73];
 
-    temp_v0 = effect_newTimedEffect(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy(temp_v0 + 1, &tmp, sizeof(tmp));
+    effect = effect_newTimedEffect(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(effect + 1, &tmp, sizeof(tmp));
     }
     if (gTaskDoneBits[0x12] & 0x40) {
         effect_newTimedEffect(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
@@ -48,9 +48,9 @@ dummy_label_15010880:
 //     prop_createWaveDeformer(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
 //     gBulletImpactHook = effect_onBulletImpactZones;
     
-//     tmp.unk0 = 0;
-//     tmp.unk4 = *((s32*) &zones) + 0xEA0;
-//     tmp.unk8 = *((s32*) &zones) + 0xED4;
+//     tmp.timer = 0;
+//     tmp.source = *((s32*) &zones) + 0xEA0;
+//     tmp.target = *((s32*) &zones) + 0xED4;
 
 //     temp_v0 = effect_newTimedEffect(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {

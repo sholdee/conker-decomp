@@ -883,7 +883,7 @@ void level_buildCollisionQuadTrees(void) {
     collision_buildQuadTree(1, NULL, NULL);
     collision_buildLeafQuadTree(2);
     collision_selectMap(0);
-    func_150025FC();
+    collision_loadQuadNodeBitmap();
     gMeshBuilt = 1;
 }
 
@@ -899,7 +899,7 @@ s32 level_findTextureByAddr(s32 addr) {
     return -1;
 }
 
-void func_150039B0(s32 arg0) {
+void func_150039B0(s32 levelId) {
 }
 
 /* Sets gMeshTriMaterials to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */

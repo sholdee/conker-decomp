@@ -14,7 +14,7 @@ static const RopeEnds gSetup11Rope4Ends = { { -2128.0f, -701.0f, 2129.0f }, { -2
 static const RopeEnds gSetup11Rope5Ends = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f, 2111.0f, 2174.0f } };
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */
-void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 arg4) {
+void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding) {
     ObjectEmitter *emitter;
 
     emitter = effect_newTimedEffectNoDraw((math_random() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
@@ -23,7 +23,7 @@ void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 arg4) {
         emitter->pos.y = y;
         emitter->pos.z = z;
         emitter->pos.floorY = floorY;
-        emitter->pos.markOnLanding = arg4;
+        emitter->pos.markOnLanding = markOnLanding;
     }
 }
 

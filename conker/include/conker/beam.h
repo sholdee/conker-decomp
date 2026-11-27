@@ -324,14 +324,35 @@ typedef struct {
 
 typedef struct ModelBeamEffect ModelBeamEffect;
 
+/* The beam particle's data (at +0x110), set by level_spawnModelBeam (game/Level/LevelSetup13/levelsetup13.c). The
+ * particle runs effect_updateBurstSpark and effect_buildBurstSparkVtx, so the fields up to beamLengthTarget are
+ * BurstSparkData's. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;         /* owner->unique_id at spawn */
+    /* 0x05 */ u8 pad05[3];
+    /* 0x08 */ f32 widthBase;
+    /* 0x0C */ f32 heightBase;
+    /* 0x10 */ f32 widthRange;
+    /* 0x14 */ f32 heightRange;
+    /* 0x18 */ f32 widthTarget;
+    /* 0x1C */ f32 heightTarget;
+    /* 0x20 */ f32 heightRange2;
+    /* 0x24 */ f32 widthTimer;
+    /* 0x28 */ f32 heightTimer;
+    /* 0x2C */ f32 alphaBase;
+    /* 0x30 */ f32 alphaRange;
+    /* 0x34 */ f32 alphaTarget;
+    /* 0x38 */ f32 alphaTimer;
+    /* 0x3C */ f32 alpha;
+    /* 0x40 */ f32 beamWidth;
+    /* 0x44 */ f32 beamLength;
+    /* 0x48 */ f32 beamWidthTarget;  /* beamWidth and beamLength ease towards these */
+    /* 0x4C */ f32 beamLengthTarget;
     /* 0x50 */ ModelBeamEffect *effect; /* the beam effect that drives this beam */
-    /* 0x54 */ u8 pad54[0x58 - 0x54];
+    /* 0x54 */ f32 scale;            /* the owner's average scale */
     /* 0x58 */ u8 flags; /* bit 0 = shown */
-} BeamPart;
+} BeamPart; /* size 0x5C */
 
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
@@ -635,17 +656,18 @@ typedef struct {
 typedef struct BoltArcObj BoltArcObj;
 typedef struct SparkObj SparkObj;
 
-/* Lightning arcing between the four edges of a quad (beam_updateBoltArc, beam_boltArcMessage). */
+/* Lightning arcing between the four edges of a quad (beam_updateBoltArc, beam_boltArcMessage), set up by
+ * level_spawnBoltArcZone (game/Level/ZoneSpawn/zonespawn.c) on the zone's rotated rectangle. */
 typedef struct BoltArcState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ s16 timer;          /* frames left; negative when off */
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
-    /* 0x0C */ Vec3f edgeStart[4];
+    /* 0x0C */ Vec3f edgeStart[4]; /* the rectangle's corners */
     /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
-    /* 0x6C */ ZoneNode *zone;
-    /* 0x70 */ s32 unk70;
-} BoltArcState;
+    /* 0x6C */ ZoneNode *zone;     /* collision_findZoneLeaf at the zone's x/z */
+    /* 0x70 */ struct Actor *actor; /* NULL at the start; the player of the last message 0x38; read by func_1515FBC4 */
+} BoltArcState; // size 0x74
 
 struct BoltArcObj {
     /* 0x00 */ TimedEffect base;
@@ -794,12 +816,12 @@ void beam_updateBoltRain(BoltRainObj *obj);
 void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
 void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg);
-void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg);
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **arg1, u8 msg);
 void beam_spawnImpactEffects(ImpactObj *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);
 void beam_updateSparkZone(SparkObj *obj);
-ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone);
+BoltArcObj *beam_findZoneRectEffect(TriggerZone *zone);
 
 /* game/Beam/BoltChain/boltchain.c */
 extern Gfx gBoltRenderSetupDl[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */

@@ -8,12 +8,12 @@
 
 /*
  * Eases the camera's height above baseY (eyeY - baseY) towards its target height: the preset
- * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
+ * height, kept 40 units below the player's ceilingY and inside [minHeight, maxHeight].
  */
 void camera_easeHeight(Camera *camera) {
     f32 targetHeight;
     f32 height;
-    s32 cappedByCeiling; // left unset when AvailableModes bit 4 is set or unk180 >= unk17C (as in the original)
+    s32 cappedByCeiling; // left unset when AvailableModes bit 4 is set or CharPtr->floorY >= CharPtr->ceilingY (as in the original)
     f32 ceiling;
 
     if (gSpawnCutsceneActive != 0) {
@@ -34,7 +34,7 @@ void camera_easeHeight(Camera *camera) {
     if (!(camera->AvailableModes & 0x10)) {
         if (camera->CharPtr->floorY < camera->CharPtr->ceilingY) {
             ceiling = camera->CharPtr->ceilingY - 40.0f;
-            // matching: the second test recomputes unk17C - 40.0f instead of reusing ceiling
+            // matching: the second test recomputes ceilingY - 40.0f instead of reusing ceiling
             if (ceiling < camera->baseY + targetHeight && camera->baseY < camera->CharPtr->ceilingY - 40.0f) {
                 targetHeight = ceiling - camera->baseY;
                 cappedByCeiling = TRUE;
