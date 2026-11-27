@@ -1148,7 +1148,7 @@ segments:
       - {start: 0x22EC90, type: .data, name: game/Effects/EffectObj/effectobj, linker_section_order: .rodata}
       - {start: 0x22EEA0, type: .data, name: game/Trail/MotionTrail/motiontrail, linker_section_order: .rodata}
       - {start: 0x22EF30, type: .data, name: game/Effects/TimedEffect/timedeffect, linker_section_order: .rodata}
-      - [0x22F4C0, rodata]
+      - {start: 0x22F4C0, type: .data, name: game/Particle/SpawnShapes/spawnshapes, linker_section_order: .rodata}
       - {start: 0x22F530, type: .data, name: game/Effects/ActorAttachments/actorattachments, linker_section_order: .rodata}
       - {start: 0x22F650, type: .data, name: game/Effects/AttachmentTables/attachmenttables, linker_section_order: .rodata}
       - {start: 0x22F720, type: .data, name: game/Particle/BurstConfigs/burstconfigs, linker_section_order: .rodata}
