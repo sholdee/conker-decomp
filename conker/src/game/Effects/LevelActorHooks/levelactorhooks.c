@@ -4,7 +4,11 @@
 #include "conker/gfx.h"
 #include "conker/light.h"
 
-
+/*
+ * The level callbacks that actor_updateAll runs before and after the update of each actor (gLevelPreUpdateFuncs[1]
+ * and gLevelPostUpdateFuncs[1] in game/Actor/Movement/movement.c). Only the level header of W1_RAPTOR_NEST selects
+ * them. They make world object 0xF9 active only while an actor other than the first one updates.
+ */
 void func_150D1410(Actor *arg0) {
     WorldObject *temp;
 

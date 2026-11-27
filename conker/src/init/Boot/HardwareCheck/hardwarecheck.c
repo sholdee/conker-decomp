@@ -1,5 +1,13 @@
 #include <ultra64.h>
 
+/*
+ * The boot code's check of the hardware on the cartridge port. In the October 2000 debug build boot_entry calls
+ * func_100038E0, and boot_runGame calls the function after it, which compares the id at 0xBC000000 with a list
+ * of ids and returns nonzero when none fits; the game then stops in a loop. That function starts on an address
+ * that is not 16-aligned, so it is part of this file. In the US build it only returns 0 (func_1000390C), and
+ * nothing calls either function.
+ */
+
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
 static u32 D_80038070;
 static u16 D_80038074;

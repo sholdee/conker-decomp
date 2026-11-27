@@ -12,6 +12,11 @@
 #include "conker/texture.h"
 #include "conker/zone.h"
 
+/*
+ * Effects of the W2_HARBOUR level. effect_levelUpdateMaterialScroll is level update hook 7, which only that level's
+ * header selects, and the level's setup (level_setup15) clears gMaterialGlowLevels and gWarpModelSetupDone.
+ */
+
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
     union {
