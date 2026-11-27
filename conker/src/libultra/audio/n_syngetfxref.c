@@ -14,6 +14,7 @@ void *n_alSynGetFXRef(s16 arg0) {
     }
 }
 
+/* The low-pass of aux bus `arg0`, or 0 when the main bus has no effects. */
 LowPass *audio_getBusLowPass(s16 arg0) {
     N_ALMainBus *sp4;
 

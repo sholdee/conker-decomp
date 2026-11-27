@@ -121,6 +121,7 @@ void audio_setSeqMsgQueue(u8 player, OSMesgQueue *queue) {
 void func_100085A4(s32 arg0, s32 arg1, s32 arg2) {
 }
 
+/* Sets the note messages of a channel of the player (ALChanState.noteMesg). */
 void audio_setChannelNoteMesg(u8 player, s32 chan, u8 arg2) {
     audio_setCspNoteMesg(gSeqPlayers[player], chan, arg2);
 }
@@ -167,6 +168,7 @@ void audio_fadeChannelsVolume(u8 player, s32 mask, u8 volume, s32 time) {
     }
 }
 
+/* Sets the fade volume of a channel at once. */
 void audio_setChannelFade(u8 player, u8 chan, u8 arg2) {
     audio_setCspChannelFade(gSeqPlayers[player], chan, arg2);
 }
@@ -212,6 +214,7 @@ void audio_setChannelMask(u8 player, s32 mask, s32 enable) {
     }
 }
 
+/* The fade volume of a channel (255 is full). */
 u8 audio_getChannelFade(u8 player, u8 chan) {
     return gSeqPlayers[player]->chanState[chan].fadeVol;
 }

@@ -8,6 +8,8 @@ void n_alSynSetFXParam(void *fx, s16 paramID, void *value) {
     n_alFxParamHdl(sp1C, paramID, value);
 }
 
+/* Sets a parameter of a bus's low-pass: 8 is the gain (in tenths), 9 the cutoff. Then the coefficients
+ * are computed again. */
 void audio_setBusLowPassParam(LowPass *lp, s16 paramID, s32 *value) {
     if (paramID == 8) {
         lp->fgain = *value * 0.1f;

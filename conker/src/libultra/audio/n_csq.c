@@ -164,6 +164,8 @@ void alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *marker) {
     }
 }
 
+/* Plays the sequence through from its start and saves a marker at the first loop start of each loop number
+ * from `base` to `base + count - 1` (alCSeqSetLoc can then jump there). */
 void audio_findLoopMarkers(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base) {
     N_ALEvent event;
     ALCSeq tmp;

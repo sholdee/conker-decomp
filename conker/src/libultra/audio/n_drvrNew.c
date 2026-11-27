@@ -1,5 +1,7 @@
 #include "n_synthInternals.h"
 
+/* The coefficients of a second-order low-pass (arg3: the three feed-forward ones, arg4[1..2]: the feedback
+ * ones) for output rate arg0 and cutoff arg1; the damping term is 1.414 / arg2. */
 void audio_calcLowPassCoefs(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
     f32 sp20;
@@ -48,6 +50,7 @@ void init_lpfilter(LowPass *arg0) {
     }
 }
 
+/* The pitch ratio of `arg0` semitones: alCents2Ratio's loop with the semitone ratio. */
 f32 audio_semitonesToRatio(s32 arg0) {
     f32 sp4;
     f32 sp0 = 1.0f;
@@ -70,6 +73,8 @@ f32 audio_semitonesToRatio(s32 arg0) {
     return sp0;
 }
 
+/* Fills lp's coefficient vector for Rare's pole filter from its fc and fgain, for output rate arg1
+ * (nothing when fgain is 0: the filter is off). */
 void audio_updateLowPassCoefs(LowPass *arg0, f32 arg1) {
     s32 i;
     f32 sp30[3];

@@ -479,6 +479,8 @@ void _n_handleEvent(SndEvent *event) {
     } while ((done == 0) && (state != NULL) && (typeMask == 0));
 }
 
+/* Ends the sound at once: stops and frees its voice if it has one (flag 4), frees the record and removes
+ * the sound's events from the queue. */
 void audio_endSound(SndState *arg0) {
     if ((arg0->unk53 & 4) != 0) {
         n_alSynStopVoice(&arg0->voice);
@@ -551,6 +553,8 @@ void _removeEvents(ALEventQueue *evtq, SndState *state, u16 typeMask) {
 }
 
 
+/* Takes a record from the free list for sound `arg1` of `bank` and puts it at the head of the allocated list
+ * (play state 5); NULL if none is free. */
 SndState *audio_allocSoundState(ALBank *bank, s16 arg1) {
     SndState *sp24;
     u32 mask;
@@ -594,6 +598,8 @@ SndState *audio_allocSoundState(ALBank *bank, s16 arg1) {
     return sp24;
 }
 
+/* Returns the record to the free list, counts one sound less if it had a voice (flag 4), and clears the
+ * owner's handle. */
 void audio_freeSoundState(SndState *arg0) {
     SndState *sp4;
 
@@ -703,6 +709,7 @@ SndState *audio_playSound(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u
 }
 
 
+/* Posts the stop event (0x400) for the sound: _n_handleEvent releases it with its envelope's release time. */
 void audio_stopSound(SndState *arg0) {
     N_ALEvent event;
 
@@ -714,6 +721,7 @@ void audio_stopSound(SndState *arg0) {
     }
 }
 
+/* audio_stopSound for every allocated sound that has all the flags in `arg0`. */
 void audio_stopSoundsWithFlags(u8 arg0) {
     s32 mask;
     N_ALEvent event;
@@ -758,14 +766,17 @@ void audio_stopSoundsWithFlags(u8 arg0) {
 //     osSetIntMask(mask);
 // }
 
+/* Stops every sound: flag 1 is set for every sound that audio_playSound starts. */
 void audio_stopAllSounds(void) {
     audio_stopSoundsWithFlags(1);
 }
 
+/* Stops the looping sounds: _n_handleEvent sets flag 2 for a sound whose envelope has decay time -1. */
 void audio_stopLoopingSounds(void) {
     audio_stopSoundsWithFlags(3);
 }
 
+/* Posts event `type` with the argument `arg` for the sound. */
 void audio_postSoundEvent(SndState *state, s16 type, s32 arg) {
     SndEvent event;
 
@@ -777,6 +788,8 @@ void audio_postSoundEvent(SndState *state, s16 type, s32 arg) {
     }
 }
 
+/* Sets the volume of sound group `arg0` in the volume table and posts the volume event (0x800) for each sound
+ * of the group. */
 void audio_setSoundGroupVolume(u8 arg0, u16 arg1) {
     s32 mask;
     SndState *ptr;

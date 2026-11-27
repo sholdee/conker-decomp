@@ -32,6 +32,7 @@ typedef struct {
 
 extern s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 
+/* Starts the stream of `arg1` bytes at ROM address `arg0` (state 5). The first call loads the decoder's tables. */
 void mp3_playStream(s32 arg0, s32 arg1) {
     if (D_800E0D80.read == 0) {
         return;
@@ -81,12 +82,14 @@ void mp3_playStream(s32 arg0, s32 arg1) {
     D_800E0D80.unk84 = 5;
 }
 
+/* State 3: mp3_pullFrame shuts the stream down. */
 void mp3_stop(void) {
     u32 mask = osSetIntMask(1);
     D_800E0D80.unk84 = 3;
     osSetIntMask(mask);
 }
 
+/* Pauses: a stream that is still opening (5) waits in state 6, any other goes to state 2. */
 void mp3_pause(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0D80.unk84 == 5) {
@@ -97,6 +100,7 @@ void mp3_pause(void) {
     osSetIntMask(mask);
 }
 
+/* Ends a pause: state 2 restarts (7), state 6 opens again (5). */
 void mp3_resume(void) {
     u32 mask = osSetIntMask(1);
     if (D_800E0D80.unk84 == 2) {
@@ -109,6 +113,7 @@ void mp3_resume(void) {
     osSetIntMask(mask);
 }
 
+/* The state while a stream is open, running or paused (1, 2, 5, 6 or 7); 0 otherwise. */
 s32 mp3_getPlayState(void) {
     s32 ret = 0;
     u32 mask = osSetIntMask(1);
@@ -120,6 +125,8 @@ s32 mp3_getPlayState(void) {
     return ret;
 }
 
+/* The target volume (0..0x7FFF) and the length of the ramp to it; a ramp down to 0 stops the stream
+ * (mp3_updateVolumeRamp). */
 void mp3_setVolume(s32 arg0, s32 arg1) {
     u32 mask = osSetIntMask(1);
     if (arg0 < 0) {
@@ -133,6 +140,7 @@ void mp3_setVolume(s32 arg0, s32 arg1) {
     osSetIntMask(mask);
 }
 
+/* The target pan (0..127); with arg1 the current pan follows at once. */
 void mp3_setPan(s32 arg0, s32 arg1) {
     if (arg0 >= 0x80) {
         arg0 = 0x7F;
@@ -147,6 +155,7 @@ void mp3_setPan(s32 arg0, s32 arg1) {
     }
 }
 
+/* The gain and the cutoff of the stream's low-pass (0, 0 is off). */
 void mp3_setLowPass(s32 arg0, s32 arg1) {
     D_800E0D80.unk32 = arg0;
     D_800E0D80.unk30 = arg1;
@@ -430,10 +439,12 @@ void mp3_updateVolumeRamp(StreamVoice *v) {
     }
 }
 
+/* The function that gets the stream's message tags (init/Audio/Mp3Stream/mp3stream.c: mp3_pushMessage). */
 void mp3_setTagCallback(void (*callback)(s32, void *, s32)) {
     D_800E0D80.tagCallback = callback;
 }
 
+/* The function that reads the stream's bytes (mp3_readStream). */
 void mp3_setReadFn(read)
     Mp3ReadFn read;
 {

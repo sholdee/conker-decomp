@@ -11,6 +11,9 @@ static u8 D_800428C8[2]; /* per bus: the mode last set */
 #include "conker/audio.h"
 
 
+/* Sets the output mode flags from `arg0`: 1 sets D_800428C1 (n_alEnvmixerPull then centres every pan: mono),
+ * 3 sets D_800428C2 (it halves the pan range), 4 sets D_800428C0 (the surround code of the envelope
+ * mixer); any other value clears all three (stereo). Then it sets both aux buses again for the new mode. */
 void audio_setOutputMode(u8 arg0) {
     s32 i;
 
@@ -36,6 +39,8 @@ void audio_setOutputMode(u8 arg0) {
     }
 }
 
+/* Sets how aux bus `arg0` runs its reverb in mode `arg1` (0: the mode last set), from the output mode:
+ * D_800428C4 gives the bus a second delay line and D_800428C6 inverts its feed (see libultra/audio/n_reverb.c). */
 void audio_setBusReverbMode(s32 arg0, u32 arg1) {
     if (arg1 == 0) {
         arg1 = D_800428C8[arg0];
