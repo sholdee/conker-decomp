@@ -1945,7 +1945,7 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game/Sprite/LevelSprites/levelsprites.c read it). */
+/* The texture of one particle resource (gParticleTexInfos[id]; game/Sprite/LevelSpriteSetup/levelspritesetup.c and game/Sprite/LevelSprites/levelsprites.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in gSpritePingPongTypes, gSpriteRandomFlipTypes; 0x04: more y jitter
                               // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (light_setupParticleSlot)
@@ -1957,7 +1957,7 @@ typedef struct ParticleTexInfo {
     /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
 } ParticleTexInfo; /* size 0xA */
 
-/* The resource picked for one of the 15 particle sprite types (gParticleSlotResources[15], game_38050.c). */
+/* The resource picked for one of the 15 particle sprite types (gParticleSlotResources[15], game/Sprite/LevelSpriteSetup/levelspritesetup.c). */
 typedef struct ParticleResource {
     /* 0x0 */ u16 id; // 0xFF: none
     /* 0x2 */ u16 flags;

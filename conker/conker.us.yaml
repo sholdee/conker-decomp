@@ -385,7 +385,7 @@ segments:
       - [0x362B0, c, game/Prop/WaveChainStart/wavechainstart]
       - [0x36600, c, game/Flare/FlareReset/flarereset]
       - [0x36680, c, game/Lighting/LevelLights/levellights]
-      - [0x38050, c, game_38050]
+      - [0x38050, c, game/Sprite/LevelSpriteSetup/levelspritesetup]
       - [0x39690, c, game/Swarm/SwarmReset/swarmreset]
       - [0x39750, c, game/Particle/AreaParticles/areaparticles]
       - [0x3B920, c, game/Game/LevelInit/levelinit]
@@ -1016,7 +1016,7 @@ segments:
       - [0x227670, .data, game/Save/SaveData/savedata]
       - [0x227690, .data, game/Effects/ObjectReset/objectreset]
       - [0x2276A0, .data, game/Lighting/LevelLights/levellights]
-      - [0x227840, .data, game_38050]
+      - [0x227840, .data, game/Sprite/LevelSpriteSetup/levelspritesetup]
       - [0x227850, .data, game/Game/LevelInit/levelinit]
       - [0x2278F0, .data, game/Level/ZoneSpawn/zonespawn]
       - [0x227A40, .data, game/Text/FontLoad/fontload]
@@ -1231,7 +1231,7 @@ segments:
       - [0x23A5D0, .rodata, game/Zone/RandomPoint/randompoint]
       - [0x23A600, .rodata, game/Level/ZoneSpray/zonespray]
       - [0x23A620, .rodata, game/Lighting/LevelLights/levellights]
-      - [0x23A6A0, .rodata, game_38050]
+      - [0x23A6A0, .rodata, game/Sprite/LevelSpriteSetup/levelspritesetup]
       - [0x23A7A0, .rodata, game/Swarm/SwarmReset/swarmreset]
       - [0x23AA60, .rodata, game/Particle/AreaParticles/areaparticles]
       - [0x23AC90, .rodata, game/Level/LevelSetupReset/levelsetupreset]
@@ -1642,7 +1642,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game/Camera/CameraViews/cameraviews}
       - {start: 0x255880, type: .bss, vram: 0x800BE2C0, name: game/Cont/PadInit/padinit}
       - {start: 0x255880, type: .bss, vram: 0x800BE2F0, name: game/Save/SaveData/savedata}
-      - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game_38050}
+      - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game/Sprite/LevelSpriteSetup/levelspritesetup}
       - {start: 0x255880, type: .bss, vram: 0x800BE4E0, name: game/Level/LevelSetup12/levelsetup12}
       - {start: 0x255880, type: .bss, vram: 0x800BE4F0, name: game/Level/LevelSetup33/levelsetup33}
       - {start: 0x255880, type: .bss, vram: 0x800BE500, name: game/Level/LevelSetup14/levelsetup14}

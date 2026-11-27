@@ -10,7 +10,7 @@
  * Subsystem "light": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game/Lighting/LevelLights/levellights.c
- *   game_38050.c
+ *   game/Sprite/LevelSpriteSetup/levelspritesetup.c
  *   game/Lighting/PlayerLight/playerlight.c
  *   game/Effects/AmbientPulse/ambientpulse.c
  *   game/Effects/ColourWave/colourwave.c
@@ -169,7 +169,7 @@ void light_runCallback(PointLight *light, s32 id);
 void light_startColourWave(s32 unused);
 void light_runAmbientAction(s32 action);
 
-/* game_38050.c */
+/* game/Sprite/LevelSpriteSetup/levelspritesetup.c */
 void light_initParticleSlots(s32 arg0);
 void light_loadParticleTextures(void);
 void light_setupParticleSlot(s32 slot, s32 id, s32 flags);
