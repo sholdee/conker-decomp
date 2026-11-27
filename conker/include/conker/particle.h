@@ -2549,7 +2549,7 @@ void particle_updateGatherParticle(BillboardParticle *particle);
 void particle_startGatherEmitter(EffectSpawner *spawner);
 void particle_updateHoverEmitter(SphereEmitter *emitter);
 void particle_updateHoverParticle(BillboardParticle *particle);
-void particle_startHoverEmitter(EffectSpawner *spawner);
+void particle_startSwellEmitter(EffectSpawner *spawner);
 void particle_updateSwellEmitter(SphereEmitter *emitter);
 void particle_updateSwellParticle(BillboardParticle *particle);
 void particle_updateSwellTint(BillboardParticle *particle);

@@ -5196,7 +5196,7 @@ particle_updateGatherParticle	0x151A175C	384	game	c		build/src/game/Particle/Sph
 particle_startGatherEmitter	0x151A18DC	188	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateHoverEmitter	0x151A1998	1180	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateHoverParticle	0x151A1E34	180	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
-particle_startHoverEmitter	0x151A1EE8	204	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
+particle_startSwellEmitter	0x151A1EE8	204	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateSwellEmitter	0x151A1FB4	1268	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateSwellParticle	0x151A24A8	312	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateSwellTint	0x151A25E0	268	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
