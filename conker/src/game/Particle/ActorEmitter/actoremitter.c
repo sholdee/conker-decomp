@@ -206,7 +206,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             }
         }
         freeSlot = NULL;
-        if (self->params.owner->unk74 & (1 << gCurrentView)) {
+        if (self->params.owner->cullMask & (1 << gCurrentView)) {
             if (!(self->state & 1)) {
                 particle_freeActorEmitterParticles(self);
                 self->state |= 1;
@@ -216,7 +216,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             numFree = 0;
             prevFree = NULL;
             table = gActorEmitterTables[self->params.table];
-            if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
+            if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->cullMask & 0xF) != 0xF) {
                 attach = 4;
                 row = &table->infos[self->params.owner->current_lod * (table->n + 2)];
                 i = 0;

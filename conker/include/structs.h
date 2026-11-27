@@ -960,12 +960,12 @@ struct Actor {
     /* 0x004 */ u8  character_type;
     /* 0x005 */ u8  drawtype;
     /* 0x006 */ u8  unk6;
-    /* 0x007 */ u8  unk7;
-    /* 0x008 */ u8  unk8;
-    /* 0x009 */ u8  unk9;
-    /* 0x00A */ u8  unkA;
-    /* 0x00B */ u8  unkB[4];  // one per player
-    /* 0x00F */ u8  unkF;     // per-player bits (<< 4: seen by player i)
+    /* 0x007 */ u8  alpha;
+    /* 0x008 */ u8  targetAlpha;
+    /* 0x009 */ u8  fadeStep;
+    /* 0x00A */ u8  fadeMode;
+    /* 0x00B */ u8  playerAlphas[4]; // one per player
+    /* 0x00F */ u8  playerFadeBits; // per-player bits (<< 4: seen by player i)
     /* 0x010 */ u16 cullDistance; // from the model definition, or the spawn record override (game/Collision/RayCast/raycast)
     /* 0x012 */ u16 unk12;    // frame counter
     /* 0x014 */ f32 xpos;
@@ -1003,7 +1003,7 @@ struct Actor {
     /* 0x070 */ u8  defaultExpression;
     /* 0x071 */ u8  expressionPriority;
     /* 0x072 */ u16 expressionTimer; // 0xFFFF = no timeout, 0xFFFE = frozen
-    /* 0x074 */ u8  unk74;
+    /* 0x074 */ u8  cullMask;
     /* 0x075 */ s8  pad75;
     /* 0x076 */ u16 angle;  // moving_angle
     /* 0x078 */ u16 fangle;
@@ -1157,7 +1157,7 @@ struct Actor {
     /* 0x1CB */ u8  unk1CB;
     /* 0x1CC */ f32 unk1CC;
     /* 0x1D0 */ s8  unk1D0;
-    /* 0x1D1 */ s8  unk1D1;
+    /* 0x1D1 */ s8  aimPitch;
     /* 0x1D2 */ u16 pad1D2;
     /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool gBonePools: MtxF while they are
                                        // built, then Mtx (fixed point) once actor_flushBoneMatrices converts them and sets
@@ -1294,9 +1294,9 @@ struct Actor {
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
     /* 0x2F8 */ u16 unk2F8; // wait animation?
-    /* 0x2FA */ u8  unk2FA;
+    /* 0x2FA */ u8  activeFlags;
     /* 0x2FB */ u8  unk2FB;
-    /* 0x2FC */ u8  unk2FC;
+    /* 0x2FC */ u8  forcedCullMask;
     /* 0x2FD */ u8  unk2FD;
     /* 0x2FE */ u8  unk2FE;
     /* 0x2FF */ u8  unk2FF;
@@ -1907,7 +1907,7 @@ typedef struct SaveSlotInfo {
     /* 0x00 */ s32 playTime;   /* gPlayTime, in seconds */
     /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
     /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
-    /* 0x0C */ u8 unkC;        /* D_800BE3DF */
+    /* 0x0C */ u8 checkpointLevel; /* D_800BE3DF */
     /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at gTaskDoneBits */
     /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
     /* 0x0F */ s8 padF;
@@ -3083,20 +3083,20 @@ typedef struct {
 
 /* Per-player match statistics (MenuState.stats). */
 typedef struct {
-    /* 0x0 */ s16 unk0; /* hits on opponents */
+    /* 0x0 */ s16 hits; /* hits on opponents */
     /* 0x2 */ s16 unk2;
     /* 0x4 */ s16 unk4; /* hits on opponents with cause 0x2E */
-    /* 0x6 */ s16 unk6; /* the player's unk1AA at the end of the match */
-    /* 0x8 */ s16 unk8; /* hits taken */
-    /* 0xA */ s16 unkA; /* kills of teammates */
+    /* 0x6 */ s16 shotsFired; /* the player's mv->shotsfired at the end of the match */
+    /* 0x8 */ s16 hitsTaken; /* hits taken */
+    /* 0xA */ s16 teamKills; /* kills of teammates */
 } PlayerMatchStats; /* size 0xC */
 
 /* Multiplayer menu / match state (gMenuState, which points at the static instance D_800E0AF0). */
 typedef struct {
-    /* 0x00 */ f32 unk0;         /* progress of a step between path stops (func_151E6C1C) */
-    /* 0x04 */ f32 unk4;         /* its speed */
-    /* 0x08 */ f32 unk8;         /* progress along the current stop's path */
-    /* 0x0C */ f32 unkC;         /* its speed */
+    /* 0x00 */ f32 stepProgress;  /* progress of a step between path stops (func_151E6C1C) */
+    /* 0x04 */ f32 stepSpeed;     /* its speed */
+    /* 0x08 */ f32 pathProgress;  /* progress along the current stop's path */
+    /* 0x0C */ f32 pathSpeed;     /* its speed */
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
@@ -3104,8 +3104,8 @@ typedef struct {
     /* 0x20 */ u16 input;        /* MENU_* bits pressed this frame on controller 1 */
     /* 0x22 */ u16 padInput[4];  /* MENU_* bits pressed this frame, per controller */
     /* 0x2A */ s8 unk2A;
-    /* 0x2B */ s8 unk2B;         /* current path stop */
-    /* 0x2C */ s8 unk2C;         /* displayed stop */
+    /* 0x2B */ s8 currentStop;    /* current path stop */
+    /* 0x2C */ s8 displayedStop;  /* displayed stop */
     /* 0x2D */ s8 unk2D;
     /* 0x2E */ s8 stickX[4];     /* last stick position, per controller */
     /* 0x32 */ s8 stickY[4];
@@ -3126,11 +3126,11 @@ typedef struct {
 /* One entry of the multiplayer game-mode table D_800AB68C[] (indexed by MenuState.selection). */
 typedef struct {
     /* 0x0 */ s16 nameText;
-    /* 0x2 */ s16 unk2;  /* mode parameter read when the match is set up */
+    /* 0x2 */ s16 map;  /* map the match is played on (game_requestLevelChange) */
     /* 0x4 */ s8 mode;   /* index into D_800AB754 / D_800AB77C / D_800AB790 */
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ s8 unk7;
+    /* 0x5 */ s8 teamSetup; /* gTeamSetups index; negative: -(preset + 1), every player on a team of their own */
+    /* 0x6 */ s8 introCue;   /* cue of D_800AB7A4 played before the match; -1: none */
+    /* 0x7 */ s8 resultCue;  /* cue of D_800AB7BC played with the results; -1, -2: special endings (save_endMatch) */
     /* 0x8 */ s8 unk8;
     /* 0x9 */ s8 unk9;
 } ModeEntry; /* size 0xA */

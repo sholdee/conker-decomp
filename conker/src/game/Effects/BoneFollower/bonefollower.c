@@ -93,7 +93,7 @@ void effect_updateBoneFollower(BoneFollower *follower) {
 
     actor = follower->actor;
     if (actor->type == 0 || actor->character_type == 0xFF || actor->unique_id != follower->actorUid ||
-        actor->ob_matrix_ptr == NULL || (actor->unk74 & 0xF) == 0xF) {
+        actor->ob_matrix_ptr == NULL || (actor->cullMask & 0xF) == 0xF) {
         effect_destroyObject(&follower->header);
         return;
     }
@@ -199,7 +199,7 @@ void effect_updateFollowerGroup(ActorFollowerGroup *group) {
         effect_destroyObject(&group->header);
         return;
     }
-    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         group->flags |= 2;
     } else {
         group->flags &= ~2;

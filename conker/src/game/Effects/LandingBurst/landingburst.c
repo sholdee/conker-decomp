@@ -46,7 +46,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
     CollisionHit ground;
     s32 profile;
 
-    if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
@@ -339,7 +339,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
         s32 i;
         u32 freeCount;
 
-        if (emitter->owner->ob_matrix_ptr != NULL && (emitter->owner->unk74 & 0xF) != 0xF) {
+        if (emitter->owner->ob_matrix_ptr != NULL && (emitter->owner->cullMask & 0xF) != 0xF) {
             head = NULL;
             last = NULL;
             freeCount = 0;

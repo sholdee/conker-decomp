@@ -162,7 +162,7 @@ void func_150F26A0(Camera *actor) {
             }
         }
     } else {
-        state->unk7 = 0xFF;
+        state->alpha = 0xFF;
         if (actor->CharContext == 59) {
             func_150F2994(actor, TRUE);
             if (actor->Mode != 0x100 && actor->cmdRunning == 0) {

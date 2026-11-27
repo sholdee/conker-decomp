@@ -237,7 +237,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
     owner = emitter->group.actor;
     params = &emitter->params;
     if (params->accum > 1.0f) {
-        if ((owner->ob_matrix_ptr != NULL) && ((owner->unk74 & 0xF) != 0xF)) {
+        if ((owner->ob_matrix_ptr != NULL) && ((owner->cullMask & 0xF) != 0xF)) {
             do {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;

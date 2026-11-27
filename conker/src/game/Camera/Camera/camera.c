@@ -1439,8 +1439,8 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
                           (u32)(-camera->TgetFOVX * 10000.0f) | 0x80000000, 0x100, 0);
             sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)camera_onLookSound, camera, *(s32 *)&aimKey, 0x100, 0);
         }
-        viewer->unk2FC |= 1 << camera->CNumber;
-        viewer->unk74 |= 1 << camera->CNumber;
+        viewer->forcedCullMask |= 1 << camera->CNumber;
+        viewer->cullMask |= 1 << camera->CNumber;
         { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the SniperState load after the a2 reload
     }
     state = ext->SniperState;
@@ -1785,8 +1785,8 @@ void camera_leaveFirstPersonAim(Camera *camera) {
     // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
     target = (linked != 0) ? &movement_obj[linked] - 1 : player;
 
-    target->unk2FC &= ~(1 << camera->CNumber);
-    target->unk74 &= ~(1 << camera->CNumber);
+    target->forcedCullMask &= ~(1 << camera->CNumber);
+    target->cullMask &= ~(1 << camera->CNumber);
     camera->Snap = 1;
 }
 

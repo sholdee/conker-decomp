@@ -490,7 +490,7 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     state = actor->state;
     points = actor->points;
     owner = state->owner;
-    if (owner->ob_matrix_ptr == NULL || (owner->unk74 & 0xF) == 0xF) {
+    if (owner->ob_matrix_ptr == NULL || (owner->cullMask & 0xF) == 0xF) {
         return gfx;
     }
     particle_getViewBuffer(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);

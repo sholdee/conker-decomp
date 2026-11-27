@@ -107,7 +107,7 @@ f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32
     return result;
 }
 
-/* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with SniperState set. */
+/* Hides `obj` in the controlling player's camera view (its bit in forcedCullMask) while that player holds R with SniperState set. */
 void func_150ED578(Actor *obj) {
     ActorCtl *state;
     s32 player;
@@ -122,7 +122,7 @@ void func_150ED578(Actor *obj) {
             if (owner->mv->SniperState != 0) {
                 camera = owner->CameraPtr;
                 if (camera != NULL) {
-                    obj->unk2FC |= 1 << camera->CNumber;
+                    obj->forcedCullMask |= 1 << camera->CNumber;
                 }
             }
         }
@@ -227,7 +227,7 @@ void weapon_updateTank(Actor *obj) {
     } else {
         viewer[0] = 0;
     }
-    obj->unk2FC = 0;
+    obj->forcedCullMask = 0;
     obj->owner = 0;
     controlled = 0;
     player = obj->owner;
@@ -609,7 +609,7 @@ void weapon_releaseTankCamera(Actor *obj) {
         obj->mv->rt_context_b = 0x29;
         gPads[index].button &= ~R_TRIG;
         player = &movement_obj[index];
-        player->unk2FC |= 1 << camera->CNumber;
+        player->forcedCullMask |= 1 << camera->CNumber;
         if (player->unk10A != 0) {
             screen_startViewFlash(0xFF, 0, 0, 180, 20, camera->CNumber);
             player->unk10A = 0;

@@ -150,7 +150,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
                   252.0f, 0.003968254197f, (math_randomFloat() * 20.0f) + 75.0f, (math_randomFloat() * 250.0f) + 502.0f, 50.0f,
                   (math_random() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
                   cameraMask, 0, 0, arg4, arg5);
-    if ((obj->unk74 & 0xF) != 0xF) {
+    if ((obj->cullMask & 0xF) != 0xF) {
         if (!(math_random() & 7)) {
             spark.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
             spark.update = -1;

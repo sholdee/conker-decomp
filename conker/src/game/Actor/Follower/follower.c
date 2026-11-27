@@ -33,7 +33,7 @@ void actor_updateFollower(Actor *self) {
         stateArg = 3;
     }
     self->taskint[1] = 0;
-    self->unk2FC = 0;
+    self->forcedCullMask = 0;
     self->taskint[0] -= self->taskint[0] >> 3;
     if (1) {} // matching: splits the block here; without it IDO swaps the owner/state registers
     owner = movement_obj;
@@ -44,7 +44,7 @@ void actor_updateFollower(Actor *self) {
     if (mask != 0) {
         owner += mask - 100;
         if (owner->CameraPtr != NULL) {
-            self->unk2FC = 1 << owner->CameraPtr->CNumber;
+            self->forcedCullMask = 1 << owner->CameraPtr->CNumber;
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
         mask = (s32) owner->mv;

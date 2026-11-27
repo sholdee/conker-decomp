@@ -88,7 +88,7 @@ s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
     if (model == NULL) {
         return 0;
     }
-    if ((owner->unk74 & 0xF) == 0xF) {
+    if ((owner->cullMask & 0xF) == 0xF) {
         return 0;
     }
     if (gIsMultiplayer != 0) {
@@ -255,7 +255,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
         burst.spray.eventFunc = 0;
     }
     particle_spawnJetSprayBursts(&burst, arg1, arg2);
-    if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+    if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
         collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
         {
@@ -1322,7 +1322,7 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
     s32 pad2; // matching: stack slot of the original frame
 
     owner = strip->owner;
-    if ((owner->unk74 & 0xF) != 0xF) {
+    if ((owner->cullMask & 0xF) != 0xF) {
         desc.texture = 0x29;
         desc.renderMode = 0xE03;
         desc.unk0 = 0x200005;
@@ -1584,7 +1584,7 @@ void effect_updateBoneBurst(BurstEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->ob_matrix_ptr != NULL && (owner->unk74 & 0xF) != 0xF) {
+    if (owner->ob_matrix_ptr != NULL && (owner->cullMask & 0xF) != 0xF) {
         BurstSpark *spark;
         BurstGlow *glow;
         s32 pad1; // matching: stack slots of the original frame

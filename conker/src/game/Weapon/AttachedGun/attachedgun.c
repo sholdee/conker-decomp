@@ -55,7 +55,7 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
         particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
-        if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
             valid = TRUE;
         } else {
             valid = FALSE;

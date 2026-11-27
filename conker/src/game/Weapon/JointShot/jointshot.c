@@ -124,7 +124,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
-    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
+    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->cullMask & 0xF) != 0xF)) {
         if (arg2 || ((gScreenLayout < 2) && (math_random() & 1))) {
             particle_spawnShortLightFlash(&origin, arg5, arg6);
         }

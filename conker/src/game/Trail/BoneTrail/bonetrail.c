@@ -631,7 +631,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
     if (emitter->owner->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((emitter->owner->unk74 & 0xF) == 0xF) {
+    if ((emitter->owner->cullMask & 0xF) == 0xF) {
         return;
     }
 
@@ -743,7 +743,7 @@ s32 trail_getBoneAttachPoint(BoneTrailParams *params, Vec3f *out) {
     if (bones == NULL) {
         return 0;
     }
-    if ((owner->unk74 & 0xF) == 0xF) {
+    if ((owner->cullMask & 0xF) == 0xF) {
         return 0;
     }
     // matching: a byte offset; &bones[params->bone] scales the index differently
@@ -777,7 +777,7 @@ void trail_updateRetryTask(TrailRetryTask *task) {
     if (trail->owner->unique_id != trail->ownerId) {
         done = 1;
     }
-    if (!done && trail->owner->ob_matrix_ptr != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
+    if (!done && trail->owner->ob_matrix_ptr != NULL && (trail->owner->cullMask & 0xF) != 0xF) {
         trail_createBoneTrailEffect(trail, task->base.header.owner);
         done = 1;
     }

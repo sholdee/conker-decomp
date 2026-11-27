@@ -178,7 +178,7 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     ParticleDef groundDef;
     s32 flag;
 
-    if (obj->unk7 < 0xFF) {
+    if (obj->alpha < 0xFF) {
         return;
     }
     pos.x = obj->xpos;

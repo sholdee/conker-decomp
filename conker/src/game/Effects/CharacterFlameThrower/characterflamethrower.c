@@ -2155,7 +2155,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
     if (obj->type == 0 || obj->unique_id != flame->seed.ownerId) {
         return 0;
     }
-    if ((obj->unk74 & 0xF) == 0xF) {
+    if ((obj->cullMask & 0xF) == 0xF) {
         flame->flags |= 0x10;
     } else {
         flame->flags &= ~0x10;
@@ -2260,7 +2260,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         flame->end = cur1;
         flame->timeCarry = t;
     }
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         flame->scatterAccum += (flame->scatter.rate + math_randomFloat() * flame->scatter.rateRange) * gFrameDelta;
         if (flame->scatterAccum > 1.0f) {
             EffectTemplate spawn;
@@ -2318,7 +2318,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             } while (flame->scatterAccum > 1.0f);
         }
     }
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         flame->particleAccum += (flame->emit.rate + math_randomFloat() * flame->emit.rateRange) * gFrameDelta;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;

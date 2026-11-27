@@ -707,10 +707,10 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             if (live != 0) {
                 total = movement_obj[i].mv->shotsfired;
             } else {
-                total = gMenuState->stats[i].unk6;
+                total = gMenuState->stats[i].shotsFired;
             }
             if (total > 0) {
-                percent = (gMenuState->stats[i].unk0 * 100) / total;
+                percent = (gMenuState->stats[i].hits * 100) / total;
             }
             if (percent >= 10000) {
                 percent = 9999;
@@ -1211,7 +1211,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by gMenuState->unk2C (or the func_151EC648 / hud_updateCodeEntry screens). */
+/* Draws the fading image picked by gMenuState->displayedStop (or the func_151EC648 / hud_updateCodeEntry screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
     static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
     static u8 D_800900D4 = 0;
@@ -1231,10 +1231,10 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         return func_151EC648(gfx);
     }
     if (gMenuState->menu == 0) {
-        if (gMenuState->unk2C == 1 && D_8008FEF8 != 0) {
+        if (gMenuState->displayedStop == 1 && D_8008FEF8 != 0) {
             gfx = hud_updateCodeEntry(gfx);
         } else {
-            alpha = (gMenuState->unk0 - 0.5f) * 512.0f;
+            alpha = (gMenuState->stepProgress - 0.5f) * 512.0f;
             if (alpha < 0) {
                 alpha = -alpha;
             }
@@ -1244,7 +1244,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             if (D_800900D4 < alpha) {
                 alpha = D_800900D4;
             }
-            if (gMenuState->unk2C == 1) {
+            if (gMenuState->displayedStop == 1) {
                 alpha = (gMenuPageFade * alpha) >> 8;
                 if (alpha >= 0xFE) {
                     alpha = 0xFF;
@@ -1252,13 +1252,13 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            gHudSprite.texId = D_800900BC[gMenuState->unk2C];
+            gHudSprite.texId = D_800900BC[gMenuState->displayedStop];
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
-        if (gMenuState->unk8 >= 0.5f) {
-            if (gMenuState->unk2C >= 3) {
-                if (gSaveSlots[gMenuState->unk2C - 3].sequence != -1) {
-                    gfx = hud_drawImagePanel(gfx, gSaveSlots[gMenuState->unk2C - 3].unkC);
+        if (gMenuState->pathProgress >= 0.5f) {
+            if (gMenuState->displayedStop >= 3) {
+                if (gSaveSlots[gMenuState->displayedStop - 3].sequence != -1) {
+                    gfx = hud_drawImagePanel(gfx, gSaveSlots[gMenuState->displayedStop - 3].checkpointLevel);
                 }
             }
         }
@@ -1294,7 +1294,7 @@ Gfx *func_151EC648(Gfx *gfx) {
     s32 diff;
     f32 sc;
 
-    fadeAlpha = (gMenuState->unk0 - 0.5f) * 512.0f;
+    fadeAlpha = (gMenuState->stepProgress - 0.5f) * 512.0f;
     if (fadeAlpha < 0) {
         fadeAlpha = -fadeAlpha;
     }
@@ -1303,13 +1303,13 @@ Gfx *func_151EC648(Gfx *gfx) {
     }
     gDPPipeSync(gfx++);
     state = gMenuState;
-    progress = state->unk8;
-    if (0.0f == state->unk8 && 0.0f == state->unkC) {
-        page = state->unk2C;
+    progress = state->pathProgress;
+    if (0.0f == state->pathProgress && 0.0f == state->pathSpeed) {
+        page = state->displayedStop;
         D_800900F8 = page;
     } else {
-        page = state->unk2C;
-        if (page == 0 && state->unkC < 0.0f) {
+        page = state->displayedStop;
+        if (page == 0 && state->pathSpeed < 0.0f) {
             D_800900F8 = 4;
         }
     }
@@ -1342,7 +1342,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             gHudSprite.texId = *image;
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, y, diff, v, scale, 0);
             state = gMenuState;
-            progress = state->unk8;
+            progress = state->pathProgress;
         }
         alpha = 0xFF - (s32)(progress * 300.0f);
         progress = 2.0f;
@@ -1360,7 +1360,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         gHudSlotAlphas[1] = 0xFF;
         gHudSlotAlphas[2] = 0xFF;
         gHudSlotAlphas[3] = 0xFF;
-        if (state->unk8 >= 0.5f && state->unk2C == 4) {
+        if (state->pathProgress >= 0.5f && state->displayedStop == 4) {
             listAlpha = (gMenuBrightness * gMenuPageFade) >> 8;
             if (listAlpha >= 0xFE) {
                 listAlpha = 0xFF;
@@ -1418,7 +1418,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         sc = (gTotalTicks & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
         pulse = (gMenuPageFade * (s32)((sc + 1.0f) * 127.0f)) >> 8;
-        if (gMenuState->unk2C == 7) {
+        if (gMenuState->displayedStop == 7) {
             x = 0x70;
             slotCount = 2;
         } else {

@@ -322,7 +322,7 @@ u8 light_followActor(LightEffect *effect) {
     if (actor->unique_id != attach->actorId) {
         return 0;
     }
-    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         Vec3f position;
 
         math_transformOffset(&attach->offset, &position, actor->ob_matrix_ptr[attach->bone]);
@@ -396,7 +396,7 @@ s32 light_updateBeam(LightEffect *effect) {
     if (actor->unique_id != beam->actorId) {
         return 0;
     }
-    if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->cullMask & 0xF) != 0xF) {
         Vec3f start;
         Vec3f dir;
         RayHit ray;

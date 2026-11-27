@@ -66,7 +66,7 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
                   math_randomFloat() * 10.0f + 25.0f, math_randomFloat() * 200.0f + 400.0f, 50.0f,
                   (math_random() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
                   arg1, arg2);
-    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         particle_spawnShortLightFlash(&position, arg1, arg2);
         particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
         if (math_random() & 1) {

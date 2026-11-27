@@ -428,7 +428,7 @@ void particle_attachPointEmitter(obj, posFunc, arg2, arg3, arg4)
     }
 
     if (obj->ob_matrix_ptr != NULL) {
-        if ((obj->unk74 & 0xF) != 0xF) {
+        if ((obj->cullMask & 0xF) != 0xF) {
             gEmitterPointFuncs[posFunc](obj, emitter.unk6, &emitter.pos);
             emitter.flags |= 1;
         }
@@ -456,7 +456,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         gEmitterPointFuncs[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
         emitter->flags |= 1;
     }
@@ -794,7 +794,7 @@ void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3
     Vec3f *dsts[2];
 
     if (obj->ob_matrix_ptr != NULL) {
-        if ((obj->unk74 & 0xF) != 0xF) {
+        if ((obj->cullMask & 0xF) != 0xF) {
             mtx = obj->ob_matrix_ptr + bone;
             srcs[0] = from;
             srcs[1] = to;

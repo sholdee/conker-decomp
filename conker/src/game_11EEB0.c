@@ -182,12 +182,12 @@ void func_150F20F0(s32 index) {
 }
 
 /* Spawns weapon_spawnImpactBurst's effect at a random point 100 units around bone 19 of `actor`
- * (unless actor->unk74's low nibble is 0xF). */
+ * (unless actor->cullMask's low nibble is 0xF). */
 void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
     Vec3f pos;
 
-    if ((actor->ob_matrix_ptr != NULL) && ((actor->unk74 & 0xF) != 0xF)) {
+    if ((actor->ob_matrix_ptr != NULL) && ((actor->cullMask & 0xF) != 0xF)) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;

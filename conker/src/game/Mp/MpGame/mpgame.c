@@ -505,13 +505,13 @@ s32 func_1508B194(s32 player) {
         return 0;
     }
 
-    return gMenuState->stats[player].unkA;
+    return gMenuState->stats[player].teamKills;
 }
 
 /* Clears player's score record value. */
 void func_1508B1D4(s32 player) {
     if (player < D_8008FD90) {
-        gMenuState->stats[player].unkA = 0;
+        gMenuState->stats[player].teamKills = 0;
     }
 }
 

@@ -839,11 +839,11 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     gfxShadows = gfx;
     vtxTotal = 0;
     for (i = 0; i < 25; i++) {
-        // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
+        // matching: the dead store to v and the repeated cullMask test (as u32) steer IDO's register allocation
         if (movement_obj[i].type == 0 || movement_obj[i].ob_matrix_ptr == NULL ||
-            ((v = movement_obj[i].unk74) & (1 << view)) || movement_obj[i].drawtype != 0 ||
+            ((v = movement_obj[i].cullMask) & (1 << view)) || movement_obj[i].drawtype != 0 ||
             (movement_obj[i].unk66 & 0x10) != 0x10 ||
-            (u32)(movement_obj[i].unk74 & (1 << view)) == (u32)(1 << view) ||
+            (u32)(movement_obj[i].cullMask & (1 << view)) == (u32)(1 << view) ||
             movement_obj[i].animseq.uh == 0x2D8 ||
             (movement_obj[i].mv != NULL && (movement_obj[i].mv->ladder != 0 || movement_obj[i].mv->rope != 0)) ||
             (D_800DF0E0 & (1 << i))) {

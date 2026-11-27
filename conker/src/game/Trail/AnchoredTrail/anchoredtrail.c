@@ -169,7 +169,7 @@ s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    if (actor->unk7 != 0xFF) {
+    if (actor->alpha != 0xFF) {
         anchor->flags &= ~1;
         return 1;
     }

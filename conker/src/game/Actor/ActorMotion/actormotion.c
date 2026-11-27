@@ -587,7 +587,7 @@ void actor_updateChaseAi(Actor *actor) {
             bestDist = actor->unk23F * 8;
             for (i = 0; i < 25; i++) {
                 target = &movement_obj[i];
-                if ((target->type != 0) && (target->character_type == actor->unk240) && (target->unk2FA != 0)) {
+                if ((target->type != 0) && (target->character_type == actor->unk240) && (target->activeFlags != 0)) {
                     ox = target->xpos - actor->xpos;
                     oz = actor->zpos - target->zpos;
                     d = sqrtf((ox * ox) + (oz * oz));
@@ -834,7 +834,7 @@ void actor_updateChaseAi(Actor *actor) {
             }
             ang = actor_getDirectionAngle(sqrtf(distSqXZ), h, 0);
             func_1504C9E4(actor, (s16)ang / 200, 0);
-        } else if (actor->unk1D1 != 0) {
+        } else if (actor->aimPitch != 0) {
             func_1504C9E4(actor, 0, 0);
         }
         if (actor->noshove & 0x40000) {
@@ -2296,7 +2296,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
                     other->intelwalk = v;
                     other->scriptCmd = NULL;
                 }
-                other->unk2FC = 0;
+                other->forcedCullMask = 0;
                 other->lifting = 0;
                 victim->intelhitroute = 0;
                 victim->attach_char = 0;
@@ -3034,7 +3034,7 @@ void actor_resolveCollisions(Actor *actor, s32 selfIdx) {
             if (other->carried >= 100) {
                 continue;
             }
-            if (other->unk2FA == 0) {
+            if (other->activeFlags == 0) {
                 continue;
             }
             otherRadius = other->bodyRadius;
@@ -3096,7 +3096,7 @@ u8 actor_findTargetInCone(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 
     for (i = 0; i < 25; i++) {
         other = &movement_obj[i];
         if ((other->type != 0) && (other->energy != 0) && (i != (u8)(actor - movement_obj)) &&
-            (other->noshove & 0x40) && (i != skipIdx) && (other->unk2FA != 0)) {
+            (other->noshove & 0x40) && (i != skipIdx) && (other->activeFlags != 0)) {
             dist = actor_getDistSqTo(actor, i, &angle, &distXZ, &dy, 0);
             if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
                 ((u8)(((angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
@@ -4561,17 +4561,17 @@ void actor_driftOnCurrent(Actor *actor, s32 pathIdx) {
 // TODO: is this really Actor?
 /* Resets the actor's bytes 0x7..0xF. */
 void actor_resetFade(Actor *actor) {
-    actor->unk7 = 0xFF;
-    actor->unk8 = 0xFF;
-    actor->unk9 = 0;
-    actor->unkA = 0;
-    actor->unkF = 0;
-    actor->unkB[0] = actor->unkB[1] = actor->unkB[2] = actor->unkB[3] = 0xFF;
+    actor->alpha = 0xFF;
+    actor->targetAlpha = 0xFF;
+    actor->fadeStep = 0;
+    actor->fadeMode = 0;
+    actor->playerFadeBits = 0;
+    actor->playerAlphas[0] = actor->playerAlphas[1] = actor->playerAlphas[2] = actor->playerAlphas[3] = 0xFF;
 }
 
 /*
- * Actor fading. unk7 is the alpha, faded toward unk8 by unk9 per frame in mode unkA (4: in, 5/6: out,
- * then removed). Bytes unkB..unkE.ub[0] are per-player alphas, unkE.ub[1] holds per-player hide bits
+ * Actor fading. alpha is faded toward targetAlpha by fadeStep per frame in mode fadeMode (4: in, 5/6: out,
+ * then removed). playerAlphas are per-player alphas, playerFadeBits holds per-player hide bits
  * (low nibble) and pending bits (high nibble). Commands 8 and up act on player `player` only.
  */
 void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
@@ -4582,50 +4582,50 @@ void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
         if (cmd != 10) {
             if (cmd == 8) {
                 bit = 1 << (u8)player;
-                actor->unkF |= bit;
+                actor->playerFadeBits |= bit;
                 value = 0;
             } else {
                 bit = 1 << (u8)player;
-                actor->unkF &= ~bit;
+                actor->playerFadeBits &= ~bit;
                 value = 0xFF;
             }
             hi = bit << 4;
-            if (actor->unkF & hi) {
-                actor->unkB[(u8)player] = value;
+            if (actor->playerFadeBits & hi) {
+                actor->playerAlphas[(u8)player] = value;
             }
-            actor->unkF &= ~hi;
+            actor->playerFadeBits &= ~hi;
         } else {
-            actor->unkF |= (1 << (u8)player) << 4;
+            actor->playerFadeBits |= (1 << (u8)player) << 4;
             value = 0;
         }
         if ((actor->unk2FD != 0) || (gCameraSnapTimers[(u8)player] != 0)) {
-            actor->unkB[(u8)player] = value;
+            actor->playerAlphas[(u8)player] = value;
         }
-    } else if (cmd >= actor->unkA) {
+    } else if (cmd >= actor->fadeMode) {
         if (cmd == 4) {
-            actor->unkA = cmd;
-            actor->unk7 = 0;
-            actor->unk8 = 0xFF;
-            actor->unk9 = 0x20;
+            actor->fadeMode = cmd;
+            actor->alpha = 0;
+            actor->targetAlpha = 0xFF;
+            actor->fadeStep = 0x20;
         } else if (cmd == 5) {
-            actor->unkA = cmd;
-            actor->unk8 = 0;
-            actor->unk9 = 0x20;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = 0;
+            actor->fadeStep = 0x20;
         } else if (cmd == 6) {
-            actor->unkA = cmd;
-            actor->unk8 = 0;
-            actor->unk9 = 8;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = 0;
+            actor->fadeStep = 8;
         } else if (cmd == 2) {
-            actor->unkA = cmd;
-            actor->unk8 = value;
-            actor->unk9 = step;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = value;
+            actor->fadeStep = step;
         } else if (cmd == 1) {
-            actor->unkA = 0;
-            actor->unk7 = value;
-            actor->unk8 = value;
+            actor->fadeMode = 0;
+            actor->alpha = value;
+            actor->targetAlpha = value;
         }
         if (*(s32 *)gCameraSnapTimers != 0) {
-            actor->unk7 = actor->unk8;
+            actor->alpha = actor->targetAlpha;
         }
     }
 }
@@ -4639,34 +4639,34 @@ void actor_updateFade(Actor *actor) {
     if (actor->type != 0) {
         mask = 1;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (actor->unkF & mask) {
-                if (actor->unkB[i] > 0) {
+            if (actor->playerFadeBits & mask) {
+                if (actor->playerAlphas[i] > 0) {
                     if (gCameraSnapTimers[i] == 0) {
-                        value = actor->unkB[i] - 50;
+                        value = actor->playerAlphas[i] - 50;
                         if (value < 0) {
                             value = 0;
                         }
                     } else {
                         value = 0;
                     }
-                    actor->unkB[i] = value;
+                    actor->playerAlphas[i] = value;
                 }
             } else {
-                if (actor->unkB[i] < 0xFF) {
+                if (actor->playerAlphas[i] < 0xFF) {
                     if (gCameraSnapTimers[i] == 0) {
-                        value = actor->unkB[i] + 50;
+                        value = actor->playerAlphas[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
                         }
                     } else {
                         value = 0xFF;
                     }
-                    actor->unkB[i] = value;
+                    actor->playerAlphas[i] = value;
                 }
             }
             mask <<= 1;
         }
-        /* matching: byte indexing (7: unk7, 8: unk8, 9: unk9, 0xA: unkA); field access loads in another order */
+        /* matching: byte indexing (7: alpha, 8: targetAlpha, 9: fadeStep, 0xA: fadeMode); field access loads in another order */
         if (((u8 *)actor)[0xA] != 0) {
             if (((u8 *)actor)[8] != ((u8 *)actor)[7]) {
                 if (((u8 *)actor)[7] < ((u8 *)actor)[8]) {
@@ -4697,7 +4697,7 @@ void actor_updateFade(Actor *actor) {
 
 /* The actor's alpha as seen by `player` (0..255). */
 s32 actor_getAlpha(Actor *actor, s32 player) {
-    s32 alpha = actor->unk7 * actor->unkB[player];
+    s32 alpha = actor->alpha * actor->playerAlphas[player];
 
     if (alpha == 255 * 255) {
         alpha = 255;
@@ -4708,7 +4708,7 @@ s32 actor_getAlpha(Actor *actor, s32 player) {
 }
 
 /*
- * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when actor_isVisible says the
+ * Per-frame fade and visibility update of all actors: activeFlags bit 0 is set when actor_isVisible says the
  * actor is visible, or when one of its linked actors (keys in unk20B) is.
  */
 void actor_updateVisibility(void) {
@@ -4729,9 +4729,9 @@ void actor_updateVisibility(void) {
             }
             actor_updateFade(actor);
             if (actor_isVisible(actor) != 0) {
-                actor->unk2FA |= 1;
+                actor->activeFlags |= 1;
             } else {
-                actor->unk2FA &= ~1;
+                actor->activeFlags &= ~1;
                 if (actor->unk20B[0] != 0 || actor->unk20B[1] != 0 || actor->unk20B[2] != 0 || actor->unk20B[3] != 0) {
                     list[count] = i;
                     count++;
@@ -4746,8 +4746,8 @@ void actor_updateVisibility(void) {
             for (j = 0; j < 4; j++) {
                 if (actor->unk20B[j] != 0) {
                     other = collision_findObjectById(actor->unk20B[j]);
-                    if (other != NULL && (other->unk2FA & 1)) {
-                        actor->unk2FA |= 1;
+                    if (other != NULL && (other->activeFlags & 1)) {
+                        actor->activeFlags |= 1;
                         break;
                     }
                 }
@@ -4766,7 +4766,7 @@ void actor_updateTypeAnims(void) {
 
     bzero(done, sizeof(done));
     for (i = 0; i < 25; i++) {
-        if ((movement_obj[i].type == 0) || (movement_obj[i].unk2FA == 0)) {
+        if ((movement_obj[i].type == 0) || (movement_obj[i].activeFlags == 0)) {
             continue;
         }
         id = movement_obj[i].character_type;
@@ -4970,7 +4970,7 @@ s32 actor_isVisible(Actor *actor) {
     if (sum == 0) {
         return 0;
     }
-    if ((actor->unk74 & 0xF) != 0xF) {
+    if ((actor->cullMask & 0xF) != 0xF) {
         return 1;
     }
     idx = actor->listpos;
@@ -5200,7 +5200,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type == 0) continue;
             if (type != movement_obj[i].character_type) continue;
-            if (movement_obj[i].unk2FA == 0) continue;
+            if (movement_obj[i].activeFlags == 0) continue;
             w = gModelTextures[type][set].width;
             h = gModelTextures[type][set].height;
             if (doubleSize != 0) {

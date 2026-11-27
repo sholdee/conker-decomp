@@ -324,9 +324,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x1E:
         if (cmd->a[0].w != 0) {
-            obj->unk2FA |= 0x80;
+            obj->activeFlags |= 0x80;
         } else {
-            obj->unk2FA &= ~0x80;
+            obj->activeFlags &= ~0x80;
         }
         break;
     case 0x1F:
@@ -656,7 +656,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unique_id = cmd->a[0].w;
         break;
     case 0x50:
-        obj->unk74 = (obj->unk74 & ~cmd->a[1].w) | cmd->a[0].w;
+        obj->cullMask = (obj->cullMask & ~cmd->a[1].w) | cmd->a[0].w;
         break;
     case 0x51:
         obj->mv->chased = cmd->a[0].w;
@@ -1578,7 +1578,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xF0:
         return gPlayerRanks[obj->team];
     case 0xF1:
-        return (obj->unk74 & 0xF) == 0xF;
+        return (obj->cullMask & 0xF) == 0xF;
     case 0xF2:
         if (obj->lifting != 0) {
             return movement_obj[obj->lifting].listpos | 0x2000;

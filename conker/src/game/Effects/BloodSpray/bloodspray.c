@@ -40,7 +40,7 @@ static const struct_AF4D0 gBloodBonePoints[] = {
     { 37, { 0 }, { 0.0f, 47.0f, -46.0f }, { 0.0f, 47.0f, -73.0f } },
 };
 
-/* Blood spray of kind `type` between two points attached to one of obj's bones (skipped when unk74&0xF is 0xF). */
+/* Blood spray of kind `type` between two points attached to one of obj's bones (skipped when cullMask&0xF is 0xF). */
 void blood_sprayFromBone(obj, type, sceneTag, arg3)
     Actor *obj;
     u8 type;
@@ -52,7 +52,7 @@ void blood_sprayFromBone(obj, type, sceneTag, arg3)
     MtxF *boneMtx;
     const struct_AF4D0 *entry;
 
-    if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         entry = &gBloodBonePoints[type];
         boneMtx = &obj->ob_matrix_ptr[entry->bone];
         math_transformOffset(&entry->from, &from, boneMtx);

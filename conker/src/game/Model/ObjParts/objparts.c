@@ -87,7 +87,7 @@ void model_updateParts(s32 objIndex) {
     ps = &gObjPartsStates[objIndex];
     state = ps->state;
     if (state == PARTS_STATE_START) {
-        movement_obj[objIndex].unk74 |= 0x80;
+        movement_obj[objIndex].cullMask |= 0x80;
         state = PARTS_STATE_SETUP;
         if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
             return;
@@ -170,7 +170,7 @@ void model_stopParts(s32 objIndex) {
             heap_free((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
         }
         gObjPartsStates[objIndex].parts = NULL;
-        movement_obj[objIndex].unk74 &= ~0x80;
+        movement_obj[objIndex].cullMask &= ~0x80;
     }
 }
 

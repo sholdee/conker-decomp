@@ -82,10 +82,10 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
             cmd++;
         }
     }
-    if (actor->unk1D1 != 0) {
+    if (actor->aimPitch != 0) {
         cmd->opcode = 6;
         cmd++;
-        cmd[-1].value = actor->unk1D1 * 200;
+        cmd[-1].value = actor->aimPitch * 200;
     }
     if ((movement_obj[dc_glbl_CharNum].mv != NULL) && (movement_obj[dc_glbl_CharNum].mv->pssd_waist_tilt != 0)) {
         cmd->opcode = 8;
@@ -95,14 +95,14 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* Appends an opcode-6 command scaled from unk1D1, if it is set. */
+/* Appends an opcode-6 command scaled from aimPitch, if it is set. */
 GameCommand *func_15034340(GameCommand *cmd, s32 index) {
     Actor *actor = &movement_obj[index];
 
-    if (actor->unk1D1 != 0) {
+    if (actor->aimPitch != 0) {
         cmd->opcode = 6;
         cmd++;
-        cmd[-1].value = actor->unk1D1 * 200;
+        cmd[-1].value = actor->aimPitch * 200;
     }
     return cmd;
 }
@@ -111,10 +111,10 @@ GameCommand *func_15034340(GameCommand *cmd, s32 index) {
 GameCommand *func_150343B0(GameCommand *cmd, s32 index) {
     Actor *actor = &movement_obj[index];
 
-    if (actor->unk1D1 != 0) {
+    if (actor->aimPitch != 0) {
         cmd->opcode = 6;
         cmd++;
-        cmd[-1].value = actor->unk1D1 * 200;
+        cmd[-1].value = actor->aimPitch * 200;
     }
     return cmd;
 }

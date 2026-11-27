@@ -96,7 +96,7 @@ void weapon_spawnLauncherFlash(obj, muzzle, arg2, arg3)
     s32 random1;
     s32 random0;
 
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         params.height = math_randomFloat() * 1.5f + 2.0f;
         params.width = math_randomFloat() * 10.10000038f + 2.059999943f;
 

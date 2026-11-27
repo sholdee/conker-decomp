@@ -167,7 +167,7 @@ void save_readFile(s32 eepromSlot) {
                 }
                 gSaveSlots[saveSlot].playTime = gPlayTime;
                 gSaveSlots[saveSlot].flagCount = flagCount;
-                gSaveSlots[saveSlot].unkC = D_800BE3DF;
+                gSaveSlots[saveSlot].checkpointLevel = D_800BE3DF;
                 gSaveSlots[saveSlot].unk4 = D_800BE3E4;
                 gSaveSlots[saveSlot].sequence = sequence;
                 gSaveSlots[saveSlot].eepromSlot = eepromSlot;

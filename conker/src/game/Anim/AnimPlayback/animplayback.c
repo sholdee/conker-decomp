@@ -358,7 +358,7 @@ void anim_advanceObjects(s32 onlyType4) {
         if (onlyType4 && (obj->drawtype != 4)) continue;
         if (D_800C3638 && (D_800C3654[0] == 0) && (cutscene_isActorBound(obj) == 0)) continue;
         anim = obj->unk2D0;
-        if ((anim != NULL) && obj->unk2FA) {
+        if ((anim != NULL) && obj->activeFlags) {
             anim_advance(anim, obj->speedup, obj, onlyType4);
         }
     }

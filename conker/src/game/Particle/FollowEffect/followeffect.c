@@ -194,7 +194,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     if (obj->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((obj->unk74 & 0xF) == 0xF) {
+    if ((obj->cullMask & 0xF) == 0xF) {
         return;
     }
     moving = math_vec3Normalize(&vel, &vel, &ignored0, &ignored1) ? 1 : 0; // matching: != 0 and a plain store differ

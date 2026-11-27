@@ -300,7 +300,7 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
     if (gPaused != 0) {
         return gdl;
     }
-    alpha = movement_obj[index].unk7;
+    alpha = movement_obj[index].alpha;
     size = movement_obj[index].unk122;
     scroll = movement_obj[index].texScroll;
     if (alpha == 0) {
@@ -337,7 +337,7 @@ void actor_scrollSpriteTexture(s32 index) {
     if (gPaused == 0) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
-        if (movement_obj[index].unk7 != 0) {
+        if (movement_obj[index].alpha != 0) {
             period = gEffectAnimTextures[actor_getSpriteTexture(index)]->frameCount << 8;
             scroll += speed;
             if (scroll >= period) {
@@ -445,7 +445,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         return gdl;
     }
     obj = &movement_obj[index];
-    if ((obj->unk74 & (1 << player)) == (1 << player)) {
+    if ((obj->cullMask & (1 << player)) == (1 << player)) {
         return gdl;
     }
     if (actor_getAlpha(obj, player) == 0) {
@@ -971,7 +971,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
         }
     }
     if (canCull) {
-        if ((obj->unk74 & 0xF) == 0xF) {
+        if ((obj->cullMask & 0xF) == 0xF) {
             return;
         }
         maxAlpha = 0;
@@ -1071,7 +1071,7 @@ void actor_flushBoneMatrices(void) {
 }
 
 /* Visibility test of the object against each player's view; updates the per-player culled mask
-   (unk74) and reports the result per player through actor_fadeCommand. */
+   (cullMask) and reports the result per player through actor_fadeCommand. */
 void actor_updateCulling(s32 index) {
     Actor *obj;
     u8 id;
@@ -1094,11 +1094,11 @@ void actor_updateCulling(s32 index) {
     obj = &movement_obj[index];
     id = obj->character_type;
     if (obj->drawtype == 7) {
-        obj->unk74 &= ~0xF;
+        obj->cullMask &= ~0xF;
         return;
     }
-    oldMask = obj->unk74;
-    obj->unk74 |= 0xF;
+    oldMask = obj->cullMask;
+    obj->cullMask |= 0xF;
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && cutscene_isActorBound(obj) == 0) {
         return;
     }
@@ -1108,11 +1108,11 @@ void actor_updateCulling(s32 index) {
     if ((obj->unk101 & 1) == 1) {
         return;
     }
-    if (obj->unk7 == 0) {
+    if (obj->alpha == 0) {
         return;
     }
     if (obj->attach_char != 0) {
-        obj->unk74 = movement_obj[obj->attach_char - 1].unk74;
+        obj->cullMask = movement_obj[obj->attach_char - 1].cullMask;
         return;
     }
     width = gModelDefs[id]->bodyRadius * obj->scale_xz;
@@ -1170,7 +1170,7 @@ void actor_updateCulling(s32 index) {
                 }
                 actor_fadeCommand(obj, event, 0, 0, i);
             } else {
-                obj->unkF |= (1 << i) << 4;
+                obj->playerFadeBits |= (1 << i) << 4;
                 actor_fadeCommand(obj, 9, 0, 0, i);
                 event = -1;
             }
@@ -1184,20 +1184,20 @@ void actor_updateCulling(s32 index) {
             actor_fadeCommand(obj, event, 1, 0, i);
         }
         if (!inside) {
-            obj->unk74 &= ~mask;
+            obj->cullMask &= ~mask;
         }
         if (actor_getAlpha(obj, i) == 0) {
-            obj->unk74 |= mask;
+            obj->cullMask |= mask;
         }
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
     if (obj->CameraPtr != NULL && (obj->CameraPtr->Mode == 0x10000 || obj->mv->SniperState != 0)) {
-        obj->unk74 |= 1 << index;
+        obj->cullMask |= 1 << index;
     }
     if (gCutsceneStates[0] != 1) {
-        if (obj->unk2FC != 0) {
-            obj->unk74 |= obj->unk2FC;
+        if (obj->forcedCullMask != 0) {
+            obj->cullMask |= obj->forcedCullMask;
         }
     }
 }
@@ -1499,13 +1499,13 @@ void actor_followParent(s32 index) {
         obj->fangle = parent->fangle;
     }
     if (!(obj->unk101 & 0x40)) {
-        obj->unk7 = parent->unk7;
-        obj->unk8 = parent->unk8;
-        obj->unk9 = parent->unk9;
-        obj->unkA = parent->unkA;
-        obj->unkF = parent->unkF;
+        obj->alpha = parent->alpha;
+        obj->targetAlpha = parent->targetAlpha;
+        obj->fadeStep = parent->fadeStep;
+        obj->fadeMode = parent->fadeMode;
+        obj->playerFadeBits = parent->playerFadeBits;
         for (i = 0; i <= gScreenLayout; i++) {
-            obj->unkB[i] = parent->unkB[i];
+            obj->playerAlphas[i] = parent->playerAlphas[i];
         }
     }
 }

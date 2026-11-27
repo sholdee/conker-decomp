@@ -196,7 +196,7 @@ void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
             effect_destroyObject(&drip->header);
             return NULL;
         }
-        if ((owner->ob_matrix_ptr != 0) && ((owner->unk74 & 0xF) != 0xF)) {
+        if ((owner->ob_matrix_ptr != 0) && ((owner->cullMask & 0xF) != 0xF)) {
             math_transformOffset(&drip->desc.offset, &drip->previous, BONE_MATRIX(owner, drip->desc.bone));
         } else {
             drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
@@ -266,7 +266,7 @@ void blood_updateDrip(BloodDrip *drip) {
                 return;
             }
             bones = drip->desc.owner->ob_matrix_ptr;
-            if ((bones == NULL) || ((drip->desc.owner->unk74 & 0xF) == 0xF)) {
+            if ((bones == NULL) || ((drip->desc.owner->cullMask & 0xF) == 0xF)) {
                 drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
             }
@@ -577,7 +577,7 @@ void blood_updateStrip(BloodStrip *arg0) {
         kill = 1;
     }
     if (strip->active & 1) {
-        if (!kill && strip->owner->ob_matrix_ptr != 0 && (strip->owner->unk74 & 0xF) != 0xF) {
+        if (!kill && strip->owner->ob_matrix_ptr != 0 && (strip->owner->cullMask & 0xF) != 0xF) {
             boneMatrix = BONE_MATRIX(strip->owner, strip->bone);
             strip->timer -= D_800BE9E4;
             if (strip->timer < -strip->pause) {
@@ -1483,7 +1483,7 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
     s32 mode;
 
     if (actor != 0) {
-        if (actor->ob_matrix_ptr == 0 || (actor->unk74 & 0xF) == 0xF ||
+        if (actor->ob_matrix_ptr == 0 || (actor->cullMask & 0xF) == 0xF ||
             actor->energy <= 0) {
             return;
         }
@@ -1742,7 +1742,7 @@ s32 blood_getBloodPoint(Actor *actor, s32 kind, Vec3f *out) {
     if (bones == NULL) {
         return 0;
     }
-    if ((actor->unk74 & 0xF) == 0xF) {
+    if ((actor->cullMask & 0xF) == 0xF) {
         return 0;
     }
     math_transformOffset(&gBloodProfiles[kind].offset, out, bones + 12);
@@ -2132,7 +2132,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((actor->unk74 & 0xF) == 0xF) {
+    if ((actor->cullMask & 0xF) == 0xF) {
         return;
     }
     blood_spawnSplash(origin, arg4, arg5);
@@ -2345,7 +2345,7 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
             }
         }
     }
-    if (actor->ob_matrix_ptr != 0 && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != 0 && (actor->cullMask & 0xF) != 0xF) {
         s32 count;
         u8 mask2;
         u8 j;
@@ -2477,7 +2477,7 @@ void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 a
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((actor->unk74 & 0xF) == 0xF) {
+    if ((actor->cullMask & 0xF) == 0xF) {
         return;
     }
     blood_spawnSplash(origin, arg3, arg4);
@@ -2734,7 +2734,7 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
             }
         }
     }
-    if (actor->ob_matrix_ptr != 0 && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != 0 && (actor->cullMask & 0xF) != 0xF) {
         Vec3f a;
         Vec3f b;
         ParticleSpawn spawn2;
@@ -2861,7 +2861,7 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((actor->unk74 & 0xF) == 0xF) {
+    if ((actor->cullMask & 0xF) == 0xF) {
         return;
     }
     blood_spawnSplash(origin, arg4, arg5);
@@ -3011,7 +3011,7 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((actor->unk74 & 0xF) == 0xF) {
+    if ((actor->cullMask & 0xF) == 0xF) {
         return;
     }
     model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],

@@ -200,12 +200,12 @@ void model_queueReflection(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 p
     if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
         return;
     }
-    if ((movement_obj[objIndex].unk74 & 0xF) == 15) {
+    if ((movement_obj[objIndex].cullMask & 0xF) == 15) {
         return;
     }
 // matching: an unused label here swaps IDO's s0/s1 choice for range and alpha
 visible:;
-    alpha = movement_obj[objIndex].unk7;
+    alpha = movement_obj[objIndex].alpha;
     if (alpha == 0) {
         return;
     }

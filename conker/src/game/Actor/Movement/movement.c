@@ -125,7 +125,7 @@ void actor_updateAll(void) {
                 continue;
             }
         }
-        if (obj->unk2FA == 0) {
+        if (obj->activeFlags == 0) {
             continue;
         }
         gCurrentActor = obj;
@@ -861,7 +861,7 @@ void func_1504C9E4(Actor *obj, s8 target, u8 mode) {
     s32 delta;
     s32 saved;
 
-    delta = (u8)(obj->unk1D1 - target);
+    delta = (u8)(obj->aimPitch - target);
     if (delta != 0) {
         step = 3;
         if (mode == 16) {
@@ -869,15 +869,15 @@ void func_1504C9E4(Actor *obj, s8 target, u8 mode) {
         }
         saved = delta;
         if (delta >= 128) {
-            obj->unk1D1 += step;
+            obj->aimPitch += step;
         } else {
-            obj->unk1D1 -= step;
+            obj->aimPitch -= step;
         }
         // stop at the target once the difference changes sign
         delta = saved; // matching: the round trip through saved keeps a separate copy of delta in a3
-        delta ^= obj->unk1D1 - target;
+        delta ^= obj->aimPitch - target;
         if ((u8)delta & 0x80) {
-            obj->unk1D1 = target;
+            obj->aimPitch = target;
         }
     }
 }
@@ -4082,7 +4082,7 @@ void actor_updateOverEdge(Actor *obj) {
             obj->noshove |= 0x200;
             obj->bodyRadius = 0;
             obj->bodyHeight = 0;
-            obj->unk7 = 0;
+            obj->alpha = 0;
             obj->energy = 0;
             obj->type = 5;
             obj->speed = 0.0f;

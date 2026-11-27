@@ -1096,7 +1096,7 @@ void event_fireProjectile(void) {
         }
         elevation *= 1.40625f;
     } else {
-        elevation = -gCurrentActor->unk1D1;
+        elevation = -gCurrentActor->aimPitch;
     }
 
     switch (kind) {
@@ -2378,7 +2378,7 @@ void func_15070300(s32 cmd) {
     if (gCurrentActor->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((gCurrentActor->unk74 & 0xF) == 0xF) {
+    if ((gCurrentActor->cullMask & 0xF) == 0xF) {
         return;
     }
     localPos = D_80099B70;
@@ -2567,7 +2567,7 @@ void func_15070D24(s32 cmd) {
         return;
     }
 
-    if ((gCurrentActor->unk74 & 0xF) == 0xF) {
+    if ((gCurrentActor->cullMask & 0xF) == 0xF) {
         return;
     }
 
@@ -2604,7 +2604,7 @@ void func_15070F60(cmd)
         return;
     }
 
-    if ((gCurrentActor->unk74 & 0xF) == 0xF) {
+    if ((gCurrentActor->cullMask & 0xF) == 0xF) {
         return;
     }
 
@@ -2724,7 +2724,7 @@ void event_spawnLargeObjBurst(s32 cmd) {
     s32 buf;
 
     obj = gCurrentActor;
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         effect_getBone5Point(obj, &buf);
         effect_spawnLargeObjBurstAt(&buf, 0xFF, 1);
     }
@@ -2780,7 +2780,7 @@ void func_150718E4(s32 cmd) {
     Vec3f pos;
     const u8 bones[4] = { 13, 16, 24, 27 };
 
-    if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->unk74 & 0xF) == 0xF) {
+    if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->cullMask & 0xF) == 0xF) {
         math_transformOffset(&gZeroVec3f, &pos, &gCurrentActor->ob_matrix_ptr[bones[math_random() & 3]]);
         pos.y = gCurrentActor->floorY + 20.0f;
         weapon_spawnImpactBurst(&pos, 0xFF, 1);
@@ -2817,7 +2817,7 @@ void event_emitLineBursts(s32 cmd) {
 void func_15071A64(s32 cmd) {
     GroundPoint hit;
 
-    if (!(math_random() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
+    if (!(math_random() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->cullMask & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         collision_initHitFromObject(&hit.ground, gCurrentActor);
         math_transformOffset(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
@@ -2829,7 +2829,7 @@ void func_15071B18(s32 cmd) {
     Vec3f point;
     CollisionHit collision;
 
-    if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF) {
+    if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->cullMask & 0xF) != 0xF) {
         math_transformOffset(&D_80099BC8[math_random() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
         collision_initHitFromObject(&collision, gCurrentActor);
         if (math_random() & 1) {
@@ -3358,7 +3358,7 @@ void func_15072F10(void) {
     f32 targetY;
     s16 pitch;
 
-    pitch = gCurrentActor->unk1D1 * 200;
+    pitch = gCurrentActor->aimPitch * 200;
     gCurrentActor->mv->gun_before_reload -= 1;
     actor_splitVelocity(gCurrentActor->langle - gCurrentActor->mv->pssd_waist_tilt, 2000.0f, pitch * 0.0054931640625f,
                   &targetX, &targetZ, &targetY);

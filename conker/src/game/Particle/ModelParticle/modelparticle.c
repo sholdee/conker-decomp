@@ -714,7 +714,7 @@ s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     if (ownerMtxs == NULL) {
         return 0;
     }
-    if ((owner->unk74 & 0xF) == 0xF) {
+    if ((owner->cullMask & 0xF) == 0xF) {
         return 0;
     }
     if (gBoneMatricesFlushed) {

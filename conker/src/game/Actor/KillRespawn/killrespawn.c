@@ -94,7 +94,7 @@ void actor_updatePlayerStates(void) {
                 }
             } else {
                 player->mv->deathTime += D_800BE9E4;
-                if (player->unk7 == 0xFF && player->mv->deathTime >= 161) {
+                if (player->alpha == 0xFF && player->mv->deathTime >= 161) {
                     actor_fadeCommand(player, 2, 0, 60, 0);
                 }
                 if (player->mv->deathTime >= 181 && player->mv->death_State != 10) {

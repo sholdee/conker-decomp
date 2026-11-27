@@ -83,7 +83,7 @@ typedef struct {
     u8 pad7;
 } Entry151E7F60;
 
-/* Team layout of a mode (gTeamSetups[ModeEntry.unk5]) */
+/* Team layout of a mode (gTeamSetups[ModeEntry.teamSetup]) */
 typedef struct {
     /* 0x0 */ s8 teamCount;
     /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */
@@ -103,7 +103,7 @@ struct Struct151E4314 {
     s8 altCutscene;
 };
 
-/* menu 1: maps the stop unk2C to its menu 1 order (save_initMenu) */
+/* menu 1: maps the stop displayedStop to its menu 1 order (save_initMenu) */
 static const u8 D_800AB570[10] = { 0, 5, 3, 1, 4, 6, 2, 7, 8, 9 };
 static const Entry151E7F60 gMenuCharacterTypes[22] = {
     { 0.07f, 0, 128, 4 },
@@ -183,7 +183,7 @@ static const s32 D_800AB754[10] = { 0x3001C, 0x3404C, 0x36008, 0x7000C, 0x3004C,
 static const s16 D_800AB77C[10] = { 0x15, 0xC14, 0x1C, 0x4014, 0xC14, 0x54, 0x114, 0xA014, 0x94, 0x94 };
 /* per mode: D_8008FDBC */
 static const s16 D_800AB790[10] = { 0x100, 0x0, 0xB, 0x300, 0x0, 0x21, 0x0, 0x0, 0x100, 0x140 };
-/* cue per mode (ModeEntry.unk6), menu 0 */
+/* cue per mode (ModeEntry.introCue), menu 0 */
 static const struct Struct151E4314 D_800AB7A4[6] = {
     { 26, 1, 1 },
     { 36, 1, 1 },
@@ -582,8 +582,8 @@ void func_151DE85C(void) {
     D_8008FE28 = 2;
     D_8008FDA4 = 0;
     gMenuState->menu = 0;
-    gMenuState->unk2B = 5;
-    gMenuState->unk2C = gMenuState->unk2B;
+    gMenuState->currentStop = 5;
+    gMenuState->displayedStop = gMenuState->currentStop;
 }
 
 void func_151DE8E8(void) {
@@ -754,7 +754,7 @@ void save_updateMenuPages(void) {
     {
         s32 fade;
 
-        fade = (gMenuState->unk8 - 0.5f) * 512.0f;
+        fade = (gMenuState->pathProgress - 0.5f) * 512.0f;
         if (fade < 0) {
             fade = 0;
         } else if (fade > 0xFF) {
@@ -762,16 +762,16 @@ void save_updateMenuPages(void) {
         }
         gMenuBrightness = fade;
     }
-    if (gMenuState->unk8 >= (f32)0.5) { // matching: a double constant narrowed, not 0.5f
-        if (gMenuState->unk8 < 1.0f) {
+    if (gMenuState->pathProgress >= (f32)0.5) { // matching: a double constant narrowed, not 0.5f
+        if (gMenuState->pathProgress < 1.0f) {
             gMenuState->input &= ~MENU_ACCEPT;
         }
         switch (gMenuState->menu) {
             case 0:
-                if (gMenuState->unk2C != 1) {
+                if (gMenuState->displayedStop != 1) {
                     D_8008FEF8 = 0;
                 }
-                switch (gMenuState->unk2C) {
+                switch (gMenuState->displayedStop) {
                     case 1:
                         func_151DF1BC();
                         break;
@@ -834,7 +834,7 @@ void save_updateMenuPages(void) {
 }
 
 
-/* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
+/* Menu page for displayedStop == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
 void func_151DF1BC(void) {
     u16 unused; // matching: unused stack slot sets IDO's frame layout
     s32 alpha;
@@ -936,7 +936,7 @@ u8 D_8008FF08[28] = {
 };
 
 /*
- * Menu page for unk2C == 2: a scrolling list of the entries in category gMenuListCategory.
+ * Menu page for displayedStop == 2: a scrolling list of the entries in category gMenuListCategory.
  * Left/right changes category, the stick scrolls; the highlighted entry goes to gMenuListSelection.
  */
 void func_151DF574(void) {
@@ -1218,7 +1218,7 @@ draw_rows: // matching: unused label splits the basic block for as1
 
 /* Saved-record slot (gSaveSlots[]); see game/Save/SaveData/savedata.c */
 
-/* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
+/* Menu page for displayedStop == 3..5: shows saved record slot displayedStop - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {
     s32 slot;
     u8 alpha;
@@ -1229,7 +1229,7 @@ void func_151DFF38(void) {
 
     alpha = gMenuBrightness;
     sfx = 0;
-    slot = gMenuState->unk2C - 3;
+    slot = gMenuState->displayedStop - 3;
     if (gPauseCursor < 2) {
         if (gMenuState->input & (MENU_LEFT | MENU_RIGHT)) {
             gPauseCursor = 1 - gPauseCursor;
@@ -1316,7 +1316,7 @@ void func_151DFF38(void) {
                 D_800BE3E0 = 0;
                 D_800BE3E4 = 0;
                 zone_resetTaskProgress();
-                entry->unkC = 0x18;
+                entry->checkpointLevel = 0x18;
                 entry->unk4 = 0;
                 entry->sequence = -1;
                 D_8008FDA4 = 0;
@@ -1335,7 +1335,7 @@ void func_151DFF38(void) {
 }
 
 
-/* Mode-select page: up/down picks a game mode of category unk2C; accept opens its setup (page 4). */
+/* Mode-select page: up/down picks a game mode of category displayedStop; accept opens its setup (page 4). */
 void save_updateModeSelectPage(void) {
     s32 titleAlpha;
     s32 modeCount;
@@ -1350,7 +1350,7 @@ void save_updateModeSelectPage(void) {
     s8 teams;
 
     alpha = gMenuBrightness;
-    if (gMenuState->unk2C != 0) {
+    if (gMenuState->displayedStop != 0) {
         titleAlpha = alpha;
         if (gMenuPendingPage != -1) {
             gMenuState->input &= ~MENU_BACK;
@@ -1383,7 +1383,7 @@ void save_updateModeSelectPage(void) {
                 alpha = 0xFF;
             }
         }
-        modeCount = D_8008FE9C[gMenuState->unk2C - 1];
+        modeCount = D_8008FE9C[gMenuState->displayedStop - 1];
         gExtraPlayerSlots = 0;
         D_8008FDC4 = 0;
         D_800E0B8C = 0;
@@ -1420,7 +1420,7 @@ void save_updateModeSelectPage(void) {
         }
         cursor = value;
         first = 0;
-        for (i = 0; i < gMenuState->unk2C - 1; i++) {
+        for (i = 0; i < gMenuState->displayedStop - 1; i++) {
             first += D_8008FE9C[i];
         }
         gMenuState->selection = cursor + first;
@@ -1459,7 +1459,7 @@ void save_updateModeSelectPage(void) {
                 if (gPauseCursor == 0) {
                     gMenuPendingPage = 4;
                     gSettings[0] = gMenuState->cursor;
-                    teams = D_800AB68C[gMenuState->selection].unk5;
+                    teams = D_800AB68C[gMenuState->selection].teamSetup;
                     if (teams < 0) {
                         gPlayerCharacters[0] = D_8008FEC4[(-teams - 1) << 2];
                     } else {
@@ -1562,9 +1562,9 @@ void save_updateJoinPage(void) {
         gMenuPageFade = alpha;
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    if (D_800AB68C[gMenuState->selection].unk5 < 0) {
+    if (D_800AB68C[gMenuState->selection].teamSetup < 0) {
         nextPage = 5;
-        i = -D_800AB68C[gMenuState->selection].unk5 - 1;
+        i = -D_800AB68C[gMenuState->selection].teamSetup - 1;
         remap = D_8008FEC4 + (i << 2);
         allowed = D_8008FEA4[i];
         if (D_800E9D00 & 0x20) {
@@ -1591,7 +1591,7 @@ void save_updateJoinPage(void) {
     } else {
         nextPage = 1;
     }
-    if (gMenuState->unk2C == 7) {
+    if (gMenuState->displayedStop == 7) {
         maxPlayers = 2;
     } else {
         maxPlayers = 4;
@@ -1714,8 +1714,8 @@ void save_updateCpuPlayersPage(void) {
         gMenuPageFade = alpha;
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    // unk5 is -(preset + 1) here, so -1 - unk5 is the preset
-    limits = D_800AB74C[D_8008FEE4[-1 - D_800AB68C[gMenuState->selection].unk5]];
+    // teamSetup is -(preset + 1) here, so -1 - teamSetup is the preset
+    limits = D_800AB74C[D_8008FEE4[-1 - D_800AB68C[gMenuState->selection].teamSetup]];
     limit = (limits - 1)[gRosterSize]; // matching: limits[gRosterSize - 1] schedules differently
     for (i = 0; i < gRosterSize; i++) {
         if (gRoster[i] >= 0) {
@@ -1753,7 +1753,7 @@ void save_updateCpuPlayersPage(void) {
         gFrontEndState = 7;
         gFrontEndFadeStep = 8;
         sound_play(0x500, 0x7D00, 0x40, 0, 0);
-        if (D_800AB68C[gMenuState->selection].unk6 == -1) {
+        if (D_800AB68C[gMenuState->selection].introCue == -1) {
             gPendingTransition = save_setupMatch;
         } else {
             gPendingTransition = save_playModeIntro;
@@ -1831,7 +1831,7 @@ void save_updateTeamPage(void) {
         gMenuPageFade = alpha;
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    setup = &gTeamSetups[D_800AB68C[gMenuState->selection].unk5];
+    setup = &gTeamSetups[D_800AB68C[gMenuState->selection].teamSetup];
     special = setup->unk7;
     D_800E0BB0 = setup->teamCount;
     D_800E0BC8[0] = setup->teamColor[0];
@@ -2248,8 +2248,8 @@ void save_setupMatch(void) {
     gPlayerChannels[1] = -1;
     gPlayerChannels[2] = -1;
     gPlayerChannels[3] = -1;
-    param = entry->unk2;
-    D_8008FDC8 = entry->unk5 < 0;
+    param = entry->map;
+    D_8008FDC8 = entry->teamSetup < 0;
     flags = D_800AB754[entry->mode];
     D_8008FDC0 = D_800AB77C[entry->mode];
     D_8008FDBC = D_800AB790[entry->mode] | 1;
@@ -2843,13 +2843,13 @@ void save_updateModeIntro(void) {
     }
 }
 
-/* Plays the mode's intro cue (entry unk6) and waits in state 5, or sets up the match directly. */
+/* Plays the mode's intro cue (entry introCue) and waits in state 5, or sets up the match directly. */
 void save_playModeIntro(void) {
     const struct Struct151E4314 *entry;
     s32 cueIdx;
     s32 param;
 
-    cueIdx = D_800AB68C[gMenuState->selection].unk6;
+    cueIdx = D_800AB68C[gMenuState->selection].introCue;
     if (cueIdx >= 0) {
         entry = &D_800AB7A4[cueIdx];
         if (gRosterTeams[0]) {
@@ -2882,7 +2882,7 @@ void save_updateResultsScreen(void) {
     s32 j;
 
     if (D_8008FD80 == 1) {
-        idx = D_800AB68C[gMenuState->selection].unk7;
+        idx = D_800AB68C[gMenuState->selection].resultCue;
         param = D_800AB7BC[idx].cutscene;
         if (gMenuState->selection == 0) {
             count = 1;
@@ -2917,7 +2917,7 @@ void save_updateResultsScreen(void) {
             if (D_8008FD80 == 4) {
                 camera_global_Cameras->Mode = 0x80000;
             }
-            if (D_800AB68C[gMenuState->selection].unk5 < 0) {
+            if (D_800AB68C[gMenuState->selection].teamSetup < 0) {
                 if (gMenuState->selection == 11 || gMenuState->selection == 12) {
                     y = 0x48;
                     for (i = 0; i < D_8008FD88; i++) {
@@ -3012,7 +3012,7 @@ void save_updateResultsScreen(void) {
 }
 
 
-/* End of round: picks the results screen state and cue from the mode entry (unk7) and the ranks. */
+/* End of round: picks the results screen state and cue from the mode entry (resultCue) and the ranks. */
 void save_endRound(void) {
     s8 resultCue;
     s8 count;
@@ -3024,9 +3024,9 @@ void save_endRound(void) {
     D_8008FDA4 = 0;
     gFrontEndTimer = 0;
     count = 0;
-    resultCue = D_800AB68C[gMenuState->selection].unk7;
+    resultCue = D_800AB68C[gMenuState->selection].resultCue;
     D_8008FDC0 &= 0xF369;
-    if (D_800AB68C[gMenuState->selection].unk5 >= 0) {
+    if (D_800AB68C[gMenuState->selection].teamSetup >= 0) {
         for (i = 0; i < 4; i++) {
             if (gPlayerRanks[i] == 1) {
                 count++;
@@ -3133,9 +3133,9 @@ void save_updateFadeTransition(void) {
 
 /* Resets the path/selection state in gMenuState. */
 void save_resetMenuState(void) {
-    gMenuState->unk0 = 0.0f;
-    gMenuState->unk4 = 0.0f;
-    gMenuState->unk2B = 0;
+    gMenuState->stepProgress = 0.0f;
+    gMenuState->stepSpeed = 0.0f;
+    gMenuState->currentStop = 0;
     gMenuState->input = 0;
     gMenuState->menu = 0;
     gMenuState->page = 0;
@@ -3147,8 +3147,8 @@ void save_resetMenuState(void) {
     gMenuState->unk14 = 0.0f;
     gMenuState->unk18 = 0.0f;
     gMenuState->unk1C = 0.0f;
-    gMenuState->unkC = 0.0f;
-    gMenuState->unk8 = 0.0f;
+    gMenuState->pathSpeed = 0.0f;
+    gMenuState->pathProgress = 0.0f;
 }
 
 
@@ -3163,7 +3163,7 @@ void save_initMenu(void) {
         gMenuState = &D_800E0AF0;
         save_resetMenuState();
         if (gMenuState->menu == 1) {
-            gMenuState->unk2C = D_800AB570[gMenuState->unk2C];
+            gMenuState->displayedStop = D_800AB570[gMenuState->displayedStop];
         }
     }
     zone_resetTaskProgress();
@@ -3210,7 +3210,7 @@ void save_updateFrontEnd(void) {
     gDebugStatusCode = 0;
 }
 
-/* Fades the screen in, or derives the fade from the state's unk8 transition. */
+/* Fades the screen in, or derives the fade from the state's pathProgress transition. */
 void save_updateFadeIn(void) {
     s32 fade;
     MenuState *state;
@@ -3224,8 +3224,8 @@ void save_updateFadeIn(void) {
             gFrontEndFade = fade;
         }
         state = gMenuState;
-        if (state != NULL && state->unk2B == 0 && state->unkC > 0.0f && state->unk8 > 0.5f) {
-            fade = (state->unk8 - 0.5f) * 524.0f;
+        if (state != NULL && state->currentStop == 0 && state->pathSpeed > 0.0f && state->pathProgress > 0.5f) {
+            fade = (state->pathProgress - 0.5f) * 524.0f;
             if (fade > 255) {
                 fade = 0xFF;
             }
@@ -3244,7 +3244,7 @@ void save_endMatch(s32 flag) {
     if (gIsMultiplayer != 0) {
         gFrontEndState = 7;
         gFrontEndFadeStep = 8;
-        if (D_800AB68C[gMenuState->selection].unk7 != -1) {
+        if (D_800AB68C[gMenuState->selection].resultCue != -1) {
             gMenuState->page = 4;
             gPendingTransition = save_endRound;
         } else {
@@ -3252,11 +3252,11 @@ void save_endMatch(s32 flag) {
             gPendingTransition = func_151DDBA0;
         }
         for (i = 0; i < D_8008FD90; i++) {
-            gMenuState->stats[i].unk6 = movement_obj[i].mv->shotsfired;
+            gMenuState->stats[i].shotsFired = movement_obj[i].mv->shotsfired;
         }
         D_8008FDC0 &= 0xE35F;
         D_800E0A86 = flag;
-        if (D_800AB68C[gMenuState->selection].unk7 == -2) {
+        if (D_800AB68C[gMenuState->selection].resultCue == -2) {
             if (flag == 0) {
                 save_endRound();
                 return;
@@ -3308,7 +3308,7 @@ void func_151E562C(void) {
     }
 }
 
-/* Returns D_8008FDC8: set when the mode entry's unk5 is negative (every player then gets a team of their own). */
+/* Returns D_8008FDC8: set when the mode entry's teamSetup is negative (every player then gets a team of their own). */
 s8 func_151E564C(void) {
     return D_8008FDC8;
 }
@@ -3553,13 +3553,13 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
         D_800E0BB8[victimIdx] = attackerIdx | 0x80;
         if (attackerIdx < D_8008FD90) {
             if (gRosterTeams[attackerIdx] != gRosterTeams[victimIdx]) {
-                gMenuState->stats[attackerIdx].unk0++;
+                gMenuState->stats[attackerIdx].hits++;
                 if (cause == 0x2E) {
                     gMenuState->stats[attackerIdx].unk4++;
                 }
             }
             if ((victim->energy <= 0) && (gRosterTeams[attackerIdx] == gRosterTeams[victimIdx]) && (cause != 0x2D)) {
-                gMenuState->stats[attackerIdx].unkA++;
+                gMenuState->stats[attackerIdx].teamKills++;
             }
         }
         if (victim->energy <= 0) {
@@ -3571,7 +3571,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
             }
         }
         if (victimIdx < D_8008FD90) {
-            gMenuState->stats[victimIdx].unk8++;
+            gMenuState->stats[victimIdx].hitsTaken++;
         }
         if ((attacker != victim) && (victim->mv != NULL) && (attacker->energy != 0)) {
             sound = 0;
@@ -3585,7 +3585,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                 }
             } else if ((attacker->character_type == 0x75) && (victim->energy <= 0)) {
                 if (attacker->character_type == victim->character_type) {
-                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].unkA >= 4)) {
+                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
                         sound = 0x665;
                         variants = 4;
                     }
@@ -3609,7 +3609,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     sourceState = source->headEffectState;
                 }
                 if (attacker->character_type == victim->character_type) {
-                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].unkA >= 4)) {
+                    if ((victimIdx < D_8008FD90) && (gMenuState->stats[victimIdx].teamKills >= 4)) {
                         variants = 8;
                         sound = 0x65A;
                     }
@@ -3850,7 +3850,7 @@ static const Snd151E6C1C D_800AB920[8] = {
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 
 /*
- * Moves object index along the node path selected by gMenuState (unk2B = current stop, unk8 = progress
+ * Moves object index along the node path selected by gMenuState (currentStop = current stop, pathProgress = progress
  * along it), spline-interpolating its position (unk2F8..) and look-at point (unk2A4..), and drives the
  * related objects returned by gfx_findObjectById.
  */
@@ -3902,93 +3902,93 @@ void func_151E6C1C(s32 index) {
     }
     mp_getNodePos(mp_findNodeById(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
 
-    if (gMenuState->unk4 != 0.0f) {
-        gMenuState->unk0 += gMenuState->unk4 * D_800BE9E4;
-        if (gMenuState->unk0 <= 0.0f) {
-            gMenuState->unk0 = 0.0f;
-            gMenuState->unk4 = 0.0f;
+    if (gMenuState->stepSpeed != 0.0f) {
+        gMenuState->stepProgress += gMenuState->stepSpeed * D_800BE9E4;
+        if (gMenuState->stepProgress <= 0.0f) {
+            gMenuState->stepProgress = 0.0f;
+            gMenuState->stepSpeed = 0.0f;
         }
-        if (gMenuState->unk0 >= 1.0f) {
-            gMenuState->unk0 = 0.0f;
-            gMenuState->unk4 = 0.0f;
-            gMenuState->unk2B++;
-            if (gMenuState->unk2B >= nodeCount) {
-                gMenuState->unk2B -= nodeCount;
+        if (gMenuState->stepProgress >= 1.0f) {
+            gMenuState->stepProgress = 0.0f;
+            gMenuState->stepSpeed = 0.0f;
+            gMenuState->currentStop++;
+            if (gMenuState->currentStop >= nodeCount) {
+                gMenuState->currentStop -= nodeCount;
             }
         }
-    } else if (gMenuState->unkC != 0.0f || gMenuState->unk8 != 0.0f) {
-        if ((gMenuState->input & 0x20) && (gMenuState->menu == 0 || gMenuState->unk2B != 0)) {
-            gMenuState->unkC = -speeds[gMenuState->unk2B];
-            music_playTune(sounds[gMenuState->unk2B].unk2, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->unk2B].unk2;
+    } else if (gMenuState->pathSpeed != 0.0f || gMenuState->pathProgress != 0.0f) {
+        if ((gMenuState->input & 0x20) && (gMenuState->menu == 0 || gMenuState->currentStop != 0)) {
+            gMenuState->pathSpeed = -speeds[gMenuState->currentStop];
+            music_playTune(sounds[gMenuState->currentStop].unk2, D_800E0A97, 0);
+            D_800E0A97 = sounds[gMenuState->currentStop].unk2;
         }
-        if (gMenuState->unk2A != 0 && gMenuState->menu == 1 && gMenuState->unk2B == 0) {
+        if (gMenuState->unk2A != 0 && gMenuState->menu == 1 && gMenuState->currentStop == 0) {
             if (gMenuState->input & 0x20) {
-                gMenuState->unkC = speeds[gMenuState->unk2B];
+                gMenuState->pathSpeed = speeds[gMenuState->currentStop];
             }
         } else if (gMenuState->input & 0x10) {
-            gMenuState->unkC = speeds[gMenuState->unk2B];
+            gMenuState->pathSpeed = speeds[gMenuState->currentStop];
         }
-        gMenuState->unk8 += gMenuState->unkC * D_800BE9E4;
-        if (gMenuState->unk8 >= 1.0f) {
-            gMenuState->unk8 = 1.0f;
-            gMenuState->unkC = 0.0f;
-        } else if (gMenuState->unk8 < 0.0f) {
-            gMenuState->unk8 = 0.0f;
-            gMenuState->unkC = 0.0f;
-            if (gMenuState->unk2C == 0 && gMenuState->menu == 1 && gMenuState->unk44 != 0) {
+        gMenuState->pathProgress += gMenuState->pathSpeed * D_800BE9E4;
+        if (gMenuState->pathProgress >= 1.0f) {
+            gMenuState->pathProgress = 1.0f;
+            gMenuState->pathSpeed = 0.0f;
+        } else if (gMenuState->pathProgress < 0.0f) {
+            gMenuState->pathProgress = 0.0f;
+            gMenuState->pathSpeed = 0.0f;
+            if (gMenuState->displayedStop == 0 && gMenuState->menu == 1 && gMenuState->unk44 != 0) {
                 gMenuState->unk43 = 1;
                 gMenuState->unk44 = 0;
             }
         }
     } else {
         if (gMenuState->input & 0x10) {
-            gMenuState->unkC = speeds[gMenuState->unk2B];
-            music_playTune(sounds[gMenuState->unk2B].unk0, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->unk2B].unk0;
+            gMenuState->pathSpeed = speeds[gMenuState->currentStop];
+            music_playTune(sounds[gMenuState->currentStop].unk0, D_800E0A97, 0);
+            D_800E0A97 = sounds[gMenuState->currentStop].unk0;
         } else {
             if (gMenuState->input & 4) {
-                gMenuState->unk2B--;
-                gMenuState->unk0 = 1.0f;
-                gMenuState->unk4 = -0.05000000075f;
-                if (gMenuState->unk2B < 0) {
-                    gMenuState->unk2B += nodeCount;
+                gMenuState->currentStop--;
+                gMenuState->stepProgress = 1.0f;
+                gMenuState->stepSpeed = -0.05000000075f;
+                if (gMenuState->currentStop < 0) {
+                    gMenuState->currentStop += nodeCount;
                 }
             }
             if ((gMenuState->input & 8) || gMenuState->unk43 != 0) {
-                gMenuState->unk4 = 0.05000000075f;
+                gMenuState->stepSpeed = 0.05000000075f;
             }
             gMenuState->unk43 = 0;
-            if (gMenuState->unk2B < 0) {
-                gMenuState->unk2B += nodeCount;
+            if (gMenuState->currentStop < 0) {
+                gMenuState->currentStop += nodeCount;
             }
-            if (gMenuState->unk2B >= nodeCount) {
-                gMenuState->unk2B -= nodeCount;
+            if (gMenuState->currentStop >= nodeCount) {
+                gMenuState->currentStop -= nodeCount;
             }
         }
     }
 
-    scale = gMenuState->unk8;
+    scale = gMenuState->pathProgress;
     if (gMenuState->menu == 0) {
-        scale *= 1.0f - D_8008FF60[gMenuState->unk2C] * D_8008FDD0;
-    } else if (gMenuState->unk2C != 0) {
+        scale *= 1.0f - D_8008FF60[gMenuState->displayedStop] * D_8008FDD0;
+    } else if (gMenuState->displayedStop != 0) {
         scale *= 0.6000000238f;
     }
-    turnT = sinf(gMenuState->unk0 * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
+    turnT = sinf(gMenuState->stepProgress * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
     pathT = sinf(scale * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
 
     if (gMenuState->menu == 0) {
         for (i = 0; i < 2; i++) {
-            a = D_8008FFB0[i][gMenuState->unk2C];
+            a = D_8008FFB0[i][gMenuState->displayedStop];
             if (a != 0xFF) {
                 r = gfx_findObjectById(a);
                 if (r != NULL) {
-                    if (gMenuState->unkC > 0.0f || D_8008FDD0 < 1.0f) {
-                        if (D_8008FF78[gMenuState->unk2C] < (s32)(scale * 100.0f)) {
+                    if (gMenuState->pathSpeed > 0.0f || D_8008FDD0 < 1.0f) {
+                        if (D_8008FF78[gMenuState->displayedStop] < (s32)(scale * 100.0f)) {
                             r->touch.i.b = 1;
                         }
-                    } else if (gMenuState->unkC < 0.0f) {
-                        if (D_8008FF80[gMenuState->unk2C] >= (s32)(scale * 100.0f)) {
+                    } else if (gMenuState->pathSpeed < 0.0f) {
+                        if (D_8008FF80[gMenuState->displayedStop] >= (s32)(scale * 100.0f)) {
                             r->touch.i.b = 0;
                         }
                     }
@@ -4002,7 +4002,7 @@ void func_151E6C1C(s32 index) {
 
     if (scale > 0.0f) {
         path[0] = mp_findNodeById(homeNode);
-        path[1] = mp_findNodeById(nodeTable[gMenuState->unk2B]);
+        path[1] = mp_findNodeById(nodeTable[gMenuState->currentStop]);
         node = &gPathNodes[path[1]];
         pathLen = 1;
         while (node != NULL) {
@@ -4065,7 +4065,7 @@ void func_151E6C1C(s32 index) {
             UNK2AC_F32 = z[1] + (z[2] - z[1]) * pathT;
         }
     } else {
-        idx = gMenuState->unk2B - 1;
+        idx = gMenuState->currentStop - 1;
         if (idx < 0) {
             idx += nodeCount;
         }
@@ -4095,13 +4095,13 @@ void func_151E6C1C(s32 index) {
     if (gMenuState->unk2A != 3) {
         gMenuState->unk10 *= 0.8500000238f;
     } else {
-        gMenuState->unk10 = -((0.25f - gMenuState->unk8) * 4.0f);
+        gMenuState->unk10 = -((0.25f - gMenuState->pathProgress) * 4.0f);
     }
 
     if (gMenuState->menu == 1) {
         state = 0;
         mp_getNodePos(mp_findNodeById(homeNode), &ax, &ay, &az);
-        idx = gMenuState->unk2B;
+        idx = gMenuState->currentStop;
         if (idx >= nodeCount) {
             idx = 0;
         }
@@ -4114,29 +4114,29 @@ void func_151E6C1C(s32 index) {
             by = -by;
             bz = -bz;
         }
-        if (gMenuState->unk8 == 0.0f && (gMenuState->input & 0x20) && gMenuState->unk10 < 0.009999999776f &&
-            gMenuState->unk4 == 0.0f) {
-            gMenuState->unk2B = 0;
+        if (gMenuState->pathProgress == 0.0f && (gMenuState->input & 0x20) && gMenuState->unk10 < 0.009999999776f &&
+            gMenuState->stepSpeed == 0.0f) {
+            gMenuState->currentStop = 0;
             if (gMenuState->unk2D >= 2 && gMenuState->unk2D < 7) {
                 gMenuState->unk2A = 2;
             }
             state = 1;
-            gMenuState->unkC = speeds[gMenuState->unk2B];
-            music_playTune(sounds[gMenuState->unk2B].unk0, D_800E0A97, 0);
-            D_800E0A97 = sounds[gMenuState->unk2B].unk0;
+            gMenuState->pathSpeed = speeds[gMenuState->currentStop];
+            music_playTune(sounds[gMenuState->currentStop].unk0, D_800E0A97, 0);
+            D_800E0A97 = sounds[gMenuState->currentStop].unk0;
         }
-        if (gMenuState->unk8 < 0.25f && gMenuState->unk2A == 1) {
-            gMenuState->unk2B = 4;
+        if (gMenuState->pathProgress < 0.25f && gMenuState->unk2A == 1) {
+            gMenuState->currentStop = 4;
             state = 2;
             gMenuState->unk2A = 0;
         }
-        if (gMenuState->unk8 == 0.0f && gMenuState->unk2A == 3) {
-            gMenuState->unk2B = 4;
+        if (gMenuState->pathProgress == 0.0f && gMenuState->unk2A == 3) {
+            gMenuState->currentStop = 4;
             gMenuState->unk2A = 0;
             gMenuState->unk10 = 0.0f;
         }
         if (state != 0) {
-            mp_getNodePos(mp_findNodeById(nodeTable[gMenuState->unk2B]), &cx, &cy, &cz);
+            mp_getNodePos(mp_findNodeById(nodeTable[gMenuState->currentStop]), &cx, &cy, &cz);
             cx -= ax;
             cy -= ay;
             cz -= az;
@@ -4152,18 +4152,18 @@ void func_151E6C1C(s32 index) {
         }
         if (state == 2) {
             gMenuState->unk10 = 0.0f;
-            gMenuState->unk2B = 0;
+            gMenuState->currentStop = 0;
             gMenuState->unk2A = 3;
         }
     }
 
-    if (gMenuState->unk8 >= 1.0f && gMenuState->unk2B == 0) {
+    if (gMenuState->pathProgress >= 1.0f && gMenuState->currentStop == 0) {
         gMenuState->menu = 1 - gMenuState->menu;
-        gMenuState->unk8 = 0.9900000095f;
+        gMenuState->pathProgress = 0.9900000095f;
         if (gMenuState->menu != 0) {
-            gMenuState->unkC = -D_8008FF90[0];
+            gMenuState->pathSpeed = -D_8008FF90[0];
         } else {
-            gMenuState->unkC = -D_8008FF48[0];
+            gMenuState->pathSpeed = -D_8008FF48[0];
         }
         if (gMenuState->menu != 0) {
             gMenuState->unk2A = 1;
@@ -4171,19 +4171,19 @@ void func_151E6C1C(s32 index) {
             gMenuState->unk2A = 0;
         }
     }
-    gMenuState->unk2C = gMenuState->unk2B;
-    if (gMenuState->unk0 > 0.5f) {
-        gMenuState->unk2C++;
+    gMenuState->displayedStop = gMenuState->currentStop;
+    if (gMenuState->stepProgress > 0.5f) {
+        gMenuState->displayedStop++;
     }
-    if (gMenuState->unk2C < 0) {
-        gMenuState->unk2C += nodeCount;
+    if (gMenuState->displayedStop < 0) {
+        gMenuState->displayedStop += nodeCount;
     }
-    if (gMenuState->unk2C >= nodeCount) {
-        gMenuState->unk2C -= nodeCount;
+    if (gMenuState->displayedStop >= nodeCount) {
+        gMenuState->displayedStop -= nodeCount;
     }
-    gMenuState->unk2D = gMenuState->unk2C;
+    gMenuState->unk2D = gMenuState->displayedStop;
     if (gMenuState->menu == 1) {
-        gMenuState->unk2C = D_800AB570[gMenuState->unk2C];
+        gMenuState->displayedStop = D_800AB570[gMenuState->displayedStop];
     }
 
     obj->target.x = obj->focus.x;
@@ -4224,13 +4224,13 @@ void func_151E7DC0(void) {
     u8 objId;
 
     state = gMenuState;
-    if (state->unk8 < 0.8000000119f && state->menu == 0) {
+    if (state->pathProgress < 0.8000000119f && state->menu == 0) {
         return;
     }
     for (i = 0; i < 2; i++) {
         state = gMenuState;
         if (state->menu == 0) {
-            objId = D_8008FFB0[i][state->unk2C];
+            objId = D_8008FFB0[i][state->displayedStop];
         } else {
             objId = D_8008FFB0[i][0];
         }
@@ -4301,7 +4301,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)gSpawnRecords); // matching: offset + base operand order
     kind = gMenuCharacterTypes[charIdx].spawnType;
     posIdx = slotIdx;
-    if (gMenuState->unk2C == 7) {
+    if (gMenuState->displayedStop == 7) {
         posIdx++;
     }
     spawn->type = kind;

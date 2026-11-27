@@ -422,7 +422,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 effect_destroyObject(&state.follow->header);
             }
         }
-        if (shooter->ob_matrix_ptr != NULL && (shooter->unk74 & 0xF) != 0xF) {
+        if (shooter->ob_matrix_ptr != NULL && (shooter->cullMask & 0xF) != 0xF) {
             if (shooter->character_type != 0x77 && shooter->character_type != 0x28) {
                 const Vec3f a = { 3.0f, 125.0f, 35.0f };
                 const Vec3f b = { 6.0f, -50.0f, 35.0f };

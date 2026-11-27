@@ -165,7 +165,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->unk1D1 == gAimImpacts[aim].unk2) {
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->aimPitch == gAimImpacts[aim].unk2) {
                         effect->target_x = gAimImpacts[aim].x;
                         effect->target_y = gAimImpacts[aim].y;
                         effect->target_z = gAimImpacts[aim].z;
@@ -185,7 +185,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                         }
                         stopDist = 1.0f;
                     } else {
-                        angle = effect->owner->unk1D1 * 200;
+                        angle = effect->owner->aimPitch * 200;
                         actor_splitVelocity(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;

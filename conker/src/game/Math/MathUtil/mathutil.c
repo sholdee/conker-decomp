@@ -1525,7 +1525,7 @@ void math_getActorAim(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir,
     if ((actor->character_type == 150) && (actor->mv->matrix_physics != 0)) {
         pitch = actor->mv->unk82 + 1024;
     } else {
-        pitch = actor->unk1D1 * 200;
+        pitch = actor->aimPitch * 200;
     }
     // matching: this scope with its unused pad is a uopt block boundary, and the dead store to
     // pitch keeps pitchDeg from being copy-propagated

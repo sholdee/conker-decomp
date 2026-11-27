@@ -559,7 +559,7 @@ Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass) {
             continue;
         }
         owner = collision_findObjectById(att->ownerId);
-        if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
+        if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->cullMask & (1 << view)) == (1 << view))) {
             att = next;
             continue;
         }
