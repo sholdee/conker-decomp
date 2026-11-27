@@ -76,6 +76,7 @@ licence.
 |------|--------|---------|-------|
 | IDO 5.3 (toolchain image) | Static recompilation of the IRIX IDO 5.3 C compiler: release v1.2 of <https://github.com/decompals/ido-static-recomp> (`ido-5.3-recomp-linux.tar.gz`, sha256 `ab5c7415…e506`) | ido-static-recomp has no licence. The recompiled programs are translations of SGI's proprietary IDO binaries | Not distributed in this repository. `tools/toolchain/Containerfile` downloads it |
 | `gzip-rare` (toolchain image) | GNU gzip from <https://github.com/mkst/gzip> at commit `f6f21831c51dd3d13c98f536e836aa1b43a0b0b2`, configured with `--enable-rare-deflate` (restores pre-1.5 deflate output) | GPL-3.0-or-later. Copyright (C) 2018 Free Software Foundation, Inc.; Copyright (C) 1993 Jean-loup Gailly | Not distributed in this repository. `tools/toolchain/Containerfile` builds it from that source |
+| mupen64plus (emulator image) | Release 2.6.0 bundle of <https://github.com/mupen64plus/mupen64plus-core> (`mupen64plus-bundle-linux64-2.6.0.tar.gz`, sha256 `37675357…3e3b`) | GPL-2.0-or-later | Not distributed in this repository. `tools/shifttest/Containerfile` downloads it for the emulator shift test |
 
 ## Git submodules (not vendored; fetched from upstream)
 

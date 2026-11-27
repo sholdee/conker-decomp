@@ -1,0 +1,15 @@
+# The emulator image for tools/shifttest/shift_test.sh: mupen64plus 2.6.0 (GPL-2.0-or-later) with the
+# Rice video plugin, the HLE RSP plugin and the core's dummy audio and input, under a virtual X server
+# (xvfb). The release bundle is downloaded at build time and checked against a pinned sha256. Nothing
+# of it is stored in this repository.
+FROM docker.io/library/ubuntu:24.04@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1e07929e6b
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+      xvfb xauth libsdl2-2.0-0 libpng16-16t64 libfreetype6 libgl1 libglu1-mesa libgl1-mesa-dri \
+      libminizip1t64 imagemagick \
+ && rm -rf /var/lib/apt/lists/*
+ARG M64P_URL=https://github.com/mupen64plus/mupen64plus-core/releases/download/2.6.0/mupen64plus-bundle-linux64-2.6.0.tar.gz
+ARG M64P_SHA256=37675357fb85f62e0875a75248437a211e8b89a4ce286826ef287ab750d13e3b
+RUN curl -fsSL -o /tmp/m64p.tar.gz "$M64P_URL" && echo "$M64P_SHA256  /tmp/m64p.tar.gz" | sha256sum -c - \
+ && mkdir -p /opt/m64p && tar -xzf /tmp/m64p.tar.gz -C /opt/m64p --strip-components=1 && rm /tmp/m64p.tar.gz
+WORKDIR /opt/m64p
