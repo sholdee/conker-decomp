@@ -393,7 +393,7 @@ typedef struct BulletState {
     /* 0x084 */ struct SpriteParticle *follow;    /* weapon_spawnBulletSprite (game/Weapon/BulletParticle/bulletparticle.c) */
     /* 0x088 */ struct BulletParticle *particle;  /* weapon_spawnBulletParticle's particle; it follows the bullet until
                                                   * weapon_releaseBullet clears its bullet */
-    /* 0x08C */ struct BloodTrail *bloodTrail;    /* weapon_startBulletTrail, NULL on split screens */
+    /* 0x08C */ struct BloodTrail *bloodTrail;    /* weapon_startBulletTrail; NULL with three or more views (gScreenLayout >= 2) or gPlayerCount >= 4 */
     /* 0x090 */ u16 sound;
     /* 0x092 */ u8 impactType;
     /* 0x093 */ u8 pad93;

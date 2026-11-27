@@ -460,7 +460,7 @@ void attach_updateAll(void) {
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
 ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
-                          s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
+                          s32 setId, s32 handler, const u16 *ownerStates, s32 animBank, s32 parentSet, s32 parentMtx) {
     ModelAttachment *att;
     ModelAttachment *next;
     s32 err;
@@ -513,7 +513,7 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
     att->ownerStates[0] = ownerStates[0];
     att->ownerStates[1] = ownerStates[1];
     att->ownerStates[2] = ownerStates[2];
-    att->animBank = unk17;
+    att->animBank = animBank;
     att->anim = NULL;
     att->unk15 = unk15;
     att->unk16 = unk16;

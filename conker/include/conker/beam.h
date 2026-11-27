@@ -652,17 +652,17 @@ Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex);
 /* game/Beam/Tracer/tracer.c */
 void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist, f32 halfWidth,
                    f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime, Actor *owner, u8 ownerId,
-                   u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE, f32 startX, f32 startY, f32 startZ, f32 endX,
+                   u8 bone, s32 ownerTag, u8 impactEffect, u8 hitsObjects, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ);
 void beam_updateTracer(Game10EF60Effect *effect);
 Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view);
 s32 func_150E2DA4(s32 arg0, s32 arg1);
 void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
-                   f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE);
+                   f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 hitsObjects);
 void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
-                   f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length, s32 unkFE,
+                   f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length, s32 hitsObjects,
                    f32 speed);
-s32 beam_endTracerDraw(s32 a0, s32 a1, s16 a2);
+s32 beam_endTracerDraw(s32 gfx, s32 type, s16 view);
 void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
 extern AimImpact gAimImpacts[4];  /* aim-impact slots (effect_spawnMaterialImpact / effect_sprayDebris index them; 0xFF = none) */

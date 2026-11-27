@@ -28,7 +28,7 @@ s32 attach_removeFromSet(Actor *owner, s32 setId, s32 index);
 s32 attach_removeAll(Actor *owner);
 void attach_updateAll(void);
 ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
-                               s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx);
+                               s32 setId, s32 handler, const u16 *ownerStates, s32 animBank, s32 parentSet, s32 parentMtx);
 void attach_setOffset(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ);
 Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass);
 Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 reflections);
