@@ -7,7 +7,7 @@ Reads tools/accounting.tsv (every function: size, origin, object) and conker/con
 slice). No ROM and no build are needed. Writes into OUTDIR:
   progress.json          the figures
   treemap.svg            one rectangle per source file, sized by its code bytes, grouped by segment and
-                         area, coloured by how it matches (C or proven hand-written asm)
+                         area, coloured by how it matches (C or hand-written asm)
   badge-*.svg            code matched, fully linked, functions named, data in source
 `--linked` comes from the caller (CI runs it only after the gate, whose linkcheck passed).
 """
@@ -165,7 +165,7 @@ def treemap(rows, figures, width=1200, height=720):
            f'<rect x="10" y="27" width="12" height="12" fill="{COLOURS["c"]}"/>'
            f'<text x="27" y="38" font-size="11" fill="#e6edf3">C, byte-identical ({figures["c_bytes"]:,} bytes)</text>',
            f'<rect x="300" y="27" width="12" height="12" fill="{COLOURS["hasm"]}"/>'
-           f'<text x="317" y="38" font-size="11" fill="#e6edf3">proven hand-written asm ({figures["hasm_bytes"]:,} bytes)</text>']
+           f'<text x="317" y="38" font-size="11" fill="#e6edf3">hand-written asm ({figures["hasm_bytes"]:,} bytes)</text>']
     gitems = sorted(((sum(v for v, _ in g), (name, g)) for name, g in groups.items()), key=lambda t: -t[0])
     for gx, gy, gw, gh, (gname, members) in squarify(gitems, 0, head, width, height):
         pad = 14 if gw > 60 and gh > 30 else 0

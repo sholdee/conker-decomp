@@ -2208,14 +2208,11 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
 void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index,
                    s32 victimSlot, u8 damageMask) {
     u8 reaction;
+    u8 tmp;
     s32 slot;
     Actor *savedActor;
     s32 savedIdx;
-    u8 tmp;
     s32 v;
-    ActorCtl *movement;
-    Actor *other;
-    struct S { void *a; u8 b; } msg;
 
     if (hit[index].unk0 & 0x80) {
         reaction = hit[index].unk0 & 0x7F;
@@ -2253,8 +2250,8 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
     }
     if (victim->type == 1) {
         {
-            /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
-            extern s32 D_800ZZZZ;
+            ActorCtl *movement;
+
             savedActor = gCurrentActor;
             savedIdx = dc_glbl_CharNum;
             gCurrentActor = victim;
@@ -2277,8 +2274,8 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         tmp = victim->attach_char;
         victim->unk137 = 0;
         if (tmp != 0) {
-            /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
-            extern s32 D_800ZZZZ;
+            Actor *other;
+
             v = tmp - 1;
             other = &movement_obj[(u8)v];
 
@@ -2314,14 +2311,16 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         gHitReactionProcs[v](attacker, victim, &reaction);
     }
     if (gIsMultiplayer != 0) {
+        Actor *other;
+
         tmp = reaction;
         v = attacker->owner;
         other = v != 0 ? &movement_obj[v - 1] : attacker;
         save_recordHit(other, victim, tmp);
     }
     {
-        /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
-        extern s32 D_800ZZZZ;
+        struct S { void *a; u8 b; } msg;
+
         msg.a = attacker;
         msg.b = attacker->unique_id;
         effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);

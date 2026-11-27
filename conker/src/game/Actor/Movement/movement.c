@@ -942,7 +942,7 @@ void actor_updatePlayer(Actor *actor) {
     TriggerZone *climb;
     TriggerZone *climbSpot;
     f32 climbTop;
-    u8 pad5; // matching: unused; keeps the original stack layout
+    f32 climbSpeed;
     f32 animSpeed;
     f32 stickY;
     u32 chance;
@@ -999,7 +999,7 @@ void actor_updatePlayer(Actor *actor) {
     Rope *path;
     u16 dirAngle;
     u16 otherFacing;
-    f32 tiltDeg;
+    f32 heightDiff;
     f32 turnLean;
     f32 prevSteer;
     s16 ledgeAngle;
@@ -1007,8 +1007,6 @@ void actor_updatePlayer(Actor *actor) {
     f32 ledgeY;
     f32 splashSpeed;
     s32 sound;
-    f32 climbSpeed;
-    f32 heightDiff;
 
     moveSpeed = 0.0f;
     pushAnim = 0;
@@ -1468,18 +1466,15 @@ void actor_updatePlayer(Actor *actor) {
         } else {
             if ((actor->mv->rt_context_b == 2) || (actor->mv->rt_context_b == 0x13) || (actor->mv->rt_context_b == 0xA) || (actor->mv->rt_context_b == 0x34)) {
                 if (actor->mv->AimState != 0) {
+                    f32 tiltDeg;
+
                     tiltDeg = -actor->mv->aimPitch;
                     if ((actor->mv->rt_context_b == 2) || (actor->mv->rt_context_b == 0x13)) {
                         tiltDeg += 30.0f;
                     } else {
                         tiltDeg = -tiltDeg;
                     }
-                    {
-                        /* matching: a declaration makes this an IDO -g3 scope block (register choice); the block uses no global, so it declares a type */
-                        typedef s32 blk_t;
-
-                        steer = (s8) tiltDeg;
-                    }
+                    steer = (s8) tiltDeg;
                 } else {
                     steer = (gCurrentPad->stick_y / 2);
                 }
@@ -1738,14 +1733,12 @@ void actor_updatePlayer(Actor *actor) {
                     actor->mv->swing_zvel = offsetZ + gHitAttackerZ;
                     actor->mv->gpoint = 2;
                 } else {
+                    s32 pad; // matching: an unused local makes this block an IDO -g3 scope (register choice)
+
                     actor->unk10B &= ~0x40;
                     actor->speed = 30.0f;
                     actor->yspd = 90.0f;
                     actor->ygrav = 4.0f;
-                    {
-                        /* matching: a declaration makes this an IDO -g3 scope block (register choice); the block uses no global, so it declares a type */
-                        typedef s32 blk_t;
-                    }
                 }
             }
             if (actor->unk10B & 0x80) {

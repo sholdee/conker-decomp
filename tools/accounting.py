@@ -10,7 +10,7 @@ It exits non-zero if anything is left over: a GLOBAL_ASM stub, an inline GLOBAL_
 asm segment outside src/, or a hasm function with no proof.
 
 Proof rules (see AGENTS.md "Hand-written asm"). The rules marked * are computed from the instructions here;
-every computed rule was checked to occur 0 times in the 5,746 functions compiled by IDO 5.3.
+every computed rule was checked to occur 0 times in the 5,761 functions compiled by IDO 5.3.
   a  source-identical      the SDK's own .s, assembled by IDO 5.3, gives the same bytes (tools/hasm_proofs.tsv)
   b* unemittable           cop0/TLB/cache/sync/syscall/eret, 64-bit ops, trapping add/addi/sub, $k0/$k1
   c  uninit-read           dataflow: reads a register that is no ABI input and not written first (hasm_proofs.tsv)
@@ -169,6 +169,9 @@ def computed_rules(start, ins):
 def strip_c(text):
     """C text with comments replaced by spaces (newlines kept), scanned in order like the compiler does:
     a `/*` inside a `//` comment or a string does not open a comment, and the reverse."""
+    # translation phases 1-2 first: a ??/ trigraph is a backslash, and backslash-newline joins two lines
+    # (so a comment can end in "*\\" + newline + "/")
+    text = re.sub(r"(?:\\|\?\?/)\r?\n", "", text.replace("??/", "\\"))
     out, i, n = [], 0, len(text)
     while i < n:
         c = text[i]
@@ -241,16 +244,38 @@ def main():
     pieces, insns = functions()
     # rules are computed on runs: a piece that is not an object start and not an entry point belongs to the
     # run of the piece before it (see entry_points)
+    # A run starts only at an entry point or where the code changes kind (compiled C, hand-written asm or
+    # padding); an object start alone does not begin one. So a compiled function cut into pieces, by labels
+    # or by splitting it across .s files, stays one run, and its pieces cannot prove each other (g, d, k).
     entries = entry_points(pieces, insns)
+
+    def kind_of(name, o):
+        if name in pads:
+            return "pad"
+        return "c" if o.endswith(".c.o") else "hasm" if o.endswith(".s.o") and o.startswith("build/src/") else "other"
+    def ends_routine(ins):
+        """The code before ends in a return or an unconditional jump (with its delay slot)."""
+        ins = list(ins)
+        while ins and (ins[-1][1], ins[-1][2]) in (("nop", ""), ("sll", "zero,zero,0x0")):
+            ins.pop()  # alignment padding after the routine
+        if len(ins) < 2:
+            return False
+        op, args = ins[-2][1], ins[-2][2]
+        return op in ("jr", "j", "eret") or (op == "beq" and args.startswith("zero,zero,"))
     run_of, runs = {}, collections.OrderedDict()
-    prev_obj = cur = None
+    prev_kind = prev_obj = cur = None
     for name, start, ins, o, _ in pieces:
-        if o != prev_obj or start in entries or cur is None:
+        k = kind_of(name, o)
+        # a 16-aligned object start after a finished routine is a routine of its own, even if nothing calls
+        # it; a compiled function cut in the middle does not end in a return there, so it stays one run
+        new_object = o != prev_obj and start % 16 == 0 and cur is not None and ends_routine(runs[cur])
+        prev_obj = o
+        if start in entries or k != prev_kind or cur is None or new_object:
             cur = start
             runs[cur] = []
         runs[cur].extend(ins)
         run_of[start] = cur
-        prev_obj = o
+        prev_kind = k
     run_rules = {r: computed_rules(r, i) for r, i in runs.items()}
     for name, start, ins, o, _ in pieces:
         seg = "init" if start < 0x15000000 else "game"
@@ -258,6 +283,8 @@ def main():
             seg = "debugger"
         if name in pads:
             kind = "pad"
+            if any((op, args) not in (("nop", ""), ("sll", "zero,zero,0x0")) for _, op, args in ins):
+                problems.append(f"padding block contains code: {name}")
         elif o.endswith(".c.o"):
             kind = "c"
         elif o.endswith(".s.o") and o.startswith("build/src/"):

@@ -48,7 +48,7 @@ game text.
 ![The US code by source file](../../raw/progress/treemap.svg)
 
 The map shows every source file, sized by its code. Green is C that compiles to byte-identical code,
-and blue is proven hand-written assembly. CI regenerates it, and the badges, from the committed files
+and blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it, and the badges, from the committed files
 after each change to `master` (`tools/progress.py`).
 
 ## Building
@@ -121,14 +121,17 @@ reviewed by the maintainer. They followed the runbooks in [AGENTS.md](AGENTS.md)
 Each agent worked in its own workspace (`tools/mw.py`, `tools/cw.py`). Before a change landed, the
 whole ROM had to build byte-identically.
 
-Nothing is taken on trust. CI rebuilds the ROM on every change, and its checks run from the trusted
-base branch:
-- Every function is compiled C or hand-written assembly with a recorded proof.
-- No address is pinned, and no pointer is written as a number.
+The project relies on mechanical checks rather than on the agents' word. CI rebuilds the ROM on every
+change, and its checks run from the trusted base branch:
+- Every function is compiled C or hand-written assembly with a recorded proof (or, for 8 pieces,
+  search evidence).
+- No address is pinned, and no pointer or address is written as a number, in data or in code.
+- The committed accounting manifest agrees with the build.
 - The number of compiler warnings does not rise.
 
-Before release, an independent AI audit tried to defeat these checks and to disprove the claims in this
-README. The problems it found are fixed.
+Independent AI audits tried to defeat these checks and to disprove the claims in this README. Each round
+found ways past the checks, and each was closed. The checks are strong evidence, not a proof: if you
+find a way past one, please open an issue.
 
 ## Contributing
 

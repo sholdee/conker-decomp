@@ -4,18 +4,21 @@
     manifest_cmp.py COMMITTED.tsv COMPUTED.tsv
 
 The gate runs the trusted tools/accounting.py into a scratch file and compares it with the committed
-tools/accounting.tsv. What must agree is the coverage: which address ranges are matched C, hand-written
-asm or padding. The row boundaries and the proof column can change with the checker's version (for
-example when it learns to cut at another kind of function start), so they are not compared; the
-checker's exit code already requires a proof for every hand-written piece. Exit status 1 on a difference.
+tools/accounting.tsv. Two things must agree:
+- the coverage: which address ranges are matched C, hand-written asm or padding;
+- the name and size of every row that both manifests have at the same address (the progress figures
+  count names from the committed manifest).
+Rows that only one side has, and the proof column, can change with the checker's version (for example
+when it learns to cut at another kind of function start); the checker's exit code already requires a
+proof for every hand-written piece. Exit status 1 on a difference.
 """
 import sys
 
 
-def ranges(path):
+def ranges(lines):
     """Merged (start, end, origin) ranges of a manifest."""
     rows = []
-    for line in open(path):
+    for line in lines:
         if not line.strip() or line.startswith("#"):
             continue
         f = line.rstrip("\n").split("\t")
@@ -30,10 +33,27 @@ def ranges(path):
     return [tuple(r) for r in out]
 
 
+def rows(lines):
+    out = {}
+    for line in lines:
+        if line.strip() and not line.startswith("#"):
+            f = line.rstrip("\n").split("\t")
+            out[int(f[1], 16)] = (f[0], int(f[2]))
+    return out
+
+
 def main():
-    a, b = ranges(sys.argv[1]), ranges(sys.argv[2])
+    # each file is read once, so that a pipe (bash process substitution) works too
+    la, lb = open(sys.argv[1]).read().splitlines(True), open(sys.argv[2]).read().splitlines(True)
+    a, b = ranges(la), ranges(lb)
+    ra, rb = rows(la), rows(lb)
+    bad = [(k, ra[k], rb[k]) for k in sorted(set(ra) & set(rb)) if ra[k] != rb[k]]
+    for k, x, y in bad[:10]:
+        print(f"row 0x{k:08X}: committed {x[0]} ({x[1]} bytes), computed {y[0]} ({y[1]} bytes)")
+    if bad:
+        sys.exit(f"{len(bad)} rows differ: run tools/accounting.py and commit tools/accounting.tsv")
     if a == b:
-        print(f"manifest coverage agrees: {len(a)} ranges")
+        print(f"manifest coverage agrees: {len(a)} ranges, {len(set(ra) & set(rb))} rows")
         return
     for x, y in zip(a, b):
         if x != y:
