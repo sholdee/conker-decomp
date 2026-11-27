@@ -313,7 +313,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         obj->energy = player_getStat(obj->playernumber, 4);
         obj->underwaterTime = gCarriedUnderwaterTime;
         func_150829D8(obj);
-        func_15083384(obj, player_getStat(idx, 1));
+        collision_applyCharacterVariant(obj, player_getStat(idx, 1));
     }
     if (((obj->unk66 & 0xC) == 8) || ((obj->unk66 & 0xC) == 0xC)) {
         collision_allocActorLights(obj);
@@ -395,7 +395,7 @@ void collision_allocActorLights(Actor *obj) {
     }
 }
 
-void func_15083384(Actor *obj, s32 arg1) {
+void collision_applyCharacterVariant(Actor *obj, s32 arg1) {
     s32 partSet;
     s32 group;
     ActorCtl *ext;

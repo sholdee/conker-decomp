@@ -70,7 +70,7 @@ void collision_initMapBackground(s32 arg0);
 void collision_addDlTris(Gfx *dl);
 void collision_initTriArena(void);
 void collision_allocQuadTree(void);
-void func_15001B08(void);
+void collision_allocQuadTreeChecksumEnd(void);
 QuadNode *collision_newQuadNode(void);
 void collision_quadPutByte(u8 value);
 void collision_quadPutHalf(u16 value);
@@ -80,7 +80,7 @@ QuadNode *collision_buildQuadNode(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, 
 void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
 int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList);
 void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext);
-void func_150025FC(void);
+void collision_loadQuadNodeBitmap(void);
 void collision_beginMapTris(s32 map);
 void collision_endMapTris(s32 map);
 void collision_addDlTriCount(Gfx *dl);
@@ -91,7 +91,7 @@ s32 collision_buildVertexRuns(s32 map);
 void collision_setFloorReach(s32 map);
 s32 collision_xorScramble(s32 value);
 void collision_loadMapSettings(s32 map);
-void func_1500310C(void);
+void collision_loadMapSettingsChecksumEnd(void);
 extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
 
 /* game/Collision/CylinderSets/cylindersets.c */
@@ -179,7 +179,7 @@ void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange);
 void func_150829D8(Actor *obj);
 s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
 void collision_allocActorLights(Actor *obj);
-void func_15083384(Actor *obj, s32 arg1);
+void collision_applyCharacterVariant(Actor *obj, s32 arg1);
 void *collision_createPartSet(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 void collision_removePartSet(Actor *parent, s32 setId);
 void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2);

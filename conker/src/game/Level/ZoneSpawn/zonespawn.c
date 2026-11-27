@@ -386,7 +386,7 @@ static s32 (*gNeutralZoneSpawnHandlers[23])() = {
     level_spawnRandomPointZone,
     level_spawnAreaEmitterZone,
     level_registerSprayAreaZone,
-    func_15015644,
+    level_spawnSparkRegionZone,
     NULL,
     level_spawnZoneSpray,
 };
@@ -1145,7 +1145,7 @@ void level_spawnBoltArcZone(TriggerZone *obj) {
     }
 }
 
-s32 func_15015644(TriggerZone *obj) {
+s32 level_spawnSparkRegionZone(TriggerZone *obj) {
     struct {
         TriggerZone *unk0;
         f32 unk4;

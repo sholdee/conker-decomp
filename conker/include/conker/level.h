@@ -256,7 +256,7 @@ void level_setup31(void);
 
 /* game/Level/LevelSetup13/levelsetup13.c */
 void level_setup13(void);
-void func_1501175C(Actor *owner, u8 arg1, s32 arg2);
+void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2);
 void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2);
 
 /* game_3EFB0.c */
@@ -290,7 +290,7 @@ void level_startAmbientColourCycle(s32 arg0);
 void level_attachDripEmitter(Actor *arg0);
 
 /* game/Level/GroundParticles/groundparticles.c */
-void func_150121C0(LightEffect *effect);
+void level_spawnLightAlphaModel(LightEffect *effect);
 
 /* game_3FBD0.c */
 u8 level_getEffectKind(void);
@@ -332,7 +332,7 @@ s32 level_spawnZoneEffect(TriggerZone *obj);
 s32 level_spawnBoltRainZone(TriggerZone *obj);
 s32 level_spawnBoltZone(TriggerZone *obj);
 void level_spawnBoltArcZone(TriggerZone *obj);
-s32 func_15015644(TriggerZone *obj);
+s32 level_spawnSparkRegionZone(TriggerZone *obj);
 s32 level_spawnRopeZone(TriggerZone *obj);
 extern const s32 gPointGlowTextures[5]; // defined after level_spawnPointGlowZone, which reads them: their .rodata follows its const local
 extern const s32 gPointGlowRenderModes[5];

@@ -4354,7 +4354,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
         if (kind == 0x3B) {
             obj->swapTexture[0] = slotIdx + 1;
         }
-        func_15083384(obj, gMenuCharacterTypes[charIdx].unk6);
+        collision_applyCharacterVariant(obj, gMenuCharacterTypes[charIdx].unk6);
         actor_playAnim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     }
 }

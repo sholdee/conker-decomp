@@ -186,7 +186,7 @@ static EffectDefList gAttachedBurstLists[] = {
 };
 
 /* Spawns the effects in gAttachedBurstLists[0] and attaches each to `actor`. Also checksums the code from
-   collision_allocQuadTree up to func_15001B08 and, if it was modified, empties object list 35. */
+   collision_allocQuadTree up to collision_allocQuadTreeChecksumEnd and, if it was modified, empties object list 35. */
 void effect_spawnAttachedBursts(Actor *actor) {
     u32 *p;
     u32 sum;
@@ -197,7 +197,7 @@ void effect_spawnAttachedBursts(Actor *actor) {
     idx = 0;
     if (actor != NULL) {
         sum = 0;
-        end = (u32)func_15001B08;
+        end = (u32)collision_allocQuadTreeChecksumEnd;
         for (p = (u32 *)collision_allocQuadTree; (u32)p < end; p++) {
             sum ^= *p;
             sum <<= 1;

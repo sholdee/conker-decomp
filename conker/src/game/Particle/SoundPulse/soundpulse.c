@@ -53,7 +53,7 @@ PulseParticle *particle_spawnSoundPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f 
 
         sum = 0;
         p = (u32 *)collision_loadMapSettings;
-        end = (u32 *)func_1500310C;
+        end = (u32 *)collision_loadMapSettingsChecksumEnd;
         for (; p < end; p++) {
             sum += *p;
             sum <<= 1;

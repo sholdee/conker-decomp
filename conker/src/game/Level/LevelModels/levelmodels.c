@@ -883,7 +883,7 @@ void level_buildCollisionQuadTrees(void) {
     collision_buildQuadTree(1, NULL, NULL);
     collision_buildLeafQuadTree(2);
     collision_selectMap(0);
-    func_150025FC();
+    collision_loadQuadNodeBitmap();
     gMeshBuilt = 1;
 }
 

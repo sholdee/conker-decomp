@@ -121,7 +121,7 @@ void level_setup13(void) {
     }
 }
 
-/* Per-owner data stored in the effect object func_1501175C spawns. */
+/* Per-owner data stored in the effect object level_spawnModelBeam spawns. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 id;
@@ -167,7 +167,7 @@ typedef struct MotionEffect {
 } MotionEffect;
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
-void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
+void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2) {
     ControllerEffect *object;
     Controller data;
     Controller *controller;

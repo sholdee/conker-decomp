@@ -559,7 +559,7 @@ collision_initMapBackground	0x15000AD0	2448	game	c		build/src/game/Collision/Map
 collision_addDlTris	0x15001460	1296	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_initTriArena	0x15001970	152	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_allocQuadTree	0x15001A08	256	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
-func_15001B08	0x15001B08	8	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
+collision_allocQuadTreeChecksumEnd	0x15001B08	8	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_newQuadNode	0x15001B10	76	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_quadPutByte	0x15001B5C	48	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_quadPutHalf	0x15001B8C	60	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
@@ -569,7 +569,7 @@ collision_buildQuadNode	0x15001DE0	552	game	c		build/src/game/Collision/QuadTree
 collision_writeLeafTris	0x15002008	576	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_collectBoxTris	0x15002248	792	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_threadQuadTree	0x15002560	156	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
-func_150025FC	0x150025FC	200	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
+collision_loadQuadNodeBitmap	0x150025FC	200	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_beginMapTris	0x150026C4	36	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_endMapTris	0x150026E8	60	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_addDlTriCount	0x15002724	48	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
@@ -580,7 +580,7 @@ collision_buildVertexRuns	0x150028BC	1668	game	c		build/src/game/Collision/QuadT
 collision_setFloorReach	0x15002F40	96	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_xorScramble	0x15002FA0	20	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 collision_loadMapSettings	0x15002FB4	344	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
-func_1500310C	0x1500310C	20	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
+collision_loadMapSettingsChecksumEnd	0x1500310C	20	game	c		build/src/game/Collision/QuadTree/quadtree.c.o
 level_rebaseVtxColorSet	0x15003120	204	game	c		build/src/game/Level/LevelModels/levelmodels.c.o
 level_loadModels	0x150031EC	712	game	c		build/src/game/Level/LevelModels/levelmodels.c.o
 level_resetTextureTable	0x150034B4	188	game	c		build/src/game/Level/LevelModels/levelmodels.c.o
@@ -815,7 +815,7 @@ level_setup37	0x15011170	448	game	c		build/src/game/Level/LevelSetup37/levelsetu
 level_setup16	0x15011330	48	game	c		build/src/game/Level/LevelSetup16/levelsetup16.c.o
 level_setup31	0x15011360	128	game	c		build/src/game/Level/LevelSetup31/levelsetup31.c.o
 level_setup13	0x150113E0	892	game	c		build/src/game/Level/LevelSetup13/levelsetup13.c.o
-func_1501175C	0x1501175C	796	game	c		build/src/game/Level/LevelSetup13/levelsetup13.c.o
+level_spawnModelBeam	0x1501175C	796	game	c		build/src/game/Level/LevelSetup13/levelsetup13.c.o
 level_spawnFlashBurst	0x15011A78	136	game	c		build/src/game/Level/LevelSetup13/levelsetup13.c.o
 level_queueObjectDrop17	0x15011B00	148	game	c		build/src/game/Level/LevelSetup17/levelsetup17.c.o
 level_setup17	0x15011B94	172	game	c		build/src/game/Level/LevelSetup17/levelsetup17.c.o
@@ -830,7 +830,7 @@ level_startAmbientPulse	0x15011FA0	128	game	c		build/src/game/Level/AmbientActio
 level_spawnZoneAreaEmitter	0x15012020	144	game	c		build/src/game/Level/ZoneAreaEmitter/zoneareaemitter.c.o
 level_startAmbientColourCycle	0x150120B0	156	game	c		build/src/game/Level/AmbientColourCycle/ambientcolourcycle.c.o
 level_attachDripEmitter	0x1501214C	116	game	c		build/src/game/Level/AmbientColourCycle/ambientcolourcycle.c.o
-func_150121C0	0x150121C0	432	game	c		build/src/game/Level/GroundParticles/groundparticles.c.o
+level_spawnLightAlphaModel	0x150121C0	432	game	c		build/src/game/Level/GroundParticles/groundparticles.c.o
 view_buildOrthoMatrices	0x15012370	256	game	c		build/src/game/View/ViewOrtho/viewortho.c.o
 view_initGroundDecalQueue	0x15012470	48	game	c		build/src/game/View/ViewOrtho/viewortho.c.o
 level_initPipeBurstPoints	0x150124A0	640	game	c		build/src/game/Level/PipeBurstSetup/pipeburstsetup.c.o
@@ -871,7 +871,7 @@ level_spawnZoneEffect	0x15015104	208	game	c		build/src/game/Level/ZoneSpawn/zone
 level_spawnBoltRainZone	0x150151D4	300	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnBoltZone	0x15015300	84	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnBoltArcZone	0x15015354	752	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
-func_15015644	0x15015644	176	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
+level_spawnSparkRegionZone	0x15015644	176	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnRopeZone	0x150156F4	540	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 func_15015910	0x15015910	16	game	c		build/src/game/Text/FontLoad/fontload.c.o
 text_loadFont	0x15015920	280	game	c		build/src/game/Text/FontLoad/fontload.c.o
@@ -2205,7 +2205,7 @@ collision_trySpawnRecords	0x1508295C	124	game	c		build/src/game/Collision/Spawn/
 func_150829D8	0x150829D8	108	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_spawnObject	0x15082A44	2152	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_allocActorLights	0x150832AC	216	game	c		build/src/game/Collision/Spawn/spawn.c.o
-func_15083384	0x15083384	484	game	c		build/src/game/Collision/Spawn/spawn.c.o
+collision_applyCharacterVariant	0x15083384	484	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_createPartSet	0x15083568	356	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_removePartSet	0x150836CC	264	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_setObjectModel	0x150837D4	280	game	c		build/src/game/Collision/Spawn/spawn.c.o

@@ -1550,7 +1550,7 @@ void effect_attachPulseEffect(Actor *obj) {
 }
 
 void func_1514F590(Actor *obj) {
-    func_1501175C(obj, 0xFF, 1);
+    level_spawnModelBeam(obj, 0xFF, 1);
     level_spawnFlashBurst(obj, 0xFF, 1);
 }
 

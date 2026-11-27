@@ -6,7 +6,7 @@
 
 static const Vec3f D_80096550 = { -21.0f, 1631.0f, -1535.0f };
 
-void func_150121C0(LightEffect *effect) {
+void level_spawnLightAlphaModel(LightEffect *effect) {
     ModelParticle *ret;
     s32 i;
     struct {

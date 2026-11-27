@@ -239,7 +239,7 @@ void collision_allocQuadTree(void) {
     }
 }
 
-void func_15001B08(void) {
+void collision_allocQuadTreeChecksumEnd(void) {
 }
 
 /** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
@@ -567,7 +567,7 @@ void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext) {
  * func_150183D0 with a row stride of ceil(gMap0QuadNodeCount / 8) bytes, rounded up to 16. Clears
  * D_800BE5D0 when the map has no such resource.
  */
-void func_150025FC(void) {
+void collision_loadQuadNodeBitmap(void) {
     s32 width;
     s32 height;
     u8 *res0;
@@ -892,5 +892,5 @@ void collision_loadMapSettings(s32 map) {
     }
 }
 
-void func_1500310C(void) {
+void collision_loadMapSettingsChecksumEnd(void) {
 }
