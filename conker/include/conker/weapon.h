@@ -112,8 +112,8 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
                  Actor *obj, ModelAttachment *gun);
 extern const Vec3f gAttachedGunMuzzle;
 extern const Vec3f gAttachedGunShotStart;
-extern const Vec3f gAttachedGunOrigin;
-extern const Vec3f gAttachedGunDirPoint;
+extern const Vec3f gAttachedGunDirParticleFrom;
+extern const Vec3f gAttachedGunDirParticleTo;
 extern const Vec3f gAttachedGunFlashPoints[2][6];
 
 /* game/Weapon/GunShot/gunshot.c */
@@ -126,8 +126,8 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 unused);
 void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 fxOwner, s32 fxList);
 extern u8 gGunMuzzleBone;
 extern const Vec3f gGunMuzzleStart;
-extern const Vec3f gGunShotOrigin;
-extern const Vec3f gGunShotDirPoint;
+extern const Vec3f gGunDirParticleFrom;
+extern const Vec3f gGunDirParticleTo;
 
 /* game/Weapon/BulletParticle/bulletparticle.c */
 BulletParticle *weapon_spawnBulletParticle(Bullet *bullet);

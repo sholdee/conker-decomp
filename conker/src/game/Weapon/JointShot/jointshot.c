@@ -12,8 +12,8 @@
 static const s32 gJointShotMatrixOffsets[2] = { 0x240, 0x100 };
 static const Vec3f gJointShotMuzzles[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
 static const Vec3f gJointShotBeamEnds[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
-static const Vec3f gJointShotOrigins[2] = { { -6.0f, -38.0f, 32.0f }, { 6.0f, -38.0f, 32.0f } };
-static const Vec3f gJointShotDirPoints[2] = { { -31.0f, -38.0f, 56.0f }, { 31.0f, -38.0f, 57.0f } };
+static const Vec3f gJointShotDirParticleFroms[2] = { { -6.0f, -38.0f, 32.0f }, { 6.0f, -38.0f, 32.0f } };
+static const Vec3f gJointShotDirParticleTos[2] = { { -31.0f, -38.0f, 56.0f }, { 31.0f, -38.0f, 57.0f } };
 static const Vec3f gJointShotStarts[2] = { { 3.0f, 11.0f, 27.0f }, { -4.0f, 11.0f, 27.0f } };
 /* not referenced: five more point pairs */
 static const Vec3f D_800AAB80[5][2] = {
@@ -68,8 +68,8 @@ Game1EF500Trail *weapon_fireJointShot(Actor *obj, u8 side, u8 jointAim, ModelAtt
         results[3] = &shotPos;
         results[4] = &aim;
         points[0] = &gJointShotMuzzles[side];
-        points[1] = &gJointShotOrigins[side];
-        points[2] = &gJointShotDirPoints[side];
+        points[1] = &gJointShotDirParticleFroms[side];
+        points[2] = &gJointShotDirParticleTos[side];
         points[3] = &gJointShotStarts[side];
         points[4] = &gJointShotBeamEnds[side];
         if (attachment != NULL) {
@@ -199,8 +199,8 @@ void weapon_fireJointShotProjectile(Actor *obj, u8 side, u8 fxOwner, s32 fxList)
 
                 matrix = (u8 *)obj->ob_matrix_ptr + gJointShotMatrixOffsets[side];
                 points[0] = &gJointShotMuzzles[side];
-                points[1] = &gJointShotOrigins[side];
-                points[2] = &gJointShotDirPoints[side];
+                points[1] = &gJointShotDirParticleFroms[side];
+                points[2] = &gJointShotDirParticleTos[side];
                 results[0] = &origin;
                 results[1] = &start;
                 results[2] = &dir;

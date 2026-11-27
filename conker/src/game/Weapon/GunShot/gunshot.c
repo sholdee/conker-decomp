@@ -11,8 +11,8 @@
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f gGunMuzzleEnd = { 10.0f, -155.0f, 99.0f };
 /* Muzzle points (from, to) used by particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
-const Vec3f gGunShotOrigin = { -1.0f, -38.0f, 38.0f };
-const Vec3f gGunShotDirPoint = { -26.0f, -23.0f, 51.0f };
+const Vec3f gGunDirParticleFrom = { -1.0f, -38.0f, 38.0f };
+const Vec3f gGunDirParticleTo = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
 static const TextureChoices gFannedParticleTextures = { { 0x60, 0x61, 0x62, 0x63 } };
 
