@@ -3163,7 +3163,7 @@ void actor_startRiderJump(Actor *mount, f32 yVelocity, f32 gravity, s32 mountWal
 
 /**
  * Death handling for obj (called once its health is 0): picks the outcome from the
- * flag byte of its gModelDefs entry. Returns 0 only when unk10E is in 1..0xEF.
+ * flag byte of its gModelDefs entry. Returns 0 only when deathReaction is in 1..0xEF.
  */
 s32 actor_handleDeath(Actor *obj) {
     u8 flags;
@@ -3174,12 +3174,12 @@ s32 actor_handleDeath(Actor *obj) {
     }
 
     flags = gModelDefs[obj->character_type]->flags;
-    if ((obj->unk10E != 0) && (obj->unk10E < 0xF0)) {
+    if ((obj->deathReaction != 0) && (obj->deathReaction < 0xF0)) {
         actor_startKnockback(obj, 9);
     } else {
         s32 result = 0;
 
-        if ((obj->unk10E < 0xF0) && (flags & 0x20)) {
+        if ((obj->deathReaction < 0xF0) && (flags & 0x20)) {
             particle_spawnPuffQuad(obj->xpos, obj->ypos + 50.0f, obj->zpos, 0.5f, 0xFF, 0);
         }
         if (flags & 4) {

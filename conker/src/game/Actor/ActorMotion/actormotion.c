@@ -2392,7 +2392,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         if ((base[index].flags & 0x40) && (victim->type == 1)) {
             movement_obj[slot].mv->bitten = 8000;
         } else {
-            v = victim->unk23B;
+            v = victim->hitReactionOverride;
             if (v != 0) {
                 reaction = v;
             }
@@ -2903,8 +2903,8 @@ void actor_startKnockback(Actor *actor, u8 entryIdx) {
     actor->ygrav = entry->gravity;
     actor->stunned = 0xFE;
     actor->stunnednum = 0;
-    actor->stunnedseq = actor_findReaction(actor->unk10E & 0x7F, actor);
-    actor->unk10E = 0xFF;
+    actor->stunnedseq = actor_findReaction(actor->deathReaction & 0x7F, actor);
+    actor->deathReaction = 0xFF;
     actor_advanceReaction(dc_glbl_CharNum, actor);
 }
 

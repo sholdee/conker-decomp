@@ -1087,7 +1087,7 @@ struct Actor {
     /* 0x10A */ u8  lastAttacker; // slot of the last attacker | 0x80
     /* 0x10B */ u8  unk10B;
     /* 0x10C */ s16 reactionTimer; // also the carry height * 100 of a carried actor (actor_moveToHost)
-    /* 0x10E */ u8  unk10E;
+    /* 0x10E */ u8  deathReaction; // 1..0xEF: instead of dying, knockback with reaction kind (& 0x7F), once; >= 0xF0: none, no death puff
     /* 0x10F */ u8  unk10F;
     /* 0x110 */ u8  slideState;
     /* 0x111 */ u8  pad111;
@@ -1229,7 +1229,7 @@ struct Actor {
     /* 0x238 */ u8  stunEndScript;
     /* 0x239 */ s8  intelhitroute;
     /* 0x23A */ u8  pendingScript;
-    /* 0x23B */ u8  unk23B;
+    /* 0x23B */ u8  hitReactionOverride; // nonzero: replaces the reaction kind of a hit (actor_applyHit)
     /* 0x23C */ u8  nearRangeDefault;
     /* 0x23D */ u8  sightRange;
     /* 0x23E */ u8  arriveRange;

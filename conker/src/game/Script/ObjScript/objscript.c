@@ -721,7 +721,7 @@ void script_jumpIfTargetSlow(void) {
 }
 
 void script_setDeathReaction(void) {
-    gCurrentActor->unk10E = gScriptArg0;
+    gCurrentActor->deathReaction = gScriptArg0;
 }
 
 void script_playUntrackedSound(void) {
@@ -1761,7 +1761,7 @@ void script_setSpeedup(void) {
 }
 
 void script_setHitReaction(void) {
-    gCurrentActor->unk23B = gScriptArg0;
+    gCurrentActor->hitReactionOverride = gScriptArg0;
 }
 
 void func_15079F6C(void) {
