@@ -43,7 +43,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x94 */ u8 ownerId; /* owner->unique_id at spawn */
     /* 0x95 */ u8 pad95[3];
     /* 0x98 */ f32 scale;
-    /* 0x9C */ s8 expireHandler; /* index into D_8008FBD0, -1 for none */
+    /* 0x9C */ s8 expireHandler; /* index into gProjectileExpireHandlers, -1 for none */
     /* 0x9D */ u8 pad9D;
     /* 0x9E */ u16 sound;
     /* 0xA0 */ u8 soundEnabled;
@@ -111,9 +111,9 @@ s32 func_150FF6B4(Actor *obj, s32 self, s32 filterArg);
 u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
                  Actor *obj, ModelAttachment *gun);
 extern const Vec3f gAttachedGunMuzzle;
-extern const Vec3f D_800A205C;
-extern const Vec3f D_800A2068;
-extern const Vec3f D_800A2074;
+extern const Vec3f gAttachedGunShotStart;
+extern const Vec3f gAttachedGunOrigin;
+extern const Vec3f gAttachedGunDirPoint;
 extern const Vec3f gAttachedGunFlashPoints[2][6];
 
 /* game/Weapon/GunShot/gunshot.c */
@@ -126,8 +126,8 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 unused);
 void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 fxOwner, s32 fxList);
 extern u8 gGunMuzzleBone;
 extern const Vec3f gGunMuzzleStart;
-extern const Vec3f D_800A2148;
-extern const Vec3f D_800A2154;
+extern const Vec3f gGunShotOrigin;
+extern const Vec3f gGunShotDirPoint;
 
 /* game/Weapon/BulletParticle/bulletparticle.c */
 BulletParticle *weapon_spawnBulletParticle(Bullet *bullet);

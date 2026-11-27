@@ -209,7 +209,7 @@ s32 script_taskQuery(s32 id, s32 opcode, ScriptCmd *cmd) {
     case 29:
         mask = 0;
         for (j = 0; j < gPlayerCount; j++) {
-            if (D_80087270[j] != 10) {
+            if (gDefaultCharacters[j] != 10) {
                 mask |= 1 << j;
             }
         }

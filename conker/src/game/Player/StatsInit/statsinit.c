@@ -18,12 +18,12 @@ void player_initMatch(s16 mode, s16 playerMask) {
 
     for (i = 0; i < 16; i++) {
         if ((1 << i) & playerMask) {
-            player_setStat(i, 0, D_80087270[i]);
+            player_setStat(i, 0, gDefaultCharacters[i]);
             gHudBlockTarget = gHudBlockCount = 6;
             player_setStat(i, 5, gDefaultHealth);
-            player_setStat(i, 2, D_80087260);
+            player_setStat(i, 2, gDefaultLives);
             if (gIsMultiplayer != 0) {
-                player_setStat(i, 9, D_80087264);
+                player_setStat(i, 9, gDefaultScore);
             }
         }
         func_1501748C(playerMask);

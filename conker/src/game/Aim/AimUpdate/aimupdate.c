@@ -722,7 +722,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
     f32 bestDist;
     f32 pz;
     f32 distSq;
-    static u32 D_80084400 = 0; /* aim point the next scan starts from */
+    static u32 gAimPointScanStart = 0; /* aim point the next scan starts from */
 
     out[0] = -99999.0f;
     out[1] = -99999.0f;
@@ -785,11 +785,11 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         f32 dy;
         f32 dz;
 
-        if (D_80084400 >= gAimPointCount) {
-            D_80084400 = 0;
+        if (gAimPointScanStart >= gAimPointCount) {
+            gAimPointScanStart = 0;
         }
         if (gAimPointCount != 0) {
-            idx = D_80084400;
+            idx = gAimPointScanStart;
             bestIdx = -1;
             do {
                 point = &((AimPoint *)gAimPoints)[idx]; // matching: the no-op cast keeps the addu operand order
@@ -814,9 +814,9 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
                 if (idx == gAimPointCount) {
                     idx = 0;
                 }
-            } while (idx != D_80084400);
+            } while (idx != gAimPointScanStart);
             if (bestIdx != -1) {
-                D_80084400 = bestIdx;
+                gAimPointScanStart = bestIdx;
                 foundKind = 2;
             }
         }
@@ -1688,10 +1688,10 @@ void func_1503A60C(void) {
     mtx[3][2] = movement_obj[dc_glbl_CharNum].unk178;
 }
 
-static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
+static u8 gAimPassScaleBones[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
 
 /*
- * For object type 0x22: scales bone D_80084404[gAimPass] by 1 + unk20A / 64 in x and z (the inverse for
+ * For object type 0x22: scales bone gAimPassScaleBones[gAimPass] by 1 + unk20A / 64 in x and z (the inverse for
  * every pass after the first), keeping its translation.
  */
 void func_1503A678(void) {
@@ -1719,7 +1719,7 @@ void func_1503A678(void) {
             scale[2] = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
-        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[gAimPass] << 6));
+        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (gAimPassScaleBones[gAimPass] << 6));
         bone[3][3] = 1.0f;
         bone[0][3] = 0.0f;
         bone[1][3] = 0.0f;

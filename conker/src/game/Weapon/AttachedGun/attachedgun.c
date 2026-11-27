@@ -11,9 +11,9 @@
 const Vec3f gAttachedGunMuzzle = { 9.574001f, -124.071396f, 91.0238f };
 
 /* Muzzle-relative points in the gun's attachment space. */
-const Vec3f D_800A205C = { 9.679999f, -7.0199966f, 24.842f };
-const Vec3f D_800A2068 = { 1.4242005f, -6.4357996f, 24.477999f };
-const Vec3f D_800A2074 = { -14.875598f, -6.4357996f, 24.477999f };
+const Vec3f gAttachedGunShotStart = { 9.679999f, -7.0199966f, 24.842f };
+const Vec3f gAttachedGunOrigin = { 1.4242005f, -6.4357996f, 24.477999f };
+const Vec3f gAttachedGunDirPoint = { -14.875598f, -6.4357996f, 24.477999f };
 const Vec3f gAttachedGunFlashPoints[2][6] = { /* two random sets of flash points */
     {
         { 18.3144f, -117.26579f, 118.493004f },
@@ -282,9 +282,9 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
 
     set = math_random() & 1;
     src[0] = &gAttachedGunMuzzle;
-    src[1] = &D_800A2068;
-    src[2] = &D_800A2074;
-    src[3] = &D_800A205C;
+    src[1] = &gAttachedGunOrigin;
+    src[2] = &gAttachedGunDirPoint;
+    src[3] = &gAttachedGunShotStart;
     for (i = 0; i < 6; i++) {
         src[i + 4] = &gAttachedGunFlashPoints[set][i];
         dst[i + 4] = &points[i];

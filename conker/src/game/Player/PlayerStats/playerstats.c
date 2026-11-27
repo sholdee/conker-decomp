@@ -13,11 +13,11 @@ MatchState gMatchState;
 #include "conker/save.h"
 
 /* This file's .data: the match defaults that game/Player/StatsInit/statsinit and game/Actor/KillRespawn/killrespawn pass to player_setStat. */
-s8 D_80087260 = 100;   // stat 2 (lives)
-s8 D_80087264 = 0;     // stat 9 (score)
+s8 gDefaultLives = 100;   // stat 2 (lives)
+s8 gDefaultScore = 0;     // stat 9 (score)
 s8 D_80087268 = 0;
 s8 gDefaultHealth = 6;     // stat 5 (health)
-s8 D_80087270[16] = { 0 }; // per player: stat 0 (character)
+s8 gDefaultCharacters[16] = { 0 }; // per player: stat 0 (character)
 u8 gModePlayerCounts[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by gMatchState.mode
 
 /* &gMatchState.players[i] */

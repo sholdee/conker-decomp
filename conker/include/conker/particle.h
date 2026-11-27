@@ -1098,7 +1098,7 @@ typedef struct {
 } TwoSidedEmitter;
 
 void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 owner, s32 list);
-void particle_spawnHitEffectsHideOwnerSparks(struct Game1EF500Trail *trail); /* an expire handler of D_8008FBD0 */
+void particle_spawnHitEffectsHideOwnerSparks(struct Game1EF500Trail *trail); /* an expire handler of gProjectileExpireHandlers */
 void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3);
 void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj);
 void particle_onTwoSidedEmitterMsg(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType);

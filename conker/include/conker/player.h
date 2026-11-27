@@ -55,11 +55,11 @@ extern SpawnPoint *gSpawnPoints; /* the level's spawn point table */
 void player_setStat(s16 player, s16 stat, s32 value);
 s32 player_getStat(s16 player, s16 stat);
 void player_syncHealth(s16 players);
-extern s8 D_80087260;      /* match default of stat 2 (lives) */
-extern s8 D_80087264;      /* match default of stat 9 (score) */
+extern s8 gDefaultLives;      /* match default of stat 2 (lives) */
+extern s8 gDefaultScore;      /* match default of stat 9 (score) */
 extern s8 D_80087268;
 extern s8 gDefaultHealth;      /* match default of stat 5 (health) */
-extern s8 D_80087270[16];  /* per player: match default of stat 0 (character) */
+extern s8 gDefaultCharacters[16];  /* per player: match default of stat 0 (character) */
 extern u8 gModePlayerCounts[8];   /* indexed by gMatchState.mode */
 extern s8 gSpawnGrenadeCount;
 extern s16 gCarriedUnderwaterTime;

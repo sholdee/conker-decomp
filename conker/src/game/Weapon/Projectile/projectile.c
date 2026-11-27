@@ -18,7 +18,7 @@
 /* This file's .data. */
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
-static void (*D_8008FBD0[])() = {
+static void (*gProjectileExpireHandlers[])() = {
     weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, weapon_spawnHitEffectsNoFlash, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
@@ -26,7 +26,7 @@ typedef struct {
     u16 sound;
     u16 range;
 } FlybySound;
-static FlybySound D_8008FBE8[] = {
+static FlybySound gProjectileFlybySounds[] = {
     { 0x327, 40 }, { 0x328, 30 }, { 0x329, 60 }, { 0x32A, 20 }, { 0x32B, 15 }, { 0x320, 5 }, { 0x321, 5 }, { 0x322, 5 },
 };
 
@@ -64,7 +64,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
 
 /* TrailExt flags */
 #define TRAIL_HIT_CALLBACK 1    /* call gProjectileHitCallback on expiry */
-#define TRAIL_EXPIRE_HANDLER 2  /* call D_8008FBD0[expireHandler] on expiry */
+#define TRAIL_EXPIRE_HANDLER 2  /* call gProjectileExpireHandlers[expireHandler] on expiry */
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
 
@@ -233,13 +233,13 @@ s8 weapon_updateProjectile(Game1EF500Trail *trail) {
                 dz = player->eye.z - trail->head.def.pos.z;
                 /* distance of the player ahead along the flight direction */
                 dot = ext->path.dir.x * dx + dy * ext->path.dir.y + dz * ext->path.dir.z;
-                if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
-                    (D_8008FBE8[sfxIndex].range - 10) * ext->scale < dot) {
+                if (dot < (u32)gProjectileFlybySounds[sfxIndex].range * ext->scale &&
+                    (gProjectileFlybySounds[sfxIndex].range - 10) * ext->scale < dot) {
                     dist = sqrtf(dx * dx + dy * dy + dz * dz);
                     if (dist != 0.0f && dist < ext->remaining * ext->scale) {
                         dot /= dist;
                         if (0.8999999762f < dot) {
-                            sound = D_8008FBE8[sfxIndex].sound;
+                            sound = gProjectileFlybySounds[sfxIndex].sound;
                             ext->listener = i;
                             break;
                         }
@@ -390,7 +390,7 @@ s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-/* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
+/* Expiry handler 0 (gProjectileExpireHandlers[0]): debris, a flash and sometimes a burst where the projectile ended. */
 void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Game1EF500TrailExt *ext;
     LightEffectHeader header;
@@ -930,7 +930,7 @@ s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *
         if (ext->flags & TRAIL_EXPIRE_HANDLER) {
             handler = ext->expireHandler;
             if (handler != -1) {
-                D_8008FBD0[handler](trail);
+                gProjectileExpireHandlers[handler](trail);
             }
         }
         alive = FALSE;

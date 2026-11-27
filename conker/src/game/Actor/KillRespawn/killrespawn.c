@@ -408,7 +408,7 @@ void actor_finishDeath(s32 slot) {
         script_autoSave();
         gRespawnPending = 1;
         player_setStat(slot, 5, gDefaultHealth);
-        player_setStat(slot, 2, D_80087260);
+        player_setStat(slot, 2, gDefaultLives);
         game_requestLevelChange(1, LEVEL_W5_THRONE_ROOM, 0, 0, 0);
     } else {
         gEliminatedPlayers |= 1 << slot;

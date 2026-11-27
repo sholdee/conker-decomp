@@ -958,7 +958,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
                 vpLeft = gViews[i].left;
                 y = gViews[i].top + scaled[6];
                 if (gMatchHudFlags & 2) {
@@ -1009,7 +1009,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
                 vpLeft = gViews[i].left + scaled[5];
                 vpRight = gViews[i].right - scaled[5];
                 y = gViews[i].top + scaled[5];
@@ -1139,7 +1139,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
 
                 vpRight = gViews[i].right - 5.0f;
                 y = gViews[i].top + 5.0f;
