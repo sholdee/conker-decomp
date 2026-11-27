@@ -2624,7 +2624,6 @@ void particle_spawnHeavyTrailBurstAtSprite(SpriteParticle *particle);
 
 /* game/Particle/RegionEmitter/regionemitter.c */
 typedef struct Game1D3420Listener Game1D3420Listener;
-typedef struct Game1D3420Emitter Game1D3420Emitter;
 typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
 typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;
 void particle_updateRegionEmitter(u8 *effect);
@@ -2634,17 +2633,17 @@ void particle_stopEffectSound(u16 soundHandle);
 QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, s16 duration, u8 lit, u8 arg6,
                           u8 owner, s32 list);
 void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *data, u8 type);
-void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
+void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
 Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner, s16 index);
 
 /* game/Particle/ZoneEmitter/zoneemitter.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (particle_updateZoneEmitter, particle_shutZoneEmitter). */
 typedef struct ZoneEmitterState {
     /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ f32 angle;
-    /* 0x08 */ f32 angleSpeed;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ EffectHeader *unk10; /* released by particle_shutZoneEmitter */
+    /* 0x04 */ f32 texScroll;      /* texture s of the quad's first edge (particle_buildYawedVerticalQuad) */
+    /* 0x08 */ f32 texScrollSpeed;
+    /* 0x0C */ f32 texSpan;        /* texture s span */
+    /* 0x10 */ LightEffect *light; /* light_createJitterAt's light; released by particle_shutZoneEmitter */
     /* 0x14 */ u8 phase;
     /* 0x15 */ u8 phaseSpeed;
     /* 0x16 */ u8 alpha;      /* oscillates in [129, 255] with phase */
