@@ -254,7 +254,7 @@ static AttachmentHook gAttachHooks[] = {
     attach_hookScrollTileSound,
     attach_hookDelayedSound,
     attach_hookScrollTexV,
-    func_15033E00,
+    attach_hookRemoveWhenHidden,
     beam_hookSlideTexture,
     attach_hookRemoveInWater,
     func_15033F0C,
@@ -2674,7 +2674,7 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
 }
 
 /* Hook: removes the attachment once its owner's unk5 becomes 3. */
-s32 func_15033E00(ModelAttachment *att, Actor *owner) {
+s32 attach_hookRemoveWhenHidden(ModelAttachment *att, Actor *owner) {
     if (owner->drawtype == 3) {
         return 1;
     }

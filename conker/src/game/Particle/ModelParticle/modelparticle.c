@@ -51,7 +51,7 @@ static s32 (*gModelParticleUpdateFuncs[])() = {
     particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, collision_updateWobble,
     particle_settleWobble, particle_moveBallisticFloor, particle_bobModelParticle, particle_updateGrowFade,
     effect_updateSway, particle_updateFallingDebris, particle_updateSwell, effect_updateProjectile,
-    effect_updatePuffFollower, cutscene_updateTrackEffect, particle_moveSpiral, func_151C7038,
+    effect_updatePuffFollower, cutscene_updateTrackEffect, particle_moveSpiral, weapon_updateHoverModel,
     func_150C5310,
 };
 static s32 (*gModelParticleUpdate2Funcs[])() = {

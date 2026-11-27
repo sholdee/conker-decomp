@@ -1109,7 +1109,7 @@ attach_hookStateEffect	0x15033838	400	game	c		build/src/game/Attach/Attachment/a
 attach_hookScrollTileSound	0x150339C8	272	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_hookDelayedSound	0x15033AD8	260	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_soundCallback	0x15033BDC	548	game	c		build/src/game/Attach/Attachment/attachment.c.o
-func_15033E00	0x15033E00	40	game	c		build/src/game/Attach/Attachment/attachment.c.o
+attach_hookRemoveWhenHidden	0x15033E00	40	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_getAll	0x15033E28	92	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_getFirst	0x15033E84	64	game	c		build/src/game/Attach/Attachment/attachment.c.o
 attach_swapOwners	0x15033EC4	72	game	c		build/src/game/Attach/Attachment/attachment.c.o
@@ -3094,7 +3094,7 @@ attach_hookScrollTexH	0x150D82BC	284	game	c		build/src/game/Attach/TextureScroll
 attach_hookScrollTexV	0x150D83D8	440	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 func_150D8590	0x150D8590	28	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_spawnFootImpact	0x150D85AC	768	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
-func_150D88AC	0x150D88AC	52	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
+attach_disableLightWithoutExpression	0x150D88AC	52	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_getBonePoint	0x150D88E0	320	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
 attach_selectBonePointEffects	0x150D8A20	20	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
 attach_spawnBonePointEffects	0x150D8A34	220	game	c		build/src/game/Attach/BonePoint/bonepoint.c.o
@@ -3174,7 +3174,7 @@ beam_drawTracer	0x150E28DC	1224	game	c		build/src/game/Beam/Tracer/tracer.c.o
 func_150E2DA4	0x150E2DA4	16	game	c		build/src/game/Beam/Tracer/tracer.c.o
 beam_spawnBoneTracer	0x150E2DB4	240	game	c		build/src/game/Beam/Tracer/tracer.c.o
 beam_spawnBoneTracerEx	0x150E2EA4	236	game	c		build/src/game/Beam/Tracer/tracer.c.o
-func_150E2F90	0x150E2F90	48	game	c		build/src/game/Beam/Tracer/tracer.c.o
+beam_endTracerDraw	0x150E2F90	48	game	c		build/src/game/Beam/Tracer/tracer.c.o
 beam_tracerSwapMessage	0x150E2FC0	96	game	c		build/src/game/Beam/Tracer/tracer.c.o
 effect_newHomingEffect	0x150E3020	488	game	c		build/src/game/Effects/HomingEffect/homingeffect.c.o
 effect_startHomingToPoint	0x150E3208	200	game	c		build/src/game/Effects/HomingEffect/homingeffect.c.o
@@ -3257,7 +3257,7 @@ func_150EB8C4	0x150EB8C4	956	game	c		build/src/game/Prop/MoverSwing/moverswing.c
 prop_spawnCylinderBurst	0x150EBC80	576	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 weapon_fireTwinMuzzleShot	0x150EBEC0	1300	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
 func_150EC3D4	0x150EC3D4	136	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
-func_150EC45C	0x150EC45C	84	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
+weapon_spawnHitEffectsNoFlash	0x150EC45C	84	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
 camera_levelHook32	0x150EC4B0	112	game	c		build/src/game/Camera/LevelHook32/levelhook32.c.o
 particle_updateShapeEmitter	0x150EC520	400	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 particle_updateSourceEmitter	0x150EC6B0	952	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
@@ -3273,7 +3273,7 @@ weapon_hideTankInSniperView	0x150ED578	192	game	c		build/src/game/Weapon/Tank/ta
 weapon_scrollTreads	0x150ED638	272	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_updateTank	0x150ED748	5436	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_releaseTankCamera	0x150EEC84	292	game	c		build/src/game/Weapon/Tank/tank.c.o
-func_150EEDA8	0x150EEDA8	88	game	c		build/src/game/Weapon/Tank/tank.c.o
+weapon_updateHidden	0x150EEDA8	88	game	c		build/src/game/Weapon/Tank/tank.c.o
 beam_fireSlot	0x150EEE00	320	game	c		build/src/game/Beam/AimedBeam/aimedbeam.c.o
 beam_releaseSlot	0x150EEF40	64	game	c		build/src/game/Beam/AimedBeam/aimedbeam.c.o
 beam_spawnAimed	0x150EEF80	1036	game	c		build/src/game/Beam/AimedBeam/aimedbeam.c.o
@@ -5528,7 +5528,7 @@ weapon_spawnHitLight	0x151C0418	224	game	c		build/src/game/Weapon/Bullet/bullet.
 weapon_spawnHitGrowFade	0x151C04F8	172	game	c		build/src/game/Weapon/Bullet/bullet.c.o
 weapon_wobbleNearbyCameras	0x151C05A4	76	game	c		build/src/game/Weapon/Bullet/bullet.c.o
 weapon_rumbleNearbyPlayers	0x151C05F0	84	game	c		build/src/game/Weapon/Bullet/bullet.c.o
-func_151C0644	0x151C0644	84	game	c		build/src/game/Weapon/Bullet/bullet.c.o
+weapon_startHitRandomEmitter	0x151C0644	84	game	c		build/src/game/Weapon/Bullet/bullet.c.o
 weapon_fireBullet	0x151C0698	2676	game	c		build/src/game/Weapon/Bullet/bullet.c.o
 weapon_bulletSoundCallback	0x151C110C	116	game	c		build/src/game/Weapon/Bullet/bullet.c.o
 weapon_updateBullet	0x151C1180	1008	game	c		build/src/game/Weapon/Bullet/bullet.c.o
@@ -5560,15 +5560,15 @@ weapon_moveProjectile	0x151C4510	76	game	c		build/src/game/Weapon/Projectile/pro
 weapon_countdownProjectileRange	0x151C455C	232	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_updateStreamEmitter	0x151C4644	476	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 particle_updateWobbleStream	0x151C4820	656	game	c		build/src/game/Particle/WobbleStream/wobblestream.c.o
-func_151C4AB0	0x151C4AB0	92	game	c		build/src/game/Weapon/ProjectileRay/projectileray.c.o
+weapon_projectileMessage	0x151C4AB0	92	game	c		build/src/game/Weapon/ProjectileRay/projectileray.c.o
 weapon_setupProjectileRay	0x151C4B0C	1908	game	c		build/src/game/Weapon/ProjectileRay/projectileray.c.o
 weapon_fireSegmentShot	0x151C5280	776	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_spawnSegmentBeam	0x151C5588	284	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_spawnLightAt	0x151C56A4	216	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_spawnHitBurst	0x151C577C	1784	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_emitBloodStripParticle	0x151C5E74	208	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
-func_151C5F44	0x151C5F44	604	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
-func_151C61A0	0x151C61A0	240	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
+weapon_spawnDragSprite	0x151C5F44	604	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
+weapon_spawnTedizSplash	0x151C61A0	240	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 func_151C6290	0x151C6290	64	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_fireJointShot	0x151C62D0	1700	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_getSide0JointPos	0x151C6974	44	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
@@ -5576,8 +5576,8 @@ weapon_getSide1JointPos	0x151C69A0	44	game	c		build/src/game/Weapon/JointShot/jo
 weapon_getJointPos	0x151C69CC	92	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_fireJointShotProjectile	0x151C6A28	840	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 weapon_spawnJointBeam	0x151C6D70	304	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
-func_151C6EA0	0x151C6EA0	408	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
-func_151C7038	0x151C7038	360	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
+weapon_spawnHoverModel	0x151C6EA0	408	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
+weapon_updateHoverModel	0x151C7038	360	game	c		build/src/game/Weapon/JointShot/jointshot.c.o
 sight_placeBeam	0x151C71A0	972	game	c		build/src/game/Effects/Sight/SightBeam/sightbeam.c.o
 sight_spawnBeam	0x151C756C	2348	game	c		build/src/game/Effects/Sight/SightBeam/sightbeam.c.o
 sight_buildBeamQuad	0x151C7E98	1080	game	c		build/src/game/Effects/Sight/SightBeam/sightbeam.c.o

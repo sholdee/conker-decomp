@@ -108,7 +108,7 @@ void (*gActorUpdateHandlers[])(Actor *) = {
     func_150C3994, player_updateFlying, NULL, NULL,
     func_150C3574, actor_removeIfDead, func_150E0BE0, actor_removeAtAnimEnd,
     actor_updateWeaponProp, NULL, weapon_updateTank, actor_updateMount,
-    func_150D7928, func_1505528C, NULL, func_150EEDA8,
+    func_150D7928, func_1505528C, NULL, weapon_updateHidden,
     actor_updateFollower, weapon_releaseTankCamera, func_150C3230, actor_updateFrozenRemoval,
     actor_updateSpinDown, actor_updateOverEdge, actor_updateSinkAway,
 };

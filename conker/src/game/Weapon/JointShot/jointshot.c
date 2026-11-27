@@ -282,7 +282,7 @@ typedef struct {
 } SpawnedEffect;
 
 /* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
-void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
+void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
     ParticleSpawn spawn;
     struct {
         u8 unk0;
@@ -332,7 +332,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
-s32 func_151C7038(Func151C7038Arg *arg0) {
+s32 weapon_updateHoverModel(Func151C7038Arg *arg0) {
     Actor *owner;
     f32 speed;
 

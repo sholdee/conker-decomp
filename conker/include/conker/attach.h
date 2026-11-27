@@ -57,7 +57,7 @@ s32 attach_hookScrollTileSound(ModelAttachment *att, Actor *owner);
 s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner);
 /* A sound record callback (SoundRecordCallback, conker/sound.h). */
 s32 attach_soundCallback(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_15033E00(ModelAttachment *att, Actor *owner);
+s32 attach_hookRemoveWhenHidden(ModelAttachment *att, Actor *owner);
 s32 attach_getAll(Actor *owner, ModelAttachment **out);
 ModelAttachment *attach_getFirst(Actor *owner);
 void attach_swapOwners(s32 a, s32 b);
@@ -76,7 +76,7 @@ s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
 GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
 void attach_spawnFootImpact(Actor *actor);
-s32 func_150D88AC(struct S150D88AC *arg0);
+s32 attach_disableLightWithoutExpression(struct S150D88AC *arg0);
 
 /* game/Attach/BonePoint/bonepoint.c */
 s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);

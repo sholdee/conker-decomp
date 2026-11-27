@@ -132,6 +132,6 @@ s32 func_150EC3D4(Actor *actor, Actor *self) {
 }
 
 /* Particle callback (table D_8008FBD0): weapon_spawnHitEffects with 1.0f, 1.0f, 1.0f, 0.0f and 0xFF masks. */
-void func_150EC45C(void *particle) {
+void weapon_spawnHitEffectsNoFlash(void *particle) {
     weapon_spawnHitEffects(particle, 1.0f, 1.0f, 1.0f, 0.0f, 0xFF, 0xFF, 0xFF);
 }

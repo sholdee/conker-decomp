@@ -196,7 +196,7 @@ struct S150D88AC {
 };
 
 /* Sets unk14[9] to whether unk18[0x6F] is clear. */
-s32 func_150D88AC(struct S150D88AC *arg0) {
+s32 attach_disableLightWithoutExpression(struct S150D88AC *arg0) {
     if (arg0->unk18[0x6F] != 0) {
         arg0->unk14[9] = 0;
     } else {

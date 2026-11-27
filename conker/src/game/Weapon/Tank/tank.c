@@ -631,7 +631,7 @@ void weapon_releaseTankCamera(Actor *obj) {
 
 
 /* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
-void func_150EEDA8(Actor *obj) {
+void weapon_updateHidden(Actor *obj) {
     if (obj->drawtype != 3) {
         func_151045E0(obj, 15, 250.0f);
         obj->drawtype = 3;

@@ -78,7 +78,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
     weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
     if (surface != NULL && withParticles) {
         if (math_getTriEdges(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
-            func_151C0644(pos, fxOwner, fxList);
+            weapon_startHitRandomEmitter(pos, fxOwner, fxList);
         }
     }
     if (surface != NULL && withParticles) {
@@ -161,7 +161,7 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
             markPos.y = floor.height;
             markPos.z = probe.z;
             weapon_spawnHitDecal(&floor.tri, &markPos, fxOwner, fxList);
-            func_151C0644(pos, fxOwner, fxList);
+            weapon_startHitRandomEmitter(pos, fxOwner, fxList);
         }
     }
 }
@@ -234,7 +234,7 @@ void weapon_rumbleNearbyPlayers(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startPlayerRumbles(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
-void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_startHitRandomEmitter(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startRandomEmitter(pos, math_random() % 62 + 120, fxOwner, fxList);
 }
 

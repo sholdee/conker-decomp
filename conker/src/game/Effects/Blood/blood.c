@@ -1363,7 +1363,7 @@ void blood_spawnHitEffects(Actor *actor, u8 doDecalSpray, u8 doGroundDecals, u8 
     }
     if (doSplash != 0) {
         if ((gTedizBloodProfiles == &gBloodProfiles[kind]) || (gBroadTedizBloodProfiles == &gBloodProfiles[kind])) {
-            func_151C61A0(&position, &hit, owner, list);
+            weapon_spawnTedizSplash(&position, &hit, owner, list);
         } else {
             blood_spawnSmallSplash(&position, owner, list);
         }
@@ -2349,7 +2349,7 @@ void blood_spawnTedizGore(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *
         ParticleSpawn spawn2;
         for (count = (math_random() & 3) + 5; count > 0; count--) {
             math_dirFromBinAngles(math_random() & 0xFF, math_random() % 71U - 60, math_randomFloat() * 6.0f + 6.0f, &dir);
-            func_151C5F44(origin, &dir, math_randomFloat() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
+            weapon_spawnDragSprite(origin, &dir, math_randomFloat() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           math_random() % 66U + 190, math_random() % 45U + 44, math_randomFloat() * 20.0f + 50.0f,
                           0, hit, owner, list);
         }

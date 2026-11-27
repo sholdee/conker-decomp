@@ -117,7 +117,7 @@ static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { particle_ignoreQuadSpri
  * of the event data. */
 static void (*gQuadParticleEventFuncs[])(DefParticleHead *, s32, u8) = {
     particle_ignoreQuadParticleEvent, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, flare_glowMessage, beam_aimedMessage, effect_burstSparkMessage,
-    effect_burstSparkMessage, func_151C4AB0, effect_actorBeamMessage, particle_onBoneBurstParticleEvent,
+    effect_burstSparkMessage, weapon_projectileMessage, effect_actorBeamMessage, particle_onBoneBurstParticleEvent,
 };
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */

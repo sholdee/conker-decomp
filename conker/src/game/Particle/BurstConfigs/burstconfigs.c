@@ -1336,7 +1336,7 @@ s32 particle_updateGrowFade(Object15132A4C *object) {
     }
 }
 
-/* Spawns a random number of particles (func_151C5F44), each moving at a random yaw and a pitch from
+/* Spawns a random number of particles (weapon_spawnDragSprite), each moving at a random yaw and a pitch from
  * config's range. */
 void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
     f32 pad; // matching: unused stack slot above velocity
@@ -1349,7 +1349,7 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
                       (math_random() % (config->pitchRange + 1)) + config->pitchBase,
                       (math_randomFloat() * config->speedRange) + config->speedBase,
                       &velocity);
-        func_151C5F44(config->pos, &velocity,
+        weapon_spawnDragSprite(config->pos, &velocity,
                       (math_randomFloat() * config->gravityRange) + config->gravityBase,
                       config->unk20,
                       (math_random() % (config->alphaRange + 1)) + config->alphaBase,

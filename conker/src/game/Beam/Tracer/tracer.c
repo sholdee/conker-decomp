@@ -398,7 +398,7 @@ void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f
                   *(s16 *)((u8 *)&bone + 2), ownerTag, 0, *((u8 *)&unkFE + 3), startX, startY, startZ, endX, endY, endZ);
 }
 
-s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
+s32 beam_endTracerDraw(s32 a0, s32 a1, s16 a2) {
     return func_150E2DA4(a0, a2);
 }
 

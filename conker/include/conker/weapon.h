@@ -108,7 +108,7 @@ typedef struct {
 /* game/Weapon/TwinMuzzle/twinmuzzle.c */
 Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EC3D4(Actor *actor, Actor *self);
-void func_150EC45C(void *particle);
+void weapon_spawnHitEffectsNoFlash(void *particle);
 
 /* game/Weapon/Tank/tank.c */
 f32 weapon_getAngleDelta(f32 from, f32 to);
@@ -118,7 +118,7 @@ void weapon_hideTankInSniperView(Actor *obj);
 void weapon_scrollTreads(Actor *obj, s32 left, s32 right);
 void weapon_updateTank(Actor *obj);
 void weapon_releaseTankCamera(Actor *obj);
-void func_150EEDA8(Actor *obj);
+void weapon_updateHidden(Actor *obj);
 
 /* game/Weapon/SecondGun/secondgun.c (data-only unit between game/Player/FlyControl/flycontrol and game/Particle/Spiral/spiral) */
 extern const Vec3f gSecondGunMuzzle; /* the second gun's muzzle point */
@@ -187,7 +187,7 @@ void weapon_spawnHitLight(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_spawnHitGrowFade(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_wobbleNearbyCameras(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_rumbleNearbyPlayers(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
+void weapon_startHitRandomEmitter(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList);
 s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 s32 weapon_updateBullet(Bullet *bullet);
@@ -240,7 +240,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
 
 
 /* game/Weapon/ProjectileRay/projectileray.c */
-void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);
+void weapon_projectileMessage(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast);
@@ -252,9 +252,9 @@ void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2);
 void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7);
 void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
-SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA);
-void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3);
+void weapon_spawnTedizSplash(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3);
 s32 func_151C6290(Actor *obj, Actor *self, s32 arg2);
 extern const Vec3f gSegmentShotStart; /* bone-attachment offset */
 extern const Vec3f gSegmentShotBeamEnd;
@@ -268,8 +268,8 @@ void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out);
 void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side);
 void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
-void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2);
-s32 func_151C7038(Func151C7038Arg *arg0);
+void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2);
+s32 weapon_updateHoverModel(Func151C7038Arg *arg0);
 
 /* game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil) */
 extern u8 gLayoutDetailShift;

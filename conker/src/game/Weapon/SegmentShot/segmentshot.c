@@ -263,7 +263,7 @@ void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocity
 
 /* Spawns a particle_newSpriteParticleWithFloor particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
@@ -332,7 +332,7 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
 }
 
 /* Spawns a fixed particle_spawnParticleBurst effect between the points `arg0` and `arg1`. */
-void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
+void weapon_spawnTedizSplash(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     ParticleBurst desc;
 
     desc.countBase = 10;

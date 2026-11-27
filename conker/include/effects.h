@@ -1487,7 +1487,7 @@ typedef struct BloodStrip {
     /* 0x78 */ f32 time;
 } BloodStrip; /* size 0x7C; extra data may follow */
 
-/* particle_spawnParticleBurst (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) func_151C5F44 particles (game/Weapon/SegmentShot/segmentshot.c)
+/* particle_spawnParticleBurst (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) weapon_spawnDragSprite particles (game/Weapon/SegmentShot/segmentshot.c)
  * from pos, each at a random yaw (the yaw fields are unused) and a pitch/speed from the ranges below. */
 typedef struct ParticleBurst {
     /* 0x00 */ s16 countBase;

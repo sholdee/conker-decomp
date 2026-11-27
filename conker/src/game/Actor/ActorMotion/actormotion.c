@@ -4142,7 +4142,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                         sound_stopActorSound2(actor);
                         sound_addDynamicSound(0x61E, actor->xpos, actor->ypos, actor->zpos,
                                       0x7FFF, 0x1F4, 0xC8, sound_followOwnerAnimsCallback, actor, (s32)D_80099428, 0, 0);
-                        func_151C6EA0(actor, 0xFF, 1);
+                        weapon_spawnHoverModel(actor, 0xFF, 1);
                     }
                 }
             } else {

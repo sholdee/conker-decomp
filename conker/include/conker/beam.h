@@ -727,7 +727,7 @@ void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 
 void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length, s32 unkFE,
                    f32 speed);
-s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
+s32 beam_endTracerDraw(s32 a0, s32 a1, s16 a2);
 void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
 extern AimImpact gAimImpacts[4];  /* aim-impact slots (effect_spawnMaterialImpact / effect_sprayDebris index them; 0xFF = none) */

@@ -5,7 +5,7 @@
 #include "conker/weapon.h"
 
 /* On event 0x2D, switch the object's id to the other end of the pair (with that end's tag). */
-void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
+void weapon_projectileMessage(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
     GameStruct151C4AB0b *state = &obj->state;
 
     if (event == 0x2D) {

@@ -120,7 +120,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  10 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, func_150E2F90, NULL, NULL, NULL, 1 },
+    /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, beam_endTracerDraw, NULL, NULL, NULL, 1 },
     /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
     /*  13 */ { particle_updatePuffQuad, NULL, particle_drawPuffQuad, NULL, gPuffQuadSetupDl, particle_beginPuffQuadDraw, NULL, NULL, particle_endPuffQuadDraw, NULL, NULL, NULL, 1 },
     /*  14 */ { effect_updateQuadFx, NULL, effect_drawQuadFx, NULL, gQuadFxRenderSetupDl, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
