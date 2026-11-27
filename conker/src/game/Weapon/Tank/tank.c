@@ -178,8 +178,8 @@ void weapon_updateTank(Actor *obj) {
     s16 turn;
     s32 left;
     s32 right;
-    s32 stateFlags;
-    f32 blend;
+    f32 offset;
+    f32 yawStep;
     Actor *driver;
     Actor *other;
     s32 reversing;
@@ -190,11 +190,11 @@ void weapon_updateTank(Actor *obj) {
     f32 heading;
     f32 leadX;
     f32 leadZ;
-    f32 unused2; // matching: unused, but keeps the stack layout
+    f32 dx;
     f32 bearing;
     f32 lead;
     f32 dirX;
-    f32 angle2;
+    s8 camSlot;
     f32 angle;
     f32 deltaZ;
     f32 distance;
@@ -203,23 +203,6 @@ void weapon_updateTank(Actor *obj) {
     s32 i;
     s32 bestIdx;
     s32 objCount;
-    f32 yawStep;
-    f32 offset;
-    s8 camSlot;
-    s32 j;
-    s32 hit;
-    f32 hitX;
-    f32 hitY;
-    f32 hitZ;
-    f32 dir[3]; // matching: an array; a Vec3f changes the register allocation
-    f32 limit;
-    f32 dist;
-    Vec3f nearPoint;
-    Vec3f farPoint;
-    f32 tNear;
-    f32 tFar;
-    Camera *camera;
-    ActorCtl *subject;
 
     health = 1;
     if (gIsMultiplayer) {
@@ -273,7 +256,8 @@ void weapon_updateTank(Actor *obj) {
     }
     /* Driver input. */
     if (controlled) {
-        s32 unused3; // matching: an unused block local here steers IDO's register allocation
+        s32 stateFlags;
+
         throttleScale = 0.0f;
         lockFlags = 0;
         health = movement_obj[player].energy;
@@ -364,11 +348,11 @@ void weapon_updateTank(Actor *obj) {
             }
         }
         {
-            s32 unused4; // matching: as above
+            f32 blend;
 
             blend = 1.0f; // matching: a literal 0.4f alone schedules differently
             if (obj->energy != 0) {
-                typedef s32 scope; // matching: a declaration here gives IDO a new block scope
+                typedef s32 scope; // matching: a declaration here gives IDO a new block scope; no local fits (the 12 bytes above j hold stateFlags, blend and dirZ)
                 throttle = obj->stickspeed;
                 trackSpeed = obj->speed;
                 turn = (s16)(obj->langle - prevFacing) / 70;
@@ -406,9 +390,9 @@ void weapon_updateTank(Actor *obj) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
                 target = &movement_obj[obj->mv->unk129];
-                offset = target->xpos - obj->xpos;
+                dx = target->xpos - obj->xpos;
                 score = target->zpos - obj->zpos;
-                lead = sqrtf(offset * offset + score * score) / 200.0f;
+                lead = sqrtf(dx * dx + score * score) / 200.0f;
                 lead = target->speed * lead;
                 heading = target->theta * 0.01745329238f;
                 leadX = sinf(heading) * lead;
@@ -429,7 +413,21 @@ void weapon_updateTank(Actor *obj) {
                 obj->mv->gunPitch *= 0.8999999762f;
             }
         } else if (controlled && health) {
-            typedef s32 scope; // matching: as above
+            s32 j;
+            s32 hit;
+            f32 hitX;
+            f32 hitY;
+            f32 hitZ;
+            f32 dir[3]; // matching: an array; a Vec3f changes the register allocation
+            f32 limit;
+            f32 dist;
+            Vec3f nearPoint;
+            Vec3f farPoint;
+            f32 tNear;
+            f32 tFar;
+            Camera *camera;
+            ActorCtl *subject;
+
             bestScore = 0.0f;
             yawStep = 3.0f * gFrameDelta;
             bestIdx = -1;
@@ -487,14 +485,15 @@ void weapon_updateTank(Actor *obj) {
                     }
                 }
                 if (bestIdx != -1) {
-                    typedef s32 scope; // matching: as above
-                    driver = &movement_obj[bestIdx];
+                    Actor *enemy;
+
+                    enemy = &movement_obj[bestIdx];
                     if (gIsMultiplayer != 0) {
-                        limit = driver->ypos + 40.0f;
+                        limit = enemy->ypos + 40.0f;
                     } else {
-                        limit = driver->aim.topY;
+                        limit = enemy->aim.topY;
                     }
-                    deltaZ = weapon_getShellAimError(obj, 0.0f, driver->xpos, limit, driver->zpos, 0.0f) * 0.001000000047f;
+                    deltaZ = weapon_getShellAimError(obj, 0.0f, enemy->xpos, limit, enemy->zpos, 0.0f) * 0.001000000047f;
                     limit = 4.0f * gFrameDelta;
                     if (limit < deltaZ) {
                         deltaZ = limit;
@@ -511,26 +510,28 @@ void weapon_updateTank(Actor *obj) {
                 subject = camera->mv;
                 if (camera->mv->SniperState != 0) {
                     /* Copy the camera subject's angles. */
-                    typedef s32 scope; // matching: as above
-                    angle = -subject->aimPitch;
-                    angle -= obj->vtilt;
-                    angle2 = subject->aimYaw;
-                    angle2 = (obj->theta - 90.0f) - angle2;
-                    while (angle > 180.0f) {
-                        angle -= 360.0f;
-                        if (angle) {} // matching: steers the scheduling of the wrap loop
+                    f32 pitch;
+                    f32 yaw;
+
+                    pitch = -subject->aimPitch;
+                    pitch -= obj->vtilt;
+                    yaw = subject->aimYaw;
+                    yaw = (obj->theta - 90.0f) - yaw;
+                    while (pitch > 180.0f) {
+                        pitch -= 360.0f;
+                        if (pitch) {} // matching: steers the scheduling of the wrap loop
                     }
-                    while (angle < -180.0f) {
-                        angle += 360.0f;
+                    while (pitch < -180.0f) {
+                        pitch += 360.0f;
                     }
-                    while (angle2 > 180.0f) {
-                        angle2 -= 360.0f;
+                    while (yaw > 180.0f) {
+                        yaw -= 360.0f;
                     }
-                    while (angle2 < -180.0f) {
-                        angle2 += 360.0f;
+                    while (yaw < -180.0f) {
+                        yaw += 360.0f;
                     }
-                    obj->mv->gunPitch = angle;
-                    obj->mv->gunYaw = angle2;
+                    obj->mv->gunPitch = pitch;
+                    obj->mv->gunYaw = yaw;
                 } else {
                     /* Aim at what the camera's look ray hits: level geometry or another object. */
                     dir[0] = camera->target.x - camera->eye.x;
