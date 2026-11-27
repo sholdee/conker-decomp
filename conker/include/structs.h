@@ -1948,12 +1948,12 @@ typedef struct TexCoord {
 /* The texture of one particle resource (gParticleTexInfos[id]; game/Sprite/LevelSpriteSetup/levelspritesetup.c and game/Sprite/LevelSprites/levelsprites.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in gSpritePingPongTypes, gSpriteRandomFlipTypes; 0x04: more y jitter
-                              // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (light_setupParticleSlot)
+                              // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (sprite_setupParticleSlot)
     /* 0x1 */ u8  frameCount;
     /* 0x2 */ u16 frameSize;  // bytes of one frame
     /* 0x4 */ s16 scaleX;     // base x scale of the sprite
     /* 0x6 */ s16 scaleY;     // base y scale of the sprite
-    /* 0x8 */ u8  width;      // texture width (light_loadParticleTextures: tile extent (width << 5) - 1)
+    /* 0x8 */ u8  width;      // texture width (sprite_loadParticleTextures: tile extent (width << 5) - 1)
     /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
 } ParticleTexInfo; /* size 0xA */
 

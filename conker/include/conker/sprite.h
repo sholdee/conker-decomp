@@ -90,19 +90,19 @@ typedef struct ActorTracker {
 } ActorTracker;
 
 /* game/Sprite/LevelSpriteSetup/levelspritesetup.c */
-void light_initParticleSlots(s32 arg0);
-void light_loadParticleTextures(void);
-void light_setupParticleSlot(s32 slot, s32 id, s32 flags);
-s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
-s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-void light_resetSpriteBuffers(s32 unused);
-void light_resetParticles(void);
-void light_buildLevelParticles(void);
+void sprite_initParticleSlots(s32 arg0);
+void sprite_loadParticleTextures(void);
+void sprite_setupParticleSlot(s32 slot, s32 id, s32 flags);
+s32 sprite_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
+s32 sprite_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 sprite_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 sprite_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 sprite_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 sprite_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 sprite_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+void sprite_resetSpriteBuffers(s32 unused);
+void sprite_resetParticles(void);
+void sprite_buildLevelParticles(void);
 
 /* game/Sprite/PointGroup/pointgroup.c */
 extern f32 (*gPointGroupMtx)[4]; // the current float matrix
@@ -203,7 +203,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 /* game/Sprite/LevelSprites/levelsprites.c */
 /*
  * One sprite placed on a level triangle (gLevelSprites holds gLevelSpriteCount of them, sorted by x or z; filled by
- * light_addLevelParticle when the level loads).
+ * sprite_addLevelParticle when the level loads).
  */
 typedef struct Game1A89B0Position {
     s16 x;
@@ -221,7 +221,7 @@ typedef struct Game1A89B0Position {
 
 /*
  * A sprite kind (gSpriteKinds): emit places sprites of this kind on a level triangle when the level loads
- * (light_buildLevelParticles) and returns the next free index; anim runs for each sprite every frame (sprite_buildLevelSprites),
+ * (sprite_buildLevelParticles) and returns the next free index; anim runs for each sprite every frame (sprite_buildLevelSprites),
  * nonzero hides the sprite.
  */
 typedef struct SpriteKind {

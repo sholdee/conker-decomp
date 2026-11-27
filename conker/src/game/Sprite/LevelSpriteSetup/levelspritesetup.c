@@ -11,20 +11,20 @@
 #include "conker/swarm.h"
 
 /* Particle slot state (15 slots). */
-static u16 gParticleSlotParity;               /* parity bits of light_placeParticlePattern, one per slot */
+static u16 gParticleSlotParity;               /* parity bits of sprite_placeParticlePattern, one per slot */
 static s16 gParticleSlotScales[15][2];        /* base x/y scale of each slot */
 static u16 gParticleSlotTriCounts[15];           /* triangles placed per slot */
 static u8 D_800BE498[8];             /* not referenced */
 static ParticleResource gParticleSlotResources[15]; /* this level's resource per slot */
 
-/* Particle patterns of light_placeParticlePattern: a pair count, then the x/z offset of each particle. */
+/* Particle patterns of sprite_placeParticlePattern: a pair count, then the x/z offset of each particle. */
 static const f32 gParticlePattern3[] = { 3.0f, 32.0f, 22.0f, -30.0f, 25.0f, 0.0f, -28.0f };
 static const f32 gParticlePattern5[] = { 5.0f, 32.0f, 22.0f, -30.0f, 25.0f, 0.0f, 0.0f, 27.0f, -27.0f, -22.0f, -30.0f };
 static const f32 gParticlePattern7[] = {
     7.0f, 32.0f, 22.0f, -30.0f, 25.0f, 0.0f, 0.0f, 27.0f, -27.0f, -22.0f, -30.0f, 50.0f, 5.0f, -47.0f, -5.0f,
 };
 
-/* Pairs of barycentric weights for the particles that light_scatterParticles scatters over a triangle. */
+/* Pairs of barycentric weights for the particles that sprite_scatterParticles scatters over a triangle. */
 static const f32 gParticleScatterWeights[] = {
     0.5f, 0.5f, 0.3f, 0.12f, 0.7f, 0.88f, 0.9f, 0.4f, 0.1f, 0.6f, 0.6f, 0.25f, 0.3f, 0.75f, 0.8f, 0.2f,
 };
@@ -37,11 +37,11 @@ static const u8 D_80095CA4[32] = {
 /* Initial value of both D_800DDC20 counters of each slot. */
 static const u8 gParticleSlotCounterInits[15] = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
 
-/* The patterns of light_placeParticlePattern. */
+/* The patterns of sprite_placeParticlePattern. */
 static const f32 *gParticlePatterns[] = { gParticlePattern3, gParticlePattern5, gParticlePattern7 };
 
 /** Clears the particle slot tables and picks this level's resources. */
-void light_initParticleSlots(s32 arg0) {
+void sprite_initParticleSlots(s32 arg0) {
     bzero(gParticleSlotResources, sizeof(gParticleSlotResources));
     rom_loadPathInto(gParticleSlotResources, sizeof(gParticleSlotResources), 3, 12, arg0, 10);
     bzero(gSpriteTypeTexFiles, sizeof(gSpriteTypeTexFiles));
@@ -49,7 +49,7 @@ void light_initParticleSlots(s32 arg0) {
 }
 
 /** Looks up the texture file of every used particle slot and computes its texture extents. */
-void light_loadParticleTextures(void) {
+void sprite_loadParticleTextures(void) {
     s32 i;
     s32 id;
     s32 size;
@@ -76,7 +76,7 @@ void light_loadParticleTextures(void) {
 }
 
 /** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
-void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
+void sprite_setupParticleSlot(s32 slot, s32 id, s32 flags) {
     const ParticleTexInfo *info;
     u8 *frames;
     s32 infoFlags;
@@ -120,7 +120,7 @@ void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
 
 
 /** Fills particle `index` for particle slot `slot`; returns the next free index. */
-s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
+s32 sprite_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
     s16 scale;
 
     if (index >= (u32)(gLevelHeader->maxParticles - 1)) {
@@ -168,7 +168,7 @@ s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z
 #define LERP(a, b, t) ((a) + ((b) - (a)) * (t))
 
 /** Scatters `count` particles over the triangle `tri` at the barycentric weights of gParticleScatterWeights. */
-s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -184,7 +184,7 @@ s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index,
         do {
             w0 = weights[0];
             w1 = weights[1];
-            next = light_addLevelParticle(index, slot, subtype,
+            next = sprite_addLevelParticle(index, slot, subtype,
                                  LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
@@ -201,7 +201,7 @@ s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index,
  * Places the particles of pattern `pattern` (gParticlePatterns: a pair count, then x/z offsets) around the
  * centre of triangle `tri`, projecting each onto the triangle's plane (computed by math_computeTriPlane).
  */
-s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     u32 i;
     f32 centerX;
     f32 centerY;
@@ -234,7 +234,7 @@ s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 
         } else {
             y = centerY;
         }
-        index = light_addLevelParticle(index, slot, subtype, x, y, z, 0x80, kind, gParticleSlotParity >> slot);
+        index = sprite_addLevelParticle(index, slot, subtype, x, y, z, 0x80, kind, gParticleSlotParity >> slot);
     }
 
     gParticleSlotParity ^= 1 << slot;
@@ -242,7 +242,7 @@ s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 
 }
 
 /** Places one particle at the centre of triangle `tri` and starts positional sound 0x4D there. */
-s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     u16 clamped;
     s32 x;
     s32 y;
@@ -254,7 +254,7 @@ s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 in
     y = (VTX(tri, 0, 1) + VTX(tri, 1, 1) + VTX(tri, 2, 1)) / 3;
     z = (VTX(tri, 0, 2) + VTX(tri, 1, 2) + VTX(tri, 2, 2)) / 3;
 
-    index = light_addLevelParticle(index, slot, subtype, x, y, z, 0x80, kind, index);
+    index = sprite_addLevelParticle(index, slot, subtype, x, y, z, 0x80, kind, index);
 
     if ((u16)amount > 62.5f) {
         clamped = 62;
@@ -264,11 +264,11 @@ s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 in
     return index;
 }
 /**
- * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 87. It has no return
- * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
- * light_addLevelParticle call left in v0.
+ * Like sprite_scatterParticles without scale jitter, then sets the slot's frame count to 87. It has no return
+ * statement: its caller sprite_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
+ * sprite_addLevelParticle call left in v0.
  */
-s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -284,7 +284,7 @@ s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 inde
         do {
             w0 = weights[0];
             w1 = weights[1];
-            next = light_addLevelParticle(index, slot, subtype,
+            next = sprite_addLevelParticle(index, slot, subtype,
                                  LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
@@ -297,11 +297,11 @@ s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 inde
     gSpriteTypeFrameCounts[slot] = 87;
 }
 /**
- * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 8. It has no return
- * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
- * light_addLevelParticle call left in v0.
+ * Like sprite_scatterParticles without scale jitter, then sets the slot's frame count to 8. It has no return
+ * statement: its caller sprite_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
+ * sprite_addLevelParticle call left in v0.
  */
-s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -317,7 +317,7 @@ s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index
         do {
             w0 = weights[0];
             w1 = weights[1];
-            next = light_addLevelParticle(index, slot, subtype,
+            next = sprite_addLevelParticle(index, slot, subtype,
                                  LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
@@ -330,11 +330,11 @@ s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index
     gSpriteTypeFrameCounts[slot] = 8;
 }
 /**
- * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 33. It has no return
- * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
- * light_addLevelParticle call left in v0.
+ * Like sprite_scatterParticles without scale jitter, then sets the slot's frame count to 33. It has no return
+ * statement: its caller sprite_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
+ * sprite_addLevelParticle call left in v0.
  */
-s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+s32 sprite_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -350,7 +350,7 @@ s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 inde
         do {
             w0 = weights[0];
             w1 = weights[1];
-            next = light_addLevelParticle(index, slot, subtype,
+            next = sprite_addLevelParticle(index, slot, subtype,
                                  LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
                                  LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
@@ -363,19 +363,19 @@ s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 inde
     gSpriteTypeFrameCounts[slot] = 33;
 }
 
-void light_resetSpriteBuffers(s32 unused) {
+void sprite_resetSpriteBuffers(s32 unused) {
     gSpriteVtxBuffers[0] = NULL;
     gSpriteVtxBuffers[1] = NULL;
     gSpriteMaxPerFrame = 110;
 }
 
 /** Resets the particle counters and slot bitmasks. */
-void light_resetParticles(void) {
+void sprite_resetParticles(void) {
     gBillboardAnimCounter = 0;
     gBillboardQueueCount = 0;
     gSpritePingPongTypes = D_800DDC00 = gSpriteRandomFlipTypes = 0;
     gLevelSpriteCount = 0;
-    light_resetSpriteBuffers(0);
+    sprite_resetSpriteBuffers(0);
 }
 
 
@@ -383,13 +383,13 @@ void light_resetParticles(void) {
  * Builds the level's particles: sets up the 15 particle slots, then for every level triangle whose
  * packed word names a slot, runs that slot's emitter for the triangle's kind.
  */
-void light_buildLevelParticles(void) {
+void sprite_buildLevelParticles(void) {
     s32 i;
     s32 slot;
     u32 packed;
     s32 kind;
 
-    light_resetParticles();
+    sprite_resetParticles();
     if (gLevelHeader->maxParticles == 0) {
         return;
     }
@@ -401,7 +401,7 @@ void light_buildLevelParticles(void) {
     }
 
     for (i = 0; i < 15; i++) {
-        light_setupParticleSlot(i, gParticleSlotResources[i].id, gParticleSlotResources[i].flags);
+        sprite_setupParticleSlot(i, gParticleSlotResources[i].id, gParticleSlotResources[i].flags);
     }
 
     gLevelSprites = allocate_memory(gLevelHeader->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);

@@ -61,12 +61,12 @@ u8 gBillboardQueueCount = 0;
 s32 gLevelSpriteSortAxis = 0;
 
 SpriteKind gSpriteKinds[6] = {
-    { light_scatterParticles, NULL, 0 },
-    { light_placeCentreParticle, func_1517B500, 0 },
-    { light_scatterParticles87, sprite_animFadeOffset, 0 },
-    { light_scatterParticles8, func_1517B7A8, 0 },
-    { light_placeParticlePattern, NULL, 0 },
-    { light_scatterParticles33, sprite_animHop, 0 },
+    { sprite_scatterParticles, NULL, 0 },
+    { sprite_placeCentreParticle, func_1517B500, 0 },
+    { sprite_scatterParticles87, sprite_animFadeOffset, 0 },
+    { sprite_scatterParticles8, func_1517B7A8, 0 },
+    { sprite_placeParticlePattern, NULL, 0 },
+    { sprite_scatterParticles33, sprite_animHop, 0 },
 };
 
 SpriteKindChoice gSpriteKindChoices[5][8] = {

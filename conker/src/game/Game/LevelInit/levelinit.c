@@ -67,9 +67,9 @@ void game_initLevelSubsystems(s32 levelId) {
     if (gLevelHeader->setupCallback) {
         gLevelSetupFuncs[gLevelHeader->setupCallback]();
     }
-    light_initParticleSlots(levelId);
-    light_buildLevelParticles();
-    light_loadParticleTextures();
+    sprite_initParticleSlots(levelId);
+    sprite_buildLevelParticles();
+    sprite_loadParticleTextures();
     shadow_initLevelSettings(levelId);
     effect_resetRain();
     level_resetScreenCopy();
