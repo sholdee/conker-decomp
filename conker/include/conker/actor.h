@@ -52,7 +52,7 @@ void actor_setDefaultSizes(void);
 
 /* game/Actor/ObjectUpdate/objectupdate.c */
 Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player);
-void actor_updateObject(Actor *obj, s32 index);
+void actor_updateObject(Actor *actor, s32 index);
 void actor_updateObjects(void);
 void actor_updateBlobShadows(void);
 void actor_resetBonePool(void);
@@ -61,25 +61,25 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index);
 void actor_scrollSpriteTexture(s32 index);
 void actor_selectLod(s32 index, s16 player, s32 mode);
 Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
-void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB, s32 *envR,
+void actor_getDrawColours(Actor *actor, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB, s32 *envR,
                    s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA);
 Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
 void func_1502D54C(s32 index, s32 *colour);
 /* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game/Attach/Attachment/attachment.c passes 4 arguments */
 void actor_getFogAlpha();
-void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf);
+void actor_loadAnimFrames(AnimInstance *anim, Actor *actor, u8 *buf);
 s32 actor_getBoneMatrixCount(s32 id);
 void actor_computeBones(MtxF mtx, s32 index);
 void actor_buildRootMatrix(s32 index, s32 rootOnly);
 void actor_flushBoneMatrices(void);
 void actor_updateCulling(s32 index);
-void func_1502E9FC(Actor *obj, s32 dist);
-void actor_startFogPulse(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 rate);
-void actor_fadeFogPulse(Actor *obj);
-void actor_startFogFadeOut(Actor *obj, s32 rate);
-void actor_startFogFadeIn(Actor *obj, s32 rate);
-void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
-void actor_updateFog(Actor *obj);
+void func_1502E9FC(Actor *actor, s32 dist);
+void actor_startFogPulse(Actor *actor, s32 r, s32 g, s32 b, s32 a, s32 rate);
+void actor_fadeFogPulse(Actor *actor);
+void actor_startFogFadeOut(Actor *actor, s32 rate);
+void actor_startFogFadeIn(Actor *actor, s32 rate);
+void actor_flashFog(Actor *actor, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
+void actor_updateFog(Actor *actor);
 /* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game/Effects/HoltenRope/holtenrope.c passes a u32 *a */
 void actor_getFogColour();
 s32 actor_getEyeTarget(s32 index, s32 slot);
@@ -88,10 +88,10 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index);
 void actor_followParent(s32 index);
 void actor_carryStandingObjects(void);
 void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri);
-void actor_savePrevBones(Actor *obj);
+void actor_savePrevBones(Actor *actor);
 Gfx *actor_setTextureScroll(Gfx *gdl, s32 index);
-void actor_applyForcedLod(Actor *obj);
-void actor_refreshModelUnload(Actor *arg0);
+void actor_applyForcedLod(Actor *actor);
+void actor_refreshModelUnload(Actor *actor);
 extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix gIdentityMtx, lit smooth shading
 extern Gfx gObjectPassEndDL[]; // closes a pass: clears the lighting modes and the prim/env colours
 extern u8 dc_glbl_CharNum;
@@ -258,8 +258,8 @@ f32 actor_getDistSqTo(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ
 void actor_stopAnim(Actor *actor);
 void actor_saveBlendAnim(AnimInstance *state);
 void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
-                   s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
-void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000);
+                   s32 bank, f32 speed, f32 blendFrames, f32 startFrame, f32 loopStart, s32 flag8000);
+void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 startFrame, f32 loopStart, s32 flag8000);
 u32 actor_findReaction(s32 kind, Actor *actor);
 void actor_advanceReaction(s32 sourceIdx, Actor *actor);
 Actor *actor_alloc(void);
@@ -296,7 +296,7 @@ void actor_setBodyHeight(Actor *actor, f32 height);
 void actor_updateHitRatios(Actor *actor);
 void actor_setScale(Actor *actor, f32 xzScale, f32 yScale);
 void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute);
-void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize);
+void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 count, s32 firstCoord, s32 angle, s32 set, s32 doubleSize);
 void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void actor_igniteTouching(Actor *actor);
 void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 scale);
@@ -349,25 +349,25 @@ void actor_updateSizes(void);
 void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth);
 
 /* game/Actor/KillRespawn/killrespawn.c */
-void actor_startDeathCountdown(Actor *obj, s32 timer);
+void actor_startDeathCountdown(Actor *actor, s32 timer);
 void actor_updatePlayerStates(void);
-void actor_closeDeathIris(Actor *obj);
-void actor_kill(Actor *obj, s32 cause);
-void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void actor_respawn(Actor *obj);
+void actor_closeDeathIris(Actor *actor);
+void actor_kill(Actor *actor, s32 cause);
+void func_1507D158(s32 slot, s32 arg, s32 extra0, s32 extra1, s32 extra2);
+void actor_respawn(Actor *actor);
 void actor_finishDeath(s32 slot);
-s32 actor_runDeathEffect(Actor *obj);
+s32 actor_runDeathEffect(Actor *actor);
 void func_1507DB34(void);
 void func_1507DB3C(void);
-void actor_breakIntoParts(Actor *obj, s32 arg1);
+void actor_breakIntoParts(Actor *actor, s32 kind);
 void func_1507DB64(void);
 Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 extern u8 D_D0F; // texture id 0xD0F as a symbol (undefined_syms.us.txt): func_1507DB6C passes its address
-void actor_applyHeadShot(Actor *obj);
-void actor_applyPartHit(Actor *obj, s32 part);
+void actor_applyHeadShot(Actor *actor);
+void actor_applyPartHit(Actor *actor, s32 part);
 void actor_startSpawnCutscene(s32 resource, s32 arg1);
 s32 actor_resumeAtCheckpoint(s32 *arg0);
-void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z);
+void actor_getTrackPoint(Actor *actor, f32 *x, f32 *y, f32 *z);
 extern u16 gEliminatedPlayers;
 extern u16 D_800D18A2;
 extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
@@ -375,11 +375,11 @@ extern u8 gRespawnPending;
 extern u8 gLastDeathKind;
 
 /* game_DE5A0.c */
-void func_150B10F0(Actor *obj);
-void func_150B12FC(Actor *obj);
-void func_150B1484(Actor *obj);
-void func_150B17DC(Actor *obj);
-void func_150B19E0(Actor *obj);
+void func_150B10F0(Actor *actor);
+void func_150B12FC(Actor *actor);
+void func_150B1484(Actor *actor);
+void func_150B17DC(Actor *actor);
+void func_150B19E0(Actor *actor);
 
 /* game/Effects/Greyscale/greyscale.s: rearranges the 64-bit words from start up to end */
 void colourfb_toGreyscale(void *start, void *end);

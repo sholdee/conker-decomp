@@ -2180,14 +2180,14 @@ typedef struct {
 
 /* D_800CC298 (0x18 bytes): state of the per-type texture animations (actor_updateTypeAnims, game/Beam/AimedBeam/aimedbeam.c). */
 typedef struct TexAnimState {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ s8  unk8;
-    /* 0x09 */ s8  unk9;
-    /* 0x0A */ s8  unkA;
-    /* 0x0B */ u8  unkB[4];
-    /* 0x0F */ u8  unkF;
-    /* 0x10 */ u8  unk10;
+    /* 0x00 */ f32 fastAngle;     // degrees, -4 per tick: texcoord rotation of type 0x24's second vertex group
+    /* 0x04 */ f32 slowAngle;     // degrees, -0.5 per tick: texcoord rotation of type 0x24's first vertex group
+    /* 0x08 */ s8  scrollT;       // type 0x24: random T scroll step (-2..2) of tile 4
+    /* 0x09 */ s8  sweepS;        // type 0x2C: S position of tile 0xAA, swept back and forth over 0..41
+    /* 0x0A */ s8  sweepStep;     // +1 or -1: direction of sweepS
+    /* 0x0B */ u8  colourPhases[4]; // type 0x3A: binary angles of the four vertex-colour ramps
+    /* 0x0F */ u8  frameTimer;    // type 0x4B: ticks since its unk68 frame last stepped (steps at 4)
+    /* 0x10 */ u8  fadeLevel;     // type 0x54: vertex-colour ramp 0..255, +-20 per frame with taskint[2]
     /* 0x11 */ u8  pad11;
     /* 0x12 */ s16 tilt;
     /* 0x14 */ s16 pulse;
@@ -3293,34 +3293,34 @@ typedef struct ZoneNode {
 
 /* One hit-reaction entry (tables gDefaultHitReactions, gKnockbackReactions and AnimHeader.hits): what happens to an actor hit by an attack. */
 typedef struct HitReaction {
-    /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
+    /* 0x00 */ u8 kind;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ s32 unk4; /* sound to play */
-    /* 0x08 */ u8 unk8;  /* handler index into gHitReactionProcs */
+    /* 0x04 */ s32 sound; /* sound to play */
+    /* 0x08 */ u8 handler; /* index into gHitReactionProcs */
     /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
     /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
     /* 0x0B */ u8 padB;
     /* 0x0C */ s16 unkC; /* hit-volume height offset */
     /* 0x0E */ u8 unkE;  /* hit-volume radius / side offset */
     /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
-    /* 0x10 */ u8 unk10; /* added to the attacker's heading (high byte) */
+    /* 0x10 */ u8 headingOffset; /* added to the attacker's heading (high byte) for the victim's */
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 xzVelocity;
     /* 0x18 */ f32 yVelocity;
     /* 0x1C */ f32 gravity;
     /* 0x20 */ u8 unk20;
     /* 0x21 */ u8 pad21;
-    /* 0x22 */ u8 unk22; /* 0x80: sets immune to & 0x3F */
+    /* 0x22 */ u8 immunity; /* 0x80: sets the victim's imune to & 0x3F */
     /* 0x23 */ u8 pad23;
-    /* 0x24 */ u16 unk24; /* flags */
+    /* 0x24 */ u16 flags;
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
 /* One rule of a hit route (gHitRoutes, game/Anim/AnimPlayback/animplayback.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 typedef struct HitRule {
-    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
-    /* 0x1 */ u8 unk1; /* the reaction kind it matches */
-    /* 0x2 */ u8 unk2; /* bit 0x80: matches every other kind; & 0x7F: action */
+    /* 0x0 */ u8 condition; /* 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
+    /* 0x1 */ u8 kind; /* the reaction kind it matches */
+    /* 0x2 */ u8 action; /* bit 0x80: matches every other kind; & 0x7F: the action */
     /* 0x3 */ u8 unk3; /* the table entry to use */
 } HitRule;
 

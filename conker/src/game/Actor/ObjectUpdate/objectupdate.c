@@ -66,49 +66,49 @@ Gfx gObjectPassEndDL[] = {
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
 Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
-    Actor *obj;
+    Actor *actor;
     s32 i;
     s32 state;
 
     gSPDisplayList(gdl++, gObjectPassBeginDL);
-    obj = movement_obj;
-    for (i = 0; i != 25; i++, obj++) {
+    actor = movement_obj;
+    for (i = 0; i != 25; i++, actor++) {
         gDebugStatusCode = (i & 0xFFFFFF) | 0x01000000;
-        state = obj->type;
-        if (state == 0 || obj->drawtype == 3 || obj->drawtype == 5) {
+        state = actor->type;
+        if (state == 0 || actor->drawtype == 3 || actor->drawtype == 5) {
             continue;
         }
-        if (obj->drawtype == 2) {
+        if (actor->drawtype == 2) {
             if (mode != 2) {
                 continue;
             }
-        } else if (obj->character_type == 0xFF) {
+        } else if (actor->character_type == 0xFF) {
             continue;
         }
         if (mode == 6) {
-            if (obj->drawtype != 7) {
+            if (actor->drawtype != 7) {
                 continue;
             }
         } else if (mode == 0) {
-            if (!((obj->floorMaterial >> 9) & 1)) {
+            if (!((actor->floorMaterial >> 9) & 1)) {
                 continue;
             }
         } else if (mode == 1) {
-            if (obj->drawtype == 7 || obj->drawtype == 1) {
+            if (actor->drawtype == 7 || actor->drawtype == 1) {
                 continue;
             }
-            if (obj->drawtype == 0 && actor_getAlpha(obj, player) < 0xFF) {
+            if (actor->drawtype == 0 && actor_getAlpha(actor, player) < 0xFF) {
                 continue;
             }
-        } else if (mode == 2 && obj->drawtype != 2) {
-            if (obj->drawtype == 7 || (obj->drawtype != 0 && obj->drawtype != 1)) {
+        } else if (mode == 2 && actor->drawtype != 2) {
+            if (actor->drawtype == 7 || (actor->drawtype != 0 && actor->drawtype != 1)) {
                 continue;
             }
-            if (obj->drawtype == 0 && actor_getAlpha(obj, player) == 0xFF) {
+            if (actor->drawtype == 0 && actor_getAlpha(actor, player) == 0xFF) {
                 continue;
             }
         }
-        if (obj->drawtype == 2) {
+        if (actor->drawtype == 2) {
             gdl = actor_drawSprite(gdl, i);
         } else {
             gdl = actor_drawModel(gdl, i, player, mode, 0);
@@ -131,55 +131,55 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
 }
 
 /* Per-frame update of one object: LOD, culling, bone matrices, fog effect and attachments. */
-void actor_updateObject(Actor *obj, s32 index) {
-    obj->ob_matrix_ptr = NULL;
-    if (obj->drawtype == 5) {
+void actor_updateObject(Actor *actor, s32 index) {
+    actor->ob_matrix_ptr = NULL;
+    if (actor->drawtype == 5) {
         actor_buildRootMatrix(index, TRUE);
         return;
     }
-    if (obj->character_type == 0xFF) {
+    if (actor->character_type == 0xFF) {
         return;
     }
-    if (obj->drawtype == 3) {
+    if (actor->drawtype == 3) {
         return;
     }
-    if (obj->drawtype == 2) {
+    if (actor->drawtype == 2) {
         actor_scrollSpriteTexture(index);
         return;
     }
-    if (obj->forced_lod != 0) {
-        actor_applyForcedLod(obj);
+    if (actor->forced_lod != 0) {
+        actor_applyForcedLod(actor);
     }
     actor_updateCulling(index);
     actor_buildRootMatrix(index, FALSE);
-    aim_updatePoints(obj);
-    if (obj->ob_matrix_ptr == NULL) {
-        obj->unk1FC = 2;
+    aim_updatePoints(actor);
+    if (actor->ob_matrix_ptr == NULL) {
+        actor->unk1FC = 2;
     } else {
         bone_updateObject(index);
-        aim_turnHead(obj);
+        aim_turnHead(actor);
     }
     if (gObjPartsStates[index].state != 0) {
         model_updateParts(index);
     }
-    if (obj->type != 0) {
+    if (actor->type != 0) {
         actor_updateEyes(index);
         actor_followParent(index);
-        if (obj->fogMode != 0) {
-            actor_updateFog(obj);
+        if (actor->fogMode != 0) {
+            actor_updateFog(actor);
         }
-        if (obj->noshove & 0x4000) {
-            collision_updateActorHitMesh(obj);
+        if (actor->noshove & 0x4000) {
+            collision_updateActorHitMesh(actor);
         }
-        if (obj->morph != NULL) {
-            anim_morphVertices(obj->unk134, obj->morphDuration, index);
+        if (actor->morph != NULL) {
+            anim_morphVertices(actor->unk134, actor->morphDuration, index);
         }
     }
 }
 
 /* Updates every object, parents before the objects attached to them (by attachment depth). */
 void actor_updateObjects(void) {
-    Actor *obj;
+    Actor *actor;
     Actor *parent;
     s32 i;
     s32 j;
@@ -200,11 +200,11 @@ void actor_updateObjects(void) {
     }
     bzero(depth, 25);
     for (i = 0; i < 25; i++) {
-        obj = &movement_obj[i];
-        state = obj->type;
+        actor = &movement_obj[i];
+        state = actor->type;
         if (state != 0) {
-            if (obj->attach_char != 0) {
-                parent = obj;
+            if (actor->attach_char != 0) {
+                parent = actor;
                 depth[i] = 0;
                 while (parent->attach_char != 0) {
                     parent = &movement_obj[parent->attach_char - 1];
@@ -214,7 +214,7 @@ void actor_updateObjects(void) {
                     maxDepth = depth[i];
                 }
             } else {
-                actor_updateObject(obj, i);
+                actor_updateObject(actor, i);
             }
         }
     }
@@ -246,7 +246,7 @@ void actor_updateObjects(void) {
 
 /* Creates the blobShadow effect for objects visible to some player and frees it for the rest. */
 void actor_updateBlobShadows(void) {
-    Actor *obj;
+    Actor *actor;
     s32 visible;
     s32 i;
     s32 variant;
@@ -257,39 +257,39 @@ void actor_updateBlobShadows(void) {
     s32 j;
 
     for (j = 0; j < 25; j++) {
-        obj = &movement_obj[j];
-        state = obj->type;
+        actor = &movement_obj[j];
+        state = actor->type;
         if (state != 0) {
-            id = obj->character_type;
+            id = actor->character_type;
             visible = FALSE;
-            if (obj->drawtype != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
-                obj->shadow_size != 0 && obj->attach_char == 0 &&
-                (gCutsceneActorLock == 0 || gCutsceneShowUnboundActors[0] != 0 || cutscene_isActorBound(obj) != 0) &&
-                (obj->unk88 == 0 || obj->unkCC >= -150)) {
+            if (actor->drawtype != 3 && id != 0xFF && actor->unk123 == 0 && (actor->unk66 & 0x10) != 0x10 &&
+                actor->shadow_size != 0 && actor->attach_char == 0 &&
+                (gCutsceneActorLock == 0 || gCutsceneShowUnboundActors[0] != 0 || cutscene_isActorBound(actor) != 0) &&
+                (actor->unk88 == 0 || actor->unkCC >= -150)) {
                 for (i = 0; i <= gScreenLayout; i++) {
-                    if (actor_getAlpha(obj, i) != 0) {
+                    if (actor_getAlpha(actor, i) != 0) {
                         visible = TRUE;
                     }
                 }
             }
             if (visible) {
-                if (obj->blobShadow == NULL) {
+                if (actor->blobShadow == NULL) {
                     variant = 0;
-                    if (obj->character_type == 0x4D) {
+                    if (actor->character_type == 0x4D) {
                         variant = 2;
                         variantFlag = 1;
                     } else {
                         variantFlag = 0;
                     }
-                    obj->blobShadow = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
+                    actor->blobShadow = (EffectHeader *)shadow_createBlob(0, actor, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
             } else {
-                effect = obj->blobShadow;
+                effect = actor->blobShadow;
                 if (effect != NULL) {
                     effect_destroyObject(effect);
-                    obj->blobShadow = NULL;
+                    actor->blobShadow = NULL;
                 }
             }
         }
@@ -379,7 +379,7 @@ void actor_scrollSpriteTexture(s32 index) {
 /* Switches the object to the LOD model for its distance from the player's camera. */
 void actor_selectLod(s32 index, s16 player, s32 mode) {
     Camera *cam;
-    Actor *obj;
+    Actor *actor;
     s32 special;
     s32 lod;
     s32 maxLod;
@@ -389,28 +389,28 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
     f32 distSq;
 
     cam = &camera_global_Cameras[player];
-    obj = &movement_obj[index];
-    if (obj->forced_lod != 0) {
+    actor = &movement_obj[index];
+    if (actor->forced_lod != 0) {
         return;
     }
-    if (obj->drawtype == 7) {
+    if (actor->drawtype == 7) {
         return;
     }
     range[0] = 500.0f;
     range[1] = 730.0f;
     range[2] = 1500.0f;
     range[3] = 2000.0f;
-    maxLod = obj->lodCount - 1;
+    maxLod = actor->lodCount - 1;
     if (maxLod == -1) {
         return;
     }
-    special = collision_getModelId(obj);
-    diff = cam->eye.x - obj->xpos;
+    special = collision_getModelId(actor);
+    diff = cam->eye.x - actor->xpos;
     distSq = diff * diff;
-    diff = cam->eye.y - obj->ypos;
+    diff = cam->eye.y - actor->ypos;
     diff = diff * diff;
     distSq += diff;
-    diff = cam->eye.z - obj->zpos;
+    diff = cam->eye.z - actor->zpos;
     diff = diff * diff;
     distSq += diff;
     if (distSq < range[0] * range[0]) {
@@ -424,7 +424,7 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
     } else {
         lod = 4;
     }
-    if (lod >= 2 && obj->speed < 3.0f) {
+    if (lod >= 2 && actor->speed < 3.0f) {
         lod--;
     }
     if (special) {
@@ -448,12 +448,12 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
     if (lod == -1) {
         return;
     }
-    if (lod == obj->current_lod) {
+    if (lod == actor->current_lod) {
         return;
     }
-    model = obj->modelIds[lod];
+    model = actor->modelIds[lod];
     collision_setObjectModel(index, model, 0);
-    obj->current_lod = lod;
+    actor->current_lod = lod;
 }
 
 /* Draws one object's model for one player; drops the output if the display list would overflow. */
@@ -464,37 +464,37 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     s32 overflow;
     void *model;
     Gfx *start;
-    Actor *obj;
+    Actor *actor;
 
     start = gdl;
     if (gCutsceneActorLock != 0 && gCutsceneShowUnboundActors[0] == 0 && cutscene_isActorBound(&movement_obj[index]) == 0) {
         return gdl;
     }
-    obj = &movement_obj[index];
-    if ((obj->cullMask & (1 << player)) == (1 << player)) {
+    actor = &movement_obj[index];
+    if ((actor->cullMask & (1 << player)) == (1 << player)) {
         return gdl;
     }
-    if (actor_getAlpha(obj, player) == 0) {
+    if (actor_getAlpha(actor, player) == 0) {
         return gdl;
     }
-    if (obj->ob_matrix_ptr == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return gdl;
     }
     if (mode != 4 && mode != 5 && mode != 3) {
         actor_selectLod(index, player, mode);
-        lod = obj->current_lod;
+        lod = actor->current_lod;
     } else {
-        collision_getLodModelId(obj, &lod);
+        collision_getLodModelId(actor, &lod);
     }
     func_1502D54C(index, colour);
     if (gLevelHeader->unk3E != 0) {
-        actor_getFogAlpha(obj, colour, player);
+        actor_getFogAlpha(actor, colour, player);
     } else {
         colour[3] = 0xFF;
     }
-    alpha = actor_getAlpha(obj, player);
+    alpha = actor_getAlpha(actor, player);
     if (alpha < 0xFF) {
-        if (obj->CameraPtr != NULL && obj->CameraPtr->Mode == 0x100 && player != obj->playernumber) {
+        if (actor->CameraPtr != NULL && actor->CameraPtr->Mode == 0x100 && player != actor->playernumber) {
             alpha = 0xFF;
         }
     }
@@ -502,7 +502,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         alpha = (gAfterimageAlpha * alpha) >> 8;
         model = gBoneTrailMtxs;
     } else {
-        model = obj->ob_matrix_ptr;
+        model = actor->ob_matrix_ptr;
     }
     gdl = actor_emitModel(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
@@ -518,7 +518,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
 }
 
 /* Gathers the colours an object is drawn with: the player's prim/env colours and the object's fog. */
-void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB,
+void actor_getDrawColours(Actor *actor, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB,
                    s32 *envR, s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA) {
     u8 *prim;
     u8 *env;
@@ -535,14 +535,14 @@ void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *p
     *fogG = 0;
     *fogB = 0;
     *fogA = colour[3];
-    if (obj->fogMode != 0) {
-        actor_getFogColour(obj, fogR, fogG, fogB, fogA);
+    if (actor->fogMode != 0) {
+        actor_getFogColour(actor, fogR, fogG, fogB, fogA);
     }
 }
 
 /* Emits an object's model: segments, geometry mode, lighting, colours and each part's display list. */
 Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap) {
-    Actor *obj;
+    Actor *actor;
     s32 i;
     s32 lod;
     s32 id;
@@ -563,18 +563,18 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     s32 fogA;
     s32 pad; // matching: unused stack slot
 
-    obj = &movement_obj[index];
-    id = obj->character_type;
+    actor = &movement_obj[index];
+    id = actor->character_type;
     if (mode == 3 || mode == 4 || mode == 5) {
-        id = collision_getLodModelId(obj, &lod);
+        id = collision_getLodModelId(actor, &lod);
     } else {
-        lod = obj->current_lod;
+        lod = actor->current_lod;
     }
-    if (model_loadForActor(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
+    if (model_loadForActor(actor, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
     }
     fb = gDrawBufferIndex;
-    if (obj->modelData[lod][fb] == 0) {
+    if (actor->modelData[lod][fb] == 0) {
         return gdl;
     }
     if (wrap) {
@@ -585,8 +585,8 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     gdl = actor_bindSwapTextures(gdl, index);
     gdl = actor_setTextureScroll(gdl, index);
     gSPSegment(gdl++, 3, model);
-    gSPSegment(gdl++, 1, obj->modelData[lod][fb] - 0x38);
-    actor_getDrawColours(obj, player, alpha, colour, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+    gSPSegment(gdl++, 1, actor->modelData[lod][fb] - 0x38);
+    actor_getDrawColours(actor, player, alpha, colour, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     if (mode == 5) {
         gSPSegment(gdl++, 8, D_800832C0);
@@ -605,10 +605,10 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     }
     lit = TRUE;
     levelFog = gLevelHeader->unk3E;
-    if ((obj->unk66 & 0xC) == 0xC) {
+    if ((actor->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);
-    } else if ((obj->unk66 & 0xC) != 8) {
+    } else if ((actor->unk66 & 0xC) != 8) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
     } else if (gLightingEnabled != 0) {
@@ -622,18 +622,18 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
         lit = FALSE;
     }
     if (lit) {
-        lightFlags = (obj->unk2FE == 0) ? 0xA : 2;
+        lightFlags = (actor->unk2FE == 0) ? 0xA : 2;
         if (gStrobeCount != 0) {
             lightFlags |= 8;
         }
-        gdl = light_pickLights(gdl, player, obj->xpos, obj->ypos, obj->zpos,
-                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[gDrawBufferIndex],
-                            &obj->unk302, 2, obj->unk1DD, lightFlags, gPickedLights);
+        gdl = light_pickLights(gdl, player, actor->xpos, actor->ypos, actor->zpos,
+                            actor->floorMaterial, actor->unk304[player], actor->unk301, &actor->unk314[gDrawBufferIndex],
+                            &actor->unk302, 2, actor->unk1DD, lightFlags, gPickedLights);
     }
     colourSet = -1;
     for (i = 0; i < gModelDlPartCounts[id]; i++) {
-        if (!(obj->unk94 & (1 << i))) {
-            if (!(obj->unk98 & (1 << i))) {
+        if (!(actor->unk94 & (1 << i))) {
+            if (!(actor->unk98 & (1 << i))) {
                 if (colourSet != 0) {
                     gDPPipeSync(gdl++);
                     colourSet = 0;
@@ -664,10 +664,10 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
             }
         }
     }
-    actor_refreshModelUnload(obj);
-    obj->unk2FE = 1;
+    actor_refreshModelUnload(actor);
+    actor->unk2FE = 1;
     if (mode == 0) {
-        gdl = attach_drawOwner(gdl, obj, player, 1);
+        gdl = attach_drawOwner(gdl, actor, player, 1);
     }
     if (wrap) {
         gSPDisplayList(gdl++, gObjectPassEndDL);
@@ -680,13 +680,13 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
 
 /* Object colour: for (unk66 & 0xC) == 4 the inverse of the mean of unk1DD and unk1E0, else white. */
 void func_1502D54C(s32 index, s32 *colour) {
-    Actor *obj;
+    Actor *actor;
 
-    obj = &movement_obj[index];
-    if ((obj->unk66 & 0xC) == 4) {
-        colour[0] = (obj->unk1E0[0] + obj->unk1DD[0]) / 2;
-        colour[1] = (obj->unk1E0[1] + obj->unk1DD[1]) / 2;
-        colour[2] = (obj->unk1E0[2] + obj->unk1DD[2]) / 2;
+    actor = &movement_obj[index];
+    if ((actor->unk66 & 0xC) == 4) {
+        colour[0] = (actor->unk1E0[0] + actor->unk1DD[0]) / 2;
+        colour[1] = (actor->unk1E0[1] + actor->unk1DD[1]) / 2;
+        colour[2] = (actor->unk1E0[2] + actor->unk1DD[2]) / 2;
         colour[0] = 0xFF - colour[0];
         colour[1] = 0xFF - colour[1];
         colour[2] = 0xFF - colour[2];
@@ -698,8 +698,8 @@ void func_1502D54C(s32 index, s32 *colour) {
 }
 
 /* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
-void actor_getFogAlpha(obj, colour, player)
-    Actor *obj;
+void actor_getFogAlpha(actor, colour, player)
+    Actor *actor;
     s32 *colour;
     s32 player;
 {
@@ -727,7 +727,7 @@ void actor_getFogAlpha(obj, colour, player)
     step = (first - last) * 0.001000000047f;
     near = D_800DD2E8 * step + last;
     far = D_800DD2EC * step + last;
-    math_transformPointW(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
+    math_transformPointW(gSpriteViewMtx[player], actor->xpos, actor->ypos, actor->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
@@ -741,8 +741,8 @@ void actor_getFogAlpha(obj, colour, player)
     colour[3] = (1.0f - amount) * 255.0f;
 }
 
-/* DMAs the current frame of each animation channel into buf (anim, or obj->unk2D0 when obj is given). */
-void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf) {
+/* DMAs the current frame of each animation channel into buf (anim, or actor->unk2D0 when actor is given). */
+void actor_loadAnimFrames(AnimInstance *anim, Actor *actor, u8 *buf) {
     s32 frameSize;
     u32 size;
     u32 src;
@@ -758,11 +758,11 @@ void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf) {
 
     channels = 1;
     align = 0;
-    if (obj != NULL) {
-        if (obj->animseq.uh == 0xFFFF) {
-            actor_stopAnim(obj);
+    if (actor != NULL) {
+        if (actor->animseq.uh == 0xFFFF) {
+            actor_stopAnim(actor);
         }
-        anim = obj->unk2D0;
+        anim = actor->unk2D0;
     }
     if (anim == NULL) {
         return;
@@ -858,42 +858,42 @@ void actor_computeBones(MtxF mtx, s32 index) {
     s16 cmd[42];
     s32 id;
     u8 *remap;
-    Actor *obj;
+    Actor *actor;
     s32 count;
     s32 moved;
     u8 frameBuf[0x320];
     u8 remapBuf[0x44];
-    SpawnRecord *unk144;
+    SpawnRecord *spawn;
 
-    obj = &movement_obj[index];
-    id = obj->character_type;
+    actor = &movement_obj[index];
+    id = actor->character_type;
     remap = NULL;
     if (gModelData[id] == NULL) {
-        unk144 = obj->listpos_ptr;
-        if (model_load(id, 0, unk144, 1, obj->unkAC) != 0) {
-            obj->ob_matrix_ptr = NULL;
+        spawn = actor->listpos_ptr;
+        if (model_load(id, 0, spawn, 1, actor->unkAC) != 0) {
+            actor->ob_matrix_ptr = NULL;
             return;
         }
         if (gModelData[id] == NULL) {
-            obj->ob_matrix_ptr = NULL;
+            actor->ob_matrix_ptr = NULL;
             return;
         }
     }
-    if (obj->unk2D0 != NULL) {
+    if (actor->unk2D0 != NULL) {
         goto animated;
     }
     // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
 load:
-    if (collision_allocAnimState(obj, 0, 0, 1.0f) == 0) {
+    if (collision_allocAnimState(actor, 0, 0, 1.0f) == 0) {
     animated:
-        if (gModelBoneCounts[id] < 2 || obj->unk2D0 != NULL) {
+        if (gModelBoneCounts[id] < 2 || actor->unk2D0 != NULL) {
             count = actor_getBoneMatrixCount(id);
             if (gBonePoolSize * sizeof(Mtx) < gBonePoolCursor + count * sizeof(Mtx) - gBonePoolStart) {
-                obj->ob_matrix_ptr = NULL;
+                actor->ob_matrix_ptr = NULL;
                 return;
             }
-            actor_refreshModelUnload(obj);
-            obj->ob_matrix_ptr = (void *)gBonePoolCursor;
+            actor_refreshModelUnload(actor);
+            actor->ob_matrix_ptr = (void *)gBonePoolCursor;
             {
                 s32 k;
 
@@ -912,41 +912,41 @@ load:
                 }
             }
             bone_buildCommands((GameCommand *)cmd, index);
-            actor_loadAnimFrames(NULL, obj, frameBuf);
+            actor_loadAnimFrames(NULL, actor, frameBuf);
             {
                 s16 scale;
 
                 if (gCutsceneStates[0] != 1) {
-                    scale = obj->scale_y * obj->unkCC;
+                    scale = actor->scale_y * actor->unkCC;
                 } else {
                     scale = 0;
                 }
-                anim_buildBoneMatrices(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
+                anim_buildBoneMatrices(&gBonePoolCursor, mtx, actor->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
             }
-            obj->mod_angle = gAnimModAngle;
+            actor->mod_angle = gAnimModAngle;
             moved = D_80088558;
             if (moved != 0) {
-                f32 f0;
+                f32 value;
 
-                f0 = D_80088554 / 32768.0f;
-                if (obj->unk1FC & 4) {
-                    obj->unk1F8 -= moved * 0.03125f;
+                value = D_80088554 / 32768.0f;
+                if (actor->unk1FC & 4) {
+                    actor->unk1F8 -= moved * 0.03125f;
                 }
-                obj->unk1F4 = f0 - obj->unk1F8;
-                obj->unk1F8 = f0;
-                if (obj->unk1FC & 2) {
-                    obj->unk1FC &= ~3;
-                    obj->unk1F4 = obj->speed;
+                actor->unk1F4 = value - actor->unk1F8;
+                actor->unk1F8 = value;
+                if (actor->unk1FC & 2) {
+                    actor->unk1FC &= ~3;
+                    actor->unk1F4 = actor->speed;
                 } else {
-                    obj->unk1FC |= 1;
+                    actor->unk1FC |= 1;
                 }
-                if (obj->intel_animspd & 0x40) {
-                    f0 = moved * 0.03125f;
+                if (actor->intel_animspd & 0x40) {
+                    value = moved * 0.03125f;
                     if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
-                    f0 = obj->scale_xz * f0;
-                    f0 = f0 / obj->unk2D0->numFrames[0];
-                    f0 = *(volatile f32 *)&obj->speed / f0;
-                    obj->unk2D0->speed[0] = f0 * 0.5f;
+                    value = actor->scale_xz * value;
+                    value = value / actor->unk2D0->numFrames[0];
+                    value = *(volatile f32 *)&actor->speed / value;
+                    actor->unk2D0->speed[0] = value * 0.5f;
                 }
             }
             gBoneMatricesUsed += count;
@@ -958,7 +958,7 @@ load:
    rootOnly it is stored as the object's only bone, otherwise the full skeleton is computed. */
 void actor_buildRootMatrix(s32 index, s32 rootOnly) {
     MtxF mtx;
-    Actor *obj;
+    Actor *actor;
     Actor *other;
     s32 canCull;
     s32 i;
@@ -970,39 +970,39 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
     void *dst;
     s32 parent;
 
-    obj = &movement_obj[index];
-    if (obj->scale_xz == 0.0f) {
-        obj->scale_xz = 0.1000000015f;
-        obj->unk154 = 0.1000000015f;
+    actor = &movement_obj[index];
+    if (actor->scale_xz == 0.0f) {
+        actor->scale_xz = 0.1000000015f;
+        actor->unk154 = 0.1000000015f;
     }
-    if (obj->scale_y == 0.0f) {
-        obj->scale_y = 0.1000000015f;
-        obj->unk158 = 0.1000000015f;
+    if (actor->scale_y == 0.0f) {
+        actor->scale_y = 0.1000000015f;
+        actor->unk158 = 0.1000000015f;
     }
-    if ((obj->unk66 & 0x20) == 0x20) {
+    if ((actor->unk66 & 0x20) == 0x20) {
         canCull = FALSE;
     } else {
         canCull = TRUE;
     }
-    if (obj->mv != NULL && obj->mv->SniperState != 0) {
+    if (actor->mv != NULL && actor->mv->SniperState != 0) {
         canCull = FALSE;
     }
     if ((1 << index) & gStoodOnActors) {
         canCull = FALSE;
     }
-    if (obj->character_type == 0x8A) {
-        other = event_getOwnedObject(obj, 0);
+    if (actor->character_type == 0x8A) {
+        other = event_getOwnedObject(actor, 0);
         if (other != NULL && other->mv != NULL && other->mv->SniperState != 0) {
             canCull = FALSE;
         }
     }
     if (canCull) {
-        if ((obj->cullMask & 0xF) == 0xF) {
+        if ((actor->cullMask & 0xF) == 0xF) {
             return;
         }
         maxAlpha = 0;
         for (i = 0; i <= gCurrentView; i++) {
-            alpha = actor_getAlpha(obj, i);
+            alpha = actor_getAlpha(actor, i);
             if (maxAlpha < alpha) {
                 maxAlpha = alpha;
             }
@@ -1012,19 +1012,19 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
         }
     }
     dc_glbl_CharNum = index;
-    if (obj->attach_char && !(obj->unk101 & 0x10)) {
-        parent = obj->attach_char - 1;
+    if (actor->attach_char && !(actor->unk101 & 0x10)) {
+        parent = actor->attach_char - 1;
         bone = movement_obj[parent].ob_matrix_ptr;
         if (bone == NULL) {
             return;
         }
-        bone += obj->basemtx;
-        if (!(obj->unk101 & 4)) {
+        bone += actor->basemtx;
+        if (!(actor->unk101 & 4)) {
             for (i = 0; i < 3; i++) {
                 if (i == 1) {
-                    scale = obj->scale_y;
+                    scale = actor->scale_y;
                 } else {
-                    scale = obj->scale_xz;
+                    scale = actor->scale_xz;
                 }
                 for (j = 0; j < 3; j++) {
                     mtx[i][j] = (*bone)[i][j] * scale;
@@ -1040,9 +1040,9 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
                 len = sqrtf((*bone)[i][0] * (*bone)[i][0] + (*bone)[i][1] * (*bone)[i][1] +
                             (*bone)[i][2] * (*bone)[i][2]);
                 if (i == 1) {
-                    scale = obj->scale_y / len;
+                    scale = actor->scale_y / len;
                 } else {
-                    scale = obj->scale_xz / len;
+                    scale = actor->scale_xz / len;
                 }
                 for (j = 0; j < 3; j++) {
                     mtx[i][j] = (*bone)[i][j] * scale;
@@ -1053,25 +1053,25 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
             mtx[3][3] = 1.0f;
         }
     } else {
-        math_mtxRotScaleF(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
-        if (obj->unk101 & 0x10) {
-            other = &movement_obj[obj->attach_char - 1];
-            bone = movement_obj[obj->attach_char - 1].ob_matrix_ptr;
+        math_mtxRotScaleF(mtx, actor->vtilt, actor->theta, actor->lean_angle, actor->scale_xz, actor->scale_y, actor->scale_xz);
+        if (actor->unk101 & 0x10) {
+            other = &movement_obj[actor->attach_char - 1];
+            bone = movement_obj[actor->attach_char - 1].ob_matrix_ptr;
             if (bone == NULL) {
                 mtx[3][0] = 0;
                 mtx[3][1] = 0;
                 mtx[3][2] = 0;
             } else {
-                bone += obj->basemtx;
+                bone += actor->basemtx;
                 mtx[3][0] = (*bone)[3][0];
                 mtx[3][1] = (*bone)[3][1];
                 mtx[3][2] = (*bone)[3][2];
             }
         } else {
-            other = obj;
-            mtx[3][0] = obj->xpos;
-            mtx[3][1] = obj->ypos + obj->scale_y * obj->unkC8;
-            mtx[3][2] = obj->zpos;
+            other = actor;
+            mtx[3][0] = actor->xpos;
+            mtx[3][1] = actor->ypos + actor->scale_y * actor->unkC8;
+            mtx[3][2] = actor->zpos;
         }
         if (other->unk2D0 != NULL && other->unk2D0->frameRom[0] == 0) {
             mtx[3][1] += other->unkCC;
@@ -1079,7 +1079,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
     }
     if (rootOnly) {
         dst = gBonePoolCursor;
-        obj->ob_matrix_ptr = dst;
+        actor->ob_matrix_ptr = dst;
         bcopy(mtx, dst, sizeof(mtx));
         gBonePoolCursor += sizeof(mtx);
         gBoneMatricesUsed++;
@@ -1099,7 +1099,7 @@ void actor_flushBoneMatrices(void) {
 /* Visibility test of the object against each player's view; updates the per-player culled mask
    (cullMask) and reports the result per player through actor_fadeCommand. */
 void actor_updateCulling(s32 index) {
-    Actor *obj;
+    Actor *actor;
     u8 id;
     MtxF *tbl;
     RenderView *view;
@@ -1117,48 +1117,48 @@ void actor_updateCulling(s32 index) {
     s32 event;
 
     mask = 1;
-    obj = &movement_obj[index];
-    id = obj->character_type;
-    if (obj->drawtype == 7) {
-        obj->cullMask &= ~0xF;
+    actor = &movement_obj[index];
+    id = actor->character_type;
+    if (actor->drawtype == 7) {
+        actor->cullMask &= ~0xF;
         return;
     }
-    oldMask = obj->cullMask;
-    obj->cullMask |= 0xF;
-    if (gCutsceneActorLock != 0 && gCutsceneShowUnboundActors[0] == 0 && cutscene_isActorBound(obj) == 0) {
+    oldMask = actor->cullMask;
+    actor->cullMask |= 0xF;
+    if (gCutsceneActorLock != 0 && gCutsceneShowUnboundActors[0] == 0 && cutscene_isActorBound(actor) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !(gMatchState.playerMask & (1 << obj->playernumber))) {
+    if (actor->playernumber != 0xFF && !(gMatchState.playerMask & (1 << actor->playernumber))) {
         return;
     }
-    if ((obj->unk101 & 1) == 1) {
+    if ((actor->unk101 & 1) == 1) {
         return;
     }
-    if (obj->alpha == 0) {
+    if (actor->alpha == 0) {
         return;
     }
-    if (obj->attach_char != 0) {
-        obj->cullMask = movement_obj[obj->attach_char - 1].cullMask;
+    if (actor->attach_char != 0) {
+        actor->cullMask = movement_obj[actor->attach_char - 1].cullMask;
         return;
     }
-    width = gModelDefs[id]->bodyRadius * obj->scale_xz;
-    height = gModelDefs[id]->bodyRadius * obj->scale_y;
-    yOffset = (gModelDefs[id]->bodyHeight + obj->unkCC) * obj->scale_y;
-    obj->cull_radius_xz = width;
-    range = obj->cullDistance;
+    width = gModelDefs[id]->bodyRadius * actor->scale_xz;
+    height = gModelDefs[id]->bodyRadius * actor->scale_y;
+    yOffset = (gModelDefs[id]->bodyHeight + actor->unkCC) * actor->scale_y;
+    actor->cull_radius_xz = width;
+    range = actor->cullDistance;
     if (gCutsceneStates[0] == 1 && D_800C3660[0] == 0) {
         range = 0;
     }
     maxDist = 0;
-    if (obj->unk101 & 0x80) {
+    if (actor->unk101 & 0x80) {
         cullDist = 0.0f;
     } else {
         if (gModelDefs[id]->cullDistance == 0) {
-            cullDist = obj->bodyRadius;
+            cullDist = actor->bodyRadius;
         } else if (gModelDefs[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = gModelDefs[id]->cullDistance * obj->scale_xz;
+            cullDist = gModelDefs[id]->cullDistance * actor->scale_xz;
         }
     }
     for (i = 0; i <= gScreenLayout; i++) {
@@ -1172,7 +1172,7 @@ void actor_updateCulling(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = view_testCylinderInView(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
+        dist = view_testCylinderInView(view, *tbl, actor->xpos, actor->ypos + yOffset, actor->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;
@@ -1183,7 +1183,7 @@ void actor_updateCulling(s32 index) {
             if (maxDist < dist) {
                 maxDist = dist;
             }
-            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && gCutsceneStates[0] != 1) {
+            if ((actor->unk66 & 0x80) != 0x80 && dist <= cullDist && gCutsceneStates[0] != 1) {
                 inside = TRUE;
             }
         }
@@ -1194,142 +1194,142 @@ void actor_updateCulling(s32 index) {
                 } else {
                     event = 9;
                 }
-                actor_fadeCommand(obj, event, 0, 0, i);
+                actor_fadeCommand(actor, event, 0, 0, i);
             } else {
-                obj->playerFadeBits |= (1 << i) << 4;
-                actor_fadeCommand(obj, 9, 0, 0, i);
+                actor->playerFadeBits |= (1 << i) << 4;
+                actor_fadeCommand(actor, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && zone_isActorHiddenFromView(obj, i, oldMask) != 0) {
+            if ((actor->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && zone_isActorHiddenFromView(actor, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {
             event = 10;
         }
         if (event != -1) {
-            actor_fadeCommand(obj, event, 1, 0, i);
+            actor_fadeCommand(actor, event, 1, 0, i);
         }
         if (!inside) {
-            obj->cullMask &= ~mask;
+            actor->cullMask &= ~mask;
         }
-        if (actor_getAlpha(obj, i) == 0) {
-            obj->cullMask |= mask;
+        if (actor_getAlpha(actor, i) == 0) {
+            actor->cullMask |= mask;
         }
         mask <<= 1;
     }
-    func_1502E9FC(obj, maxDist);
-    if (obj->CameraPtr != NULL && (obj->CameraPtr->Mode == 0x10000 || obj->mv->SniperState != 0)) {
-        obj->cullMask |= 1 << index;
+    func_1502E9FC(actor, maxDist);
+    if (actor->CameraPtr != NULL && (actor->CameraPtr->Mode == 0x10000 || actor->mv->SniperState != 0)) {
+        actor->cullMask |= 1 << index;
     }
     if (gCutsceneStates[0] != 1) {
-        if (obj->forcedCullMask != 0) {
-            obj->cullMask |= obj->forcedCullMask;
+        if (actor->forcedCullMask != 0) {
+            actor->cullMask |= actor->forcedCullMask;
         }
     }
 }
 
 /* Empty in the final game. */
-void func_1502E9FC(Actor *obj, s32 dist) {
+void func_1502E9FC(Actor *actor, s32 dist) {
 }
 
-/* Fog effect modes (obj->fogMode), advanced by actor_updateFog and turned into a fog colour by
+/* Fog effect modes (actor->fogMode), advanced by actor_updateFog and turned into a fog colour by
    actor_getFogColour:
      1    fixed colour fogLevel/fogRate/fogFade, alpha fogColor (or *(f32 *)fogColor percent)
      2/3  black fog fading out / in at fogRate
      4    fogColor pulsing (fogLevel is the phase), 5 the same while fading out
      6/7  fogColor flash: one step up (6), then fading out at fogRate (7) */
 /* Starts a pulsing fog of colour (r, g, b, a). */
-void actor_startFogPulse(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
-    obj->fogMode = 4;
-    obj->fogLevel = 0;
-    obj->fogRate = rate;
-    obj->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
-    obj->fogFade = 0xFF;
+void actor_startFogPulse(Actor *actor, s32 r, s32 g, s32 b, s32 a, s32 rate) {
+    actor->fogMode = 4;
+    actor->fogLevel = 0;
+    actor->fogRate = rate;
+    actor->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
+    actor->fogFade = 0xFF;
 }
 
 /* Fades out the pulsing fog. */
-void actor_fadeFogPulse(Actor *obj) {
-    obj->fogMode = 5;
+void actor_fadeFogPulse(Actor *actor) {
+    actor->fogMode = 5;
 }
 
 /* Starts black fog fading out. */
-void actor_startFogFadeOut(Actor *obj, s32 rate) {
-    obj->fogMode = 2;
-    obj->fogLevel = 0xFF;
-    obj->fogRate = rate;
+void actor_startFogFadeOut(Actor *actor, s32 rate) {
+    actor->fogMode = 2;
+    actor->fogLevel = 0xFF;
+    actor->fogRate = rate;
 }
 
 /* Starts black fog fading in. */
-void actor_startFogFadeIn(Actor *obj, s32 rate) {
-    obj->fogMode = 3;
-    obj->fogLevel = 0xFF;
-    obj->fogRate = rate;
+void actor_startFogFadeIn(Actor *actor, s32 rate) {
+    actor->fogMode = 3;
+    actor->fogLevel = 0xFF;
+    actor->fogRate = rate;
 }
 
 /* Flashes fog of colour (r, g, b, a), from full strength when instant, then fades it out. */
-void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate) {
-    if (obj->fogMode != 6 && obj->fogMode != 7) {
+void actor_flashFog(Actor *actor, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate) {
+    if (actor->fogMode != 6 && actor->fogMode != 7) {
         if (instant) {
-            obj->fogLevel = 0xFF;
+            actor->fogLevel = 0xFF;
         } else {
-            obj->fogLevel = 0;
+            actor->fogLevel = 0;
         }
-        obj->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
-        obj->fogRate = rate;
+        actor->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
+        actor->fogRate = rate;
     }
-    obj->fogMode = 6;
+    actor->fogMode = 6;
 }
 
 /* Advances the object's fog effect by one frame. */
-void actor_updateFog(Actor *obj) {
+void actor_updateFog(Actor *actor) {
     // matching: per-case blocks with the break after them keep the last store out of the delay slot
-    switch (obj->fogMode) {
+    switch (actor->fogMode) {
     case 2:
     case 3: {
-        s32 step = obj->fogRate * gFrameTicks;
-        u8 intensity = obj->fogLevel;
+        s32 step = actor->fogRate * gFrameTicks;
+        u8 intensity = actor->fogLevel;
 
         if (step < intensity) {
-            obj->fogLevel = intensity - step;
+            actor->fogLevel = intensity - step;
         } else {
-            obj->fogLevel = 0;
+            actor->fogLevel = 0;
         }
     }
         break;
     case 5: {
         s32 step = gFrameTicks * 10;
-        u8 fade = obj->fogFade;
+        u8 fade = actor->fogFade;
 
         if (step < fade) {
-            obj->fogFade = fade - step;
+            actor->fogFade = fade - step;
         } else {
-            obj->fogMode = 0;
+            actor->fogMode = 0;
         }
     }
         /* fallthrough */
     case 4:
-        obj->fogLevel += obj->fogRate * gFrameTicks;
+        actor->fogLevel += actor->fogRate * gFrameTicks;
         break;
     case 6: {
-        s32 step = obj->fogRate * gFrameTicks;
-        u8 intensity = obj->fogLevel;
+        s32 step = actor->fogRate * gFrameTicks;
+        u8 intensity = actor->fogLevel;
 
         if (intensity < 0xFF - step) {
-            obj->fogLevel = intensity + step;
+            actor->fogLevel = intensity + step;
         } else {
-            obj->fogLevel = 0xFF;
+            actor->fogLevel = 0xFF;
         }
-        obj->fogMode = 7;
+        actor->fogMode = 7;
     }
         break;
     case 7: {
-        s32 step = obj->fogRate * gFrameTicks;
-        u8 intensity = obj->fogLevel;
+        s32 step = actor->fogRate * gFrameTicks;
+        u8 intensity = actor->fogLevel;
 
         if (step < intensity) {
-            obj->fogLevel = intensity - step;
+            actor->fogLevel = intensity - step;
         } else {
-            obj->fogMode = 0;
+            actor->fogMode = 0;
         }
     }
         break;
@@ -1337,14 +1337,14 @@ void actor_updateFog(Actor *obj) {
 }
 
 /* Fog colour (r, g, b, a) of the object's current fog effect (see actor_updateFog for the modes). */
-void actor_getFogColour(arg0, r, g, b, a)
-Actor *arg0;
+void actor_getFogColour(actor, r, g, b, a)
+Actor *actor;
 s32 *r;
 s32 *g;
 s32 *b;
 s32 *a;
 {
-    Actor *obj = arg0; // matching: the parameter copy gets its own stack slot
+    Actor *obj = actor; // matching: the parameter copy gets its own stack slot
     f32 intensity;
 
     switch (obj->fogMode) {
@@ -1443,23 +1443,23 @@ void actor_updateEyes(s32 index) {
 
 /* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
 Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
-    Actor *obj;
+    Actor *actor;
     u8 texIndex[2];
     s32 id;
     ExpressionRecord *override;
     s32 i;
     ObjTexture *tex;
 
-    obj = &movement_obj[index];
-    id = obj->character_type;
+    actor = &movement_obj[index];
+    id = actor->character_type;
     override = NULL;
     for (i = 0; i < 2; i++) {
-        if (obj->eyeCode[i] >= 10) {
-            texIndex[i] = obj->eyeCode[i] - 10;
+        if (actor->eyeCode[i] >= 10) {
+            texIndex[i] = actor->eyeCode[i] - 10;
         } else {
-            texIndex[i] = gModelDefs[id]->texture[i][obj->eyeCode[i]];
-            if (obj->expression && !override) {
-                override = face_getExpressionRecord(obj, obj->expression);
+            texIndex[i] = gModelDefs[id]->texture[i][actor->eyeCode[i]];
+            if (actor->expression && !override) {
+                override = face_getExpressionRecord(actor, actor->expression);
             }
             if (override != NULL) {
                 s32 overrideTex[2];
@@ -1468,7 +1468,7 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
                 overrideTex[1] = override->eyeCode[1];
                 if (override != NULL) { // matching: dropping this redundant re-test changes the code
                     if (overrideTex[i] != gModelDefs[id]->texture[i][2]) {
-                        if (obj->eyeCode[i] == 0) {
+                        if (actor->eyeCode[i] == 0) {
                             texIndex[i] = overrideTex[i];
                         }
                     } else {
@@ -1478,60 +1478,60 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
             }
         }
     }
-    tex = gModelTextures[obj->character_type];
+    tex = gModelTextures[actor->character_type];
     if (tex != NULL) {
         gSPSegment(gdl++, 6, tex[texIndex[0]].addr);
         gSPSegment(gdl++, 7, tex[texIndex[1]].addr);
-        gSPSegment(gdl++, 10, tex[obj->unk68[0]].addr);
-        gSPSegment(gdl++, 11, tex[obj->unk68[1]].addr);
+        gSPSegment(gdl++, 10, tex[actor->unk68[0]].addr);
+        gSPSegment(gdl++, 11, tex[actor->unk68[1]].addr);
     }
     return gdl;
 }
 
 /* Moves an attached object onto its parent (or the parent's bone) and copies the parent's state. */
 void actor_followParent(s32 index) {
-    Actor *obj;
+    Actor *actor;
     Actor *parent;
     MtxF *bone;
     s32 i;
 
-    obj = &movement_obj[index];
-    if (obj->attach_char == 0) {
+    actor = &movement_obj[index];
+    if (actor->attach_char == 0) {
         return;
     }
-    parent = &movement_obj[obj->attach_char - 1];
-    if ((obj->unk101 & 2) == 2) {
+    parent = &movement_obj[actor->attach_char - 1];
+    if ((actor->unk101 & 2) == 2) {
         return;
     }
     bone = parent->ob_matrix_ptr;
     if (bone == NULL) {
-        obj->xpos = parent->xpos;
-        obj->ypos = parent->ypos;
-        obj->zpos = parent->zpos;
+        actor->xpos = parent->xpos;
+        actor->ypos = parent->ypos;
+        actor->zpos = parent->zpos;
     } else {
-        bone += obj->basemtx;
-        obj->xpos = (*bone)[3][0];
-        obj->ypos = (*bone)[3][1];
-        obj->zpos = (*bone)[3][2];
+        bone += actor->basemtx;
+        actor->xpos = (*bone)[3][0];
+        actor->ypos = (*bone)[3][1];
+        actor->zpos = (*bone)[3][2];
     }
-    obj->floorY = parent->floorY;
-    obj->yspd = -4.0f;
-    if (!(obj->unk101 & 0x20)) {
-        obj->angle = parent->angle;
-        obj->speed = parent->speed;
-        obj->theta = parent->theta;
-        obj->angle = parent->angle; /* copied twice in the original */
-        obj->langle = parent->langle;
-        obj->fangle = parent->fangle;
+    actor->floorY = parent->floorY;
+    actor->yspd = -4.0f;
+    if (!(actor->unk101 & 0x20)) {
+        actor->angle = parent->angle;
+        actor->speed = parent->speed;
+        actor->theta = parent->theta;
+        actor->angle = parent->angle; /* copied twice in the original */
+        actor->langle = parent->langle;
+        actor->fangle = parent->fangle;
     }
-    if (!(obj->unk101 & 0x40)) {
-        obj->alpha = parent->alpha;
-        obj->targetAlpha = parent->targetAlpha;
-        obj->fadeStep = parent->fadeStep;
-        obj->fadeMode = parent->fadeMode;
-        obj->playerFadeBits = parent->playerFadeBits;
+    if (!(actor->unk101 & 0x40)) {
+        actor->alpha = parent->alpha;
+        actor->targetAlpha = parent->targetAlpha;
+        actor->fadeStep = parent->fadeStep;
+        actor->fadeMode = parent->fadeMode;
+        actor->playerFadeBits = parent->playerFadeBits;
         for (i = 0; i <= gScreenLayout; i++) {
-            obj->playerAlphas[i] = parent->playerAlphas[i];
+            actor->playerAlphas[i] = parent->playerAlphas[i];
         }
     }
 }
@@ -1652,20 +1652,20 @@ void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tr
 }
 
 /* Keeps a copy of the object's bone matrices in prevBones (allocated on first use). */
-void actor_savePrevBones(Actor *obj) {
+void actor_savePrevBones(Actor *actor) {
     s32 id;
     void *copy;
 
-    if ((obj->noshove & 0x4000) && obj->hit_vtx_array != 0 && obj->ob_matrix_ptr != NULL) {
-        id = obj->character_type;
-        if (obj->prevBones == NULL) {
-            copy = allocate_memory(gModelBoneCounts[id] * sizeof(*obj->ob_matrix_ptr), 1, 1, 2);
-            obj->prevBones = copy;
+    if ((actor->noshove & 0x4000) && actor->hit_vtx_array != 0 && actor->ob_matrix_ptr != NULL) {
+        id = actor->character_type;
+        if (actor->prevBones == NULL) {
+            copy = allocate_memory(gModelBoneCounts[id] * sizeof(*actor->ob_matrix_ptr), 1, 1, 2);
+            actor->prevBones = copy;
             if (copy == NULL) {
                 return;
             }
         }
-        bcopy(obj->ob_matrix_ptr, obj->prevBones, gModelBoneCounts[id] * sizeof(*obj->ob_matrix_ptr));
+        bcopy(actor->ob_matrix_ptr, actor->prevBones, gModelBoneCounts[id] * sizeof(*actor->ob_matrix_ptr));
     }
 }
 
@@ -1712,51 +1712,51 @@ Gfx *actor_setTextureScroll(Gfx *gdl, s32 index) {
 
 /* Applies a requested LOD model change (forced_lod), restarting the animation if the new model
    uses a different animation set. */
-void actor_applyForcedLod(Actor *obj) {
+void actor_applyForcedLod(Actor *actor) {
     s32 lod;
     ActorAnim *oldAnims;
     s32 model;
 
-    if (obj->forced_lod == 0) {
+    if (actor->forced_lod == 0) {
         return;
     }
-    oldAnims = gModelAnimTables[obj->character_type];
-    if (obj->forced_lod == 0xFF) {
-        obj->forced_lod = 0;
+    oldAnims = gModelAnimTables[actor->character_type];
+    if (actor->forced_lod == 0xFF) {
+        actor->forced_lod = 0;
         lod = 0;
     } else {
-        lod = obj->forced_lod - 1;
-        if (lod >= obj->modelCount || lod == obj->current_lod) {
+        lod = actor->forced_lod - 1;
+        if (lod >= actor->modelCount || lod == actor->current_lod) {
             return;
         }
     }
-    model = obj->modelIds[lod];
-    collision_setObjectModel(obj - movement_obj, model, 0);
-    obj->current_lod = lod;
+    model = actor->modelIds[lod];
+    collision_setObjectModel(actor - movement_obj, model, 0);
+    actor->current_lod = lod;
     if (gCutsceneStates[0] == 1) {
         gCutsceneActorLock = 0;
     }
     if (oldAnims != gModelAnimTables[model]) {
-        if (obj->animseq.uh >= gModelAnimCounts[model]) {
-            obj->animseq.uh = 0xFFFF;
-            actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        if (actor->animseq.uh >= gModelAnimCounts[model]) {
+            actor->animseq.uh = 0xFFFF;
+            actor_playAnim(actor, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
-            s32 anim = obj->animseq.uh;
+            s32 anim = actor->animseq.uh;
 
-            obj->animseq.uh = 0xFFFF;
-            actor_playAnim(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            actor->animseq.uh = 0xFFFF;
+            actor_playAnim(actor, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
     if (gCutsceneStates[0] == 1) {
         gCutsceneActorLock = 1;
     }
-    face_revertExpression(obj);
+    face_revertExpression(actor);
 }
 
 /* Refreshes the gModelUnloadTimers counter of the object's model id (2 in one special case, 3 by default,
    or keepTime seconds). */
-void actor_refreshModelUnload(Actor *arg0) {
-    Actor *obj = arg0; // matching: the parameter copy changes register allocation
+void actor_refreshModelUnload(Actor *actor) {
+    Actor *obj = actor; // matching: the parameter copy changes register allocation
     u8 id = obj->character_type;
     u8 *counter;
 

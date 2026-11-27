@@ -37,8 +37,9 @@
    actor_applyHit's register allocation differs), so no header declares it */
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
 
-/* Animation id lists (D_80099428 goes with the dive sound in actor_updatePlayerControls). */
+/* Frame counts of actor type 0x92's animations 20..23, too long for the header's u8 count (actor_startAnimState). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
+/* 0-terminated animation ids that keep sound 0x61E playing: anim 0xE9 is the hover (sound_followOwnerAnimsCallback, actor_updatePlayerControls). */
 const u16 D_80099428[2] = { 0xE9, 0 };
 /* Eye frame for eye codes 0..2 (actor_updateTypeAnims). */
 const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
@@ -1317,7 +1318,6 @@ void actor_easePushVelocity(Actor *actor, u16 angle, f32 speed, f32 rate) {
 void actor_applyWaterCurrent(Actor *actor) {
     s32 pathIdx;
     s32 id;
-    s32 tmp;
 
     pathIdx = -1;
 
@@ -2245,18 +2245,18 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
     s32 savedIdx;
     s32 v;
 
-    if (hit[index].unk0 & 0x80) {
-        reaction = hit[index].unk0 & 0x7F;
+    if (hit[index].kind & 0x80) {
+        reaction = hit[index].kind & 0x7F;
     } else {
-        reaction = base[index].unk0 & 0x7F;
+        reaction = base[index].kind & 0x7F;
     }
     victim->unk10B = 0;
-    if ((base[index].unk24 & 1) && (victim->stunned != 0)) {
+    if ((base[index].flags & 1) && (victim->stunned != 0)) {
         damageMask = 0;
     }
     if (!(hit[index].unkF & 0x40)) {
-        victim->angle = attacker->angle + (hit[index].unk10 << 8);
-        if (base[index].unk24 & 0x10) {
+        victim->angle = attacker->angle + (hit[index].headingOffset << 8);
+        if (base[index].flags & 0x10) {
             victim->angle = actor_getDirectionAngle(victim->xpos - attacker->xpos,
                                           attacker->zpos - victim->zpos, 0);
         }
@@ -2334,9 +2334,9 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
             }
         }
     }
-    v = hit[index].unk8;
+    v = hit[index].handler;
     if (v == 0) {
-        v = base[index].unk8;
+        v = base[index].handler;
     }
     if (reaction != 0x27) {
         gHitReactionProcs[v](attacker, victim, &reaction);
@@ -2359,14 +2359,14 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         msg.b = victim->unique_id;
         effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);
     }
-    if (base[index].unk4 != 0) {
-        gEventParam = base[index].unk4;
+    if (base[index].sound != 0) {
+        gEventParam = base[index].sound;
         if (event_resolveSoundCommand(victim, &gEventParam, 0) != 0) {
             sound_playActorUntracked(gEventParam, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
-        if (hit[index].unk4 != 0) {
-            gEventParam = hit[index].unk4;
+        if (hit[index].sound != 0) {
+            gEventParam = hit[index].sound;
             if (event_resolveSoundCommand(victim, &gEventParam, 0) != 0) {
                 sound_playActorUntracked(gEventParam, victim, 0x6D60, 0x12C, 0x708);
             }
@@ -2375,7 +2375,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
     attacker->ivehitit = 60;
     if ((gIsMultiplayer == 0) || (victim->type != 1)) {
         victim->unk21C = 0;
-        if (base[index].unk24 & 0x100) {
+        if (base[index].flags & 0x100) {
             victim->scriptCmd = NULL;
         }
     }
@@ -2389,7 +2389,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
     }
     attacker->unk108 = slot | 0x80;
     if (reaction != 0x27) {
-        if ((base[index].unk24 & 0x40) && (victim->type == 1)) {
+        if ((base[index].flags & 0x40) && (victim->type == 1)) {
             movement_obj[slot].mv->bitten = 8000;
         } else {
             v = victim->unk23B;
@@ -2401,27 +2401,27 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
             victim->stunnedseq = actor_findReaction(reaction, victim);
             victim->animseq.uh = 0xFFFF;
             actor_advanceReaction(slot, victim);
-            if (base[index].unk24 & 0x200) {
+            if (base[index].flags & 0x200) {
                 victim->unk10B |= 0x20;
             }
             if (victim->yspd > 0.0f) {
                 victim->shad += 0.1000000015f;
             }
-            if (base[index].unk24 & 8) {
+            if (base[index].flags & 8) {
                 victim->unk10B |= 0x40;
                 gHitAttackerX = attacker->xpos;
                 gHitAttackerZ = attacker->zpos;
                 gHitAttackerY = attacker->ypos;
             }
         }
-        if (base[index].unk24 & 2) {
+        if (base[index].flags & 2) {
             victim->unk10B |= 0x80;
         }
     }
-    if ((base[index].unk24 & 0x400) || (hit[index].unk24 & 0x400)) {
+    if ((base[index].flags & 0x400) || (hit[index].flags & 0x400)) {
         victim->unk10B |= 4;
     }
-    v = base[index].unk22;
+    v = base[index].immunity;
     if (v & 0x80) {
         victim->imune = v & 0x3F;
     }
@@ -2470,29 +2470,29 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
     u8 idx;
 
     done = FALSE;
-    kind = table[index].unk0 & 0x7F;
+    kind = table[index].kind & 0x7F;
     entry = table;
     if (((u8)victim->intelhitroute & 0x7F) != 0) {
         count = gHitRuleCounts[((u8)victim->intelhitroute & 0x7F)];
         rules = gHitRoutes[((u8)victim->intelhitroute & 0x7F)];
         for (i = 0; i < count; i++) {
-            type = rules[i].unk2;
-            if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
+            type = rules[i].action;
+            if (((type & 0x80) == 0 && kind == rules[i].kind) || ((type & 0x80) != 0 && kind != rules[i].kind)) {
                 type &= 0x7F;
-                if (rules[i].unk0 == 1) {
+                if (rules[i].condition == 1) {
                     if (actor_getAttackAngle(attacker, victim) > 0x4000) {
                         type = 0xFF;
                     }
                 }
-                if (rules[i].unk0 == 2) {
+                if (rules[i].condition == 2) {
                     if (actor_getAttackAngle(attacker, victim) < 0x4000) {
                         type = 0xFF;
                     }
                 }
-                if (rules[i].unk0 == 3 && victim->stunned == 0) {
+                if (rules[i].condition == 3 && victim->stunned == 0) {
                     type = 0xFF;
                 }
-                if (rules[i].unk0 == 4 && victim->stunned != 0) {
+                if (rules[i].condition == 4 && victim->stunned != 0) {
                     type = 0xFF;
                 }
                 if (type < 2) {
@@ -2548,7 +2548,7 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     victim->scriptCmd = NULL;
                     victim->norun = 1;
                     victim->doing_hit = 0;
-                    gEventParam = table[index].unk4;
+                    gEventParam = table[index].sound;
                     if (gEventParam != 0) {
                         event_playSound2Range1800();
                     }
@@ -2592,8 +2592,8 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     s32 reactionBuf;
                     u8 handler;
                     s32 sound;
-                    handler = table[index].unk8;
-                    gEventParam = table[index].unk4;
+                    handler = table[index].handler;
+                    gEventParam = table[index].sound;
                     if (gEventParam != 0) {
                         event_playSound2Range1800();
                     }
@@ -2651,7 +2651,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     f32 t;
     f32 offZ;
     f32 height;
-    f32 pad1; // matching: pad1..pad5, padCC and padC4 reproduce the stack layout
+    f32 pad1; // matching: pad1..pad7 reproduce the stack layout
     f32 pad2;
     f32 pad3;
     f32 offZ2;
@@ -2662,9 +2662,9 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     f32 hitY;
     f32 hitX;
     Vec3f ray;
-    f32 padCC;
+    f32 pad6;
     f32 hitDist;
-    f32 padC4;
+    f32 pad7;
 
     selfSlot = (selfSlot & 0x7F) + 1;
     ret = 0;
@@ -2680,7 +2680,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     }
     attackIdx = attacker->doing_hit - 1;
     hits = actor_getHitReactions(attacker);
-    if (hits[attackIdx].unk24 & 0x80) {
+    if (hits[attackIdx].flags & 0x80) {
         // matching: byte-offset form (not &hits[attackIdx]) keeps IDO's addu operand order
         hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         y = attacker->ypos;
@@ -2711,10 +2711,10 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
             continue;
         }
         hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
-        if (i == attacker->owner && !(hit->unk24 & 0x1000)) {
+        if (i == attacker->owner && !(hit->flags & 0x1000)) {
             continue;
         }
-        if (hit->unk24 & 0x80) {
+        if (hit->flags & 0x80) {
             s16 sideOffset;
 
             dist = 2.0f;
@@ -2768,7 +2768,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
             }
         }
         if (dist < maxDist) {
-            if ((hit->unk24 & 0x2000) && i != attacker->carried) {
+            if ((hit->flags & 0x2000) && i != attacker->carried) {
                 if (attacker->attachments != NULL) {
                     pos = *(Vec3f *)attacker->attachments; // the first attachment's first 12 bytes
                 } else {
@@ -2812,10 +2812,10 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 attacker->scriptCmd = NULL;
             }
         }
-        if (!(hit->unk24 & 4)) {
+        if (!(hit->flags & 4)) {
             attacker->unk21C = 0;
         }
-        if (!(hit->unk24 & 0x800)) {
+        if (!(hit->flags & 0x800)) {
             attacker->doing_hit = 0;
         }
     }
@@ -2931,8 +2931,6 @@ void actor_pushOut(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distS
     f32 dist;
     f32 invDist;
     f32 pushFactor;
-    s32 temp_a2;
-    s32 temp_t0;
     u8 actorWeight;
     u8 otherWeight;
 
@@ -3230,7 +3228,7 @@ void actor_saveBlendAnim(AnimInstance *state) {
  * already playing. `actor` may be NULL for non-actor users; blendFrames >= 1 blends from the old one.
  */
 void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
-                   s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000) {
+                   s32 bank, f32 speed, f32 blendFrames, f32 startFrame, f32 loopStart, s32 flag8000) {
     s32 index;
     s32 changed;
     s32 assetId;
@@ -3307,9 +3305,9 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         if (flag8000 != 0) {
             state->anim[0] |= 0x8000;
         }
-        state->frame[0] = arg9;
+        state->frame[0] = startFrame;
         state->speed[0] = speed;
-        state->start[0] = arg10;
+        state->start[0] = loopStart;
         if (animEntry != NULL) {
             state->callback = gAnimStateProcs[animEntry[1]];
         } else {
@@ -3384,7 +3382,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
             state->anim[0] &= 0xFFFF7FFF;
         }
         if (gCutsceneStates[0] == 1 && (state->anim[0] & 0x8000)) {
-            state->frame[0] = arg9;
+            state->frame[0] = startFrame;
         }
     }
     if (actor != NULL && changed != FALSE) {
@@ -3392,7 +3390,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
     }
 }
 /* Starts animation `anim` of the actor's type (see actor_startAnimState); ignored while a cutscene holds the actor. */
-void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
+void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 startFrame, f32 loopStart, s32 flag8000) {
     ActorAnim *animTable;
     s32 idx;
     u16 *entry;
@@ -3437,7 +3435,7 @@ void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 
                     if (actor->unk2FF == 0) {
                         blend = 0.0f;
                     }
-                    actor_startAnimState(actor, entry, data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
+                    actor_startAnimState(actor, entry, data, 0, 0, anim, 0, speed, blend, startFrame, loopStart, flag8000);
                 }
             } while (0);
         }
@@ -4814,30 +4812,30 @@ void actor_updateTypeAnims(void) {
             done[1] = 1;
         } else if ((id == 0x24) && (done[2] == 0)) {
             if ((math_random() % 1000U) < 300) {
-                D_800CC298.unk8 = (math_random() % 5U) - 2;
+                D_800CC298.scrollT = (math_random() % 5U) - 2;
             }
-            actor_scrollTypeTexture(id, 4, -4, D_800CC298.unk8, 0, 0);
+            actor_scrollTypeTexture(id, 4, -4, D_800CC298.scrollT, 0, 0);
             if (gModelVtxIndices[id] != NULL) {
-                actor_rotateModelTexCoords(id, gModelVtxIndices[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
-                actor_rotateModelTexCoords(id, gModelVtxIndices[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
+                actor_rotateModelTexCoords(id, gModelVtxIndices[id][0], 0x37, 0, D_800CC298.slowAngle, 2, 1);
+                actor_rotateModelTexCoords(id, gModelVtxIndices[id][1], 0x27, 0x37, D_800CC298.fastAngle, 1, 0);
             }
-            D_800CC298.unk0 += -4.0f * gFrameTicks;
-            if (D_800CC298.unk0 <= 0.0f) {
-                D_800CC298.unk0 += 360.0f;
+            D_800CC298.fastAngle += -4.0f * gFrameTicks;
+            if (D_800CC298.fastAngle <= 0.0f) {
+                D_800CC298.fastAngle += 360.0f;
             }
-            D_800CC298.unk4 += -0.5f * gFrameTicks;
-            if (D_800CC298.unk4 <= 0.0f) {
-                D_800CC298.unk4 += 360.0f;
+            D_800CC298.slowAngle += -0.5f * gFrameTicks;
+            if (D_800CC298.slowAngle <= 0.0f) {
+                D_800CC298.slowAngle += 360.0f;
             }
             done[2] = 1;
         } else if ((id == 0x2C) && (done[3] == 0)) {
-            if (D_800CC298.unk9 >= 0x29) {
-                D_800CC298.unkA = -1;
-            } else if (D_800CC298.unk9 <= 0) {
-                D_800CC298.unkA = 1;
+            if (D_800CC298.sweepS >= 0x29) {
+                D_800CC298.sweepStep = -1;
+            } else if (D_800CC298.sweepS <= 0) {
+                D_800CC298.sweepStep = 1;
             }
-            D_800CC298.unk9 += D_800CC298.unkA;
-            actor_scrollTypeTexture(id, 0xAA, D_800CC298.unk9, 0, 0, 1);
+            D_800CC298.sweepS += D_800CC298.sweepStep;
+            actor_scrollTypeTexture(id, 0xAA, D_800CC298.sweepS, 0, 0, 1);
             done[3] = 1;
         } else if ((id == 0x3A) && (done[4] == 0)) {
             f32 weights[4];
@@ -4846,8 +4844,8 @@ void actor_updateTypeAnims(void) {
 
             if (movement_obj[i].ob_matrix_ptr != NULL) {
                 for (j = 0; j < 4; j++) {
-                    weights[j] = (math_cosBinAngle(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
-                    D_800CC298.unkB[j] += step[j];
+                    weights[j] = (math_cosBinAngle(D_800CC298.colourPhases[j]) + 1.0f) * 0.5f;
+                    D_800CC298.colourPhases[j] += step[j];
                 }
                 model_rampVertexGroupColours(&movement_obj[i], weights, 1);
                 done[4] = 1;
@@ -4862,8 +4860,8 @@ void actor_updateTypeAnims(void) {
                 actor_scrollTypeTexture(id, 0x175, -2, 0, 0, 0);
                 actor_scrollTypeTexture(id, 0x177, -1, 0, 0, 0);
             }
-            if (D_800CC298.unkF >= 4) {
-                D_800CC298.unkF = 0;
+            if (D_800CC298.frameTimer >= 4) {
+                D_800CC298.frameTimer = 0;
                 if (movement_obj[i].unk68[1] == 5) {
                     movement_obj[i].unk68[1] = 0;
                 } else {
@@ -4876,7 +4874,7 @@ void actor_updateTypeAnims(void) {
                 }
                 movement_obj[i].unk68[0] += 0xF;
             } else {
-                D_800CC298.unkF += gFrameTicks;
+                D_800CC298.frameTimer += gFrameTicks;
             }
         } else if (id == 0x45) {
             s32 val = movement_obj[i].eyeCode[1];
@@ -4905,17 +4903,17 @@ void actor_updateTypeAnims(void) {
             f32 scale;
 
             if (movement_obj[i].taskint[2] != 0) {
-                if (D_800CC298.unk10 < 0xEB) {
-                    D_800CC298.unk10 += 0x14;
+                if (D_800CC298.fadeLevel < 0xEB) {
+                    D_800CC298.fadeLevel += 0x14;
                 } else {
-                    D_800CC298.unk10 = 0xFF;
+                    D_800CC298.fadeLevel = 0xFF;
                 }
-            } else if (D_800CC298.unk10 >= 0x15) {
-                D_800CC298.unk10 -= 0x14;
+            } else if (D_800CC298.fadeLevel >= 0x15) {
+                D_800CC298.fadeLevel -= 0x14;
             } else {
-                D_800CC298.unk10 = 0;
+                D_800CC298.fadeLevel = 0;
             }
-            scale = D_800CC298.unk10 * 0.003921568859f;
+            scale = D_800CC298.fadeLevel * 0.003921568859f;
             model_rampVertexGroupColours(&movement_obj[i], &scale, 0);
         } else if (id == 0x8A) {
             s32 delta;
@@ -5220,7 +5218,7 @@ void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 ab
 }
 
 /* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
-void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {
+void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 count, s32 firstCoord, s32 angle, s32 set, s32 doubleSize) {
     s32 i;
     s32 w;
     s32 h;
@@ -5240,7 +5238,7 @@ void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 
             vtx = ((Vtx **)movement_obj[i].modelData)[gDrawBufferIndex];
             if (vtx != NULL) {
                 vtx += firstVtx;
-                sprite_rotateTexcoords(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + arg3, arg2, arg4, h, w);
+                sprite_rotateTexcoords(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + firstCoord, count, angle, h, w);
             }
         }
     }
@@ -5324,8 +5322,8 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     f32 y;
     f32 z;
     f32 pitch;
-    f32 unk40;
-    f32 unkC4;
+    f32 theta;
+    f32 leanAngle;
     s32 angle;
 
     pathIdx = actor->listpos;
@@ -5340,8 +5338,8 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     y = actor->ypos;
     z = actor->zpos;
     pitch = actor->vtilt;
-    unk40 = actor->theta;
-    unkC4 = actor->lean_angle;
+    theta = actor->theta;
+    leanAngle = actor->lean_angle;
     angle = actor->angle;
     index = actor - movement_obj;
     actor_remove(actor, 0);
@@ -5351,8 +5349,8 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     actor->ypos = y;
     actor->zpos = z;
     actor->vtilt = pitch;
-    actor->theta = unk40;
-    actor->lean_angle = unkC4;
+    actor->theta = theta;
+    actor->lean_angle = leanAngle;
     actor->angle = angle;
     actor->langle = angle;
     actor->old_xpos = x;
