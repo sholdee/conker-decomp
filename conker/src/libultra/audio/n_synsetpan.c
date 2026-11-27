@@ -2,7 +2,6 @@
 #include <ultraerror.h>
 #include "n_synthInternals.h"
 
-// func_1001CB40
 void n_alSynSetPan(N_ALVoice *v, u8 pan) {
     ALParam *update;
 

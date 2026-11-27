@@ -53,7 +53,7 @@ void              __n_setInstChanState(N_ALSeqPlayer *seqp, ALInstrument *inst, 
 void              __n_seqpStopOsc(N_ALSeqPlayer *seqp, N_ALVoiceState *vs);
 void		  __n_postNextSeqEvent(N_ALSeqPlayer *seqp);
 
-/* Conker: Rare's sequence player helpers in src/init_1AAE0.c (subsystem audio), used by n_csplayer.c. */
+/* Conker: Rare's sequence player helpers in init/Audio/SeqVoice/seqvoice.c (subsystem audio), used by n_csplayer.c. */
 u8                audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
 s32               audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
 

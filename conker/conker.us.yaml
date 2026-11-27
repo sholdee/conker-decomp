@@ -78,14 +78,15 @@ segments:
       - [0x12560, c, init/Audio/Mp3Stream/mp3stream]
       # -g from here (libultra (n)audio code)
       - [0x12820, c, libultra/audio/heap]
-      - [0x128D0, c, libultra/audio/init_128D0]
+      - [0x128D0, c, libultra/audio/bnkf]
+      - [0x12D80, c, libultra/audio/osc]
       - [0x13320, c, libultra/audio/n_csplayer]
-      - [0x15550, c, libultra/audio/init_15550]
+      - [0x15550, c, libultra/audio/n_cspsetbank]
+      - [0x155A0, c, libultra/audio/n_sndplayer]
       - [0x17870, c, init/Audio/OutputMode/outputmode]
       - [0x17A80, c, libultra/audio/n_cspgetstate]
       - [0x17AA0, c, libultra/audio/n_cspplay]
-      - [0x17AF0, c, libultra/audio/init_17AF0]
-      - [0x17C00, c, libultra/audio/init_17C00]
+      - [0x17AF0, c, libultra/audio/n_cspchan]
       - [0x17D80, c, libultra/audio/n_cspsetpan]
       - [0x17DF0, c, libultra/audio/init_17DF0]
       - [0x17EC0, c, libultra/audio/n_cspgettempo]
@@ -108,8 +109,10 @@ segments:
       - [0x1C9E0, c, libultra/audio/n_synsetpitch]
       - [0x1CA90, c, libultra/audio/n_synfilter13]
       - [0x1CB40, c, libultra/audio/n_synfilter12]
-      - [0x1CBF0, c, libultra/audio/n_drvrNew] # contains n_drvrNew.c + other
-      - [0x1D900, c, libultra/audio/init_1D900] #, libultra/audio/n_synsetfxmix
+      - [0x1CBF0, c, libultra/audio/n_drvrNew]
+      - [0x1D900, c, libultra/audio/n_synsetfxmix]
+      - [0x1D9B0, c, libultra/audio/n_syngetfxref]
+      - [0x1DAA0, c, libultra/audio/n_synsetfxparam]
       - [0x1DBA0, c, libultra/audio/n_cseqnextdelta] # split out of cseq
       - [0x1DC80, c, libultra/audio/n_synallocvoice]
       - [0x1E170, c, libultra/audio/n_synstartvoiceparam]
@@ -237,7 +240,7 @@ segments:
       - [0x2AE40, .data, init/Audio/AudioMgr/audiomgr]
       - [0x2B070, .data, init/Audio/Tune/tune]
       - [0x2BA10, .data, init/Audio/MixSelector/mixselector]
-      - [0x2BA20, .data, libultra/audio/init_15550]
+      - [0x2BA20, .data, libultra/audio/n_sndplayer]
       - [0x2BA40, .data, libultra/audio/n_sl]
       - [0x2BA50, .data, libultra/audio/init_19B50]
       - [0x2BBE0, .data, libultra/audio/n_drvrNew]
@@ -264,13 +267,13 @@ segments:
       - [0x2C220, .rodata, init/Audio/Tune/tune]
       - [0x2C240, .rodata, init/Audio/DynamicSound/dynamicsound]
       - [0x2C410, .rodata, init/Audio/MixSelector/mixselector]
-      - [0x2C450, .rodata, libultra/audio/init_128D0]
+      - [0x2C450, .rodata, libultra/audio/osc]
       - [0x2C460, .rodata, libultra/audio/n_csplayer]
-      - [0x2C6B0, .rodata, libultra/audio/init_15550]
+      - [0x2C6B0, .rodata, libultra/audio/n_sndplayer]
       - [0x2C750, .rodata, libultra/audio/n_synthesizer]
       - [0x2C760, .rodata, libultra/audio/cents2ratio]
       - [0x2C770, .rodata, libultra/audio/n_drvrNew]
-      - [0x2C790, .rodata, libultra/audio/init_1D900]
+      - [0x2C790, .rodata, libultra/audio/n_synsetfxparam]
       - [0x2C7A0, .rodata, init/Audio/Reverb/n_reverb]
       - [0x2C7D0, .rodata, init/Audio/Env/n_env]
       - [0x2C820, .rodata, init/Audio/AuxBus/n_auxbus]
@@ -309,9 +312,9 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init/Audio/DynamicSound/dynamicsound}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init/Audio/MixSelector/mixselector}
       - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init/Audio/Mp3Stream/mp3stream}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/init_128D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/osc}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80042850, name: libultra/audio/init_15550}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042850, name: libultra/audio/n_sndplayer}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: init/Audio/OutputMode/outputmode}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428D0, name: libultra/audio/n_synthesizer}
       # libultra objects that link their own .bss

@@ -131,7 +131,7 @@ extern u8 D_800428C6[2];
 /* init/Audio/Env/n_env.c */
 extern s16 n_eqpower[128]; /* n_eqpower: equal-power pan curve */
 
-/* libultra/audio/init_15550.c */
+/* libultra/audio/n_sndplayer.c */
 s32  func_100173C4(SndState **arg0);
 SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7);
 void func_10017594(SndState *arg0);

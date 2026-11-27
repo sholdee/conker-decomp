@@ -3,15 +3,6 @@
 
 ALMicroTime _n_sndpVoiceHandler(void *node);
 
-void n_alCSPSetBank(N_ALCSPlayer *csp, ALBank *bank) {
-    N_ALEvent event;
-
-    event.type = AL_SEQP_BANK_EVT;
-    event.msg.spbank.bank = bank;
-
-    n_alEvtqPostEvent(&csp->evtq, &event, 0, 2);
-}
-
 /* N_ALSndPlayer plus the wave-table slot at 0x54 that n_libaudio.h lacks. */
 typedef struct {
     /* 0x00 */ N_ALSndPlayer sndp;

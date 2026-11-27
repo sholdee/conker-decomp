@@ -3,8 +3,9 @@
 #include "n_synthInternals.h"
 
 
-/* NOTE: might not actually be pan! */
-void func_1001CB40( N_ALVoice *v, u8 pan)
+/* Posts filter type 18: n_alLoadParam (init/Audio/VoiceLowPass/voicelowpass.c) stores the value as
+ * the fgain of the voice's low-pass. */
+void func_1001CB40( N_ALVoice *v, u8 fgain)
 {
     ALParam  *update;
 
@@ -17,15 +18,15 @@ void func_1001CB40( N_ALVoice *v, u8 pan)
         ALFailIf(update == 0, ERR_ALSYN_NO_UPDATE);
 
         /*
-         * set offset and pan data
+         * set offset and data
          */
 #ifdef SAMPLE_ROUND
 	update->delta  = SAMPLE184( n_syn->paramSamples + v->pvoice->offset);
 #else
         update->delta  = n_syn->paramSamples + v->pvoice->offset;
 #endif
-        update->type   = 18; /* custom */
-        update->data.i = pan;
+        update->type   = 18;
+        update->data.i = fgain;
         update->next   = 0;
 
 	n_alEnvmixerParam(v->pvoice, AL_FILTER_ADD_UPDATE, update);

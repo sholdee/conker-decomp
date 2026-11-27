@@ -3,7 +3,6 @@
 
 // this was the very first function to be successfully translated to C
 
-// n_alSeqpPlay or n_alCSPPlay?
 void n_alCSPPlay(N_ALCSPlayer *seqp)
 {
     N_ALEvent evt;

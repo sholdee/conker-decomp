@@ -266,7 +266,7 @@ typedef struct {                /* Note: sizeof won't be correct        */
     ALBank      *bankArray[1];  /* ARRAY of bank offsets                */
 } ALBankFile;
 
-void    alBnkfNew(ALBankFile *f, u8 *table, s32 arg2); /* Conker: a third argument, which relocates the instruments (see init_128D0.c) */
+void    alBnkfNew(ALBankFile *f, u8 *table, s32 arg2); /* Conker: a third argument, which relocates the instruments (see bnkf.c) */
 
 /***********************************************************************
  * Sequence Files

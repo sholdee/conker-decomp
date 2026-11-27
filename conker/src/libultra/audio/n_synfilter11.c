@@ -2,8 +2,9 @@
 #include <ultraerror.h>
 #include "n_synthInternals.h"
 
-
-void func_1001E350(N_ALVoice *v, u8 fxmix) {
+/* Posts filter type 17: n_alLoadParam (init/Audio/VoiceLowPass/voicelowpass.c) stores the value in the
+ * voice's unk99. */
+void func_1001E350(N_ALVoice *v, u8 value) {
     ALParam *update;
 
     if (v->pvoice) {
@@ -12,7 +13,7 @@ void func_1001E350(N_ALVoice *v, u8 fxmix) {
 
         update->delta = n_syn->paramSamples + v->pvoice->offset;
         update->type = 17;
-        update->data.i = fxmix;
+        update->data.i = value;
         update->next = 0;
         n_alEnvmixerParam(v->pvoice, AL_FILTER_ADD_UPDATE, update);
     }

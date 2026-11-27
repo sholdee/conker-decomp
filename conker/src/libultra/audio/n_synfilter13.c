@@ -3,8 +3,9 @@
 #include "n_synthInternals.h"
 
 
-// set pitch 2 ?
-void func_1001CA90( N_ALVoice *v, f32 pitch) {
+/* Posts filter type 19: n_alLoadParam (init/Audio/VoiceLowPass/voicelowpass.c) stores the value as
+ * the cutoff (fc) of the voice's low-pass. */
+void func_1001CA90( N_ALVoice *v, f32 fc) {
     ALParam  *update;
 
     if (v->pvoice) {
@@ -16,7 +17,7 @@ void func_1001CA90( N_ALVoice *v, f32 pitch) {
         ALFailIf(update == 0, ERR_ALSYN_NO_UPDATE);
 
         /*
-         * set offset and pitch data
+         * set offset and data
          */
 #ifdef SAMPLE_ROUND
         update->delta  = SAMPLE184( n_syn->paramSamples + v->pvoice->offset);
@@ -24,7 +25,7 @@ void func_1001CA90( N_ALVoice *v, f32 pitch) {
         update->delta  = n_syn->paramSamples + v->pvoice->offset;
 #endif
         update->type   = 19;
-        update->data.f = pitch;
+        update->data.f = fc;
         update->next   = 0;
 
         n_alEnvmixerParam(v->pvoice, AL_FILTER_ADD_UPDATE, update);
