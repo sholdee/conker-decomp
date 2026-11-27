@@ -313,7 +313,7 @@ void actor_respawn(Actor *actor) {
 
     saved1AA = actor->mv->shotsfired;
     saved1B0 = actor->mv->lastSpawnIndex;
-    saved328 = actor->radarColor; // signed byte at 0x328 (Actor types it u8)
+    saved328 = actor->radarColor;
     saved1AF = actor->mv->unk1AF;
     if (gIsMultiplayer != 0) {
         player = actor->mv->spawnIndex;
