@@ -446,7 +446,7 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gDPSetOtherMode(gfx++, 0x08AC0F, 0x5041CC);
         gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
-        gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
+        gDPSetEnvColor(gfx++, 255, 255, 255, gMenuFadeInAlpha);
     }
     count = gHudBlockCount;
     dl = gHudBlockDl;

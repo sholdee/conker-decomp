@@ -48,7 +48,7 @@ typedef struct MpGame {
     /* 0x031C */ s32 unk31C[16];
     /* 0x035C */ s32 unk35C[16];
     /* 0x039C */ s32 unk39C[16];
-    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from D_800E0BB8 */
+    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from gLastAttackers */
     /* 0x041C */ s32 unk41C[16];
     /* 0x045C */ s32 opponentDist[16];
     /* 0x049C */ s32 opponent[16];            /* chosen by mp_pickOpponentByPath */

@@ -753,7 +753,7 @@ void prop_replaceNextWhenTriggered(WorldObject *obj) {
                 case 0: {
                     u16 first = math_random() % 3U;
                     u16 second;
-                    SoundTriple sounds = D_800A2F84;
+                    SoundTriple sounds = gReplaceNextSounds;
 
                     second = ((math_random() & 1) + first + 1) % 3U;
                     first = sounds.ids[first];
@@ -987,7 +987,7 @@ struct Entry1511D394 {
 };
 
 /* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
-static struct Entry1511D394 D_80089444[2] = {
+static struct Entry1511D394 gOwnerWaveScrollPresets[2] = {
     { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x00, 0, { 0, 0 } },
     { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x80, 0, { 0, 0 } },
 };
@@ -1026,7 +1026,7 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
     if (ownerWave == NULL) {
         return;
     }
-    entry = &D_80089444[(obj->moveData.word >> 8) & 0xFF];
+    entry = &gOwnerWaveScrollPresets[(obj->moveData.word >> 8) & 0xFF];
     rangeS = entry->rangeS;
     baseS = entry->baseS;
     phaseOffset = entry->phaseOffset;

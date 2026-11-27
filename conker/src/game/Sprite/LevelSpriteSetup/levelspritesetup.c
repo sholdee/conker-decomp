@@ -102,7 +102,7 @@ void sprite_setupParticleSlot(s32 slot, s32 id, s32 flags) {
         gSpriteTypeTexInfoIds[slot] = id;
         gSpriteTypeKindRows[slot] = flags & 0xFF7F;
         if (flags & 0x80) {
-            D_800DDC00 |= 1 << slot;
+            gSpriteParityPhaseTypes |= 1 << slot;
         }
         if (infoFlags & 1) {
             gSpritePingPongTypes |= 1 << slot;
@@ -132,7 +132,7 @@ s32 sprite_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 
     gLevelSprites[index].z = z;
 
     if (gSpriteTypeFrameCounts[slot] >= 2) {
-        if ((1 << slot) & D_800DDC00) {
+        if ((1 << slot) & gSpriteParityPhaseTypes) {
             gLevelSprites[index].phaseIdx = (slot << 2) + (parity & 1);
         } else {
             gLevelSprites[index].phaseIdx = (index & 3) + (slot << 2);
@@ -373,7 +373,7 @@ void sprite_resetSpriteBuffers(s32 unused) {
 void sprite_resetParticles(void) {
     gBillboardAnimCounter = 0;
     gBillboardQueueCount = 0;
-    gSpritePingPongTypes = D_800DDC00 = gSpriteRandomFlipTypes = 0;
+    gSpritePingPongTypes = gSpriteParityPhaseTypes = gSpriteRandomFlipTypes = 0;
     gLevelSpriteCount = 0;
     sprite_resetSpriteBuffers(0);
 }

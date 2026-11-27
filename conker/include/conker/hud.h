@@ -107,7 +107,7 @@ void hud_clearCodeFlags(void);
 extern Gfx *(*gHudModeOverlayDrawers[13])(Gfx *);
 extern Gfx *(*gHudModeDrawers[13])(Gfx *);
 extern Gfx gHudSpriteDl[];
-extern HudModel *D_80090058;
+extern HudModel *gHudCashModel;
 extern HudModel *D_8009005C;
 extern HudSprite gHudSprite;
 extern u8 gScoreDigitCols[4];

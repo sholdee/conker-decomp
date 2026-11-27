@@ -33,7 +33,7 @@ typedef union {
 
 /* This file's .data. */
 static s32 D_800887F0 = 0; /* not referenced */
-static s32 D_800887F4 = 0; /* set while the camera is inside the zone of prop_levelUpdateMusicAndDebris */
+static s32 gInMusicZone = 0; /* set while the camera is inside the zone of prop_levelUpdateMusicAndDebris */
 
 /* Runs prop_updatePush with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
  * bit 3 of byte 0xA of the 27-byte flag record at gTaskDoneBits is set. */
@@ -100,15 +100,15 @@ void prop_levelUpdateMusicAndDebris(s32 view) {
     dy = (s32)camera_global_Cameras[view].eye.y - 2500;
     dz = (s32)camera_global_Cameras[view].eye.z - 1775;
     if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
-        if (D_800887F4 == 0) {
+        if (gInMusicZone == 0) {
             music_playTune(0x5F, 0xF, 6);
             music_stopTune(0x10, 4);
-            D_800887F4 = 1;
+            gInMusicZone = 1;
         }
-    } else if (D_800887F4 != 0) {
+    } else if (gInMusicZone != 0) {
         music_playTune(0xF, 0x5F, 4);
         music_playTune(0x10, 0, 3);
-        D_800887F4 = 0;
+        gInMusicZone = 0;
     }
     dy = (s32)camera_global_Cameras[view].eye.y - 1583;
     if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (math_random() & 0xFFFF) < 0x2000) {

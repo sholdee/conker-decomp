@@ -254,7 +254,7 @@ extern u8 gSpriteTypeTexInfoIds[15]; /* index into gParticleTexInfos */
 extern u8 gSpriteTypeFrameCounts[15]; /* frame count the phases cycle through */
 extern u8 gSpriteTypeDisturbFrames[15]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
 extern u8 gSpriteTypePasses[15]; /* draw pass (see sprite_drawLevelSprites) */
-extern s32 D_800DDC00; /* bit per type */
+extern s32 gSpriteParityPhaseTypes; /* bit per type */
 extern s32 gSpritePingPongTypes; /* bit per type: ping-pong animation */
 extern s32 gSpriteRandomFlipTypes; /* bit per type: random flips of the ping-pong direction */
 extern u8 gSpritePingPongDirs[15]; /* per-phase direction bits for ping-pong animation */

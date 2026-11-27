@@ -379,8 +379,8 @@ s32 mp_update(void) {
             if (arr19C[i] == 3 && (arr25C[i] & 0x1F) >= 0x1D) {
                 mp_sendPlayerCommand61(i, 0x8000);
             }
-            attackers[i] = D_800E0BB8[i];
-            D_800E0BB8[i] &= 0x7F;
+            attackers[i] = gLastAttackers[i];
+            gLastAttackers[i] &= 0x7F;
             if (gMpGame->grenades != NULL) {
                 gMpGame->grenades[i] = obj->mv->numGrenades;
             }

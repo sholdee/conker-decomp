@@ -146,29 +146,29 @@ void prop_springTiltByPlayerDistance(WorldObject *obj) {
     }
 }
 
-static const Vec3f D_800A1490 = { -304.75f, 304.5f, 6214.25f };
-static const Vec3f D_800A149C = { -304.75f, 250.0f, 6214.25f };
-static const Vec3f D_800A14A8[4] = {
+static const Vec3f gFixedExplosionPos = { -304.75f, 304.5f, 6214.25f };
+static const Vec3f gFixedExplosionEmitterPos = { -304.75f, 250.0f, 6214.25f };
+static const Vec3f gFixedExplosionDebrisPos[4] = {
     { -309.0f, 335.0f, 6247.0f },
     { -312.0f, 266.0f, 6251.0f },
     { -299.0f, 269.0f, 6178.0f },
     { -299.0f, 348.0f, 6181.0f },
 };
-static const u8 D_800A14D8[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
+static const u8 gFixedExplosionDebrisModels[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
 
 /*
- * Plays a fixed burst of effects: camera_startWobblePreset, a particle_startRandomEmitter effect at D_800A149C lasting
- * 120-181 frames, the particle_spawnBlastSpray/particle_spawnLightFlash/particle_spawnGrowFade trio at D_800A1490, and four
- * particle_newModelParticleWithFloor debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
+ * Plays a fixed burst of effects: camera_startWobblePreset, a particle_startRandomEmitter effect at gFixedExplosionEmitterPos lasting
+ * 120-181 frames, the particle_spawnBlastSpray/particle_spawnLightFlash/particle_spawnGrowFade trio at gFixedExplosionPos, and four
+ * particle_newModelParticleWithFloor debris pieces thrown from the gFixedExplosionDebrisPos points at random yaw/pitch/speed.
  */
 void prop_spawnFixedExplosion(void) {
     ParticleSpawn spawn;
 
     camera_startWobblePreset(2, gLastPlayerIndex, NULL, 0xFF, 1);
-    particle_startRandomEmitter(&D_800A149C, math_random() % 62U + 120, 0xFF, 1);
-    particle_spawnBlastSpray(&D_800A1490, 0xFF, 1);
-    particle_spawnLightFlash(&D_800A1490, 0xFF, 1);
-    particle_spawnGrowFade(&D_800A1490, math_randomFloat() * 4.0f + 12.0f, 1.640999913f,
+    particle_startRandomEmitter(&gFixedExplosionEmitterPos, math_random() % 62U + 120, 0xFF, 1);
+    particle_spawnBlastSpray(&gFixedExplosionPos, 0xFF, 1);
+    particle_spawnLightFlash(&gFixedExplosionPos, 0xFF, 1);
+    particle_spawnGrowFade(&gFixedExplosionPos, math_randomFloat() * 4.0f + 12.0f, 1.640999913f,
                   math_random() % 56U + 200, 0.0f, 0xFF, 1);
     {
         u8 i;
@@ -206,7 +206,7 @@ void prop_spawnFixedExplosion(void) {
         if (pitch) {
         }
         for (i = 0; i < 4; i++) {
-            spawn.pos = D_800A14A8[i];
+            spawn.pos = gFixedExplosionDebrisPos[i];
             yaw = math_random();
             pitch = math_random();
             math_dirFromBinAngles(yaw % 26U + 45, (pitch & 0xF) - 25, math_randomFloat() * 30.0f + 15.0f, &spawn.vel);
@@ -214,7 +214,7 @@ void prop_spawnFixedExplosion(void) {
             spawn.rotVel.z = math_randomFloat() * 15.10800076f + -7.554000378f;
             spawn.gravity = math_randomFloat() * 0.6170000434f + -1.621000051f;
             spawn.lifetime = math_random() % 51U + 50;
-            spawn.model = D_800A14D8[i];
+            spawn.model = gFixedExplosionDebrisModels[i];
             particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
         }
     }

@@ -219,7 +219,7 @@ typedef struct SoundTriple {
     /* 0x0 */ u16 ids[3];
 } SoundTriple;
 extern const VertexPivots gPivotVertexPairs;
-extern const SoundTriple D_800A2F84;
+extern const SoundTriple gReplaceNextSounds;
 void prop_emptyBehavior22(WorldObject *obj);
 void prop_spinZ(WorldObject *obj);
 void prop_spinY(WorldObject *obj);

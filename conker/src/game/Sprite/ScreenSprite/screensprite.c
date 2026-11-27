@@ -52,7 +52,7 @@ void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
 static const SpriteListIds gScreenSpriteLists = { 93, 87 };
 
 /* The same two lists, for sprite_sendEventToScreenSprites. */
-static const IdList2 D_800A6038 = { 93, 87 };
+static const IdList2 gScreenSpriteEventTypes = { 93, 87 };
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
 void sprite_updateScreenSprite(ScreenSprite *sprite) {
@@ -281,6 +281,6 @@ lbl: // matching: unused label; it splits the block before i++
 void sprite_sendEventToScreenSprites(s32 event, u8 eventType) {
     IdList2 pair;
 
-    pair = D_800A6038;
+    pair = gScreenSpriteEventTypes;
     effect_sendEventToTypes(pair.ids, 2, event, eventType);
 }

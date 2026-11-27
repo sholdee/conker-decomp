@@ -23,15 +23,15 @@ u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
 s8 gMenuPendingPage; /* page to switch to once faded out; -1: none */
 u8 gMenuTune;
-u8 D_800E0A98;
+u8 gPausingPlayer;
 s8 D_800E0A99;
-s16 D_800E0AA0[4];
+s16 gTeamScores[4];
 u8 D_800E0AA8;
-s8 D_800E0AA9;
+s8 gNextEliminationRank;
 s8 D_800E0AAA;
-s8 D_800E0AB0[16];
+s8 gEliminationRanks[16];
 s8 gPlayerRanks[16];
-s16 D_800E0AD0[16];
+s16 gPlayerDeaths[16];
 MenuState gMenuStateData; // the instance gMenuState points at
 u8 **gTextBank2Strings; // bank 2 text strings (80)
 u8 D_800E0B8C;
@@ -44,16 +44,16 @@ u8 gMenuPulseFalling;
 u8 D_800E0B99;
 s16 gFrontEndButtons;
 Actor *gMenuCharacters[4]; /* characters spawned by save_spawnMenuCharacter */
-s8 D_800E0BB0;
-s8 D_800E0BB1;
-u8 D_800E0BB8[16];
-s8 D_800E0BC8[4];
+s8 gTeamCount;
+s8 gTeamSize;
+u8 gLastAttackers[16];
+s8 gTeamColorIds[4];
 u16 D_800E0BCC;
 s8 gPartnerSlots[2];
 s8 gBotDifficulty;
 u8 D_800E0BD1;
 s8 D_800E0BD2;
-s8 D_800E0BD3;
+s8 gTextBankId;
 s32 gTextBank; // the loaded text bank; an integer as in the original (save_loadTextBank converts it to a pointer at each use)
 u8 **gTextStrings; // text strings of the current language ([8 + n]: player names)
 u8 D_800E0BDC;
@@ -64,8 +64,8 @@ u8 D_800E0BDC;
 // matching: defined here, not extern; IDO then knows the copy loop's stores can't alias the source
 s8 gSettings[0x1C];
 s8 gRosterTeams[16]; /* team of each gRoster entry */
-s16 D_800E0C10[4];
-s32 D_800E0C18[2];
+s16 gBestLapTimes[4];
+s32 gRaceTotalTimes[2];
 s8 gMatchResult;
 
 #include <math.h>
@@ -251,12 +251,12 @@ u16 gMatchFlags = 0;
 u16 gMatchHudFlags = 0;
 s8 D_8008FDC4 = 0;
 s8 gFreeForAll = 0;
-s16 D_8008FDCC = 0; /* save_updatePauseMenu reads its low byte */
+s16 gMenuFadeInAlpha = 0; /* save_updatePauseMenu reads its low byte */
 f32 D_8008FDD0 = 1.0f;
 MenuState *gMenuState = NULL;
 s32 gTextBank2 = 0; // the loaded text bank 2; an integer, as gTextBank
 s8 D_8008FDDC = 0;
-s8 D_8008FDE0 = 0;
+s8 gModeSettingsChanged = 0;
 s8 D_8008FDE4 = 0;
 f32 D_8008FDE8 = 0.0f;
 /* Per-mode (gFrontEndState) update functions. */
@@ -285,8 +285,8 @@ s8 D_8008FEC4[32] = {
     0, 2, 11, 4, 0, 2, 11, 4, 0, 2, 11, 4, 4, 5, 0, 11, 6, 7, 8, 10, 7, 8, 9, 14, 13, 12, 11, 11, 0, 0, 0, 0,
 };
 s8 D_8008FEE4[8] = { 0, 0, 0, 0, 0, 1, 0, 1 }; /* per team preset: row of gPlayerCountLimits */
-s8 D_8008FEEC = 0;
-s8 D_8008FEF0 = 0;
+s8 gPauseInputDelay = 0;
+s8 gUnpauseDelay = 0;
 
 /* Resets every setting to its default. */
 void save_resetSettings(void) {
@@ -372,18 +372,18 @@ void save_updatePauseMenu(void) {
     if ((gCutsceneStates[0] == 1) && (gCutsceneNoPause != 0)) {
         blocked = 1;
     }
-    if (D_8008FEEC > 0) {
-        D_8008FEEC--;
+    if (gPauseInputDelay > 0) {
+        gPauseInputDelay--;
     }
-    if ((gPaused == 0) && (gPauseRequested == 0) && (blocked == 0) && (D_8008FEEC == 0)) {
+    if ((gPaused == 0) && (gPauseRequested == 0) && (blocked == 0) && (gPauseInputDelay == 0)) {
         for (i = 0; (i <= gScreenLayout) && (gPauseRequested == 0); i++) {
             if ((gMenuButtonsPressed[i] & START_BUTTON) && !(gEliminatedPlayers & (1 << i))) {
                 gPauseRequested = 1;
                 gRumbleStopRequest = 1;
-                D_800E0A98 = i;
+                gPausingPlayer = i;
                 gPauseCursor = 0;
                 D_8008FEF4 = gMenuPads[i].stick_y;
-                D_8008FEEC = 10;
+                gPauseInputDelay = 10;
             }
         }
     }
@@ -406,9 +406,9 @@ void save_updatePauseMenu(void) {
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
         text_printAt(135, timerY, 0x80, "%d:%02d", seconds / 60, seconds % 60);
     }
-    if (D_8008FEF0 > 0) {
-        D_8008FEF0--;
-        if (D_8008FEF0 < 2) {
+    if (gUnpauseDelay > 0) {
+        gUnpauseDelay--;
+        if (gUnpauseDelay < 2) {
             gPauseRequested = 0;
         }
     } else if (gPaused != 0) {
@@ -419,11 +419,11 @@ void save_updatePauseMenu(void) {
             menuY = 5;
             numOptions = 2;
         }
-        gFrontEndButtons = gMenuButtonsPressed[D_800E0A98];
-        if (D_8008FEEC != 0) {
+        gFrontEndButtons = gMenuButtonsPressed[gPausingPlayer];
+        if (gPauseInputDelay != 0) {
             gFrontEndButtons = 0;
         }
-        cont = &gMenuPads[D_800E0A98];
+        cont = &gMenuPads[gPausingPlayer];
         stickX = cont->stick_x;
         stickY = cont->stick_y;
         if (gPauseCursor < numOptions) {
@@ -449,7 +449,7 @@ void save_updatePauseMenu(void) {
         }
         D_8008FEF4 = stickX & 0xFF; // matching: the masked temp fixes the t-register rotation
         D_800E0A85 = stickY;
-        text_setColor(0xFF, 0xFF, 0xFF, ((u8 *)&D_8008FDCC)[1]);
+        text_setColor(0xFF, 0xFF, 0xFF, ((u8 *)&gMenuFadeInAlpha)[1]);
         if (reducedMenu != 0) {
             textY = menuY + 115;
             gPauseCursor = 0;
@@ -480,12 +480,12 @@ void save_updatePauseMenu(void) {
                 text_print("#", (i == gPauseCursor) + 0xE);
             }
             if (gFrontEndButtons & START_BUTTON) {
-                D_8008FEF0 = 5;
-                D_8008FEEC = 10;
+                gUnpauseDelay = 5;
+                gPauseInputDelay = 10;
             } else if ((gPauseCursor == 0) || (gFrontEndButtons & B_BUTTON)) {
                 if (gFrontEndButtons & (A_BUTTON | B_BUTTON)) {
-                    D_8008FEF0 = 5;
-                    D_8008FEEC = 10;
+                    gUnpauseDelay = 5;
+                    gPauseInputDelay = 10;
                 }
             } else if (gFrontEndButtons & A_BUTTON) {
                 gPauseConfirm = 0;
@@ -716,7 +716,7 @@ void save_updateMenuPages(void) {
         if (gMenuState->stickX[i] > -50 && gMenuState->stickX[i] < 50) {
             gMenuState->repeatX[i] = 0;
             // matching: store via an alias of D_8008FDDC so IDO re-materialises its address
-            *(s8 *)((u8 *)&D_8008FDE0 - 4) = D_8008FDDC & ~(1 << i);
+            *(s8 *)((u8 *)&gModeSettingsChanged - 4) = D_8008FDDC & ~(1 << i);
         } else if (!(D_8008FDDC & (1 << i))) {
             gMenuState->repeatX[i] += gFrameTicks;
             if (gMenuState->repeatX[i] > 50) {
@@ -1384,7 +1384,7 @@ void save_updateModeSelectPage(void) {
                 gMenuPageFade = 0;
                 gMenuState->page = gMenuPendingPage;
                 if (gMenuPendingPage == 2) {
-                    D_8008FDE0 = 0;
+                    gModeSettingsChanged = 0;
                     D_8008FDDC = 1;
                     D_8008FE34 = 0;
                 }
@@ -1500,7 +1500,7 @@ void save_updateModeSelectPage(void) {
     }
 }
 
-/* Options page for the selected mode (gModeOptionFlags[mode]); leaving it saves the settings if D_8008FDE0 is set. */
+/* Options page for the selected mode (gModeOptionFlags[mode]); leaving it saves the settings if gModeSettingsChanged is set. */
 void save_updateOptionsPage(void) {
     s32 options;
     s32 alpha;
@@ -1515,10 +1515,10 @@ void save_updateOptionsPage(void) {
         alpha = gMenuPageFade - (gFrameTicks << 5);
         if (alpha <= 0) {
             gMenuState->page = 0;
-            if (D_8008FDE0 != 0) {
+            if (gModeSettingsChanged != 0) {
                 save_storeModeSettings();
             }
-            D_8008FDE0 = 0;
+            gModeSettingsChanged = 0;
             gMenuPendingPage = -1;
             return;
         }
@@ -1806,8 +1806,8 @@ Offs4 D_8008FF34 = { { -12, -12, -12, -12 } }; /* per-team x jitter for stacked 
 s8 D_8008FF38[4] = { 0, 2, 3, 4 }; /* indexed from 1 through D_8008FF37 */
 
 /*
- * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
- * slots gExtraPlayerSlots, and the team size D_800E0BB1 is kept within the mode's TeamSetup bounds.
+ * Team page: left/right moves each player between the gTeamCount teams, up/down sets the extra
+ * slots gExtraPlayerSlots, and the team size gTeamSize is kept within the mode's TeamSetup bounds.
  */
 void save_updateTeamPage(void) {
     s32 alpha;
@@ -1858,11 +1858,11 @@ void save_updateTeamPage(void) {
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
     setup = &gTeamSetups[gModeEntries[gMenuState->selection].teamSetup];
     special = setup->unk7;
-    D_800E0BB0 = setup->teamCount;
-    D_800E0BC8[0] = setup->teamColor[0];
-    D_800E0BC8[1] = setup->teamColor[1];
-    D_800E0BC8[2] = setup->teamColor[2];
-    D_800E0BC8[3] = setup->teamColor[3];
+    gTeamCount = setup->teamCount;
+    gTeamColorIds[0] = setup->teamColor[0];
+    gTeamColorIds[1] = setup->teamColor[1];
+    gTeamColorIds[2] = setup->teamColor[2];
+    gTeamColorIds[3] = setup->teamColor[3];
     if (gRosterSize < 3) {
         minSlots = setup->minSlots;
         maxSlots = setup->maxSlots;
@@ -1879,7 +1879,7 @@ void save_updateTeamPage(void) {
         }
     }
     i = 0; // matching: while with i++ in the store; a for loop schedules differently
-    while (i < D_800E0BB0) {
+    while (i < gTeamCount) {
         teamPlayers[i] = 0;
         teamY[i++] = 0x6E;
     }
@@ -1911,7 +1911,7 @@ void save_updateTeamPage(void) {
                 gExtraPlayerSlots = 0;
                 sfx = 0;
             }
-            gRosterTeams[i] &= D_800E0BB0 - 1;
+            gRosterTeams[i] &= gTeamCount - 1;
             if (teamPlayers[gRosterTeams[i]] >= teamCap[gRosterTeams[i]]) {
                 gRosterTeams[i] = old;
             }
@@ -1919,35 +1919,35 @@ void save_updateTeamPage(void) {
             teamPlayers[old]--;
         }
     }
-    D_800E0BB1 = 1;
-    for (i = 0; i < D_800E0BB0; i++) {
-        if (D_800E0BB1 < teamPlayers[i]) {
-            D_800E0BB1 = teamPlayers[i];
+    gTeamSize = 1;
+    for (i = 0; i < gTeamCount; i++) {
+        if (gTeamSize < teamPlayers[i]) {
+            gTeamSize = teamPlayers[i];
         }
     }
-    D_800E0BB1 += gExtraPlayerSlots;
-    while (D_800E0BB1 * D_800E0BB0 < minSlots) {
-        D_800E0BB1++;
+    gTeamSize += gExtraPlayerSlots;
+    while (gTeamSize * gTeamCount < minSlots) {
+        gTeamSize++;
         gExtraPlayerSlots++;
     }
-    while (maxSlots < D_800E0BB1 * D_800E0BB0) {
-        D_800E0BB1--;
+    while (maxSlots < gTeamSize * gTeamCount) {
+        gTeamSize--;
         gExtraPlayerSlots--;
         if (gExtraPlayerSlots < 0) {
             gExtraPlayerSlots = 0;
         }
     }
-    if (special != 0 && D_800E0BB1 == 1) {
+    if (special != 0 && gTeamSize == 1) {
         special = 1;
     }
     for (i = 0; i < 4; i++) {
-        v = D_800E0BB1;
+        v = gTeamSize;
         if (i == 1 && special != 0) {
             v = special;
         }
         teamSize[i] = v;
     }
-    if (D_800E0BB0 == 2) {
+    if (gTeamCount == 2) {
         if (gMenuState->input & MENU_CLEFT) {
             D_8008FDC4++;
         } else if (gMenuState->input & MENU_CRIGHT) {
@@ -1956,7 +1956,7 @@ void save_updateTeamPage(void) {
         if (gRosterSize >= 3) {
             D_8008FDC4 = 0;
         }
-        bound = D_800E0BB1;
+        bound = gTeamSize;
         if (D_8008FDC4 < -bound) {
             D_8008FDC4 = -bound;
         } else if (bound < D_8008FDC4) {
@@ -1976,10 +1976,10 @@ void save_updateTeamPage(void) {
             }
         }
     }
-    step = 0x128 / D_800E0BB0;
+    step = 0x128 / gTeamCount;
     x = step >> 1;
     slots = gRosterSize;
-    for (i = 0; i < D_800E0BB0; i++) {
+    for (i = 0; i < gTeamCount; i++) {
         teamX[i] = x;
         x += step;
         v = teamSize[i];
@@ -2002,34 +2002,34 @@ void save_updateTeamPage(void) {
     }
     gMenuState->input &= ~MENU_BACK;
     text_setColor(0xFF, 0xFF, 0, alpha);
-    text_setPosition(0x94, ((D_800E0BB0 == 4) << 5) + 0x78);
+    text_setPosition(0x94, ((gTeamCount == 4) << 5) + 0x78);
     text_print("#", 0x1A);
-    for (i = 0; i < D_800E0BB0; i++) {
+    for (i = 0; i < gTeamCount; i++) {
         x = teamX[i];
-        old = D_800E0BC8[i] * 3;
+        old = gTeamColorIds[i] * 3;
         // matching: flat byte index into the RGB rows (old is the tripled colour)
         text_setColor(gTeamColorsRGB[0][old], gTeamColorsRGB[0][old + 1], gTeamColorsRGB[0][old + 2], alpha);
         text_setPosition(x, 0x50);
-        if (D_800E0BC8[i] == 4) {
+        if (gTeamColorIds[i] == 4) {
             text_print("#", 9);
-        } else if (D_800E0BC8[i] == 5) {
+        } else if (gTeamColorIds[i] == 5) {
             text_print("#", 8);
-        } else if (D_800E0BC8[i] == 7) {
+        } else if (gTeamColorIds[i] == 7) {
             text_print("#", 0xA);
-        } else if (D_800E0BC8[i] == 8) {
+        } else if (gTeamColorIds[i] == 8) {
             text_print("#", 0xB);
-        } else if (D_800E0BC8[i] == 9) {
+        } else if (gTeamColorIds[i] == 9) {
             text_print("#", 0x34);
         } else {
-            old = (D_800E0BC8[i] < 4) ? 0x59 : 0x4C;
-            text_print("#", D_800E0BC8[i] + old);
+            old = (gTeamColorIds[i] < 4) ? 0x59 : 0x4C;
+            text_print("#", gTeamColorIds[i] + old);
         }
     }
     hasExtra = save_addPartnerPlayers(extra);
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
     for (i = 0; i < slots; i++) {
         old = gRosterTeams[i];
-        if (slots == D_800E0BB0) {
+        if (slots == gTeamCount) {
             jitter.v[old] = 0;
         }
         x = teamX[old] + jitter.v[old];
@@ -2051,7 +2051,7 @@ void save_updateTeamPage(void) {
     if (sfx != 0) {
         sound_play(sfx, sfx == 0x4FF ? 0x4650 : 0x7D00, 0x40, 0, 0);
     }
-    if (D_800E0BB0 == 2) {
+    if (gTeamCount == 2) {
         text_printAt(0x94, 0xB4, 0x81, "#", 0x3A);
         text_printAt(0x7B, 0xB4, 0x81, "#", 0x3B);
         text_printAt(0xAD, 0xB4, 0x81, "#", 0x3C);
@@ -2265,7 +2265,7 @@ void save_setupMatch(void) {
     D_800BE3E4 = 0;
     bzero(gMenuState->stats, sizeof(gMenuState->stats));
     bzero(gMenuState->score, sizeof(gMenuState->score));
-    bzero(D_800E0AD0, sizeof(D_800E0AD0));
+    bzero(gPlayerDeaths, sizeof(gPlayerDeaths));
     gPauseRequested = 0;
     gPaused = 0;
     gFrontEndState = 0;
@@ -2390,18 +2390,18 @@ void save_setupMatch(void) {
     }
     gHumansRemaining = gHumanCount;
     D_800BE618 = gPlayerCount;
-    bzero(D_800E0BB8, 0x10);
+    bzero(gLastAttackers, 0x10);
     D_800E0AAA = -1;
-    D_800E0AA9 = 4;
+    gNextEliminationRank = 4;
     if (1) {} // matching: lowers the priority of the -1 web so IDO splits it like the target
     for (i = 0; i < 16; i++) {
-        D_800E0AB0[i] = -1;
+        gEliminationRanks[i] = -1;
         gPlayerRanks[i] = 0;
     }
     usedTeams = 0;
     if (gFreeForAll != 0) {
         k = 0;
-        D_800E0AA9 = gPlayerCount;
+        gNextEliminationRank = gPlayerCount;
         for (i = 0; i < D_8008FD88; i++) {
             v = gRoster[i];
             if (v >= 0) {
@@ -2417,12 +2417,12 @@ void save_setupMatch(void) {
             }
         }
     }
-    D_800E0C10[0] = -1;
-    D_800E0C10[1] = -1;
-    D_800E0C18[0] = -1;
-    D_800E0C18[1] = -1;
-    D_800E0AA0[0] = 0;
-    D_800E0AA0[1] = 0;
+    gBestLapTimes[0] = -1;
+    gBestLapTimes[1] = -1;
+    gRaceTotalTimes[0] = -1;
+    gRaceTotalTimes[1] = -1;
+    gTeamScores[0] = 0;
+    gTeamScores[1] = 0;
     save_checkCodeTamper();
     gMatchResult = 0;
     gStartedFromListSelection = 0;
@@ -2475,7 +2475,7 @@ void save_startListSelection(void) {
 
     gDefaultCharacters[0] = 0;
     gRespawnPending = 0;
-    D_800E0BB1 = 1;
+    gTeamSize = 1;
     save_checkCodeTamper();
     gStartedFromListSelection = 1;
     game_requestLevelChange(6, gNextLevel, script_getTaskSpawnPoint(resource), 0, 1);
@@ -2499,7 +2499,7 @@ void save_startSavedGame(void) {
     gStartedFromListSelection = 0;
     game_requestLevelChange(6, gCheckpointLevel, gCheckpointSpawn, 0, 1);
     D_800E0B99 = 1;
-    D_800E0BB1 = 1;
+    gTeamSize = 1;
     save_checkCodeTamper();
 }
 
@@ -2729,11 +2729,11 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
         }
         if (gSettings[k] < gSettingMins[k]) {
             gSettings[k] = gSettingMins[k];
-            D_8008FDE0 = 1;
+            gModeSettingsChanged = 1;
         }
         if (gSettingMaxes[k] < gSettings[k]) {
             gSettings[k] = gSettingMaxes[k];
-            D_8008FDE0 = 1;
+            gModeSettingsChanged = 1;
         }
     }
     descOff = D_8008FE34;
@@ -2748,11 +2748,11 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
         if (carousel) {
             if (gMenuState->input & 1) {
                 gSettings[descOff]++;
-                D_8008FDE0 = 1;
+                gModeSettingsChanged = 1;
                 i = 1;
             } else if (gMenuState->input & 2) {
                 gSettings[descOff]--;
-                D_8008FDE0 = 1;
+                gModeSettingsChanged = 1;
                 i = 1;
             } else if (gMenuState->input & 8) {
                 D_8008FE3C = 0.07500000298f;
@@ -2771,11 +2771,11 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
         } else {
             if (gMenuState->input & 4) {
                 gSettings[descOff]--;
-                D_8008FDE0 = 1;
+                gModeSettingsChanged = 1;
                 i = 1;
             } else if (gMenuState->input & 8) {
                 gSettings[descOff]++;
-                D_8008FDE0 = 1;
+                gModeSettingsChanged = 1;
                 i = 1;
             } else if (gMenuState->input & 2) {
                 D_8008FE3C = 1.0f;
@@ -2796,11 +2796,11 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
         }
         if (gSettingMins[descOff] > gSettings[descOff]) {
             gSettings[descOff] = gSettingMaxes[descOff];
-            D_8008FDE0 = 1;
+            gModeSettingsChanged = 1;
         }
         if (gSettingMaxes[descOff] < gSettings[descOff]) {
             gSettings[descOff] = gSettingMins[descOff];
-            D_8008FDE0 = 1;
+            gModeSettingsChanged = 1;
         }
     }
     D_8008FE38 += D_8008FE3C * gFrameTicks;
@@ -2929,15 +2929,15 @@ void save_updateResultsScreen(void) {
             save_updateFadeIn();
         }
         if (D_8008FD80 == 2 || D_8008FD80 == 3 || D_8008FD80 == 4) {
-            D_8008FDCC += gFrameTicks * 4;
-            if (D_8008FDCC > 255) {
-                D_8008FDCC = 0xFF;
+            gMenuFadeInAlpha += gFrameTicks * 4;
+            if (gMenuFadeInAlpha > 255) {
+                gMenuFadeInAlpha = 0xFF;
             }
-            D_800E0BDC = 0xFF - D_8008FDCC;
-            text_setColor(0xFF, 0xFF, 0, D_8008FDCC);
+            D_800E0BDC = 0xFF - gMenuFadeInAlpha;
+            text_setColor(0xFF, 0xFF, 0, gMenuFadeInAlpha);
             text_printAt(148, 20, 0x81, "#", 0x4B);
             text_print(" ");
-            text_setColor(0xFF, 0xFF, 0xFF, D_8008FDCC);
+            text_setColor(0xFF, 0xFF, 0xFF, gMenuFadeInAlpha);
             text_setPosition(148, 50);
             if (D_8008FD80 == 4) {
                 camera_global_Cameras->Mode = 0x80000;
@@ -2949,8 +2949,8 @@ void save_updateResultsScreen(void) {
                         if (gRoster[i] >= 0) {
                             count = gPlayerRanks[i];
                             text_printAt(88, y, 0x81, "       : %s", gTextStrings[count + 0x5D]);
-                            hud_printRaceTime(0x8A, y, D_800E0C18[i], 0x80);
-                            hud_printRaceTime(0xBC, y, D_800E0C10[i], 0x80);
+                            hud_printRaceTime(0x8A, y, gRaceTotalTimes[i], 0x80);
+                            hud_printRaceTime(0xBC, y, gBestLapTimes[i], 0x80);
                             text_printAt(168, y, 0x80, "(");
                             text_printAt(214, y, 0x80, ")");
                             y += 0x12;
@@ -2980,8 +2980,8 @@ void save_updateResultsScreen(void) {
                 } else {
                     for (i = 0; i < 4; i++) {
                         if (gPlayerRanks[i] == 1) {
-                            text_printAt(113 - ((D_800E0BC8[i] == 4) ? -12 : 0), 50, 0x81, "#", D_800E0BC8[i] + 0x4C);
-                            text_printAt(((D_800E0BC8[i] == 4) ? 21 : 0) + 183, 50, 0x81, "#", 0x56);
+                            text_printAt(113 - ((gTeamColorIds[i] == 4) ? -12 : 0), 50, 0x81, "#", gTeamColorIds[i] + 0x4C);
+                            text_printAt(((gTeamColorIds[i] == 4) ? 21 : 0) + 183, 50, 0x81, "#", 0x56);
                             i = 4; // matching: ends the loop; `break` schedules differently
                         }
                     }
@@ -3029,7 +3029,7 @@ void save_updateResultsScreen(void) {
                 gHumanCount = 1;
             }
         } else if (gFrontEndButtons != 0 || gCutsceneHoldEnd == 2) {
-            D_8008FDCC = 0;
+            gMenuFadeInAlpha = 0;
             D_8008FD80 = 2;
         }
         gMenuState->input &= 0xFFDF;
@@ -3100,7 +3100,7 @@ void func_151E4DD8(void) {
 /* Requests the front-end level (LEVEL_FRONTEND, mode 6) in state 3 with the save files read again (gMenuLoadStep 0);
  * run as gPendingTransition once the screen has faded. */
 void save_returnToFrontEnd(void) {
-    D_8008FDCC = 0;
+    gMenuFadeInAlpha = 0;
     save_resetControllerMap();
     gFrontEndState = 3;
     gMenuLoadStep = 0;
@@ -3375,8 +3375,8 @@ s32 save_checkMatchOver(void) {
                 winScore = gSettings[6];
             }
             if (gEliminatedPlayers & (1 << i)) {
-                if (D_800E0AB0[i] == -1) {
-                    D_800E0AB0[i] = D_800E0AA9--;
+                if (gEliminationRanks[i] == -1) {
+                    gEliminationRanks[i] = gNextEliminationRank--;
                 }
             }
         }
@@ -3386,8 +3386,8 @@ s32 save_checkMatchOver(void) {
         D_800E0AAA = -1;
         if (gMatchHudFlags & 0x80) {
             for (i = 0; i < gHumanCount; i++) {
-                if (D_800E0AB0[i] != -1) {
-                    gPlayerRanks[i] = D_800E0AB0[i];
+                if (gEliminationRanks[i] != -1) {
+                    gPlayerRanks[i] = gEliminationRanks[i];
                 } else {
                     if (gRacers[i].finishOrder == 0x7F) {
                         gPlayerRanks[i] = gRacers[i].rank;
@@ -3399,22 +3399,22 @@ s32 save_checkMatchOver(void) {
         } else {
             for (i = 0; i < gHumanCount; i++) {
                 if (gDefaultCharacters[i] != 10) {
-                    if (D_800E0AB0[i] != -1) {
-                        gPlayerRanks[i] = D_800E0AB0[i];
+                    if (gEliminationRanks[i] != -1) {
+                        gPlayerRanks[i] = gEliminationRanks[i];
                     } else {
                         gPlayerRanks[i] = 1;
                         score = gMenuState->score[i];
                         if (score >= winScore) {
                             score += 1000;
                         }
-                        score -= D_800E0AD0[i];
+                        score -= gPlayerDeaths[i];
                         for (j = 0; j < gPlayerCount; j++) {
-                            if (j != i && D_800E0AB0[j] == -1 && gDefaultCharacters[j] != 10) {
+                            if (j != i && gEliminationRanks[j] == -1 && gDefaultCharacters[j] != 10) {
                                 other = gMenuState->score[j];
                                 if (other >= winScore) {
                                     other += 1000;
                                 }
-                                other -= D_800E0AD0[j];
+                                other -= gPlayerDeaths[j];
                                 if (score < other) {
                                     gPlayerRanks[i]++;
                                 } else if (score == other) {
@@ -3463,7 +3463,7 @@ s32 save_checkMatchOver(void) {
             break;
     }
     if (team > 0) {
-        for (i = 0; i < D_800E0BB0; i++) {
+        for (i = 0; i < gTeamCount; i++) {
             j = teamStats[i + statBase];
             if (j >= team) {
                 gameOver = 1;
@@ -3472,14 +3472,14 @@ s32 save_checkMatchOver(void) {
         }
     }
     text_setPosition(20, 20);
-    for (i = 0; i < D_800E0BB0; i++) {
-        if (D_800E0AB0[i] != -1) {
-            gPlayerRanks[i] = D_800E0AB0[i];
+    for (i = 0; i < gTeamCount; i++) {
+        if (gEliminationRanks[i] != -1) {
+            gPlayerRanks[i] = gEliminationRanks[i];
             continue;
         }
         gPlayerRanks[i] = 1;
-        for (j = 0; j < D_800E0BB0; j++) {
-            if (j != i && D_800E0AB0[j] == -1) {
+        for (j = 0; j < gTeamCount; j++) {
+            if (j != i && gEliminationRanks[j] == -1) {
                 if (teamStats[i + statBase] < teamStats[j + statBase]) {
                     gPlayerRanks[i]++;
                 } else if (teamStats[i + statBase] == teamStats[j + statBase]) {
@@ -3511,8 +3511,8 @@ s32 save_checkMatchOver(void) {
             if (D_800E0AA8 & (1 << i)) {
                 hits++;
             }
-        } else if (D_800E0AB0[i] == -1) {
-            D_800E0AB0[i] = D_800E0AA9--;
+        } else if (gEliminationRanks[i] == -1) {
+            gEliminationRanks[i] = gNextEliminationRank--;
         }
     }
     if (hits == 0 || j < 2) {
@@ -3576,7 +3576,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
     }
     if ((attackerIdx >= 0) && (attackerIdx < gPlayerCount) && (attackerIdx < gPlayerCount) /* matching: repeated test */) {
         victimIdx = victim - movement_obj;
-        D_800E0BB8[victimIdx] = attackerIdx | 0x80;
+        gLastAttackers[victimIdx] = attackerIdx | 0x80;
         if (attackerIdx < gHumanCount) {
             if (gRosterTeams[attackerIdx] != gRosterTeams[victimIdx]) {
                 gMenuState->stats[attackerIdx].hits++;
@@ -3765,9 +3765,9 @@ void save_loadTextBank(s32 bank) {
 
     if (gSettings[10] != gTextLanguage) {
         gTextLanguage = gSettings[10];
-        D_800E0BD3 = 0;
+        gTextBankId = 0;
     }
-    if (bank == D_800E0BD3) {
+    if (bank == gTextBankId) {
         return;
     }
     if (gTextBank != 0) {
@@ -3780,8 +3780,8 @@ void save_loadTextBank(s32 bank) {
             gTextBank2 = 0;
         }
     }
-    D_800E0BD3 = bank;
-    if (D_800E0BD3 == 0) {
+    gTextBankId = bank;
+    if (gTextBankId == 0) {
         return;
     }
 
@@ -3836,7 +3836,7 @@ void save_loadTextBank(s32 bank) {
 
 /* Forgets the loaded text banks without freeing them. */
 void save_forgetTextBanks(void) {
-    D_800E0BD3 = 0;
+    gTextBankId = 0;
     gTextBank = 0;
     gTextBank2 = 0;
 }
@@ -4376,7 +4376,7 @@ void save_startCredits(void) {
             gFrontEndTimer = 0;
         }
         if (gFrontEndTimer > 160) {
-            D_8008FDCC = 0;
+            gMenuFadeInAlpha = 0;
             gFrontEndState = 8;
             gPlayerCount = 1;
             gHumanCount = 1;
@@ -4398,7 +4398,7 @@ void save_updateCredits(void) {
         if (gFrontEndTimer > 120) {
             gFrontEndState = 9;
             gFrontEndTimer = 0;
-            D_8008FDCC = 0xFF;
+            gMenuFadeInAlpha = 0xFF;
             gCreditsLine = 0;
             game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
             return;

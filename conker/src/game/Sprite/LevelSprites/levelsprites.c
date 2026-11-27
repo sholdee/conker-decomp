@@ -25,7 +25,7 @@ u8 gSpriteTypeTexInfoIds[15];
 u8 gSpriteTypeFrameCounts[15];
 u8 gSpriteTypeDisturbFrames[15];
 u8 gSpriteTypePasses[15];
-s32 D_800DDC00;
+s32 gSpriteParityPhaseTypes;
 s32 gSpritePingPongTypes;
 s32 gSpriteRandomFlipTypes;
 u8 gSpritePingPongDirs[15];

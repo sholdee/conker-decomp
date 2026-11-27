@@ -956,8 +956,8 @@ s32 mp_advanceRacer(Racer *racer, f32 step) {
                     if (t > 32000) {
                         t = 32000;
                     }
-                    if (D_800E0C10[idx] <= 0 || t < D_800E0C10[idx]) {
-                        D_800E0C10[idx] = t;
+                    if (gBestLapTimes[idx] <= 0 || t < gBestLapTimes[idx]) {
+                        gBestLapTimes[idx] = t;
                     }
                     racer->lastLapTime = t;
                 }
@@ -966,7 +966,7 @@ s32 mp_advanceRacer(Racer *racer, f32 step) {
                     if (v > 360000) {
                         v = 360000;
                     }
-                    D_800E0C18[idx] = v;
+                    gRaceTotalTimes[idx] = v;
                 }
             }
             if (lim == racer->maxLap) {

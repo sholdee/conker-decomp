@@ -12,7 +12,7 @@
 /* prop_rotateAboutPivots: the (vertex, pivot) index pairs of the vertices that follow the preceding objects. */
 const VertexPivots gPivotVertexPairs = { 8, { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 }, { 4, 0 }, { 5, 1 }, { 6, 1 }, { 7, 0 } } };
 /* prop_replaceNextWhenTriggered: the three sound ids it picks from. */
-const SoundTriple D_800A2F84 = { { 0x2B6, 0x2BD, 0x2BE } };
+const SoundTriple gReplaceNextSounds = { { 0x2B6, 0x2BD, 0x2BE } };
 
 /* Behaviour scratch state (WorldObject.touch) of the objects driven by the callbacks in this file. */
 typedef struct {

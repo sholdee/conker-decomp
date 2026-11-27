@@ -53,11 +53,11 @@ static SkyDrawFunc gSkyDrawFuncs[] = {
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
 struct Game13D350U8x2 { u8 v[2]; };
 struct Game13D350S16x2 { s16 v[2]; };
-static struct Game13D350U8x2 D_800891EC = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
-static struct Game13D350U8x2 D_800891F0 = { { 1, 2 } };          // load shifts
-static struct Game13D350S16x2 D_800891F4 = { { 0x800, 0x400 } }; // palette offsets
-static struct Game13D350U8x2 D_800891F8 = { { 255, 15 } };       // TLUT counts - 1
-static struct Game13D350U8x2 D_800891FC = { { 0, 1 } };          // render tiles
+static struct Game13D350U8x2 gSkyFormatSizes = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
+static struct Game13D350U8x2 gSkyFormatShifts = { { 1, 2 } };          // load shifts
+static struct Game13D350S16x2 gSkyFormatPalOffsets = { { 0x800, 0x400 } }; // palette offsets
+static struct Game13D350U8x2 gSkyFormatTlutCounts = { { 255, 15 } };       // TLUT counts - 1
+static struct Game13D350U8x2 gSkyFormatTiles = { { 0, 1 } };          // render tiles
 
 /* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
 typedef struct SkyFace {
@@ -661,11 +661,11 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     struct Game13D350U8x2 tlutCounts;
     struct Game13D350U8x2 tiles;
 
-    sizes = D_800891EC;
-    shifts = D_800891F0;
-    palOffsets = D_800891F4;
-    tlutCounts = D_800891F8;
-    tiles = D_800891FC;
+    sizes = gSkyFormatSizes;
+    shifts = gSkyFormatShifts;
+    palOffsets = gSkyFormatPalOffsets;
+    tlutCounts = gSkyFormatTlutCounts;
+    tiles = gSkyFormatTiles;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gfx = view_setColorImage(view_setScissor(gfx, gCurrentView, 0, 0, 0, 0));
     fov = (gScreenLayout != 1) ? 80.0f : 95.0f;
