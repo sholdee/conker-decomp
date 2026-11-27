@@ -2546,7 +2546,7 @@ void func_151A11CC(f32 x, f32 y, f32 z, f32 arg3, f32 arg4, s32 arg5, s32 arg6, 
                    s32 arg19, s32 arg20, s32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26, s32 arg27);
 void particle_updateGatherEmitter(SphereEmitter *emitter);
 void particle_updateGatherParticle(BillboardParticle *particle);
-void particle_startGatherEmitter(EffectSpawner *spawner);
+void particle_startHoverEmitter(EffectSpawner *spawner);
 void particle_updateHoverEmitter(SphereEmitter *emitter);
 void particle_updateHoverParticle(BillboardParticle *particle);
 void particle_startSwellEmitter(EffectSpawner *spawner);

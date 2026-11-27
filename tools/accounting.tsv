@@ -5193,7 +5193,7 @@ func_151A1010	0x151A1010	444	game	c		build/src/game/Particle/SphereEmitter/spher
 func_151A11CC	0x151A11CC	24	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateGatherEmitter	0x151A11E4	1400	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateGatherParticle	0x151A175C	384	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
-particle_startGatherEmitter	0x151A18DC	188	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
+particle_startHoverEmitter	0x151A18DC	188	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateHoverEmitter	0x151A1998	1180	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_updateHoverParticle	0x151A1E34	180	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o
 particle_startSwellEmitter	0x151A1EE8	204	game	c		build/src/game/Particle/SphereEmitter/sphereemitter.c.o

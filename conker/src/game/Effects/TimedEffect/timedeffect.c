@@ -41,7 +41,7 @@ Gfx gTimedEffectRenderResetDl[] = {
  */
 /* Expire callbacks (TimedEffect.expireCallback). */
 static void (*gTimedEffectExpireFuncs[10])() = {
-    effect_updateAttachedBurst, effect_dropFallingObject, effect_startTrapStream, particle_startGatherEmitter, particle_startSwellEmitter, particle_emitDiscParticle, trail_stopTrailPair,
+    effect_updateAttachedBurst, effect_dropFallingObject, effect_startTrapStream, particle_startHoverEmitter, particle_startSwellEmitter, particle_emitDiscParticle, trail_stopTrailPair,
     flamethrower_spawnControllerFlame, effect_dropPointEffect, effect_sendFirstLightAndGlowEvents,
 };
 /* Tick callbacks (TimedEffect.tickCallback), run every frame. */

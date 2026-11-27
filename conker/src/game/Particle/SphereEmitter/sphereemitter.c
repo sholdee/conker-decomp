@@ -235,7 +235,7 @@ void particle_updateGatherParticle(BillboardParticle *particle) {
     }
 }
 
-/* Data copied to 0x28 of the effect created by particle_startGatherEmitter. */
+/* Data copied to 0x28 of the effect created by particle_startHoverEmitter. */
 typedef struct {
     /* 0x00 */ Words3 pos;
     /* 0x0C */ f32 radius;
@@ -248,7 +248,7 @@ typedef struct {
 } EffectData151A18DC;
 
 /* Creates a type 3 effect_newTimedEffectNoDraw effect from the spawner's settings. */
-void particle_startGatherEmitter(EffectSpawner *spawner) {
+void particle_startHoverEmitter(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
     TimedEffect *effect;
