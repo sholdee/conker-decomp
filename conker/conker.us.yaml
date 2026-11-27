@@ -1754,7 +1754,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DCDE0, name: game/Camera/CameraWobble/camerawobble}
       - {start: 0x255880, type: .bss, vram: 0x800DCE40, name: game/Effects/QuadEffect/quadeffect}
       - {start: 0x255880, type: .bss, vram: 0x800DCE50, name: game/Effects/ObjectList/objectlist}
-      - {start: 0x255880, type: bss, vram: 0x800DD230, name: bss_800DD230}
+      - {start: 0x255880, type: .bss, vram: 0x800DD250, name: game/Text/TextBoxCreate/textboxcreate}
       - {start: 0x255880, type: .bss, vram: 0x800DD2A0, name: game/Particle/StyleParticle/styleparticle}
       - {start: 0x255880, type: .bss, vram: 0x800DD2B0, name: game/Player/PlayerWarp/playerwarp}
       - {start: 0x255880, type: .bss, vram: 0x800DD2D0, name: game/Flare/ScreenFlash/screenflash}

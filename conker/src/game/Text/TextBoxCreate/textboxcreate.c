@@ -1,4 +1,14 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* The .bss of the text box unit (this file and game/Text/TextBox/textbox.c), defined before conker/text.h declares it
+ * (see init/Sched/SchedInit/schedinit.c). */
+s32 D_800DD250;           /* not referenced */
+MessageEntry *D_800DD254;
+MessageEntry *D_800DD258;
+s32 D_800DD25C;           /* not referenced */
+u8 D_800DD260[0x40];      /* not referenced */
+
 #include "functions.h"
 #include "variables.h"
 

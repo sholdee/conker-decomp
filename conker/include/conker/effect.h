@@ -1218,6 +1218,7 @@ extern s32 gCachedOtherModeL;
 extern s32 gDrawHookTextureFrame;
 extern s32 gDrawHookTextureCm;
 extern TextureDesc *gDrawHookTexture; // texture of the current draw hook (effect_beginQuadEffectDraw, particle_beginPuffQuadDraw)
+extern SpriteParams D_800DD230;
 typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
 /*

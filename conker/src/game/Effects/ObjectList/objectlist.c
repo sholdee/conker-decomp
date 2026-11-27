@@ -35,6 +35,7 @@ s32 gCachedOtherModeL;
 s32 gDrawHookTextureFrame;
 s32 gDrawHookTextureCm;
 TextureDesc *gDrawHookTexture;
+SpriteParams D_800DD230; /* the sprite of the current draw hook: quadeffect.c and puffquad.c load the texture frame through it */
 
 #include "functions.h"
 #include "variables.h"

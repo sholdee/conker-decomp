@@ -140,9 +140,6 @@ extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
-extern SpriteParams D_800DD230;
-extern MessageEntry *D_800DD254;
-extern MessageEntry *D_800DD258;
 
 
 
