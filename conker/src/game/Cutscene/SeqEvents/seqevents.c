@@ -55,7 +55,7 @@ void cutscene_emptyStartHook(void) {
  * down its lifetime and applies fade-in/fade-out to *volume. Returns 1 (after
  * freeing the state) when the sound should stop.
  */
-s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+s32 cutscene_updateSound(SeqVoice *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound) {
     SeqSound *snd;
     SeqTrackState *states;
     SeqTrackState *state;
@@ -64,7 +64,7 @@ s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 a
     snd = voice->userData;
     if ((snd->stopAtEnd != 0 && gCutsceneTimes[snd->scene] >= gCutsceneEndTimes[snd->scene]) || (voice->flags & 0x80)) {
         *volume = 0;
-        *arg6 = 0;
+        *sound = 0;
         heap_free(snd);
         return 1;
     }
@@ -82,7 +82,7 @@ s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 a
             snd->remaining -= gFrameTicks;
         } else {
             *volume = 0;
-            *arg6 = 0;
+            *sound = 0;
             heap_free(snd);
             return 1;
         }
@@ -105,7 +105,7 @@ s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 a
         *volume = *volume * gCutsceneSkipFadeTimer / 30;
         if (gFrameTicks >= gCutsceneSkipFadeTimer) {
             *volume = 0;
-            *arg6 = 0;
+            *sound = 0;
             heap_free(snd);
             return 1;
         }
@@ -566,17 +566,17 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 obj->fogColor = 0;
             }
         } else if (event->value == 0x44) {
-            s32 a;
-            s32 c;
+            s32 mode;
+            s32 spawnPoint;
 
             if (event->unk5 != 0) {
-                c = event->unk6;
-                a = 2;
+                spawnPoint = event->unk6;
+                mode = 2;
             } else {
-                c = 0;
-                a = 1;
+                spawnPoint = 0;
+                mode = 1;
             }
-            game_requestLevelChange(a, event->unk4, c, 0, 0);
+            game_requestLevelChange(mode, event->unk4, spawnPoint, 0, 0);
         } else if (event->value == 0x17) {
             if (obj == NULL) {
                 return 1;
@@ -1137,14 +1137,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
             s32 param;
             s32 idx;
-            s32 c0;
-            s32 c1;
-            s32 c2;
-            s32 c3;
-            s32 c4;
-            s32 c5;
+            s32 r;
+            s32 g;
+            s32 b;
+            s32 alpha;
+            s32 envR;
+            s32 envG;
             s32 t;
-            s32 u;
+            s32 radius;
             u8 colors[3][6] = { { 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF, 0x00, 0xAB, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
@@ -1161,18 +1161,18 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 } else {
                     idx = event->unk5;
                 }
-                c0 = colors[idx][0];
-                c1 = colors[idx][1];
-                c2 = colors[idx][2];
-                c3 = colors[idx][3];
-                c4 = colors[idx][4];
-                c5 = colors[idx][5];
+                r = colors[idx][0];
+                g = colors[idx][1];
+                b = colors[idx][2];
+                alpha = colors[idx][3];
+                envR = colors[idx][4];
+                envG = colors[idx][5];
                 t = param >> 3;
-                u = ((param * 40) / 4096) & 0xFF;
+                radius = ((param * 40) / 4096) & 0xFF;
                 particle_newSpriteEmitter((s32)pos >> 16, (s32)pos & 0xFFFF, 0, 0x1B, 0,
-                              c0, c1, c2, c3, c4, c5,
+                              r, g, b, alpha, envR, envG,
                               0, 1, 6, 0, 0, 0, 0, 0, t >> 8, t & 0xFF, 0, 0, 0xA, 0, 0, 0, 0, 0, 0, 0,
-                              duration, u, u, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
+                              duration, radius, radius, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
                               scene, 0, 0, sceneTag, 0);
             }
         } else if (event->value == 0xA) {
@@ -1192,19 +1192,19 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 particle_newFallingEmitter(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
-            SpriteFxTemplate sp;
+            SpriteFxTemplate sprite;
 
-            sp.anim = gEffectAnimTextures[1];
-            sp.frame = 0;
-            sp.frameStep = 0x100;
-            sp.x = pos[0];
-            sp.y = pos[1] + event->unk4;
-            sp.z = pos[2];
-            sp.scaleX = 0x5DC;
-            sp.scaleY = 0x5DC;
-            sp.fadeStep = -10;
-            sp.callback = 0;
-            effect_spawnSpriteFx(&sp, sceneTag, 1);
+            sprite.anim = gEffectAnimTextures[1];
+            sprite.frame = 0;
+            sprite.frameStep = 0x100;
+            sprite.x = pos[0];
+            sprite.y = pos[1] + event->unk4;
+            sprite.z = pos[2];
+            sprite.scaleX = 0x5DC;
+            sprite.scaleY = 0x5DC;
+            sprite.fadeStep = -10;
+            sprite.callback = 0;
+            effect_spawnSpriteFx(&sprite, sceneTag, 1);
         } else if (event->value == 0x19) {
             s32 duration;
             SeqEvent *found;
@@ -1380,26 +1380,26 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         break;
                     }
                     case 9: {
-                        ActorLink sp;
+                        ActorLink link;
 
-                        sp.actor = obj;
-                        sp.actorId = obj->unique_id;
-                        sp.timer = duration;
-                        sp.flags = 1;
-                        sp.unk9 = 0;
+                        link.actor = obj;
+                        link.actorId = obj->unique_id;
+                        link.timer = duration;
+                        link.flags = 1;
+                        link.unk9 = 0;
                         switch (obj->character_type) {
                             case 0x57:
                             case 0x71:
-                                sp.kind = 1;
+                                link.kind = 1;
                                 break;
                             case 0x96:
-                                sp.kind = 3;
+                                link.kind = 3;
                                 break;
                             default:
-                                sp.kind = 0;
+                                link.kind = 0;
                                 break;
                         }
-                        particle_newDripEmitter(&sp, 0, sceneTag, 1);
+                        particle_newDripEmitter(&link, 0, sceneTag, 1);
                         break;
                     }
                     case 10:
@@ -1407,14 +1407,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         break;
                     case 11: {
                         s16 data[2];
-                        void *p;
+                        void *fx;
 
                         particle_startGreyscaleScreen(duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = effect_newTimedEffect(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
-                        if (p != NULL) {
-                            memcpy((u8 *)p + 0x28, data, 4);
+                        fx = effect_newTimedEffect(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
+                        if (fx != NULL) {
+                            memcpy((u8 *)fx + 0x28, data, 4);
                         }
                         break;
                     }
@@ -1519,14 +1519,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         break;
                     }
                     case 26: {
-                        RumbleParams sp;
+                        RumbleParams rumble;
 
-                        sp.flags = 1;
-                        sp.duration = duration;
-                        sp.strength = 8;
-                        sp.playerMask = 1;
-                        sp.updateKind = -1;
-                        cont_spawnRumble(&sp, 0, sceneTag, 1);
+                        rumble.flags = 1;
+                        rumble.duration = duration;
+                        rumble.strength = 8;
+                        rumble.playerMask = 1;
+                        rumble.updateKind = -1;
+                        cont_spawnRumble(&rumble, 0, sceneTag, 1);
                         break;
                     }
                 }
@@ -1582,17 +1582,17 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 endTime = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
                 {
                     f32 *p = pos; // matching: IDO needs the pointer copied to a local here
-                    BloodTrailDesc18 sp;
+                    BloodTrailDesc18 trail;
 
-                    sp.y = p + 1;
-                    sp.z = p + 2;
-                    sp.x = p;
-                    sp.radius = 2.0f;
-                    sp.rate = 1.0f;
-                    sp.lifetime = endTime - eventTime;
-                    sp.flags = 1;
-                    sp.emitter = 2;
-                    blood_spawnTrail(&sp, 0, sceneTag, 0);
+                    trail.y = p + 1;
+                    trail.z = p + 2;
+                    trail.x = p;
+                    trail.radius = 2.0f;
+                    trail.rate = 1.0f;
+                    trail.lifetime = endTime - eventTime;
+                    trail.flags = 1;
+                    trail.emitter = 2;
+                    blood_spawnTrail(&trail, 0, sceneTag, 0);
                 }
             }
         } else if (event->value == 0x50) {
@@ -1879,14 +1879,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
-                    RumbleParams sp;
+                    RumbleParams rumble;
 
-                    sp.flags = 1;
-                    sp.duration = 0x32;
-                    sp.strength = 8;
-                    sp.playerMask = 1;
-                    sp.updateKind = -1;
-                    cont_spawnRumble(&sp, 0, sceneTag, 1);
+                    rumble.flags = 1;
+                    rumble.duration = 0x32;
+                    rumble.strength = 8;
+                    rumble.playerMask = 1;
+                    rumble.updateKind = -1;
+                    cont_spawnRumble(&rumble, 0, sceneTag, 1);
                     break;
                 }
                 case 18: {
@@ -1918,13 +1918,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         s16 y;
                         s16 z;
                         u8 pad16[0x86];
-                    } sp;
+                    } origin;
 
                     state = &gSeqTrackStates[scene][track];
-                    sp.x = state->x;
-                    sp.y = state->y + 50.0f;
-                    sp.z = state->z;
-                    effect_spawnModelBurst(&sp, 1, 1, 2, sceneTag, 0);
+                    origin.x = state->x;
+                    origin.y = state->y + 50.0f;
+                    origin.z = state->z;
+                    effect_spawnModelBurst(&origin, 1, 1, 2, sceneTag, 0);
                     break;
                 }
                 case 21:
@@ -1942,93 +1942,93 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x40) {
             particle_startSparkEmitter(obj, 0x28, sceneTag, 1);
         } else if (event->value == 0x4D) {
-            DebrisEmitter sp;
+            DebrisEmitter debris;
 
-            sp.count = (math_random() % 5) + 5;
-            sp.pos.x = pos[0];
-            sp.pos.y = pos[1];
-            sp.pos.z = pos[2];
-            sp.radius = 4.700000286f;
-            sp.speedBase = 24.80000114f;
-            sp.speedRange = 15.5f;
-            sp.sizeBase = 0.2670000196f;
-            sp.lifetime = 0x5A;
-            sp.yawBase = -7;
-            sp.yawRange = 0x2D;
-            sp.pitchBase = -0x34;
-            sp.pitchRange = 0x20;
-            sp.landPuffs = 0;
-            sp.landPuffFlag = 0;
-            sp.landPuffLifeBase = 0x32;
-            sp.landPuffLifeRange = 0x19;
-            sp.sizeRange = 0.2430000156f;
-            sp.gravityBase = -2.041000128f;
-            sp.dir.x = 0.0f;
-            sp.dir.y = 0.0f;
-            sp.dir.z = 0.0f;
-            sp.gravityRange = 0;
-            sp.spinBase = -3.0f;
-            sp.spinRange = 6.0f;
-            blood_spawnDebris(&sp, 1, sceneTag, 1);
+            debris.count = (math_random() % 5) + 5;
+            debris.pos.x = pos[0];
+            debris.pos.y = pos[1];
+            debris.pos.z = pos[2];
+            debris.radius = 4.700000286f;
+            debris.speedBase = 24.80000114f;
+            debris.speedRange = 15.5f;
+            debris.sizeBase = 0.2670000196f;
+            debris.lifetime = 0x5A;
+            debris.yawBase = -7;
+            debris.yawRange = 0x2D;
+            debris.pitchBase = -0x34;
+            debris.pitchRange = 0x20;
+            debris.landPuffs = 0;
+            debris.landPuffFlag = 0;
+            debris.landPuffLifeBase = 0x32;
+            debris.landPuffLifeRange = 0x19;
+            debris.sizeRange = 0.2430000156f;
+            debris.gravityBase = -2.041000128f;
+            debris.dir.x = 0.0f;
+            debris.dir.y = 0.0f;
+            debris.dir.z = 0.0f;
+            debris.gravityRange = 0;
+            debris.spinBase = -3.0f;
+            debris.spinRange = 6.0f;
+            blood_spawnDebris(&debris, 1, sceneTag, 1);
         } else if (event->value == 0x4E) {
-            DebrisEmitter sp;
+            DebrisEmitter debris;
 
-            sp.count = (math_random() % 6) + 6;
-            sp.pos.x = pos[0];
-            sp.pos.y = pos[1];
-            sp.pos.z = pos[2];
-            sp.radius = 151.5f;
-            sp.speedBase = 15.10000038f;
-            sp.speedRange = 25.20000076f;
-            sp.sizeBase = 0.3880000114f;
-            sp.lifetime = 0x5A;
-            sp.yawRange = 0xFF;
-            sp.yawBase = 0;
-            sp.pitchBase = -0x40;
-            sp.pitchRange = 0x28;
-            sp.landPuffs = 0;
-            sp.landPuffFlag = 0;
-            sp.landPuffLifeBase = 0x32;
-            sp.landPuffLifeRange = 0x19;
-            sp.sizeRange = 0.2430000156f;
-            sp.gravityBase = -1.0200001f;
-            sp.dir.x = 0.0f;
-            sp.dir.y = 0.0f;
-            sp.dir.z = 0.0f;
-            sp.gravityRange = 0;
-            sp.spinBase = -4.0f;
-            sp.spinRange = 8.0f;
-            blood_spawnDebris(&sp, 1, sceneTag, 1);
+            debris.count = (math_random() % 6) + 6;
+            debris.pos.x = pos[0];
+            debris.pos.y = pos[1];
+            debris.pos.z = pos[2];
+            debris.radius = 151.5f;
+            debris.speedBase = 15.10000038f;
+            debris.speedRange = 25.20000076f;
+            debris.sizeBase = 0.3880000114f;
+            debris.lifetime = 0x5A;
+            debris.yawRange = 0xFF;
+            debris.yawBase = 0;
+            debris.pitchBase = -0x40;
+            debris.pitchRange = 0x28;
+            debris.landPuffs = 0;
+            debris.landPuffFlag = 0;
+            debris.landPuffLifeBase = 0x32;
+            debris.landPuffLifeRange = 0x19;
+            debris.sizeRange = 0.2430000156f;
+            debris.gravityBase = -1.0200001f;
+            debris.dir.x = 0.0f;
+            debris.dir.y = 0.0f;
+            debris.dir.z = 0.0f;
+            debris.gravityRange = 0;
+            debris.spinBase = -4.0f;
+            debris.spinRange = 8.0f;
+            blood_spawnDebris(&debris, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
-            SplashSpraySpec sp;
+            SplashSpraySpec splash;
 
-            sp.spray.pos.x = pos[0];
-            sp.spray.pos.y = pos[1];
-            sp.spray.pos.z = pos[2];
-            sp.spray.scaleBase = 2.900000095f;
-            sp.spray.scaleRange = 17.0f;
-            sp.spray.sizeBase = 2.5f;
-            sp.spray.countBase = 0xF;
-            sp.spray.sizeRange = 0.5770000219f;
-            sp.spray.speedBase = 25.0f;
-            sp.spray.speedRange = 20.20000076f;
-            sp.spray.countRange = 0xA;
-            sp.angles.yawBase = -0x14;
-            sp.angles.yawRange = 0x31;
-            sp.angles.pitchBase = -0x34;
-            sp.angles.pitchRange = 0x2B;
-            sp.spray.itemCountBase = 3;
-            sp.spray.itemCountRange = 4;
-            sp.spray.lifeBase = 0x28;
-            sp.spray.lifeRange = 0x1E;
-            sp.spray.unk30 = 0x64;
-            sp.spray.unk32 = 0x64;
-            sp.spray.kind = 0;
-            sp.spray.unk3C = 0x10;
-            sp.spray.unk3E = 0xF;
-            sp.spray.unk40 = 0;
-            sp.spray.unk38 = 0.5f;
-            particle_spawnSplashSprayAtAngles(&sp.angles, &sp.spray, 0, sceneTag, 1);
+            splash.spray.pos.x = pos[0];
+            splash.spray.pos.y = pos[1];
+            splash.spray.pos.z = pos[2];
+            splash.spray.scaleBase = 2.900000095f;
+            splash.spray.scaleRange = 17.0f;
+            splash.spray.sizeBase = 2.5f;
+            splash.spray.countBase = 0xF;
+            splash.spray.sizeRange = 0.5770000219f;
+            splash.spray.speedBase = 25.0f;
+            splash.spray.speedRange = 20.20000076f;
+            splash.spray.countRange = 0xA;
+            splash.angles.yawBase = -0x14;
+            splash.angles.yawRange = 0x31;
+            splash.angles.pitchBase = -0x34;
+            splash.angles.pitchRange = 0x2B;
+            splash.spray.itemCountBase = 3;
+            splash.spray.itemCountRange = 4;
+            splash.spray.lifeBase = 0x28;
+            splash.spray.lifeRange = 0x1E;
+            splash.spray.unk30 = 0x64;
+            splash.spray.unk32 = 0x64;
+            splash.spray.kind = 0;
+            splash.spray.unk3C = 0x10;
+            splash.spray.unk3E = 0xF;
+            splash.spray.unk40 = 0;
+            splash.spray.unk38 = 0.5f;
+            particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             Vec3f p;
             s32 count;

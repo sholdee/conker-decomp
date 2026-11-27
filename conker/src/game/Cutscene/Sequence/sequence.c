@@ -1031,13 +1031,13 @@ void cutscene_evalTracks(s32 scene) {
     f32 t;
     s32 mask;
     s32 found;
-    s32 n;
+    s32 keyIdx;
     f32 points[4];
     s32 start;
     s32 needed;
     s32 m;
     s32 channel;
-    s32 q;
+    s32 pointIdx;
     s32 next;
     SeqChannelKey *key;
 
@@ -1141,11 +1141,11 @@ void cutscene_evalTracks(s32 scene) {
                                 mask = 7;
                                 start = nextKey[j] - 2;
                                 needed = 3;
-                                q = 0;
+                                pointIdx = 0;
                             } else {
                                 start = nextKey[j] - 1;
                                 needed = 2;
-                                q = 1;
+                                pointIdx = 1;
                             }
                             if (nextKey[j] + 1 < numKeys[j]) {
                                 mask |= 8;
@@ -1159,7 +1159,7 @@ void cutscene_evalTracks(s32 scene) {
                                 key = &gSeqChannelKeys[scene][track][m];
                                 if (j == key->channel) {
                                     if (skip == start) {
-                                        points[q++] = key->value;
+                                        points[pointIdx++] = key->value;
                                         needed--;
                                     } else {
                                         skip++;
@@ -1174,15 +1174,15 @@ void cutscene_evalTracks(s32 scene) {
                             }
                             value[j] = math_catmullRom(points, 0, t);
                         } else {
-                            n = 0;
+                            keyIdx = 0;
                             for (k = 0; k < gSeqChannelKeyCounts[scene][track]; k++) {
                                 key = &gSeqChannelKeys[scene][track][k];
                                 if (j == key->channel) {
                                     if (found == -1) {
-                                        if (n == nextKey[j] - 1) {
+                                        if (keyIdx == nextKey[j] - 1) {
                                             found = k;
                                         } else {
-                                            n++;
+                                            keyIdx++;
                                         }
                                     } else {
                                         next = k;
@@ -1686,16 +1686,16 @@ void cutscene_applyTracks(s32 scene) {
                         gCamShot.unk30 = tilt3C;
                         gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 3) {
-                        WorldObject *actor3;
+                        WorldObject *focus;
 
-                        actor3 = gfx_findObjectById(ENT(scene, track)->unk3);
-                        if (actor3 == NULL) {
+                        focus = gfx_findObjectById(ENT(scene, track)->unk3);
+                        if (focus == NULL) {
                             continue;
                         }
                         gCamShot.mode = 0;
-                        gCamShot.at.focus.x = actor3->x;
-                        gCamShot.at.focus.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.focus.z = actor3->z;
+                        gCamShot.at.focus.x = focus->x;
+                        gCamShot.at.focus.y = (focus->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.focus.z = focus->z;
                         gCamShot.unk2C = -state->unk14;
                         gCamShot.unk30 = tilt3C;
                         gCamShot.unk34 = tilt40;
@@ -1742,10 +1742,10 @@ void cutscene_applyTracks(s32 scene) {
                         actor->alpha = (s32)ELEM(scene, track)->unk34;
                     }
                 } else if (ENT(scene, track)->type == 2) {
-                    Actor *obj2;
+                    Actor *obj;
 
-                    obj2 = collision_findObjectById(ENT(scene, track)->targetId);
-                    cutscene_applyObjectTrack(obj2, scene, track);
+                    obj = collision_findObjectById(ENT(scene, track)->targetId);
+                    cutscene_applyObjectTrack(obj, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
@@ -1872,8 +1872,8 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
 
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in gSeqActiveEvents (slot 2: another track's position, slot 1: this track's
-   unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
-s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
+   unk24..unk2C or the player). Returns 1 when yaw, pitch and roll were written, else 0. */
+s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
     Camera *player;
@@ -1893,13 +1893,13 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
         active = gSeqActiveEvents[scene][track];
         if (active[2] != 0xFF) {
             SeqEvent *event;
-            s32 other;
+            s32 otherTrack;
 
             event = &gSeqEventTracks[scene][track][active[2]];
-            other = event->unk5;
-            target[0] = gSeqTrackStates[scene][other].x;
-            target[1] = gSeqTrackStates[scene][other].y + event->unk6;
-            target[2] = gSeqTrackStates[scene][other].z;
+            otherTrack = event->unk5;
+            target[0] = gSeqTrackStates[scene][otherTrack].x;
+            target[1] = gSeqTrackStates[scene][otherTrack].y + event->unk6;
+            target[2] = gSeqTrackStates[scene][otherTrack].z;
             return 0;
         }
         if (active[1] != 0xFF) {
@@ -1907,9 +1907,9 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
 
             event = &gSeqEventTracks[scene][track][active[1]];
             if (event->unk5 == 0) {
-                *outX = gSeqTrackStates[scene][track].unk28;
-                *outY = gSeqTrackStates[scene][track].unk24;
-                *outZ = gSeqTrackStates[scene][track].unk2C;
+                *yaw = gSeqTrackStates[scene][track].unk28;
+                *pitch = gSeqTrackStates[scene][track].unk24;
+                *roll = gSeqTrackStates[scene][track].unk2C;
                 return 1;
             }
             player = camera_global_Cameras;
@@ -1927,9 +1927,9 @@ s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 obj
     return 0;
 }
 
-/* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (outA) and unk3C
-   (outB) values, each written twice (0 where unset). */
-s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
+/* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (yaw) and unk3C
+   (pitch) values, each written twice (0 where unset). */
+s32 cutscene_getHeadAngles(f32 *yaw, f32 *pitch, s32 objIndex, s32 scene) {
     s32 track;
 
     if (gCutsceneStates[scene] != 1) {
@@ -1938,17 +1938,17 @@ s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (gSeqPathKeyCounts[scene][track] != 0) {
             if (gSeqTrackInfos[scene][track].type == 2 && movement_obj[objIndex].unique_id == gSeqTrackInfos[scene][track].targetId) {
-                outA[1] = 0.0f;
-                outB[1] = 0.0f;
-                outA[0] = 0.0f;
-                outB[0] = 0.0f;
+                yaw[1] = 0.0f;
+                pitch[1] = 0.0f;
+                yaw[0] = 0.0f;
+                pitch[0] = 0.0f;
                 if (gSeqTrackStates[scene][track].unk3C != -9999.0f) {
-                    outB[0] = gSeqTrackStates[scene][track].unk3C;
-                    outB[1] = outB[0];
+                    pitch[0] = gSeqTrackStates[scene][track].unk3C;
+                    pitch[1] = pitch[0];
                 }
                 if (gSeqTrackStates[scene][track].unk40 != -9999.0f) {
-                    outA[0] = gSeqTrackStates[scene][track].unk40;
-                    outA[1] = outA[0];
+                    yaw[0] = gSeqTrackStates[scene][track].unk40;
+                    yaw[1] = yaw[0];
                 }
                 return 1;
             }
@@ -1958,8 +1958,8 @@ s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
 }
 
 /* Set gCutsceneAnchorPos/gCutsceneAnchorHeading and raise gCutsceneAnchorSet. */
-void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value) {
-    gCutsceneAnchorHeading = value;
+void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 heading) {
+    gCutsceneAnchorHeading = heading;
     gCutsceneAnchorPos[0] = x;
     gCutsceneAnchorPos[1] = y;
     gCutsceneAnchorPos[2] = z;
@@ -1968,8 +1968,8 @@ void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value) {
 
 
 /* Set gNextCutsceneAnchorPos/gNextCutsceneAnchorHeading (copied back to gCutsceneAnchorPos/gCutsceneAnchorHeading when a cutscene ends). */
-void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 value) {
-    gNextCutsceneAnchorHeading = value;
+void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 heading) {
+    gNextCutsceneAnchorHeading = heading;
     gNextCutsceneAnchorPos[0] = x;
     gNextCutsceneAnchorPos[1] = y;
     gNextCutsceneAnchorPos[2] = z;
@@ -2382,16 +2382,16 @@ s32 cutscene_pickCameraTrack(s32 scene, s32 time) {
     s32 result;
     s32 score;
     SeqEvent *found;
-    SeqEvent *ptr;
+    SeqEvent *events;
 
     result = -1;
     best = 99999;
 
     for (track = 0; track < gSeqTrackCounts[scene]; track++) {
-        ptr = gSeqEventTracks[scene][track];
-        if (ptr != NULL) {
+        events = gSeqEventTracks[scene][track];
+        if (events != NULL) {
             found = NULL;
-            score = cutscene_findEvent(&ptr[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
+            score = cutscene_findEvent(&events[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 if (score < best) {
                     best = score;

@@ -119,10 +119,10 @@ void cutscene_measurePath(s32 track, s32 scene);
 void cutscene_cacheSegment(s32 track, s32 segment, s32 scene);
 void cutscene_applyTracks(s32 scene);
 void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack);
-s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene);
-s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene);
-void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value);
-void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 value);
+s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene);
+s32 cutscene_getHeadAngles(f32 *yaw, f32 *pitch, s32 objIndex, s32 scene);
+void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 heading);
+void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 heading);
 void cutscene_resetSpawnedActors(s32 scene);
 void cutscene_resetActivatedActors(s32 scene);
 void cutscene_addSpawnedActor(s32 id, s32 scene);
@@ -219,11 +219,11 @@ extern u8 ucode_ROM_START[];                 /* ROM start of the RSP microcodes 
 extern u64 D_800CBE10[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
 
 /* game/Cutscene/StartCallback/startcallback.c */
-void cutscene_startCallback1(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void cutscene_startCallback1(s32 map, s32 cutscene, s32 scene, s32 actorPath);
 
 /* game/Cutscene/SeqEvents/seqevents.c */
 void cutscene_emptyStartHook(void);
-s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 cutscene_updateSound(SeqVoice *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound);
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
                   s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene);
 void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type,
@@ -238,13 +238,13 @@ void cutscene_dispatchEvent(SeqEvent *event, s32 track, s32 index, s32 eventTime
 extern Color24 gCutsceneFadeColours[2]; /* screen fade colours for screen_startViewFade, picked by sequence events */
 
 /* game/Cutscene/EventEffects/eventeffects.c */
-EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
-                       s32 arg6);
+EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 fxOwner,
+                       s32 fxList);
 void cutscene_updateTimer(EvTimer *timer);
-void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4);
-void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4);
+void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 owner, s32 list);
+void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 owner, s32 list);
 s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj);
-void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4);
+void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 owner, s32 list);
 s32 cutscene_updateTrackParticle(TrackParticle *particle);
 
 #endif
