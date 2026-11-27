@@ -601,7 +601,7 @@ segments:
       - [0xE0F60, c, game/Effects/BoneStreak/bonestreak]
       - [0xE1280, c, game/Effects/Trail/ScatterTrail/scattertrail]
       - [0xE2880, c, game/Effects/OwnerSpark/ownerspark]
-      - [0xE2DA0, c, game_E2DA0]
+      - [0xE2DA0, c, game/Effects/ObjBurst/objburst]
       - [0xE3C90, c, game/Camera/LevelHook07/levelhook07]
       - [0xE4070, c, game/Sprite/SpriteRoutines/spriteroutines]
       - [0xE4FF0, c, game/Effects/BreakUp/breakup]
@@ -615,7 +615,7 @@ segments:
       - [0xEABF0, c, game/Effects/SegmentTrail/segmenttrail]
       - [0xEB020, c, game/Actor/Follower/follower]
       - [0xEB340, c, game/Effects/Sfx/effects_sfx_w1_bee_cavern]
-      - [0xEB6C0, c, game_EB6C0]
+      - [0xEB6C0, c, game/Effects/PathMover/pathmover]
       - [0xEBD00, c, game/Camera/LevelHook18/levelhook18]
       - [0xEBE60, c, game/Effects/BoneGroundFx/bonegroundfx]
       - [0xEC420, c, game/Prop/Scenery/scenery]
@@ -659,7 +659,7 @@ segments:
       - [0xFDBE0, c, game/Effects/ZoneSounds/zonesounds]
       - [0xFDD70, c, game/Level/LevelHook30/levelhook30]
       - [0xFE850, c, game_FE850]
-      - [0xFE8C0, c, game_FE8C0]
+      - [0xFE8C0, c, game/Effects/LevelActorHooks/levelactorhooks]
       - [0xFE9E0, c, game/Camera/SpeedDistance/speeddistance]
       - [0xFECC0, c, game/Env/SkyGradient/skygradient]
       - [0xFEFF0, c, game/Effects/AmbientPulse/ambientpulse]
@@ -683,7 +683,7 @@ segments:
       - [0x10C140, c, game/Effects/RainHook/rainhook]
       - [0x10C170, c, game/Effects/Explosion/explosion]
       - [0x10CCD0, c, game/Camera/LevelHook09/levelhook09]
-      - [0x10CD70, c, game_10CD70]
+      - [0x10CD70, c, game/Effects/MaterialScroll/materialscroll]
       - [0x10DD20, c, game/Effects/SplashBurst/splashburst]
       - [0x10E240, c, game/Effects/PropEmitter/propemitter]
       - [0x10EA20, c, game/Collision/ObjectRay/objectray]
@@ -722,7 +722,7 @@ segments:
       - [0x125A50, c, game/Effects/StageEffect/stageeffect]
       - [0x126ED0, c, game/Camera/LevelHook28/levelhook28]
       - [0x126F60, c, game/Screen/StarSky/starsky]
-      - [0x127060, c, game_127060]
+      - [0x127060, c, game/Effects/DelayedBurst/delayedburst]
       - [0x128970, hasm, game/Effects/StarField/starfield]
       - [0x128D70, c, game/Particle/TwoSidedEmitter/twosidedemitter]
       - [0x129DE0, c, game/Effects/ChildEffect/childeffect]
@@ -1094,7 +1094,7 @@ segments:
       - {start: 0x22D3D0, type: .data, name: game/Beam/BeamQuad/beamquad, linker_section_order: .rodata}
       - {start: 0x22D410, type: .data, name: game/Effects/ZonePairEmitter/zonepairemitter, linker_section_order: .rodata}
       - {start: 0x22D420, type: .data, name: game/Effects/Explosion/explosion, linker_section_order: .rodata}
-      - {start: 0x22D440, type: .data, name: game_10CD70, linker_section_order: .rodata}
+      - {start: 0x22D440, type: .data, name: game/Effects/MaterialScroll/materialscroll, linker_section_order: .rodata}
       - {start: 0x22D450, type: .data, name: game/Camera/LevelHook35/levelhook35, linker_section_order: .rodata}
       - {start: 0x22D4A0, type: .data, name: game/Beam/Tracer/tracer, linker_section_order: .rodata}
       - {start: 0x22D4C0, type: .data, name: game/Effects/DistantBolts/distantbolts, linker_section_order: .rodata}
@@ -1108,7 +1108,7 @@ segments:
       - {start: 0x22D5E0, type: .data, name: game/Particle/Spiral/spiral, linker_section_order: .rodata}
       - {start: 0x22D600, type: .data, name: game/Effects/SurfaceSound/surfacesound, linker_section_order: .rodata}
       - {start: 0x22D610, type: .data, name: game/Effects/StageEffect/stageeffect, linker_section_order: .rodata}
-      - {start: 0x22D620, type: .data, name: game_127060, linker_section_order: .rodata}
+      - {start: 0x22D620, type: .data, name: game/Effects/DelayedBurst/delayedburst, linker_section_order: .rodata}
       - [0x22D630, rodata]
       - {start: 0x22D640, type: .data, name: game/Weapon/Launcher/launcher, linker_section_order: .rodata}
       - {start: 0x22D650, type: .data, name: game/Effects/BonePointFx/bonepointfx, linker_section_order: .rodata}
@@ -1347,7 +1347,7 @@ segments:
       - [0x244680, .rodata, game/Effects/BoneStreak/bonestreak]
       - [0x2446B0, .rodata, game/Effects/Trail/ScatterTrail/scattertrail]
       - [0x2446E0, .rodata, game/Effects/OwnerSpark/ownerspark]
-      - [0x2446F0, .rodata, game_E2DA0]
+      - [0x2446F0, .rodata, game/Effects/ObjBurst/objburst]
       - [0x2447B0, .rodata, game/Camera/LevelHook07/levelhook07]
       - [0x2447C0, .rodata, game/Sprite/SpriteRoutines/spriteroutines]
       - [0x2447F0, .rodata, game/Effects/BreakUp/breakup]
@@ -1360,7 +1360,7 @@ segments:
       - [0x244A00, .rodata, game/Effects/SegmentTrail/segmenttrail]
       - [0x244AB0, .rodata, game/Actor/Follower/follower]
       - [0x244AC0, .rodata, game/Effects/Sfx/effects_sfx_w1_bee_cavern]
-      - [0x244AD0, .rodata, game_EB6C0]
+      - [0x244AD0, .rodata, game/Effects/PathMover/pathmover]
       - [0x244B70, .rodata, game/Camera/LevelHook18/levelhook18]
       - [0x244B80, .rodata, game/Effects/BoneGroundFx/bonegroundfx]
       - [0x244BA0, .rodata, game/Prop/Scenery/scenery]
@@ -1396,7 +1396,7 @@ segments:
       - [0x245340, .rodata, game/Effects/TextLines/textlines]
       - [0x245350, .rodata, game/Level/LevelHook30/levelhook30]
       - [0x245370, .rodata, game_FE850]
-      - [0x245380, .rodata, game_FE8C0]
+      - [0x245380, .rodata, game/Effects/LevelActorHooks/levelactorhooks]
       - [0x245390, .rodata, game/Camera/SpeedDistance/speeddistance]
       - [0x2453A0, .rodata, game/Effects/AmbientPulse/ambientpulse]
       - [0x2453B0, .rodata, game/Effects/RaySpinner/rayspinner]
@@ -1414,7 +1414,7 @@ segments:
       - [0x2457C0, .rodata, game/Effects/ZonePairEmitter/zonepairemitter]
       - [0x245820, .rodata, game/Effects/Explosion/explosion]
       - [0x245A20, .rodata, game/Camera/LevelHook09/levelhook09]
-      - [0x245A30, .rodata, game_10CD70]
+      - [0x245A30, .rodata, game/Effects/MaterialScroll/materialscroll]
       - [0x245AA0, .rodata, game/Effects/PropEmitter/propemitter]
       - [0x245AF0, .rodata, game/Effects/HomingEffect/homingeffect]
       - [0x245B20, .rodata, game/Effects/GroundHits/groundhits]
@@ -1443,7 +1443,7 @@ segments:
       - [0x246670, .rodata, game/Beam/CastBeam/castbeam]
       - [0x246680, .rodata, game/Effects/ProjectilePuffs/projectilepuffs]
       - [0x2466C0, .rodata, game/Effects/StageEffect/stageeffect]
-      - [0x246780, .rodata, game_127060]
+      - [0x246780, .rodata, game/Effects/DelayedBurst/delayedburst]
       - [0x246890, .rodata, game/Particle/TwoSidedEmitter/twosidedemitter]
       - [0x2469A0, .rodata, game/Effects/AreaSpray/areaspray]
       - [0x246A30, .rodata, game/Weapon/Launcher/launcher]
@@ -1715,7 +1715,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game/Screen/Strobe/strobe}
       - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game/Effects/TintedObject/tintedobject}
       - {start: 0x255880, type: .bss, vram: 0x800D9920, name: game_data_800D9920}
-      - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game_10CD70}
+      - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game/Effects/MaterialScroll/materialscroll}
       - {start: 0x255880, type: .bss, vram: 0x800D9960, name: game/Beam/Tracer/tracer}
       - {start: 0x255880, type: .bss, vram: 0x800D99D0, name: game/Effects/HomingEffect/homingeffect}
       - {start: 0x255880, type: .bss, vram: 0x800D99F0, name: game/Effects/GroundHits/groundhits}

@@ -2091,7 +2091,7 @@ typedef struct DefParticleHead {
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
-/* Burst effect (effect_spawnDelayedBurst in game_127060.c, effect_spawnBoneBurst in game/Effects/FollowEffects/followeffects.c): an effect object that
+/* Burst effect (effect_spawnDelayedBurst in game/Effects/DelayedBurst/delayedburst.c, effect_spawnBoneBurst in game/Effects/FollowEffects/followeffects.c): an effect object that
  * keeps two sparks (particle_newQuadParticle beams) and two glows (flare_spawnGlow) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
@@ -2954,7 +2954,7 @@ typedef struct ActorLink {
     /* 0xA */ u8 kind;              /* gDripEmitterKinds index */
 } ActorLink; /* size 0xC */
 
-/* Tick data of timed effect 0x46 (effect_updateBoltRing, game_E2DA0.c): bolts around a trigger zone. */
+/* Tick data of timed effect 0x46 (effect_updateBoltRing, game/Effects/ObjBurst/objburst.c): bolts around a trigger zone. */
 typedef struct BoltRingData {
     /* 0x00 */ struct TriggerZone *emitter;
     /* 0x04 */ f32 spawnAccum;

@@ -18,13 +18,13 @@
  *   game/Effects/PerimeterEmitter/perimeteremitter.c
  *   game/Effects/BoneStreak/bonestreak.c
  *   game/Effects/OwnerSpark/ownerspark.c
- *   game_E2DA0.c
+ *   game/Effects/ObjBurst/objburst.c
  *   game/Effects/BreakUp/breakup.c
  *   game/Effects/JointDecal/jointdecal.c
  *   game/Effects/ParticleBursts/particlebursts.c
  *   game/Effects/SegmentTrail/segmenttrail.c
  *   game/Effects/Sfx/effects_sfx_w1_bee_cavern.c
- *   game_EB6C0.c
+ *   game/Effects/PathMover/pathmover.c
  *   game/Effects/BoneGroundFx/bonegroundfx.c
  *   game/Effects/BoneRing/bonering.c
  *   game/Effects/PulseEffect/pulseeffect.c
@@ -38,7 +38,7 @@
  *   game/Effects/TextLines/textlines.c
  *   game/Effects/ZoneSounds/zonesounds.c
  *   game_FE850.c
- *   game_FE8C0.c
+ *   game/Effects/LevelActorHooks/levelactorhooks.c
  *   game/Effects/RaySpinner/rayspinner.c
  *   game/Effects/HitSpray/hitspray.c
  *   game/Effects/TintedObject/tintedobject.c
@@ -49,7 +49,7 @@
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
- *   game_10CD70.c
+ *   game/Effects/MaterialScroll/materialscroll.c
  *   game/Effects/SplashBurst/splashburst.c
  *   game/Effects/PropEmitter/propemitter.c
  *   game/Effects/HomingEffect/homingeffect.c
@@ -64,7 +64,7 @@
  *   game/Effects/BeamZones/beamzones.c
  *   game/Effects/ProjectilePuffs/projectilepuffs.c
  *   game/Effects/StageEffect/stageeffect.c
- *   game_127060.c
+ *   game/Effects/DelayedBurst/delayedburst.c
  *   game/Effects/StarField/starfield.s
  *   game/Effects/ChildEffect/childeffect.c
  *   game/Effects/ChildEffectFree/childeffectfree.c
@@ -168,7 +168,7 @@ typedef struct {
 
 #define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
-/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game_EB6C0.c): the end points of its path. */
+/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game/Effects/PathMover/pathmover.c): the end points of its path. */
 typedef struct {
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
@@ -247,7 +247,7 @@ void effect_destroyOwnerSpark(OwnerSparkEffect *effect);
 void effect_freeOwnerSpark(OwnerSparkEffect *effect);
 void effect_ownerSparkMessage(OwnerSparkEffect *effect, ActorMsg *event, u8 eventId);
 
-/* game_E2DA0.c */
+/* game/Effects/ObjBurst/objburst.c */
 typedef struct ObjBurstEffect ObjBurstEffect;
 typedef struct BoltRingEffect BoltRingEffect;
 typedef struct Arg150B66DC Arg150B66DC;
@@ -314,7 +314,7 @@ void effect_updateEmitterSpawner(EB340Obj *obj);
 void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
 s32 effect_updateRisingScreenSprite(EB340Rising *sprite);
 
-/* game_EB6C0.c */
+/* game/Effects/PathMover/pathmover.c */
 void func_150BE210(WorldObject *obj);
 void effect_updatePathMover(WorldObject *mover);
 GameCommand *func_150BE438(GameCommand *cmd, s32 id);
@@ -452,7 +452,7 @@ extern u8 gRandomSoundTimer;
 /* game_FE850.c */
 void effect_spinDownActor(Actor *arg0);
 
-/* game_FE8C0.c */
+/* game/Effects/LevelActorHooks/levelactorhooks.c */
 /* A timed effect that pulses the ambient colour (effect_updateAmbientPulse, and light_updateAmbientRedDrift of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
@@ -542,7 +542,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind);
 void effect_dropPointEffect(PointEffect *effect);
 void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind);
 
-/* game_10CD70.c */
+/* game/Effects/MaterialScroll/materialscroll.c */
 typedef struct SwingObject SwingObject;
 typedef struct BoltEmitter BoltEmitter;
 extern u8 gWarpModelSetupDone;
@@ -680,7 +680,7 @@ void effect_spawnCutsceneBoneBeam(Actor *obj, u8 owner, s32 list);
 void effect_spawnGunMuzzleEffects(Actor *obj, u8 owner, s32 list);
 extern const u8 gStagePartObjectIds[8][8];
 
-/* game_127060.c */
+/* game/Effects/DelayedBurst/delayedburst.c */
 typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
 typedef struct FadeInSprite FadeInSprite;
