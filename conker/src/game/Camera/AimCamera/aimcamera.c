@@ -33,15 +33,15 @@ void camera_enterAim(Camera *camera) {
     if ((camera->SpecialFlags & 2) || (camera->CharContext == 9) || (camera->CharContext == 0x38) || (camera->CharContext == 0x39) ||
         (camera->CharContext == 0x37) || (camera->CharContext == 0x3B)) {
         // matching: the original stores 0 then 1; IDO drops the dead store unless it is volatile
-        *(volatile u8 *)&aim->unk4D = 0;
-        aim->unk4D = 1;
+        *(volatile u8 *)&aim->swing = 0;
+        aim->swing = 1;
     } else {
-        aim->unk4D = 1;
+        aim->swing = 1;
     }
     camera->AimTargetOn = FALSE;
     if (camera->MCache[CAMERA_MODE_AIM] == 0x40) {
         aim->targetYaw = camera->CameraAngle;
-    } else if (aim->unk4D) {
+    } else if (aim->swing) {
         if (IS_FACING_ZONE(camera->CharContext)) {
             aim->targetYaw = ((camera->CharPtr->langle - camera->mv->pssd_waist_tilt) + 0xC000) * BAM2DEG;
         } else if ((gContextTextId == 0x42) && (zone == 0x1A)) {
@@ -86,15 +86,15 @@ void camera_enterAim(Camera *camera) {
     if (camera->DoingRail) {
         aim->savedTargetDistance = sqrtf((camera->target.x - camera->eye.x) * (camera->target.x - camera->eye.x) +
                                           (camera->target.z - camera->eye.z) * (camera->target.z - camera->eye.z));
-        aim->savedHeight = camera->unk344;
-        aim->savedUnk354 = camera->unk354;
+        aim->savedHeight = camera->eyeHeight;
+        aim->savedBaseY = camera->baseY;
     } else {
         aim->savedTargetDistance = camera->IdealTripodMagnitude;
         aim->savedHeight = camera->height;
-        aim->savedUnk354 = camera->unk354;
+        aim->savedBaseY = camera->baseY;
     }
     camera->floorY = camera->target.y;
-    camera->unk354 = camera->target.y;
+    camera->baseY = camera->target.y;
     aim->distance = 110.0f;
     camera->height = 30.0f;
     camera->mv->aimYaw = aim->targetYaw;
@@ -143,7 +143,7 @@ void camera_updateAim(Camera *camera) {
     camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
                              (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
     if (camera->Snap) {
-        aim->savedUnk354 = probeY;
+        aim->savedBaseY = probeY;
     }
     if ((zone != 0x2A) && (camera->DoingAim != 3)) {
         if (zone == 0xD) {
@@ -171,7 +171,7 @@ void camera_updateAim(Camera *camera) {
             camera_setAimDistance(camera);
         }
     }
-    camera->floorY = camera->unk354 = camera->target.y;
+    camera->floorY = camera->baseY = camera->target.y;
     actor_fadeCommand(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     dist = aim->distance;
     if (camera->DoingAim == 1) {
@@ -206,7 +206,7 @@ void camera_updateAim(Camera *camera) {
         }
         // matching: a goto to the end of this branch makes IDO duplicate the yawRad store; break does not
         do {
-            if (aim->unk4D) {
+            if (aim->swing) {
                 // matching: the original compares the yaw error and does nothing with the result
                 if (fabsf(math_angleDiff(camera->CameraAngle, aim->targetYaw)) < 0.009999999776f) {
                 }
@@ -236,7 +236,7 @@ void camera_updateAim(Camera *camera) {
         f32 horizontal;
         f32 sinPitch;
         f32 rate;
-        s32 notUnk3E8;
+        s32 wallHit;
         s32 stickX;
         OSContPad *pad;
 
@@ -267,9 +267,9 @@ void camera_updateAim(Camera *camera) {
         }
         if (zone != 0xD) {
             // matching: the negated copy in a local fixes the register allocation of this block
-            notUnk3E8 = !camera->TonyHitsClear;
-            if (!aim->unk4D) {
-                if (!notUnk3E8) {
+            wallHit = !camera->TonyHitsClear;
+            if (!aim->swing) {
+                if (!wallHit) {
                     aim->stickLock = 0;
                 } else {
                     if (aim->stickLock == 0) {
@@ -376,20 +376,20 @@ void camera_updateAim(Camera *camera) {
             }
         }
         if ((camera->AvailableModes & 0x200000) || IS_FACING_ZONE(camera->CharContext)) {
-            aim->unk4D = 0;
+            aim->swing = 0;
         }
-        if (!aim->unk4D || (yawDelta < 45.0f)) {
+        if (!aim->swing || (yawDelta < 45.0f)) {
             camera->IdealTripodMagnitude = aim->savedTargetDistance;
             camera->height = aim->savedHeight;
             if ((camera->SpecialFlags & 0x40) || (camera->waterY != 0.0f)) {
-                camera->floorY = aim->savedUnk354;
-                camera->unk354 = aim->savedUnk354;
+                camera->floorY = aim->savedBaseY;
+                camera->baseY = aim->savedBaseY;
             } else {
                 camera->floorY = camera->CharPtr->floorY;
-                camera->unk354 = camera->CharPtr->floorY;
+                camera->baseY = camera->CharPtr->floorY;
             }
         }
-        if (!aim->unk4D || (yawDelta < 0.05000000075f)) {
+        if (!aim->swing || (yawDelta < 0.05000000075f)) {
             camera->mv->AimState = 0;
             camera->DoingAim = 0;
         } else {

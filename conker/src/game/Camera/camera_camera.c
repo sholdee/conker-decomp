@@ -557,8 +557,8 @@ void camera_updateFollow(Camera *camera) {
                                 if (camera->CharContext == 3) {
                                     camera->height *= camera->IdealTripodMagnitude / prevDistance;
                                     if (camera->SpecialFlags & 0x10) {
-                                        camera->height = (camera->height < camera->target.y - camera->unk354)
-                                                          ? camera->target.y - camera->unk354
+                                        camera->height = (camera->height < camera->target.y - camera->baseY)
+                                                          ? camera->target.y - camera->baseY
                                                           : camera->height;
                                     }
                                 }
@@ -750,23 +750,23 @@ void camera_loadDistancePreset(Camera *camera) {
     mode80 = camera->Mode & 0x80;
     if (mode80 && (camera->PadPtr->button & R_TRIG)) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;
     } else if (mode80) {
-        camera->height = camera->eye.y - camera->unk354;
+        camera->height = camera->eye.y - camera->baseY;
     } else if (mode80 && (camera->CharPtr->unk102 == 0) && (level != LEVEL_W1_DOG_FISH_NURSERY_PART1)) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;
     } else if (camera->CharPtr->unk102 != 0) {
         camera->height = 40.0f;
-        camera->unk34C = 40.0f;
+        camera->idealHeight = 40.0f;
         camera->IdealTripodMagnitude = 194.0f;
     } else {
         preset = gCameraDistancePresets[camera->DistIndex];
         camera->IdealTripodMagnitude = preset[0];
         camera->height = preset[1];
-        camera->unk34C = camera->height;
+        camera->idealHeight = camera->height;
     }
 }
 
@@ -891,7 +891,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
     }
 }
 
-/* Pitch of the eye->target line (degrees and radians), plus the pitch offsets unk38C / unk3A8. */
+/* Pitch of the eye->target line (degrees and radians), plus the pitch offsets AddOnPitch / APitchAngle. */
 void camera_updatePitch(Camera *camera) {
     f32 dz;
     f32 dx;
@@ -992,7 +992,7 @@ void camera_attachToObject(Camera *camera, s32 index) {
     camera->CharTrackingSpeed = 0.0f;
 }
 
-/* Recomputes pitch, yaw, unk380 (yaw minus unk5E8, wrapped) and the view direction. */
+/* Recomputes pitch, yaw, TrueCameraAngle (yaw minus YawAngle, wrapped) and the view direction. */
 void camera_updateAngles(Camera *camera) {
     camera_updatePitch(camera);
     camera_updateYaw(camera);
@@ -1086,21 +1086,21 @@ void camera_updateSway(Camera *camera) {
 
 /* Pushes the deep-water mode 0x80 (slot 13) while camera_isInDeepWater says so, and pops it otherwise. */
 void camera_updateDeepWater(Camera *camera) {
-    s32 extUnk4E;
-    s32 extUnk1C;
+    s32 transport;
+    s32 waterUp;
 
     if (camera->mv != NULL) {
-        extUnk1C = camera->mv->water_up;
-        extUnk4E = camera->mv->transport;
+        waterUp = camera->mv->water_up;
+        transport = camera->mv->transport;
     } else {
-        extUnk1C = 0;
-        extUnk4E = 0;
+        waterUp = 0;
+        transport = 0;
     }
 
     if (!(camera->Mode & 0x40)) {
         if ((camera->AvailableModes & 0x4000) || (camera->CharPtr->unk102 != 0)) {
             if (camera_isInDeepWater(camera) != 0) {
-                if ((extUnk4E == 0) && (extUnk1C == 0)) {
+                if ((transport == 0) && (waterUp == 0)) {
                     if (camera_pushMode(camera, 0x80, 1, 1, CAMERA_MODE_SFLY) != 0) {
                         if (camera->cmdRunning == 0) {
                             camera_loadDistancePreset(camera);
@@ -1116,7 +1116,7 @@ void camera_updateDeepWater(Camera *camera) {
             }
             if (camera->SpecialFlags & 0x1000) {
                 camera->SpecialFlags &= ~0x1000;
-                camera->height = camera->unk344 = camera->eye.y - camera->unk354;
+                camera->height = camera->eyeHeight = camera->eye.y - camera->baseY;
             }
         }
     }
@@ -1417,8 +1417,8 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         camera->target.y = camera->CharPtr->ypos + (camera->mv->height * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
         ext->aimEye = camera->eye;
-        ext->unk18C = camera->CameraAngle;
-        ext->unk160 = camera->eye;
+        ext->savedCameraYaw = camera->CameraAngle;
+        ext->savedCameraEye = camera->eye;
         if (zone != ext->aimZone) {
             if (zone == 0x1B) {
                 t = 1.0f;
@@ -1579,7 +1579,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
 
 /* Sound callback while aiming (zoom): follows the player and switches between the gAimZoomSounds[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
-s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 index;
     u32 oldZoom;
@@ -1587,9 +1587,9 @@ s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
     f32 zoom;
     s32 changed;
 
-    camera = sound->camera;
-    index = sound->data >> 31;
-    oldZoom = sound->data & 0xFFFFFF;
+    camera = sound->callback_param1.camera;
+    index = sound->callback_param2.bits >> 31;
+    oldZoom = sound->callback_param2.bits & 0xFFFFFF;
     zoom = camera->TgetFOVX * -10000.0f;
     changed = 0;
 
@@ -1605,23 +1605,23 @@ s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
         newZoom = zoom;
         if (oldZoom != newZoom) {
             changed = 1;
-            sound->data = (index << 31) | newZoom;
+            sound->callback_param2.bits = (index << 31) | newZoom;
         }
 
         if (changed) {
             if (*soundId != gAimZoomSounds[index][0]) {
-                if (sound->voice != 0) {
-                    sound_stop(sound->voice);
+                if (sound->sound_id != 0) {
+                    sound_stop(sound->sound_id);
                 }
-                sound->voice = 0;
+                sound->sound_id = 0;
                 sound->flags &= ~0x80;
                 *soundId = gAimZoomSounds[index][0];
             }
         } else if (*soundId == gAimZoomSounds[index][0]) {
-            if (sound->voice != 0) {
-                sound_stop(sound->voice);
+            if (sound->sound_id != 0) {
+                sound_stop(sound->sound_id);
             }
-            sound->voice = 0;
+            sound->sound_id = 0;
             *soundId = gAimZoomSounds[index][1];
             sound_play(gAimZoomSounds[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
@@ -1638,7 +1638,7 @@ s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
 }
 /* Sound callback while aiming (look): plays sound 0x61C while the aim angles keep changing, 0x61D
    once they settle. Returns 1 when the aim ended. */
-s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onLookSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 count;
     u32 oldKey;
@@ -1646,9 +1646,9 @@ s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
     s32 changed;
     f32 key;
 
-    camera = sound->camera;
-    oldKey = sound->data & 0xFFFFFF;
-    count = sound->data >> 24;
+    camera = sound->callback_param1.camera;
+    oldKey = sound->callback_param2.bits & 0xFFFFFF;
+    count = sound->callback_param2.bits >> 24;
     key = camera->mv->aimYawTarget * camera->mv->aimPitchTarget;
     newKey = *(u32 *)&key & 0xFFFFFF;
     changed = 0;
@@ -1673,22 +1673,22 @@ s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
         } else {
             count = 0;
         }
-        sound->data = (count << 24) | newKey;
+        sound->callback_param2.bits = (count << 24) | newKey;
 
         if (changed) {
             if (*soundId != 0x61C) {
-                if (sound->voice != 0) {
-                    sound_stop(sound->voice);
+                if (sound->sound_id != 0) {
+                    sound_stop(sound->sound_id);
                 }
-                sound->voice = 0;
+                sound->sound_id = 0;
                 sound->flags &= ~0x80;
                 *soundId = 0x61C;
             }
         } else if (*soundId == 0x61C) {
-            if (sound->voice != 0) {
-                sound_stop(sound->voice);
+            if (sound->sound_id != 0) {
+                sound_stop(sound->sound_id);
             }
-            sound->voice = 0;
+            sound->sound_id = 0;
             *soundId = 0x61D;
             sound->flags &= ~0x80;
         }
@@ -1696,7 +1696,7 @@ s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
         return 1;
     }
 
-    if (sound->voice == 0 && *soundId == 0) {
+    if (sound->sound_id == 0 && *soundId == 0) {
         sound->flags &= ~0x80;
     }
     return 0;
@@ -1813,7 +1813,7 @@ void camera_leaveFirstPersonAim(Camera *camera) {
 }
 
 /* Starts a transition (camera_updateTransition) from the current focus point. */
-void camera_startTransition(Camera *camera, s32 arg1, s32 arg2) {
+void camera_startTransition(Camera *camera, s32 duration, s32 yaw) {
     camera->transition.state = 1;
     camera->transition.startTarget.x = camera->focus.x;
     camera->transition.startTarget.y = camera->focus.y;
@@ -1957,8 +1957,8 @@ void camera_endUpdate(Camera *camera) {
         camera->Snap--;
     }
     if (camera->AvailableModes & 8) {
-        if (camera->unk5FE <= 0) {
-            camera->unk5FE = 60;
+        if (camera->boxedInTimer <= 0) {
+            camera->boxedInTimer = 60;
             camera_placeAtObject(camera, camera->CharPtr);
         }
     }
@@ -2000,7 +2000,7 @@ s32 camera_runSpecialModes(Camera *camera) {
     }
 
     if (mode & 0x400000) {
-        func_1512D380(camera);
+        camera_emptySpecialModeHook(camera);
         camera_updateStatus(camera);
         camera_endUpdate(camera);
         return 1;
@@ -2052,6 +2052,6 @@ void camera_placeAtObject(Camera *camera, Actor *obj) {
     camera->prevEye.y = camera->eye.y = obj->ypos;
     camera->prevEye.z = camera->eye.z = obj->zpos;
     camera->CameraAngle = camera->CharPtr->theta - 180.0f;
-    camera->mv->unk18C = 999.0f;
+    camera->mv->savedCameraYaw = 999.0f;
     camera->Snap = 1;
 }

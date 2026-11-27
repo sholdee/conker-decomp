@@ -106,7 +106,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
     }
 }
 
-/* Sets camera distances (unk190, unk348/unk34C/unk374) and flag bits in unk84/unk5F0 from game flags. */
+/* Sets camera distances (YOffsetTget, height/idealHeight/IdealTripodMagnitude) and flag bits in AvailableModes/SpecialFlags from game flags. */
 void particle_levelHook21(Camera *camera) {
     s32 flagBC;
     s32 flagBB;
@@ -124,7 +124,7 @@ void particle_levelHook21(Camera *camera) {
         camera->YOffsetTget = 235.0f;
     } else {
         camera->height = 114.0f;
-        camera->unk34C = 114.0f;
+        camera->idealHeight = 114.0f;
         camera->IdealTripodMagnitude = 384.0f;
         camera->YOffsetTget = 60.0f;
     }

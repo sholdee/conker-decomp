@@ -12,12 +12,12 @@ static const Vec3f gSegmentProgressEnd = { 0.0f, 98.0f, 1198.0f };
 #define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 
 /*
- * While query 0x4003 holds and the actor is alive, measures how far the actor's position has progressed
+ * While query 0x4003 holds and the camera's character is alive, measures how far the camera's focus has progressed
  * along the segment from gSegmentProgressStart to gSegmentProgressEnd (scaled by 0.75, clamped to [0, 1]) and passes values
  * derived from it to script_command; also sets unk374 and turns unk37C via math_springAngleTo. Otherwise clears
  * the flags it set.
  */
-void camera_levelHook23(Camera *actor) {
+void camera_levelHook23(Camera *camera) {
     f32 vertical;
     Vec3f normalized;
     Vec3f offset;
@@ -28,9 +28,9 @@ void camera_levelHook23(Camera *actor) {
     f32 projection;
     f32 clamped;
 
-    if (script_query(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
-        actor->AvailableModes |= 0xC0001000;
-        math_vec3Diff(&gSegmentProgressStart, &actor->focus, &offset);
+    if (script_query(1, 0x4003, 6, 0x2000) && camera->CharPtr->energy) {
+        camera->AvailableModes |= 0xC0001000;
+        math_vec3Diff(&gSegmentProgressStart, &camera->focus, &offset);
         math_vec3Diff(&gSegmentProgressStart, &gSegmentProgressEnd, &direction);
         inverseLength = 1.0f / math_length3(&direction.x);
         math_vec3Unit(&direction, &normalized);
@@ -44,19 +44,19 @@ void camera_levelHook23(Camera *actor) {
         }
         if (script_query(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043)) {
             lateral = LERP(-900.0f, -900.0f, blend);
-            actor->IdealTripodMagnitude = 220.0f;
+            camera->IdealTripodMagnitude = 220.0f;
         } else if (script_query(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044)) {
             lateral = LERP(900.0f, 900.0f, blend);
-            actor->IdealTripodMagnitude = 220.0f;
+            camera->IdealTripodMagnitude = 220.0f;
         } else {
-            actor->IdealTripodMagnitude = 294.0f;
+            camera->IdealTripodMagnitude = 294.0f;
             lateral = LERP(0.0f, 0.0f, blend);
         }
         vertical = -20.0f;
         script_command(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        math_springAngleTo(&actor->CameraAngle, math_vec3Heading(&gLastBeamDir) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
-        actor->CameraAngleRad = actor->CameraAngle * 0.01745329238f; // degrees to radians
+        math_springAngleTo(&camera->CameraAngle, math_vec3Heading(&gLastBeamDir) - 180.0f, &camera->AutoBehindAngleVel, 8.0f, 10.0f, camera->SpringTime);
+        camera->CameraAngleRad = camera->CameraAngle * 0.01745329238f; // degrees to radians
     } else {
-        actor->AvailableModes &= 0x3FFFEFFF;
+        camera->AvailableModes &= 0x3FFFEFFF;
     }
 }

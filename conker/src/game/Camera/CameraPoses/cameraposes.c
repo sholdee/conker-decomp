@@ -22,9 +22,9 @@ static struct Entry151298C0 D_800DC028[4];
 s16 gNumCameraPoses = 0; // number of entries in gCameraPoses
 
 /* Resets this camera's D_800DC028 entry when gNumCameraPoses is set. */
-void func_151298C0(cam, arg1)
+void func_151298C0(cam, resource)
     Camera *cam;
-    s32 arg1;
+    s32 resource;
 {
     if (gNumCameraPoses != 0) {
         D_800DC028[cam->CNumber].unk2 = 0;
@@ -35,7 +35,7 @@ void func_151298C0(cam, arg1)
 
 
 /*
- * Eases the eye toward the point FTgetRadius short of target on the line from posePos
+ * Eases the eye toward the point FTgetRadius short of target on the line from fixedEye (set to posePos)
  * (snapping when Snap is set), then re-queries collision_findFloorInRange for it when needed.
  */
 void camera_updatePoseEye(Camera *cam) {
@@ -50,26 +50,26 @@ void camera_updatePoseEye(Camera *cam) {
     f32 dz;
 
     if (gNumCameraPoses != 0 && cam->DoingAim == 0) {
-        cam->unk27C.x = cam->posePos.x;
-        cam->unk27C.y = cam->posePos.y;
-        cam->unk27C.z = cam->posePos.z;
-        math_vec3Diff(&cam->unk27C, &cam->target, &dir);
+        cam->fixedEye.x = cam->posePos.x;
+        cam->fixedEye.y = cam->posePos.y;
+        cam->fixedEye.z = cam->posePos.z;
+        math_vec3Diff(&cam->fixedEye, &cam->target, &dir);
         math_vec3Unit(&dir, &dir);
-        dx = cam->target.x - cam->unk27C.x;
-        dy = cam->target.y - cam->unk27C.y;
-        dz = cam->target.z - cam->unk27C.z;
+        dx = cam->target.x - cam->fixedEye.x;
+        dy = cam->target.y - cam->fixedEye.y;
+        dz = cam->target.z - cam->fixedEye.z;
         dist = sqrtf(dx * dx + dy * dy + dz * dz) - cam->FTgetRadius;
         if (dist < 0.0f) {
             dist = 0.0f;
         }
         math_vec3Scale(&dir, dist, &dir);
-        x = cam->unk27C.x + dir.x;
-        if (cam->cmd.unk8 & 0xF) {
-            y = cam->unk27C.y;
+        x = cam->fixedEye.x + dir.x;
+        if (cam->cmd.data3 & 0xF) {
+            y = cam->fixedEye.y;
         } else {
-            y = cam->unk27C.y + dir.y * 1.2f;
+            y = cam->fixedEye.y + dir.y * 1.2f;
         }
-        z = cam->unk27C.z + dir.z;
+        z = cam->fixedEye.z + dir.z;
         if (cam->Snap) {
             cam->eye.x = x;
             cam->prevEye.x = x;

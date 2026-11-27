@@ -27,22 +27,22 @@ void camera_runCommand(Camera *camera) {
     if (cam->cmdId != cmd->id) {
         camera->DoingRail = 0;
         cam->cmdId = cmd->id;
-        cam->unk6 = 0;
+        cam->cancelled = 0;
         camera_popMode(camera, CAMERA_MODE_FIXED);
         camera_popMode(camera, CAMERA_MODE_SFLY);
         camera_popMode(camera, CAMERA_MODE_ZONES);
         camera_popMode(camera, CAMERA_MODE_ZONE_FLAGS);
     }
     if ((cmd->type != 4) && (camera->mv->death_State != 0) && (camera->DoingRail == 0)) {
-        cam->unk6 = 1;
+        cam->cancelled = 1;
     }
-    if (cam->unk6 != 0) {
+    if (cam->cancelled != 0) {
         camera_popMode(camera, CAMERA_MODE_FIXED);
     }
-    if ((camera->cmdState.unk0 != 0) && (cam->unk6 == 0) && (cam->blending == 0)) {
+    if ((camera->cmdState.cmdReceived != 0) && (cam->cancelled == 0) && (cam->blending == 0)) {
         cam->lastType = cmd->type;
         if (cmd->type != 10) {
-            camera_startCommandMode(camera, cmd->unk8);
+            camera_startCommandMode(camera, cmd->data3);
         }
         if (cmd->type == 4) {
             camera->FCameraIndex = -1;
@@ -101,9 +101,9 @@ void camera_runCommand(Camera *camera) {
             if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_FIXED) != 0) {
                 camera->cmdRunning = 1;
                 camera->AvailableModes &= ~0x80000006;
-                camera->RailFlags = cmd->unk8;
-                camera->RailMagXZ = cmd->unk1C;
-                camera->RailMagY = cmd->unk20;
+                camera->RailFlags = cmd->data3;
+                camera->RailMagXZ = cmd->data1;
+                camera->RailMagY = cmd->data2;
                 if (camera->RailFlags & 1) {
                     camera->AvailableModes |= 4;
                 }
@@ -165,8 +165,8 @@ void camera_runCommand(Camera *camera) {
                 }
             }
             camera_updateAngles(camera);
-            camera->RailMagXZ = cmd->unk1C;
-            camera->RailMagY = cmd->unk20;
+            camera->RailMagXZ = cmd->data1;
+            camera->RailMagY = cmd->data2;
             camera->IdealTripodMagnitude = camera->RailMagXZ;
             camera->height = camera->RailMagY;
             if (camera->RailFlags & 4) {
@@ -179,51 +179,51 @@ void camera_runCommand(Camera *camera) {
             if (camera_pushMode(camera, 0x40, 0, 0, CAMERA_MODE_FIXED) != 0) {
                 camera->AvailableModes &= ~0xE;
                 camera->AvailableModes |= 0x200;
-                camera->unk27C = camera->eye;
+                camera->fixedEye = camera->eye;
             }
-            if ((cmd->unk8 == 5) || (cmd->unk8 == 0x11)) {
-                if (camera->FCameraIndex != cmd->unk1C) {
-                    camera->FCameraIndex = cmd->unk1C;
+            if ((cmd->data3 == 5) || (cmd->data3 == 0x11)) {
+                if (camera->FCameraIndex != cmd->data1) {
+                    camera->FCameraIndex = cmd->data1;
                     gTargetCameraPose = gCameraPoses;
                     gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
-                    camera->FTgetRadius = cmd->unk20;
+                    camera->FTgetRadius = cmd->data2;
                     camera->posePos.x = gTargetCameraPose->x;
                     camera->posePos.y = gTargetCameraPose->y;
                     camera->posePos.z = gTargetCameraPose->z;
                     camera->SpecialFlags |= 4;
                     camera->eye.x = camera->posePos.x;
-                    camera->unk27C.x = camera->posePos.x;
+                    camera->fixedEye.x = camera->posePos.x;
                     camera->eye.y = camera->posePos.y;
-                    camera->unk27C.y = camera->posePos.y;
+                    camera->fixedEye.y = camera->posePos.y;
                     camera->eye.z = camera->posePos.z;
-                    camera->unk27C.z = camera->posePos.z;
+                    camera->fixedEye.z = camera->posePos.z;
                     camera_placeAtObject(camera, camera->CharPtr);
                     camera->Snap = 1;
                 }
             } else {
-                camera->FCameraIndex = cmd->unk1C;
+                camera->FCameraIndex = cmd->data1;
                 gTargetCameraPose = gCameraPoses;
                 gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
                 camera->posePos.x = gTargetCameraPose->x;
                 camera->posePos.y = gTargetCameraPose->y;
                 camera->posePos.z = gTargetCameraPose->z;
-                camera->FTgetRadius = cmd->unk20;
+                camera->FTgetRadius = cmd->data2;
             }
-            camera->FToFromStatus = cmd->unk8;
+            camera->FToFromStatus = cmd->data3;
             camera->cmdRunning = 1;
             return;
         }
         if (cmd->type == 11) {
-            cam->minHeight = cmd->unk1C;
-            cam->maxHeight = cmd->unk20;
-            cam->maxDistance = cmd->unk8;
+            cam->minHeight = cmd->data1;
+            cam->maxHeight = cmd->data2;
+            cam->maxDistance = cmd->data3;
             return;
         }
         if ((cmd->type == 10) || (cmd->type == 14)) {
             Actor *obj;
 
             // matching: reusing obj for the id (instead of nesting the calls) drops a cfe temp
-            obj = (Actor *)collision_findSpawnById(cmd->unk1C);
+            obj = (Actor *)collision_findSpawnById(cmd->data1);
             obj = actor_findOnPath((s32)obj);
             if (obj != NULL) {
                 f32 dist;
@@ -258,15 +258,15 @@ void camera_runCommand(Camera *camera) {
                     camera->pivotPos.z += (obj->zpos - camera->pivotPos.z) * 0.03999999911f;
                 }
                 // matching: two separate tests; merging them (or dropping h) changes scheduling
-                if (cmd->unk8 != 0) {
-                    camera->IdealTripodMagnitude = cmd->unk20;
+                if (cmd->data3 != 0) {
+                    camera->IdealTripodMagnitude = cmd->data2;
                 }
-                if (cmd->unk8 != 0) {
+                if (cmd->data3 != 0) {
                     f32 h;
 
-                    h = cmd->unk8 - (camera->focus.y - camera->pivotPos.y);
-                    camera->unk34C = h;
-                    cmd->unk34 = cmd->unk8;
+                    h = cmd->data3 - (camera->focus.y - camera->pivotPos.y);
+                    camera->idealHeight = h;
+                    cmd->height = cmd->data3;
                 }
             }
             return;
@@ -287,24 +287,24 @@ void camera_runCommand(Camera *camera) {
                 camera->PivotPtr = &camera->pivotPos;
                 camera->unk62C = 0.0f;
                 camera->PanButtonAddOn = 0.0f;
-                camera->IdealTripodMagnitude = cmd->unk1C;
-                camera->unk34C = cmd->unk20;
-                cmd->unk34 = cmd->unk20;
+                camera->IdealTripodMagnitude = cmd->data1;
+                camera->idealHeight = cmd->data2;
+                cmd->height = cmd->data2;
                 camera->cmdRunning = 1;
             }
             camera->pivotPos.x = cmd->x;
             camera->pivotPos.y = cmd->y;
             camera->pivotPos.z = cmd->z;
-            camera->IdealTripodMagnitude = cmd->unk1C;
+            camera->IdealTripodMagnitude = cmd->data1;
             return;
         }
         if (cmd->type == 2) {
             f32 shortfall;
 
             if (camera_pushMode(camera, 0x2000, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
-                camera->IdealTripodMagnitude = cmd->unk1C;
-                camera->unk34C = cmd->unk20;
-                cmd->unk34 = cmd->unk20;
+                camera->IdealTripodMagnitude = cmd->data1;
+                camera->idealHeight = cmd->data2;
+                cmd->height = cmd->data2;
             }
             camera->cmdRunning = 1;
             camera_easeHeight(camera);
@@ -327,9 +327,9 @@ void camera_runCommand(Camera *camera) {
             if ((camera->cmdRunning == 0) || (cmd->type == 0)) {
                 if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                     camera->cmdRunning = 1;
-                    camera->IdealTripodMagnitude = cmd->unk1C;
-                    camera->unk34C = cmd->unk20;
-                    cmd->unk34 = cmd->unk20;
+                    camera->IdealTripodMagnitude = cmd->data1;
+                    camera->idealHeight = cmd->data2;
+                    cmd->height = cmd->data2;
                     camera->AvailableModes &= ~4;
                     if (cmd->type == 0) {
                         camera->LastMagsZone = cmd->id | 0x4000;
@@ -337,9 +337,9 @@ void camera_runCommand(Camera *camera) {
                     }
                 }
             }
-            camera->IdealTripodMagnitude = cmd->unk1C;
-            camera->unk34C = camera->height = cmd->unk20;
-            cmd->unk34 = cmd->unk20;
+            camera->IdealTripodMagnitude = cmd->data1;
+            camera->idealHeight = camera->height = cmd->data2;
+            cmd->height = cmd->data2;
             if ((dist < camera->IdealTripodMagnitude) && (cmd->type == 1)) {
                 shortfall = camera->IdealTripodMagnitude - dist;
                 camera->eye.x += shortfall * cam->pushRate * math_sin(camera->CameraAngleRad);
@@ -348,10 +348,10 @@ void camera_runCommand(Camera *camera) {
                 cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }
             if (cmd->type == 1) {
-                cam->unk18 += (cmd->x - cam->unk18) * 0.03999999911f;
-                cam->unk20 += (cmd->z - cam->unk20) * 0.03999999911f;
-                camera->focus.x += (cam->unk18 - camera->focus.x) * 0.5f;
-                camera->focus.z += (cam->unk20 - camera->focus.z) * 0.5f;
+                cam->focusX += (cmd->x - cam->focusX) * 0.03999999911f;
+                cam->focusZ += (cmd->z - cam->focusZ) * 0.03999999911f;
+                camera->focus.x += (cam->focusX - camera->focus.x) * 0.5f;
+                camera->focus.z += (cam->focusZ - camera->focus.z) * 0.5f;
             }
             if (cmd->type != 0) {
                 camera_easeHeight(camera);
@@ -368,12 +368,12 @@ void camera_runCommand(Camera *camera) {
     cam->minHeight = 0.0f;
     cam->maxHeight = 0.0f;
     cam->maxDistance = 0.0f;
-    if (camera->cmdState.unk0 == 0) {
-        cam->unk6 = 0;
+    if (camera->cmdState.cmdReceived == 0) {
+        cam->cancelled = 0;
     }
     if ((camera->cmdRunning == 1) && (cam->lastType == 1)) {
-        cam->unk18 = camera->focus.x + (cam->unk18 - camera->focus.x) * 0.5f;
-        cam->unk20 = camera->focus.z + (cam->unk20 - camera->focus.z) * 0.5f;
+        cam->focusX = camera->focus.x + (cam->focusX - camera->focus.x) * 0.5f;
+        cam->focusZ = camera->focus.z + (cam->focusZ - camera->focus.z) * 0.5f;
         cam->pushRate = 0.0f;
     }
     if (camera->Mode == 0x40) {
@@ -382,8 +382,8 @@ void camera_runCommand(Camera *camera) {
     }
     if (camera->cmdRunning == 1) {
         if (cam->lastType == 0) {
-            cam->unk18 = camera->focus.x;
-            cam->unk20 = camera->focus.z;
+            cam->focusX = camera->focus.x;
+            cam->focusZ = camera->focus.z;
         }
         if (cam->lastType == 14) {
             camera->CharTrackingSpeed = 0.009999999776f;
@@ -391,15 +391,15 @@ void camera_runCommand(Camera *camera) {
         }
     }
     if (camera->Snap != 0) {
-        cam->unk18 = camera->focus.x;
-        cam->unk20 = camera->focus.z;
+        cam->focusX = camera->focus.x;
+        cam->focusZ = camera->focus.z;
         cam->blend = 1.0f;
     } else {
-        cam->unk18 += (camera->focus.x - cam->unk18) * cam->blend;
-        cam->unk20 += (camera->focus.z - cam->unk20) * cam->blend;
+        cam->focusX += (camera->focus.x - cam->focusX) * cam->blend;
+        cam->focusZ += (camera->focus.z - cam->focusZ) * cam->blend;
     }
-    camera->focus.x = cam->unk18;
-    camera->focus.z = cam->unk20;
+    camera->focus.x = cam->focusX;
+    camera->focus.z = cam->focusZ;
     cam->blend += 0.01499999966f;
     cam->blend = (cam->blend > 1.0f) ? 1.0f : cam->blend;
     if ((cam->blend != 1.0f) && (cam->lastType == 1)) {
@@ -411,7 +411,7 @@ void camera_runCommand(Camera *camera) {
         camera->FCameraIndex = -1;
         camera->PivotPtr = NULL;
         camera->cmdRunning = 0;
-        cmd->unk34 = 0;
+        cmd->height = 0;
         cmd->type = 13;
         camera->RailWantedX = 0.0f;
         camera->RailWantedXVel = 0.0f;
@@ -440,7 +440,7 @@ void camera_runCommand(Camera *camera) {
     }
 }
 
-// Starts the camera mode for a command's action (cmd.unk8) and sets its flags.
+// Starts the camera mode for a command's action (cmd.data3) and sets its flags.
 void camera_startCommandMode(Camera *camera, s32 action) {
     switch (action) {
     case 1:

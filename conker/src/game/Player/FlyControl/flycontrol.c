@@ -356,7 +356,7 @@ void player_levelHook24(Camera *actor) {
             }
             actor->Tightness = 0;
             actor->height = 125.0f;
-            actor->unk34C = 125.0f;
+            actor->idealHeight = 125.0f;
             actor->IdealTripodMagnitude = 220.0f;
             actor->YOffsetTget = 30.0f;
         } else {

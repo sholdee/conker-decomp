@@ -107,7 +107,7 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     view->SHitsPIPOutY = -1.0f;
     view->CentreBias = 999.0f;
     view->FZoneAdjustAngleRad = view->TrueCameraAngleRad;
-    view->mv->unk18C = 999.0f;
+    view->mv->savedCameraYaw = 999.0f;
     camera_stopEnvelope(view);
     camera_updateDeepWater(view);
     view->CharTrackingSpeedTarget = 1.0f;
@@ -120,11 +120,11 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     view->CameraRadius = 50.0f;
     view->ForceSwimAngle = 999.0f;
     view->HitsZBufferHoriDataPtr = gCameraZRowBuffers[view->CNumber];
-    D_80089520 = 0;
+    gCameraCutsceneExitSkips = 0;
     gSpawnCutsceneActive = 0;
     gSavedSniperStates[view->CNumber] = 0;
     gSavedAimStates[view->CNumber] = 0;
-    view->unk5FE = 60;
+    view->boxedInTimer = 60;
     view->Snap = 1;
 }
 
@@ -139,15 +139,15 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye) {
     view->eye.y = eye->y;
     view->eye.z = eye->z;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
-    view->unk27C = view->eye;
+    view->fixedEye = view->eye;
     view->prevEye = view->eye;
 
     viewEye = &view->eye; // matching: kept live across the call in a stack slot
-    collision_findFloorInRange(&view->TrianglePtr, view->floorTri.v, &view->unk354, &view->waterY, &view->Attributes, 0,
+    collision_findFloorInRange(&view->TrianglePtr, view->floorTri.v, &view->baseY, &view->waterY, &view->Attributes, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
-    view->unk358 = view->unk354;
-    view->floorY = view->unk354;
+    view->unk358 = view->baseY;
+    view->floorY = view->baseY;
 
     view->focus.x = actor->xpos;
     view->focus.y = actor->ypos;
@@ -157,8 +157,8 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye) {
 
     view->IdealTripodMagnitude = sqrtf((view->focus.x - view->eye.x) * (view->focus.x - view->eye.x) +
                          (view->focus.z - view->eye.z) * (view->focus.z - view->eye.z));
-    view->unk34C = view->eye.y - view->unk354;
-    view->height = view->eye.y - view->unk354;
+    view->idealHeight = view->eye.y - view->baseY;
+    view->height = view->eye.y - view->baseY;
 
     view->savedTarget = view->target;
     view->savedEye = *viewEye;

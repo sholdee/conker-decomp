@@ -3,12 +3,12 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup15(Camera *arg0) {
-    camera_pushMode(arg0, 8, 0, arg0->Tightness, CAMERA_MODE_TRANSPORT);
-    arg0->AvailableModes |= 0x1000000;
-    arg0->AvailableModes &= -5;
-    arg0->height = 500.0f;
-    arg0->unk34C = 500.0f;
-    arg0->IdealTripodMagnitude = 800.0f;
-    arg0->DoingAim = 0;
+void camera_levelSetup15(Camera *camera) {
+    camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT);
+    camera->AvailableModes |= 0x1000000;
+    camera->AvailableModes &= -5;
+    camera->height = 500.0f;
+    camera->idealHeight = 500.0f;
+    camera->IdealTripodMagnitude = 800.0f;
+    camera->DoingAim = 0;
 }

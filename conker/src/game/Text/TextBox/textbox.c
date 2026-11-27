@@ -254,7 +254,7 @@ void text_updateBox(TextBox *box) {
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
             movement_obj[box->config->objIndex].textBoxOpen = 0;
-            player->cmdState.unk0 = 0;
+            player->cmdState.cmdReceived = 0;
             box->config->numPages = 0;
             effect_destroyObject(box);
         }
