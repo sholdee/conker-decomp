@@ -94,8 +94,8 @@ const s16 gProjectileSpawnOffsets[19][4] = {
 };
 
 /* Effect offsets (the words are f32 bit patterns). */
-const Vec3f D_80099B70 = { 0.0f, 12.0f, 120.0f };
-const Vec3f D_80099B7C = { 0.0f, 27.0f, 215.0f };
+const Vec3f gTankMuzzleStart = { 0.0f, 12.0f, 120.0f };
+const Vec3f gTankMuzzleEnd = { 0.0f, 27.0f, 215.0f };
 const Vec3f D_80099B88 = { 0.0f, 0.0f, 544.0f };
 const Vec3f D_80099B94 = { 0.0f, 0.0f, 700.0f };
 const Vec3f D_80099BA0 = { 0.0f, 0.0f, 278.0f };
@@ -2412,8 +2412,8 @@ void func_15070300(s32 cmd) {
     if ((gCurrentActor->cullMask & 0xF) == 0xF) {
         return;
     }
-    localPos = D_80099B70;
-    endPos = D_80099B7C;
+    localPos = gTankMuzzleStart;
+    endPos = gTankMuzzleEnd;
     randoms.width = (math_randomFloat() * 30.0f) + 40.0f;
     randoms.height = (math_randomFloat() * 2.512f) + 3.5900002f;
     srcs[0] = &localPos;

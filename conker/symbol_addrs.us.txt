@@ -7832,3 +7832,5 @@ script_setImpactSound = 0x1507BAF8; // type:func
 script_updateDiveLock = 0x1509C228; // type:func
 gTaskManifest = 0x80087430;
 gStartedFromListSelection = 0x800D2E40;
+gTankMuzzleStart = 0x80099B70;
+gTankMuzzleEnd = 0x80099B7C;

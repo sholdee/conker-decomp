@@ -352,8 +352,8 @@ extern const u8 gPissedWalkAnims[8];
 extern const u8 gPissedWalkFirstAnims[8];
 extern const u8 gProjectileHitValues[20];
 extern const s16 gProjectileSpawnOffsets[19][4];
-extern const Vec3f D_80099B70; /* 0, 12, 120 */
-extern const Vec3f D_80099B7C; /* 0, 27, 215 */
+extern const Vec3f gTankMuzzleStart; /* 0, 12, 120 */
+extern const Vec3f gTankMuzzleEnd; /* 0, 27, 215 */
 extern const Vec3f D_80099B88; /* 0, 0, 544 */
 extern const Vec3f D_80099B94; /* 0, 0, 700 */
 extern const Vec3f D_80099BA0; /* 0, 0, 278 */
