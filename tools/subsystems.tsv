@@ -684,6 +684,7 @@ src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (ove
 src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers
 src/init/Audio/Resample/n_resample.c	audio	Rare's rework of n_alResamplePull
 src/init/Audio/Reverb/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
+src/init/Audio/SeqCtrl/seqctrl.c	audio	MIDI controller handlers of the compact sequence player
 src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
 src/init/Audio/SeqVoice/seqvoice.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
 src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path

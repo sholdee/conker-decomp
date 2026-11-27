@@ -57,7 +57,7 @@ void		  __n_postNextSeqEvent(N_ALSeqPlayer *seqp);
 u8                audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
 s32               audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
 
-/* Conker: the controller-change handlers of the compact sequence player (src/libultra/audio/init_19B50.c).
+/* Conker: the controller-change handlers of the compact sequence player (src/init/Audio/SeqCtrl/seqctrl.c).
  * gCspCtrlHandlers[0..0x5C] is indexed by the controller number, gCspCtrlHandlers[0x5D..0x60] by 0xFF - controller
  * for the controllers 0xFF..0xFC. */
 typedef void (*CSPCtrlHandler)(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value);

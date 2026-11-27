@@ -5,6 +5,7 @@ extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
 
+/* Controller 0x07: the channel's volume. */
 void audio_ctrlVolume(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
     N_ALVoiceState *vs;
     s16 tmp;
@@ -17,6 +18,7 @@ void audio_ctrlVolume(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
     }
 }
 
+/* Controller 0x0A: the channel's pan. */
 void audio_ctrlPan(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     N_ALVoiceState *vs;
     u8 tmp;
@@ -29,23 +31,28 @@ void audio_ctrlPan(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     }
 }
 
+/* Controller 0x10: the channel's priority. */
 void audio_ctrlPriority(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 priority) {
     seqp->chanState[chan].priority = priority;
 }
 
+/* Controller 0x1E: sends a message with the value's low 3 bits to the player's queue (n_cspchan.c sets it). */
 void audio_ctrlSendMesg(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if (seqp->msgQueue != 0) {
         osSendMesg(seqp->msgQueue, (arg3 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & -0x100), 0);
     }
 }
 
+/* Controller 0x20: the bank of the channel's next program change (program = bank * 128 + number). */
 void audio_ctrlBank(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk8 = arg3;
 }
 
+/* Sends the channel's low-pass settings to its voices: the gain (unk14), and, when the gain is not 0, the
+ * cutoff, 440 Hz moved by the note's key (plus unk15 - 64 semitones) and the pitch bend. */
 void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
     N_ALVoiceState *vs;
-    s16 pan;
+    s16 gain;
     s8 keyoff;
     f32 pb;
 
@@ -54,9 +61,9 @@ void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
 
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if (vs->channel == chan) {
-            pan = seqp->chanState[chan].unk14;
-            func_1001CB40(&vs->voice, pan);
-            if (pan != 0) {
+            gain = seqp->chanState[chan].unk14;
+            func_1001CB40(&vs->voice, gain);
+            if (gain != 0) {
                 func_1001CA90(&vs->voice,
                     func_1001CEA4((vs->key - vs->sound->keyMap->keyBase) + keyoff) * 440.0f * pb);
             }
@@ -64,16 +71,19 @@ void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
     }
 }
 
+/* Controller 0x21: the gain of the channel's low-pass (0 turns it off). */
 void audio_ctrlLowPassGain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk14 = arg3;
     audio_applyChannelLowPass(seqp, chan);
 }
 
+/* Controller 0x22: the key offset of the low-pass cutoff (64 is no offset). */
 void audio_ctrlLowPassKey(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk15 = arg3;
     audio_applyChannelLowPass(seqp, chan);
 }
 
+/* Controller 0x23: posts filter type 17 (func_1001E350) with the value for each voice of the channel. */
 void func_10019F98(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALVoiceState *vs;
     seqp->chanState[chan].unk16 = arg3;
@@ -84,6 +94,7 @@ void func_10019F98(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     }
 }
 
+/* Controller 0x40: the sustain pedal. */
 void audio_ctrlSustain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALVoiceState *vs;
 
@@ -115,6 +126,7 @@ void audio_ctrlSustain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3)
     }
 }
 
+/* Controller 0x41: the top bit of the channel's fxmix. */
 void func_1001A224(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALVoiceState *vs;
 
@@ -126,27 +138,31 @@ void func_1001A224(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     }
 }
 
+/* Controller 0x5B: the channel's effect mix (the low 7 bits of fxmix). */
 void audio_ctrlFxMix(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     arg3 = arg3 & 0x7F;
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x80) | arg3;
     func_1001A224(seqp, event, chan, seqp->chanState[chan].fxmix >> 7);
 }
 
+/* Controller 0x5C: the aux bus of the channel's new voices. */
 void audio_ctrlFxBus(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if ((u32)arg3 < n_syn->maxAuxBusses) {
         seqp->chanState[chan].unkB = arg3;
     }
 }
 
+/* Controller 0x1B: the hundreds of the track number that controller 0x1A starts. */
 void audio_ctrlMp3Bank(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->mpegBank = arg3;
 }
 
-/* Plays sound mpegBank * 100 + arg3. */
+/* Controller 0x1A: starts the streamed track mpegBank * 100 + value. */
 void audio_ctrlMp3Start(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     mp3_startTrack(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
 }
 
+/* Sends the channel's volume to its voices. */
 void audio_applyChannelVolume(N_ALCSPlayer *seqp, u8 chan) {
     N_ALVoiceState *vs;
     s16 tmp;
@@ -157,6 +173,8 @@ void audio_applyChannelVolume(N_ALCSPlayer *seqp, u8 chan) {
         }
     }
 }
+/* Controller 0xFF: starts a fade of the channel's fade volume (unkD) to the value, in the number of steps
+ * that controller 0xFD set. */
 void audio_ctrlFadeTo(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     f32 delta;
 
@@ -181,6 +199,8 @@ call_block:
     audio_ctrlFadeStep(seqp, event, chan, arg3);
 }
 
+/* Controller 0xFE: one step of the fade. It posts itself again until the fade volume reaches the target
+ * (unkE), and it takes a channel with fade volume 0 out of the channel mask. */
 void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     u8 sp2F;
     u8 sp2E;
@@ -233,10 +253,12 @@ void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3
     audio_applyChannelVolume(seqp, chan);
 }
 
+/* Controller 0xFD: the number of steps of the next fade (bit 7: a rising fade is twice as fast). */
 void audio_ctrlFadeTime(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkF = arg3;
 }
 
+/* Controller 0xFC: sets the fade volume and its target at once (0 mutes the channel). */
 void audio_ctrlFadeSet(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkD = arg3;
     seqp->chanState[chan].unkE = arg3;
@@ -251,11 +273,11 @@ void audio_ctrlFadeSet(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3)
 /* The controller-change handlers (see n_seqp.h). */
 CSPCtrlHandler gCspCtrlHandlers[0x5D + 4] = {
     /* 0x00 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    /* 0x07 */ audio_ctrlVolume, /* volume */
+    /* 0x07 */ audio_ctrlVolume,
     /* 0x08 */ NULL, NULL,
-    /* 0x0A */ audio_ctrlPan, /* pan */
+    /* 0x0A */ audio_ctrlPan,
     /* 0x0B */ NULL, NULL, NULL, NULL, NULL,
-    /* 0x10 */ audio_ctrlPriority, /* priority */
+    /* 0x10 */ audio_ctrlPriority,
     /* 0x11 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x19 */ NULL,
     /* 0x1A */ audio_ctrlMp3Start,
@@ -271,16 +293,16 @@ CSPCtrlHandler gCspCtrlHandlers[0x5D + 4] = {
     /* 0x2C */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x34 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x3C */ NULL, NULL, NULL, NULL,
-    /* 0x40 */ audio_ctrlSustain, /* sustain */
+    /* 0x40 */ audio_ctrlSustain,
     /* 0x41 */ func_1001A224,
     /* 0x42 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x4A */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x52 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x5A */ NULL,
-    /* 0x5B */ audio_ctrlFxMix, /* fx mix */
+    /* 0x5B */ audio_ctrlFxMix,
     /* 0x5C */ audio_ctrlFxBus,
-    /* 0x5D */ audio_ctrlFadeTo, /* controller 0xFF */
+    /* 0x5D */ audio_ctrlFadeTo,   /* controller 0xFF */
     /* 0x5E */ audio_ctrlFadeStep, /* controller 0xFE */
     /* 0x5F */ audio_ctrlFadeTime, /* controller 0xFD */
-    /* 0x60 */ audio_ctrlFadeSet  /* controller 0xFC */
+    /* 0x60 */ audio_ctrlFadeSet   /* controller 0xFC */
 };
