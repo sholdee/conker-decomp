@@ -17,11 +17,11 @@ game text.
 
 The map shows every source file, sized by its code. Green is C and blue is hand-written assembly. CI
 redraws the map and the badges after each merge to `master` (`tools/progress.py`).
-[progress.json](../../blob/progress/progress.json) has all the figures, including how many struct fields
-and data symbols have names.
+[progress.json](../../blob/progress/progress.json) has the figures behind them, and also counts the named
+struct fields and data symbols.
 
-- All CPU code is matched. Each function in the init, game and debugger segments is C that compiles to
-  the original bytes, or hand-written assembly.
+- All the game's CPU code is matched. Each function in the init, game and debugger segments is C that
+  compiles to the original bytes, or hand-written assembly.
 - A small part of the code is hand-written assembly, as in other N64 games. Examples are the exception
   handler, the memory paging and some matrix maths. Most pieces have a recorded proof that the compiler
   did not produce them. For a few pieces, the evidence is compiler searches that found no match from
@@ -29,25 +29,24 @@ and data symbols have names.
 - The code and data can move. Each reference uses a symbol, not a fixed address, and CI checks this on
   every change. A separate test, `tools/shifttest/shift_test.sh`, adds code and boots the game in an
   emulator. A few fixed sizes remain. [CONTRIBUTING.md](CONTRIBUTING.md) lists them, and the build stops
-  with a message before you reach one.
+  with a message if a change goes past one.
 - The data is in the source. Each file defines its own data, with real types. A few small pieces stay
-  extracted, because the evidence does not show which file owns them. The assets in the code's data
-  (microcode, fonts and the resource manifest) are not in the repository. The build extracts them from
-  your ROM, and it does the same for the game's text and the other assets.
-- The code is organised by subsystem. Each function and global that other files use is declared once, in
-  the header of its subsystem. A few local declarations remain where IDO needs them for the original
-  code, and a comment says why. The files follow the pattern of Rare's own source paths, for example
+  extracted, because the evidence does not show which file owns them. Assets and game text stay out of
+  the repository, and the build extracts them from your ROM. The code's data holds some assets:
+  microcode, fonts and the resource manifest, whose names are game text.
+- Each function and global that other files use is declared once, in the header of its subsystem. Some
+  C files still declare a few symbols themselves, for example data that the build extracts, or a
+  declaration that IDO needs to give the original code.
+- The files follow the pattern of Rare's own source paths, for example
   `src/game/Effects/PipeExplode/pipeexplode.c`. A few files have Rare's exact path, from path strings in
   the ROM and in prerelease builds. The other names are descriptive.
 - Naming is the main open work. Some functions, struct fields and data keep names made from their
   address or offset (`func_XXXXXXXX`, `D_XXXXXXXX`, `unk1C`), because no evidence shows yet what they do.
-  [tools/RENAMING.md](tools/RENAMING.md) gives the rules: Rare's own names first, then Nintendo SDK
-  names, then names that the code supports.
-- Other open work: the C files that still have address names (`conker/src/*.c`), a few known fake
-  matches, and the assembly pieces that rest only on search evidence. The EU, debug and ECTS versions
-  have splat configurations (they split a ROM into code and data), but these versions are not
-  decompiled, and their builds are not verified. [CONTRIBUTING.md](CONTRIBUTING.md) lists the fake
-  matches and explains how to help.
+  [tools/RENAMING.md](tools/RENAMING.md) gives the rules. Other open work is the C files that still have
+  address names (`conker/src/*.c`), a few known fake matches, and the assembly pieces that rest only on
+  search evidence. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to help.
+- Only the US version is decompiled. The EU, debug and ECTS versions have splat configurations (they
+  split a ROM into code and data), but their builds are not verified.
 
 ## Building
 
@@ -115,7 +114,7 @@ gitignored and must never be committed.
 | `conker/src/checks/` | Struct size checks (`structsizes.c`), compiled but not linked |
 | `conker/src/*.c` | A few files whose purpose is not clear yet. They keep address names |
 | `conker/include/conker/<subsystem>.h` | One header for each subsystem: the declarations of its functions and globals |
-| `conker/include/` | Shared types (`structs.h`, `effects.h`) and the SDK 2.0L headers, with small libc headers (`libc/`) and assembler macros (`macro.inc`) |
+| `conker/include/` | Shared types and macros (`structs.h`, `effects.h`, `macros.h`) and the SDK 2.0L headers, with small libc headers (`libc/`) and assembler macros (`macro.inc`) |
 | `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |
 | `tools/` | Build tools, checks (`accounting.py`, `linkcheck.py`, `warncheck.py`) and contributor tooling |
 

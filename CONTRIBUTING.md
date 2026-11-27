@@ -1,8 +1,9 @@
 # Contributing
 
 This project rebuilds the US ROM of *Conker's Bad Fur Day* byte for byte from C and a small amount of
-proven hand-written assembly. Every change must keep that true. This file gives the rules and the
-checks. The longer runbooks are in [AGENTS.md](AGENTS.md) and `tools/*.md`.
+hand-written assembly, each piece with a proof or, for a few, search evidence. Every change must keep
+that true. This file gives the rules and the checks. The longer runbooks are in [AGENTS.md](AGENTS.md)
+and `tools/*.md`.
 
 ## What never goes into the repository
 
@@ -92,7 +93,7 @@ commit it.
   types and initializers. [tools/PERFILE.md](tools/PERFILE.md) gives the rules and the IDO facts
   about data order.
 - **Code and data can move.** You can add code or data in any segment. Some fixed sizes remain, and the
-  build stops with a message before you reach one of them:
+  build stops with a message if a change goes past one of them:
   - The page-fault handler (`pagefault.s`) maps 0x1FC000 bytes of game code. A link `ASSERT` in
     `conker/undefined_syms.us.txt` checks it.
   - The compressed game code and data each have a reserved size in the ROM (`conker/Makefile`).
@@ -103,10 +104,10 @@ commit it.
 
 ## Hand-written assembly
 
-A function can stay in a `.s` file only with a proof that IDO 5.3 did not produce it. A
-function that has not been matched yet is not hand-written. [ACCOUNTING.md](ACCOUNTING.md) gives the
-proof rules. A new hand-written function needs a proof row in `tools/hasm_proofs.tsv` or a rule that
-`tools/accounting.py` checks.
+A function can stay in a `.s` file only with a proof that IDO 5.3 did not produce it, or with the
+search evidence that [ACCOUNTING.md](ACCOUNTING.md) describes. A function that has not been matched yet
+is not hand-written. ACCOUNTING.md also gives the proof rules. A new hand-written function needs a
+proof row in `tools/hasm_proofs.tsv` or a rule that `tools/accounting.py` checks.
 
 If you match a function that is now hand-written assembly, that is a welcome change. Move it to C and
 remove its proof.
