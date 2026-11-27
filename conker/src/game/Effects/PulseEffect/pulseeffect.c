@@ -36,7 +36,7 @@ struct PulseEffect {
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
-void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 fxOwner, s32 fxList) {
     EffectData data;
     PulseEffect *effect;
     EffectData *state;
@@ -56,7 +56,7 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         data.flags = 1;
     }
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
-                                     0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
+                                     0x40, sizeof(EffectData), fxOwner, fxList); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));
@@ -105,7 +105,7 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.viewMask = NULL;
             spawn.views = 0xFF;
             spawn.minSize = 0;
-            state->particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
+            state->particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(ParticlePulse), fxOwner, fxList);
             if (state->particle != NULL) {
                 memcpy(&state->particle->data.pulse, &pulse, sizeof(ParticlePulse));
             }
@@ -265,14 +265,14 @@ void effect_freePulseEffect(PulseEffect *effect) {
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to effect_handleTimedEffectOwnerEvent. */
-void effect_pulseEffectMessage(PulseEffect *effect, s32 arg1, u8 event) {
+void effect_pulseEffectMessage(PulseEffect *effect, s32 event, u8 eventType) {
     EffectData *data = &effect->data;
 
-    if (event == 0x55) {
+    if (eventType == 0x55) {
         data->flags &= ~2;
-    } else if (event == 0x56) {
+    } else if (eventType == 0x56) {
         data->flags |= 2;
     } else {
-        effect_handleTimedEffectOwnerEvent(arg1, event, &data->owner, &data->ownerId, effect);
+        effect_handleTimedEffectOwnerEvent(event, eventType, &data->owner, &data->ownerId, effect);
     }
 }

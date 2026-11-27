@@ -58,7 +58,7 @@ void effect_attachPerimeterEmitter(Actor *owner) {
 }
 
 /* Attaches a DDB60Effect (updated by effect_updatePerimeterEmitter) to owner. */
-void effect_spawnPerimeterEmitter(Actor *owner, u8 arg1, s32 arg2) {
+void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
     DDB60EffectData data;
     DDB60Effect *effect;
 
@@ -66,15 +66,15 @@ void effect_spawnPerimeterEmitter(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0.0f;
 
-    effect = effect_newTimedEffect(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x58, -1, 0, 0x43, sizeof(data), fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
 /* Effect callback: hands effect_handleOwnerActorEvent the owner reference. */
-void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Emit-rate base and random range per emitter. */

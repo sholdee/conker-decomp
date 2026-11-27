@@ -47,7 +47,7 @@ Gfx *(*gModelEffectPostDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *) = { effect_
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
  * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
  */
-ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
+ModelEffect *effect_newModelEffect(EffectParams *params, s32 anim, f32 speed, s32 attachArg, s32 arg4, s32 extraSize,
                       u8 owner, s32 list) {
     ModelEffect *fx;
     s32 type;
@@ -70,7 +70,7 @@ ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32
     guMtxIdentF(fx->mtx[1]);
     fx->model->matrices[0] = fx->mtx[0];
     fx->model->matrices[1] = fx->mtx[1];
-    anim_play(fx->model, 1, arg1, arg2, 0.0f, 0);
+    anim_play(fx->model, 1, anim, speed, 0.0f, 0);
     fx->attach.model = attachArg;
     fx->attach.unk1C = arg4;
     fx->attach.unk4 = 0;
@@ -233,11 +233,11 @@ s32 effect_resetModelEffectRoot(ModelEffect *fx) {
 }
 
 /* effect_newModelEffect plus a 0x38-byte extension copied from `extra`. */
-ModelEffect *effect_newMovingModelEffect(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+ModelEffect *effect_newMovingModelEffect(EffectParams *params, EffectMotion *motion, s32 anim, f32 speed, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
     ModelEffect *fx;
 
-    fx = effect_newModelEffect(params, arg2, arg3, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
+    fx = effect_newModelEffect(params, anim, speed, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
     if (fx == NULL) {
         return NULL;
     }

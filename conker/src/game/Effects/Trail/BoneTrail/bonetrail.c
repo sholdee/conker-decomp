@@ -20,7 +20,7 @@
 #define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
-void trail_spawnActorBoneTrail(Actor *owner, u8 arg1) {
+void trail_spawnActorBoneTrail(Actor *owner, u8 fxOwner) {
     BoneTrailParams params;
     Vec3f origin;
 
@@ -43,18 +43,18 @@ void trail_spawnActorBoneTrail(Actor *owner, u8 arg1) {
     params.pointsPerUnit = 0.01800000109f;
     params.width = 30.0f;
     params.widthGrowth = 0.9810000658f;
-    trail_createBoneTrailEffect(&params, arg1);
-    trail_startBloodDrip(owner, arg1);
-    trail_startBoneEmitter(owner, arg1);
+    trail_createBoneTrailEffect(&params, fxOwner);
+    trail_startBloodDrip(owner, fxOwner);
+    trail_startBoneEmitter(owner, fxOwner);
     sound_playActorSound2(0x1AA, owner, 0x55F0, 1000, 4000);
     origin.x = 0.0f;
     origin.y = 0.0f;
     origin.z = 0.0f;
-    light_createAttached(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    light_createAttached(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, fxOwner, 1);
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
-BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1) {
+BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 owner) {
     EffectTemplate info;
     BoneTrailState state;
     BoneTrailEffect *effect;
@@ -79,7 +79,7 @@ BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1) {
     }
 
     info.kind = 8;
-    effect = effect_newEffectObj(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    effect = effect_newEffectObj(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, owner, 0);
     if (effect != NULL) {
         memcpy(effect->state, &state, sizeof(BoneTrailState));
     }
@@ -447,7 +447,7 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-void trail_startBloodDrip(Actor *owner, u8 arg1) {
+void trail_startBloodDrip(Actor *owner, u8 fxOwner) {
     BloodDripDesc params;
 
     // matching: an integer test makes IDO reload owner from its arg slot
@@ -467,7 +467,7 @@ void trail_startBloodDrip(Actor *owner, u8 arg1) {
         params.callback = -1;
         params.unk2D = 0;
         params.owner = owner;
-        blood_spawnDrip(&params, 0, arg1, 0);
+        blood_spawnDrip(&params, 0, fxOwner, 0);
     }
 }
 
@@ -536,7 +536,7 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
 }
 
 /* Particle update for trail_emitBurst's bursts: fades and resizes by age. */
-s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1) {
+s32 trail_updateBurstParticle(SpriteParticle *particle, Vec3f *prevPos) {
     s16 age;
     AgeFadeParams *params;
 
@@ -565,7 +565,7 @@ s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1) {
 }
 
 /* Like trail_updateBurstParticle, but always sets unk2C from the age. */
-s32 trail_updateBurstParticleTint(SpriteParticle *particle, u8 arg1) {
+s32 trail_updateBurstParticleTint(SpriteParticle *particle, Vec3f *prevPos) {
     s16 age;
     AgeFadeParams *params;
 
@@ -588,7 +588,7 @@ s32 trail_updateBurstParticleTint(SpriteParticle *particle, u8 arg1) {
 }
 
 /* Starts a BoneEmitterTask on the owner's bone 1. */
-void trail_startBoneEmitter(Actor *owner, u8 arg1) {
+void trail_startBoneEmitter(Actor *owner, u8 fxOwner) {
     BoneEmitterTask *task;
     BoneEmitter emitter;
 
@@ -600,7 +600,7 @@ void trail_startBoneEmitter(Actor *owner, u8 arg1) {
     emitter.offset.y = 0.0f;
     emitter.offset.z = 0.0f;
     emitter.rate = 0.7220000029f;
-    task = effect_newTimedEffectNoDraw(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    task = effect_newTimedEffectNoDraw(300, -1, 5, 0, 1, sizeof(BoneEmitter), fxOwner, 0);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }

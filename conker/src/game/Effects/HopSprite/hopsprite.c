@@ -16,12 +16,12 @@ s32 gTile0ScrollT = 0;
 s32 gTile1ScrollS = 0;
 s32 gTile1ScrollT = 0;
 
-void effect_spawnGroundFxNearPlayer(s32 arg0) {
+void effect_spawnGroundFxNearPlayer(TimedEffect *object) {
     trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Advances the texture scroll offsets by the frames elapsed. */
-void effect_scrollTileTextures(s32 arg0) {
+void effect_scrollTileTextures(s32 unused) {
     gTile0ScrollS += gFrameTicks * 26;
     gTile0ScrollT -= gFrameTicks * 28;
     gTile1ScrollS -= gFrameTicks * 28;

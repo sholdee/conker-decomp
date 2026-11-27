@@ -11,11 +11,11 @@
 #include "conker/trail.h"
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5) {
+FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 owner, s32 list) {
     FallingTrail *trail;
 
     header->kind = 10;
-    trail = effect_newEffectObj(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
+    trail = effect_newEffectObj(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, owner, list);
     if (trail == NULL) {
         return NULL;
     }

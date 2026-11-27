@@ -194,14 +194,14 @@ void effect_freeTimedEffect(TimedEffect *object) {
     gTimedEffectFreeFuncs[set](object);
 }
 
-void effect_handleTimedEffectMessage(TimedEffect *object, s32 arg1, u8 arg2) {
+void effect_handleTimedEffectMessage(TimedEffect *object, s32 event, u8 eventType) {
     s32 set = object->callbackSet;
 
     if (set < 0 || set >= 74) {
         set = 0;
     }
     if (gTimedEffectMessageFuncs[set] != NULL) {
-        gTimedEffectMessageFuncs[set](object, arg1, arg2);
+        gTimedEffectMessageFuncs[set](object, event, eventType);
     }
 }
 
@@ -215,8 +215,8 @@ Gfx *effect_drawTimedEffect(Gfx *gfx, TimedEffect *object, s16 view) {
     return gfx;
 }
 
-void effect_sendEventToTimedEffects(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(gTimedEffectTypes, 2, arg0, arg1);
+void effect_sendEventToTimedEffects(s32 event, u8 eventType) {
+    effect_sendEventToTypes(gTimedEffectTypes, 2, event, eventType);
 }
 
 /* effect_handleOwnerActorEvent for effects: tracks or retargets the effect's owner on actor events. */

@@ -20,7 +20,7 @@ static void (*gScreenEffectDrawProcs[])() = { screen_drawMosaic, sight_drawLens,
 static void (*gScreenEffectMessageProcs[])(ScreenEffect *, s32, u8) = { NULL, sight_handleLensMessage, screen_handleMosaicMessage };
 
 /* Draws every screen effect in both object lists through its draw handler. */
-void colourfb_drawScreenEffects(s32 arg0) {
+void colourfb_drawScreenEffects(s32 framebuffer) {
     u8 list;
     u8 visible;
 
@@ -46,7 +46,7 @@ void colourfb_drawScreenEffects(s32 arg0) {
                 visible = FALSE;
             }
             if (visible) {
-                gScreenEffectDrawProcs[effect->desc.drawIndex](effect, arg0);
+                gScreenEffectDrawProcs[effect->desc.drawIndex](effect, framebuffer);
             }
         }
         gObjectWalkDepth--;

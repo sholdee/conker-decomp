@@ -678,7 +678,7 @@ void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     effect_sendEventToEffectObjs((s32)&msg, 0x44);
 }
 
-s32 trail_updatePissSpark(SpriteParticle *particle, s32 arg1) {
+s32 trail_updatePissSpark(SpriteParticle *particle, Vec3f *prevPos) {
     WobbleData *spark;
 
     spark = &particle->data.wobble;

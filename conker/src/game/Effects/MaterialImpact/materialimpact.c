@@ -489,7 +489,7 @@ struct Struct150E5810 {
  * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
  * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
  */
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
+s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
     Tri3f tri;
     s32 i;
     f32 len;

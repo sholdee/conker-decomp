@@ -11,8 +11,8 @@ struct CPad150CEF60 {
     f32 pad[6];
 };
 
-void effect_levelUpdateRotatingZone(s32 arg0) {
-    WorldObject *temp_v0;
+void effect_levelUpdateRotatingZone(s32 unused) {
+    WorldObject *object;
     f32 angle;
     struct CPad150CEF60 c;
     f32 s;
@@ -23,8 +23,8 @@ void effect_levelUpdateRotatingZone(s32 arg0) {
     cx = -1.0f;
     cy = 44.0f;
     z = -1805.0f;
-    temp_v0 = gfx_findObjectById(4);
-    angle = temp_v0->v * 0.017453292f;
+    object = gfx_findObjectById(4);
+    angle = object->v * 0.017453292f;
     c.c = math_sin(angle);
     s = math_cos(angle);
     zone_setPosition(2,

@@ -136,7 +136,7 @@ void effect_updateFadeBurst(FadeBurstEffect *burst) {
 }
 
 /* Draws the 12 burst pieces, each fading out over its own duration. */
-Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
+Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 view) {
     s32 i;
     s32 alpha;
     MtxF mtx;

@@ -555,17 +555,17 @@ struct ParticleUpdateArg {
 };
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
     u8 alive;
     s32 found;
 
     alive = 1;
-    if (effect_updateRiseParticle(particle, arg1) != 0) {
+    if (effect_updateRiseParticle(particle, prevPos) != 0) {
         if (particle->head.desc.vel.y > 0.0f) {
             Vec3f pos;
 
             pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-            pos.y = arg1->unk4;
+            pos.y = prevPos->unk4;
             pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
             if (math_isInWorldBounds(&pos) == 0) {
                 return 0;
@@ -587,7 +587,7 @@ u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUp
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -625,7 +625,7 @@ s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg 
 }
 
 /* Spawns one rising particle (effect_updateRiseParticle family) at pos with the given velocity. */
-EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
+EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 owner, s32 list) {
     f32 size;
     ParticleDesc6C spawn;
     EffectMotionParticle *particle;
@@ -698,7 +698,7 @@ EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 
 }
 
 /* Spawns one stationary rising particle at (x, y, z). */
-void effect_emitRiseParticle(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
+void effect_emitRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -835,7 +835,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -859,8 +859,8 @@ s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdat
 }
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
-                        s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
+EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocity, f32 gravity, f32 damping, CollisionHit *ground, f32 size,
+                        s16 lifetime, u8 alpha, u8 lands, u8 owner, s32 list) {
     EffectMotionParticle *particle;
     ParticleDesc spawn;
     ParticleDriftMotion drift;
@@ -889,7 +889,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     spawn.flags = flipY | 0x1007 | flipX | 0x8000 | 0x4000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 8;
-    if (arg8) {
+    if (lands) {
         spawn.updateFunc = 0x15;
     } else {
         spawn.updateFunc = 0x14;
@@ -921,7 +921,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     spawn.handlerSet = 0;
     spawn.timer = lifetime;
     spawn.alpha = alpha;
-    spawn.gravity = arg2;
+    spawn.gravity = gravity;
     drift.damping = damping;
     if (velocity->x != 0 || velocity->z != 0) {
         drift.groundHeight = GROUND_UNKNOWN;
@@ -942,7 +942,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
             drift.groundHeight = 10000.0f;
         }
     }
-    particle = particle_newSpriteParticleWithFloor(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 2, ground, sizeof(ParticleDriftMotion), owner, list);
     if (particle != NULL) {
         memcpy(&particle->motion, &drift, sizeof(ParticleDriftMotion));
     }
@@ -950,7 +950,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
     ParticleDriftMotion *drift;
     s32 i;
 
@@ -974,19 +974,19 @@ s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *prevPos) {
     ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
 
     alive = 1;
     drift = &particle->motion.drift;
-    effect_updateDriftParticle(particle, arg1);
+    effect_updateDriftParticle(particle, prevPos);
     if (particle->head.desc.vel.y < 0.0f) {
         return 1;
     }
     pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-    pos.y = arg1->unk4;
+    pos.y = prevPos->unk4;
     pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
         if (math_isInWorldBounds(&pos) == 0) {
@@ -1076,7 +1076,7 @@ struct SpawnerSource {
 
 /* Creates a spawner object for src from template gRiseSpawnerTemplates[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
-void effect_spawnRiseZoneEmitter(SpawnerSource *volatile src, s32 arg1) {
+void effect_spawnRiseZoneEmitter(SpawnerSource *volatile src, s32 kind) {
     EmitterDef info;
     s32 pad[2]; // matching: 8 unused frame bytes between data and info
     SpawnerData data;
@@ -1120,7 +1120,7 @@ struct RiseEmitterObject {
 };
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
-void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
+void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 noGround) {
     RiseEmitter emitter;
     SpawnerData *data;
     RiseEmitterObject *obj;

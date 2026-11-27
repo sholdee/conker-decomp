@@ -14,19 +14,19 @@
 #include "libc/string.h"
 
 
-void func_150DE320(s32 arg0) {
+void func_150DE320(s32 unused) {
 }
 
 /* For each of eight zones records that zone_containsPoint accepts, sets the moving state of the
  * matching gfx_findObjectById object, or (for records without one) calls zone_setDisabled(id, 1). */
-void effect_onBulletImpactZones(s32 arg0, s32 arg1, s32 arg2) {
+void effect_onBulletImpactZones(s32 x, s32 y, s32 z) {
     s32 i;
     WorldObject *prop;
     u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
     u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
     for (i = 0; i < 8; i++) {
-        if (zone_containsPoint(&zones[ids[i]], arg0, arg1, arg2) != 0) {
+        if (zone_containsPoint(&zones[ids[i]], x, y, z) != 0) {
             if (propIds[i] != 0) {
                 prop = gfx_findObjectById(propIds[i]);
                 prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
@@ -240,11 +240,11 @@ s32 effect_moveTravelParticle(TravelParticle *particle) {
 
 /* Calls particle_buildQuadFromAxes with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
  * below 5. */
-Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 arg1) {
+Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 viewport) {
     if (camera_global_Cameras[gScreenLayout].CameraPitch < 5.0f) {
         return NULL;
     }
-    return particle_buildQuadFromAxes(&particle->head, &particle->travel.side, &particle->travel.forward, arg1);
+    return particle_buildQuadFromAxes(&particle->head, &particle->travel.side, &particle->travel.forward, viewport);
 }
 
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
@@ -252,7 +252,7 @@ static const s32 gLightGlowEventLights[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C
 static const s32 gLightGlowEventGlows[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
 
 /* Runs effect_sendLightAndGlowEvent on entries 0-3. */
-void effect_sendFirstLightAndGlowEvents(s32 arg0) {
+void effect_sendFirstLightAndGlowEvents(TimedEffect *object) {
     u8 i;
 
     for (i = 0; i < 4; i++) {

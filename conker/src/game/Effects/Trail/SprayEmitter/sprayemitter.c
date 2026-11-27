@@ -9,8 +9,8 @@
 
 /* Trail types (see game/Effects/Trail/MotionTrail/motiontrail.c). */
 
-/* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
-void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
+/* Creates a spray emitter from desc; bit 0 of its flags records whether floorSplash was set. */
+void trail_createSprayEmitter(SprayDesc *desc, u8 floorSplash) {
     SprayEmitter *emitter;
     s32 flag;
 
@@ -20,7 +20,7 @@ void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
         collision_selectMap(0);
         emitter->zone = collision_findZoneLeaf(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f),
                                       emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f));
-        if (arg1 != 0) {
+        if (floorSplash != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -163,7 +163,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
 }
 
 /* Empty handler with four arguments. */
-s32 trail_ignoreGroundHit(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    (void)&arg0; // matching: taking an argument's address makes IDO home all four argument registers
+s32 trail_ignoreGroundHit(MotionTrail *trail, f32 x, f32 y, f32 z) {
+    (void)&trail; // matching: taking an argument's address makes IDO home all four argument registers
     return 1;
 }

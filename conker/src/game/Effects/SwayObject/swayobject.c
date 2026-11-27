@@ -107,7 +107,7 @@ s32 effect_updateModelSway(DynModel *model) {
 }
 
 /* Builds the model's matrix for this frame from its SwayBlock rotation and position. */
-s32 effect_buildSwayMatrix(DynModel *model, s32 arg1) {
+s32 effect_buildSwayMatrix(DynModel *model, s32 viewport) {
     MtxF mtx;
     SwayBlock *block;
 

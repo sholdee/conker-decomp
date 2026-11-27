@@ -24,7 +24,7 @@ s32 effect_consumeZoneFlag(void) {
     }
 }
 
-void effect_updateSurfaceSound(s32 arg0) {
+void effect_updateSurfaceSound(s32 unused) {
     if (((movement_obj[0].floorMaterial & 0X1F) == 3) || ((movement_obj[0].floorMaterial & 0x1F) == 4)) {
         if (gFrameTicks < gSurfaceSoundTimer){
             if(gCutsceneStates[0] != 1) {

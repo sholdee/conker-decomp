@@ -33,7 +33,7 @@ typedef struct {
 } ColourFrameBufferEffect;
 
 /* game/Effects/ColourFrameBuffer/colourframebuffer.c */
-void colourfb_drawScreenEffects(s32 arg0);
+void colourfb_drawScreenEffects(s32 framebuffer);
 ScreenEffect *colourfb_createScreenEffect(EffectDesc *desc, s32 dataSize, u8 owner, s32 list);
 void colourfb_updateScreenEffect(ScreenEffect *effect);
 void colourfb_dispatchMessage(ScreenEffect *effect, s32 data, u8 event);

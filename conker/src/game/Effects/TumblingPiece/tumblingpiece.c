@@ -14,7 +14,7 @@ static s32 gTumblePieceAltDls[2] = { 2, 3 };
  */
 EffectActor *effect_spawnTumblingPiece(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velocity, Vec3f *angularVelocity,
                            f32 gravity, f32 damping, u8 flags, s16 lifetime, u8 altDisplayList, s32 extraSize,
-                           u8 arg11, s32 arg12) {
+                           u8 owner, s32 list) {
     EffectActor *actor;
     EffectActorTemplate template;
     TumbleMotion motion;
@@ -63,7 +63,7 @@ EffectActor *effect_spawnTumblingPiece(Vec3f *position, Vec3f *angle, f32 scale,
     fade.duration = 12;
     fade.alphaPerTick = 21;
 
-    actor = effect_newEffectActor(&template, 3, 255, 1, extraSize + 0x38, arg11, arg12);
+    actor = effect_newEffectActor(&template, 3, 255, 1, extraSize + 0x38, owner, list);
     if (actor == NULL) {
         return NULL;
     }

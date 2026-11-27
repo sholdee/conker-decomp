@@ -61,8 +61,8 @@ struct ProjectileParticle {
 /* Spawns a projectile at `pos`, aimed along `aim` (or from `altOrigin` at `target` when both are set). `knownHit`
  * is a ray already cast (see weapon_setupProjectileRay). */
 void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 targetIsDir, RayHit *knownHit, f32 speed,
-                   f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
-                   s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
+                   f32 distScale, f32 defaultRemaining, Actor *owner, u8 castRay, u8 endFlash, u8 collide, u8 hitModels, s32 arg14,
+                   s8 filter, s32 sound, u8 recast, u8 fxOwner, s32 fxList) {
     ProjectileState state;
     ParticleSpawn spawn;
     ProjectileParticle *obj;
@@ -76,8 +76,8 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     if (targetIsDir) {
         targetDir = *target;
     }
-    state.flags = (arg11 ? 1 : 0) | (arg12 ? 2 : 0) | (arg13 ? 4 : 0);
-    state.unkB0 = arg15;
+    state.flags = (endFlash ? 1 : 0) | (collide ? 2 : 0) | (hitModels ? 4 : 0);
+    state.unkB0 = filter;
     if (altOrigin != NULL && target != NULL) {
         if (!hasTargetDir) {
             if (!math_vec3Normalize(target, &targetDir, NULL, NULL)) {
@@ -91,9 +91,9 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
         }
         hasAimDir = TRUE;
     }
-    if (!weapon_setupProjectileRay(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
-                       hasTargetDir ? &targetDir : NULL, &state.flags, 1, arg8, owner, arg15, arg12, arg13, 0,
-                       arg17)) {
+    if (!weapon_setupProjectileRay(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, distScale, castRay, altOrigin,
+                       hasTargetDir ? &targetDir : NULL, &state.flags, 1, defaultRemaining, owner, filter, collide, hitModels, 0,
+                       recast)) {
         return;
     }
     if (!math_buildPerpendicularBasis(&state.hit.dir, &state.unk74, &state.unk80)) {
@@ -102,7 +102,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     state.unk64 = arg14;
     state.trailAge = 0.0f;
     state.trailDist = 0.0f;
-    state.trailAgeStep = 70.0f * arg7;
+    state.trailAgeStep = 70.0f * distScale;
     state.trailPos = *pos;
     state.speed = speed;
     state.trailStep.x = state.hit.dir.x * 70.0f;
@@ -149,7 +149,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     } else {
         spawn.sound = 0;
     }
-    obj = particle_newModelParticleWithFloor(&spawn, 0, 0, 0, 0xB4, arg18, arg19);
+    obj = particle_newModelParticleWithFloor(&spawn, 0, 0, 0, 0xB4, fxOwner, fxList);
     if (obj != NULL) {
         memcpy(&obj->state.projectile, &state, sizeof(state));
     }
@@ -297,23 +297,23 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
 }
 
 /* Quad spanned by the puff's two axes (vertex function). */
-void effect_buildTrailPuffQuad(TrailPuff *obj, s16 arg1) {
-    particle_buildQuadFromAxes(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
+void effect_buildTrailPuffQuad(TrailPuff *obj, s16 viewport) {
+    particle_buildQuadFromAxes(&obj->head, &obj->state.axisU, &obj->state.axisV, viewport);
 }
 
 /* Impact effect at `pos`. */
-void effect_spawnPuffFlash(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnPuffFlash(Vec3f *pos, u8 owner, s32 list) {
     f32 random1;
     f32 random0;
 
     random0 = math_randomFloat();
     random1 = math_randomFloat();
-    particle_spawnGrowFade(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
-    particle_spawnShortLightFlash(pos, arg1, arg2);
+    particle_spawnGrowFade(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, owner, list);
+    particle_spawnShortLightFlash(pos, owner, list);
 }
 
 /* Spawns an effect that follows `target` (a position followed by three more floats), trailing puffs behind it. */
-void effect_spawnPuffFollower(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
+void effect_spawnPuffFollower(f32 *target, s16 lifetime, u8 owner, s32 list) {
     struct {
         ParticleSpawn spawn;
         FollowState follow;
@@ -344,7 +344,7 @@ void effect_spawnPuffFollower(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.rotVel = gZeroVec3f;
     packet.spawn.gravity = 0.0f;
     packet.spawn.flags = 0x980;
-    packet.spawn.lifetime = arg1;
+    packet.spawn.lifetime = lifetime;
     packet.spawn.model = 0x2F;
     packet.spawn.variant = 0;
     packet.spawn.unk5C = 0;
@@ -363,7 +363,7 @@ void effect_spawnPuffFollower(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.fadeStart = 1;
     packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
-    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 0xB4, arg2, arg3);
+    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 0xB4, owner, list);
     if (obj != NULL) {
         memcpy(&obj->state.follow, &packet.follow, sizeof(packet.follow));
     }

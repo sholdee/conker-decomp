@@ -189,7 +189,7 @@ void effect_freeEffectObj(EffectObj *obj) {
 /* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes.
  * Returns it as void *: each caller keeps it in its own view of the object. */
 void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                    s32 drawKind, s32 arg6, s32 arg7, CollisionHit *hit, u8 arg9, s32 argA) {
+                    s32 drawKind, s32 maxLights, s32 lightMask, CollisionHit *hit, u8 owner, s32 list) {
     EffectObj *obj;
     u8 type;
     s32 itemsSize;
@@ -202,7 +202,7 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
         type = 0x22;
     }
 
-    obj = effect_newObject(type, argA, dataSize + itemsSize + sizeof(EffectObj), 1, arg9, 1);
+    obj = effect_newObject(type, list, dataSize + itemsSize + sizeof(EffectObj), 1, owner, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -223,8 +223,8 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
         obj->collision.flags = 0;
     }
 
-    obj->head.model.model = arg6;
-    obj->head.model.unk1C = arg7;
+    obj->head.model.model = maxLights;
+    obj->head.model.unk1C = lightMask;
     obj->head.model.unk4 = 0;
 
     for (i = 0; i < 4; i++) {
@@ -232,9 +232,9 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
     }
     obj->head.model.sharedHandle = NULL;
 
-    if (arg6 != 0) {
+    if (maxLights != 0) {
         for (i = 0; i <= gScreenLayout; i++) {
-            obj->head.model.handles[i] = light_allocGfxLights(arg6);
+            obj->head.model.handles[i] = light_allocGfxLights(maxLights);
         }
         obj->head.model.sharedHandle = light_allocAmbients();
     }
@@ -247,7 +247,7 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
 }
 
 /* Draws the object through math_emitPointLights and then its drawKind handler; returns the advanced display list. */
-void *effect_drawEffectObj(void *gfx, EffectObj *obj, s16 arg2) {
+void *effect_drawEffectObj(void *gfx, EffectObj *obj, s16 view) {
     s32 material;
 
     if (obj->head.tmpl.flags & 0x20) {
@@ -255,26 +255,26 @@ void *effect_drawEffectObj(void *gfx, EffectObj *obj, s16 arg2) {
     } else {
         material = 0;
     }
-    gfx = math_emitPointLights(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, material);
+    gfx = math_emitPointLights(gfx, &obj->head.model, 0, NULL, 0, view, &obj->head.modelPos, 2, material);
     if (obj->head.drawKind >= 19) {
         effect_destroyObject(&obj->head.header);
         return gfx;
     }
     if (obj->head.drawKind != 0) {
-        return gEffectObjDrawFuncs[obj->head.drawKind](obj, gfx, arg2);
+        return gEffectObjDrawFuncs[obj->head.drawKind](obj, gfx, view);
     }
     return gfx;
 }
 
 /* Runs the optional gEffectObjMessageFuncs handler for header.kind. */
-void effect_handleEffectObjMessage(EffectObj *obj, s32 arg1, u8 arg2) {
+void effect_handleEffectObjMessage(EffectObj *obj, s32 event, u8 eventType) {
     void (*handler)(EffectObj *, s32, u8) = gEffectObjMessageFuncs[obj->head.tmpl.kind];
 
     if (handler != NULL) {
-        handler(obj, arg1, arg2);
+        handler(obj, event, eventType);
     }
 }
 
-void effect_sendEventToEffectObjs(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(gEffectObjTypes, 2, arg0, arg1);
+void effect_sendEventToEffectObjs(s32 event, u8 eventType) {
+    effect_sendEventToTypes(gEffectObjTypes, 2, event, eventType);
 }

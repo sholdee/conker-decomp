@@ -35,12 +35,12 @@ static s16 gQuadEffectTexFrame; // frame offset of the next texture frame (effec
 
 
 /* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
-void effect_spawnQuadEffect(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
+void effect_spawnQuadEffect(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 owner, s32 list) {
     s32 i;
     QuadEffect *effect;
     f32 angle;
 
-    effect = effect_newObject(4, arg8, sizeof(QuadEffect), 1, arg7, 1);
+    effect = effect_newObject(4, list, sizeof(QuadEffect), 1, owner, 1);
     if (effect != NULL) {
         if (direction == -1) {
             for (i = 0; i < 2; i++) {
@@ -85,12 +85,12 @@ void effect_spawnQuadEffect(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, 
 }
 
 /* Spawns a mode-2 quad effect at (x, y, z), rotated by angleA and angleB. */
-void effect_spawnRotatedQuadEffect(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 arg8,
-                   s32 arg9) {
+void effect_spawnRotatedQuadEffect(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 owner,
+                   s32 list) {
     s32 i;
     QuadEffect *effect;
 
-    effect = effect_newObject(4, arg9, sizeof(QuadEffect), 1, arg8, 1);
+    effect = effect_newObject(4, list, sizeof(QuadEffect), 1, owner, 1);
     if (effect != NULL) {
         effect->mode = 2;
         for (i = 0; i < 2; i++) {
@@ -134,7 +134,7 @@ void effect_updateQuadEffect(QuadEffect *effect) {
 
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
-Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
+Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 view) {
     s32 mode;
     s32 x;
     s32 y;
@@ -240,7 +240,7 @@ Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
 }
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
-Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 type, s32 list, s32 view) {
     u8 needSync;
     s16 frame;
 

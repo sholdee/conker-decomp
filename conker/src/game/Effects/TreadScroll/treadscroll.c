@@ -6,7 +6,7 @@
 #include "conker/weapon.h"
 
 
-void effect_levelUpdateCutsceneTreads(s32 arg0) {
+void effect_levelUpdateCutsceneTreads(s32 unused) {
     s32 i;
 
     sound_updateCooldowns();

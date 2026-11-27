@@ -73,7 +73,7 @@ void effect_nextTextLine(TextObj *obj) {
 }
 
 /* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
-TextObj *effect_newTextBox(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
+TextObj *effect_newTextBox(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 owner, s32 list) {
     TextLines init;
     TextObj *obj;
     s32 lineSize;
@@ -93,7 +93,7 @@ TextObj *effect_newTextBox(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updat
 
     lineSize = effect_getLongestLineLength(str) + 1;
 
-    obj = effect_newTimedEffect(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
+    obj = effect_newTimedEffect(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), owner, list);
     if (obj != NULL) {
         text = &obj->text;
         memcpy(text, &init, sizeof(TextLines));
@@ -108,15 +108,15 @@ TextObj *effect_newTextBox(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updat
 }
 
 /* Text box update: runs the style's update function, removing the box when it returns 0. */
-s32 effect_drawTextBox(s32 arg0, TextObj *obj, s32 arg2) {
+s32 effect_drawTextBox(s32 gfx, TextObj *obj, s32 view) {
     TextLines *text = &obj->text;
 
     if ((text->updateFn != -1) && (gTextBoxUpdateFuncs[text->updateFn](obj) == 0)) {
         obj->base.header.state = -1;
-        return arg0;
+        return gfx;
     }
     text->flags &= ~1;
-    return arg0;
+    return gfx;
 }
 
 /* Text box message handler: message 0x51 with this box's id advances the line; the style's
@@ -143,12 +143,12 @@ typedef struct {
 } CrossfadeStyle;
 
 /* Creates a text box that crossfades between lines (style 0). */
-void effect_newFadeTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newFadeTextBox(u8 id, u8 *str, s16 duration, u8 owner, s32 list) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = effect_newTextBox(id, str, duration, 8, 0, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 0, 0, owner, list);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
@@ -193,13 +193,13 @@ typedef struct {
 } TypewriterStyle;
 
 /* Creates a text box that types out each line behind a "C:> " prompt (style 1). */
-void effect_newPromptTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newPromptTextBox(u8 id, u8 *str, s16 duration, u8 owner, s32 list) {
     TextObj *obj;
     TypewriterStyle style;
 
     style.shown = 0;
     style.progress = 0.0f;
-    obj = effect_newTextBox(id, str, duration, 8, 1, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 1, 0, owner, list);
     if (obj != NULL) {
         memcpy(obj->text.style, &style, sizeof(style));
     }
@@ -242,12 +242,12 @@ s32 effect_updatePromptTextBox(TextObj *obj) {
 }
 
 /* Creates a text box that crossfades between lines more slowly, in white (style 2). */
-void effect_newSlowFadeTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newSlowFadeTextBox(u8 id, u8 *str, s16 duration, u8 owner, s32 list) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = effect_newTextBox(id, str, duration, 8, 2, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 2, 0, owner, list);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }

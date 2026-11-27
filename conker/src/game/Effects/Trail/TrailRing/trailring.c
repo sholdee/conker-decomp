@@ -5,8 +5,8 @@
 #include "conker/trail.h"
 
 /* Spawns a ring of 25 kind-2 particles (trail_spawnKind2Trail) of radius 80 around (x, y, z). */
-void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3) {
-    particle_emitOnCircle(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, arg3);
+void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 owner) {
+    particle_emitOnCircle(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, owner);
 }
 
 /*
@@ -15,7 +15,7 @@ void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3) {
  */
 s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12,
-                  s32 arg13, u8 arg14) {
+                  void *data, u8 owner) {
     u8 pad[4]; // matching: frame size
     EffectTemplate spawn;
     TrailMotion motion;
@@ -62,7 +62,7 @@ s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX
         motion.velocity.x = speed * pitchSin * angleCos;
         motion.velocity.y = -speed * pitchCos;
         motion.velocity.z = speed * pitchSin * angleSin;
-        trail_createMotionTrail(&spawn, &motion, 0, 1, 5, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 0);
+        trail_createMotionTrail(&spawn, &motion, 0, 1, 5, 0, 0, 0, 0, 0, 0, &render, 0, owner, 0);
         count--;
     } while (count != 0);
     return 1;

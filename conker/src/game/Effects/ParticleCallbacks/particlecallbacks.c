@@ -12,22 +12,22 @@ struct Obj150C7670 {
     Mid150C7670 *unk170;
 };
 
-s32 func_150C7670(Obj150C7670 *arg0) {
+s32 func_150C7670(Obj150C7670 *particle) {
     f32 temp;
 
-    temp = arg0->unk170->unk14[0x2F];
+    temp = particle->unk170->unk14[0x2F];
     {
         // matching: a block-scope local for the factor lets IDO hoist the `return 1` (li v0) to the top
         f32 scale = 2.2970001f;
 
-        arg0->unk70 = temp * scale;
+        particle->unk70 = temp * scale;
     }
     return 1;
 }
 
 
 
-s32 effect_setParticleIdentityMtx(void *arg0, s32 arg1) {
-    memcpy(arg0, &gIdentityMtx, sizeof(Mtx));
+s32 effect_setParticleIdentityMtx(void *mtx, s32 particle) {
+    memcpy(mtx, &gIdentityMtx, sizeof(Mtx));
     return 1;
 }

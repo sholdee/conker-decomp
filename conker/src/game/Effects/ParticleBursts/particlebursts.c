@@ -603,7 +603,7 @@ struct Obj150BCFB8 {
 };
 
 /* Ground-hit callback: comes to rest when falling slowly, otherwise bounces, scaling all motion by obj->bounce. */
-s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 floorY) {
+s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floorY) {
     obj->unk3C = obj->unk10 * 1.1f + floorY;
     if (-2.0f < obj->vel.y) {
         obj->vel.x = 0.0f;
@@ -622,7 +622,7 @@ s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3,
 }
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
-void func_150BD070(u8 arg0, s32 arg1) {
+void func_150BD070(u8 owner, s32 list) {
     TriggerZone *anchors[2];
     const u8 idx[2] = {0x4C, 0x4D};
     s16 count;
@@ -673,7 +673,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = math_random();
             math_dirFromBinAngles(rnd % 31U - 84, math_random() % 26U - 45, math_randomFloat() * 21.80000114f + 30.2f, &particle.vel);
             particle.gravity = math_randomFloat() * 1.129000068f + -1.909f;
-            particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, arg0, arg1);
+            particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, owner, list);
             count--;
         }
     }
@@ -726,7 +726,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = math_random();
             math_dirFromBinAngles(rnd % 41U - 89, math_random() % 51U - 64, math_randomFloat() * 45.60000229f + 18.80000114f, &spawn.vel);
             spawn.gravity = math_randomFloat() * 0.559f + -0.777f;
-            spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg0, arg1);
+            spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, owner, list);
             if (spawned != NULL) {
                 memcpy(&spawned->data.drag, &scale, sizeof(scale));
             }
@@ -735,11 +735,11 @@ void func_150BD070(u8 arg0, s32 arg1) {
         pos.x = anchors[0]->x;
         pos.y = anchors[0]->y;
         pos.z = anchors[0]->z;
-        particle_startPlayerCameraWobbles(&pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
+        particle_startPlayerCameraWobbles(&pos, 0.0f, 1000.0f, 0.001f, 5, owner, list);
         pos2.x = anchors[0]->x;
         pos2.y = anchors[0]->y;
         pos2.z = anchors[0]->z;
-        particle_startPlayerRumbles(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+        particle_startPlayerRumbles(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, owner, list);
     }
 }
 

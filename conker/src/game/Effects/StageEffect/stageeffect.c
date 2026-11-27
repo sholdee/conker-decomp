@@ -30,7 +30,7 @@ static const Vec3f gCutsceneBoneBeamStart = { -124.0f, -8.0f, 28.0f };
 static const Vec3f gCutsceneBoneBeamEnd = { -170.0f, -8.0f, 28.0f };
 
 /* Effects 50 units above `obj`: a light_createWithEffect burst and a particle_spawnTrailBurst emitter. */
-void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
+void effect_hitReactLightBurst(s32 self, Actor *obj, s32 result) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -381,26 +381,26 @@ void effect_jumpStagesToEnd(u8 index) {
     effect_sendEventToTimedEffects((s32)&msg, 0x42);
 }
 
-void effect_releaseStage(TimedEffect *arg0) {
+void effect_releaseStage(TimedEffect *object) {
 }
 
-void effect_destroyStage(TimedEffect *arg0) {
-    effect_releaseStage(arg0);
-    effect_defaultDestroyTimedEffect(arg0);
+void effect_destroyStage(TimedEffect *object) {
+    effect_releaseStage(object);
+    effect_defaultDestroyTimedEffect(object);
 }
 
-void effect_freeStage(TimedEffect *arg0) {
-    effect_releaseStage(arg0);
-    effect_defaultFreeTimedEffect(arg0);
+void effect_freeStage(TimedEffect *object) {
+    effect_releaseStage(object);
+    effect_defaultFreeTimedEffect(object);
 }
 
 static u8 gCutsceneBoneBeamBone = 23; /* the bone of effect_spawnCutsceneBoneBeam's effect */
 
 /* Effect at the point gCutsceneBoneBeamStart on bone gCutsceneBoneBeamBone of `obj`. */
-void effect_spawnCutsceneBoneBeam(obj, arg1, arg2)
+void effect_spawnCutsceneBoneBeam(obj, owner, list)
 Actor *obj;
-u8 arg1;
-s32 arg2;
+u8 owner;
+s32 list;
 {
     Vec3f pos;
     f32 one;
@@ -424,14 +424,14 @@ s32 arg2;
     random0 = math_random();
     random1 = math_random();
     effect_spawnBoneBeamParticle(obj, gCutsceneBoneBeamBone, &gCutsceneBoneBeamStart, &gCutsceneBoneBeamEnd, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
-                  math_randomFloat() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
+                  math_randomFloat() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, owner, list);
 }
 
 /* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */
-void effect_spawnGunMuzzleEffects(obj, arg1, arg2)
+void effect_spawnGunMuzzleEffects(obj, owner, list)
 Actor *obj;
-u8 arg1;
-s32 arg2;
+u8 owner;
+s32 list;
 {
     Vec3f points[6];
     Vec3f position;
@@ -443,9 +443,9 @@ s32 arg2;
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
         if (weapon_getGunMuzzlePoints(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
-            particle_spawnShortLightFlash(&position, arg1, arg2);
-            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
-            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
+            particle_spawnShortLightFlash(&position, owner, list);
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, owner, list);
+            weapon_spawnMuzzleFlashes(&position, points, owner, list);
         }
     }
 }

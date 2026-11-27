@@ -22,7 +22,7 @@ struct OwnerSparkEffect {
 };
 
 /* Spawns a spark effect attached to `owner`; a duration of -1 means 300 frames, not looping. */
-OwnerSparkEffect *effect_spawnOwnerSpark(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+OwnerSparkEffect *effect_spawnOwnerSpark(Actor *owner, s16 duration, u8 fxOwner, s32 fxList) {
     OwnerSparkEffect *effect;
     OwnerSparkData data;
 
@@ -37,7 +37,7 @@ OwnerSparkEffect *effect_spawnOwnerSpark(Actor *owner, s16 duration, u8 arg2, s3
 
     // matching: `duration != -1` compiles to sltu/xori; IDO only emits this branchy form for ?:
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x24, -1,
-                                               (duration == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
+                                               (duration == -1) ? 0 : 1, 0x23, 0x10, fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
         effect_acquireAnchorSet(6);

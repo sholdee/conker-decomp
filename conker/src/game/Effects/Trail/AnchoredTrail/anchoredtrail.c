@@ -28,7 +28,7 @@ static const Vec3f gTrailBoneAnchors[7] = {
 static const u8 gTrailBoneMatrices[7] = { 15, 17, 15, 2, 6, 6, 14 };
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
-TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
+TimedEffect *trail_createAnchoredEmitter(s16 timer, u8 flags, u8 anchorType, f32 maxStep, s32 extraSize, u8 owner, s32 list) {
     TimedEffect *emitter;
     TrailAnchor anchor;
 
@@ -40,7 +40,7 @@ TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 m
     anchor.pos.z = 0.0f;
     anchor.maxStep = maxStep;
 
-    emitter = effect_newTimedEffect(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
+    emitter = effect_newTimedEffect(timer, -1, 0x42, -1, flags, 0x36, (extraSize + sizeof(TrailAnchor)), owner, list);
     if (emitter != NULL) {
         memcpy(&((AnchoredTrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
     }
@@ -117,7 +117,7 @@ void trail_broadcastActorGone(Actor *actor) {
 }
 
 /* Attaches a trail to `bone` of `actor`; `condition` picks an extra gAnchorConditionProcs check (-1 for none). */
-void trail_attachToBone(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
+void trail_attachToBone(Actor *actor, u8 bone, s8 condition, u8 owner, s32 list) {
     TrailBoneLink link;
     TimedEffect *emitter;
 
@@ -126,7 +126,7 @@ void trail_attachToBone(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) 
     link.bone = bone;
     link.condition = condition;
 
-    emitter = trail_createAnchoredEmitter(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), arg3, arg4);
+    emitter = trail_createAnchoredEmitter(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), owner, list);
     if (emitter != NULL) {
         memcpy(&((AnchoredTrailEmitter *)emitter)->link, &link, sizeof(TrailBoneLink));
     }

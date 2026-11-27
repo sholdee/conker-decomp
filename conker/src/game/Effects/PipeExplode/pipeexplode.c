@@ -22,7 +22,7 @@ const PipeSpot gPipeSpots[] = {
 };
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
-void pipeexplode_explode(u8 pipe, u8 arg1) {
+void pipeexplode_explode(u8 pipe, u8 owner) {
     camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 7, 1);
     {
         DebrisEmitter argsA;
@@ -54,11 +54,11 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         argsA.gravityRange = -2.600000143f;
         argsA.spinBase = -5.0f;
         argsA.spinRange = 10.0f;
-        blood_spawnDebris(&argsA, 0, arg1, 1);
+        blood_spawnDebris(&argsA, 0, owner, 1);
         i = (math_random() & 1) + 1;
         while (i--) {
             size = (math_randomFloat() * 73.0f) + 31.0f;
-            particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, size, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (math_random() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+            particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, size, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (math_random() % 3U) + 4, 9, 0, 0.009615384974f, 0, owner);
         }
     }
     {
@@ -94,7 +94,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         argsB.tailSpeedRange = 3.419999838f;
         argsB.widthBase = 4.139999866f;
         argsB.widthRange = 4.859999657f;
-        particle_spawnStreakBurst(&argsB, arg1);
+        particle_spawnStreakBurst(&argsB, owner);
     }
     {
         SimplePuffSpray argsC;
@@ -126,14 +126,14 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         argsC.sizeRange = 30.0f;
         argsC.growthBase = 1.5f;
         argsC.growthRange = 1.0f;
-        particle_spawnSimplePuffSpray(&argsC, arg1);
+        particle_spawnSimplePuffSpray(&argsC, owner);
         argsC.countBase = 10;
         argsC.countRange = 6;
         argsC.lifeBase = 100;
         argsC.lifeRange = 0;
         argsC.red = 9;
         argsC.handlers[3] = 5;
-        particle_spawnSimplePuffSpray(&argsC, arg1);
+        particle_spawnSimplePuffSpray(&argsC, owner);
     }
     {
         f32 yawSin;
@@ -185,9 +185,9 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
 }
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
-s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
-                  f32 argC, s32 argD, u8 argE) {
+s32 pipeexplode_spawnChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 arg8, s32 baseAngle, f32 radius, s32 argB,
+                  f32 argC, void *data, u8 owner) {
     f32 yawCos;
     f32 yawSin;
     s16 angle;
@@ -214,7 +214,7 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.elasticity = 0.200000003f;
 
     speed = (math_randomFloat() * 31.0f) + 18.0f;
-    angle = (arg9 - 0x40) + (s16)(60.0f * yawSin * argA * argC);
+    angle = (baseAngle - 0x40) + (s16)(60.0f * yawSin * radius * argC);
     headingCos = math_cosBinAngleMasked(angle - 0x40);
     headingSin = math_cosBinAngleMasked(angle);
     angle = (s16)(48.0f * yawCos) - 20;
@@ -254,7 +254,7 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 0xFF;
     spawn.sizeY = pitchSin;
 
-    particle_newModelParticle(&spawn, 3, 0xFF, 0, argE, 0);
+    particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, 0);
     return 1;
 }
 
@@ -262,9 +262,9 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
  * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (math_debugTunable), and the chunk
  * bounces until it lands slowly.
  */
-s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
-                  f32 argC, s32 argD, u8 argE) {
+s32 pipeexplode_spawnTunableChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 arg8, s32 baseAngle, f32 radius, s32 argB,
+                  f32 argC, void *data, u8 owner) {
     f32 yawCos;
     f32 yawSin;
     s16 angle;
@@ -313,7 +313,7 @@ s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
     spawn.elasticity = 0.200000003f;
 
     speed = (math_randomFloat() * speedRange) + minSpeed;
-    angle = (arg9 - 0x40) + (s16)(xzAngle * yawSin * argA * argC);
+    angle = (baseAngle - 0x40) + (s16)(xzAngle * yawSin * radius * argC);
     headingCos = math_cosBinAngleMasked(angle - 0x40);
     headingSin = math_cosBinAngleMasked(angle);
     angle = (s16)(yzAngle * yawCos) - 20;
@@ -353,7 +353,7 @@ s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
     spawn.fadeRate = 7;
     spawn.sizeY = pitchSin;
 
-    chunk = particle_newModelParticle(&spawn, 3, 0xFF, 4, argE, 0);
+    chunk = particle_newModelParticle(&spawn, 3, 0xFF, 4, owner, 0);
     if (chunk != NULL) {
         memcpy(&chunk->minBounceVelY, &minBounceVelY, sizeof(f32));
     }
@@ -361,8 +361,8 @@ s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
 }
 
 /* Floor-hit callback for a pipe chunk: bounce it, or stop it once it lands slowly enough. */
-s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    chunk->head.pos.y = chunk->head.radius + arg4;
+s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, f32 x, f32 y, f32 z, f32 floorHeight) {
+    chunk->head.pos.y = chunk->head.radius + floorHeight;
     if (chunk->minBounceVelY < chunk->head.vel.y) {
         chunk->head.flags &= ~0x7;
         chunk->head.flags &= ~0x8;

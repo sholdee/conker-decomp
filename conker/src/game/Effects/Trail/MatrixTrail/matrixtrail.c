@@ -88,7 +88,7 @@ void trail_freeMatrixTrail(MatrixTrail *trail) {
 }
 
 /* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
-MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
+MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u8 timed, u8 fxOwner, s32 fxList) {
     EffectTemplate spawn;
     MatrixTrailData data;
     MatrixTrail *trail;
@@ -112,7 +112,7 @@ MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u
     spawn.life = lifetime;
     data.spawnCount = 0.0f;
 
-    spawn.flags = (arg3 ? 1 : 0) | 2;
+    spawn.flags = (timed ? 1 : 0) | 2;
 
     data.gravity = spec->gravity;
     data.spawnRate = spec->spawnRate;
@@ -140,7 +140,7 @@ MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u
     }
 
     spawn.kind = 4;
-    trail = effect_newEffectObj(&spawn, sizeof(MatrixTrailData), sizeof(MatrixTrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
+    trail = effect_newEffectObj(&spawn, sizeof(MatrixTrailData), sizeof(MatrixTrailPoint), 3, 3, 3, 0, 0, 0, fxOwner, fxList);
     if (trail != NULL) {
         memcpy(trail->data, &data, sizeof(MatrixTrailData));
     }
@@ -587,11 +587,11 @@ s32 trail_getAttachPoint(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z,
 }
 
 /* Restarts the kind 3 and 4 trails on owner and spawns a effect_newTimedEffectNoDraw object. */
-void trail_restartTrailPair(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
+void trail_restartTrailPair(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList) {
     trail_cancelTrailPair();
-    trail_startMatrixTrail(owner, 3, 300, 0, arg2, arg3);
-    trail_startMatrixTrail(owner, 4, 300, 0, arg2, arg3);
-    effect_newTimedEffectNoDraw(lifetime, 6, -1, 1, 3, 0, arg2, arg3);
+    trail_startMatrixTrail(owner, 3, 300, 0, fxOwner, fxList);
+    trail_startMatrixTrail(owner, 4, 300, 0, fxOwner, fxList);
+    effect_newTimedEffectNoDraw(lifetime, 6, -1, 1, 3, 0, fxOwner, fxList);
 }
 
 /* Trail task: once the owner has its matrices, starts the trail and finishes. */

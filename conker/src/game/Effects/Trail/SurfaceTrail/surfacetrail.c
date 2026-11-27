@@ -472,7 +472,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
  * point (or the live attach point) back to the oldest. Only the centre line is opaque.
  */
-Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     SurfaceTrailConfig *config;
     SurfaceTrailPoint *points;
@@ -502,7 +502,7 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        particle_getViewBuffer(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             config = trail->config;
             points = trail->points;

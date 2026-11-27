@@ -52,12 +52,12 @@ static void (*gRopeTypeMsgHandlers[])(HoltenRopeEffect *, s32, u8) = { NULL, NUL
 static void (*gRopeTypeCleanups[])() = { rope_unlinkTiedRope, NULL };
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
-HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
+HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 owner, s32 list) {
     HoltenRopeEffect *effect;
     f32 length;
     f32 halfAxesSq;
 
-    effect = effect_newObject(0x33, arg4, extraSize + sizeof(HoltenRopeEffect), 1, arg3, 1);
+    effect = effect_newObject(0x33, list, extraSize + sizeof(HoltenRopeEffect), 1, owner, 1);
     if (effect == NULL) {
         return NULL;
     }
@@ -280,10 +280,10 @@ Gfx *rope_drawEffect(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
 }
 
 /* Calls the rope type's handler from gRopeTypeMsgHandlers, if it has one. */
-void rope_effectMessage(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
+void rope_effectMessage(HoltenRopeEffect *effect, s32 event, u8 eventType) {
     void (*handler)(HoltenRopeEffect *, s32, u8) = gRopeTypeMsgHandlers[effect->type];
     if (handler != NULL) {
-        handler(effect, arg1, arg2);
+        handler(effect, event, eventType);
     }
 }
 

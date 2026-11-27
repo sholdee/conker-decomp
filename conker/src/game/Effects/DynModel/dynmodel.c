@@ -72,7 +72,7 @@ static const VtxRange gWarpModelGroupVertices[9] = {
 };
 
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
-DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
+DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 owner, s32 list) {
     DynModel *obj;
     ModelAsset *asset;
     s32 buffersSize;
@@ -93,7 +93,7 @@ DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 a
         } else {
             type = 0x38;
         }
-        obj = effect_newObject(type, arg4, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, arg3, 1);
+        obj = effect_newObject(type, list, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, owner, 1);
         if (obj == NULL) {
             return NULL;
         }

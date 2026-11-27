@@ -66,11 +66,11 @@ static void (*gRingUpdateFuncs[])(RadialEffect *, f32) = { effect_ringHitActors 
  * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
  * (count + 1) * 5 Vtx each, then extraSize bytes at unk364.
  */
-RadialEffect *effect_newRingEffect(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+RadialEffect *effect_newRingEffect(RadialEffectDef *def, s32 extraSize, u8 owner, s32 list) {
     RadialEffect *effect;
     s32 i;
 
-    effect = effect_newObject(0x31, arg3, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, arg2, 1);
+    effect = effect_newObject(0x31, list, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, owner, 1);
     if (effect == NULL) {
         return NULL;
     }
@@ -163,7 +163,7 @@ void effect_updateRingEffect(RadialEffect *effect) {
  * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
  * gRingProfile is swept out at the current radius into this frame's vertex buffer.
  */
-Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
+Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 view) {
     RadialEffect *first; // matching: a second, stack-homed copy of effect
 
     first = effect;
@@ -655,22 +655,22 @@ void effect_emitGroundCircle(Vec3f *pos) {
 }
 
 /* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
-s32 effect_capQuadSpriteAlphaByLife(QuadSprite *arg0) {
+s32 effect_capQuadSpriteAlphaByLife(QuadSprite *sprite) {
     s32 maxAlpha;
 
-    if (arg0->def.lifetime < 32) {
-        maxAlpha = arg0->def.lifetime * 8;
-        if (maxAlpha < arg0->def.unk10) {
-            arg0->def.unk10 = maxAlpha;
+    if (sprite->def.lifetime < 32) {
+        maxAlpha = sprite->def.lifetime * 8;
+        if (maxAlpha < sprite->def.unk10) {
+            sprite->def.unk10 = maxAlpha;
         }
     }
     return 1;
 }
 
 /* Spawns a particle at (x, y, z) moving along heading; effect_dampParticleVelocityXZ damps its velocity. */
-s32 effect_spawnDampedParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
+s32 effect_spawnDampedParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s16 heading, s32 baseAngle, f32 radius, s32 arg11,
+                  s32 arg12, void *data, u8 owner) {
     ParticleObject *obj;
     ParticleDesc packet;
     s32 pad1; // matching: unused stack slot
@@ -724,7 +724,7 @@ s32 effect_spawnDampedParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     packet.fadeRate = 10;
     packet.scaleStart = 0x20;
 
-    obj = particle_newOwnedSpriteParticle(&packet, 1, 4, arg14, 1);
+    obj = particle_newOwnedSpriteParticle(&packet, 1, 4, owner, 1);
     if (obj != NULL) {
         memcpy(&obj->damping, &damping, sizeof(f32));
     }
@@ -733,7 +733,7 @@ s32 effect_spawnDampedParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
 }
 
 /* Damps a particle's horizontal velocity once per elapsed tick. */
-s32 effect_dampParticleVelocityXZ(ParticleObject *obj, s32 arg1) {
+s32 effect_dampParticleVelocityXZ(ParticleObject *obj, Vec3f *prevPos) {
     f32 *damping; // matching: reading obj->damping directly changes the loop code
     s32 ticks;
 
@@ -746,9 +746,9 @@ s32 effect_dampParticleVelocityXZ(ParticleObject *obj, s32 arg1) {
 }
 
 /* Spawns a tumbling burst object at (x, y, z) moving along heading. */
-s32 effect_spawnTumblingBurst(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, f32 *arg13, u8 arg14) {
+s32 effect_spawnTumblingBurst(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s16 heading, s32 baseAngle, f32 radius, s32 arg11,
+                  s32 arg12, f32 *data, u8 owner) {
     s32 pad; // matching: unused stack slot
     ParticleSpawn packet;
 
@@ -798,7 +798,7 @@ s32 effect_spawnTumblingBurst(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     packet.fadeStart = 0x20;
     packet.fadeRate = 7;
 
-    particle_newModelParticle(&packet, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&packet, 3, 0xFF, 0, owner, 0);
     return 1;
 }
 

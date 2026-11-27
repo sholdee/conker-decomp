@@ -96,7 +96,7 @@ static const FxImpactEntry gImpactGroundEffects[] = {
 
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
+void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 owner, s32 list) {
     const FxImpactSet *set;
     u8 kind;
 
@@ -109,42 +109,42 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
         FxSpawnPayload payload;
 
         payload.hit = hit;
-        payload.unk4 = arg4;
+        payload.unk4 = list;
         payload.kind = kind;
         {
             const FxSpawnRange *spawn = &gImpactFirstEffects[set->first];
 
             particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           math_random() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
-                          &payload, arg3);
+                          &payload, owner);
         }
     }
     if (set->second != -1) {
         FxSpawnPayload payload;
 
         payload.hit = hit;
-        payload.unk4 = arg4;
+        payload.unk4 = list;
         payload.kind = kind;
         {
             const FxSpawnRange *spawn = &gImpactSecondEffects[set->second];
 
             particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           math_random() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
-                          &payload, arg3);
+                          &payload, owner);
         }
     }
     if (set->impact != -1 && (hit->flags & 1)) {
         const FxImpactEntry *impact = &gImpactGroundEffects[set->impact];
 
-        particle_startKindEffect(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
+        particle_startKindEffect(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, owner, list);
     }
 }
 
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
  * pitch and speed from the impact type's spray parameters. */
-s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9,
-                  s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
+s32 effect_spawnImpactSprayParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw, s32 baseAngle,
+                  f32 radius, s32 type, s32 argC, FxSpawnPayload *payload, u8 owner) {
     const FxSprayParams *params;
     EffectTemplate18 spawn;
     TrailMotion part;
@@ -216,7 +216,7 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
     spawn.life = random % (params->unk1A + 1) + params->unk18;
     part.halfWidth = math_randomFloat() * params->unk20 + params->unk1C;
     part.gravity = math_randomFloat() * params->unk28 + params->unk24;
-    trail_createMotionTrail(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
+    trail_createMotionTrail(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, owner, payload->unk4);
     return 1;
 }
 

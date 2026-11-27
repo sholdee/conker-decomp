@@ -26,8 +26,8 @@ static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
     ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : blood_getProfile(actor)) : 4)
 
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
-s32 effect_spawnPitchYawSplash(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
-                  s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 effect_spawnPitchYawSplash(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
+                  s16 pitch, s16 yaw, f32 radius, s32 argB, s32 argC, void *data, u8 owner) {
     Vec3f pos;
     Vec3f dir;
     f32 speed;
@@ -40,7 +40,7 @@ s32 effect_spawnPitchYawSplash(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
     particle_spawnSplash(&pos, &dir, math_randomFloat() * (0.68f - 0.68f) + 0.68f, math_random() % 20 + 31,
                   math_random() % 101 + 155, math_randomFloat() * 2.33f + 6.7f,
-                  (math_random() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
+                  (math_random() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, owner, 1);
     return 1;
 }
 
@@ -92,7 +92,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
 }
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
-void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnLandingBurst(Actor *actor, u8 owner, s32 list) {
     SplashSpraySpec impact;
     CollisionHit ground;
     s32 count;
@@ -155,10 +155,10 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (math_random() & 1) {
                     particle_spawnKindEmitter(0, math_randomFloat() * 4.5f + 15.0f, math_randomFloat() * (f32)100 + 155.0f,
-                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
+                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, owner, list);
                 } else {
                     particle_spawnSquash(0, math_randomFloat() * 5.9f + 6.1f, math_randomFloat() * (f32)100 + 155.0f,
-                                  (Vec3f *)spot, 1, arg1, arg2);
+                                  (Vec3f *)spot, 1, owner, list);
                 }
                 if (--count == 0) {
                     break;
@@ -188,7 +188,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         center[1] += 10.0f;
         blood_spawnGrowingParticle((math_randomFloat() * 40.0f + 120.0f) * 0.001f, (math_randomFloat() * 123.0f + 123.0f) * 0.00001f,
                       math_random() % 101 + 155, math_random() % 101 + 100, math_random() % 56 + 70,
-                      &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
+                      &centerGround.tri, (Vec3f *)center, 0, 1, owner, list);
     }
 }
 
@@ -239,7 +239,7 @@ struct Game1DD500Task {
 };
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
+Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list) {
     Game1DD500Task *task;
     Game1DD500Emitter emitter;
     s32 profile;
@@ -285,7 +285,7 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
             emitter.slots[i].next = NULL;
         }
     }
-    task = effect_newTimedEffectNoDraw(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    task = effect_newTimedEffectNoDraw(life, -1, 0x13, timed, 0xF, sizeof(emitter), owner, list);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(emitter));
     }

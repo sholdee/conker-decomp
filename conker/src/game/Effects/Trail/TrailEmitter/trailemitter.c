@@ -305,7 +305,7 @@ s32 trail_fadeEmittedTrail(MotionTrail *trail) {
 }
 
 /* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
-s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+s32 trail_spawnHitPuff(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;

@@ -485,7 +485,7 @@ void trail_burstScatterTrail(ScatterTrail *trail) {
 }
 
 /* Message handler: message 5 stops the trail. */
-void trail_onScatterTrailMessage(ScatterTrail *trail, s32 arg1, u8 msg) {
+void trail_onScatterTrailMessage(ScatterTrail *trail, s32 event, u8 msg) {
     if (msg == 5) {
         trail_stopScatterTrail(trail);
     }
