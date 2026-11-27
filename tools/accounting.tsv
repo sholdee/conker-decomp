@@ -2710,11 +2710,11 @@ effect_attachPerimeterEmitter	0x150B0C34	36	game	c		build/src/game/Effects/Perim
 effect_spawnPerimeterEmitter	0x150B0C58	136	game	c		build/src/game/Effects/PerimeterEmitter/perimeteremitter.c.o
 effect_perimeterEmitterMessage	0x150B0CE0	64	game	c		build/src/game/Effects/PerimeterEmitter/perimeteremitter.c.o
 effect_updatePerimeterEmitter	0x150B0D20	976	game	c		build/src/game/Effects/PerimeterEmitter/perimeteremitter.c.o
-func_150B10F0	0x150B10F0	524	game	c		build/src/game_DE5A0.c.o
-func_150B12FC	0x150B12FC	392	game	c		build/src/game_DE5A0.c.o
-func_150B1484	0x150B1484	856	game	c		build/src/game_DE5A0.c.o
-func_150B17DC	0x150B17DC	516	game	c		build/src/game_DE5A0.c.o
-func_150B19E0	0x150B19E0	976	game	c		build/src/game_DE5A0.c.o
+func_150B10F0	0x150B10F0	524	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
+func_150B12FC	0x150B12FC	392	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
+func_150B1484	0x150B1484	856	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
+func_150B17DC	0x150B17DC	516	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
+func_150B19E0	0x150B19E0	976	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
 colourfb_toGreyscale	0x150B1DB0	112	game	hasm	b	build/src/game/Effects/Greyscale/greyscale.s.o
 particle_levelHook29	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_spawnPointEmitter	0x150B1EE0	176	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
@@ -3024,7 +3024,7 @@ level_updateHazardProps	0x150D0E90	596	game	c		build/src/game/Level/LevelHook30/
 level_spawnBloodStrip	0x150D10E4	208	game	c		build/src/game/Level/LevelHook30/levelhook30.c.o
 level_sampleBloodStripPower	0x150D11B4	80	game	c		build/src/game/Level/LevelHook30/levelhook30.c.o
 level_emitBloodStripParticle	0x150D1204	412	game	c		build/src/game/Level/LevelHook30/levelhook30.c.o
-effect_spinDownActor	0x150D13A0	112	game	c		build/src/game_FE850.c.o
+effect_spinDownActor	0x150D13A0	112	game	c		build/src/game/Actor/SpinDown/spindown.c.o
 func_150D1410	0x150D1410	92	game	c		build/src/game/Effects/LevelActorHooks/levelactorhooks.c.o
 func_150D146C	0x150D146C	48	game	c		build/src/game/Effects/LevelActorHooks/levelactorhooks.c.o
 effect_updateAmbientPulse	0x150D149C	148	game	c		build/src/game/Effects/LevelActorHooks/levelactorhooks.c.o

@@ -37,7 +37,7 @@
  *   game/Effects/HopSprite/hopsprite.c
  *   game/Effects/TextLines/textlines.c
  *   game/Effects/ZoneSounds/zonesounds.c
- *   game_FE850.c
+ *   game/Actor/SpinDown/spindown.c
  *   game/Effects/LevelActorHooks/levelactorhooks.c
  *   game/Effects/RaySpinner/rayspinner.c
  *   game/Effects/HitSpray/hitspray.c
@@ -449,7 +449,7 @@ s32 effect_updateSlowFadeTextBox(TextObj *obj);
 void effect_playRandomZoneSounds(s32 unused);
 extern u8 gRandomSoundTimer;
 
-/* game_FE850.c */
+/* game/Actor/SpinDown/spindown.c */
 void effect_spinDownActor(Actor *arg0);
 
 /* game/Effects/LevelActorHooks/levelactorhooks.c */
