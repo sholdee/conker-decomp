@@ -175,13 +175,13 @@ void effect_freeDynModel(DynModel *obj) {
     gDynModelFreeFuncs[obj->desc.kind](obj);
 }
 
-void effect_dynModelMessage(DynModel *obj, s32 arg1, u8 arg2) {
+void effect_dynModelMessage(DynModel *obj, void *msg, u8 msgType) {
     switch (obj->desc.kind) {
     case 1:
-        light_handleLampMessage(obj, arg1, arg2);
+        light_handleLampMessage(obj, msg, msgType);
         break;
     case 2:
-        effect_ownerModelMessage(obj, arg1, arg2);
+        effect_ownerModelMessage(obj, msg, msgType);
         break;
     }
 }

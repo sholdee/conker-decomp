@@ -158,10 +158,10 @@ void sound_playWithCooldown(s32 sound, s32 objId, u32 variantCount, s32 slot, s3
 
     if (hasCamera) {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, 30000, 0x7FFF,
-                      0x7FFE, sound_followDelayedCameraCallback, 20, obj, 0x100, 0);
+                      0x7FFE, sound_followDelayedCameraCallback, (void *)20, (s32)obj, 0x100, 0);
     } else {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, 32700, 0x7FFF,
-                      0x7FFE, sound_followDelayedCallback, (pairVariants << 15) | 20, obj, 0x100, 0);
+                      0x7FFE, sound_followDelayedCallback, (void *)((pairVariants << 15) | 20), (s32)obj, 0x100, 0);
     }
 
     gSoundCooldowns[slot] = 600;

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "functions.h"
 #include "variables.h"
 
@@ -19,7 +20,7 @@ f32 expf(f32 arg0) {
     n = ax / 0.6931471825f;
     if (n > 0x400) {
         if (arg0 >= 0.0f) {
-            return 3.402823466e+38f;
+            return MAXFLOAT;
         }
         return 0.0f;
     }
