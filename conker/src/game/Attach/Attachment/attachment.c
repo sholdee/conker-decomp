@@ -732,26 +732,26 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         lit = FALSE;
     }
     if (lit) {
-        if (owner->unk304[view] == 0) {
+        if (owner->gfxLights[view] == 0) {
             collision_allocActorLights(owner);
             i = TRUE;
         } else {
             i = FALSE;
         }
-        if (owner->unk304[view] != 0) {
-            if ((owner->unk2FD != 0) || i) {
+        if (owner->gfxLights[view] != 0) {
+            if ((owner->snapTimer != 0) || i) {
                 v = 0xA;
             } else {
                 v = 2;
             }
-            if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
-                gdl = light_reemitLights(gdl, owner->unk304[view], owner->unk301, owner->unk302,
-                                    &owner->unk314[gDrawBufferIndex]);
+            if ((owner->drawtype != 5) && (owner->lightCount != 0) && (owner->unk66 & 0xC) && !i) {
+                gdl = light_reemitLights(gdl, owner->gfxLights[view], owner->maxLights, owner->lightCount,
+                                    &owner->ambients[gDrawBufferIndex]);
             } else {
                 gdl = light_pickLights(gdl, view, owner->xpos, owner->ypos, owner->zpos,
-                                    owner->floorMaterial, owner->unk304[view], owner->unk301,
-                                    &owner->unk314[gDrawBufferIndex], &owner->unk302, 2,
-                                    owner->unk1DD, v, gPickedLights);
+                                    owner->floorMaterial, owner->gfxLights[view], owner->maxLights,
+                                    &owner->ambients[gDrawBufferIndex], &owner->lightCount, 2,
+                                    owner->ambientColor, v, gPickedLights);
             }
         }
     }
@@ -882,10 +882,10 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
         }
         break;
     case 0x90:
-        owner->unk9C |= 0x70;
+        owner->hiddenBones |= 0x70;
         break;
     case 0x8F:
-        owner->unk9C |= 0xE00;
+        owner->hiddenBones |= 0xE00;
         break;
     case 0x49:
         light_createActorPulse(owner, 0xFF, 1);
@@ -902,7 +902,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
         break;
     case 0x5E:
     case 0x85:
-        owner->unk9C |= 0x6000;
+        owner->hiddenBones |= 0x6000;
         break;
     case 0x8D:
         if (player_getStat(0, 6) < 100) {
@@ -936,10 +936,10 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
             }
             break;
         case 0x90:
-            owner->unk9C &= ~0x70;
+            owner->hiddenBones &= ~0x70;
             break;
         case 0x8F:
-            owner->unk9C &= ~0xE00;
+            owner->hiddenBones &= ~0xE00;
             break;
         case 0x37:
         case 0x4B:
@@ -976,7 +976,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
             break;
         case 0x5E:
         case 0x85:
-            owner->unk9C &= ~0x6000;
+            owner->hiddenBones &= ~0x6000;
             break;
         }
         switch (att->setId) {
@@ -1018,7 +1018,7 @@ s32 attach_hookFrameTile(ModelAttachment *att, Actor *owner) {
     s32 i;
     f32 t;
 
-    anim = owner->unk2D0;
+    anim = owner->anim;
     if (anim == NULL) {
         return 0;
     }
@@ -1069,7 +1069,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
     s32 pad; // matching: stack padding
     s32 syncAll;
 
-    ownerAnim = owner->unk2D0;
+    ownerAnim = owner->anim;
     animId = -1;
     anim = att->anim;
     if (anim == NULL) {
@@ -2285,7 +2285,7 @@ s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
     AnimInstance *anim;
 
-    ownerAnim = owner->unk2D0;
+    ownerAnim = owner->anim;
     anim = att->anim;
     if (anim == NULL) {
         return 0;

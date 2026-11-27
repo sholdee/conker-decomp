@@ -166,7 +166,7 @@ void model_stopParts(s32 objIndex) {
             count = gPartCounts[gObjPartsStates[objIndex].kind];
             for (i = 0; i < count; i++) {
                 if (flagBits[i] != 0xFF && model_isPartSelected(i, objIndex)) {
-                    movement_obj[objIndex].unk94 |= 1 << flagBits[i];
+                    movement_obj[objIndex].hiddenParts |= 1 << flagBits[i];
                 }
             }
         }
@@ -509,32 +509,32 @@ void model_initPartKind2(ObjPart *part, s32 objIndex) {
     model_randomizePart(part, 2.06f, 3.0f, TRUE);
 }
 
-/* Start for kind 1: 140-tick timer; sets the object's unk94 to 6 and kicks part 4 upwards. */
+/* Start for kind 1: 140-tick timer; sets the object's hiddenParts to 6 and kicks part 4 upwards. */
 void model_startPartsKind1(s32 objIndex) {
     ObjPartsState *ps = &gObjPartsStates[objIndex];
 
     ps->timer = 140;
-    movement_obj[objIndex].unk94 = 6;
+    movement_obj[objIndex].hiddenParts = 6;
     ps->parts[4].vel[1] = 10.0f;
 }
 
-/* Start for kind 2: 300-tick timer; updates unk94 flags for the selected variants 0..2. */
+/* Start for kind 2: 300-tick timer; updates hiddenParts flags for the selected variants 0..2. */
 void model_startPartsKind2(s32 objIndex) {
     gObjPartsStates[objIndex].timer = 300;
     if (model_hasPartVariant(2, 0, objIndex)) {
-        movement_obj[objIndex].unk94 |= 0x40;
-        movement_obj[objIndex].unk94 &= ~0x200;
+        movement_obj[objIndex].hiddenParts |= 0x40;
+        movement_obj[objIndex].hiddenParts &= ~0x200;
     }
     if (model_hasPartVariant(2, 1, objIndex)) {
-        movement_obj[objIndex].unk94 |= 0x80;
-        movement_obj[objIndex].unk94 &= ~0x100;
+        movement_obj[objIndex].hiddenParts |= 0x80;
+        movement_obj[objIndex].hiddenParts &= ~0x100;
     }
     if (model_hasPartVariant(2, 2, objIndex)) {
-        movement_obj[objIndex].unk94 &= ~0x400;
+        movement_obj[objIndex].hiddenParts &= ~0x400;
     }
 }
 
-/* Update for kind 2: bounce the parts; when the timer runs out stop the effect and set unk94 flags. */
+/* Update for kind 2: bounce the parts; when the timer runs out stop the effect and set hiddenParts flags. */
 void model_updatePartsKind2(s32 objIndex) {
     ObjPartsState *ps;
 
@@ -546,13 +546,13 @@ void model_updatePartsKind2(s32 objIndex) {
     }
     model_stopParts(objIndex);
     if (model_hasPartVariant(2, 0, objIndex)) {
-        movement_obj[objIndex].unk94 |= 8;
+        movement_obj[objIndex].hiddenParts |= 8;
     }
     if (model_hasPartVariant(2, 1, objIndex)) {
-        movement_obj[objIndex].unk94 |= 4;
+        movement_obj[objIndex].hiddenParts |= 4;
     }
     if (model_hasPartVariant(2, 2, objIndex)) {
-        movement_obj[objIndex].unk94 |= 2;
+        movement_obj[objIndex].hiddenParts |= 2;
     }
 }
 

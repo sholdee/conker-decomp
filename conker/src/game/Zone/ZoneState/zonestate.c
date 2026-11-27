@@ -250,7 +250,7 @@ void zone_updateActor(Actor *actor) {
         text_clearObjectText(actor->playernumber);
     }
     func_150829D8(actor);
-    actor->unk120 = -10000;
+    actor->zoneWaterHeight = -10000;
     D_800D3278 = 0;
     idx = actor - movement_obj;
     found = 0;
@@ -347,7 +347,7 @@ void zone_updateActor(Actor *actor) {
                         actor->noshove &= ~2;
                         break;
                     case 2:
-                        actor->unk120 = zones[i].y + zones[i].ySize;
+                        actor->zoneWaterHeight = zones[i].y + zones[i].ySize;
                         break;
                     case 3:
                         actor->noshove |= 2;
@@ -443,7 +443,7 @@ void zone_updateActor(Actor *actor) {
                         player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
-                            actor->unk1CC = actor->ypos;
+                            actor->fallStartY = actor->ypos;
                         }
                     }
                 }

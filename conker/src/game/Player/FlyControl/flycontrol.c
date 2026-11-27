@@ -50,7 +50,7 @@ void player_updateFlying(Actor *actor) {
     floorLevel = 0.0f;
     actor->unkAB = 1;
     actor->count2 = 1;
-    actor->unk222 = 0;
+    actor->targetIndex = 0;
     gActorPressedButtons = gButtonsPressed[0];
     gCurrentPad = gPadTable[0];
     if ((dc_glbl_CharNum <= gScreenLayout) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
@@ -60,7 +60,7 @@ void player_updateFlying(Actor *actor) {
         gActorPressedButtons = 0;
     }
     actor->noshove |= 0x40;
-    actor->unk1CC = actor->ypos;
+    actor->fallStartY = actor->ypos;
     if (actor->unk103 != 0) {
         actor->unk103--;
     }
@@ -141,7 +141,7 @@ void player_updateFlying(Actor *actor) {
                 ((movement_obj[i].character_type == 0x9C) || (movement_obj[i].character_type == 0x9D))) {
                 dist = actor_distanceXZ(gCurrentActor, &movement_obj[i]);
                 if (dist < minDist) {
-                    actor->unk222 = i;
+                    actor->targetIndex = i;
                     minDist = dist;
                 }
             }

@@ -386,10 +386,10 @@ s32 mp_update(void) {
             }
             arr39C[i] = player_getStat(i, 4);
             layers[i] = path_getLayerAt(obj->ypos);
-            if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
+            if (arr39C[i] == 0 || isNew || obj->snapTimer != 0) {
                 if (arr35C[i] == 0) {
-                    if (obj->unk20F != 0xFF) {
-                        gMpGame->unk59C[i] = obj->unk20F;
+                    if (obj->pathNode != 0xFF) {
+                        gMpGame->unk59C[i] = obj->pathNode;
                     } else {
                         gMpGame->unk59C[i] = -1;
                         if (!attackers) { // matching: an extra use of attackers steers IDO's register allocation
@@ -421,7 +421,7 @@ s32 mp_update(void) {
                 reset = 0;
                 if (arr19C[i] != 1 && aimTimes[i] < 30) {
                     type = obj->intelwalk;
-                    obj->unk222 = arr31C[i] - 2;
+                    obj->targetIndex = arr31C[i] - 2;
                     if (type != 4 && type != 5) {
                         mp_sendPlayerCommand14(i, 4);
                     }

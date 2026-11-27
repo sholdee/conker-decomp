@@ -75,7 +75,7 @@ s32 func_1518A214(BoneGlow *emitter, u8 *follow) {
     f32 value;
 
     params = &emitter->params;
-    switch (emitter->attach.target->unk68[0] - 15) {
+    switch (emitter->attach.target->swapTexture[0] - 15) {
     default: // < 15 or > 17
         value = 0.6f;
         params->alpha1 = value;

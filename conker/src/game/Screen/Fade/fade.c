@@ -34,7 +34,7 @@ void screen_updateFade(FadeEffect *effect) {
 
     switch (effect->state) {
     case 0:
-        anim = effect->owner->unk2D0;
+        anim = effect->owner->anim;
         frame = anim->frame[0];
         mode = effect->mode;
         triggered = FALSE;

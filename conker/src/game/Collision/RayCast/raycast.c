@@ -141,13 +141,13 @@ void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 d
     }
 }
 
-/* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
-   unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
+/* Intersects a ray with obj's collision cylinder (radius hitRadius, centre raised by hitOffsetY, y squashed by
+   hitRadiusOverHeight). Returns 1 with the entry/exit points and their distances from origin on a hit. */
 s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
     Vec3f pos;
 
     pos.x = obj->xpos;
-    pos.y = obj->ypos + obj->unkD6;
+    pos.y = obj->ypos + obj->hitOffsetY;
     pos.z = obj->zpos;
     {
         Vec3f start;
@@ -156,8 +156,8 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
         f32 yScale;
         f32 yUnscale;
 
-        yScale = obj->unkDC;
-        yUnscale = obj->unkE0;
+        yScale = obj->hitRadiusOverHeight;
+        yUnscale = obj->hitHeightOverRadius;
         start.x = origin->x;
         start.y = origin->y * yScale;
         start.z = origin->z;
@@ -170,7 +170,7 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
         center.x = pos.x;
         center.y = pos.y * yScale;
         center.z = pos.z;
-        if (math_raySphere(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
+        if (math_raySphere(&start, &unitDir, &center, obj->hitRadius, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
         outNear->y *= yUnscale;

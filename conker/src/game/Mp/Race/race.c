@@ -363,7 +363,7 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
                 } else if (D_800D2390 == 3) {
                     obj->yspd = 65.0f;
                 }
-                obj->unk21E = 0;
+                obj->waypoint = 0;
             lbl:; // matching: the empty labelled statement splits the block for IDO's scheduler
             }
         } else {
@@ -555,7 +555,7 @@ s32 mp_endRace(Racer *racer, Actor *obj, s32 mode) {
     gCurrentActor = obj;
     dc_glbl_CharNum = racer->actorIndex;
     obj->scriptCmd = script_getScript(0, mode);
-    obj->unk21C = 0;
+    obj->scriptTimer = 0;
     obj->imune = 0xFF;
     racer->state = 2;
     return 0;

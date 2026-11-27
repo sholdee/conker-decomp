@@ -185,7 +185,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
         obj->scriptCmd = script_getScript(0, obj->intelwalk);
-        obj->unk21C = 0;
+        obj->scriptTimer = 0;
         break;
     case 0x61: {
         s32 v;
@@ -266,30 +266,30 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x60:
         if (cmd->a[0].w < 0) {
-            obj->unk211 = 0xFF;
+            obj->pathGoal = 0xFF;
         } else {
-            obj->unk211 = mp_findNodeById(cmd->a[0].w);
+            obj->pathGoal = mp_findNodeById(cmd->a[0].w);
         }
-        obj->unk20F = 0xFF;
+        obj->pathNode = 0xFF;
         obj->task_attrib &= ~0x800;
         obj->intelwalk = cmd->a[1].w;
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
         obj->scriptCmd = script_getScript(0, obj->intelwalk);
-        obj->unk21C = 0;
+        obj->scriptTimer = 0;
         break;
     case 0x5B:
         if (cmd->a[0].w < 0) {
-            obj->unk211 = 0xFF;
+            obj->pathGoal = 0xFF;
         } else {
-            obj->unk211 = mp_findNodeById(cmd->a[0].w);
+            obj->pathGoal = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0x5C:
         if (cmd->a[0].w < 0) {
-            obj->unk20F = 0xFF;
+            obj->pathNode = 0xFF;
         } else {
-            obj->unk20F = mp_findNodeById(cmd->a[0].w);
+            obj->pathNode = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0x5D:
@@ -319,7 +319,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->mv != NULL) {
             obj->mv->unk129 = cmd->a[0].w;
         } else {
-            obj->unk222 = cmd->a[0].w;
+            obj->targetIndex = cmd->a[0].w;
         }
         break;
     case 0x18:
@@ -327,9 +327,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x19:
         if (cmd->a[0].w < 0) {
-            obj->unk222 = cmd->a[0].w;
+            obj->targetIndex = cmd->a[0].w;
         } else if (collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF) != -1) {
-            obj->unk222 = collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF);
+            obj->targetIndex = collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF);
         }
         break;
     case 0x1A:
@@ -337,15 +337,15 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x1B:
         if (cmd->a[0].w == 1) {
-            obj->unk9C |= cmd->a[1].w;
+            obj->hiddenBones |= cmd->a[1].w;
         } else {
-            obj->unk9C &= ~cmd->a[1].w;
+            obj->hiddenBones &= ~cmd->a[1].w;
         }
         break;
     case 0x1C:
-        obj->unk154 = cmd->a[0].w * 1.52587890625e-05f;
-        obj->unk158 = cmd->a[1].w * 1.52587890625e-05f;
-        obj->unk15C = cmd->a[2].w * 1.52587890625e-05f;
+        obj->targetScaleXz = cmd->a[0].w * 1.52587890625e-05f;
+        obj->targetScaleY = cmd->a[1].w * 1.52587890625e-05f;
+        obj->scaleStep = cmd->a[2].w * 1.52587890625e-05f;
         break;
     case 0x1E:
         if (cmd->a[0].w != 0) {
@@ -455,7 +455,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         actor_runAttackAt(cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[0].w, cmd->a[4].w, cmd->a[5].w, 0, 0);
         break;
     case 0x2D:
-        obj->unk21E = cmd->a[0].w;
+        obj->waypoint = cmd->a[0].w;
         break;
     case 0x2E:
         gButtonsPressed[cmd->a[0].w] = cmd->a[1].w;
@@ -491,7 +491,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelhitroute = cmd->a[0].w;
         break;
     case 0x32:
-        obj->unk10A = cmd->a[0].w;
+        obj->lastAttacker = cmd->a[0].w;
         break;
     case 0x33:
         gScriptSpeedups[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
@@ -528,7 +528,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
         obj->scriptCmd = script_getScript(0, cmd->a[0].w);
-        obj->unk21C = 0;
+        obj->scriptTimer = 0;
         break;
     case 0x36:
         if (cmd->a[0].w != 0) {
@@ -544,7 +544,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelwalk = cmd->a[0].w;
         break;
     case 0x39:
-        obj->unk221 = cmd->a[0].w;
+        obj->waypointStep = cmd->a[0].w;
         break;
     case 0x3A: {
         f32 scale;
@@ -568,11 +568,11 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x3D:
         if (cmd->a[0].w == 0) {
-            obj->unk94 = ~(cmd->a[1].w | 1);
+            obj->hiddenParts = ~(cmd->a[1].w | 1);
         } else if (cmd->a[0].w == 1) {
-            obj->unk94 &= ~cmd->a[1].w;
+            obj->hiddenParts &= ~cmd->a[1].w;
         } else {
-            obj->unk94 |= cmd->a[1].w;
+            obj->hiddenParts |= cmd->a[1].w;
         }
         break;
     case 0x3E:
@@ -589,11 +589,11 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x41:
-        obj->unk1CC = cmd->a[0].w;
+        obj->fallStartY = cmd->a[0].w;
         break;
     case 0x42:
         obj->intel_animspd = cmd->a[0].w >> 8;
-        obj->unk249 = cmd->a[0].w & 0xFF;
+        obj->animSpeedFrac = cmd->a[0].w & 0xFF;
         break;
     case 0x43:
         gSpawnPaths[obj->listpos][cmd->a[0].w + 1].x = cmd->a[1].w;
@@ -618,16 +618,16 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->inst_context = cmd->a[0].w;
         break;
     case 0x46:
-        obj->unk234 = cmd->a[0].w;
-        obj->unk236 = cmd->a[1].w;
-        obj->unk237 = cmd->a[2].w;
+        obj->nearScript = cmd->a[0].w;
+        obj->nearRange = cmd->a[1].w;
+        obj->nearCone = cmd->a[2].w;
         break;
     case 0x47:
         obj->mv->ind_cnt = cmd->a[0].w;
         break;
     case 0x48:
         obj->doing_hit = cmd->a[0].w;
-        obj->unk114 = cmd->a[1].w;
+        obj->doingHitTimer = cmd->a[1].w;
         break;
     case 0x49:
         obj->forced_lod = cmd->a[0].w;
@@ -703,7 +703,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x57:
-        obj->unk21C = cmd->a[0].w;
+        obj->scriptTimer = cmd->a[0].w;
         break;
     case 0x58:
         obj->unk140 = cmd->a[0].w;
@@ -720,7 +720,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x59:
-        obj->unk20B[cmd->a[1].w] = cmd->a[0].w;
+        obj->visibleWith[cmd->a[1].w] = cmd->a[0].w;
         break;
     case 0x68:
         obj->cullDistance = cmd->a[0].w;
@@ -769,7 +769,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = cmd->a[0].w;
         val = cmd->a[1].w;
-        obj->unk68[idx] = val;
+        obj->swapTexture[idx] = val;
     }
         break;
     case 0x71: {
@@ -884,10 +884,10 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->unk1AF = cmd->a[0].w;
         break;
     case 0x7C:
-        obj->unk23E = cmd->a[0].w;
+        obj->arriveRange = cmd->a[0].w;
         break;
     case 0x7D:
-        obj->unk328 = cmd->a[0].w + 1;
+        obj->radarColor = cmd->a[0].w + 1;
         break;
     case 0x7E:
         obj->mv->unk7C = cmd->a[0].w;
@@ -916,7 +916,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x83:
-        obj->unk238 = cmd->a[0].w;
+        obj->stunEndScript = cmd->a[0].w;
         break;
     case 0x84:
         obj->mv->transport = cmd->a[0].w;
@@ -925,7 +925,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         actor_finishDeath(OBJ_INDEX(obj));
         break;
     case 0x86:
-        obj->unk23D = cmd->a[0].w;
+        obj->sightRange = cmd->a[0].w;
         break;
     case 0x87:
         actor_kill(obj, 0xF);
@@ -934,7 +934,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         actor_kill(obj, 9);
         break;
     case 0x89:
-        obj->unk22E = cmd->a[0].w;
+        obj->alertCooldown = cmd->a[0].w;
         break;
     case 0x8A:
         obj->fogMode = cmd->a[0].w;
@@ -1010,7 +1010,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x91:
         return obj->intelwalk;
     case 0x92:
-        return obj->unk21C;
+        return obj->scriptTimer;
     case 0x93:
         return obj->energy;
     case 0xA8:
@@ -1085,9 +1085,9 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x9F:
         return obj->speedup;
     case 0xA0:
-        return obj->unk223;
+        return obj->moveMode;
     case 0xA1:
-        return obj->unk234;
+        return obj->nearScript;
     case 0xB3:
         return obj->theta * 65536.0f;
     case 0xA4:
@@ -1101,7 +1101,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xA3:
         return obj->task_attrib & 0x40;
     case 0xA6:
-        return (obj->unk1CC - obj->ypos) > 150.0f;
+        return (obj->fallStartY - obj->ypos) > 150.0f;
     case 0xA7:
         return player_getSpawnIndex(obj) | 0xD000;
     case 0xA9:
@@ -1131,10 +1131,10 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB2:
         return (&obj->taskint[0])[cmd->a[0].w];
     case 0xB4:
-        return obj->unk10A;
+        return obj->lastAttacker;
     case 0xB5: {
         u8 v;
-        v = obj->unk10A;
+        v = obj->lastAttacker;
         if (v & 0x80) {
             return movement_obj[v & ~0x80].type;
         }
@@ -1149,7 +1149,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return v;
     }
     case 0xB8:
-        return obj->unk2CA;
+        return obj->lookYaw;
     case 0xB9: {
         s32 x;
         s32 z;
@@ -1191,21 +1191,21 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xC5:
         return obj->norun;
     case 0xC7:
-        if (obj->unk211 == 0xFF) {
+        if (obj->pathGoal == 0xFF) {
             return 1;
         }
         return obj->task_attrib & 0x800;
     case 0xDB:
         if (cmd->a[0].w == 1) {
-            if (obj->unk20F == 0xFF) {
+            if (obj->pathNode == 0xFF) {
                 return 0xFF;
             }
-            return gPathNodes[obj->unk20F].unk7;
+            return gPathNodes[obj->pathNode].unk7;
         }
-        if (obj->unk211 == 0xFF) {
+        if (obj->pathGoal == 0xFF) {
             return 0xFF;
         }
-        return gPathNodes[obj->unk211].unk7;
+        return gPathNodes[obj->pathGoal].unk7;
     case 0xC8: {
         f32 x;
         f32 y;
@@ -1213,18 +1213,18 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 dist2;
         s32 dist;
         s32 found;
-        if (obj->unk20F == 0xFF || obj->unk211 == 0xFF) {
+        if (obj->pathNode == 0xFF || obj->pathGoal == 0xFF) {
             return 0;
         }
-        found = mp_getNodePos(obj->unk20F, &x, &y, &z);
+        found = mp_getNodePos(obj->pathNode, &x, &y, &z);
         dist = -1;
         if (found != 0) {
             x -= obj->xpos;
             y -= obj->ypos;
             z -= obj->zpos;
-            dist = obj->unk216 + (s32)sqrtf(x * x + y * y + z * z);
-            if (obj->unk20F != obj->unk211) {
-                if (mp_getNodePos(obj->unk211, &x, &y, &z) != 0) {
+            dist = obj->pathDistance + (s32)sqrtf(x * x + y * y + z * z);
+            if (obj->pathNode != obj->pathGoal) {
+                if (mp_getNodePos(obj->pathGoal, &x, &y, &z) != 0) {
                     x -= obj->xpos;
                     y -= obj->ypos;
                     z -= obj->zpos;
@@ -1242,8 +1242,8 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xCA: {
         u8 b;
         b = 0xFF;
-        if (obj->unk20F != 0xFF) {
-            return gPathNodes[obj->unk20F].unk7;
+        if (obj->pathNode != 0xFF) {
+            return gPathNodes[obj->pathNode].unk7;
         }
         gPathNearerThanNode = obj->unk212[1];
         ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
@@ -1430,7 +1430,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD6:
         return save_checkMatchOver();
     case 0xD7:
-        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->waterHeight == -10000.0f) {
+        if ((obj->fallStartY - obj->ypos) > 600.0f && obj->waterHeight == -10000.0f) {
             return 1;
         }
         return 0;

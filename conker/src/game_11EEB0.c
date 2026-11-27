@@ -77,19 +77,19 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* Picks actor->unk68[0] by state (0x14 or not) and actor->unk68[1] by the bit pairs of actor->taskint[0]. */
+/* Picks actor->swapTexture[0] by state (0x14 or not) and actor->swapTexture[1] by the bit pairs of actor->taskint[0]. */
 void func_150F1CB0(Actor *actor) {
     if (actor->animseq.uh == 0x14) {
-        actor->unk68[0] = 0x1B;
+        actor->swapTexture[0] = 0x1B;
     } else {
-        actor->unk68[0] = 0xC;
+        actor->swapTexture[0] = 0xC;
     }
-    actor->unk68[1] = 0x13;
+    actor->swapTexture[1] = 0x13;
     if ((actor->taskint[0] & 3) == 3) {
-        actor->unk68[1] = 0x14;
+        actor->swapTexture[1] = 0x14;
     }
     if ((actor->taskint[0] & 0xC) == 0xC) {
-        actor->unk68[1] = 0x17;
+        actor->swapTexture[1] = 0x17;
     }
 }
 

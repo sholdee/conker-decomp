@@ -225,7 +225,7 @@ void weapon_updateTank(Actor *obj) {
             velocity = obj->speed;
             if (fabsf(velocity) > 5.0f) {
                 obj->doing_hit = 1;
-                obj->unk114 = 2.0f;
+                obj->doingHitTimer = 2.0f;
                 if (velocity < 0.0f) {
                     obj->doing_hit = 2;
                 }
@@ -311,7 +311,7 @@ void weapon_updateTank(Actor *obj) {
                 }
             }
             if (gButtonsPressed[buttonPad] & Z_TRIG) {
-                obj->unk21C = 0;
+                obj->scriptTimer = 0;
                 obj->scriptCmd = script_getScript(0, 2);
             }
         }
@@ -610,7 +610,7 @@ void weapon_releaseTankCamera(Actor *obj) {
     obj->drawtype = 3;
     obj->bodyRadius = 0;
     obj->imune = 0xFF;
-    obj->unk328 = 0;
+    obj->radarColor = 0;
     if (obj->CameraPtr != NULL) {
         camera = obj->CameraPtr;
         index = 0;
@@ -622,9 +622,9 @@ void weapon_releaseTankCamera(Actor *obj) {
         gPads[index].button &= ~R_TRIG;
         player = &movement_obj[index];
         player->forcedCullMask |= 1 << camera->CNumber;
-        if (player->unk10A != 0) {
+        if (player->lastAttacker != 0) {
             screen_startViewFlash(0xFF, 0, 0, 180, 20, camera->CNumber);
-            player->unk10A = 0;
+            player->lastAttacker = 0;
         }
     }
 }

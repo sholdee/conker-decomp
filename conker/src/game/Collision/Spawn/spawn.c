@@ -223,20 +223,20 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     obj->unk1D0 = 2;
     obj->scale_xz = spawn->xz_scale;
     obj->scale_y = spawn->y_scale;
-    obj->unk154 = spawn->xz_scale;
-    obj->unk158 = spawn->y_scale;
+    obj->targetScaleXz = spawn->xz_scale;
+    obj->targetScaleY = spawn->y_scale;
     obj->type = spawn->interaction_state;
     obj->xpos = spawn->x;
     obj->ypos = spawn->y;
     obj->zpos = spawn->z;
     obj->unk212[0] = 0xFF;
-    obj->unk20F = 0xFF;
-    obj->unk210 = 0xFF;
-    obj->unk211 = 0xFF;
+    obj->pathNode = 0xFF;
+    obj->prevPathNode = 0xFF;
+    obj->pathGoal = 0xFF;
     obj->team = 0xFF;
     obj->old_xpos = obj->xpos;
     obj->old_ypos = obj->ypos;
-    obj->unk1CC = obj->ypos;
+    obj->fallStartY = obj->ypos;
     obj->old_zpos = obj->zpos;
     if ((spawn->flags & 6) || (spawn->flags & 4) || (spawn->flags & 2)) {
         actor_fadeCommand(obj, 4, 0, 0, 0);
@@ -258,11 +258,11 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         }
     }
     obj->energy = spawn->unkE & 0xF;
-    obj->unk1E5 = spawn->unkF;
-    obj->unk1E6 = obj->unk1E5;
-    obj->unk221 = 1;
-    obj->unk23C = spawn->unk1C;
-    obj->unk23D = spawn->unk1D;
+    obj->moveTurnRate = spawn->unkF;
+    obj->faceTurnRate = obj->moveTurnRate;
+    obj->waypointStep = 1;
+    obj->nearRangeDefault = spawn->unk1C;
+    obj->sightRange = spawn->unk1D;
     obj->angle = spawn->angle << 8;
     angle = obj->angle;
     obj->langle = angle;
@@ -275,27 +275,27 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         obj->unk224 = obj->ypos;
     }
     if (obj->noshove & 0x10000000) {
-        obj->unk38 = obj->ypos - 500.0f;
+        obj->killHeight = obj->ypos - 500.0f;
     }
     if (obj->noshove & 0x800000) {
         gZoneCursorEnabled = 1;
     }
     obj->family = spawn->unk11;
     obj->unk66 = spawn->unk10;
-    obj->unk1DD[0] = 120;
-    obj->unk1DD[1] = 120;
-    obj->unk1DD[2] = 120;
+    obj->ambientColor[0] = 120;
+    obj->ambientColor[1] = 120;
+    obj->ambientColor[2] = 120;
     obj->unk1E0[0] = 255;
     obj->unk1E0[1] = 255;
     obj->unk1E0[2] = 255;
-    obj->unk23E = 4;
+    obj->arriveRange = 4;
     obj->intel_animspd = 1;
     obj->intel_accel = 100;
     obj->intel_decel = 100;
     obj->unk1FC |= 2;
     collision_applyModelDefaults(obj, type, spawn);
     t = spawn->unk13 & 0x7F;
-    obj->unk92 = ((spawn->unk13 & 0x80) << 8) | t;
+    obj->attachedObject = ((spawn->unk13 & 0x80) << 8) | t;
     obj->unk90 = spawn->unk14;
     collision_setObjectModel(idx, type, 1);
     if (type != 0xFF) {
@@ -318,18 +318,18 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if (((obj->unk66 & 0xC) == 8) || ((obj->unk66 & 0xC) == 0xC)) {
         collision_allocActorLights(obj);
     } else {
-        obj->unk314 = NULL;
+        obj->ambients = NULL;
     }
-    obj->unk288 = collision_getSpawnModelTypeIndex(type);
+    obj->modelTypeIndex = collision_getSpawnModelTypeIndex(type);
     if (gIsMultiplayer != 0) {
         t = save_getTeam(obj->playernumber);
         if (t >= 4) {
             t = 3;
         }
         if (type == 0x3B) {
-            obj->unk68[0] = t + 1;
+            obj->swapTexture[0] = t + 1;
         } else if (type == 0x77) {
-            obj->unk68[0] = t + 0x10;
+            obj->swapTexture[0] = t + 0x10;
         }
     }
     if ((gExpansionPak == 0) && (level != LEVEL_FRONTEND) && (spawn->keepTime == 0xFF)) {
@@ -386,12 +386,12 @@ void collision_allocActorLights(Actor *obj) {
             count = n;
         }
         for (i = 0; i <= gScreenLayout; i++) {
-            obj->unk304[i] = light_allocGfxLights(count);
+            obj->gfxLights[i] = light_allocGfxLights(count);
         }
-        if (obj->unk304[i - 1] != 0) {
-            obj->unk301 = count;
+        if (obj->gfxLights[i - 1] != 0) {
+            obj->maxLights = count;
         }
-        obj->unk314 = light_allocAmbients();
+        obj->ambients = light_allocAmbients();
     }
 }
 
@@ -410,7 +410,7 @@ void func_15083384(Actor *obj, s32 arg1) {
         }
         break;
     case 9:
-        obj->unk94 |= 2;
+        obj->hiddenParts |= 2;
         break;
     case 13:
         partSet = 0x76;
@@ -420,7 +420,7 @@ void func_15083384(Actor *obj, s32 arg1) {
         break;
     case 15:
         partSet = 0x77;
-        obj->unk94 |= 2;
+        obj->hiddenParts |= 2;
         break;
     case 29:
     case 30:
@@ -430,41 +430,41 @@ void func_15083384(Actor *obj, s32 arg1) {
             s32 n;
 
             n = arg1 - 29;
-            obj->unk94 = 0x1E;
+            obj->hiddenParts = 0x1E;
             if (n < 2) {
-                obj->unk94 &= ~0x14;
+                obj->hiddenParts &= ~0x14;
             } else {
-                obj->unk94 &= ~8;
+                obj->hiddenParts &= ~8;
             }
             if (n >> 1) {
-                obj->unk94 &= ~2;
+                obj->hiddenParts &= ~2;
             }
         }
         break;
     case 17: case 18: case 19: case 20: case 21: case 22:
     case 23: case 24: case 25: case 26: case 27: case 28:
         group = (arg1 - 17) >> 2;
-        obj->unk94 = 0x3E;
+        obj->hiddenParts = 0x3E;
         switch (group) {
         case 0:
-            obj->unk94 &= ~4;
+            obj->hiddenParts &= ~4;
             break;
         case 1:
-            obj->unk94 &= ~8;
+            obj->hiddenParts &= ~8;
             break;
         case 2:
-            obj->unk94 &= ~0x10;
+            obj->hiddenParts &= ~0x10;
             break;
         }
         switch (arg1 - group * 4 - 17) {
         case 1:
-            obj->unk94 &= ~2;
+            obj->hiddenParts &= ~2;
             break;
         case 2:
-            obj->unk94 &= ~0x20;
+            obj->hiddenParts &= ~0x20;
             break;
         case 3:
-            obj->unk94 &= ~0x22;
+            obj->hiddenParts &= ~0x22;
             break;
         }
         break;
@@ -529,20 +529,20 @@ void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2) {
         obj->bodyRadius = 0;
         obj->bodyHeight = 0;
         obj->bodyOffsetY = 0;
-        obj->unkD2 = 70;
-        obj->unkD4 = 70;
-        obj->unkD6 = 0;
+        obj->hitRadius = 70;
+        obj->hitHeight = 70;
+        obj->hitOffsetY = 0;
         obj->shadow_size = 0;
-        obj->unkC8 = 0.0f;
+        obj->rootOffsetY = 0.0f;
     } else {
-        obj->unkC8 = gModelDefs[modelId]->unk6;
+        obj->rootOffsetY = gModelDefs[modelId]->unk6;
         actor_setScale(obj, obj->scale_xz, obj->scale_y);
         def = gModelDefs[modelId];
         obj->drawtype = def->unk12;
     }
-    obj->unk6 = player_getBaseCharacterType(obj);
-    if (gModelAnimCounts[obj->unk6] != 0) {
-        obj->unk58 = (s32)rom_findPath(0, 2, 2, obj->unk6);
+    obj->baseCharacterType = player_getBaseCharacterType(obj);
+    if (gModelAnimCounts[obj->baseCharacterType] != 0) {
+        obj->unk58 = (s32)rom_findPath(0, 2, 2, obj->baseCharacterType);
     }
 }
 
@@ -557,11 +557,11 @@ s32 collision_allocAnimState(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     if (gModelAnimCounts[modelId] == 0) {
         return 0;
     }
-    obj->unk2D0 = allocate_memory(0x3E0, 1, 2, 0);
-    if (obj->unk2D0 == NULL) {
+    obj->anim = allocate_memory(0x3E0, 1, 2, 0);
+    if (obj->anim == NULL) {
         return 1;
     }
-    bzero(obj->unk2D0, 0x40);
+    bzero(obj->anim, 0x40);
     actor_playAnim(obj, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
     return 0;
 }
@@ -591,11 +591,11 @@ void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
             obj->cullDistance = 0;
         }
         obj->unk13B = def->unk39;
-        obj->unk2CB = def->unk33;
-        obj->unk2CC = def->unk34;
+        obj->bouncePercent = def->unk33;
+        obj->impactSound = def->unk34;
         obj->drawtype = def->unk12;
-        obj->unk68[0] = def->eyeDefault[0];
-        obj->unk68[1] = def->eyeDefault[1];
+        obj->swapTexture[0] = def->eyeDefault[0];
+        obj->swapTexture[1] = def->eyeDefault[1];
         obj->shadow_size = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = gSubModelLists[def->subModelList];
@@ -629,31 +629,31 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
     obj->imune = 0xFF;
     obj->attach_char = (parent - movement_obj) + 1;
     obj->basemtx = arg1;
-    obj->unk123 = 1;
+    obj->noBlobShadow = 1;
     obj->character_type = modelId;
     obj->unk66 = parent->unk66;
     obj->unk66 &= ~0x10;
     // matching: a no-op |= 0 (a constant flag field upstream) keeps the reload of unk66
     obj->unk66 |= 0;
-    obj->unk1DD[0] = parent->unk1DD[0];
-    obj->unk1DD[1] = parent->unk1DD[1];
-    obj->unk1DD[2] = parent->unk1DD[1];
+    obj->ambientColor[0] = parent->ambientColor[0];
+    obj->ambientColor[1] = parent->ambientColor[1];
+    obj->ambientColor[2] = parent->ambientColor[1];
     obj->unk1E0[0] = parent->unk1E0[0];
     obj->unk1E0[1] = parent->unk1E0[1];
     obj->unk1E0[2] = parent->unk1E0[2];
     if (inheritScale == 0) {
         obj->scale_xz = 1.0f;
         obj->scale_y = 1.0f;
-        obj->unk154 = 1.0f;
-        obj->unk158 = 1.0f;
+        obj->targetScaleXz = 1.0f;
+        obj->targetScaleY = 1.0f;
     } else {
         obj->scale_xz = parent->scale_xz;
         obj->scale_y = parent->scale_y;
-        obj->unk154 = parent->unk154;
-        obj->unk158 = parent->unk158;
+        obj->targetScaleXz = parent->targetScaleXz;
+        obj->targetScaleY = parent->targetScaleY;
     }
     obj->unk101 = inheritScale;
-    obj->unkAC = arg5;
+    obj->modelLoadFlags = arg5;
     model_loadDef(modelId, 0);
     if (arg5 & 1) {
         obj->noshove |= 0x4000;
@@ -664,12 +664,12 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
         animFlag = 1;
     }
     for (i = 0; i <= gScreenLayout; i++) {
-        obj->unk304[i] = light_allocGfxLights(1);
+        obj->gfxLights[i] = light_allocGfxLights(1);
     }
-    if (obj->unk304[i - 1] != 0) {
-        obj->unk301 = 1;
+    if (obj->gfxLights[i - 1] != 0) {
+        obj->maxLights = 1;
     }
-    obj->unk314 = light_allocAmbients();
+    obj->ambients = light_allocAmbients();
     if (gCutsceneStates[0] == 1) {
         blocked = 1;
     } else {
@@ -1095,7 +1095,7 @@ void func_15084C30(Actor *obj) {
     f32 phase;
 
     if (obj->character_type == 0x94) {
-        anim = obj->unk2D0;
+        anim = obj->anim;
         phase = math_random() % (s32)anim->numFrames[0];
         anim->frame[0] = phase;
     }

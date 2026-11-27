@@ -261,7 +261,7 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
         if (obj->events[obj->speccnt].time < 900.0f) {
             gEventParam = obj->events[obj->speccnt].parameter;
             gEventParamF = *(f32 *)&gEventParam;
-            token = obj->unk2D0->frameRom[0];
+            token = obj->anim->frameRom[0];
             if (gCutsceneStates[0] == 0 || gCutsceneRunTimedEvents[0] != 0) {
                 id = obj->events[obj->speccnt].id;
                 if (filtered) {
@@ -279,8 +279,8 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
                     gTimedEventProcs[id]();
                 }
             }
-            if (token != obj->unk2D0->frameRom[0]) {
-                time = obj->unk2D0->frame[0];
+            if (token != obj->anim->frameRom[0]) {
+                time = obj->anim->frame[0];
             } else {
                 obj->speccnt++;
             }
@@ -377,7 +377,7 @@ void event_pickTurnAnim(void) {
     u8 sel = 0;
     u8 absDiff;
 
-    angleDiff = (gCurrentActor->langle + (gCurrentActor->unk1FD << 8)) -
+    angleDiff = (gCurrentActor->langle + (gCurrentActor->animEndTurn << 8)) -
                 actor_getDirectionAngle(movement_obj[0].xpos - gCurrentActor->xpos,
                               gCurrentActor->zpos - movement_obj[0].zpos, 0);
     absDiff = angleDiff >> 8;
@@ -401,7 +401,7 @@ void event_pickTurnAnim(void) {
     }
     gCurrentActor->speccnt = 0;
     gCurrentActor->intel_animseq = gTurnAnimTable[0][sel];
-    gCurrentActor->unk21C = 20000;
+    gCurrentActor->scriptTimer = 20000;
 }
 
 void func_1506B4EC(void) {
@@ -409,7 +409,7 @@ void func_1506B4EC(void) {
 }
 
 void func_1506B50C(void) {
-    gCurrentActor->unk21C = 0;
+    gCurrentActor->scriptTimer = 0;
 }
 
 void func_1506B520(void) {
@@ -444,7 +444,7 @@ void func_1506B5CC(void) {
 void func_1506B5E4(void) {
     actor_fadeCommand(gCurrentActor, 2, 7, 8, 0);
     gCurrentActor->animsp = 0.0f;
-    gCurrentActor->unk2D0->speed[0] = 0.0f;
+    gCurrentActor->anim->speed[0] = 0.0f;
 }
 
 /* Picks a random entry (0..count-1) of gPissedWalkFirstAnims / gPissedWalkAnims for the object's mv->pissed_walk. */
@@ -659,7 +659,7 @@ void event_setNoRun(void) {
 
 void event_setDoingHit(void) {
     gCurrentActor->doing_hit = gEventParam;
-    gCurrentActor->unk114 = gEventParam >> 8;
+    gCurrentActor->doingHitTimer = gEventParam >> 8;
 }
 
 void event_playSoundCommandAboveWater(void) {
@@ -715,7 +715,7 @@ void event_playSoundCommand(void) {
             break;
         }
         type = collision_getSurfaceType(gCurrentActor->floorMaterial);
-        if (type == 0xC && gCurrentActor->unkCC > -17.0f) {
+        if (type == 0xC && gCurrentActor->heightOffset > -17.0f) {
             sound = sound_pickVariant(0x9C, 2);
         } else if (gCurrentActor->waterHeight != -10000.0f && gCurrentActor->ypos <= gCurrentActor->waterHeight) {
             sound = sound_pickEffectVariant(8, NULL, sound);
@@ -821,7 +821,7 @@ void event_stopSound2(void) {
  * Spawns a projectile object of the given kind (gProjectileSpawnOffsets / gProjectileHitValues rows) from the current
  * object, at `pos` (an f32[3]), at the bone from gProjectileSpawnOffsets, or just above the object. `flags`
  * aims it: 1 = no auto-aim, 2 = face the player, 4 = arc onto the player, 8 = random yaw spread,
- * 0x10 = lead the target unk222, 0x20 = remember unk222. Returns the new object.
+ * 0x10 = lead the target targetIndex, 0x20 = remember targetIndex. Returns the new object.
  */
 u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
                   f32 scale, f32 *pos, s32 flags, s32 arg10) {
@@ -854,7 +854,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
             actor_remove(obj, 0);
         }
     }
-    obj->unk136 = 11;
+    obj->spriteTexture = 11;
     obj->type = 4;
     obj->energy = 1;
     obj->langle = gCurrentActor->langle;
@@ -892,12 +892,12 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     } else {
         obj->drawtype = 5;
         for (i = 0; i <= gScreenLayout; i++) {
-            obj->unk304[i] = light_allocGfxLights(1);
+            obj->gfxLights[i] = light_allocGfxLights(1);
         }
-        if (obj->unk304[i - 1] != 0) {
-            obj->unk301 = 1;
+        if (obj->gfxLights[i - 1] != 0) {
+            obj->maxLights = 1;
         }
-        obj->unk314 = light_allocAmbients();
+        obj->ambients = light_allocAmbients();
         switch (kind) {
         case 2:
             obj->vtilt = 260.0f;
@@ -980,7 +980,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         f32 pitch;
         f32 dummy;
 
-        target = &movement_obj[gCurrentActor->unk222];
+        target = &movement_obj[gCurrentActor->targetIndex];
         actor_splitVelocity(target->angle, target->speed * 4.0f, 0.0f, &offx, &offz, &offy);
         tx = target->xpos + offx;
         tz = target->zpos + offz;
@@ -1005,22 +1005,22 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     obj->count1 = 0;
     obj->count2 = 0xFF;
     if (flags & 0x20) {
-        obj->unk126 = obj->count2 = gCurrentActor->unk222;
+        obj->homingTarget = obj->count2 = gCurrentActor->targetIndex;
     }
     obj->count4 = 0x26;
     if (arg10 == 0) {
         obj->doing_hit = gProjectileHitValues[kind] + 1;
     }
     obj->shad = 100.0f;
-    obj->unk114 = 255.0f;
+    obj->doingHitTimer = 255.0f;
     obj->bodyRadius = 5;
     obj->bodyHeight = 5;
-    obj->unkEC = 1.0f;
-    obj->unkF0 = 1.0f;
-    obj->unkDC = 1.0f;
-    obj->unkE0 = 1.0f;
+    obj->bodyRadiusOverHeight = 1.0f;
+    obj->bodyHeightOverRadius = 1.0f;
+    obj->hitRadiusOverHeight = 1.0f;
+    obj->hitHeightOverRadius = 1.0f;
     obj->owner = dc_glbl_CharNum + 1;
-    obj->unk122 = 0x11;
+    obj->spriteSize = 0x11;
     obj->intelwalk = 0;
     obj->imune = obj->intelwalk * 0 + 0xFF; // matching: IDO reuses the zero of the unk232 store
     obj->noshove = 0x100E;
@@ -1250,7 +1250,7 @@ void event_resetBlink(void) {
 
 /*
  * face_requestExpression with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
- * scaled by 1 / unk2D0->unk10.
+ * scaled by 1 / anim->unk10.
  */
 void event_requestExpression(void) {
     Actor *obj = gCurrentActor;
@@ -1263,7 +1263,7 @@ void event_requestExpression(void) {
         hi = gEventParam >> 24;
         lo = (gEventParam >> 16) & 0xFF;
         value = gEventParam & 0xFFFF;
-        divisor = obj->unk2D0->speed[0];
+        divisor = obj->anim->speed[0];
         if (divisor == 0.0f) {
             divisor = 0.01f;
         }
@@ -1374,8 +1374,8 @@ void event_setIntelHitRoute(void) {
 }
 
 void func_1506DBA0(void) {
-    gCurrentActor->unk1E5 = gEventParam & 0xFF;
-    gCurrentActor->unk1E6 = (gEventParam >> 8) & 0xFF;
+    gCurrentActor->moveTurnRate = gEventParam & 0xFF;
+    gCurrentActor->faceTurnRate = (gEventParam >> 8) & 0xFF;
 }
 
 void func_1506DBD4(void) {
@@ -1632,7 +1632,7 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
         }
     }
     if (id >= 2000) {
-        entry = gSpawnModelData[obj->unk288][id - 2000];
+        entry = gSpawnModelData[obj->modelTypeIndex][id - 2000];
         if (entry == 0) {
             return 0;
         }
@@ -1797,7 +1797,7 @@ void event_throwHeldObject(void) {
             movement_obj[index].stunnednum = 0;
             movement_obj[index].stunnedseq = actor_findReaction(12, held);
             movement_obj[index].animseq.uh = 0xFFFF;
-            movement_obj[index].unk1CC = 1000000.0f;
+            movement_obj[index].fallStartY = 1000000.0f;
             actor_advanceReaction(index, held);
             movement_obj[index].task_attrib |= 0x40;
         }
@@ -1816,7 +1816,7 @@ void event_dropHeldObject(void) {
             movement_obj[index].speed = 0.0f;
             movement_obj[index].yspd = 0.0f;
             movement_obj[index].ygrav = 6.0f;
-            movement_obj[index].unk1CC = 1000000.0f;
+            movement_obj[index].fallStartY = 1000000.0f;
         }
         gCurrentActor->lifting = 0;
     }
@@ -1833,11 +1833,11 @@ void func_1506EC50(void) {
 }
 
 void func_1506ECD0(void) {
-    gCurrentActor->unk2D0->anim[0] |= 0x8000;
+    gCurrentActor->anim->anim[0] |= 0x8000;
 }
 
 void func_1506ECF0(void) {
-    gCurrentActor->unk3A = gEventParam;
+    gCurrentActor->hopSpeed = gEventParam;
 }
 
 void func_1506ED0C(void) {
@@ -1856,7 +1856,7 @@ void func_1506ED68(void) {
 }
 
 void func_1506ED90(void) {
-    gCurrentActor->unk21C = gEventParam;
+    gCurrentActor->scriptTimer = gEventParam;
 }
 
 void event_setMvmtControl(void) {
@@ -1895,7 +1895,7 @@ void func_1506EEAC(void) {
 }
 
 void func_1506EED8(void) {
-    gCurrentActor->unk24E = gEventParam;
+    gCurrentActor->wallHitScript = gEventParam;
 }
 
 void event_startHeadEffect(void) {
@@ -2435,10 +2435,10 @@ void event_releaseBeamSlot(s32 cmd) {
 }
 
 void event_fireSlotProjectiles(s32 cmd) {
-    if ((gCurrentActor->unk94 & 0x10) == 0) {
+    if ((gCurrentActor->hiddenParts & 0x10) == 0) {
         beam_fireSlotProjectile(gCurrentActor, 0, 0xFF, 1);
     }
-    if ((gCurrentActor->unk94 & 8) == 0) {
+    if ((gCurrentActor->hiddenParts & 8) == 0) {
         beam_fireSlotProjectile(gCurrentActor, 1, 0xFF, 1);
     }
 }
@@ -2965,7 +2965,7 @@ void event_skipNextEventInCutscene(void) {
 
 void func_15071FB0(void) {
     if (gCurrentActor->shad == 0.0f) {
-        gCurrentActor->unk10C = 0;
+        gCurrentActor->reactionTimer = 0;
     }
 }
 
@@ -2999,7 +2999,7 @@ void event_launchPlayer(void) {
             return;
         }
         player->angle = gCurrentActor->angle + 0x8000;
-        player->unk1CC = -5000.0f;
+        player->fallStartY = -5000.0f;
     } else {
         if (gCurrentActor->taskint[1] >= 113) {
             anim = 741;
@@ -3008,7 +3008,7 @@ void event_launchPlayer(void) {
             anim = 50;
             player->angle = gCurrentActor->angle;
             if (gCurrentActor->unk251 != 0) {
-                player->unk1CC = movement_obj[0].ypos + 800.0f;
+                player->fallStartY = movement_obj[0].ypos + 800.0f;
             }
             visible = 0;
         }
@@ -3068,15 +3068,15 @@ void event_fadeOwnedObject(void) {
 }
 
 void func_1507233C(void) {
-    gCurrentActor->unk94 = ~(gEventParam | 1);
+    gCurrentActor->hiddenParts = ~(gEventParam | 1);
 }
 
 void func_15072360(void) {
-    gCurrentActor->unk94 &= ~gEventParam;
+    gCurrentActor->hiddenParts &= ~gEventParam;
 }
 
 void func_15072388(void) {
-    gCurrentActor->unk94 |= gEventParam;
+    gCurrentActor->hiddenParts |= gEventParam;
 }
 
 void event_removeObjectById(void) {
@@ -3142,11 +3142,11 @@ void event_respawnObject(void) {
     obj->zpos = gCurrentActor->zpos;
     if (gIsMultiplayer != 0) {
         if (gCurrentActor->character_type == 0x53) {
-            gCurrentActor->unk222 = obj - movement_obj;
+            gCurrentActor->targetIndex = obj - movement_obj;
         }
     }
     if (level == LEVEL_WMP_RAPTOR && obj->character_type == 0x16) {
-        obj->unk94 |= 2;
+        obj->hiddenParts |= 2;
     }
 }
 
@@ -3156,13 +3156,13 @@ void func_1507266C(void) {
     Actor *obj;
 
     if (gIsMultiplayer == 0) {
-        if (gCurrentActor->unk222 == 0) {
+        if (gCurrentActor->targetIndex == 0) {
             return;
         }
     }
     packed = gEventParam;
     angle = gEventParam >> 16;
-    obj = &movement_obj[gCurrentActor->unk222];
+    obj = &movement_obj[gCurrentActor->targetIndex];
     obj->attach_char = dc_glbl_CharNum + 1;
     obj->basemtx = angle;
     obj->unk101 = 4;
@@ -3172,10 +3172,10 @@ void func_1507266C(void) {
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
     obj->intelwalk = packed;
-    obj->unkEC = 1.0f;
-    obj->unkF0 = 1.0f;
-    obj->unkDC = 1.0f;
-    obj->unkE0 = 1.0f;
+    obj->bodyRadiusOverHeight = 1.0f;
+    obj->bodyHeightOverRadius = 1.0f;
+    obj->hitRadiusOverHeight = 1.0f;
+    obj->hitHeightOverRadius = 1.0f;
     func_151B5BA0(&movement_obj[dc_glbl_CharNum], obj, angle);
 }
 
@@ -3184,7 +3184,7 @@ void func_15072740(void) {
     Actor *obj;
 
     angle = gEventParam >> 16;
-    obj = &movement_obj[gCurrentActor->unk222];
+    obj = &movement_obj[gCurrentActor->targetIndex];
     obj->attach_char = dc_glbl_CharNum + 1;
     obj->basemtx = angle;
     obj->unk101 = 4;
@@ -3192,7 +3192,7 @@ void func_15072740(void) {
 
 void event_setAnimSpeedTenths(void) {
     gCurrentActor->animsp = gEventParam * 0.1f;
-    gCurrentActor->unk2D0->speed[0] = gCurrentActor->animsp;
+    gCurrentActor->anim->speed[0] = gCurrentActor->animsp;
 }
 
 void event_setOwnedObjectsState(void) {
@@ -3363,19 +3363,19 @@ void event_removePartSet(void) {
 }
 
 void func_15072E7C(void) {
-    gCurrentActor->unk10C = gEventParam;
+    gCurrentActor->reactionTimer = gEventParam;
 }
 
 void event_scaleAnimSpeed(void) {
-    gCurrentActor->unk2D0->speed[0] *= gEventParamF;
+    gCurrentActor->anim->speed[0] *= gEventParamF;
 }
 
 void func_15072EC0(void) {
     AnimInstance *anim;
 
-    anim = gCurrentActor->unk2D0;
+    anim = gCurrentActor->anim;
     if (anim->speed[0] < gEventParamF) {
-        gCurrentActor->unk10C = 0;
+        gCurrentActor->reactionTimer = 0;
     }
 }
 
@@ -3396,7 +3396,7 @@ void func_15072F10(void) {
     targetX = targetX * 5000.0f + gCurrentActor->xpos;
     targetZ = targetZ * 5000.0f + gCurrentActor->zpos;
     targetY = targetY * 5000.0f + gCurrentActor->ypos;
-    collision_castRayAtObjects(gCurrentActor, gCurrentActor->xpos, gCurrentActor->ypos + gCurrentActor->unkD6,
+    collision_castRayAtObjects(gCurrentActor, gCurrentActor->xpos, gCurrentActor->ypos + gCurrentActor->hitOffsetY,
                   gCurrentActor->zpos, targetX, targetY, targetZ, dc_glbl_CharNum, 18);
 }
 
@@ -3404,7 +3404,7 @@ void event_emptyTimedEvent120(void) {
 }
 
 void func_15073054(void) {
-    gCurrentActor->unk22E = gEventParam;
+    gCurrentActor->alertCooldown = gEventParam;
 }
 
 void func_15073070(void) {
@@ -3472,26 +3472,26 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
     obj->unk66 = parent->unk66 & 0xC;
     obj->bodyRadius = 10;
     obj->bodyHeight = 10;
-    obj->unkEC = 1.0f;
-    obj->unkF0 = 1.0f;
-    obj->unkDC = 1.0f;
-    obj->unkE0 = 1.0f;
+    obj->bodyRadiusOverHeight = 1.0f;
+    obj->bodyHeightOverRadius = 1.0f;
+    obj->hitRadiusOverHeight = 1.0f;
+    obj->hitHeightOverRadius = 1.0f;
     obj->scale_xz = 0.5f;
     obj->scale_y = 0.5f;
     if (anim == 0x1F) {
-        obj->unkC8 = 10.0f;
+        obj->rootOffsetY = 10.0f;
     }
     obj->headEffectState = anim;
     obj->drawtype = 5;
     obj->unique_id = 255U - (obj - movement_obj);
     collision_createPartSet(obj, anim, 1.0f, 0);
     for (i = 0; i <= gScreenLayout; i++) {
-        obj->unk304[i] = light_allocGfxLights(1);
+        obj->gfxLights[i] = light_allocGfxLights(1);
     }
-    if (obj->unk304[i - 1] != 0) {
-        obj->unk301 = 1;
+    if (obj->gfxLights[i - 1] != 0) {
+        obj->maxLights = 1;
     }
-    obj->unk314 = light_allocAmbients();
+    obj->ambients = light_allocAmbients();
     effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
     return obj;
 }
@@ -3586,13 +3586,13 @@ void event_releaseHeldObject(void) {
 }
 
 void event_setWaitTimer(void) {
-    gCurrentActor->unk64 = gEventParam;
+    gCurrentActor->eventWaitTimer = gEventParam;
 }
 
 void event_waitForTimer(void) {
-    gCurrentActor->unk64 -= gFrameSteps;
+    gCurrentActor->eventWaitTimer -= gFrameSteps;
 
-    if (gCurrentActor->unk64 >= 0) {
+    if (gCurrentActor->eventWaitTimer >= 0) {
         gEventLoopRunning = 0;
         gCurrentActor->speccnt--;
         gEventResult = gEventParam;
@@ -3603,7 +3603,7 @@ void event_setStickSpeed(void) {
     gCurrentActor->stickspeed = gEventParam;
 }
 
-/* Applies actor_hitScripted (gEventParam & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
+/* Applies actor_hitScripted (gEventParam & 0xFF00FF) to object unk124; bit 30 sets its fallStartY to our height. */
 void func_15073A50(void) {
     Actor *parent;
     s32 flags;
@@ -3616,9 +3616,9 @@ void func_15073A50(void) {
         parent->lifting = 0;
         movement_obj[index].imune = 0;
         actor_hitScripted(&movement_obj[index], gEventParam & 0xFF00FF, 0, dc_glbl_CharNum);
-        movement_obj[index].unk1CC = 100000.0f;
+        movement_obj[index].fallStartY = 100000.0f;
         if (flags & 0x40000000) {
-            movement_obj[index].unk1CC = gCurrentActor->ypos;
+            movement_obj[index].fallStartY = gCurrentActor->ypos;
         }
         movement_obj[index].imune = 20;
         movement_obj[index].angle = gCurrentActor->langle + flags;
@@ -3650,14 +3650,14 @@ void event_emptyAnimState50(void) {
 }
 
 void func_15073C50(void) {
-    gCurrentActor->unk224 = movement_obj[gCurrentActor->unk222].ypos + gEventParam;
+    gCurrentActor->unk224 = movement_obj[gCurrentActor->targetIndex].ypos + gEventParam;
 }
 
 void func_15073CB8(void) {
     Actor *obj = actor_findByType(0x53);
 
     if (obj != NULL && (u16)obj->intel_animseq == 0x1F) {
-        obj->unk21C = 0;
+        obj->scriptTimer = 0;
     }
 }
 
@@ -3709,7 +3709,7 @@ void event_emptyAnimState53(void) {
 }
 
 void func_15073F5C(void) {
-    gCurrentActor->unk2CB = gEventParam;
+    gCurrentActor->bouncePercent = gEventParam;
 }
 
 void func_15073F78(void) {
@@ -3830,7 +3830,7 @@ void event_spawnThrownItem(void) {
             obj->langle = angle;
             obj->angle = angle;
             obj->speed = speed;
-            obj->unk1CC = obj->ypos;
+            obj->fallStartY = obj->ypos;
             if (player->character_type == 0x4A) {
                 state = 5;
                 obj->speed = 0.0f;
@@ -3867,7 +3867,7 @@ void event_spawnThrownItem(void) {
                 obj->yspd = player->yspd;
                 obj->imune = 0xFF;
                 obj->ypos = player->ypos - 40.0f;
-                obj->unk222 = player->unk222;
+                obj->targetIndex = player->targetIndex;
             }
             obj->intelwalk = state;
             obj->energy |= 0x80;
@@ -3947,7 +3947,7 @@ void event_addShotsFired(void) {
 }
 
 void func_15074870(void) {
-    gCurrentActor->unk24F = gEventParam;
+    gCurrentActor->turnAnimRow = gEventParam;
 }
 
 /* Adds the top byte to unk138 when bit `mask` of word taskint[index] matches the low bit's sense. */
@@ -4020,7 +4020,7 @@ void event_scaleByPlayerDistance(void) {
 
     dist = actor_distance3D(movement_obj, gCurrentActor);
     if (gCurrentActor->unk148 < 0.2f) {
-        gCurrentActor->unk148 = gCurrentActor->unk154;
+        gCurrentActor->unk148 = gCurrentActor->targetScaleXz;
     }
     if (dist < 200.0f) {
         scale = 0.3f;
@@ -4034,9 +4034,9 @@ void event_scaleByPlayerDistance(void) {
             scale = 0.3f + maxScale * range;
         }
     }
-    gCurrentActor->unk158 = scale;
-    gCurrentActor->unk154 = gCurrentActor->unk158;
-    gCurrentActor->unk15C = 0.02f;
+    gCurrentActor->targetScaleY = scale;
+    gCurrentActor->targetScaleXz = gCurrentActor->targetScaleY;
+    gCurrentActor->scaleStep = 0.02f;
 }
 
 void func_15074B7C(void) {

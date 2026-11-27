@@ -82,7 +82,7 @@ void actor_updateMount(Actor *obj) {
             obj->stickspeed = movement_obj[obj->owner].stickspeed * 1.75f;
             heading = movement_obj[obj->owner].mv->press_angle;
         }
-        if (obj->unk223 == 13) {
+        if (obj->moveMode == 13) {
             obj->stickspeed = 0.0f;
         }
         if (isType21) {
@@ -103,13 +103,13 @@ void actor_updateMount(Actor *obj) {
             }
         } else {
             obj->fangle = heading;
-            if (obj->unk223 == 1) {
+            if (obj->moveMode == 1) {
                 v = 3;
                 if (obj->speed < 35.0f) {
                     v = 4;
                 }
-                obj->unk1E6 = v;
-                obj->unk1E5 = v;
+                obj->faceTurnRate = v;
+                obj->moveTurnRate = v;
                 if ((u8)(((obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
                     if (obj->speed > 35.0f) {
                         obj->intelwalk = 4;

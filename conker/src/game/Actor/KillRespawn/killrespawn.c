@@ -313,7 +313,7 @@ void actor_respawn(Actor *actor) {
 
     saved1AA = actor->mv->shotsfired;
     saved1B0 = actor->mv->lastSpawnIndex;
-    saved328 = actor->unk328; // signed byte at 0x328 (Actor types it u8)
+    saved328 = actor->radarColor; // signed byte at 0x328 (Actor types it u8)
     saved1AF = actor->mv->unk1AF;
     if (gIsMultiplayer != 0) {
         player = actor->mv->spawnIndex;
@@ -339,7 +339,7 @@ void actor_respawn(Actor *actor) {
     collision_spawnObject(&gSpawnRecords[slot], slot, 0, 0, 0);
     actor->mv->lastSpawnIndex = saved1B0;
     actor->mv->unk1AF = saved1AF;
-    actor->unk328 = saved328;
+    actor->radarColor = saved328;
     if (gScreenLayout >= slot) {
         camera_resetView(&camera_global_Cameras[slot], slot, level, player);
         screen_openIris(slot);
@@ -356,9 +356,9 @@ void actor_respawn(Actor *actor) {
     actor->energy = gDefaultHealth;
     actor->unk22C |= 0x100;
     actor->mv->context_b = 0;
-    actor->unk20F = 0xFF;
-    actor->unk210 = 0xFF;
-    actor->unk211 = 0xFF;
+    actor->pathNode = 0xFF;
+    actor->prevPathNode = 0xFF;
+    actor->pathGoal = 0xFF;
     actor->intelwalk = 1;
     actor->scriptCmd = NULL;
     actor->mv->spawnIndex = player;
@@ -464,7 +464,7 @@ s32 actor_runDeathEffect(Actor *actor) {
     case 0xAD:
     case 0xAE:
     case 0xAF:
-        actor->unk328 = 0;
+        actor->radarColor = 0;
         actor_breakIntoParts(actor, 0);
         effect_spawnAttachedBursts(actor);
         return 1;
@@ -614,12 +614,12 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
 }
 
 
-/* Sets bits in actor->unk9C (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
+/* Sets bits in actor->hiddenBones (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
 void actor_applyHeadShot(Actor *actor) {
     if (actor->type == 1) {
         collision_removePartSet(actor, 0x44);
         collision_removePartSet(actor, 0x23);
-        actor->unk9C |= 0xF000;
+        actor->hiddenBones |= 0xF000;
         collision_removePartSet(actor, 0x44);
         collision_removePartSet(actor, 0x23);
         return;
@@ -628,41 +628,41 @@ void actor_applyHeadShot(Actor *actor) {
     switch (actor->character_type) {
     case 0x9F:
     case 0xA0:
-        actor->unk9C |= 0xF000;
+        actor->hiddenBones |= 0xF000;
         break;
     case 0x5A:
     case 0x74:
     case 0x7A:
-        actor->unk9C |= 0xFF8;
+        actor->hiddenBones |= 0xFF8;
         break;
     }
 }
 
-/* Sets actor's unk94/unk9C flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
+/* Sets actor's hiddenParts/hiddenBones flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
 void actor_applyPartHit(Actor *actor, s32 part) {
     switch (part) {
     case 9:
-        actor->unk94 |= 0x20;
-        actor->unk9C |= 0x78;
+        actor->hiddenParts |= 0x20;
+        actor->hiddenBones |= 0x78;
         actor->taskint[0] = 1;
         return;
     case 8:
-        actor->unk94 |= 0x40;
-        actor->unk94 &= ~0x200;
-        actor->unk9C |= 0xF00;
+        actor->hiddenParts |= 0x40;
+        actor->hiddenParts &= ~0x200;
+        actor->hiddenBones |= 0xF00;
         actor->taskint[0] = 2;
         return;
     case 6:
     case 7:
-        actor->unk94 |= 0xE;
-        actor->unk94 &= ~0x410;
-        actor->unk9C |= 0xEE0000;
+        actor->hiddenParts |= 0xE;
+        actor->hiddenParts &= ~0x410;
+        actor->hiddenBones |= 0xEE0000;
         actor->taskint[0] = 4;
         return;
     case 4:
     case 5:
-        actor->unk94 |= 0x80;
-        actor->unk94 &= ~0x500;
+        actor->hiddenParts |= 0x80;
+        actor->hiddenParts &= ~0x500;
         actor->taskint[0] = 8;
         return;
     }

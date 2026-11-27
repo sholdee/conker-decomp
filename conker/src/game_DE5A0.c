@@ -84,8 +84,8 @@ void func_150B12FC(Actor *actor) {
 }
 
 /*
- * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (unk223 == 14)
- * straight at its target object movement_obj[unk222]. A nonzero unk224 overrides the height: 10000 means its
+ * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (moveMode == 14)
+ * straight at its target object movement_obj[targetIndex]. A nonzero unk224 overrides the height: 10000 means its
  * current path waypoint, anything else is unk224 * 8 (plus unk180 for most ids). Stunned objects only recover.
  */
 void func_150B1484(Actor *actor) {
@@ -98,28 +98,28 @@ void func_150B1484(Actor *actor) {
 
         targetY = gSpawnRecords[actor->listpos].y + 210.0f;
         if (!(actor->unk22C & 8)) {
-            if (actor->unk223 != 3) {
+            if (actor->moveMode != 3) {
                 actor->vtilt = actor->yspd * -0.5f;
             } else {
                 actor->vtilt = 0.0f;
             }
         }
-        if (actor->unk223 == 14) {
+        if (actor->moveMode == 14) {
             f32 time;
 
-            time = actor_distanceXZ(&movement_obj[actor->unk222], actor) / actor->speed;
-            actor->yspd = (movement_obj[actor->unk222].ypos + actor->unk224 - actor->ypos) / time;
+            time = actor_distanceXZ(&movement_obj[actor->targetIndex], actor) / actor->speed;
+            actor->yspd = (movement_obj[actor->targetIndex].ypos + actor->unk224 - actor->ypos) / time;
             actor->ygrav = 0.0f;
         } else {
             s16 heightCode;
 
-            if (actor->unk223 == 1) {
+            if (actor->moveMode == 1) {
                 targetY = movement_obj[0].ypos + 210.0f;
             }
             heightCode = actor->unk224;
             if (heightCode != 0) {
                 if (heightCode == 10000) {
-                    targetY = gSpawnPaths[actor->listpos][actor->unk21E + 1].y;
+                    targetY = gSpawnPaths[actor->listpos][actor->waypoint + 1].y;
                 } else if ((actor->character_type == 0x50) || (actor->character_type == 5) || (actor->character_type == 0xAD) || (actor->character_type == 0xAE) || (actor->character_type == 0xAF)) {
                     targetY = heightCode * 8;
                 } else {
@@ -131,7 +131,7 @@ void func_150B1484(Actor *actor) {
                 f32 maxSpeed;
 
                 if (actor->character_type == 0x44) {
-                    targetY = gSpawnPaths[actor->listpos][actor->unk21E + 1].y;
+                    targetY = gSpawnPaths[actor->listpos][actor->waypoint + 1].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {
@@ -156,7 +156,7 @@ void func_150B1484(Actor *actor) {
 }
 
 /*
- * Pairs the object with the first actor in state 10 (`other`). With unk1E5 == 2 the object sits on top of
+ * Pairs the object with the first actor in state 10 (`other`). With moveTurnRate == 2 the object sits on top of
  * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
  * with the frame step gFrameSteps. Either way the object then faces the player.
  */
@@ -170,10 +170,10 @@ void func_150B17DC(Actor *actor) {
 
     other = actor_findByState(10, &otherIdx);
     actor_updateChaseAi(actor);
-    if (actor->unk1E5 == 2) {
+    if (actor->moveTurnRate == 2) {
         actor->xpos = other->xpos;
         actor->zpos = other->zpos;
-        actor->ypos = other->ypos + (actor->unk21C / 5 + 160.0f);
+        actor->ypos = other->ypos + (actor->scriptTimer / 5 + 160.0f);
         actor->yspd = 0.0f;
         actor->ygrav = -0.35f;
         actor->unk7E = 0;
@@ -199,7 +199,7 @@ void func_150B17DC(Actor *actor) {
 }
 
 /*
- * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, unk21C >= 9
+ * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, scriptTimer >= 9
  * and its host (movement_obj[carried - 100]) not stunned or gActorClock bit 2 set), and
  * now and then emits a particle at a random point around it that drifts with the player's motion.
  */
@@ -214,7 +214,7 @@ void func_150B19E0(Actor *actor) {
     u8 angle;
 
     target = 0.0f;
-    actor->unkB0 = 25;
+    actor->floatDepth = 25;
     actor->noshove &= ~4;
     actor->lifting = 0;
     actor->noshove |= 0x80;
@@ -223,7 +223,7 @@ void func_150B19E0(Actor *actor) {
     }
     actor->stunned = 10;
     actor->intelhitroute = 3;
-    actor->unkFC = 0xA7;
+    actor->hitSound = 0xA7;
     actor->count2 = 1;
     if (actor->task_attrib & 0x40) {
         actor->task_attrib &= ~0x40;
@@ -232,7 +232,7 @@ void func_150B19E0(Actor *actor) {
     }
     if (actor->carried != 0) {
         actor_moveToHost(actor);
-        if ((movement_obj[actor->carried - 100].stunned == 0 || (gActorClock & 4)) && actor->unk21C >= 9) {
+        if ((movement_obj[actor->carried - 100].stunned == 0 || (gActorClock & 4)) && actor->scriptTimer >= 9) {
             target = -20.0f;
         }
     }

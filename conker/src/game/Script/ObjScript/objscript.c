@@ -37,7 +37,7 @@ f32 gScriptSpeedups[2];
  * one-byte jump labels.
  * The handlers below act on the current object, gCurrentActor (index dc_glbl_CharNum in movement_obj);
  * their comments call the four argument bytes arg0..arg3. An object's "target" is the object
- * movement_obj[unk222], its current waypoint is unk21E of its path gSpawnPaths[unk13F].
+ * movement_obj[targetIndex], its current waypoint is waypoint of its path gSpawnPaths[unk13F].
  */
 
 
@@ -90,8 +90,8 @@ void script_startMove(void) {
     f32 speed;
     u8 speedArg;
 
-    gCurrentActor->unk223 = 0;
-    gCurrentActor->unk21C = gScriptArg0 * 100;
+    gCurrentActor->moveMode = 0;
+    gCurrentActor->scriptTimer = gScriptArg0 * 100;
     speedArg = gScriptArg2;
     if (speedArg != 0xFF) {
         speed = speedArg;
@@ -116,37 +116,37 @@ void script_pickWaypoint(void) {
     Actor *obj;
 
     index = gSpawnPathCounts[gCurrentActor->listpos] - 1;
-    if (gCurrentActor->unk21F != 0) {
-        index = gCurrentActor->unk21F;
+    if (gCurrentActor->waypointEnd != 0) {
+        index = gCurrentActor->waypointEnd;
     }
-    range = index - gCurrentActor->unk220;
+    range = index - gCurrentActor->waypointStart;
     if (gScriptArg1 == 0xFF) {
-        if (gCurrentActor->unk223 != 13) {
-            gCurrentActor->unk21E = (math_randomU8() % (u32)range) + gCurrentActor->unk220;
+        if (gCurrentActor->moveMode != 13) {
+            gCurrentActor->waypoint = (math_randomU8() % (u32)range) + gCurrentActor->waypointStart;
         }
     } else if (gScriptArg1 == 0xFE) {
-        if (gCurrentActor->unk223 != 13) {
-            previous = gCurrentActor->unk21E - 1;
-            if (gCurrentActor->unk21E <= gCurrentActor->unk220) {
+        if (gCurrentActor->moveMode != 13) {
+            previous = gCurrentActor->waypoint - 1;
+            if (gCurrentActor->waypoint <= gCurrentActor->waypointStart) {
                 previous = index - 1;
             }
-            index = (math_randomU8() % (u32)range) + gCurrentActor->unk220;
+            index = (math_randomU8() % (u32)range) + gCurrentActor->waypointStart;
             if (index != previous) {
-                gCurrentActor->unk21E = index;
+                gCurrentActor->waypoint = index;
                 // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
                 obj = gCurrentActor;
-                obj->unk223 = gCurrentActor->unk220 * 0;
+                obj->moveMode = gCurrentActor->waypointStart * 0;
                 goto set_timer;
             }
         }
     } else if (gScriptArg1 == 0xFF) {
-        gCurrentActor->unk21E = index - 1;
+        gCurrentActor->waypoint = index - 1;
     } else {
-        gCurrentActor->unk21E = gScriptArg1;
+        gCurrentActor->waypoint = gScriptArg1;
     }
-    gCurrentActor->unk223 = 0;
+    gCurrentActor->moveMode = 0;
 set_timer:
-    gCurrentActor->unk21C = gScriptArg0 * 100;
+    gCurrentActor->scriptTimer = gScriptArg0 * 100;
 
     if (gScriptArg2 != 0xFF) {
         gCurrentActor->stickspeed = gScriptArg2;
@@ -154,8 +154,8 @@ set_timer:
             gCurrentActor->stickspeed = 0.5f;
         }
     }
-    if (gCurrentActor->unk21E < gCurrentActor->unk220) {
-        gCurrentActor->unk21E = gCurrentActor->unk220;
+    if (gCurrentActor->waypoint < gCurrentActor->waypointStart) {
+        gCurrentActor->waypoint = gCurrentActor->waypointStart;
     }
     script_applyMoveFlags();
 }
@@ -170,22 +170,22 @@ void script_startTimedMove(void) {
 
     script_startMove();
     obj = gCurrentActor;
-    dx = gSpawnPaths[obj->listpos][obj->unk21E + 1].x - obj->xpos;
-    dz = gSpawnPaths[obj->listpos][obj->unk21E + 1].z - obj->zpos;
+    dx = gSpawnPaths[obj->listpos][obj->waypoint + 1].x - obj->xpos;
+    dz = gSpawnPaths[obj->listpos][obj->waypoint + 1].z - obj->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(u32)gScriptArg1;
     speed = dist / dx;
     obj->stickspeed = speed + speed;
 }
 
-/* Jumps to arg0 when waypoint arg1 compares (per arg2) with the waypoint unk221 steps back. */
+/* Jumps to arg0 when waypoint arg1 compares (per arg2) with the waypoint waypointStep steps back. */
 void script_jumpIfWaypointCompare(void) {
     s32 position;
     s32 desired;
     s32 matched;
 
     matched = 0;
-    position = gCurrentActor->unk21E - (s8)gCurrentActor->unk221;
+    position = gCurrentActor->waypoint - (s8)gCurrentActor->waypointStep;
     if (position < 0) {
         position += gSpawnPathCounts[gCurrentActor->listpos] - 1;
     } else if (position >= gSpawnPathCounts[gCurrentActor->listpos] - 1) {
@@ -214,7 +214,7 @@ void script_jumpIfWaypointCompare(void) {
 
 /* Jumps to arg0 when the current waypoint is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void script_jumpIfWaypoint(void) {
-    u8 index = gCurrentActor->unk21E;
+    u8 index = gCurrentActor->waypoint;
 
     if (((gScriptArg2 == 0) && (gScriptArg1 == index)) ||
         ((gScriptArg2 == 1) && (gScriptArg1 != index))) {
@@ -233,19 +233,19 @@ void script_startMoveUnlessNear(void) {
     dx = point->x - gCurrentActor->xpos;
     dz = point->z - gCurrentActor->zpos;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
-        gCurrentActor->unk21C = 0;
+        gCurrentActor->scriptTimer = 0;
         gCurrentActor->speed = 0.0f;
     }
 }
 
 void func_15075B60(void) {
     script_startMove();
-    gCurrentActor->unk223 = 10;
+    gCurrentActor->moveMode = 10;
 }
 
 void func_15075B8C(void) {
     script_pickWaypoint();
-    gCurrentActor->unk223 = 10;
+    gCurrentActor->moveMode = 10;
 }
 
 void func_15075BB8(void) {
@@ -257,7 +257,7 @@ void func_15075BE8(void) {
     if (gScriptArg3 != 0) {
         gCurrentActor->unk22C |= 0x80;
     }
-    gCurrentActor->unk233 = gScriptArg0;
+    gCurrentActor->spotScript = gScriptArg0;
 }
 
 /* Sets the vertical velocity to the s16 (arg2:arg0) unless arg3 == 1, and gravity to (s8)arg1 unless arg3 == 2. */
@@ -272,34 +272,34 @@ void script_setYSpeedAndGravity(void) {
 
 void func_15075CA0(void) {
     script_startMove();
-    gCurrentActor->unk223 = 1;
+    gCurrentActor->moveMode = 1;
 }
 
 void func_15075CCC(void) {
     script_startMove();
-    gCurrentActor->unk223 = 16;
-    gCurrentActor->unk231 = gScriptArg1;
+    gCurrentActor->moveMode = 16;
+    gCurrentActor->interceptSpeed = gScriptArg1;
 }
 
 void func_15075D0C(void) {
     script_startMove();
-    gCurrentActor->unk223 = 15;
+    gCurrentActor->moveMode = 15;
 }
 
 void func_15075D38(void) {
     func_15075CA0();
-    gCurrentActor->unk223 = 14;
+    gCurrentActor->moveMode = 14;
 }
 
 void func_15075D64(void) {
     script_startMove();
-    gCurrentActor->unk223 = 12;
-    gCurrentActor->unk222 = 0;
+    gCurrentActor->moveMode = 12;
+    gCurrentActor->targetIndex = 0;
 }
 
 void func_15075D9C(void) {
     script_startMove();
-    gCurrentActor->unk223 = 9;
+    gCurrentActor->moveMode = 9;
 }
 
 void func_15075DC8(void) {
@@ -321,11 +321,11 @@ void script_switchScript(void) {
 
 void func_15075E6C(void) {
     script_startMove();
-    gCurrentActor->unk223 = 2;
+    gCurrentActor->moveMode = 2;
 }
 
 void func_15075E98(void) {
-    gCurrentActor->unk235 = gScriptArg0;
+    gCurrentActor->spotWideScript = gScriptArg0;
 }
 
 /* Jumps to arg0 with a chance of arg2 percent. */
@@ -336,17 +336,17 @@ void script_jumpRandom(void) {
 }
 
 void func_15075F00(void) {
-    gCurrentActor->unk234 = gScriptArg0;
-    gCurrentActor->unk236 = gScriptArg1;
-    gCurrentActor->unk237 = gScriptArg2;
+    gCurrentActor->nearScript = gScriptArg0;
+    gCurrentActor->nearRange = gScriptArg1;
+    gCurrentActor->nearCone = gScriptArg2;
 }
 
 void func_15075F40(void) {
     script_startMove();
-    gCurrentActor->unk223 = 3;
+    gCurrentActor->moveMode = 3;
 }
 
-/* Sets the vertical velocity (arg0, downwards if arg2), the gravity (arg1) and unk3A (arg3). */
+/* Sets the vertical velocity (arg0, downwards if arg2), the gravity (arg1) and hopSpeed (arg3). */
 void func_15075F6C(void) {
     if (gScriptArg0 != 0) {
         if (gScriptArg2 == 0) {
@@ -358,7 +358,7 @@ void func_15075F6C(void) {
     if (gScriptArg1 != 0) {
         gCurrentActor->ygrav = gScriptArg1;
     }
-    gCurrentActor->unk3A = gScriptArg3;
+    gCurrentActor->hopSpeed = gScriptArg3;
 }
 
 /* Starts a jump towards waypoint arg1, timing the flight so that it lands there. */
@@ -368,7 +368,7 @@ void script_leapToWaypoint(void) {
     f32 time;
 
     script_startMove();
-    gCurrentActor->unk21E = gScriptArg1;
+    gCurrentActor->waypoint = gScriptArg1;
     dx = gSpawnPaths[gCurrentActor->listpos][gScriptArg1 + 1].x - gCurrentActor->xpos;
     dz = gSpawnPaths[gCurrentActor->listpos][gScriptArg1 + 1].z - gCurrentActor->zpos;
     time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / gCurrentActor->stickspeed);
@@ -376,18 +376,18 @@ void script_leapToWaypoint(void) {
         gCurrentActor->stickspeed *= time * 0.08333300054f;
         time = 12.0f;
     }
-    gCurrentActor->unk21C = (u32)(time * 100.0f);
+    gCurrentActor->scriptTimer = (u32)(time * 100.0f);
     gCurrentActor->yspd = gCurrentActor->ygrav * time * 0.5f;
-    gCurrentActor->unk223 = 4;
+    gCurrentActor->moveMode = 4;
 }
 
 void func_150761C8(void) {
     script_pickWaypoint();
-    gCurrentActor->unk223 = 5;
+    gCurrentActor->moveMode = 5;
 }
 
 void func_150761F4(void) {
-    gCurrentActor->unk223 = 6;
+    gCurrentActor->moveMode = 6;
     gCurrentActor->unk22C &= ~1;
 }
 
@@ -421,38 +421,38 @@ void script_jumpIfNotHit(void) {
 }
 
 void func_15076394(void) {
-    gCurrentActor->unk236 = gScriptArg0;
+    gCurrentActor->nearRange = gScriptArg0;
 }
 
 void func_150763B0(void) {
     if (gScriptArg0 == 128) {
-        gCurrentActor->unk1E5 = gCurrentActor->listpos_ptr->unkF;
+        gCurrentActor->moveTurnRate = gCurrentActor->listpos_ptr->unkF;
     } else {
-        gCurrentActor->unk1E5 = gScriptArg0;
+        gCurrentActor->moveTurnRate = gScriptArg0;
     }
-    gCurrentActor->unk1E7 = 0;
+    gCurrentActor->moveTurnFrac = 0;
 
     if (gScriptArg2 != 0) {
-        gCurrentActor->unk1E5 += math_randomU8() % (u32)gScriptArg2;
+        gCurrentActor->moveTurnRate += math_randomU8() % (u32)gScriptArg2;
     }
     if (gScriptArg3 == 1) {
-        gCurrentActor->unk1E6 = 0;
-        gCurrentActor->unk1E8 = 0;
+        gCurrentActor->faceTurnRate = 0;
+        gCurrentActor->faceTurnFrac = 0;
         return;
     }
     if (gScriptArg3 == 2) {
-        gCurrentActor->unk1E6 = gScriptArg1;
-        gCurrentActor->unk1E8 = 0;
+        gCurrentActor->faceTurnRate = gScriptArg1;
+        gCurrentActor->faceTurnFrac = 0;
         return;
     }
     if (gScriptArg1 == 0) {
-        gCurrentActor->unk1E6 = gCurrentActor->unk1E5;
-        gCurrentActor->unk1E8 = 0;
+        gCurrentActor->faceTurnRate = gCurrentActor->moveTurnRate;
+        gCurrentActor->faceTurnFrac = 0;
     }
 }
 
 void func_150764C8(void) {
-    gCurrentActor->unk238 = gScriptArg0;
+    gCurrentActor->stunEndScript = gScriptArg0;
 }
 
 void script_setHitRoute(void) {
@@ -460,7 +460,7 @@ void script_setHitRoute(void) {
 }
 
 void func_15076500(void) {
-    gCurrentActor->unk22E = (gScriptArg0 << 8) | gScriptArg1;
+    gCurrentActor->alertCooldown = (gScriptArg0 << 8) | gScriptArg1;
 }
 
 /* Sets `immune` to arg0 on the object's target (arg1 != 0) or on the object itself. */
@@ -483,7 +483,7 @@ void script_emptyCommand61(void) {
 }
 
 void func_15076608(void) {
-    gCurrentActor->unk24A = gScriptArg0;
+    gCurrentActor->turnStopScript = gScriptArg0;
 }
 
 /* Sets the flags given by the four argument bytes in unkF8. */
@@ -503,7 +503,7 @@ void script_clearNoshoveFlags(void) {
 void func_150766D0(void) {
     if (((gCurrentActor->shad > 0.0f) && (gScriptArg0 == 0)) ||
         ((gScriptArg0 * 50 < gCurrentActor->shad) && (gScriptArg0 != 0))) {
-        gCurrentActor->unk21C = 99;
+        gCurrentActor->scriptTimer = 99;
         gCurrentActor->scriptCmd--;
     }
 }
@@ -537,11 +537,11 @@ void script_jumpIfBehindTarget(void) {
     Actor *target;
     u16 angle;
 
-    target = &movement_obj[gCurrentActor->unk222];
+    target = &movement_obj[gCurrentActor->targetIndex];
     // matching: the (s32) cast before narrowing to u16 is needed
     angle = (s32)actor_getDirectionAngle(target->xpos - gCurrentActor->xpos,
                                gCurrentActor->zpos - target->zpos, 0);
-    if ((((angle >> 8) - (movement_obj[gCurrentActor->unk222].langle >> 8) + gScriptArg1) & 0xFF) < gScriptArg1 * 2) {
+    if ((((angle >> 8) - (movement_obj[gCurrentActor->targetIndex].langle >> 8) + gScriptArg1) & 0xFF) < gScriptArg1 * 2) {
         script_jump(gScriptArg0);
     }
 }
@@ -581,7 +581,7 @@ void script_findNearestInView(void) {
                     viewAngle = type->viewAngle;
                     angle = actor_getDirectionAngle(obj->xpos - gCurrentActor->xpos,
                                           gCurrentActor->zpos - obj->zpos, 0) >> 8;
-                    if (((((gCurrentActor->angle >> 8) + gCurrentActor->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
+                    if (((((gCurrentActor->angle >> 8) + gCurrentActor->lookYaw) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
                         gCurrentActor->unkA8 = i + 0x80;
                         nearest = dist;
                     }
@@ -599,13 +599,13 @@ void script_findNearestInView(void) {
             found = &movement_obj[foundIndex & 0x7F];
             found->scriptCmd = NULL;
             found->intelwalk = script;
-            found->unk222 = self;
+            found->targetIndex = self;
         }
     }
 }
 
 void script_targetFoundObject(void) {
-    gCurrentActor->unk222 = gCurrentActor->unkA8 & 0x7F;
+    gCurrentActor->targetIndex = gCurrentActor->unkA8 & 0x7F;
 }
 
 void script_setDrawType(void) {
@@ -622,9 +622,9 @@ void script_moveToLastOfType(void) {
     while (i != 0) {
         if ((gScriptArg0 == movement_obj[i - 1].character_type) && (movement_obj[i - 1].energy != 0)) {
             script_startMove();
-            gCurrentActor->unk223 = 9;
-            gCurrentActor->unk222 = i - 1;
-            gCurrentActor->unk21C = 1000;
+            gCurrentActor->moveMode = 9;
+            gCurrentActor->targetIndex = i - 1;
+            gCurrentActor->scriptTimer = 1000;
             return;
         }
         i--;
@@ -640,7 +640,7 @@ void func_15076CB4(void) {
 }
 
 void func_15076CCC(void) {
-    gCurrentActor->unk21C = 10000;
+    gCurrentActor->scriptTimer = 10000;
     actor_remove(gCurrentActor, 1);
 }
 
@@ -656,8 +656,8 @@ void script_setScale(void) {
 
     gCurrentActor->scale_xz = xz * scale;
     gCurrentActor->scale_y = y * scale;
-    gCurrentActor->unk154 = gCurrentActor->scale_xz;
-    gCurrentActor->unk158 = gCurrentActor->scale_y;
+    gCurrentActor->targetScaleXz = gCurrentActor->scale_xz;
+    gCurrentActor->targetScaleY = gCurrentActor->scale_y;
     actor_setScale(gCurrentActor, gCurrentActor->scale_xz, gCurrentActor->scale_y);
 }
 
@@ -681,11 +681,11 @@ void script_startRandomJump(void) {
     gCurrentActor->fangle = math_randomU8() % 0xFFFFU;
     gCurrentActor->speed = (math_randomU8() % 20U) + 15;
     gCurrentActor->stickspeed = gCurrentActor->speed;
-    gCurrentActor->unk223 = 7;
+    gCurrentActor->moveMode = 7;
 }
 
 void func_15076F40(void) {
-    gCurrentActor->unk21C = 1000;
+    gCurrentActor->scriptTimer = 1000;
     actor_remove(gCurrentActor, 1);
 }
 
@@ -693,9 +693,9 @@ void func_15076F78(void) {
     s8 value;
 
     value = gScriptArg0;
-    gCurrentActor->unkCC = value;
+    gCurrentActor->heightOffset = value;
     value = gScriptArg1;
-    gCurrentActor->unkCE = value;
+    gCurrentActor->targetHeightOffset = value;
 }
 
 /* arg3 == 0: moves the object by a random offset of up to +-arg0/2 (x) and +-arg1/2 (z), times 3;
@@ -715,7 +715,7 @@ void func_15076FA8(void) {
 
 /* Jumps to arg3 when the target's speed is below arg2. */
 void script_jumpIfTargetSlow(void) {
-    if (movement_obj[gCurrentActor->unk222].speed < gScriptArg2) {
+    if (movement_obj[gCurrentActor->targetIndex].speed < gScriptArg2) {
         script_jump(gScriptArg3);
     }
 }
@@ -787,28 +787,28 @@ void script_setAnimSpeedAndAccel(void) {
         gScriptArg0 += math_randomU8() % (u32)gScriptArg3;
     }
     gCurrentActor->intel_animspd = gScriptArg0;
-    gCurrentActor->unk249 = 0;
+    gCurrentActor->animSpeedFrac = 0;
     gCurrentActor->intel_accel = gScriptArg1;
     gCurrentActor->intel_decel = gScriptArg2;
 }
 
 /*
  * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in unk246 (high bits) and
- * unk249 (low byte), clamping at 0 and setting bit 7 of unk246; otherwise sets unk246 to arg0.
+ * animSpeedFrac (low byte), clamping at 0 and setting bit 7 of unk246; otherwise sets unk246 to arg0.
  */
 void func_15077404(void) {
     if (gScriptArg3 != 0) {
         s16 value;
         s16 delta;
 
-        value = ((gCurrentActor->intel_animspd & 0x1F) << 8) + gCurrentActor->unk249;
+        value = ((gCurrentActor->intel_animspd & 0x1F) << 8) + gCurrentActor->animSpeedFrac;
         delta = (gScriptArg1 << 8) + gScriptArg2;
         value += delta * gFrameTicks;
         if (value < 0) {
             value = 0;
         }
         gCurrentActor->intel_animspd = (value >> 8) | 0x80;
-        gCurrentActor->unk249 = value;
+        gCurrentActor->animSpeedFrac = value;
     } else {
         gCurrentActor->intel_animspd = gScriptArg0;
     }
@@ -816,7 +816,7 @@ void func_15077404(void) {
 
 /* Jumps to arg0 when the object has reached its destination node (or has none). */
 void script_jumpIfAtDestination(void) {
-    if ((gCurrentActor->unk20F == gCurrentActor->unk211) || (gCurrentActor->unk211 == 0xFF)) {
+    if ((gCurrentActor->pathNode == gCurrentActor->pathGoal) || (gCurrentActor->pathGoal == 0xFF)) {
         gCurrentActor->task_attrib |= 0x800;
         script_jump(gScriptArg0);
     }
@@ -827,7 +827,7 @@ void script_jumpIfAtDestination(void) {
 
 /*
  * Steps the object along the path-node graph: picks the next node (arg0 == 1: a random neighbour
- * other than the previous node, otherwise the next node towards the goal unk211) and stores a point
+ * other than the previous node, otherwise the next node towards the goal pathGoal) and stores a point
  * near it, offset sideways by up to twice the node's unk8, as waypoint 0 of the object's path.
  * Sets flag 0x800 in unk25C when the goal is reached or no node is left.
  */
@@ -850,12 +850,12 @@ void script_stepPathGraph(void) {
 
     next = 0xFF;
     if (gScriptArg0 != 1) {
-        if (gCurrentActor->unk20F == gCurrentActor->unk211) {
+        if (gCurrentActor->pathNode == gCurrentActor->pathGoal) {
             UNK216(gCurrentActor) = 0;
             gCurrentActor->task_attrib |= 0x800;
             return;
         }
-        if (gCurrentActor->unk211 == 0xFF) {
+        if (gCurrentActor->pathGoal == 0xFF) {
             UNK216(gCurrentActor) = 0;
         }
     }
@@ -863,35 +863,35 @@ void script_stepPathGraph(void) {
     if (gSpawnPathCounts[gCurrentActor->listpos] - 1 > 0) {
         hasGoal2 = 0;
         hasGoal = 0;
-        if (gCurrentActor->unk211 != 0xFF) {
+        if (gCurrentActor->pathGoal != 0xFF) {
             hasGoal = 1;
         }
         if (gCurrentActor->unk212[0] != 0xFF) {
             hasGoal2 = 1;
         }
-        current = gCurrentActor->unk20F;
+        current = gCurrentActor->pathNode;
         if (current == 0xFF) {
             if (gScriptArg0 == 1) {
                 hasGoal2 = 0;
                 hasGoal = 0;
-                next = gCurrentActor->unk210;
+                next = gCurrentActor->prevPathNode;
             }
             if (next == 0xFF) {
                 next = path_getNextNode(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
-                                     hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
+                                     hasGoal, hasGoal2, &gCurrentActor->pathGoal, gCurrentActor->unk212);
             }
         } else if (current != 0xFF) {
             if (gScriptArg0 == 1) {
                 best = 0xFF;
                 node = &gPathNodes[current];
-                if (gCurrentActor->unk210 != 0xFF) {
+                if (gCurrentActor->prevPathNode != 0xFF) {
                     // matching: dead code standing in for something the original compiled away; it
                     // keeps IDO's branch on pad210 and its register assignment
-                    tmp = 0; for (i = 0, q = (u8 *)gPathNodes; i < 4; i++, q++) { tmp += q[9] == gCurrentActor->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
+                    tmp = 0; for (i = 0, q = (u8 *)gPathNodes; i < 4; i++, q++) { tmp += q[9] == gCurrentActor->prevPathNode; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
                 }
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
-                    if (node->links[i] != 0xFF && gCurrentActor->unk210 != node->links[i]) {
+                    if (node->links[i] != 0xFF && gCurrentActor->prevPathNode != node->links[i]) {
                         roll = math_randomFloat();
                         if (roll < bestRoll) {
                             bestRoll = roll;
@@ -902,18 +902,18 @@ void script_stepPathGraph(void) {
                 next = best;
                 if (next == 0xFF) {
                     gCurrentActor->task_attrib |= 0x800;
-                    next = gCurrentActor->unk210;
+                    next = gCurrentActor->prevPathNode;
                 }
             } else {
-                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
+                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->pathGoal, gCurrentActor->unk212);
             }
         }
         if (next != 0xFF) {
-            gCurrentActor->unk21E = 0;
+            gCurrentActor->waypoint = 0;
             if (mp_getNodePos(next, &x, &y, &z)) {
                 UNK216(gCurrentActor) = gPathDistance;
-                gCurrentActor->unk210 = gCurrentActor->unk20F;
-                gCurrentActor->unk20F = next;
+                gCurrentActor->prevPathNode = gCurrentActor->pathNode;
+                gCurrentActor->pathNode = next;
                 {
                     f32 width;
                     f32 dx;
@@ -938,25 +938,25 @@ void script_stepPathGraph(void) {
     }
 }
 
-/* Advances the waypoint index by unk221, wrapping around the path (or the first unk21F waypoints). */
+/* Advances the waypoint index by waypointStep, wrapping around the path (or the first waypointEnd waypoints). */
 void script_advanceWaypoint(void) {
     u8 count;
 
     count = gSpawnPathCounts[gCurrentActor->listpos] - 1;
-    if (gCurrentActor->unk21F != 0) {
-        count = gCurrentActor->unk21F;
+    if (gCurrentActor->waypointEnd != 0) {
+        count = gCurrentActor->waypointEnd;
     }
-    gCurrentActor->unk21E += gCurrentActor->unk221;
-    gCurrentActor->unk21E += count;
-    gCurrentActor->unk21E %= count;
-    if (gCurrentActor->unk21E < gCurrentActor->unk220) {
-        gCurrentActor->unk21E = gCurrentActor->unk220;
+    gCurrentActor->waypoint += gCurrentActor->waypointStep;
+    gCurrentActor->waypoint += count;
+    gCurrentActor->waypoint %= count;
+    if (gCurrentActor->waypoint < gCurrentActor->waypointStart) {
+        gCurrentActor->waypoint = gCurrentActor->waypointStart;
     }
 }
 
 void func_150779A8(void) {
     script_pickWaypoint();
-    gCurrentActor->unk223 = 11;
+    gCurrentActor->moveMode = 11;
 }
 
 /* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
@@ -967,7 +967,7 @@ void script_jumpIfWithinRange(void) {
 
     index = 0;
     if (gScriptArg2 != 0) {
-        index = gCurrentActor->unk222;
+        index = gCurrentActor->targetIndex;
     }
     if (dc_glbl_CharNum != index) {
         obj = &movement_obj[index];
@@ -985,13 +985,13 @@ void script_setHitRouteAlt(void) {
 }
 
 void func_15077ABC(void) {
-    gCurrentActor->unk258 = gScriptArg0;
-    gCurrentActor->unk257 = gScriptArg1;
+    gCurrentActor->orbitRadius = gScriptArg0;
+    gCurrentActor->orbitStep = gScriptArg1;
     gCurrentActor->unk86 = math_randomU8() % 255U;
 }
 
 void func_15077B14(void) {
-    gCurrentActor->unk24C = gScriptArg0;
+    gCurrentActor->standOnScript = gScriptArg0;
     gCurrentActor->unk24D = gScriptArg1;
 }
 
@@ -1020,7 +1020,7 @@ void script_clearTaskAttrib(void) {
 }
 
 void func_15077C1C(void) {
-    gCurrentActor->unk23D = gScriptArg0;
+    gCurrentActor->sightRange = gScriptArg0;
 }
 
 /*
@@ -1034,7 +1034,7 @@ void script_findTarget(void) {
     s32 i;
 
     nearest = 9999999.0f;
-    gCurrentActor->unk222 = 0;
+    gCurrentActor->targetIndex = 0;
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
@@ -1043,12 +1043,12 @@ void script_findTarget(void) {
             ((obj->attach_char == 0) || (gScriptArg2 != 0)) &&
             ((obj->character_type == gScriptArg0) || ((obj->type == gScriptArg1) && (obj->stunned == 0)))) {
             if (gScriptArg3 == 0) {
-                gCurrentActor->unk222 = i;
+                gCurrentActor->targetIndex = i;
                 return;
             }
             dist = actor_distance3D(gCurrentActor, obj);
             if (nearest > dist) {
-                gCurrentActor->unk222 = i;
+                gCurrentActor->targetIndex = i;
                 nearest = dist;
             }
         }
@@ -1056,17 +1056,17 @@ void script_findTarget(void) {
 }
 
 void script_setWaypoint(void) {
-    gCurrentActor->unk21E = gScriptArg0;
+    gCurrentActor->waypoint = gScriptArg0;
 }
 
 /* Moves the object onto waypoint arg0 (0xFA: the current waypoint). */
 void script_warpToWaypoint(void) {
     if (gScriptArg0 != 0xFA) {
-        gCurrentActor->unk21E = gScriptArg0;
+        gCurrentActor->waypoint = gScriptArg0;
     }
-    gCurrentActor->xpos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->unk21E + 1].x;
-    gCurrentActor->ypos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->unk21E + 1].y;
-    gCurrentActor->zpos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->unk21E + 1].z;
+    gCurrentActor->xpos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->waypoint + 1].x;
+    gCurrentActor->ypos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->waypoint + 1].y;
+    gCurrentActor->zpos = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->waypoint + 1].z;
 }
 
 void script_startTrackAt(void) {
@@ -1076,16 +1076,16 @@ void script_startTrackAt(void) {
 }
 
 void func_15077EEC(void) {
-    gCurrentActor->unk254 = gScriptArg0;
+    gCurrentActor->hitPlayerScript = gScriptArg0;
 }
 
 void func_15077F08(void) {
-    gCurrentActor->unk1EA = (gScriptArg0 << 8) | gScriptArg1;
+    gCurrentActor->turnAccel = (gScriptArg0 << 8) | gScriptArg1;
 }
 
 void func_15077F34(void) {
-    gCurrentActor->unk24F = gScriptArg0;
-    gCurrentActor->unk250 = gScriptArg1;
+    gCurrentActor->turnAnimRow = gScriptArg0;
+    gCurrentActor->turnAnimSpeed = gScriptArg1;
 }
 
 /* Turns the object towards the current waypoint, starting turn animation arg0 - 1 for large turns. */
@@ -1096,15 +1096,15 @@ void script_turnToWaypoint(void) {
     u8 index;
 
     index = gScriptArg0 - 1;
-    dx = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->unk21E + 1].x - gCurrentActor->xpos;
-    dz = gCurrentActor->zpos - gSpawnPaths[gCurrentActor->listpos][gCurrentActor->unk21E + 1].z;
+    dx = gSpawnPaths[gCurrentActor->listpos][gCurrentActor->waypoint + 1].x - gCurrentActor->xpos;
+    dz = gCurrentActor->zpos - gSpawnPaths[gCurrentActor->listpos][gCurrentActor->waypoint + 1].z;
     gCurrentActor->fangle = actor_getDirectionAngle(dx, dz, 0);
     turn = (gCurrentActor->fangle - gCurrentActor->angle) >> 8;
     if (turn & 0x80) {
         turn = -turn;
     }
     if (gTurnAnimTable[index][0] < turn) {
-        gCurrentActor->unk250 = gScriptArg1;
+        gCurrentActor->turnAnimSpeed = gScriptArg1;
         actor_startTurnAnim(gCurrentActor, turn, index);
     }
 }
@@ -1130,7 +1130,7 @@ void script_jumpIfAnyObjectNear(void) {
 
 /* Jumps to arg0 when the target is inactive. */
 void script_jumpIfTargetInactive(void) {
-    s32 index = gCurrentActor->unk222;
+    s32 index = gCurrentActor->targetIndex;
 
     if (movement_obj[index].type == 0) {
         script_jump(gScriptArg0);
@@ -1138,10 +1138,10 @@ void script_jumpIfTargetInactive(void) {
 }
 
 void func_150781A4(void) {
-    gCurrentActor->unk23F = gScriptArg1;
-    gCurrentActor->unk240 = gScriptArg2;
-    gCurrentActor->unk241 = gScriptArg0;
-    gCurrentActor->unk242 = gScriptArg3;
+    gCurrentActor->typeSpotRange = gScriptArg1;
+    gCurrentActor->typeSpotKind = gScriptArg2;
+    gCurrentActor->typeSpotScript = gScriptArg0;
+    gCurrentActor->typeSpotReplyScript = gScriptArg3;
 }
 
 /* Jumps to arg0 when the object is closer (arg2 == 0) or farther (arg2 != 0) than arg3 * 8 from waypoint arg1. */
@@ -1165,7 +1165,7 @@ void script_jumpIfNearWaypoint(void) {
 }
 
 void func_150782CC(void) {
-    gCurrentActor->unk23E = gScriptArg0;
+    gCurrentActor->arriveRange = gScriptArg0;
 }
 
 /* Jumps to arg0 when the object's unique id is (arg2 == 0) or is not (arg2 == 1) arg1. */
@@ -1180,15 +1180,15 @@ void script_jumpIfUniqueId(void) {
 void script_targetUniqueId(void) {
     s32 index = collision_findObjectSlotById(gScriptArg0);
 
-    gCurrentActor->unk222 = index;
+    gCurrentActor->targetIndex = index;
     if (index == -1) {
-        gCurrentActor->unk222 = 0;
+        gCurrentActor->targetIndex = 0;
     }
 }
 
 /*
  * Jumps to arg0 when the distance to the target (arg2: 0 actor_distanceXZ, 1 actor_distance3D, else the
- * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: unk23D * 8).
+ * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: sightRange * 8).
  */
 void script_jumpIfTargetDistance(void) {
     Actor *target;
@@ -1196,18 +1196,18 @@ void script_jumpIfTargetDistance(void) {
     f32 threshold;
 
     if (gScriptArg2 == 0) {
-        target = &movement_obj[gCurrentActor->unk222];
+        target = &movement_obj[gCurrentActor->targetIndex];
         dist = actor_distanceXZ(gCurrentActor, target);
     } else if (gScriptArg2 == 1) {
-        target = &movement_obj[gCurrentActor->unk222];
+        target = &movement_obj[gCurrentActor->targetIndex];
         dist = actor_distance3D(gCurrentActor, target);
     } else {
-        dist = fabsf(gCurrentActor->ypos - movement_obj[gCurrentActor->unk222].ypos);
+        dist = fabsf(gCurrentActor->ypos - movement_obj[gCurrentActor->targetIndex].ypos);
     }
 
     threshold = gScriptArg3 * 8;
     if (gScriptArg3 == 0xFF) {
-        threshold = gCurrentActor->unk23D * 8;
+        threshold = gCurrentActor->sightRange * 8;
     }
     if (((gScriptArg1 == 0) && (dist < threshold)) ||
         ((gScriptArg1 == 1) && (threshold < dist))) {
@@ -1240,13 +1240,13 @@ void script_placeWaypointNearTarget(void) {
 
     mode = gScriptArg0 >> 6;
     gScriptArg0 &= 0x3F;
-    x = movement_obj[gCurrentActor->unk222].xpos;
-    z = movement_obj[gCurrentActor->unk222].zpos;
-    y = movement_obj[gCurrentActor->unk222].ypos;
+    x = movement_obj[gCurrentActor->targetIndex].xpos;
+    z = movement_obj[gCurrentActor->targetIndex].zpos;
+    y = movement_obj[gCurrentActor->targetIndex].ypos;
     offsetX = ((((s8)gScriptArg1 << 4) | (gScriptArg3 >> 4)) * 8);
     offsetZ = ((((s8)gScriptArg2 << 4) | (gScriptArg3 & 0xF)) * 8);
     if (mode == 0) {
-        facing = ((movement_obj[gCurrentActor->unk222].langle >> 8) & 0xFF) - 0x40;
+        facing = ((movement_obj[gCurrentActor->targetIndex].langle >> 8) & 0xFF) - 0x40;
         sine = math_sinBinAngle(facing);
         cosine = math_cosBinAngle(facing);
     } else if (mode == 1) {
@@ -1264,13 +1264,13 @@ void script_placeWaypointNearTarget(void) {
     gSpawnPaths[gCurrentActor->listpos][gScriptArg0 + 1].z = z;
 }
 
-/* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
+/* Jumps to arg0 when the target's anim->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
 void script_jumpIfTargetAnimFrame(void) {
     AnimInstance *data;
     f32 value;
     s32 compare;
 
-    data = movement_obj[gCurrentActor->unk222].unk2D0;
+    data = movement_obj[gCurrentActor->targetIndex].anim;
     value = data->frame[0];
     compare = gScriptArg2;
     if (((compare == 0) && (value < (f32)(u32)gScriptArg1)) ||
@@ -1294,22 +1294,22 @@ void func_15078890(void) {
 /* arg3: jumps to arg0 when the target is object 0; else when the target's unk251 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15078900(void) {
     if (gScriptArg3 != 0) {
-        if (gCurrentActor->unk222 == 0) {
+        if (gCurrentActor->targetIndex == 0) {
             script_jump(gScriptArg0);
         }
-    } else if (((gScriptArg2 == 0) && (gScriptArg1 == movement_obj[gCurrentActor->unk222].unk251)) ||
-               ((gScriptArg2 == 1) && (gScriptArg1 != movement_obj[gCurrentActor->unk222].unk251))) {
+    } else if (((gScriptArg2 == 0) && (gScriptArg1 == movement_obj[gCurrentActor->targetIndex].unk251)) ||
+               ((gScriptArg2 == 1) && (gScriptArg1 != movement_obj[gCurrentActor->targetIndex].unk251))) {
         script_jump(gScriptArg0);
     }
 }
 
-/* Copies unk8 and unkC of the target's unk2D0 data into the object's own. */
+/* Copies unk8 and unkC of the target's anim data into the object's own. */
 void script_copyTargetAnimFrame(void) {
     AnimInstance *dst;
     AnimInstance *src;
 
-    dst = gCurrentActor->unk2D0;
-    src = movement_obj[gCurrentActor->unk222].unk2D0;
+    dst = gCurrentActor->anim;
+    src = movement_obj[gCurrentActor->targetIndex].anim;
     dst->frame[0] = src->frame[0];
     dst->frame[1] = src->frame[1];
 }
@@ -1382,13 +1382,13 @@ s32 script_testProperty(s32 index) {
         value = D_800BE9EC;
         break;
     case 15:
-        value = movement_obj[gCurrentActor->unk222].character_type;
+        value = movement_obj[gCurrentActor->targetIndex].character_type;
         break;
     case 16:
         value = movement_obj[index].energy;
         break;
     case 17:
-        value = movement_obj[gCurrentActor->unk222].intelwalk;
+        value = movement_obj[gCurrentActor->targetIndex].intelwalk;
         break;
     case 18:
         value = movement_obj[index].norun;
@@ -1471,7 +1471,7 @@ void func_15079228(void) {
     }
     actor_hitScripted(gCurrentActor, gScriptArg0, angle, -1);
     gCurrentActor->scriptCmd--;
-    gCurrentActor->unk21C = 1;
+    gCurrentActor->scriptTimer = 1;
 }
 
 void script_setIntelWalk(void) {
@@ -1546,11 +1546,11 @@ void script_leapToTarget(void) {
     f32 dist;
     f32 time;
 
-    dist = actor_distanceXZ(gCurrentActor, &movement_obj[gCurrentActor->unk222]);
+    dist = actor_distanceXZ(gCurrentActor, &movement_obj[gCurrentActor->targetIndex]);
     gCurrentActor->stickspeed = gCurrentActor->speed;
     time = 2.0f * (dist / gCurrentActor->stickspeed);
     gCurrentActor->yspd = (gCurrentActor->ygrav * time) * 0.5f;
-    gCurrentActor->yspd += 2.0f * ((movement_obj[gCurrentActor->unk222].ypos - gCurrentActor->ypos) / time);
+    gCurrentActor->yspd += 2.0f * ((movement_obj[gCurrentActor->targetIndex].ypos - gCurrentActor->ypos) / time);
 }
 
 /* Restarts the object with unique id arg0 on script arg1. */
@@ -1563,7 +1563,7 @@ void script_restartById(void) {
         obj = &movement_obj[index];
         obj->intelwalk = gScriptArg1;
         obj->scriptCmd = NULL;
-        obj->unk23A = 0;
+        obj->pendingScript = 0;
     }
 }
 
@@ -1611,7 +1611,7 @@ void script_startMoveAtPlayerSpeed(void) {
 
 /* Jumps to arg0 when the object is near its current waypoint (see script_jumpIfNearWaypoint). */
 void script_jumpIfAtWaypoint(void) {
-    gScriptArg1 = gCurrentActor->unk21E;
+    gScriptArg1 = gCurrentActor->waypoint;
     script_jumpIfNearWaypoint();
 }
 
@@ -1639,8 +1639,8 @@ void script_playRandomSoundOnSelf(void) {
 }
 
 void func_15079A28(void) {
-    gCurrentActor->unk252 = gScriptArg0;
-    gCurrentActor->unk253 = gScriptArg1;
+    gCurrentActor->fallReaction = gScriptArg0;
+    gCurrentActor->fallReactionHeight = gScriptArg1;
 }
 
 void script_setSpawnDelay(void) {
@@ -1700,14 +1700,14 @@ void script_changeObjectProperty(void) {
         if (gCurrentActor->intelwalk != gScriptArg0) {
             gCurrentActor->intelwalk = gScriptArg0;
             gCurrentActor->scriptCmd = script_getScript(0, gCurrentActor->intelwalk);
-            gCurrentActor->unk21C = 0;
+            gCurrentActor->scriptTimer = 0;
         }
         dc_glbl_CharNum = savedIndex;
         gCurrentActor = savedObj;
         return;
     }
     case 6:
-        movement_obj[index].unkC8 = gScriptArg0;
+        movement_obj[index].rootOffsetY = gScriptArg0;
         return;
     case 7:
         movement_obj[index].vtilt = 0.0f;
@@ -1715,9 +1715,9 @@ void script_changeObjectProperty(void) {
     case 8: {
         u16 angle;
 
-        angle = script_getAngleToPathStart(gCurrentActor->unk222);
+        angle = script_getAngleToPathStart(gCurrentActor->targetIndex);
         if ((script_getAngleToPathStart(dc_glbl_CharNum) - angle) & 0x8000) {
-            gCurrentActor->unk221 = gScriptArg0;
+            gCurrentActor->waypointStep = gScriptArg0;
         }
         return;
     }
@@ -1728,7 +1728,7 @@ void script_changeObjectProperty(void) {
         return;
     }
     case 10:
-        gCurrentActor->unk236 = gCurrentActor->unk23D + (s8)gScriptArg0;
+        gCurrentActor->nearRange = gCurrentActor->sightRange + (s8)gScriptArg0;
         return;
     case 11:
         gCurrentActor->unk22A = gScriptArg0;
@@ -1832,8 +1832,8 @@ void script_setSpeedFromPlayer(void) {
 }
 
 void func_1507A210(void) {
-    gCurrentActor->unk223 = 0;
-    gCurrentActor->unk21C = gScriptArg0 * 100;
+    gCurrentActor->moveMode = 0;
+    gCurrentActor->scriptTimer = gScriptArg0 * 100;
     gCurrentActor->unk22C &= 0xFD;
     script_applyMoveFlags();
 }
@@ -1862,17 +1862,17 @@ void script_targetRandomOfType(void) {
     }
     if (count != 0) {
         i = math_randomU8();
-        gCurrentActor->unkA8 = gCurrentActor->unk222;
-        gCurrentActor->unk222 = candidates[i % count];
+        gCurrentActor->unkA8 = gCurrentActor->targetIndex;
+        gCurrentActor->targetIndex = candidates[i % count];
     }
 }
 
 void func_1507A3B4(void) {
-    gCurrentActor->unk222 = gCurrentActor->unkA8;
+    gCurrentActor->targetIndex = gCurrentActor->unkA8;
 }
 
 void func_1507A3CC(void) {
-    gCurrentActor->unk229 = gScriptArg0;
+    gCurrentActor->spotHeight = gScriptArg0;
 }
 
 /* Returns the four argument bytes as one big-endian word. */
@@ -1886,7 +1886,7 @@ void func_1507A428(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((gScriptArg0 & 0xFF) << 24) | ((gScriptArg1 & 0xFF) << 16) | ((gScriptArg2 & 0xFF) << 8) | (gScriptArg3 & 0xFF);
-    gCurrentActor->unk94 = ~(flags | 1);
+    gCurrentActor->hiddenParts = ~(flags | 1);
 }
 
 void func_1507A47C(void) {
@@ -1894,7 +1894,7 @@ void func_1507A47C(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((gScriptArg0 & 0xFF) << 24) | ((gScriptArg1 & 0xFF) << 16) | ((gScriptArg2 & 0xFF) << 8) | (gScriptArg3 & 0xFF);
-    gCurrentActor->unk94 &= ~flags;
+    gCurrentActor->hiddenParts &= ~flags;
 }
 
 void func_1507A4D4(void) {
@@ -1902,11 +1902,11 @@ void func_1507A4D4(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((gScriptArg0 & 0xFF) << 24) | ((gScriptArg1 & 0xFF) << 16) | ((gScriptArg2 & 0xFF) << 8) | (gScriptArg3 & 0xFF);
-    gCurrentActor->unk94 |= flags;
+    gCurrentActor->hiddenParts |= flags;
 }
 
 /*
- * Waypoint direction: arg0 0 sets the step unk221 to arg1, 1 reverses it, 2 reverses it and moves
+ * Waypoint direction: arg0 0 sets the step waypointStep to arg1, 1 reverses it, 2 reverses it and moves
  * the waypoint index by the new step plus arg3 further, wrapping at arg2 (0: the path's count).
  */
 void script_changeWaypointDirection(void) {
@@ -1914,18 +1914,18 @@ void script_changeWaypointDirection(void) {
     s32 index;
 
     if (gScriptArg0 == 0) {
-        gCurrentActor->unk221 = gScriptArg1;
+        gCurrentActor->waypointStep = gScriptArg1;
     } else if (gScriptArg0 == 1) {
-        gCurrentActor->unk221 = -gCurrentActor->unk221;
+        gCurrentActor->waypointStep = -gCurrentActor->waypointStep;
     } else if (gScriptArg0 == 2) {
         if (gScriptArg2 != 0) {
             count = gScriptArg2;
         } else {
             count = gSpawnPathCounts[gCurrentActor->listpos] - 1;
         }
-        gCurrentActor->unk221 = -gCurrentActor->unk221;
-        index = gCurrentActor->unk21E + gCurrentActor->unk221;
-        if (gCurrentActor->unk221 > 0) {
+        gCurrentActor->waypointStep = -gCurrentActor->waypointStep;
+        index = gCurrentActor->waypoint + gCurrentActor->waypointStep;
+        if (gCurrentActor->waypointStep > 0) {
             index += gScriptArg3;
         } else {
             index -= gScriptArg3;
@@ -1935,7 +1935,7 @@ void script_changeWaypointDirection(void) {
         } else if (index < 0) {
             index += count;
         }
-        gCurrentActor->unk21E = index;
+        gCurrentActor->waypoint = index;
     }
 }
 
@@ -1947,7 +1947,7 @@ void script_jumpIfAngleInRange(void) {
     u8 index;
     u16 angle;
 
-    index = gCurrentActor->unk222;
+    index = gCurrentActor->targetIndex;
     if (gScriptArg1 != 0) {
         angle = gCurrentActor->fangle >> 8;
     } else {
@@ -2011,7 +2011,7 @@ void func_1507A8A8(void) {
 
 /* Jumps to arg0 when the target is (arg2 == 0) or is not (arg2 == 1) of type arg1. */
 void script_jumpIfTargetType(void) {
-    if (gScriptArg1 == movement_obj[gCurrentActor->unk222].character_type) {
+    if (gScriptArg1 == movement_obj[gCurrentActor->targetIndex].character_type) {
         gScriptArg2 ^= 1;
     }
     if (gScriptArg2 != 0) {
@@ -2077,7 +2077,7 @@ void script_setFacing(void) {
         gCurrentActor->fangle = gCurrentActor->angle;
         break;
     case 7:
-        gCurrentActor->angle = movement_obj[gCurrentActor->unk222].langle + value;
+        gCurrentActor->angle = movement_obj[gCurrentActor->targetIndex].langle + value;
         break;
     case 8:
         gCurrentActor->angle = gCurrentActor->langle;
@@ -2086,20 +2086,20 @@ void script_setFacing(void) {
 }
 
 void script_setWaypointRange(void) {
-    gCurrentActor->unk220 = gScriptArg0;
-    gCurrentActor->unk21F = gScriptArg1;
+    gCurrentActor->waypointStart = gScriptArg0;
+    gCurrentActor->waypointEnd = gScriptArg1;
 }
 
 void func_1507ACE0(void) {
-    gCurrentActor->unk1E5 = gScriptArg0;
-    gCurrentActor->unk1E6 = gScriptArg0;
-    gCurrentActor->unk1E7 = gScriptArg1;
-    gCurrentActor->unk1E8 = gScriptArg1;
+    gCurrentActor->moveTurnRate = gScriptArg0;
+    gCurrentActor->faceTurnRate = gScriptArg0;
+    gCurrentActor->moveTurnFrac = gScriptArg1;
+    gCurrentActor->faceTurnFrac = gScriptArg1;
 }
 
 void func_1507AD30(void) {
-    gCurrentActor->unk255 = gScriptArg0;
-    gCurrentActor->unk256 = gScriptArg1;
+    gCurrentActor->fallScript = gScriptArg0;
+    gCurrentActor->fallScriptDepth = gScriptArg1;
 }
 
 void script_setFamily(void) {
@@ -2114,7 +2114,7 @@ void script_clearMvmtControl(void) {
     gCurrentActor->mvmt_control &= ~script_getArgWord();
 }
 
-/* Splits (angle between unk78 and the facing unk7A) / arg0 into unk1E6 (high byte) and unk1E8 (low byte). */
+/* Splits (angle between unk78 and the facing unk7A) / arg0 into faceTurnRate (high byte) and faceTurnFrac (low byte). */
 void func_1507ADE0(void) {
     s32 diff;
     s32 step;
@@ -2132,31 +2132,31 @@ void func_1507ADE0(void) {
         diff = -diff;
     }
     step = diff / gScriptArg0;
-    gCurrentActor->unk1E6 = step >> 8;
-    gCurrentActor->unk1E8 = step & 0xFF;
+    gCurrentActor->faceTurnRate = step >> 8;
+    gCurrentActor->faceTurnFrac = step & 0xFF;
 }
 
 void func_1507AE78(void) {
-    gCurrentActor->unk229 = gScriptArg0;
+    gCurrentActor->spotHeight = gScriptArg0;
 }
 
 void func_1507AE94(void) {
-    gCurrentActor->unkD2 = (gScriptArg0 << 8) | gScriptArg1;
-    gCurrentActor->unkD4 = (gScriptArg2 << 8) | gScriptArg3;
-    gCurrentActor->unkD2 *= gCurrentActor->scale_xz;
-    gCurrentActor->unkD4 *= gCurrentActor->scale_y;
+    gCurrentActor->hitRadius = (gScriptArg0 << 8) | gScriptArg1;
+    gCurrentActor->hitHeight = (gScriptArg2 << 8) | gScriptArg3;
+    gCurrentActor->hitRadius *= gCurrentActor->scale_xz;
+    gCurrentActor->hitHeight *= gCurrentActor->scale_y;
 }
 
 void func_1507AF3C(void) {
-    gCurrentActor->unkD6 = (gScriptArg0 << 8) | gScriptArg1;
-    gCurrentActor->unkD6 *= gCurrentActor->scale_y;
+    gCurrentActor->hitOffsetY = (gScriptArg0 << 8) | gScriptArg1;
+    gCurrentActor->hitOffsetY *= gCurrentActor->scale_y;
 }
 
 void func_1507AF98(void) {
-    gCurrentActor->unkD8 = (gScriptArg0 << 8) | gScriptArg1;
-    gCurrentActor->unkDA = (gScriptArg2 << 8) | gScriptArg3;
-    gCurrentActor->unkD8 *= gCurrentActor->scale_xz;
-    gCurrentActor->unkDA *= gCurrentActor->scale_xz;
+    gCurrentActor->hitOffsetZ = (gScriptArg0 << 8) | gScriptArg1;
+    gCurrentActor->hitOffsetX = (gScriptArg2 << 8) | gScriptArg3;
+    gCurrentActor->hitOffsetZ *= gCurrentActor->scale_xz;
+    gCurrentActor->hitOffsetX *= gCurrentActor->scale_xz;
 }
 
 void func_1507B040(void) {
@@ -2181,7 +2181,7 @@ void script_commandOwnedObject(void) {
             /* fallthrough */
         case 2:
             gCurrentActor->scriptCmd = script_getScript(0, gScriptArg1);
-            gCurrentActor->unk21C = 0;
+            gCurrentActor->scriptTimer = 0;
         }
     }
     dc_glbl_CharNum = savedIndex;
@@ -2283,7 +2283,7 @@ void script_playSound2Range800(void) {
 
 void func_1507B578(void) {
     gCurrentActor->doing_hit = gScriptArg0;
-    gCurrentActor->unk114 = gScriptArg1;
+    gCurrentActor->doingHitTimer = gScriptArg1;
 }
 
 /* Jumps to arg0 when mv->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
@@ -2309,14 +2309,14 @@ void func_1507B630(void) {
         // repeat this command
         gCurrentActor->scriptCmd--;
     }
-    gCurrentActor->unk21C = 100;
+    gCurrentActor->scriptTimer = 100;
 }
 
 void func_1507B6E0(void) {
     if ((gCurrentActor->norun != 0) || (gCurrentActor->shad > 5.0f)) {
         // repeat this command
         gCurrentActor->scriptCmd--;
-        gCurrentActor->unk21C = 100;
+        gCurrentActor->scriptTimer = 100;
     }
 }
 
@@ -2334,12 +2334,12 @@ void script_pressButtons(void) {
 
 void func_1507B7BC(void) {
     script_startMove();
-    gCurrentActor->unk223 = 17;
+    gCurrentActor->moveMode = 17;
 }
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void script_jumpIfTargetStunned(void) {
-    Actor *target = &movement_obj[gCurrentActor->unk222];
+    Actor *target = &movement_obj[gCurrentActor->targetIndex];
 
     if ((target->stunned != 0) || (target->energy == 0)) {
         gScriptArg1 ^= 1;
@@ -2376,7 +2376,7 @@ void func_1507B8F4(void) {
 }
 
 void func_1507B958(void) {
-    gCurrentActor->unkB0 = gScriptArg0;
+    gCurrentActor->floatDepth = gScriptArg0;
 }
 
 /*
@@ -2390,7 +2390,7 @@ void script_jumpIfWaypointParam(void) {
     if (gCurrentActor->attach_char != 0) {
         obj = &movement_obj[gCurrentActor->attach_char - 1];
     }
-    if (gScriptArg1 == gSpawnPaths[obj->listpos][obj->unk21E + gScriptArg3].param) {
+    if (gScriptArg1 == gSpawnPaths[obj->listpos][obj->waypoint + gScriptArg3].param) {
         gScriptArg2 ^= 1;
     }
     if (gScriptArg2 != 0) {
@@ -2408,11 +2408,11 @@ void script_playRandomUntrackedSound(void) {
 }
 
 void func_1507BAD0(void) {
-    gCurrentActor->unkFC = script_getArgWord();
+    gCurrentActor->hitSound = script_getArgWord();
 }
 
 void func_1507BAF8(void) {
-    gCurrentActor->unk2CC = script_getArgWord();
+    gCurrentActor->impactSound = script_getArgWord();
 }
 
 void script_emptyCommand108(void) {
@@ -2533,20 +2533,20 @@ const ObjScriptCmd *script_getScript(s32 arg0, s32 scriptId) {
 }
 
 /*
- * Runs an object's script: counts down the wait timer unk21C (25500 waits forever) and, once it
+ * Runs an object's script: counts down the wait timer scriptTimer (25500 waits forever) and, once it
  * expires, executes commands until one sets a new wait time.
  */
 void script_runActor(Actor *obj) {
-    if (obj->unk21C != 0) {
+    if (obj->scriptTimer != 0) {
         if (obj->scriptCmd != NULL) {
-            if (obj->unk21C != 25500) {
-                obj->unk21C = obj->unk21C - gActorStepPercent;
+            if (obj->scriptTimer != 25500) {
+                obj->scriptTimer = obj->scriptTimer - gActorStepPercent;
             }
-            if ((obj->unk21C >= 50000) || (obj->unk21C == 0)) {
+            if ((obj->scriptTimer >= 50000) || (obj->scriptTimer == 0)) {
                 // expired (or wrapped below zero)
-                obj->unk21C = 0;
+                obj->scriptTimer = 0;
                 if (obj->mvmt_control & 0x400) {
-                    obj->unk21C = 20000;
+                    obj->scriptTimer = 20000;
                     obj->mvmt_control &= ~0x400;
                     obj->mvmt_control |= 4;
                 }
@@ -2558,10 +2558,10 @@ void script_runActor(Actor *obj) {
 
     if (obj->scriptCmd == NULL) {
         obj->scriptCmd = script_getScript(0, obj->intelwalk);
-        obj->unk21C = 0;
+        obj->scriptTimer = 0;
     }
 
-    while (obj->unk21C == 0) {
+    while (obj->scriptTimer == 0) {
         if (obj->scriptCmd->op >= 247) {
             // a label: skip its single byte
             obj->scriptCmd = (const ObjScriptCmd *)((const u8 *)obj->scriptCmd + 1);

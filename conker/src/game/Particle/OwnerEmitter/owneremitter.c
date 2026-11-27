@@ -52,7 +52,7 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
             do {
                 randomYaw = math_random();
                 math_dirFromBinAngles((randomYaw % 127U) + heading - 63, (math_random() % 31U) - 50, radius, &spawnPos);
-                spawnPos.y *= owner->unkF0;
+                spawnPos.y *= owner->bodyHeightOverRadius;
                 spawnPos.x += ownerPos.x;
                 spawnPos.y += ownerPos.y;
                 spawnPos.z += ownerPos.z;

@@ -29,11 +29,11 @@ typedef struct ThrowPacket {
     volatile s32 anim;      // matching: volatile keeps the anim in its stack slot across the call
 } ThrowPacket;
 
-/* Returns the angle from this object to the object it is linked to (unk222). */
+/* Returns the angle from this object to the object it is linked to (targetIndex). */
 s16 actor_getAngleToLinked(Actor *actor) {
     Actor *other;
 
-    other = &movement_obj[actor->unk222];
+    other = &movement_obj[actor->targetIndex];
     return actor_getDirectionAngle(other->xpos - actor->xpos, actor->zpos - other->zpos, 0);
 }
 
@@ -474,7 +474,7 @@ void func_150642AC(Actor *actor, s32 buttons, f32 height, s32 noPlay, s32 lockB)
             obj = actor_findByType(0x6C);
             actor->count3 = 1;
             if (obj->taskint[0] == 0) {
-                actor->unk1CC = actor->ypos;
+                actor->fallStartY = actor->ypos;
                 obj->taskint[0] = 100;
                 anim = 0x38;
             }
@@ -593,7 +593,7 @@ void func_150642AC(Actor *actor, s32 buttons, f32 height, s32 noPlay, s32 lockB)
     }
 }
 
-/* Copies object srcIndex's animation position (unk2D0->unk8) to object dstIndex, keeping it
+/* Copies object srcIndex's animation position (anim->unk8) to object dstIndex, keeping it
  * below dstIndex's unk18. */
 void actor_copyAnimPosition(s32 srcIndex, s32 dstIndex) {
     Actor *objects;
@@ -601,8 +601,8 @@ void actor_copyAnimPosition(s32 srcIndex, s32 dstIndex) {
     AnimInstance *src;
 
     objects = movement_obj;
-    dst = objects[dstIndex].unk2D0;
-    src = objects[srcIndex].unk2D0;
+    dst = objects[dstIndex].anim;
+    src = objects[srcIndex].anim;
 
     if (dst != NULL && src != NULL) {
         dst->frame[0] = src->frame[0];
@@ -677,7 +677,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         } else {
             switch (movement_obj[gCurrentActor->lifting - 100].character_type) {
             case 0x8C:
-                actor->unkAA = 0x5A;
+                actor->speedPercent = 0x5A;
                 anim = 0x1A6;
                 speed = vel / 6.0f + 0.4f;
                 if (actor->speed > 14.0f) {
@@ -686,7 +686,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
                 }
                 break;
             case 0x57:
-                actor->unkAA = 0x5A;
+                actor->speedPercent = 0x5A;
                 anim = 0x116;
                 speed = vel / 6.0f + 0.4f;
                 if (actor->speed > 14.0f) {
@@ -727,14 +727,14 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         anim = overrideAnim;
         speed = vel / 15.0f + 0.6f;
     } else if (2.6f < actor->stickspeed && (ctl->walk_attrib & 1)) {
-        actor->unkAA = 0x28;
+        actor->speedPercent = 0x28;
         blend = 5.0f;
         speed = actor->stickspeed / 15.0f + 0.5f;
         anim = actor_getDuckWalkAnim();
     } else if (ctl->rt_context_b == 0x16) {
         if (actor->stickspeed >= 1.0f) {
             anim = ctl->unk1B2 != 0 ? 0x2C6 : 0xE8;
-            actor->unkAA = 0x1E;
+            actor->speedPercent = 0x1E;
             speed = vel * 0.0625f + 0.6f;
         } else {
             speed = 1.0f;
@@ -743,7 +743,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
     } else if (ctl->rt_context_b == 9) {
         if (actor->stickspeed >= 1.0f) {
             if (gIsMultiplayer == 0) {
-                actor->unkAA = 0x37;
+                actor->speedPercent = 0x37;
             }
             anim = 0x7E;
             if (gIsMultiplayer == 0) {
@@ -801,7 +801,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         if (actor->animseq.uh != 0x222 && actor->animseq.uh != 0x236) {
             if (actor->stickspeed >= 1.0f || ctl->door_walkf_time > 0) {
                 anim = 0x223;
-                actor->unkAA = 0x37;
+                actor->speedPercent = 0x37;
                 if (actor->stickspeed >= 20.0f) {
                     anim = 0x224;
                     speed = vel / 22.0f + 0.4f;
@@ -815,7 +815,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x12 || ctl->rt_context_b == 0x18 || ctl->rt_context_b == 0x41) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0xEC;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -828,7 +828,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x24) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0x158;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -841,7 +841,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x22) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0x15B;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -854,7 +854,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x21) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x6E;
+            actor->speedPercent = 0x6E;
             anim = 0x123;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 15.0f) {
@@ -867,7 +867,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x26) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0x178;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -880,7 +880,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x3A) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0x1FB;
             speed = vel * 0.0625f + 0.6f;
         } else {
@@ -889,7 +889,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x25) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0xD7;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -913,7 +913,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x23) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0x161;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -926,7 +926,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if (ctl->rt_context_b == 0x15) {
         if (actor->stickspeed >= 1.0f) {
-            actor->unkAA = 0x50;
+            actor->speedPercent = 0x50;
             anim = 0xED;
             speed = vel * 0.0625f + 0.6f;
             if (actor->stickspeed >= 20.0f) {
@@ -952,7 +952,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
     } else if (ctl->injured != 0 && arg2 > 1.0f) {
         anim = 0x6D;
         speed = vel / 6.5f + 0.3f;
-        actor->unkAA = 0x28;
+        actor->speedPercent = 0x28;
         blend = 8.0f;
     } else if (ctl->pissed_up > 0) {
         if (arg2 < 1.0f) {
@@ -981,7 +981,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
                 event_playSound2Range1800();
             }
             if (actor->stickspeed >= 1.0f && actor->norun == 0) {
-                actor->unkAA = 0x2D;
+                actor->speedPercent = 0x2D;
                 speed = actor->speed / 9.0f;
                 anim = 0x4E;
             } else {
@@ -991,7 +991,7 @@ s32 actor_updateMoveAnim(Actor *actor, f32 vel, f32 arg2, s32 overrideAnim, f32 
         }
     } else if ((ctl->walk_attrib & 2) && actor->stickspeed >= 1.0f) {
         ctl->turn = 0x1C;
-        actor->unkAA = 0xF;
+        actor->speedPercent = 0xF;
         speed = moveSpeed / 5.0f + 0.3f;
         blend = 8.0f;
         anim = 0x64;
@@ -1227,7 +1227,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                 collision_removePartSet(actor, sfx);
                 actor->mv->weapon_status = 0;
             } else if (act == actor->mv->rt_context_b) {
-                actor->unkAA = 0x4B;
+                actor->speedPercent = 0x4B;
                 if (isStunned != 0) {
                     clearAction = 0;
                 } else if (actor->mv->SniperState != 0) {
@@ -1334,7 +1334,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             actor->unkA9 = 2;
             actor->norun = 0x78;
             actor->ygrav = 6.0f;
-            actor->unk1CC = -100000.0f;
+            actor->fallStartY = -100000.0f;
             anim = 0x4A;
             actor->speed *= 0.5f;
             speed = 1.799999952f;
@@ -1435,7 +1435,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             obj = &movement_obj[actor->attach_char - 1];
             actor->nojump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
-                if ((obj->animseq.uh == 0) || (obj->unk22E != 0) || (obj->animseq.uh == 0xC) || (obj->animseq.uh == 0xD)) {
+                if ((obj->animseq.uh == 0) || (obj->alertCooldown != 0) || (obj->animseq.uh == 0xC) || (obj->animseq.uh == 0xD)) {
                     u8 mode;
 
                     mode = 0x10;
@@ -1446,9 +1446,9 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                         obj->animseq.uh = 0;
                     }
                     obj->scriptCmd = script_getScript(1, mode);
-                    obj->unk21C = 0;
+                    obj->scriptTimer = 0;
                     gCurrentActor = actor;
-                    obj->unk22E = 0;
+                    obj->alertCooldown = 0;
                 }
                 anim = 999;
             }
@@ -1557,7 +1557,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                                     actor->mv->turn = 0;
                                 }
                                 if (gIsMultiplayer == 0) {
-                                    actor->unkAA = 0x37;
+                                    actor->speedPercent = 0x37;
                                 }
                             } else {
                                 anim = 0x7C;
@@ -1763,7 +1763,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
         break;
     case 0xB:
         if (actor->animseq.uh == 0x68) {
-            if ((actor->unk2D0->frame[0] < 68.0f) && (actor->unk222 != 0)) {
+            if ((actor->anim->frame[0] < 68.0f) && (actor->targetIndex != 0)) {
                 gWaistTiltTarget = (actor->langle - actor_getAngleToLinked(actor)) - 0x2000;
             }
             anim = 999;
@@ -1930,7 +1930,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
                 actor_turnWaist(actor, heldButtons, Z_TRIG | R_TRIG);
                 if ((heldButtons & Z_TRIG) && (actor->animseq.uh != 0x168)) {
                     if (actor->speed != 0.0f) {
-                        actor->unkAA = 0x50;
+                        actor->speedPercent = 0x50;
                         actor->mv->turn = 3;
                         actor->mv->pssd_waist_tilt = 0;
                         anim = 0x22B;
@@ -2530,7 +2530,7 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
         handled = 1;
         anim = 999;
         if (act != actor->mv->rt_context_b) {
-            if ((height <= 0.0f) && (actor->unk110 == 0) && (actor->nojump == 0)) {
+            if ((height <= 0.0f) && (actor->slideState == 0) && (actor->nojump == 0)) {
                 actor->norun = 0xFF;
                 actor->nojump = 0xFF;
                 actor->count5 = 0xFF;
@@ -2817,9 +2817,9 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             }
             if (actor->mv->unk12C >= gFrameTicks) {
                 actor->mv->unk12C -= gFrameTicks;
-                actor->unkAA = 0x96;
+                actor->speedPercent = 0x96;
             } else {
-                actor->unkAA = 0x4B;
+                actor->speedPercent = 0x4B;
                 actor->mv->unk12C = 0;
             }
         }

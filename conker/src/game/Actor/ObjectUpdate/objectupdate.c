@@ -172,7 +172,7 @@ void actor_updateObject(Actor *actor, s32 index) {
             collision_updateActorHitMesh(actor);
         }
         if (actor->morph != NULL) {
-            anim_morphVertices(actor->unk134, actor->morphDuration, index);
+            anim_morphVertices(actor->morphTarget, actor->morphDuration, index);
         }
     }
 }
@@ -262,10 +262,10 @@ void actor_updateBlobShadows(void) {
         if (state != 0) {
             id = actor->character_type;
             visible = FALSE;
-            if (actor->drawtype != 3 && id != 0xFF && actor->unk123 == 0 && (actor->unk66 & 0x10) != 0x10 &&
+            if (actor->drawtype != 3 && id != 0xFF && actor->noBlobShadow == 0 && (actor->unk66 & 0x10) != 0x10 &&
                 actor->shadow_size != 0 && actor->attach_char == 0 &&
                 (gCutsceneActorLock == 0 || gCutsceneShowUnboundActors[0] != 0 || cutscene_isActorBound(actor) != 0) &&
-                (actor->unk88 == 0 || actor->unkCC >= -150)) {
+                (actor->unk88 == 0 || actor->heightOffset >= -150)) {
                 for (i = 0; i <= gScreenLayout; i++) {
                     if (actor_getAlpha(actor, i) != 0) {
                         visible = TRUE;
@@ -304,7 +304,7 @@ void actor_resetBonePool(void) {
 
 /* Texture index of a sprite object (out-of-range values fall back to 11). */
 s32 actor_getSpriteTexture(s32 index) {
-    s32 tex = movement_obj[index].unk136;
+    s32 tex = movement_obj[index].spriteTexture;
 
     if (tex >= 70) {
         tex = 11;
@@ -327,7 +327,7 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
         return gdl;
     }
     alpha = movement_obj[index].alpha;
-    size = movement_obj[index].unk122;
+    size = movement_obj[index].spriteSize;
     scroll = movement_obj[index].texScroll;
     if (alpha == 0) {
         return gdl;
@@ -622,17 +622,17 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
         lit = FALSE;
     }
     if (lit) {
-        lightFlags = (actor->unk2FE == 0) ? 0xA : 2;
+        lightFlags = (actor->modelDrawn == 0) ? 0xA : 2;
         if (gStrobeCount != 0) {
             lightFlags |= 8;
         }
         gdl = light_pickLights(gdl, player, actor->xpos, actor->ypos, actor->zpos,
-                            actor->floorMaterial, actor->unk304[player], actor->unk301, &actor->unk314[gDrawBufferIndex],
-                            &actor->unk302, 2, actor->unk1DD, lightFlags, gPickedLights);
+                            actor->floorMaterial, actor->gfxLights[player], actor->maxLights, &actor->ambients[gDrawBufferIndex],
+                            &actor->lightCount, 2, actor->ambientColor, lightFlags, gPickedLights);
     }
     colourSet = -1;
     for (i = 0; i < gModelDlPartCounts[id]; i++) {
-        if (!(actor->unk94 & (1 << i))) {
+        if (!(actor->hiddenParts & (1 << i))) {
             if (!(actor->unk98 & (1 << i))) {
                 if (colourSet != 0) {
                     gDPPipeSync(gdl++);
@@ -665,7 +665,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
         }
     }
     actor_refreshModelUnload(actor);
-    actor->unk2FE = 1;
+    actor->modelDrawn = 1;
     if (mode == 0) {
         gdl = attach_drawOwner(gdl, actor, player, 1);
     }
@@ -678,15 +678,15 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     return gdl;
 }
 
-/* Object colour: for (unk66 & 0xC) == 4 the inverse of the mean of unk1DD and unk1E0, else white. */
+/* Object colour: for (unk66 & 0xC) == 4 the inverse of the mean of ambientColor and unk1E0, else white. */
 void func_1502D54C(s32 index, s32 *colour) {
     Actor *actor;
 
     actor = &movement_obj[index];
     if ((actor->unk66 & 0xC) == 4) {
-        colour[0] = (actor->unk1E0[0] + actor->unk1DD[0]) / 2;
-        colour[1] = (actor->unk1E0[1] + actor->unk1DD[1]) / 2;
-        colour[2] = (actor->unk1E0[2] + actor->unk1DD[2]) / 2;
+        colour[0] = (actor->unk1E0[0] + actor->ambientColor[0]) / 2;
+        colour[1] = (actor->unk1E0[1] + actor->ambientColor[1]) / 2;
+        colour[2] = (actor->unk1E0[2] + actor->ambientColor[2]) / 2;
         colour[0] = 0xFF - colour[0];
         colour[1] = 0xFF - colour[1];
         colour[2] = 0xFF - colour[2];
@@ -741,7 +741,7 @@ void actor_getFogAlpha(actor, colour, player)
     colour[3] = (1.0f - amount) * 255.0f;
 }
 
-/* DMAs the current frame of each animation channel into buf (anim, or actor->unk2D0 when actor is given). */
+/* DMAs the current frame of each animation channel into buf (anim, or actor->anim when actor is given). */
 void actor_loadAnimFrames(AnimInstance *anim, Actor *actor, u8 *buf) {
     s32 frameSize;
     u32 size;
@@ -762,7 +762,7 @@ void actor_loadAnimFrames(AnimInstance *anim, Actor *actor, u8 *buf) {
         if (actor->animseq.uh == 0xFFFF) {
             actor_stopAnim(actor);
         }
-        anim = actor->unk2D0;
+        anim = actor->anim;
     }
     if (anim == NULL) {
         return;
@@ -870,7 +870,7 @@ void actor_computeBones(MtxF mtx, s32 index) {
     remap = NULL;
     if (gModelData[id] == NULL) {
         spawn = actor->listpos_ptr;
-        if (model_load(id, 0, spawn, 1, actor->unkAC) != 0) {
+        if (model_load(id, 0, spawn, 1, actor->modelLoadFlags) != 0) {
             actor->ob_matrix_ptr = NULL;
             return;
         }
@@ -879,14 +879,14 @@ void actor_computeBones(MtxF mtx, s32 index) {
             return;
         }
     }
-    if (actor->unk2D0 != NULL) {
+    if (actor->anim != NULL) {
         goto animated;
     }
     // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
 load:
     if (collision_allocAnimState(actor, 0, 0, 1.0f) == 0) {
     animated:
-        if (gModelBoneCounts[id] < 2 || actor->unk2D0 != NULL) {
+        if (gModelBoneCounts[id] < 2 || actor->anim != NULL) {
             count = actor_getBoneMatrixCount(id);
             if (gBonePoolSize * sizeof(Mtx) < gBonePoolCursor + count * sizeof(Mtx) - gBonePoolStart) {
                 actor->ob_matrix_ptr = NULL;
@@ -917,11 +917,11 @@ load:
                 s16 scale;
 
                 if (gCutsceneStates[0] != 1) {
-                    scale = actor->scale_y * actor->unkCC;
+                    scale = actor->scale_y * actor->heightOffset;
                 } else {
                     scale = 0;
                 }
-                anim_buildBoneMatrices(&gBonePoolCursor, mtx, actor->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
+                anim_buildBoneMatrices(&gBonePoolCursor, mtx, actor->anim, (s32)gModelBones[id], count, cmd, remap, scale);
             }
             actor->mod_angle = gAnimModAngle;
             moved = D_80088558;
@@ -944,9 +944,9 @@ load:
                     value = moved * 0.03125f;
                     if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
                     value = actor->scale_xz * value;
-                    value = value / actor->unk2D0->numFrames[0];
+                    value = value / actor->anim->numFrames[0];
                     value = *(volatile f32 *)&actor->speed / value;
-                    actor->unk2D0->speed[0] = value * 0.5f;
+                    actor->anim->speed[0] = value * 0.5f;
                 }
             }
             gBoneMatricesUsed += count;
@@ -973,11 +973,11 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
     actor = &movement_obj[index];
     if (actor->scale_xz == 0.0f) {
         actor->scale_xz = 0.1000000015f;
-        actor->unk154 = 0.1000000015f;
+        actor->targetScaleXz = 0.1000000015f;
     }
     if (actor->scale_y == 0.0f) {
         actor->scale_y = 0.1000000015f;
-        actor->unk158 = 0.1000000015f;
+        actor->targetScaleY = 0.1000000015f;
     }
     if ((actor->unk66 & 0x20) == 0x20) {
         canCull = FALSE;
@@ -1070,11 +1070,11 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
         } else {
             other = actor;
             mtx[3][0] = actor->xpos;
-            mtx[3][1] = actor->ypos + actor->scale_y * actor->unkC8;
+            mtx[3][1] = actor->ypos + actor->scale_y * actor->rootOffsetY;
             mtx[3][2] = actor->zpos;
         }
-        if (other->unk2D0 != NULL && other->unk2D0->frameRom[0] == 0) {
-            mtx[3][1] += other->unkCC;
+        if (other->anim != NULL && other->anim->frameRom[0] == 0) {
+            mtx[3][1] += other->heightOffset;
         }
     }
     if (rootOnly) {
@@ -1143,7 +1143,7 @@ void actor_updateCulling(s32 index) {
     }
     width = gModelDefs[id]->bodyRadius * actor->scale_xz;
     height = gModelDefs[id]->bodyRadius * actor->scale_y;
-    yOffset = (gModelDefs[id]->bodyHeight + actor->unkCC) * actor->scale_y;
+    yOffset = (gModelDefs[id]->bodyHeight + actor->heightOffset) * actor->scale_y;
     actor->cull_radius_xz = width;
     range = actor->cullDistance;
     if (gCutsceneStates[0] == 1 && D_800C3660[0] == 0) {
@@ -1482,8 +1482,8 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
     if (tex != NULL) {
         gSPSegment(gdl++, 6, tex[texIndex[0]].addr);
         gSPSegment(gdl++, 7, tex[texIndex[1]].addr);
-        gSPSegment(gdl++, 10, tex[actor->unk68[0]].addr);
-        gSPSegment(gdl++, 11, tex[actor->unk68[1]].addr);
+        gSPSegment(gdl++, 10, tex[actor->swapTexture[0]].addr);
+        gSPSegment(gdl++, 11, tex[actor->swapTexture[1]].addr);
     }
     return gdl;
 }

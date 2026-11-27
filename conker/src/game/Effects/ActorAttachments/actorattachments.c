@@ -721,11 +721,11 @@ void func_1514DA38(Actor *obj) {
     }
 }
 
-/** Sets bit 1 of obj->unk94 and attaches a effect_newCharacterWatcher object (type 0x13) with an 8-byte payload. */
+/** Sets bit 1 of obj->hiddenParts and attaches a effect_newCharacterWatcher object (type 0x13) with an 8-byte payload. */
 void func_1514DAA4(Actor *obj) {
     void *handle;
 
-    obj->unk94 |= 2;
+    obj->hiddenParts |= 2;
     {
         s32 payload[2];
 
@@ -774,16 +774,16 @@ void func_1514DC5C(Actor *obj) {
 }
 
 void func_1514DC84(Actor *obj) {
-    obj->unk94 |= 2;
+    obj->hiddenParts |= 2;
 }
 
 void func_1514DC98(Actor *obj) {
-    obj->unk94 |= 0x710;
+    obj->hiddenParts |= 0x710;
 }
 
-/** Sets obj->unk9C to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
+/** Sets obj->hiddenBones to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
 void func_1514DCAC(Actor *obj) {
-    obj->unk9C = 0x6000;
+    obj->hiddenBones = 0x6000;
     collision_createPartSet(obj, 0x23, 1.0f, 0);
     collision_createPartSet(obj, 0x44, 1.0f, 0);
 }
