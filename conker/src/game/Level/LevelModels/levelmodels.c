@@ -865,8 +865,8 @@ void level_buildCollisionTris(s32 unused) {
     collision_selectMap(0);
 
     size = (collision_getMaxMapTriCount() + 7) & ~7;
-    D_800D3668 = (u8 *)D_8003809C;
-    D_800D366C = D_800D3668 + size;
+    gShadowFaceFlags = (u8 *)D_8003809C;
+    gShadowFaceFlagsEnd = gShadowFaceFlags + size;
     collision_selectMap(2);
 }
 

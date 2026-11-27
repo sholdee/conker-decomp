@@ -99,12 +99,12 @@ void func_15129934(Camera *cam) {
             }
             camera_updateStatus(cam);
         }
-        cam->unk974 = 1.0f;
-        cam->unk964 = 1.0f;
+        cam->accelATarget = 1.0f;
+        cam->accelA = 1.0f;
         cam->targetSpeed = 1.0f;
         cam->speed = 1.0f;
-        cam->unk978 = 2.0f;
-        cam->unk968 = 2.0f;
+        cam->accelBTarget = 2.0f;
+        cam->accelB = 2.0f;
         cam->targetLimit = 2.0f;
         cam->limit = 2.0f;
     }

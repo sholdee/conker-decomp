@@ -9,8 +9,8 @@ static const u8 gBeamSlotMasks[4] = { 0x40, 0x20, 0x00, 0x00 };
 static const Vec3f gBeamProjectileStarts[2] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
 static const Vec3f gBeamProjectileEnds[2] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
 static const u8 gBeamProjectileBones[4] = { 0x16, 0x1A, 0x00, 0x00 };
-static const Vec3f D_800A1674 = { 0.0f, -29.0f, 0.0f };
-static const Vec3f D_800A1680 = { 0.0f, 62.0f, 98.0f };
+static const Vec3f gBeamLightOffsetA = { 0.0f, -29.0f, 0.0f };
+static const Vec3f gBeamLightOffsetB = { 0.0f, 62.0f, 98.0f };
 static const Vec3f gBeamMuzzleBurstStarts[2][4][2] = {
     {
         { { -125.0f, 10.0f, -30.0f }, { 125.0f, 10.0f, 30.0f } },
@@ -766,8 +766,8 @@ void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type) {
 }
 
 void beam_attachActorLights(Actor *actor) {
-    light_createAttached(actor, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    light_createAttached(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_createAttached(actor, 0x25, &gBeamLightOffsetA, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_createAttached(actor, 2, &gBeamLightOffsetB, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 /* Spawns a particle effect (particle_spawnTrailBurst) at `pos`; beam_fireSlot uses it at the muzzle. */

@@ -122,7 +122,7 @@ void particle_updateStyleParticle(StyleParticle *particle) {
 
     value = particle->lifetime;
     if (value != 0) {
-        value -= D_800BE9E4;
+        value -= gFrameTicks;
         if (value < 0) {
             value = 0;
         }
@@ -138,7 +138,7 @@ void particle_updateStyleParticle(StyleParticle *particle) {
         /* y is 8.8 fixed point with its fraction in yFraction */
         value = particle->y;
         value = (value << 8) + particle->yFraction;
-        value += particle->velocityY * D_800BE9E4;
+        value += particle->velocityY * gFrameTicks;
         particle->y = value >> 8;
         particle->yFraction = value & 0xFF;
     }
@@ -159,7 +159,7 @@ Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     s32 cycleType;
 
     synced = FALSE;
-    D_800D2DAB = 0;
+    gSpriteKeepPrimColor = 0;
     texture = gEffectAnimTextures[particle->texture];
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
@@ -338,7 +338,7 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
         isAlt = 1;
     }
     countdown = emitter->countdown;
-    countdown -= D_800BE9E4;
+    countdown -= gFrameTicks;
     while (countdown < 0) {
         if (emitter->interval != 0) {
             countdown += emitter->interval;
@@ -508,7 +508,7 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
     emitter->countdown = countdown;
     i = emitter->timer;
     if (i != 0xFFFF) {
-        i -= D_800BE9E4;
+        i -= gFrameTicks;
         if (i > 0) {
             emitter->timer = i;
         } else {
@@ -539,7 +539,7 @@ s32 particle_updateStyleColorRamp(StyleParticle *particle) {
     alpha = particle->alpha;
     if (particle->lifetime != 0) {
         if (alpha != 0xFF) {
-            alpha += D_800BE9E4 << 5;
+            alpha += gFrameTicks << 5;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -547,7 +547,7 @@ s32 particle_updateStyleColorRamp(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 << 4;
+            alpha -= gFrameTicks << 4;
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -561,7 +561,7 @@ s32 particle_updateStyleColorRamp(StyleParticle *particle) {
 
     scale = particle->scaleX;
     intensity = particle->lifetime;
-    scale += D_800BE9E4 * 10;
+    scale += gFrameTicks * 10;
     particle->scaleY = scale;
     particle->scaleX = scale;
 
@@ -586,7 +586,7 @@ s32 particle_updateStyleColorRamp(StyleParticle *particle) {
 
 /* The ROM has 8 bytes of `jr ra; nop` between particle_updateStyleColorRamp and particle_updateStylePulse.
  * splat has no symbol for them so they fold into particle_updateStyleColorRamp's size; they are an
- * empty leaf function, the same shape game/Event/TimedEvent/timedevent.c func_1507304C and
+ * empty leaf function, the same shape game/Event/TimedEvent/timedevent.c event_emptyTimedEvent120 and
  * game/Swarm/SwarmCentre/swarmcentre.c func_15178750_pad already reconstruct. */
 static void func_1516ECA4_pad(void) {
 }
@@ -601,7 +601,7 @@ s32 particle_updateStylePulse(StyleParticle *particle) {
     alpha = particle->alpha;
     if (lifetime != 0) {
         if (alpha != 0xFF) {
-            alpha += D_800BE9E4 << 7;
+            alpha += gFrameTicks << 7;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -610,7 +610,7 @@ s32 particle_updateStylePulse(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 * particle->u.pulse.fadeRate;
+            alpha -= gFrameTicks * particle->u.pulse.fadeRate;
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -678,7 +678,7 @@ s32 particle_updateStyleDrift(StyleParticle *particle) {
     if (lifetime != 0) {
         limit = maxAlpha.v[style];
         if (alpha != limit) {
-            alpha += D_800BE9E4 << 4;
+            alpha += gFrameTicks << 4;
             if (limit < alpha) {
                 alpha = limit;
             }
@@ -687,7 +687,7 @@ s32 particle_updateStyleDrift(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 * fadeRate.v[style];
+            alpha -= gFrameTicks * fadeRate.v[style];
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -702,7 +702,7 @@ s32 particle_updateStyleDrift(StyleParticle *particle) {
 
     particle_moveStyleXZ(particle);
     alpha = particle->scaleX;
-    alpha += D_800BE9E4 * growth.v[style];
+    alpha += gFrameTicks * growth.v[style];
     particle->scaleY = alpha;
     particle->scaleX = alpha;
     if (style == 3) {
@@ -786,7 +786,7 @@ void particle_moveStyleXZ(StyleParticle *particle) {
     velocity = particle->u.drift.velocityXHigh;
     velocity <<= 8;
     velocity += particle->u.drift.velocityXLow;
-    x += velocity * D_800BE9E4;
+    x += velocity * gFrameTicks;
     particle->x = x >> 8;
     x = (u8)x;
     particle->u.drift.xFraction = x;
@@ -796,7 +796,7 @@ void particle_moveStyleXZ(StyleParticle *particle) {
     velocity = particle->u.drift.velocityZHigh;
     velocity <<= 8;
     velocity += particle->u.drift.velocityZLow;
-    z += velocity * D_800BE9E4;
+    z += velocity * gFrameTicks;
     particle->z = z >> 8;
     z = (u8)z;
     particle->u.drift.zFraction = z;
@@ -847,7 +847,7 @@ s32 func_1516F9C4(StyleParticle *particle) {
     alpha = particle->alpha;
     if (lifetime != 0) {
         if (alpha != 0xFF) {
-            alpha += D_800BE9E4 << 4;
+            alpha += gFrameTicks << 4;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -856,7 +856,7 @@ s32 func_1516F9C4(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 << 3;
+            alpha -= gFrameTicks << 3;
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -895,7 +895,7 @@ s32 particle_updateStyleTint(StyleParticle *particle) {
     v = particle->alpha;
     if (particle->lifetime != 0) {
         if (v != 0xFF) {
-            v += D_800BE9E4 << 4;
+            v += gFrameTicks << 4;
             if (v >= 0x100) {
                 v = 0xFF;
             }
@@ -903,7 +903,7 @@ s32 particle_updateStyleTint(StyleParticle *particle) {
         }
     } else {
         if (v != 0) {
-            v -= D_800BE9E4 << particle->u.tint.fadeShift;
+            v -= gFrameTicks << particle->u.tint.fadeShift;
             if (v < 0) {
                 v = 0;
             }
@@ -914,10 +914,10 @@ s32 particle_updateStyleTint(StyleParticle *particle) {
         return 1;
     }
     v = particle->u.tint.growX;
-    v *= D_800BE9E4;
+    v *= gFrameTicks;
     particle->scaleX += v;
     v = particle->u.tint.growY;
-    v *= D_800BE9E4;
+    v *= gFrameTicks;
     particle->scaleY += v;
     /* BUG (original game): scaleX is tested twice, scaleY never */
     if (particle->scaleX <= 0 || particle->scaleX <= 0) {
@@ -925,7 +925,7 @@ s32 particle_updateStyleTint(StyleParticle *particle) {
         return 1;
     }
     v = particle->u.tint.blend;
-    v += D_800BE9E4;
+    v += gFrameTicks;
     if (v >= 0x80) {
         v = 0x7F;
     }
@@ -952,7 +952,7 @@ s32 particle_updateStyleAccelY(StyleParticle *particle) {
     alpha = particle->alpha;
     if (lifetime != 0) {
         if (alpha != 0xFF) {
-            alpha += D_800BE9E4 << 4;
+            alpha += gFrameTicks << 4;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -961,7 +961,7 @@ s32 particle_updateStyleAccelY(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 << 3;
+            alpha -= gFrameTicks << 3;
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -1175,7 +1175,7 @@ s32 func_151707E0(StyleParticle *particle) {
             particle->lifetime = (math_random() % 25U) + 200;
         }
         if (alpha != 0xFE) {
-            alpha += D_800BE9E4 << 6;
+            alpha += gFrameTicks << 6;
             if (alpha >= 0xFF) {
                 alpha = 0xFE;
             }
@@ -1183,7 +1183,7 @@ s32 func_151707E0(StyleParticle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 << 4;
+            alpha -= gFrameTicks << 4;
             if (alpha < 0) {
                 alpha = 0;
             }

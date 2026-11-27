@@ -95,8 +95,8 @@ void func_150C3230(Actor *obj) {
             obj->taskint[0] = 0;
         }
 
-        if (D_800BE9E4 < obj->taskint[0]) {
-            obj->taskint[0] -= D_800BE9E4;
+        if (gFrameTicks < obj->taskint[0]) {
+            obj->taskint[0] -= gFrameTicks;
             if (gIsMultiplayer != 0) {
                 mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
@@ -254,7 +254,7 @@ void func_150C3994(Actor *obj) {
     }
 }
 
-s32 func_150C3D48(s32 value) {
+s32 particle_decodeTamperAddress(s32 value) {
     return value + 0xEDCBA988;
 }
 
@@ -267,7 +267,7 @@ void func_150C3D5C(Actor *obj) {
 
     locals.checksum = 0xC23459B8;
     // matching: calling through a function-pointer cast makes IDO emit jalr
-    ((void (*)(s32, s32 *))osPiReadIo)(func_150C3D48(locals.checksum), &locals.checksum);
+    ((void (*)(s32, s32 *))osPiReadIo)(particle_decodeTamperAddress(locals.checksum), &locals.checksum);
     if (locals.checksum != 0x0330C820) {
         // tamper check failed: overwrite heap_free with "jr $ra; nop"
         ((s32 *)&heap_free)[0] = 0x03E00008;

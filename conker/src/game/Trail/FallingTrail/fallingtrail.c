@@ -83,7 +83,7 @@ s32 trail_fadeFallingTrail(FallingTrail *trail) {
             }
         }
         if ((data->flags & TRAIL_BURST_SHRINK) && trail->head.tmpl.life < data->shrinkStart && !data->shrinkPaused) {
-            for (frames = D_800BE9E4; frames != 0; frames--) {
+            for (frames = gFrameTicks; frames != 0; frames--) {
                 data->width *= data->shrinkFactor;
             }
         }

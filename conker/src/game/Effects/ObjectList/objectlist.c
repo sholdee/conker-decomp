@@ -386,7 +386,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 if (gObjectTypes[type].drawMode == 1) {
                     mode1Start = gfx;
                 }
-                D_800D2DAB = 0;
+                gSpriteKeepPrimColor = 0;
                 gDrawHookTexture = NULL;
                 gDrawHookTextureFrame = 0;
                 gDrawHookTextureCm = 2;
@@ -597,7 +597,7 @@ void effect_updateBillboard(BillboardParticle *p) {
 
     finished = 0;
     if (p->tmpl.life != 0x7FFF) {
-        p->tmpl.life -= D_800BE9E4;
+        p->tmpl.life -= gFrameTicks;
         if (p->tmpl.life < 0) {
             p->tmpl.life = 0;
             finished = 1;
@@ -631,28 +631,28 @@ void effect_updateBillboard(BillboardParticle *p) {
         // matching: 24.8 fixed point moves written step by step (incl. the redundant (u8)) for IDO's temp registers
         posY = p->tmpl.y;
         posY = (posY << 8) | p->tmpl.subY;
-        delta = p->tmpl.velY * D_800BE9E4;
+        delta = p->tmpl.velY * gFrameTicks;
         posY += delta;
         p->tmpl.y = posY >> 8;
         posY = (u8)posY;
         p->tmpl.subY = posY;
         posX = p->tmpl.x;
         posX = (posX << 8) | p->tmpl.subX;
-        delta = p->tmpl.velX * D_800BE9E4;
+        delta = p->tmpl.velX * gFrameTicks;
         posX += delta;
         p->tmpl.x = posX >> 8;
         posX = (u8)posX;
         p->tmpl.subX = posX;
         posZ = p->tmpl.z;
         posZ = (posZ << 8) | p->tmpl.subZ;
-        delta = p->tmpl.velZ * D_800BE9E4;
+        delta = p->tmpl.velZ * gFrameTicks;
         posZ += delta;
         p->tmpl.z = posZ >> 8;
         posZ = (u8)posZ;
         p->tmpl.subZ = posZ;
         if (p->tmpl.frameStep != 0) {
             limit = (p->tmpl.anim->frameCount << 8) - 1;
-            p->tmpl.frame += p->tmpl.frameStep * D_800BE9E4;
+            p->tmpl.frame += p->tmpl.frameStep * gFrameTicks;
             if (limit < p->tmpl.frame) {
                 if (p->tmpl.flags & BILLBOARD_DIE_AT_END) {
                     p->tmpl.life = 0;
@@ -897,7 +897,7 @@ void effect_updateQuadFx(QuadFx *fx) {
     if (step != 0) {
         frameCount = gEffectAnimTextures[fx->data.animIndex]->frameCount;
         limit = (frameCount << 8) - 1;
-        fx->data.frame += step * D_800BE9E4;
+        fx->data.frame += step * gFrameTicks;
         frame = fx->data.frame;
         if (limit < frame) {
             if (fx->data.flags & 0x40) {
@@ -1337,9 +1337,9 @@ void effect_sendActorEventToType(s32 type, Actor *actor, u8 eventType) {
     effect_sendEventToType(type, (s32)&event, eventType);
 }
 
-/* Sets D_800D2DAB and returns its first argument unchanged. */
+/* Sets gSpriteKeepPrimColor and returns its first argument unchanged. */
 Gfx *effect_beginBillboardDraw(Gfx *gfx, s32 type, s32 list, s16 view) {
-    D_800D2DAB = 1;
+    gSpriteKeepPrimColor = 1;
     return gfx;
 }
 

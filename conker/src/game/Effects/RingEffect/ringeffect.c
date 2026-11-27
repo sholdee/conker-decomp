@@ -103,7 +103,7 @@ void effect_updateRingEffect(RadialEffect *effect) {
 
     expired = 0;
     if (effect->def.flags & 1) {
-        effect->def.remaining -= D_800BE9E4;
+        effect->def.remaining -= gFrameTicks;
         if (effect->def.remaining < 0) {
             expired = 1;
         }
@@ -529,7 +529,7 @@ void effect_spawnImpactRing(Actor *actor) {
     onGround = 0;
     if (actor != NULL) {
         collision_initHitFromObject(&floorInfo, actor);
-        camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
+        camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 7, 1);
         pos.x = actor->xpos;
         pos.y = actor->ypos + 100.0f;
         pos.z = actor->zpos;
@@ -734,7 +734,7 @@ s32 effect_dampParticleVelocityXZ(ParticleObject *obj, s32 arg1) {
     s32 ticks;
 
     damping = &obj->damping;
-    for (ticks = D_800BE9E4; ticks != 0; ticks--) {
+    for (ticks = gFrameTicks; ticks != 0; ticks--) {
         obj->p.vel.x *= *damping;
         obj->p.vel.z *= *damping;
     }

@@ -26,7 +26,7 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
             } else if (gScriptCmdWordCount == 3) {
                 // Type 2 in bits 12-15: the low 12 bits are an object id.
                 if ((params->a[0].w & 0xF000) == 0x2000) {
-                    func_1509C8FC(params->a[0].w, 0);
+                    script_setAnchorAtObject(params->a[0].w, 0);
                 } else {
                     value = params->a[0].w;
                 }
@@ -72,7 +72,7 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
             cutscene_setNextAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
         } else if (gScriptCmdWordCount == 3) {
             if ((params->a[0].w & 0xF000) == 0x2000) {
-                func_1509C8FC(params->a[0].w, 1);
+                script_setAnchorAtObject(params->a[0].w, 1);
             } else {
                 gNextCutsceneMap = params->a[0].w;
             }
@@ -133,7 +133,7 @@ s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
  * Looks up the object whose id is the low 12 bits of `ref` and passes its position, with the
  * player's (camera_global_Cameras) angle turned by 180 degrees, to cutscene_setNextAnchor if `alt` else cutscene_setAnchor.
  */
-void func_1509C8FC(s32 ref, s32 alt) {
+void script_setAnchorAtObject(s32 ref, s32 alt) {
     Actor *obj;
     Camera *player;
     f32 angle;

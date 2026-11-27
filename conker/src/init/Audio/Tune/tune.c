@@ -609,7 +609,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     }
 
     if (level != 29) {
-        func_10008F24(channel);
+        audio_endSeqTrack(channel);
         return state;
     }
 
@@ -672,7 +672,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         case 1:
             countdown = state & 0x7C;
             if (countdown != 0) {
-                countdown -= (D_800BE9E4 >> 1) << 2;
+                countdown -= (gFrameTicks >> 1) << 2;
                 if (countdown <= 0) {
                     func_1000E704(34, 0, 0xFFFF);
                     state = 0x81;
@@ -715,7 +715,7 @@ s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         return state;
     }
     if (level != 29) {
-        func_10008F24(channel);
+        audio_endSeqTrack(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
         case 1:
@@ -760,7 +760,7 @@ s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         countdown = 30;
     }
     if (countdown != 0) {
-        countdown -= D_800BE9E4;
+        countdown -= gFrameTicks;
         if (countdown <= 0) {
             countdown = 0;
             mode = 0;
@@ -795,7 +795,7 @@ s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         fade = 0xFF000000;
     }
     if (fade != 0) {
-        upper = (D_800BE9E4 << 23) & 0xFF000000;
+        upper = (gFrameTicks << 23) & 0xFF000000;
         if (upper < fade) {
             fade -= upper;
         } else {
@@ -911,7 +911,7 @@ s32 music_updateSeq88(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 }
 
 /* Starts fading the first two channels to `volume`. */
-void func_1000CBA8(s32 volume) {
+void music_fadeFirstTwoChannels(s32 volume) {
     if (gChannelTunes[0] != NULL) {
         gChannelTunes[0]->vol0.intended = volume;
         gChannelTunes[0]->vol0.rate = 0x500;
@@ -963,7 +963,7 @@ void music_updateChannelVolume(s32 channel) {
 /* Steps `current` toward `target` by rate per frame. */
 s32 music_stepVolume(s32 current, s32 target, s32 rate) {
     if (target != current) {
-        rate *= D_800BE9E4;
+        rate *= gFrameTicks;
         if (current < target) {
             current += rate;
             if (target < current) {
@@ -1048,7 +1048,7 @@ void music_readMarkers(s32 channel) {
                                 gMusicEventToggles[channel][i] ^= 1;
                                 rate >>= 1;
                                 if (gMusicEventToggles[channel][i] == 0) {
-                                    gMusicEventLevels[channel][i] = rate * D_800BE9E4 + 0x8000;
+                                    gMusicEventLevels[channel][i] = rate * gFrameTicks + 0x8000;
                                 }
                                 gMusicEventDecay[channel][i] = rate;
                                 break;
@@ -1061,7 +1061,7 @@ void music_readMarkers(s32 channel) {
                                 break;
                             default:
                                 gMusicEventToggles[channel][i] |= 1;
-                                gMusicEventLevels[channel][i] = rate * D_800BE9E4;
+                                gMusicEventLevels[channel][i] = rate * gFrameTicks;
                                 gMusicEventDecay[channel][i] = rate;
                                 break;
                             }
@@ -1080,12 +1080,12 @@ void music_readMarkers(s32 channel) {
                 gChannelTunes[channel]->internallyPaused = 1;
             }
         } else if (gChannelTunes[channel]->internallyPaused == 1) {
-            func_100084D8(channel);
+            audio_playSeqIfStopped(channel);
             gChannelTunes[channel]->internallyPaused = 0;
         }
         for (i = 0; i < 16; i++) {
             if (gMusicEventLevels[channel][i] != 0) {
-                gMusicEventLevels[channel][i] -= gMusicEventDecay[channel][i] * D_800BE9E4;
+                gMusicEventLevels[channel][i] -= gMusicEventDecay[channel][i] * gFrameTicks;
                 if (gMusicEventLevels[channel][i] < 0) {
                     gMusicEventLevels[channel][i] = 0;
                 }
@@ -1168,7 +1168,7 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                             }
                             track->currentVolume = 0;
                             music_updateChannelVolume(((u32 *)&index)[0]);
-                            func_100084D8(channel);
+                            audio_playSeqIfStopped(channel);
                             if ((*slot)->tuneOffChannels != 0) {
                                 audio_setChannelsEnabled(channel, (*slot)->tuneOffChannels, 0);
                             }
@@ -1189,7 +1189,7 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                 }
             } else if (music_isSyncReached(next->startSync, next->syncTune)) {
                 (*slot)->internallyPaused = 0;
-                func_10008F24(channel);
+                audio_endSeqTrack(channel);
             }
             track = *slot;
         } else if (track->seq_number == 0) {
@@ -1547,7 +1547,7 @@ void music_pauseTune(s32 id, s32 pause) {
     track = music_findTune(id);
     if (track != NULL) {
         if (2 == track->internallyPaused && pause == 0) {
-            func_100084D8(track->player);
+            audio_playSeqIfStopped(track->player);
             track->internallyPaused = 0;
             track->currentVolume = -1;
             music_updateChannelVolume(track->player);
@@ -1648,7 +1648,7 @@ void music_pauseAll(s32 pause) {
             audio_stopSeq(i);
         } else {
             if (!(gMusicInfo[track->seq_number].flags & 0x10)) {
-                func_100084D8(i);
+                audio_playSeqIfStopped(i);
                 track = gChannelTunes[i];
             }
             track->currentVolume = -1;
@@ -1861,7 +1861,7 @@ void music_reset(void) {
             gMusicEventLevels[i][j] = 0x8000;
             gMusicEventDecay[i][j] = 0x100;
         }
-        func_10008F24(i);
+        audio_endSeqTrack(i);
         gChannelTunes[i] = NULL;
         gMarkerInterval[i] = 0;
         gLastMarkerPos[i] = 0;

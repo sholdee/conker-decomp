@@ -31,7 +31,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
     }
 
     frame = sprite->params.frame;
-    frame += sprite->params.frameSpeed * D_800BE9E4;
+    frame += sprite->params.frameSpeed * gFrameTicks;
     frameEnd = sprite->params.frameCount << 8;
     if (frame >= frameEnd) {
         frame -= frameEnd;
@@ -42,7 +42,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
     lifetime = sprite->params.timer;
     sprite->params.frame = frame;
     if (lifetime != 0) {
-        lifetime -= D_800BE9E4;
+        lifetime -= gFrameTicks;
         if (lifetime <= 0) {
             effect_destroyObject(&sprite->header);
             return;

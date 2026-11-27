@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /* Emission point offsets in the bone space of side 2 (bone 25) and side 1 (bone 32). */
-static const Vec3f D_800AA0F0 = { -19.0f, 0.0f, 25.0f };
-static const Vec3f D_800AA0FC = { 19.0f, 0.0f, 25.0f };
+static const Vec3f gSpraySide2Offset = { -19.0f, 0.0f, 25.0f };
+static const Vec3f gSpraySide1Offset = { 19.0f, 0.0f, 25.0f };
 
 
 /*
@@ -22,9 +22,9 @@ s32 particle_getSpraySidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 
     }
 
     if (side == 1) {
-        offset = &D_800AA0FC;
+        offset = &gSpraySide1Offset;
     } else {
-        offset = &D_800AA0F0;
+        offset = &gSpraySide2Offset;
     }
 
     if (side == 1) {
@@ -265,7 +265,7 @@ s32 particle_dampSprayXZ(SparkParticle *spark, s32 arg1) {
     s32 frames;
 
     damping = &spark->damping;
-    for (frames = D_800BE9E4; frames != 0; frames--) {
+    for (frames = gFrameTicks; frames != 0; frames--) {
         spark->head.desc.vel.x *= *damping;
         spark->head.desc.vel.z *= *damping;
     }

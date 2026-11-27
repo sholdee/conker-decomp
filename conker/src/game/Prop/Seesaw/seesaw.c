@@ -226,7 +226,7 @@ void prop_addSeesawWeight(WorldObject *obj, Actor *player) {
 }
 
 /* prop_addSeesawWeight, with the weight gained this frame multiplied by 5 when player->unk84 is 0x4B. */
-void func_15115EDC(WorldObject *obj, Actor *player) {
+void prop_addSeesawWeightBoosted(WorldObject *obj, Actor *player) {
     f32 oldX;
     f32 oldZ;
 
@@ -255,7 +255,7 @@ void prop_tiltSeesaw(WorldObject *obj) {
     if (divisor) {
         obj->t += (WORK(obj)->seesaw.weightX / divisor) + bias;
     } else {
-        obj->t += (bias * D_800BE9E4);
+        obj->t += (bias * gFrameTicks);
     }
     if (maxTilt < obj->t) {
         obj->t = maxTilt;

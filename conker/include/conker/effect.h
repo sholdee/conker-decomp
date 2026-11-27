@@ -41,7 +41,7 @@
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
  *   game/Effects/TrapEffect/trapeffect.c
- *   game_10B7C0.c
+ *   game/Effects/LevelHook14/levelhook14.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
@@ -68,7 +68,7 @@
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
  *   game/Effects/OwnerEffect/ownereffect.c
- *   game_12D7E0.c
+ *   game/Effects/LevelHook08/levelhook08.c
  *   game/Effects/FlagLights/flaglights.c
  *   game/Effects/BoneBeamParticle/bonebeamparticle.c
  *   game/Effects/DebrisThrow/debristhrow.c
@@ -211,7 +211,7 @@ Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of 
 /* game/Effects/AttachedBurst/attachedburst.c */
 typedef struct Particle150AED9C Particle150AED9C;
 typedef struct AttachedEffect AttachedEffect;
-void func_150AE5B0(Camera *arg0);
+void effect_levelHook02(Camera *arg0);
 void effect_updateAttachedBurst(AttachedEffect *effect);
 void effect_spawnAttachedBursts(Actor *actor);
 void func_150AECCC(struct42 *arg0);
@@ -329,7 +329,7 @@ void effect_spawnQuadrupedFootprint(s32 actor, s32 side, s32 strength);
 s32 effect_getQuadrupedFootPosAlt(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
 s32 effect_selectQuadrupedFootEffectAlt(s32 arg0, s32 arg1);
 void effect_spawnQuadrupedFootprintAlt(s32 actor, s32 side, s32 strength);
-void func_150BEEB0(Camera *arg0);
+void effect_levelHook27(Camera *arg0);
 
 /* game/Effects/BoneRing/bonering.c */
 s32 effect_getStompFootPos(Vec3f *pos, Actor *actor, u8 side);
@@ -346,10 +346,10 @@ void effect_freePulseParticle(PulseEffect *effect);
 void effect_destroyPulseEffect(PulseEffect *effect);
 void effect_freePulseEffect(PulseEffect *effect);
 void effect_pulseEffectMessage(PulseEffect *effect, s32 arg1, u8 event);
-extern const Vec3f D_800A0350[3];
-extern const u8 D_800A0374[4];
-extern const Vec3f D_800A0378[4];
-extern const u8 D_800A03A8[4];
+extern const Vec3f gPulseBonePathOffsets[3];
+extern const u8 gPulseBonePathBones[4];
+extern const Vec3f gPulseAttachPathOffsets[4];
+extern const u8 gPulseAttachPathMatrices[4];
 
 /* game/Effects/WatcherEffects/watchereffects.c */
 typedef struct Watcher Watcher;
@@ -364,7 +364,7 @@ s32 effect_isWatcherEmitterAlive(WatcherEmitter *emitter);
 void effect_destroyWatcherEmitter(WatcherEmitter *emitter);
 void effect_freeWatcherEmitter(WatcherEmitter *emitter);
 FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher);
-extern const struct CeilingProbe D_800A0450;
+extern const struct CeilingProbe gWatcherCeilingProbe;
 
 /* game/Effects/ParticleCallbacks/particlecallbacks.c */
 typedef struct Obj150C7670 Obj150C7670;
@@ -403,7 +403,7 @@ s32 effect_moveTumblingBurst(BurstParticle *particle);
 /* game/Effects/RotatingZone/rotatingzone.c */
 void effect_levelUpdateRotatingZone(s32 arg0);
 f32 func_150CF040(s32 arg0, s32 arg1);
-void func_150CF080(s32 *arg0);
+void effect_levelHook16(s32 *arg0);
 
 /* game/Effects/ActorEmitterTick/actoremittertick.c */
 typedef struct ActorEmitter ActorEmitter;
@@ -483,9 +483,9 @@ void effect_spawnRaySurfaceImpact(CollisionTri *surface, Vec3f *pos, Vec3f *dir,
 
 /* game/Effects/TintedObject/tintedobject.c */
 typedef struct TintedObject TintedObject;
-void func_150D7420(TintedObject *obj, u8 *state, u8 msg);
-void func_150D74DC(TintedObject *obj, u8 *state, u8 msg);
-void func_150D758C(TintedObject *obj, u8 *state, u8 msg);
+void effect_handleTintMessageRedFrom1(TintedObject *obj, u8 *state, u8 msg);
+void effect_handleTintMessageRedFrom2(TintedObject *obj, u8 *state, u8 msg);
+void effect_handleTintMessageGreenOnly(TintedObject *obj, u8 *state, u8 msg);
 void effect_advanceTexAnimClock(s32 arg0);
 Gfx *effect_bindAnimatedTextures(Gfx *gdl);
 void func_150D7790(Actor *obj, s32 action);
@@ -513,7 +513,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite);
 void effect_shrinkBillboard(BillboardParticle *particle);
 
-/* game_10B7C0.c */
+/* game/Effects/LevelHook14/levelhook14.c */
 void effect_emptyLevelHook14(s32 arg0);
 
 /* game/Effects/ZonePairEmitter/zonepairemitter.c */
@@ -521,14 +521,14 @@ typedef struct ZonePairEffect ZonePairEffect;
 typedef struct TravelParticle TravelParticle;
 typedef struct TexturePair TexturePair;
 void func_150DE320(s32 arg0);
-void func_150DE32C(s32 arg0, s32 arg1, s32 arg2);
+void effect_onBulletImpactZones(s32 arg0, s32 arg1, s32 arg2);
 void func_150DE458(WorldObject *prop);
 void func_150DE6D8(WorldObject *prop);
 void effect_updateZonePairEmitter(ZonePairEffect *emitter);
 s32 effect_moveTravelParticle(TravelParticle *particle);
 Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 arg1);
-void func_150DEBE0(s32 arg0);
-void func_150DEC28(u8 index, u8 arg1);
+void effect_sendFirstLightAndGlowEvents(s32 arg0);
+void effect_sendLightAndGlowEvent(u8 index, u8 arg1);
 extern const TexturePair gTravelParticleTextures;
 
 /* game/Effects/RainHook/rainhook.c */
@@ -565,7 +565,7 @@ void func_150E0BE0(Actor *obj);
 
 /* game/Effects/PropEmitter/propemitter.c */
 typedef struct PropEmitterEffect PropEmitterEffect;
-void func_150E0D90(Camera *camera);
+void effect_levelHook12(Camera *camera);
 TimedEffect *effect_spawnPropEmitter(u8 index, u8 owner, s32 kind);
 void effect_updatePropEmitter(PropEmitterEffect *effect);
 
@@ -639,7 +639,7 @@ s32 effect_updateSway(SwayObject *obj);
 s32 effect_updateModelSway(DynModel *model);
 s32 effect_buildSwayMatrix(DynModel *model, s32 arg1);
 s32 effect_placeSwayLight(LightEffect *effect);
-void func_150F26A0(Camera *actor);
+void effect_levelHook26(Camera *actor);
 void func_150F2994(Camera *actor, s32 flag);
 
 /* game/Effects/SurfaceSound/surfacesound.c */
@@ -649,7 +649,7 @@ void effect_updateSurfaceSound(s32 arg0);
 extern u8 gZoneFlag; // set by effect_setZoneFlag, read and cleared by effect_consumeZoneFlag
 
 /* game/Effects/BeamZones/beamzones.c */
-void func_150F5340(void);
+void effect_turnBeamsOff(void);
 
 /* game/Effects/ProjectilePuffs/projectilepuffs.c */
 typedef struct TrailPuff TrailPuff;
@@ -695,9 +695,9 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void effect_turnLightsOn(void);
 void effect_turnLightsOff(void);
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
-void func_150FAE18(s16 duration, u8 owner, s32 kind);
-s32 func_150FB188(ModelEffect *fx);
-Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
+void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind);
+s32 effect_placeScreenCashModel(ModelEffect *fx);
+Gfx *effect_preDrawScreenCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void effect_fadeInAlpha(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 effect_updateFadeInEffect(FadeInEffect *effect);
 s32 effect_updateFadeInSprite(FadeInSprite *sprite);
@@ -755,7 +755,7 @@ void effect_spawnOwnerEffect(Actor *owner);
 void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId);
 void effect_updateOwnerEffect(OwnerEffect *effect);
 
-/* game_12D7E0.c */
+/* game/Effects/LevelHook08/levelhook08.c */
 void effect_emptyLevelHook8(s32 arg0);
 
 /* game/Effects/FlagLights/flaglights.c */
@@ -992,7 +992,7 @@ void effect_attachCharacterWatcher(Actor *obj);
 void func_1514DB58(Actor *obj);
 void effect_spawnRopeTieInLevel20(Actor *obj);
 void func_1514DB98(Actor *obj);
-void func_1514DBB8(Actor *obj);
+void effect_attachBone2Light(Actor *obj);
 void func_1514DC38(Actor *obj);
 void func_1514DC5C(Actor *obj);
 void func_1514DC84(Actor *obj);
@@ -1017,19 +1017,19 @@ void effect_linkToObjectId9(Actor *obj);
 void func_1514E00C(Actor *obj);
 void func_1514E194(Actor *obj);
 void func_1514E31C(Actor *obj);
-void func_1514E508(Actor *obj);
-void func_1514E5B8(Actor *obj);
-void func_1514E668(Actor *obj);
-void func_1514E718(Actor *obj);
-void func_1514E7C8(Actor *obj);
+void effect_attachCharacterEffect0(Actor *obj);
+void effect_attachCharacterEffectMinus1(Actor *obj);
+void effect_attachCharacterEffect1(Actor *obj);
+void effect_attachCharacterEffect2(Actor *obj);
+void effect_attachCharacterEffect3(Actor *obj);
 void func_1514E824(Actor *obj);
 void effect_releaseAttachedObject(EffectHeader *handle);
 void effect_releaseAttachedEmitter(void *handle);
 void effect_releaseAttachedPointLight(void *handle);
 s32 effect_handleToggleMessage(ToggleTarget *target, s32 msg, s32 arg);
 s32 effect_handleGlowToggleMessage(s32 handle, s32 msg, s32 arg);
-s32 func_1514E9DC(s32 handle, s32 msg, s32 arg);
-s32 func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg);
+s32 effect_forwardGlowToggleMessage(s32 handle, s32 msg, s32 arg);
+s32 effect_forwardToggleMessage(ToggleTarget *target, s32 msg, s32 arg);
 s32 effect_handleEmitterTableMessage(ActorEmitterProcess *target, s32 msg, s32 arg);
 s32 effect_handleRopeRiderMessage(ToggleTarget *target, s32 msg, s32 arg);
 s32 effect_acceptAnyMessage(s32 handle, s32 msg, s32 arg);
@@ -1045,9 +1045,9 @@ void func_1514EECC(Actor *obj);
 void func_1514F110(Actor *obj);
 s32 effect_handleLightMessage(LightEffect *target, s32 msg, s32 arg);
 void effect_attachTankEffects(Actor *obj);
-void func_1514F308(Actor *obj);
+void effect_attachBone5LightBeam(Actor *obj);
 void func_1514F3CC(Actor *obj);
-void func_1514F44C(Actor *obj);
+void effect_attachFrontendFireImpEffect(Actor *obj);
 void effect_attachTrailToBone1(Actor *obj);
 void effect_attachTrailToBone2(Actor *obj);
 void effect_attachTrailToBone3(Actor *obj);
@@ -1096,7 +1096,7 @@ extern Gfx gModelEffectRenderSetupDl[]; /* render setup (object type table gObje
 extern Gfx gModelEffectRenderTeardownDl[]; /* render teardown (object type table gObjectTypes) */
 extern s32 (*gModelEffectUpdateFuncs[])();
 extern s32 (*gModelEffectUpdate2Funcs[])(ModelEffect *);
-extern s32 (*D_8008ADA8[])();
+extern s32 (*gModelEffectUpdate2FuncsTail[])();
 ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize, u8 owner,
                            s32 list);
 void effect_freeModelEffectLights(ModelEffect *fx);
@@ -1148,9 +1148,9 @@ void effect_destroyCharacterWatcher(CharacterWatcher *watcher);
 void effect_freeCharacterWatcher(CharacterWatcher *watcher);
 void effect_updateCharacterWatcher(CharacterWatcher *watcher);
 void effect_characterWatcherMessage(void *self, ActorMsg *msg, u8 msgId);
-s32 func_15159084(Actor *chr, u8 mode);
-s32 func_15159120(Actor *chr, u8 mode);
-s32 func_15159184(Actor *chr, u8 mode);
+s32 effect_watcherIsOutOfWater(Actor *chr, u8 mode);
+s32 effect_watcherIsDeepWater(Actor *chr, u8 mode);
+s32 effect_watcherIsNearWaterSurface(Actor *chr, u8 mode);
 s32 effect_getWatcherMoveState(Actor *chr, Vec3f *lastPosition, u8 prevState);
 s32 func_151592B8(Actor *chr, u8 mode);
 s32 effect_pickWatcherMode(Actor *chr, u8 *mode);
@@ -1404,7 +1404,7 @@ typedef struct PeriodicTrigger {
 } PeriodicTrigger;
 
 /* The burning effect of effect_setOnFire (game/Effects/ContactEffects/contacteffects.c): an AnchorEmitter (particle_startAnchorEmitter) whose 12 bytes of extra
- * data are a PeriodicTrigger. Update effect_updateBurnDamage, expire func_151906C4, message effect_periodicTriggerMessage (game/Effects/TriggerSwap/triggerswap.c). */
+ * data are a PeriodicTrigger. Update effect_updateBurnDamage, expire effect_clearOnFire, message effect_periodicTriggerMessage (game/Effects/TriggerSwap/triggerswap.c). */
 typedef struct PeriodicObject {
     /* 0x00 */ AnchorEmitter emitter;   /* emitter.group.actor: the burning actor */
     /* 0x8C */ u8 pad8C[4];
@@ -1412,7 +1412,7 @@ typedef struct PeriodicObject {
 } PeriodicObject;
 void effect_anchorEmitterMessage(AnchorEmitter *obj, union ActorMsg *msg, u8 event);
 s32 effect_updateBurnDamage(PeriodicObject *obj);
-void func_151906C4(PeriodicObject *obj);
+void effect_clearOnFire(PeriodicObject *obj);
 
 /* game/Effects/TriggerSwap/triggerswap.c */
 typedef struct ObjectPair ObjectPair;
@@ -1433,8 +1433,8 @@ void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3);
 void effect_hitReactSplash(Actor *self, Actor *other, u8 *arg2);
 /* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game/Event/TimedEvent/timedevent.c passes two arguments */
 void effect_hitReactSmallSplash();
-void func_15194320(Actor *self, Actor *other, u8 *arg2);
-void func_15194394(Actor *self, Actor *other, u8 *arg2);
+void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *arg2);
+void effect_hitReactFireImp(Actor *self, Actor *other, u8 *arg2);
 void func_15194408(Actor *self, Actor *other);
 void func_15194588(Actor *self, Actor *other, u8 *arg2);
 void func_151945CC(Actor *self, Actor *other, u8 *arg2);
@@ -1449,7 +1449,7 @@ void func_15194B94(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactKill(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *arg2);
-void func_15194DC8(Actor *self, Actor *other, u8 *arg2);
+void effect_hitReactLava(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2);
 void func_15194F48(Actor *self, Actor *other, u8 *arg2);
@@ -1491,10 +1491,10 @@ void func_151A9EC0(ActorTask *task);
 void func_151A9FC8(ActorTask *task);
 void func_151AA09C(ActorTask *task);
 void effect_watcherNoAction(s32 arg0);
-void func_151AA17C(struct SurfaceTrailOwner *owner);
-void func_151AA1D0(void);
-void func_151AA1F0(void);
-void func_151AA210(struct SurfaceTrailOwner *owner);
+void effect_watcherStartSurfaceTrails1(struct SurfaceTrailOwner *owner);
+void effect_watcherReleaseSurfaceTrails1(void);
+void effect_watcherReleaseSurfaceTrails2(void);
+void effect_watcherStartSurfaceTrails2(struct SurfaceTrailOwner *owner);
 void func_151AA264(Actor *actor, CollisionHit *hit);
 void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task);
 PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task);
@@ -1687,7 +1687,7 @@ void effect_freeStatCounterParts(CounterEffect *effect);
 void effect_destroyStatCounter(CounterEffect *effect);
 
 /* game/Effects/ActorSoundBurst/actorsoundburst.c */
-void func_151D22B0(Actor *actor, u8 arg1, s32 arg2);
+void effect_spawnDeathDebrisBurst(Actor *actor, u8 arg1, s32 arg2);
 
 /* game/Effects/BoneFollower/bonefollower.c */
 typedef struct BoneFollower BoneFollower;

@@ -305,8 +305,8 @@ void level_prepareObjects(s32 arg0) {
     f32 z;
 
     level_clearObjectBlocks();
-    guMtxIdentF(D_800DBF08[0]);
-    guMtxIdentF(D_800DBF08[1]);
+    guMtxIdentF(gObjectIdentityMtxs[0]);
+    guMtxIdentF(gObjectIdentityMtxs[1]);
     for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
         if (obj->moveProc == NULL || obj->moveProc == prop_scrollTexture || obj->moveProc == prop_registerTextureScroll) {
@@ -317,7 +317,7 @@ void level_prepareObjects(s32 arg0) {
             guMtxF2L(mtx, &(*gObjectMtxBuffers[gDrawBufferIndex])[i]);
             bcopy(&(*gObjectMtxBuffers[gDrawBufferIndex])[i], &(*gObjectMtxBuffers[!gDrawBufferIndex])[i], sizeof(Mtx));
         }
-        if (obj->moveProc == func_151150B0) {
+        if (obj->moveProc == prop_emptyBehavior22) {
             obj->moveProc = NULL;
         }
         if ((obj->state & 1) == 1) {

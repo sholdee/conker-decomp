@@ -12,8 +12,8 @@ glabel math_mtxRotScaleF
     /* D6FBC 150A9B0C 03E07825 */  or         $t7, $ra, $zero
     /* D6FC0 150A9B10 44852000 */  mtc1       $a1, $f4
     /* D6FC4 150A9B14 44863000 */  mtc1       $a2, $f6
-    /* D6FC8 150A9B18 3C01800A */  lui        $at, %hi(D_8009F6D0)
-    /* D6FCC 150A9B1C C429F6D0 */  lwc1       $f9, %lo(D_8009F6D0)($at)
+    /* D6FC8 150A9B18 3C01800A */  lui        $at, %hi(gRotScaleFDegToRad)
+    /* D6FCC 150A9B1C C429F6D0 */  lwc1       $f9, %lo(gRotScaleFDegToRad)($at)
     /* D6FD0 150A9B20 44874000 */  mtc1       $a3, $f8
     /* D6FD4 150A9B24 46092102 */  mul.s      $f4, $f4, $f9
     /* D6FD8 150A9B28 0D42B5E0 */  jal        math_cos
@@ -90,6 +90,6 @@ glabel math_mtxRotScaleF
 
 .section .rodata
 
-glabel D_8009F6D0
+glabel gRotScaleFDegToRad
     .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
     .balign 16

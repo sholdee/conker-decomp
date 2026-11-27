@@ -333,7 +333,7 @@ s32 sight_updateBeam(SightBeamObject *obj) {
 
     if (state->flags & 1) {
         period = state->period;
-        state->timer += D_800BE9E4;
+        state->timer += gFrameTicks;
         while (state->timer >= period) {
             state->timer -= period;
         }
@@ -514,7 +514,7 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
     return 0;
 }
 
-const s32 D_800AAC30[] = { 0x17, 0x18 };
+const s32 gSightBeamBreakHits[] = { 0x17, 0x18 };
 /* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -583,7 +583,7 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
         cont_spawnRumble(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
-        actor_hitScripted(actor, D_800AAC30[state->unk94], 0, -1);
+        actor_hitScripted(actor, gSightBeamBreakHits[state->unk94], 0, -1);
     }
     sound_playAt(0x2F5, 0x7FFF, math_random() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
     sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, math_random() % 500U);

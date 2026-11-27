@@ -31,7 +31,7 @@ static ZScanSet gZScanSets[4];
 static f32 gCameraTargetScreenX; // the camera target projected to the screen: x, y and depth
 static f32 gCameraTargetScreenY;
 static f32 gCameraTargetScreenDepth;
-static f32 D_800DC1FC;
+static f32 gOcclusionEyeDrop;
 static ZScanParams gZScanParams[4][4]; // per player
 
 /* Updates the camera's floor heights (floorY, unk360; -10000 means none found) and the height it aims for
@@ -73,7 +73,7 @@ void camera_updateFloorHeights(Camera *arg0) {
         arg0->waterY = arg0->zoneWaterY;
     }
     camera_updateStatus(arg0);
-    if (!(arg0->AvailableModes & 0x10) && (arg0->CharPtr->unk102 == 0) && (D_800C3671 == 0) && (arg0->DoingRail == 0) &&
+    if (!(arg0->AvailableModes & 0x10) && (arg0->CharPtr->unk102 == 0) && (gSpawnCutsceneActive == 0) && (arg0->DoingRail == 0) &&
         (arg0->CharPtr->ceilingY < arg0->floorY)) {
         camera_placeAtObject(arg0, arg0->CharPtr);
     }
@@ -95,7 +95,7 @@ void camera_updateFloorHeights(Camera *arg0) {
     if (arg0->CharPtr->unk137 != 0) {
         arg0->floorY = arg0->unk354 = arg0->CharPtr->ypos;
     }
-    if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
+    if ((gSpawnCutsceneActive != 0) || (arg0->transition.state != 0)) {
         arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
         return;
     }
@@ -111,7 +111,7 @@ void camera_updateFloorHeights(Camera *arg0) {
             (arg0->RailMagY < fabsf(arg0->unk354 - arg0->CharPtr->floorY))) {
             arg0->unk354 = arg0->CharPtr->floorY;
         }
-    } else if (D_800C3671 == 0) {
+    } else if (gSpawnCutsceneActive == 0) {
         if (!(arg0->AvailableModes & 0x20000000)) {
             if (arg0->AvailableModes & 0x10000000) {
                 if (arg0->unk354 < arg0->CharPtr->floorY) {
@@ -216,7 +216,7 @@ void camera_resetZScans(void) {
 void camera_checkOcclusion(Camera *arg0) {
     s32 screenX;
     s32 screenY;
-    f32 *q; // matching: one local carries the projected depth (as s32) and later &D_800DC1FC
+    f32 *q; // matching: one local carries the projected depth (as s32) and later &gOcclusionEyeDrop
     f32 targetY;
     Vec3f pos;
 
@@ -244,7 +244,7 @@ void camera_checkOcclusion(Camera *arg0) {
     arg0->HitsZBufferRowIndex = screenY;
     camera_scanZRow(arg0, screenX, screenY, (s32)q);
     pos = arg0->eye;
-    camera_getOcclusionOffset(arg0, &arg0->SideHitsRxz, &D_800DC1FC);
+    camera_getOcclusionOffset(arg0, &arg0->SideHitsRxz, &gOcclusionEyeDrop);
     if (fabsf(arg0->SideHitsRxz) > 3.0f) {
         math_rotateAroundY(&pos, &arg0->target, arg0->SideHitsRxz, &pos);
         {
@@ -266,8 +266,8 @@ void camera_checkOcclusion(Camera *arg0) {
     } else {
         arg0->SideHitsClear = 1;
     }
-    q = &D_800DC1FC;
-    if (0.0f != D_800DC1FC) {
+    q = &gOcclusionEyeDrop;
+    if (0.0f != gOcclusionEyeDrop) {
         arg0->eye.y -= *q;
     }
     if (arg0->SpecialMove == 1) {
@@ -279,7 +279,7 @@ void camera_checkOcclusion(Camera *arg0) {
 /* Runs the z-buffer occlusion check (camera_checkOcclusion) when the camera mode allows it; otherwise marks the
  * check as off and arms the unk5FC/unk5FE countdowns. */
 void camera_updateOcclusion(Camera *arg0) {
-    if ((arg0->Mode & ~0x100) && (gPaused == 0) && (D_800C3671 == 0)) {
+    if ((arg0->Mode & ~0x100) && (gPaused == 0) && (gSpawnCutsceneActive == 0)) {
         if (arg0->Mode != 0x40) {
             if ((arg0->AvailableModes & 8) && !(arg0->AvailableModes & 0x200) && (arg0->Snap == 0)) {
                 if (!(arg0->SpecialFlags & 0x80) && !(arg0->SpecialFlags & 0x40)) {
@@ -443,7 +443,7 @@ s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused) {
         halfWidth = gZScanParams[arg0->CNumber][arg0->DistIndex].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
             if (arg0->CharPtr->inwater != 1 && arg0->mv->death_State == 0) {
-                arg0->unk5FE -= D_800BE9E4;
+                arg0->unk5FE -= gFrameTicks;
                 if (arg0->unk5FE < 0) {
                     arg0->unk5FE = 0;
                 }
@@ -490,7 +490,7 @@ s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused) {
         arg0->unk5FE = 60;
     }
     if (arg0->SHitsPIPOutTimer != 0) {
-        arg0->SHitsPIPOutTimer -= D_800BE9E4;
+        arg0->SHitsPIPOutTimer -= gFrameTicks;
         if (arg0->SHitsPIPOutTimer < 0) {
             arg0->SHitsPIPOutTimer = 0;
         }
@@ -586,7 +586,7 @@ void camera_collide(Camera *arg0) {
         if (arg0->AvailableModes & 0x10000) {
             gFloorProbeTypeEnabled[1] = 0;
         }
-        D_800CBDD2 = 1;
+        gWallProbeIsCamera = 1;
         savedDD3 = D_800CBDD3;
         if (arg0->CharPtr->unk102 != 0) {
             D_800CBDD3 = 1;
@@ -601,7 +601,7 @@ void camera_collide(Camera *arg0) {
         }
         hit = collision_resolveActorWalls(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
         D_800CBDD4 = savedDD4;
-        D_800CBDD2 = 0;
+        gWallProbeIsCamera = 0;
         D_800CBDD3 = savedDD3;
         gFloorProbeTypeEnabled[2] = saved2;
         gFloorProbeTypeEnabled[1] = saved1;
@@ -717,7 +717,7 @@ void camera_keepOutsideCircle(Camera *arg0) {
             math_vec3Diff(&pos, &target, &offset);
             yaw = math_vec3Heading(&offset);
             math_normalizeDegrees(&yaw);
-            arg0->unk930 = yaw;
+            arg0->avoidYaw = yaw;
             dx = math_angleDiff(outwardYaw, yaw);
             if (fabsf(dx) < 35.0f) {
                 if (dx <= 0.0f) {
@@ -732,11 +732,11 @@ void camera_keepOutsideCircle(Camera *arg0) {
             arg0->eye = pos;
         } else {
             gCameraAvoidTargetDist = 0.0f;
-            arg0->unk930 = arg0->CameraAngle;
+            arg0->avoidYaw = arg0->CameraAngle;
         }
     } else {
         gCameraAvoidTargetDist = 0.0f;
-        arg0->unk930 = 0.0f;
+        arg0->avoidYaw = 0.0f;
     }
     arg0->avoidActive = 0;
 }

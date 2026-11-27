@@ -32,7 +32,7 @@ Gfx gTimedEffectRenderResetDl[] = {
 /* Expire callbacks (TimedEffect.expireCallback). */
 static void (*gTimedEffectExpireFuncs[10])() = {
     effect_updateAttachedBurst, effect_dropFallingObject, effect_startTrapStream, particle_startGatherEmitter, particle_startHoverEmitter, particle_emitDiscParticle, trail_stopTrailPair,
-    flamethrower_spawnControllerFlame, effect_dropPointEffect, func_150DEBE0,
+    flamethrower_spawnControllerFlame, effect_dropPointEffect, effect_sendFirstLightAndGlowEvents,
 };
 /* Tick callbacks (TimedEffect.tickCallback), run every frame. */
 static void (*gTimedEffectTickFuncs[98])() = {
@@ -85,7 +85,7 @@ static void (*gTimedEffectFreeFuncs[74])() = {
 };
 /* Message handlers, per callback set; optional. */
 static void (*gTimedEffectMessageFuncs[74])(TimedEffect *object, s32 msg, u8 msgType) = {
-    NULL, trail_onBoneEmitterMessage, trail_onTaskEvent, func_1519E61C, trail_onTrailPairTaskEvent, trail_onRetryTaskMessage, trail_onSurfaceSpawnerEvent, NULL,
+    NULL, trail_onBoneEmitterMessage, trail_onTaskEvent, trail_destroyOnEndEvent, trail_onTrailPairTaskEvent, trail_onRetryTaskMessage, trail_onSurfaceSpawnerEvent, NULL,
     particle_onDripRetryMsg, effect_emitterTaskMessage, NULL, NULL, NULL, NULL, NULL, effect_jointEmitterTaskMessage, particle_onSideEmitterMsg, particle_onOwnerSideTaskMsg,
     rope_tieMessage, rope_lineMessage, NULL, beam_wavyBeamMessage, particle_onBoneSideEmitterMsg, NULL, NULL, NULL, particle_onSegmentEmitterSwap, NULL,
     particle_onPointPairEmitterSwap, particle_onDustEmitterEvent, trail_onStreamTaskEvent, NULL, NULL, NULL, beam_areaEmitterMessage, effect_ownerSparkMessage, particle_onAreaEmitterEvent,
@@ -132,7 +132,7 @@ void *effect_newTimedEffectNoDraw(s16 timer, s8 expireCallback, s8 tickCallback,
  * removal once the timer goes negative. */
 void effect_updateTimedEffect(TimedEffect *object) {
     if (object->header.flags & 1) {
-        object->header.state -= D_800BE9E4;
+        object->header.state -= gFrameTicks;
     }
     if (object->tickCallback != -1) {
         gTimedEffectTickFuncs[object->tickCallback](object);

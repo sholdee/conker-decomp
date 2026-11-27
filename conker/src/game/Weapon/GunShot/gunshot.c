@@ -34,7 +34,7 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
 
     weapon_getShotFrame(obj, &position, &direction, &axis0, &axis1);
     particle_countShot(obj);
-    if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+    if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
         particle_spawnShortLightFlash(&position, arg3, arg4);
         motion.height = ((math_randomFloat() * 3400.0f) + 4800.0f) * 0.001000000047f;
         motion.width = ((math_randomFloat() * 220.0f) + 320.0f) * 0.1000000015f;

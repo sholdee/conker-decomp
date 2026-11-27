@@ -135,7 +135,7 @@ s32 effect_placeSwayLight(LightEffect *effect) {
     return 1;
 }
 
-void func_150F26A0(Camera *actor) {
+void effect_levelHook26(Camera *actor) {
     Actor *state;
     s32 mode;
 
@@ -162,7 +162,7 @@ void func_150F26A0(Camera *actor) {
             }
         }
     } else {
-        state->unk7 = 0xFF;
+        state->alpha = 0xFF;
         if (actor->CharContext == 59) {
             func_150F2994(actor, TRUE);
             if (actor->Mode != 0x100 && actor->cmdRunning == 0) {

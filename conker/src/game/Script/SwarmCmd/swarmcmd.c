@@ -3,19 +3,19 @@
 #include "variables.h"
 
 
-s32 func_1509DD10(s32 arg0) {
+s32 script_alwaysTrue0(s32 arg0) {
     return 1;
 }
 
-s32 func_1509DD20(s32 arg0) {
+s32 script_alwaysTrue1(s32 arg0) {
     return 1;
 }
 
-s32 func_1509DD30(s32 arg0) {
+s32 script_alwaysTrue2(s32 arg0) {
     return 1;
 }
 
-s32 func_1509DD40(s32 arg0) {
+s32 script_alwaysTrue13(s32 arg0) {
     return 1;
 }
 

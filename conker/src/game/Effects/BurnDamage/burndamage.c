@@ -23,14 +23,14 @@ void effect_anchorEmitterMessage(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
 }
 
 /*
- * Advances the trigger timer by D_800BE9E4 and calls actor_hitScripted (with the target's index in
+ * Advances the trigger timer by gFrameTicks and calls actor_hitScripted (with the target's index in
  * movement_obj) once per elapsed interval; then sets the linked state's unk46 to 1000 if unk84 is clear.
  */
 s32 effect_updateBurnDamage(PeriodicObject *obj) {
     PeriodicTrigger *trigger;
     ActorCtl *state;
 
-    obj->trigger.elapsed += D_800BE9E4;
+    obj->trigger.elapsed += gFrameTicks;
     trigger = &obj->trigger;
     while (trigger->elapsed >= trigger->interval) {
         actor_hitScripted(obj->emitter.group.actor, 0x60021, 0, trigger->target - movement_obj);
@@ -44,7 +44,7 @@ s32 effect_updateBurnDamage(PeriodicObject *obj) {
 }
 
 /* Clears unk1AC of the linked object's state, if it has one. */
-void func_151906C4(PeriodicObject *obj) {
+void effect_clearOnFire(PeriodicObject *obj) {
     ActorCtl *state = obj->emitter.group.actor->mv;
 
     if (state != NULL) {

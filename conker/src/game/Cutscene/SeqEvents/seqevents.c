@@ -43,8 +43,8 @@ s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 a
         }
     }
     if (snd->remaining != 0xFFFF) {
-        if (D_800BE9E4 < snd->remaining) {
-            snd->remaining -= D_800BE9E4;
+        if (gFrameTicks < snd->remaining) {
+            snd->remaining -= gFrameTicks;
         } else {
             *volume = 0;
             *arg6 = 0;
@@ -68,7 +68,7 @@ s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 a
     }
     if (snd->remaining != 0xFFFF && gCutsceneSkipState != 0) {
         *volume = *volume * gCutsceneSkipFadeTimer / 30;
-        if (D_800BE9E4 >= gCutsceneSkipFadeTimer) {
+        if (gFrameTicks >= gCutsceneSkipFadeTimer) {
             *volume = 0;
             *arg6 = 0;
             heap_free(snd);
@@ -272,7 +272,7 @@ void cutscene_dispatchEvents(s32 mode, s32 scene) {
 
     // matching: indexing through &gCutsceneStates[0] rather than the array changes register allocation
     if ((gCutsceneHoldEnd != 2) && ((&gCutsceneStates[0])[scene] == 1) && (gSeqEventQueueSize != 0)) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
         queued = 0;
         for (track = 0; track < gSeqTrackCounts[scene]; track++) {
             if (gSeqEventTracks[scene][track] != NULL) {
@@ -321,7 +321,7 @@ void cutscene_dispatchEvents(s32 mode, s32 scene) {
             }
         }
         cutscene_flushEventQueue(queued, scene);
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
         if (mode == 0) {
             D_800C35C0[scene] = 1;
         }
@@ -494,17 +494,17 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 gLetterbox = NULL;
             }
         } else if (event->value == 8) {
-            D_800C3656[scene] = !event->unk4;
+            gCutsceneShowUnboundActors[scene] = !event->unk4;
         } else if (event->value == 9) {
-            D_800C3658[scene] = !event->unk4;
+            gCutsceneShowUnboundObjects[scene] = !event->unk4;
         } else if (event->value == 0xD) {
-            D_800C3654[scene] = !event->unk4;
+            gCutsceneUpdateUnboundActors[scene] = !event->unk4;
         } else if (event->value == 0x12) {
             gCutsceneKeepSpawnedActors[scene] = !event->unk4;
         } else if (event->value == 0x13) {
             D_800C365C[scene] = event->unk4;
         } else if (event->value == 0x15) {
-            D_800C365E[scene] = !event->unk4;
+            gCutsceneRunTimedEvents[scene] = !event->unk4;
         } else if (event->value == 0x14) {
             if (obj == NULL) {
                 return 1;
@@ -618,7 +618,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     }
                     break;
                 case 4:
-                    func_151645C4(event->unk5);
+                    light_setDaylight(event->unk5);
                     break;
                 case 5:
                     light_sendEvent(0x28, 0x17, 0);
@@ -642,7 +642,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 }
                 case 10:
-                    func_151C9DE8(camera_global_Cameras, 0, track, sceneTag, 1);
+                    sight_spawnScopeSight(camera_global_Cameras, 0, track, sceneTag, 1);
                     break;
                 case 11:
                     sight_resetPlayerEffects(camera_global_Cameras);
@@ -654,7 +654,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     effect_turnLightsOn();
                     break;
                 case 14:
-                    func_150F5340();
+                    effect_turnBeamsOff();
                     break;
                 case 15:
                     effect_startLineEmitter(0xFF, 1);
@@ -844,7 +844,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                screen_spawnTintEffect(0, duration, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+                screen_spawnTintEffect(0, duration, 0xFF, 0, 0, gLastPlayerIndex, 0, 0);
             }
         } else if (event->value == 0x49) {
             if (obj != NULL && event->unk4 < 3) {
@@ -939,11 +939,11 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x7C) {
             gCutsceneHideSky = !event->unk4;
         } else if (event->value == 0x84) {
-            D_800C3682 = !event->unk4;
+            gCutsceneSolidSky = !event->unk4;
         } else if (event->value == 0x85) {
-            D_800C3683 = !event->unk4;
+            gCutsceneNoPause = !event->unk4;
         } else if (event->value == 0x63) {
-            D_80041FDC = event->unk6;
+            gSoundTargetVolume = event->unk6;
         } else if (event->value == 0x64) {
             if (event->unk4 == 0) {
                 gCutsceneIrisOn = 1;
@@ -1032,7 +1032,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x7F) {
             D_800DBEAC = 1;
         } else if (event->value == 0x80) {
-            D_800BE9ED = event->unk4;
+            gClearToWhite = event->unk4;
         } else if (event->value == 0x81) {
             hud_setClockEnabled(event->unk4 ^ 1);
             gHudClockTime = event->unk6 * 30;
@@ -1042,7 +1042,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 gCutsceneChainBobScale = 100;
             }
         } else if (event->value == 0x83) {
-            D_800C3C9E = event->unk6;
+            gCutsceneCashOffset = event->unk6;
         } else {
             return 0;
         }
@@ -1374,7 +1374,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         s16 data[2];
                         void *p;
 
-                        func_150AF738(duration, sceneTag, 1);
+                        particle_startGreyscaleScreen(duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
                         p = effect_newTimedEffect(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
@@ -1438,7 +1438,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         break;
                     }
                     case 23:
-                        func_150FAE18(duration, sceneTag, 1);
+                        effect_spawnScreenCash(duration, sceneTag, 1);
                         break;
                     case 24: {
                         Vec3f point;
@@ -1894,7 +1894,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 }
                 case 21:
                     if (obj != NULL) {
-                        func_1507DE4C(obj);
+                        actor_applyHeadShot(obj);
                         blood_spawnFatalHit(obj, sceneTag, 0);
                     }
                     break;
@@ -2112,7 +2112,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
         } else if (event->value == 0x2A) {
         } else if (event->value == 0x2B) {
-            func_1518B6B0(pos[0], pos[1], pos[2], sceneTag, 0);
+            particle_spawnModelBurstWithBillboard(pos[0], pos[1], pos[2], sceneTag, 0);
         } else if (event->value == 0x2C) {
             SeqEvent *found;
             s32 pad[7]; // matching: stack padding

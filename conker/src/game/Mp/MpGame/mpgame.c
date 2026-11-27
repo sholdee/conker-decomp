@@ -16,13 +16,13 @@ void mp_clearGame(void) {
     gMpGame = NULL;
 }
 
-/* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
+/* Per-difficulty bot tuning (indexed by gBotDifficulty): this file's .data, in the original order. */
 f32 gBotTargetDistScales[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 gBotAimTimeLimits[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
 s8 gBotAttackIntervals[5] = { 80, 70, 60, 60, 45 };
 s8 gBotFireHoldTimes[5] = { 10, 20, 30, 60, 45 };
 s8 gBotAttackDelays[5] = { 120, 80, 40, 10, 0 };
-s8 D_800872E8[5] = { 10, 20, 50, 80, 100 }; // percent chance
+s8 gBotAimAccuracy[5] = { 10, 20, 50, 80, 100 }; // percent chance
 s8 D_800872F0[5] = { 30, 25, 20, 15, 15 };
 f32 gBotAimRates[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
 f32 D_8008730C[5] = { 0.0f, 0.025f, 0.05f, 0.075f, 0.0f }; // not referenced by any code
@@ -76,17 +76,17 @@ s32 mp_loadGame(void) {
     gMpGame->nextBot = 0;
     gMpGame->targetListPlayer = 0;
     gMpGame->gameType = id;
-    gMpGame->targetDistScale = gBotTargetDistScales[D_800E0BD0];
+    gMpGame->targetDistScale = gBotTargetDistScales[gBotDifficulty];
     gMpGame->numZones = 0;
     scales = gBotAimRates;
     for (i = 0; i < 16; i++) {
         gMpGame->sightBits[i] = 0;
-        gMpGame->aimRate[i] = scales[D_800E0BD0];
+        gMpGame->aimRate[i] = scales[gBotDifficulty];
         gMpGame->aimX[i] = 0.0f;
         gMpGame->aimY[i] = 0.0f;
         gMpGame->aimZ[i] = 0.0f;
     }
-    gMpGame->unkC = D_800872F0[D_800E0BD0];
+    gMpGame->unkC = D_800872F0[gBotDifficulty];
     return 0;
 }
 
@@ -224,7 +224,7 @@ s32 mp_updateTargetList(void) {
                     dist = -1;
                 }
             } else {
-                if (i >= D_8008FD90) {
+                if (i >= gHumanCount) {
                     dist *= 2;
                 }
                 if (gMpGame->gameType != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
@@ -236,13 +236,13 @@ s32 mp_updateTargetList(void) {
                     dist = rawDist;
                 }
                 if (other->lifting != 0) {
-                    if (i >= D_8008FD90) {
+                    if (i >= gHumanCount) {
                         dist *= 2;
                     }
                     dist = dist / (player_getStat(i, 6) + 2);
                 }
             }
-            if (i < D_8008FD90 && dist != -1) {
+            if (i < gHumanCount && dist != -1) {
                 dist *= gMpGame->targetDistScale;
             }
             if (dist >= 0) {
@@ -345,17 +345,17 @@ s32 mp_update(void) {
                 obj->family = 1;
             }
             old = attackTimers[i];
-            aimTimes[i] += D_800BE9E4;
-            attackTimers[i] += D_800BE9E4;
-            arr25C[i] -= D_800BE9E4;
+            aimTimes[i] += gFrameTicks;
+            attackTimers[i] += gFrameTicks;
+            arr25C[i] -= gFrameTicks;
             if (arr25C[i] <= 0) {
                 arr25C[i] = 0;
             }
-            arr41C[i] -= D_800BE9E4;
+            arr41C[i] -= gFrameTicks;
             if (arr41C[i] <= 0) {
                 arr41C[i] = 0;
             }
-            countdowns[i] -= D_800BE9E4;
+            countdowns[i] -= gFrameTicks;
             if (countdowns[i] < 0) {
                 countdowns[i] = 0;
             }
@@ -413,7 +413,7 @@ s32 mp_update(void) {
                     }
                     if (type == 5) {
                         aimTimes[i] = 30;
-                        gMpGame->aimRate[i] = gBotAimRates[D_800E0BD0];
+                        gMpGame->aimRate[i] = gBotAimRates[gBotDifficulty];
                         gMpGame->aimX[i] = (math_randomFloat() * 50.0f) + obj->xpos;
                         gMpGame->aimY[i] = obj->ypos + 40.0f;
                         gMpGame->aimZ[i] = (math_randomFloat() * 50.0f) + obj->zpos;
@@ -426,14 +426,14 @@ s32 mp_update(void) {
                 }
                 flag = 0;
                 bit = 0;
-                if (gBotAttackIntervals[D_800E0BD0] < attackTimers[i]) {
+                if (gBotAttackIntervals[gBotDifficulty] < attackTimers[i]) {
                     attackTimers[i] = 0;
                     old = -1;
                 }
                 if (attackTimers[i] >= 0 && old < 0) {
                     bit = 1;
                 }
-                if (gBotAimTimeLimits[D_800E0BD0] != -1 && aimTimes[i] >= gBotAimTimeLimits[D_800E0BD0]) {
+                if (gBotAimTimeLimits[gBotDifficulty] != -1 && aimTimes[i] >= gBotAimTimeLimits[gBotDifficulty]) {
                     reset = 1;
                 }
                 gMpGame->side[i] += (gMpGame->sideGoal[i] - gMpGame->side[i]) >> 2;
@@ -444,7 +444,7 @@ s32 mp_update(void) {
                 if (attackTimers[i] == 0) {
                     gMpGame->sideGoal[i] = 0;
                     gMpGame->dropGoal[i] = 0;
-                    if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
+                    if (gBotAimAccuracy[gBotDifficulty] < (s32)(math_randomFloat() * 100.0f)) {
                         if (math_randomFloat() > 0.5f) {
                             gMpGame->sideGoal[i] = -50;
                         } else {
@@ -459,7 +459,7 @@ s32 mp_update(void) {
                 }
             }
             if (flag && gMpGame->gameType != 0xB8) {
-                attackTimers[i] = -gBotAttackDelays[D_800E0BD0];
+                attackTimers[i] = -gBotAttackDelays[gBotDifficulty];
             }
             flags = obj->unk22C & 0x200;
             obj->unk22C &= ~0x200;
@@ -477,8 +477,8 @@ s32 mp_update(void) {
     }
 
     gMpGame->seenMask = seenMask;
-    if (D_800BE9E4 != 0) {
-        gMpGame->ticks = D_800BE9E4;
+    if (gFrameTicks != 0) {
+        gMpGame->ticks = gFrameTicks;
     } else {
         gMpGame->ticks = 1.0f;
     }
@@ -500,18 +500,18 @@ s32 mp_update(void) {
 }
 
 /* Returns player's score record value (0 for a non-human player). */
-s32 func_1508B194(s32 player) {
-    if (player >= D_8008FD90) {
+s32 mp_getTeamKills(s32 player) {
+    if (player >= gHumanCount) {
         return 0;
     }
 
-    return gMenuState->stats[player].unkA;
+    return gMenuState->stats[player].teamKills;
 }
 
 /* Clears player's score record value. */
-void func_1508B1D4(s32 player) {
-    if (player < D_8008FD90) {
-        gMenuState->stats[player].unkA = 0;
+void mp_clearTeamKills(s32 player) {
+    if (player < gHumanCount) {
+        gMenuState->stats[player].teamKills = 0;
     }
 }
 
@@ -589,7 +589,7 @@ void mp_assignZoneNodes(void) {
 
     zone = gMpGame->zoneExitNode;
     list = gMpGame->zoneList;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         if (zone[i] != -1) {
             zone[i] = -2;
         }
@@ -600,7 +600,7 @@ void mp_assignZoneNodes(void) {
         x = list[i].x;
         y = list[i].y;
         z = list[i].z;
-        for (j = D_8008FD90; j < D_8008FD8C; j++) {
+        for (j = gHumanCount; j < gPlayerCount; j++) {
             obj = &movement_obj[j];
             d = obj->ypos - y;
             if (d < 200.0f && d > -100.0f) {
@@ -643,7 +643,7 @@ void mp_assignZoneNodes(void) {
             }
         }
     }
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         if (zone[i] < 0) {
             zone[i] = -1;
         }
@@ -753,7 +753,7 @@ void mp_randomizeWeights(void) {
     s8 n;
     s8 used[16];
 
-    n = D_8008FD8C;
+    n = gPlayerCount;
     row = gMpGame->weights[0];
     h = n >> 1;
     if (h < 2) {
@@ -922,7 +922,7 @@ void mp_checkLineOfSight(s32 a, s32 b) {
             }
         } else if (from->type == 0x1F) {
             y0 = from->ypos + 80.0f;
-        } else if (to->mv->bot && gBotAimTimeLimits[D_800E0BD0] != -1) {
+        } else if (to->mv->bot && gBotAimTimeLimits[gBotDifficulty] != -1) {
             /* 0x1A4..0x1A9 is an s16 point; structs.h types it as u16 pad1A4/s16 unk1A6/u32 pad1A8 */
             x0 = from->aim.x;
             y0 = from->aim.y;
@@ -940,7 +940,7 @@ void mp_checkLineOfSight(s32 a, s32 b) {
             }
         } else if (to->type == 0x1F) {
             y1 = to->ypos + 80.0f;
-        } else if (fromFlag && gBotAimTimeLimits[D_800E0BD0] != -1) {
+        } else if (fromFlag && gBotAimTimeLimits[gBotDifficulty] != -1) {
             x1 = to->aim.x;
             y1 = to->aim.y;
             z1 = to->aim.z;
@@ -997,14 +997,14 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
     other = gMpGame->losOther;
     list = gMpGame->team;
     if (checks != 0) {
-        for (i = 0; i < D_8008FD90; i++) {
+        for (i = 0; i < gHumanCount; i++) {
             x0 = movement_obj[i].xpos;
             x1 = movement_obj[i].xpos;
             for (k = 0; k < 3; k++) {
                 idx[k] = -1;
                 dist[k] = 900000000.0f;
             }
-            for (k = D_8008FD90; k < D_8008FD8C; k++) {
+            for (k = gHumanCount; k < gPlayerCount; k++) {
                 if (list[i] != list[k] &&
                     !(gMpGame->sightBits[i] & (0x10001 << k))) {
                     /* BUG (original game): measures player i against itself, not k */
@@ -1042,9 +1042,9 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
             m = 0;
             do {
                 other++;
-                if (other >= D_8008FD8C) {
+                if (other >= gPlayerCount) {
                     cur++;
-                    if (cur >= D_8008FD8C - 1) {
+                    if (cur >= gPlayerCount - 1) {
                         cur = 0;
                     }
                     obj = &movement_obj[cur];
@@ -1066,7 +1066,7 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
 }
 
 /*
- * Advances nextBot round-robin over the D_8008FD8C actors; returns the next active one with
+ * Advances nextBot round-robin over the gPlayerCount actors; returns the next active one with
  * mv->bot set that isn't in gEliminatedPlayers, or -1.
  */
 s32 mp_nextBot(void) {
@@ -1081,19 +1081,19 @@ s32 mp_nextBot(void) {
     cur = gMpGame->nextBot;
     do {
         cur++;
-        if (cur >= D_8008FD8C) {
+        if (cur >= gPlayerCount) {
             cur = 0;
         }
         obj = &movement_obj[cur];
         if (obj->type != 0) {
             state = obj->mv;
             if (state != NULL && state->bot != 0 && !(gEliminatedPlayers & (1 << cur))) {
-                count = D_8008FD8C;
+                count = gPlayerCount;
                 ret = cur;
             }
         }
         count++;
-    } while (count < D_8008FD8C);
+    } while (count < gPlayerCount);
 
     gMpGame->nextBot = cur;
     return ret;
@@ -1107,7 +1107,7 @@ s32 mp_nextHuman(void) {
     p2 = &gMpGame;
     gMpGame->nextHuman++;
     temp = gMpGame->nextHuman;
-    if (temp >= D_8008FD90) {
+    if (temp >= gHumanCount) {
         gMpGame->nextHuman = 0;
         temp = (*p2)->nextHuman;
     }
@@ -1193,7 +1193,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
         }
         dx = 0.0f;
         dz = 0.0f;
-        if (gMpGame->gameType == 0xB9 || D_800E0BD0 >= 3) {
+        if (gMpGame->gameType == 0xB9 || gBotDifficulty >= 3) {
             switch (obj->mv->rt_context_b) {
                 case 0x18:
                 case 0x41:
@@ -1230,7 +1230,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
             dx = (victim->aim.x + dx) - gMpGame->aimX[player];
             dz = (victim->aim.z + dz) - gMpGame->aimZ[player];
         }
-        scale = gMpGame->aimRate[player] * D_800BE9E4;
+        scale = gMpGame->aimRate[player] * gFrameTicks;
         if (type == 3) {
             scale = 1.0f;
             dropOffset = 0;
@@ -1368,7 +1368,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
                     obj->mv->buttonsTimer = 2;
-                    if (gBotFireHoldTimes[D_800E0BD0] < gMpGame->attackTimer[player]) {
+                    if (gBotFireHoldTimes[gBotDifficulty] < gMpGame->attackTimer[player]) {
                         obj->mv->buttons &= ~Z_TRIG;
                         obj->mv->buttonsTimer = 0;
                     }
@@ -1447,7 +1447,7 @@ s32 mp_updateBotAttack(s32 player) {
     } else {
         range = 2;
     }
-    limit = ((s16 *)gBotAttackTimeLimits)[D_800E0BD0 * 3 + range]; // matching: the [level][range] form computes the address differently
+    limit = ((s16 *)gBotAttackTimeLimits)[gBotDifficulty * 3 + range]; // matching: the [level][range] form computes the address differently
     if (limit < *(s32 *)(timers + off)) {
         *(s32 *)(timers + off) = 0;
         if (*(s32 *)((s8 *)gMpGame->sightBits + off) & (0x10000 << *target)) {
@@ -1456,7 +1456,7 @@ s32 mp_updateBotAttack(s32 player) {
     }
     if (*(s32 *)(timers + off) == 0) {
         obj->mv->unk12A = 0;
-        if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
+        if (gBotAimAccuracy[gBotDifficulty] < (s32)(math_randomFloat() * 100.0f)) {
             obj->mv->unk12A = 1;
         }
     }
@@ -1734,14 +1734,14 @@ s32 mp_updatePickups(void) {
             continue;
         }
         if (dropTimers[i] != 0) {
-            dropTimers[i] -= D_800BE9E4;
+            dropTimers[i] -= gFrameTicks;
             if (dropTimers[i] <= 0) {
                 timers[i] = 4;
                 dropTimers[i] = 0;
             }
         }
         if (timers[i] > 0) {
-            timers[i] -= D_800BE9E4;
+            timers[i] -= gFrameTicks;
             if (timers[i] <= 0) {
                 timers[i] = 0;
                 pickup->inactive = 0;
@@ -1978,7 +1978,7 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
             obj->mv->shotsfired = savedRot;
             obj->mv->unk1AF = 0x40;
             camera_placeAtObject(obj->CameraPtr, obj);
-            D_8008FD94++;
+            gHumansRemaining++;
         }
     }
     return 0;

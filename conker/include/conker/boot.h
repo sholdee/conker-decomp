@@ -26,8 +26,8 @@
 void boot_entry(void);
 void boot_idleThread(void *arg);
 void boot_mainThread(void *arg);
-extern RomFile D_8002AAD0[2];
-extern u8 D_8002AAE0;
+extern RomFile gRomFiles[2];
+extern u8 gPageFaultsDisabled;
 extern u8 gPadInitDone;
 extern u16 *gFramebuffers[2]; // the two framebuffers
 extern u64 gIdleThreadStack[0x400 / sizeof(u64)];  // idle thread stack
@@ -79,7 +79,7 @@ void boot_debugTrap(void);
 
 /* init/Boot/FaultDebugger/faultdebugger.s */
 extern s32 gDebugStatusCode; // status code that the game posts for the debugger (0 when clear)
-extern u32 D_8003C8E8[4]; // TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask
+extern u32 gFaultTlbEntry[4]; // TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask
 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);

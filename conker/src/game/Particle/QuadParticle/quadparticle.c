@@ -65,7 +65,7 @@ static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
     particle_buildRotatedQuad, flare_buildGlowQuad, particle_buildFlickerQuad, particle_buildBendingQuad, particle_buildCameraFacingBeamQuad, particle_buildActorEmitterQuad, beam_fillMotionVerts,
     beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, particle_buildChannelQuad, particle_buildQuadParticleBillboard, particle_buildAxisQuad, particle_buildDripQuad,
     particle_buildSquashQuad, particle_buildImpactStreakQuad, effect_buildJointParticleQuad, particle_buildDriftQuad, particle_buildRayBeamQuad, particle_buildCentredAxisQuad, weapon_buildProjectileTail,
-    func_150AE36C, effect_buildBoneBeamQuad, particle_buildRotatedRectQuadUnrolled, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
+    collision_buildTransformedUprightQuad, effect_buildBoneBeamQuad, particle_buildRotatedRectQuadUnrolled, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
     particle_buildBeamQuadRev, effect_buildBurstSparkVtx, particle_buildRotatedRectQuad, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, effect_buildTrailPuffQuad, particle_buildUprightQuadFwd,
     particle_buildUprightQuadRev, effect_buildActorBeamQuad, particle_buildBoneBurstQuad, effect_buildTravelParticleQuad,
 };
@@ -116,7 +116,7 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
 
     expired = FALSE;
     if (sprite->def.flags & 1) {
-        sprite->def.lifetime -= D_800BE9E4;
+        sprite->def.lifetime -= gFrameTicks;
         if (sprite->def.lifetime < 0) {
             expired = TRUE;
         }
@@ -151,7 +151,7 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
         if (speed != 0) {
             numFrames = gEffectTextures[sprite->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
-            sprite->def.frame += speed * D_800BE9E4;
+            sprite->def.frame += speed * gFrameTicks;
             if (lastFrame < sprite->def.frame) {
                 if (sprite->def.flags & 2) {
                     expired = TRUE;
@@ -547,7 +547,7 @@ void particle_updateQuadParticle(DefParticleHead *particle) {
 
     expired = FALSE;
     if (particle->def.flags & 1) {
-        particle->def.lifetime -= D_800BE9E4;
+        particle->def.lifetime -= gFrameTicks;
         if (particle->def.lifetime < 0) {
             expired = TRUE;
         }
@@ -587,7 +587,7 @@ void particle_updateQuadParticle(DefParticleHead *particle) {
         if (speed != 0) {
             numFrames = gEffectTextures[particle->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
-            particle->def.frame += speed * D_800BE9E4;
+            particle->def.frame += speed * gFrameTicks;
             if (lastFrame < particle->def.frame) {
                 if (particle->def.flags & 0x800) {
                     expired = TRUE;
@@ -1627,7 +1627,7 @@ s32 particle_updateBallisticMotion(DefParticleHead *particle) {
 
     motion = PARTICLE_MOTION(particle);
     oldVel = motion->ballistic.vel;
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         motion->ballistic.vel.x *= motion->ballistic.drag;
         motion->ballistic.vel.y *= motion->ballistic.drag;
         motion->ballistic.vel.z *= motion->ballistic.drag;

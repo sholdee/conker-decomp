@@ -24,7 +24,7 @@ void effect_updateEmitterSpawner(EB340Obj *obj) {
     void *effect;
     EB340Payload payload;
 
-    obj->spawn.timer -= D_800BE9E4;
+    obj->spawn.timer -= gFrameTicks;
     spawn = &obj->spawn;
     if (obj->spawn.timer < 0) {
         emitter.x = (math_randomFloat() * 270.0f) + -135.0f;

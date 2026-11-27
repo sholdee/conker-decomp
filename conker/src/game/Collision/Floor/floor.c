@@ -28,7 +28,7 @@ f32 gFloorQueryCeilingY;                 // last floor query: ceiling
 u32 *gMeshTriMaterials;                // per world-mesh triangle: material / surface flags
 u16 gFloorQueryProp;                 // last floor query: prop hit (index + 1, 0: none)
 u8 gMeshBuilt;                  // set once the world mesh is built
-u8 D_800DBE63;
+u8 gTriBoundsFull;
 f32 gFloorQueryReach;                 // floor query reach
 f32 gFloorQueryX;                 // last floor query: x
 f32 gFloorQueryY;                 // last floor query: y

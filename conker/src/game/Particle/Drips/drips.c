@@ -66,7 +66,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
     self = emitter;
     done = 0;
     if (emitter->link.flags & 1) {
-        emitter->link.timer -= D_800BE9E4;
+        emitter->link.timer -= gFrameTicks;
         if (emitter->link.timer < 0) {
             done = 1;
         }
@@ -84,7 +84,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                 if (slot->drop != NULL) {
                     slot->drop->head.def.rot = slot->drop->head.def.pos;
                     math_transformOffset(&kind->mounts[i].offset, &slot->drop->head.def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= gFrameTicks;
                     if (slot->timer < 0) {
                         DripParticle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
@@ -218,8 +218,8 @@ s32 particle_wobbleDrip(DripParticle *drop) {
     f32 widthWave;
     f32 heightWave;
 
-    motion->phase[0] += motion->phaseSpeed[0] * D_800BE9E4;
-    motion->phase[1] += motion->phaseSpeed[1] * D_800BE9E4;
+    motion->phase[0] += motion->phaseSpeed[0] * gFrameTicks;
+    motion->phase[1] += motion->phaseSpeed[1] * gFrameTicks;
     widthWave = math_cosBinAngleMasked(motion->phase[0] - 0x40);
     heightWave = math_cosBinAngleMasked(motion->phase[1] - 0x40);
     p->head.def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->head.def.width) * 0.5f;

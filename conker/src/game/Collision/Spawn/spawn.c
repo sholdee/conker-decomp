@@ -61,7 +61,7 @@ s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1) {
                 radiusSq = 7562500.0f;
             }
             clear = 1;
-            for (j = 0; j < D_8008FD8C; j++) {
+            for (j = 0; j < gPlayerCount; j++) {
                 if (movement_obj[j].type == 0) {
                     continue;
                 }
@@ -171,7 +171,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if (slot != 0) {
         obj = &movement_obj[slot - 1];
         actor_clearSlot(obj);
-    } else if ((spawnIdx != -1) && (spawnIdx < D_8008FD8C)) {
+    } else if ((spawnIdx != -1) && (spawnIdx < gPlayerCount)) {
         obj = &movement_obj[spawnIdx];
         actor_clearSlot(obj);
     } else {
@@ -188,7 +188,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
             gSpawnInUse[spawnIdx] = idx + 0x81;
         }
         obj->listpos = spawnIdx;
-        if (spawnIdx < D_8008FD8C) {
+        if (spawnIdx < gPlayerCount) {
             obj->playernumber = spawnIdx;
         } else {
             obj->playernumber = 0xFF;
@@ -197,7 +197,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     obj->listpos_ptr = spawn;
     ret = idx + 1;
     collision_loadSpawnModel(spawn, obj->listpos, arg3);
-    if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
+    if ((idx < gPlayerCount) || (type == 0x98) || (type == 0x28)) {
         obj->mv = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
         bzero(obj->mv, sizeof(ActorCtl));
         obj->mv->gunPitch = 5.0f;
@@ -225,7 +225,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         actor_fadeCommand(obj, 4, 0, 0, 0);
     }
     obj->intelwalk = spawn->unkD;
-    if ((spawnIdx < D_8008FD8C) && (gRoster[spawnIdx] == -2)) {
+    if ((spawnIdx < gPlayerCount) && (gRoster[spawnIdx] == -2)) {
         obj->mv->bot = 1;
         obj->intelwalk = 1;
     }
@@ -659,13 +659,13 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
         blocked = 0;
     }
     if (blocked) {
-        D_800C3638 = 0;
+        gCutsceneActorLock = 0;
     }
     collision_applyModelDefaults(obj, modelId, NULL);
     collision_setObjectModel(obj - movement_obj, modelId, 1);
     collision_allocAnimState(obj, arg7, animFlag, arg8);
     if (blocked) {
-        D_800C3638 = 1;
+        gCutsceneActorLock = 1;
     }
     return obj;
 }

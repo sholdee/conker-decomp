@@ -174,7 +174,7 @@ void camera_updateAim(Camera *camera) {
         s32 passed;
 
         if (camera->AimTimeOuts != 0) {
-            camera->AimTimeOuts -= D_800BE9E4;
+            camera->AimTimeOuts -= gFrameTicks;
             if (camera->AimTimeOuts <= 0) {
                 camera->mv->AimState = 1;
                 camera->DoingAim = 2;
@@ -289,13 +289,13 @@ void camera_updateAim(Camera *camera) {
                     aim->targetYaw = ((camera->CharPtr->langle - camera->mv->pssd_waist_tilt * 0.349999994f) + 49152.0f) * BAM2DEG;
                 } else {
                     if (zone == 0x34) {
-                        aim->targetYaw -= camera->PadPtr->stick_x * rate * D_800BE9E4;
+                        aim->targetYaw -= camera->PadPtr->stick_x * rate * gFrameTicks;
                     }
-                    aim->targetYaw -= camera->PadPtr->stick_x * rate * D_800BE9E4;
+                    aim->targetYaw -= camera->PadPtr->stick_x * rate * gFrameTicks;
                 }
             }
             if ((zone != 3) && (zone != 0x1A) && !inMap42Zone1A && (zone != 0xF)) {
-                aim->targetPitch += camera->PadPtr->stick_y * rate * D_800BE9E4;
+                aim->targetPitch += camera->PadPtr->stick_y * rate * gFrameTicks;
             }
             if (zone == 0x38) {
                 // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
@@ -362,7 +362,7 @@ void camera_updateAim(Camera *camera) {
         yawDelta = fabsf(math_angleDiff(camera->CameraAngle, aim->savedYaw));
         camera->Tightness = camera->savedTightness[1];
         if (camera->AimTimeOuts != 0) {
-            camera->AimTimeOuts -= D_800BE9E4;
+            camera->AimTimeOuts -= gFrameTicks;
             if (camera->AimTimeOuts <= 0) {
                 camera->mv->AimState = 0;
                 camera->DoingAim = 0;

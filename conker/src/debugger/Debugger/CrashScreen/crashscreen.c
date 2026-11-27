@@ -520,7 +520,7 @@ s32 debugger_run(OSThread *thread) {
         return 0;
     }
     debugger_readTlb();
-    tlb = D_8003C8E8;
+    tlb = gFaultTlbEntry;
     tlbCopy = tlb; // matching: a second pointer keeps IDO's stack slot layout
     gTlbEntryLo0[15] = tlbCopy[0];
     gTlbEntryLo1[15] = tlbCopy[1];

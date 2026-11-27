@@ -176,7 +176,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
     gTextAlpha = a;
     gTextFlashOn = 0;
     gTextWaveOn = 0;
-    gTextWavePhase += D_800BE9E4 * 6;
+    gTextWavePhase += gFrameTicks * 6;
     c = 0;
     flash = 0.0f;
     while (i < len) {
@@ -245,7 +245,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 break;
             case 0xA6:
                 gTextFlashOn = 1;
-                gTextFlashPhase += D_800BE9E4 * 8;
+                gTextFlashPhase += gFrameTicks * 8;
                 flash = (cosf(gTextFlashPhase * 0.02454369329f) + 1.0f) * 0.5f;
                 break;
             case 0xA7:
@@ -359,7 +359,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 sprite.scaleX = scaleX * scale;
                 sprite.scaleY = scaleY * scale;
                 gSPDisplayList(gfx++, gSpriteRenderDl);
-                D_800D2DAB = 1;
+                gSpriteKeepPrimColor = 1;
                 gDPSetOtherMode(gfx++, 0x002C3F, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | 4);
                 if (noCombine == 0) {
                     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
@@ -372,7 +372,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 }
                 gSPDisplayList(gfx++, gSpriteEndDl);
                 gSPDisplayList(gfx++, gText2DSetupDL);
-                D_800D2DAB = 0;
+                gSpriteKeepPrimColor = 0;
                 y -= dy;
                 x += dx * 0.5f;
             } else {

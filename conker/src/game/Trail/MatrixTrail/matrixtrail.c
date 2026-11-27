@@ -9,7 +9,7 @@
  * directly (trail_startMatrixTrail) or by a task that waits until the owner has its matrices.
  *
  * Frame timing globals: gFrameDelta is the frame time step, gFrameDeltaInv its reciprocal and
- * D_800BE9E4 the number of frames elapsed.
+ * gFrameTicks the number of frames elapsed.
  */
 
 /* Trail parameters, one entry per trail kind (gMatrixTrailSpecs). */
@@ -176,9 +176,9 @@ s32 trail_ageMatrixTrail(MatrixTrail *trail) {
         point->pos.y += same->vel.y * gFrameDelta;
         point->pos.z += same->vel.z * gFrameDelta;
         if (delay > 0) {
-            point->delay = delay - D_800BE9E4;
+            point->delay = delay - gFrameTicks;
         } else {
-            point->life -= D_800BE9E4 * data->lifeDecay;
+            point->life -= gFrameTicks * data->lifeDecay;
         }
         point->width += gFrameDelta * data->widthGrowth;
         if (point->life < 0) {
@@ -639,7 +639,7 @@ void trail_onTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId) {
     }
 }
 
-void func_1519E61C(EffectHeader *task, TrailEvent *event, u8 eventId) {
+void trail_destroyOnEndEvent(EffectHeader *task, TrailEvent *event, u8 eventId) {
     if (eventId == 0 || eventId == 9) {
         effect_destroyObject(task);
     }
@@ -687,7 +687,7 @@ void trail_updateTrailPairTask(TrailTask *task) {
         finished = TRUE;
     }
     if (!finished) {
-        data->unk8 += D_800BE9E4;
+        data->unk8 += gFrameTicks;
         if (data->owner->animseq.uh != 0x7C) {
             finished = TRUE;
             if (data->unk8 > 200) {

@@ -187,7 +187,7 @@ void light_updatePlayerLight(s32 player);
 
 /* game/Effects/AmbientPulse/ambientpulse.c */
 void light_updateAmbientRedDrift(AmbientPulse *arg0); /* AmbientPulse: conker/effect.h */
-void func_150D1BD0(s32 *arg0);
+void light_levelHook31(s32 *arg0);
 
 /* game/Effects/ColourWave/colourwave.c */
 void light_updateColourWave(ColourWaveEffect *object);
@@ -249,14 +249,14 @@ extern f32 gAmbientEaseRed; // ambient effect colour being eased (red, green, bl
 extern f32 gAmbientEaseGreen;
 extern f32 gAmbientEaseBlue;
 extern f32 gAmbientEasePhase; // ambient effect 2 pulse phase
-extern f32 D_800DCDA4;
-extern f32 D_800DCDA8;
-extern f32 D_800DCDAC;
-extern f32 D_800DCDB0;
-extern f32 D_800DCDB4;
-extern f32 D_800DCDB8;
-extern f32 D_800DCDBC;
-extern f32 D_800DCDC0;
+extern f32 gSavedAmbientRed;
+extern f32 gSavedAmbientGreen;
+extern f32 gSavedAmbientBlue;
+extern f32 gSavedDirLightAmbientTintRed;
+extern f32 gSavedDirLightAmbientTintGreen;
+extern f32 gSavedDirLightAmbientTintBlue;
+extern f32 gSavedDirLightAmount;
+extern f32 gSavedDirLightAmbientAmount;
 extern RegionNode *gDustRegions; // spawn regions; their areas add up to gDustRegionsArea
 /* (TriggerZone *region); declared without a prototype: game/Level/ZoneSpawn/zonespawn.c calls it without the region */
 RegionNode *light_newRegionNode();
@@ -265,7 +265,7 @@ void light_runHandlerZone(Actor *obj, TriggerZone *zone);
 void func_1515F2B8(Actor *obj, TriggerZone *zone);
 void light_runAmbientZoneEffect(Actor *obj, TriggerZone *zone);
 void light_easeAmbientToGrey(Actor *obj, TriggerZone *zone);
-void func_1515F5C4(Actor *obj, TriggerZone *zone);
+void light_easeAmbientToYellowGreen(Actor *obj, TriggerZone *zone);
 void light_easeAmbientToPulse(Actor *obj, TriggerZone *zone);
 void func_1515FB70(Actor *obj, TriggerZone *zone);
 void func_1515FB94(Actor *obj, TriggerZone *zone);
@@ -274,7 +274,7 @@ void func_1515FC34(Actor *obj, TriggerZone *zone);
 void light_killActorInZone(Actor *obj, TriggerZone *zone);
 
 /* game/Effects/Light/light.c */
-extern u8 D_800DCDD0;
+extern u8 gDaylight;
 LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                            u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
 LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
@@ -361,7 +361,7 @@ s32 light_updateTransformed(LightEffect *effect);
 void light_placeTransformed(LightEffect *effect, LightTransformed *point);
 s32 light_updateSwing(LightEffect *effect);
 void light_placeSwing(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f32 angleZ);
-void func_151645C4(u8 enable);
+void light_setDaylight(u8 enable);
 extern const f32 gLightJitterLows[24];
 extern const f32 gLightJitterMids[24];
 extern const f32 gLightJitterHighs[24];

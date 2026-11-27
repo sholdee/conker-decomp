@@ -225,7 +225,7 @@ s32 particle_settleWobble(WobbleParticle *particle) {
         wobble->phase += wobble->phaseSpeed * gFrameDelta;
         wobble->phase = math_wrapRadians(wobble->phase);
         particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
-        wobble->timer -= D_800BE9E4;
+        wobble->timer -= gFrameTicks;
     } else {
         particle->unk20 = particle->unk50;
     }
@@ -428,7 +428,7 @@ void particle_attachPointEmitter(obj, posFunc, arg2, arg3, arg4)
     }
 
     if (obj->ob_matrix_ptr != NULL) {
-        if ((obj->unk74 & 0xF) != 0xF) {
+        if ((obj->cullMask & 0xF) != 0xF) {
             gEmitterPointFuncs[posFunc](obj, emitter.unk6, &emitter.pos);
             emitter.flags |= 1;
         }
@@ -456,7 +456,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         gEmitterPointFuncs[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
         emitter->flags |= 1;
     }
@@ -611,7 +611,7 @@ s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to
             victim->energy = hp - 1;
         } else {
             victim->energy = 0;
-            func_1507DE4C(victim);
+            actor_applyHeadShot(victim);
             blood_spawnFatalHit(victim, 0xFF, 1);
             flags = 0x100020;
         }
@@ -794,7 +794,7 @@ void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3
     Vec3f *dsts[2];
 
     if (obj->ob_matrix_ptr != NULL) {
-        if ((obj->unk74 & 0xF) != 0xF) {
+        if ((obj->cullMask & 0xF) != 0xF) {
             mtx = obj->ob_matrix_ptr + bone;
             srcs[0] = from;
             srcs[1] = to;

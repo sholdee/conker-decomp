@@ -44,7 +44,7 @@ static VertexAnim gPropVertexAnims[2] = { { 0, 0 }, { 0, 0 } };
  * Actor handler paired with prop_updateMover: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
  * enters the moving state 2 when the actor's mv->unk57 is 1.
  */
-void func_15116930(WorldObject *obj, Actor *actor) {
+void prop_triggerMover(WorldObject *obj, Actor *actor) {
     if ((obj->object_status & 4) && !(obj->task_flag & TASK_FLAG_STATE) && !(obj->task_flag & TASK_FLAG_LOCKED) && actor->mv->unk57 == 1) {
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= TASK_FLAG_GOING_ON;
@@ -72,14 +72,14 @@ void prop_stepToTarget(WorldObject *obj) {
     if (WORK(obj)->targetPos[0] != (&obj->x)[0] || WORK(obj)->targetPos[1] != (&obj->x)[1] ||
         WORK(obj)->targetPos[2] != (&obj->x)[2]) {
         if (sound != 0 && gPropSounds[sound].arrive != 0) {
-            func_15116BAC(obj);
+            prop_stepToTargetWithSounds(obj);
             return;
         }
         step = obj->moveData.word & ~0xFC00;
         if (sound != 0 && obj->sound_id == 0 && gPropSounds[sound].open != 0) {
             gfx_playObjectSound(obj, gPropSounds[sound].open, 24000, 2000, 4000, 0);
         }
-        step = (step * D_800BE9E4) >> 1;
+        step = (step * gFrameTicks) >> 1;
         pos = &obj->x;
         move = &obj->moveX;
         target = WORK(obj)->targetPos;
@@ -112,7 +112,7 @@ void prop_stepToTarget(WorldObject *obj) {
 }
 
 /* Like prop_stepToTarget, but plays the arrive sound arriveLead steps before reaching the target. */
-void func_15116BAC(WorldObject *obj) {
+void prop_stepToTargetWithSounds(WorldObject *obj) {
     s32 rate;
     s32 step;
     s32 sound;
@@ -132,7 +132,7 @@ void func_15116BAC(WorldObject *obj) {
         gfx_playObjectSound(obj, gPropSounds[sound].open, 24000, 2000, 4000, 0);
         started = TRUE;
     }
-    step = (rate * D_800BE9E4) >> 1;
+    step = (rate * gFrameTicks) >> 1;
     pos = &obj->x;
     move = &obj->moveX;
     target = WORK(obj)->targetPos;
@@ -176,7 +176,7 @@ void prop_spinToTarget(WorldObject *obj) {
     s32 i;
 
     accel = obj->moveData.word * (1.0f / 256);
-    dt = D_800BE9E4;
+    dt = gFrameTicks;
     rot = &obj->t;
     spin = &obj->spinX;
     target = WORK(obj)->targetSpin;
@@ -227,11 +227,11 @@ void prop_animateVertices(WorldObject *obj) {
     file = gPropVertexAnims[anim].file;
     pos = WORK(obj)->anim.pos;
     frameCount = gPropVertexAnims[anim].frameCount;
-    size = D_8002AAD0[file].end - D_8002AAD0[file].start;
+    size = gRomFiles[file].end - gRomFiles[file].start;
     speed = obj->moveData.word >> 16;
     if (WORK(obj)->anim.frames == NULL) {
         WORK(obj)->anim.frames = allocate_memory(size, 1, 2, 0);
-        rom_read(D_8002AAD0[file].start, WORK(obj)->anim.frames, size, 1);
+        rom_read(gRomFiles[file].start, WORK(obj)->anim.frames, size, 1);
     }
     t = frameCount * (pos * (1.0f / 65535));
     frame = t;
@@ -287,7 +287,7 @@ f32 prop_springAngle(WorldObject *obj, f32 angle) {
         if (velocity == 0.0f && (obj->moveData.word >> 10) != 0 && gPropSounds[obj->moveData.word >> 10].open != 0) {
             gfx_playObjectSound(obj, gPropSounds[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
         }
-        angle += velocity * D_800BE9E4;
+        angle += velocity * gFrameTicks;
         delta = math_angleDiff(angle, target);
         magnitude = fabsf(delta);
         if (delta > 0.0f) {

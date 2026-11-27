@@ -54,7 +54,7 @@ s32 (*gScriptEndHandlers[15])() = {
     NULL,
     NULL,
     script_endEffect,
-    func_1509DFB4,
+    script_emptyMiscEnd,
 };
 
 /* Query handlers, by class: (id, opcode, record). */
@@ -65,12 +65,12 @@ s32 (*gScriptQueryHandlers[15])() = {
     script_zoneQuery,  /* 4: game/Script/ZoneCmd/zonecmd */
     script_taskQuery,  /* 5: game/Script/TaskCmd/taskcmd */
     script_streamQuery,  /* 6: game/Script/MusicCmd/musiccmd */
-    func_1509F33C,  /* 7: game/Script/ObjectCmd/objectcmd */
+    script_soundQuery,  /* 7: game/Script/ObjectCmd/objectcmd */
     script_swarmQuery,  /* 8: game/Script/SwarmCmd/swarmcmd */
     script_cameraQuery,  /* 9: game/Script/CameraCmd/cameracmd */
     script_musicQuery,  /* 10: game/Script/MusicCmd/musiccmd */
     script_timerQuery,  /* 11: game/Script/TimerCmd/timercmd */
-    func_1509F800,  /* 12: game/Script/ObjectCmd/objectcmd */
+    script_emptyQuery12,  /* 12: game/Script/ObjectCmd/objectcmd */
     NULL,           /* 13 */
     script_effectQuery,  /* 14: game/Script/EffectCmd/effectcmd */
     script_miscQuery,  /* 15: game/Script/MiscCmd/misccmd */
@@ -89,7 +89,7 @@ s32 (*gScriptCommandHandlers[15])() = {
     script_cameraCommand,
     script_musicCommand,
     script_timerCommand,
-    func_1509F818,
+    script_trapCommand12,
     NULL,
     script_effectCommand,
     script_miscCommand,

@@ -36,7 +36,7 @@ s32 music_updateSeq62(s32 state, s32 channel, f32 x, f32 y, f32 z);
 s32 music_updateSeq76(s32 state, s32 channel, s32 arg2, s32 arg3);
 s32 music_updateSeq84(s32 state, s32 channel, s32 arg2, s32 arg3);
 s32 music_updateSeq88(s32 state, u8 channel, f32 x, f32 y, f32 z);
-void func_1000CBA8(s32 volume);
+void music_fadeFirstTwoChannels(s32 volume);
 void music_setDuck(s32 target, s32 rate, s32 channelMask);
 void music_updateChannelVolume(s32 channel);
 s32 music_stepVolume(s32 current, s32 target, s32 rate);
@@ -80,6 +80,6 @@ void music_init(void);
 void func_15000090(void);
 void music_startLevelMusic(void);
 /* (void); declared without a prototype: callers pass the level */
-void func_150006E0();
+void music_initLevelViewState();
 
 #endif

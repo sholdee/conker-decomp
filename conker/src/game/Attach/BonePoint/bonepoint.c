@@ -40,7 +40,7 @@ s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point) {
     return 1;
 }
 
-s32 func_150D8A20(s32 arg0, s32 arg1) {
+s32 attach_selectBonePointEffects(s32 arg0, s32 arg1) {
     return 8;
 }
 

@@ -75,7 +75,7 @@ s32 script_updatePoseCommand(s32 slot) {
         camera_queueMessage(actor, 5, NULL);
         camera_queueMessage(actor, 7, &gCamShot);
         if (!(gPoseCommands[slot].flags & 1)) {
-            actor->CharPtr->unk7 = 0;
+            actor->CharPtr->alpha = 0;
             actor->CharPtr->task_attrib |= 0x200;
         }
         gPoseCommandScales[slot] = gPoseCommands[slot].scale;
@@ -98,7 +98,7 @@ s32 script_updatePoseCommand(s32 slot) {
             gPoseCommandRunning = 0;
             if (!(gPoseCommands[slot].flags & 1)) {
                 actor->CharPtr->task_attrib &= ~0x200;
-                actor->CharPtr->unk7 = 0xFF;
+                actor->CharPtr->alpha = 0xFF;
             }
             gPoseCommands[slot].timer = 0;
             gPoseCommands[slot].state = 0;

@@ -278,7 +278,7 @@ void swarm_updateModelSlots(void) {
     }
     for (i = 0; i < 4; i++) {
         if (gSwarmGroupSoundTimers[i] > 0) {
-            value = gSwarmGroupSoundTimers[i] - D_800BE9E4;
+            value = gSwarmGroupSoundTimers[i] - gFrameTicks;
             if (value < 0) {
                 value = 0;
             }

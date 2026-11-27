@@ -25,11 +25,11 @@ Gfx gModelEffectRenderTeardownDl[] = {
    is done. Declared without a prototype where the entries take their own effect views. */
 s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, func_151BECB8, particle_bobEffect, effect_updateFadeInEffect };
 s32 (*gModelEffectUpdate2Funcs[])(ModelEffect *) = { effect_resetModelEffectRoot, effect_setModelEffectRootRotScale };
-s32 (*D_8008ADA8[])() = { func_151BEB20, func_151D6E60, func_150FB188, effect_setModelEffectRootFromExtra, func_150C52CC };
+s32 (*gModelEffectUpdate2FuncsTail[])() = { func_151BEB20, text_updateCashModel, effect_placeScreenCashModel, effect_setModelEffectRootFromExtra, func_150C52CC };
 
 /* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
 Gfx *(*gModelEffectPreDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
-    effect_preDrawModelEffectNone, func_151D710C, func_150FB1E8, effect_preDrawModelEffectOrtho,
+    effect_preDrawModelEffectNone, text_preDrawCashModel, effect_preDrawScreenCashModel, effect_preDrawModelEffectOrtho,
 };
 Gfx *(*gModelEffectPostDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *) = { effect_postDrawModelEffectProjection };
 
@@ -121,7 +121,7 @@ void effect_updateModelEffect(ModelEffect *fx) {
 
     dead = FALSE;
     if (fx->params.flags & 1) {
-        fx->params.lifetime -= D_800BE9E4;
+        fx->params.lifetime -= gFrameTicks;
         if (fx->params.lifetime < 0) {
             dead = TRUE;
         }
@@ -272,7 +272,7 @@ s32 effect_moveModelEffect(ModelEffect *fx) {
     if (motion->flags & 1) {
         oldVel = motion->vel;
         if (motion->flags & 8) {
-            for (i = D_800BE9E4; i != 0; i--) {
+            for (i = gFrameTicks; i != 0; i--) {
                 motion->vel.x *= motion->drag;
                 motion->vel.z *= motion->drag;
             }
@@ -302,7 +302,7 @@ void effect_modelEffectMessage(ModelEffect *fx, s32 event, u8 eventType) {
     effect_handleOwnerActorEvent(event, eventType, &fx->params.owner, &fx->params.ownerId, fx);
 }
 
-/* Update callback (D_8008ADA8[3]): root matrix from the extension, see effect_setModelEffectRootXform. */
+/* Update callback (gModelEffectUpdate2FuncsTail[3]): root matrix from the extension, see effect_setModelEffectRootXform. */
 s32 effect_setModelEffectRootFromExtra(ModelEffect *fx) {
     effect_setModelEffectRootXform(fx, fx->extra.raw);
     return TRUE;

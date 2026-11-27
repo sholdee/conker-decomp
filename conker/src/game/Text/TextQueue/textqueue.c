@@ -318,7 +318,7 @@ void text_parseFormat(u8 *format, s32 *argumentWords) {
             node->y = gQueuedTextAnchorHeight;
             node->flags |= TEXT_FLAG_CENTERED;
             node->flags = node->flags; // matching: IDO re-stores the flags byte after the OR
-            if (D_8008FD90 >= 2) {
+            if (gHumanCount >= 2) {
                 node->scale = gQueuedTextScale + gQueuedTextScale;
             } else {
                 node->scale = gQueuedTextScale;
@@ -410,8 +410,8 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 if (node->flags & TEXT_FLAG_SCREEN_SPACE) {
                     node->flags &= ~TEXT_FLAG_SCREEN_SPACE;
                 } else {
-                    node->x = node->x * D_8008FE1C;
-                    node->y = node->y * D_8008FE20;
+                    node->x = node->x * gHudScaleX;
+                    node->y = node->y * gHudScaleY;
                 }
                 if (node->flags & TEXT_FLAG_SHADOW) {
                     shadow = 1;

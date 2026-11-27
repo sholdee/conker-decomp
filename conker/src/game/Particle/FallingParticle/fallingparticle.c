@@ -107,7 +107,7 @@ void particle_updateFallingParticle(FallingParticle *particle) {
     if (kind == 1) {
         phase = particle->phase;
         // matching: `* 6` is emitted as a different shift/add sequence
-        phase += D_800BE9E4 * 4 + D_800BE9E4 * 2;
+        phase += gFrameTicks * 4 + gFrameTicks * 2;
         particle->phase = phase;
         particle->size *= 0.99f;
         size = particle->size;
@@ -117,7 +117,7 @@ void particle_updateFallingParticle(FallingParticle *particle) {
         width = particle->width;
         minSize = particle->floorAndMinSize >> 16;
         if (minSize != width) {
-            v = width - D_800BE9E4 * 4;
+            v = width - gFrameTicks * 4;
             if (v < minSize) {
                 v = minSize;
             }
@@ -209,9 +209,9 @@ void particle_updateFallingEmitter(FallingEmitter *emitter) {
                       emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->header.owner, emitter->header.kind);
     }
 
-    // matching: `timer = emitter->timer - D_800BE9E4;` schedules the end differently
+    // matching: `timer = emitter->timer - gFrameTicks;` schedules the end differently
     timer = emitter->timer;
-    timer -= D_800BE9E4;
+    timer -= gFrameTicks;
     if (timer < 0) {
         effect_destroyObject(&emitter->header);
     } else {

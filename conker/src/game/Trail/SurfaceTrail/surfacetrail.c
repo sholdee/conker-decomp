@@ -207,7 +207,7 @@ void trail_detachSurfaceTrail(SurfaceTrail *trail) {
     config->flags |= 1;
 }
 
-/* gFrameDelta: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
+/* gFrameDelta: frame time, gFrameTicks: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
 s32 trail_ageSurfaceTrail(SurfaceTrail *trail) {
@@ -229,15 +229,15 @@ s32 trail_ageSurfaceTrail(SurfaceTrail *trail) {
             index = trail->head.tmpl.itemCount - 1;
         }
         point = &points[index];
-        point->life -= D_800BE9E4;
+        point->life -= gFrameTicks;
         if (point->life < 0) {
             expired = 1;
         }
         point->fade = 255;
         if (point->fadeDelay > 0) {
-            point->fadeDelay -= D_800BE9E4;
+            point->fadeDelay -= gFrameTicks;
         } else {
-            point->alpha -= config->alphaDecay * D_800BE9E4;
+            point->alpha -= config->alphaDecay * gFrameTicks;
         }
         point->width += config->widthGrowth * gFrameDelta;
         point->x += point->vel.x * gFrameDelta;
@@ -271,7 +271,7 @@ s32 trail_ageSurfaceTrail(SurfaceTrail *trail) {
             points[trail->head.start].alpha = 0;
         }
     }
-    config->texT += config->texTSpeed * D_800BE9E4;
+    config->texT += config->texTSpeed * gFrameTicks;
     if (trail->head.count > 0) {
         trail->head.modelPos.x = points[trail->head.start].x;
         trail->head.modelPos.y = points[trail->head.start].y;

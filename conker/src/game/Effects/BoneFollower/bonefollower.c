@@ -93,7 +93,7 @@ void effect_updateBoneFollower(BoneFollower *follower) {
 
     actor = follower->actor;
     if (actor->type == 0 || actor->character_type == 0xFF || actor->unique_id != follower->actorUid ||
-        actor->ob_matrix_ptr == NULL || (actor->unk74 & 0xF) == 0xF) {
+        actor->ob_matrix_ptr == NULL || (actor->cullMask & 0xF) == 0xF) {
         effect_destroyObject(&follower->header);
         return;
     }
@@ -101,7 +101,7 @@ void effect_updateBoneFollower(BoneFollower *follower) {
     math_transformOffset(&follower->offset, &position, &actor->ob_matrix_ptr[follower->bone]);
 
     if (follower->flags & 1) {
-        follower->timer -= D_800BE9E4;
+        follower->timer -= gFrameTicks;
         if (follower->timer < 0) {
             if (follower->expireFn != -1) {
                 gBoneFollowerExpireFuncs[follower->expireFn](follower, &position);
@@ -199,13 +199,13 @@ void effect_updateFollowerGroup(ActorFollowerGroup *group) {
         effect_destroyObject(&group->header);
         return;
     }
-    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         group->flags |= 2;
     } else {
         group->flags &= ~2;
     }
     if (group->flags & 1) {
-        group->timer -= D_800BE9E4;
+        group->timer -= gFrameTicks;
         if (group->timer < 0) {
             if (group->expireFn != -1) {
                 gFollowerGroupExpireFuncs[group->expireFn](group);

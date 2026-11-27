@@ -137,7 +137,7 @@ void light_updateLampTrackTimer(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
     if (lamp->track != TRACK_NONE) {
-        if ((lamp->duration -= D_800BE9E4) < 0) {
+        if ((lamp->duration -= gFrameTicks) < 0) {
             lamp->track = TRACK_NONE;
         }
     }
@@ -247,15 +247,15 @@ s32 light_updateLampLight(LightEffect *effect) {
 }
 
 /* This file's .data: the object kinds the two lamp messages go to. */
-static IdList2 D_80088C50 = { { 0x38, 0x54 } };
-static IdList2 D_80088C58 = { { 0x38, 0x54 } };
+static IdList2 gLampTrackTargets = { { 0x38, 0x54 } };
+static IdList2 gLampToggleTargets = { { 0x38, 0x54 } };
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void light_setLampTrack(s32 track, s32 duration, u8 sceneTag) {
     LampTrackMsg msg;
     IdList2 target;
 
-    target = D_80088C50;
+    target = gLampTrackTargets;
     msg.track = track;
     msg.duration = duration;
     msg.sceneTag = sceneTag;
@@ -288,7 +288,7 @@ void light_handleLampMessage(DynModel *model, LampTrackMsg *msg, u8 event) {
 void light_toggleLamp(void) {
     IdList2 target;
 
-    target = D_80088C58;
+    target = gLampToggleTargets;
     effect_sendEventToTypes(target.ids, 2, 0, 0x1E);
 }
 

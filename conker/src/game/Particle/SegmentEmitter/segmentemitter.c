@@ -13,34 +13,34 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
 
-/* This file's .rodata. Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
- * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
-static const Vec3f D_800A24B0[7] = {
+/* This file's .rodata. Emission segments of effect 0x1A: particles start on segment i (gSegmentEmitterPoints[i] to
+ * gSegmentEmitterPoints[i + 1]), picked with weight gSegmentEmitterWeights[i]; gSegmentEmitterWeights[6] is the weight total. */
+static const Vec3f gSegmentEmitterPoints[7] = {
     { 10.0f, -2.0f, 73.0f },   { 10.0f, 7.0f, 211.0f },   { 10.0f, 0.0f, 231.0f }, { 10.0f, -17.0f, 238.0f },
     { 10.0f, -36.0f, 231.0f }, { 10.0f, -41.0f, 209.0f }, { 10.0f, -34.0f, 78.0f },
 };
-static const f32 D_800A2504[7] = {
+static const f32 gSegmentEmitterWeights[7] = {
     138.2931213f, 21.18962097f, 18.38477707f, 20.24845695f, 22.56102753f, 131.1868896f, 351.8638916f,
 };
-static const Vec3f D_800A2520[6] = {
+static const Vec3f gSegmentEmitterTips[6] = {
     { 10.0f, 22.0f, 211.0f },  { 10.0f, 7.0f, 236.0f },   { 10.0f, -19.0f, 248.0f },
     { 10.0f, -40.0f, 243.0f }, { 10.0f, -50.0f, 213.0f }, { 10.0f, -47.0f, 79.0f },
 };
 /* The same for effect 0x1B. */
-static const Vec3f D_800A2568[7] = {
+static const Vec3f gMatrixSegmentEmitterPoints[7] = {
     { 0.0f, 6.764999866f, -3.0f },        { 0.0f, 10.82400036f, 79.80000305f }, { 0.0f, 7.667000294f, 91.80000305f },
     { 0.0f, 0.0f, 96.0f },                { 0.0f, -8.569000244f, 91.80000305f }, { 0.0f, -10.82400036f, 78.6000061f },
     { 0.0f, -7.667000294f, 0.0f },
 };
-static const Vec3f D_800A25BC[6] = {
+static const Vec3f gMatrixSegmentEmitterTips[6] = {
     { 0.0f, 17.5890007f, 79.80000305f },  { 0.0f, 10.82400036f, 94.80000305f }, { 0.0f, -0.90200001f, 102.0000076f },
     { 0.0f, -10.37300014f, 99.00000763f }, { 0.0f, -14.88300037f, 81.0f },      { 0.0f, -13.52999973f, 0.6000000238f },
 };
 /* Effect 0x1C's two emission points and the points their particles head for. */
-static const Vec3f D_800A2604 = { -11.0f, -24.0f, 43.0f };
-static const Vec3f D_800A2610 = { 31.0f, -24.0f, 43.0f };
-static const Vec3f D_800A261C = { -51.0f, -24.0f, 43.0f };
-static const Vec3f D_800A2628 = { 81.0f, -24.0f, 43.0f };
+static const Vec3f gPointPairEmitPoint0 = { -11.0f, -24.0f, 43.0f };
+static const Vec3f gPointPairEmitPoint1 = { 31.0f, -24.0f, 43.0f };
+static const Vec3f gPointPairTarget0 = { -51.0f, -24.0f, 43.0f };
+static const Vec3f gPointPairTarget1 = { 81.0f, -24.0f, 43.0f };
 
 /* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
@@ -119,15 +119,15 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
+    data->spawnAccum += data->spawnRate * gSegmentEmitterWeights[6] * gFrameDelta;
     if (data->emitFunc != -1 && object->ob_matrix_ptr != NULL) {
         while (data->spawnAccum > 1.0f) {
-            r = math_randomFloat() * D_800A2504[6];
-            for (i = 0; D_800A2504[i] < r; i++) {
-                r -= D_800A2504[i];
+            r = math_randomFloat() * gSegmentEmitterWeights[6];
+            for (i = 0; gSegmentEmitterWeights[i] < r; i++) {
+                r -= gSegmentEmitterWeights[i];
             }
             t = math_randomFloat();
-            segment = &D_800A24B0[i];
+            segment = &gSegmentEmitterPoints[i];
             local.x = segment[0].x + (segment[1].x - segment[0].x) * t;
             local.y = segment[0].y + (segment[1].y - segment[0].y) * t;
             local.z = segment[0].z + (segment[1].z - segment[0].z) * t;
@@ -135,7 +135,7 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
             math_transformOffset(&local, &point, matrix);
             math_transformOffset(&segment[0], &start, matrix);
             math_transformOffset(&segment[1], &end, matrix);
-            math_transformOffset(&D_800A2520[i], &tip, matrix);
+            math_transformOffset(&gSegmentEmitterTips[i], &tip, matrix);
             t = math_randomFloat();
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
@@ -363,7 +363,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
     MatrixEmitterData *data;
 
     data = &effect->data.matrix;
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
+    data->spawnAccum += data->spawnRate * gSegmentEmitterWeights[6] * gFrameDelta;
     if (data->emitFunc != -1) {
         while (data->spawnAccum > 1.0f) {
             MtxF mtx;
@@ -381,19 +381,19 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
             f32 z;
 
             gfx_getObjectModelMtx(mtx, data->unk0);
-            r = math_randomFloat() * D_800A2504[6];
-            for (i = 0; D_800A2504[i] < r; i++) {
-                r -= D_800A2504[i];
+            r = math_randomFloat() * gSegmentEmitterWeights[6];
+            for (i = 0; gSegmentEmitterWeights[i] < r; i++) {
+                r -= gSegmentEmitterWeights[i];
             }
             t = math_randomFloat();
-            segment = &D_800A2568[i];
+            segment = &gMatrixSegmentEmitterPoints[i];
             x = segment[0].x + (segment[1].x - segment[0].x) * t;
             y = segment[0].y + (segment[1].y - segment[0].y) * t;
             z = segment[0].z + (segment[1].z - segment[0].z) * t;
             math_transformPoint(mtx, x, y, z, &point.x, &point.y, &point.z);
             math_transformPoint(mtx, segment[0].x, segment[0].y, segment[0].z, &start.x, &start.y, &start.z);
             math_transformPoint(mtx, segment[1].x, segment[1].y, segment[1].z, &end.x, &end.y, &end.z);
-            math_transformPoint(mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &tip.x, &tip.y, &tip.z);
+            math_transformPoint(mtx, gMatrixSegmentEmitterTips[i].x, gMatrixSegmentEmitterTips[i].y, gMatrixSegmentEmitterTips[i].z, &tip.x, &tip.y, &tip.z);
             t = math_randomFloat();
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
@@ -459,10 +459,10 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
     data->spawnAccum += (data->spawnRate + math_randomFloat() * data->spawnRateRandom) * gFrameDelta;
     if (data->spawnAccum > 1.0f && object->ob_matrix_ptr != NULL) {
         matrix = &object->ob_matrix_ptr[9];
-        math_transformOffset(&D_800A2604, &points[0], matrix);
-        math_transformOffset(&D_800A2610, &points[1], matrix);
-        math_transformOffset(&D_800A261C, &dirs[0], matrix);
-        math_transformOffset(&D_800A2628, &dirs[1], matrix);
+        math_transformOffset(&gPointPairEmitPoint0, &points[0], matrix);
+        math_transformOffset(&gPointPairEmitPoint1, &points[1], matrix);
+        math_transformOffset(&gPointPairTarget0, &dirs[0], matrix);
+        math_transformOffset(&gPointPairTarget1, &dirs[1], matrix);
         dirs[0].x -= points[0].x;
         dirs[0].y -= points[0].y;
         dirs[0].z -= points[0].z;

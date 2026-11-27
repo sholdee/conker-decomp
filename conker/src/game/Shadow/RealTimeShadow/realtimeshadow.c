@@ -15,7 +15,7 @@ s32 gShadowUseDefaultLight; /* nonzero: skip the light nodes and always use the 
 s32 gShadowMaxLights; /* max lights (shadows) per object */
 f32 gShadowLightDistScale; /* light distance scale */
 u8 gShadowRaiseLight;  /* nonzero: keep the light at least 30 degrees above the object */
-u8 gShadowFlaggedFacesOnly;  /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
+u8 gShadowFlaggedFacesOnly;  /* nonzero: only faces flagged in the gShadowFaceFlags table receive shadows */
 u8 gShadowTexBuffer[0x1040]; /* the 64x64 shadow texture, at the first 64-byte boundary (gShadowTex) */
 s32 gShadowTex;
 Vp gShadowViewports[4];
@@ -719,7 +719,7 @@ s32 shadow_gatherLevelFaces(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, 
                         p++;
                     }
                     if (face < 0x1760) {
-                        if (D_800D3668[face] == 1) {
+                        if (gShadowFaceFlags[face] == 1) {
                             bits[face >> 5] |= 1 << (face & 0x1F);
                             if (maxFace < face) {
                                 maxFace = face;
@@ -839,11 +839,11 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     gfxShadows = gfx;
     vtxTotal = 0;
     for (i = 0; i < 25; i++) {
-        // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
+        // matching: the dead store to v and the repeated cullMask test (as u32) steer IDO's register allocation
         if (movement_obj[i].type == 0 || movement_obj[i].ob_matrix_ptr == NULL ||
-            ((v = movement_obj[i].unk74) & (1 << view)) || movement_obj[i].drawtype != 0 ||
+            ((v = movement_obj[i].cullMask) & (1 << view)) || movement_obj[i].drawtype != 0 ||
             (movement_obj[i].unk66 & 0x10) != 0x10 ||
-            (u32)(movement_obj[i].unk74 & (1 << view)) == (u32)(1 << view) ||
+            (u32)(movement_obj[i].cullMask & (1 << view)) == (u32)(1 << view) ||
             movement_obj[i].animseq.uh == 0x2D8 ||
             (movement_obj[i].mv != NULL && (movement_obj[i].mv->ladder != 0 || movement_obj[i].mv->rope != 0)) ||
             (D_800DF0E0 & (1 << i))) {

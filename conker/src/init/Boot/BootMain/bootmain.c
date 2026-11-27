@@ -21,10 +21,10 @@ s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, 
 #include "macros.h"
 
 /* ROM range of the compressed game code (game/Prop/PropMover/propmover.c reads it). */
-RomFile D_8002AAD0[2] = {
+RomFile gRomFiles[2] = {
     { (s32)&game_us_rzip_ROM_START, (s32)&debugger_us_ROM_START },
 };
-u8 D_8002AAE0 = 0;
+u8 gPageFaultsDisabled = 0;
 u8 gPadInitDone = 0;
 u16 *gFramebuffers[2] = { NULL, NULL }; // the two framebuffers
 
@@ -103,7 +103,7 @@ void boot_mainThread(void *arg) {
     }
     gPagePool = 0;
     boot_initPaging(0xEB);
-    func_10001420();
+    libc_clearPageSlots();
     boot_resetPageBitmap();
     boot_runGame();
 }

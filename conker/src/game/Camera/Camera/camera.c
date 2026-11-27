@@ -261,7 +261,7 @@ void camera_stepDistancePreset(Camera *camera) {
         return;
     }
     if (camera->ZoomCounter > 0) {
-        camera->ZoomCounter -= D_800BE9E4;
+        camera->ZoomCounter -= gFrameTicks;
         if (camera->ZoomCounter < 0) {
             camera->ZoomCounter = 0;
         }
@@ -390,7 +390,7 @@ void camera_updateFollow(Camera *camera) {
     savedDistance = camera->IdealTripodMagnitude;
     camera->blocked = 0;
     camera->blockedDistance = camera->IdealTripodMagnitude;
-    if (D_800C3671 == 0) {
+    if (gSpawnCutsceneActive == 0) {
         if (camera->cmdState.maxDistance != 0.0f) {
             camera->IdealTripodMagnitude = (camera->cmdState.maxDistance < camera->IdealTripodMagnitude) ? camera->cmdState.maxDistance : camera->IdealTripodMagnitude;
         }
@@ -555,18 +555,18 @@ void camera_updateFollow(Camera *camera) {
                 camera->XZVel = 0.0f;
                 if (camera->AvailableModes & 0x200000) {
                     if (camera->Mode & 0x40) {
-                        camera->unk974 = 1.0f;
-                        camera->unk964 = 1.0f;
-                        camera->unk978 = 2.0f;
-                        camera->unk968 = 2.0f;
+                        camera->accelATarget = 1.0f;
+                        camera->accelA = 1.0f;
+                        camera->accelBTarget = 2.0f;
+                        camera->accelB = 2.0f;
                     } else {
-                        camera->unk978 = 8.0f;
-                        camera->unk968 = 8.0f;
-                        camera->unk974 = 6.0f;
-                        camera->unk964 = 6.0f;
+                        camera->accelBTarget = 8.0f;
+                        camera->accelB = 8.0f;
+                        camera->accelATarget = 6.0f;
+                        camera->accelA = 6.0f;
                     }
-                    camera->unk984 = 0.0f;
-                    camera->unk988 = 0.0f;
+                    camera->accelAVel = 0.0f;
+                    camera->accelBVel = 0.0f;
                 }
             } else {
                 if ((camera->ZoomCounter != 0) || (camera->Mode & 0x100) ||
@@ -575,16 +575,16 @@ void camera_updateFollow(Camera *camera) {
                     camera->AccelB = 10.0f;
                 } else if ((gIsMultiplayer != 0) || (camera->AvailableModes & 0x200000)) {
                     if (camera->Mode & 0x40) {
-                        camera->unk974 = 1.0f;
-                        camera->unk978 = 2.0f;
+                        camera->accelATarget = 1.0f;
+                        camera->accelBTarget = 2.0f;
                     } else {
-                        camera->unk974 = 6.0f;
-                        camera->unk978 = 8.0f;
+                        camera->accelATarget = 6.0f;
+                        camera->accelBTarget = 8.0f;
                     }
-                    math_springTo(&camera->unk964, camera->unk974, &camera->unk984, 1.0f, 2.0f, camera->SpringTime);
-                    math_springTo(&camera->unk968, camera->unk978, &camera->unk988, 1.0f, 2.0f, camera->SpringTime);
-                    camera->AccelA = camera->unk964;
-                    camera->AccelB = camera->unk968;
+                    math_springTo(&camera->accelA, camera->accelATarget, &camera->accelAVel, 1.0f, 2.0f, camera->SpringTime);
+                    math_springTo(&camera->accelB, camera->accelBTarget, &camera->accelBVel, 1.0f, 2.0f, camera->SpringTime);
+                    camera->AccelA = camera->accelA;
+                    camera->AccelB = camera->accelB;
                 } else if ((camera->CharPtr->unk102 != 0) || (camera->LockedBehind != 0) ||
                            ((camera->DoingRail != 0) && (camera->RailFlags & 0x40))) {
                     camera->AccelA = 6.0f;
@@ -816,7 +816,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
                 goalY = camera->CharPtr->ypos + height * 0.25f;
             } else if (camera->AvailableModes & 0x20000000) {
                 goalY = camera->CharPtr->floorY + height;
-            } else if ((D_800C3671 != 0) || (camera->CharPtr->unk137 != 0) ||
+            } else if ((gSpawnCutsceneActive != 0) || (camera->CharPtr->unk137 != 0) ||
                        (camera->CharPtr->animseq.uh == 0x194) || (camera->CharPtr->inwater == 1)) {
                 goalY = camera->CharPtr->ypos + height;
             } else if ((-10000.0f == camera->waterY) && !(camera->AvailableModes & 0x20000000) && !(camera->AvailableModes & 0x200000) &&
@@ -1220,7 +1220,7 @@ void camera_filterButtons(Camera *camera) {
         camera->CameraButtons &= ~CAM_C_BUTTONS;
     }
 
-    if ((D_800C3671 != 0) || (camera->SpecialFlags & 0x80)) {
+    if ((gSpawnCutsceneActive != 0) || (camera->SpecialFlags & 0x80)) {
         camera->CameraButtons &= ~(R_TRIG | CAM_C_BUTTONS);
         camera->PadPtr->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
@@ -1241,7 +1241,7 @@ void camera_filterButtons(Camera *camera) {
     }
 
     if ((camera->Mode & 0x40) && (camera->AimTimeOuts != 0)) {
-        camera->AimTimeOuts -= D_800BE9E4;
+        camera->AimTimeOuts -= gFrameTicks;
         camera->CameraButtons &= ~R_TRIG;
         camera->PadPtr->button &= ~R_TRIG;
         if (camera->AimTimeOuts <= 0) {
@@ -1439,8 +1439,8 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
                           (u32)(-camera->TgetFOVX * 10000.0f) | 0x80000000, 0x100, 0);
             sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)camera_onLookSound, camera, *(s32 *)&aimKey, 0x100, 0);
         }
-        viewer->unk2FC |= 1 << camera->CNumber;
-        viewer->unk74 |= 1 << camera->CNumber;
+        viewer->forcedCullMask |= 1 << camera->CNumber;
+        viewer->cullMask |= 1 << camera->CNumber;
         { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the SniperState load after the a2 reload
     }
     state = ext->SniperState;
@@ -1643,7 +1643,7 @@ s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
         if (oldKey != newKey) {
             if (count < 10) {
                 if ((((oldKey - newKey) < 0) ? -(oldKey - newKey) : (oldKey - newKey)) > 100) {
-                    count += D_800BE9E4;
+                    count += gFrameTicks;
                 }
             } else {
                 changed = 1;
@@ -1696,7 +1696,7 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
 
     ext = obj->mv;
     zone = ext->rt_context_b;
-    dt = D_800BE9E4 * (1.0f / 60.0f);
+    dt = gFrameTicks * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
         contPad->button |= R_TRIG;
     }
@@ -1785,8 +1785,8 @@ void camera_leaveFirstPersonAim(Camera *camera) {
     // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
     target = (linked != 0) ? &movement_obj[linked] - 1 : player;
 
-    target->unk2FC &= ~(1 << camera->CNumber);
-    target->unk74 &= ~(1 << camera->CNumber);
+    target->forcedCullMask &= ~(1 << camera->CNumber);
+    target->cullMask &= ~(1 << camera->CNumber);
     camera->Snap = 1;
 }
 
@@ -1878,7 +1878,7 @@ s32 camera_updateTransition(Camera *camera) {
             camera->AvailableModes |= 8;
             break;
         }
-        camera->transition.LerpCurrentFrames -= D_800BE9E4;
+        camera->transition.LerpCurrentFrames -= gFrameTicks;
         if (camera->transition.LerpCurrentFrames < 0) {
             camera->transition.LerpCurrentFrames = 0;
         }
@@ -1955,7 +1955,7 @@ s32 camera_runSpecialModes(Camera *camera) {
 
     mode = camera->Mode;
     if (mode & 0x80000) {
-        func_1512A360(camera);
+        camera_updateFrontEndPath(camera);
         camera->target = camera->focus;
         camera_updateSway(camera);
         camera_updateStatus(camera);

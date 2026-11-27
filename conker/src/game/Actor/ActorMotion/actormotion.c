@@ -273,7 +273,7 @@ void actor_moveToHost(Actor *actor) {
     if (actor->unk21C < 20) {
         timer = actor->unk21C;
         lerp = (u32)timer / 50.0f;
-        if (D_800BE9B4 != 0) {
+        if (gLevelLoadState != 0) {
             lerp = 1.0f;
         }
     } else {
@@ -357,7 +357,7 @@ s32 actor_isTargetInPathArea(Actor *actor, s32 targetIdx) {
 }
 
 /* Neither caller reads a return value. */
-void func_15056A00(Actor *actor, u8 turn, u8 row) {
+void actor_startTurnAnim(Actor *actor, u8 turn, u8 row) {
     u8 col;
     u16 angle;
     const u8 *entry;
@@ -424,7 +424,7 @@ void actor_updateChaseAi(Actor *actor) {
         actor->unk21C = 0;
         actor->unk23A = 0;
     }
-    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
+    if ((gCutsceneActorLock != 0) && (cutscene_isActorBound(actor) != 0)) {
         return;
     }
     if ((actor->mvmt_control & 0x1000) && (actor->shad < 0.200000003f)) {
@@ -587,7 +587,7 @@ void actor_updateChaseAi(Actor *actor) {
             bestDist = actor->unk23F * 8;
             for (i = 0; i < 25; i++) {
                 target = &movement_obj[i];
-                if ((target->type != 0) && (target->character_type == actor->unk240) && (target->unk2FA != 0)) {
+                if ((target->type != 0) && (target->character_type == actor->unk240) && (target->activeFlags != 0)) {
                     ox = target->xpos - actor->xpos;
                     oz = actor->zpos - target->zpos;
                     d = sqrtf((ox * ox) + (oz * oz));
@@ -763,7 +763,7 @@ void actor_updateChaseAi(Actor *actor) {
                 k = (u8)actor->unk24F - 1;
                 if (gTurnAnimTable[k][0] < turnDiff) {
                     actor->angle = prevMoveAngle;
-                    func_15056A00(actor, turnDiff, k);
+                    actor_startTurnAnim(actor, turnDiff, k);
                 }
             }
         }
@@ -833,9 +833,9 @@ void actor_updateChaseAi(Actor *actor) {
                 h -= 45.0f * actor->scale_y;
             }
             ang = actor_getDirectionAngle(sqrtf(distSqXZ), h, 0);
-            func_1504C9E4(actor, (s16)ang / 200, 0);
-        } else if (actor->unk1D1 != 0) {
-            func_1504C9E4(actor, 0, 0);
+            actor_stepAimPitch(actor, (s16)ang / 200, 0);
+        } else if (actor->aimPitch != 0) {
+            actor_stepAimPitch(actor, 0, 0);
         }
         if (actor->noshove & 0x40000) {
             f32 wantVelX;
@@ -1136,7 +1136,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
 }
 
 /* Picks gravity by height band and clamps the vertical velocity. */
-void func_15058EA4(Actor *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravityBelow, f32 maxVelY, f32 minVelY) {
+void actor_setHoverGravity(Actor *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravityBelow, f32 maxVelY, f32 minVelY) {
     if (maxY < actor->ypos) {
         actor->ygrav = gravityAbove;
     } else if (actor->ypos < minY) {
@@ -1395,14 +1395,14 @@ void actor_checkGrab(Actor *actor) {
     Actor *player;
 
     mask = gCollidedActors;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         player = &movement_obj[i];
         if (((1 << i) & mask) && (player->lifting == 0) && (player->norun == 0) &&
             (player->type == 1) && (player->stunned == 0) && (player->playernumber != 0xFF)) {
             break;
         }
     }
-    if (i != D_8008FD8C) {
+    if (i != gPlayerCount) {
         player = &movement_obj[i];
         if (player->lifting == 0) {
             movement = player->mv;
@@ -2296,7 +2296,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
                     other->intelwalk = v;
                     other->scriptCmd = NULL;
                 }
-                other->unk2FC = 0;
+                other->forcedCullMask = 0;
                 other->lifting = 0;
                 victim->intelhitroute = 0;
                 victim->attach_char = 0;
@@ -3034,7 +3034,7 @@ void actor_resolveCollisions(Actor *actor, s32 selfIdx) {
             if (other->carried >= 100) {
                 continue;
             }
-            if (other->unk2FA == 0) {
+            if (other->activeFlags == 0) {
                 continue;
             }
             otherRadius = other->bodyRadius;
@@ -3096,7 +3096,7 @@ u8 actor_findTargetInCone(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 
     for (i = 0; i < 25; i++) {
         other = &movement_obj[i];
         if ((other->type != 0) && (other->energy != 0) && (i != (u8)(actor - movement_obj)) &&
-            (other->noshove & 0x40) && (i != skipIdx) && (other->unk2FA != 0)) {
+            (other->noshove & 0x40) && (i != skipIdx) && (other->activeFlags != 0)) {
             dist = actor_getDistSqTo(actor, i, &angle, &distXZ, &dy, 0);
             if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
                 ((u8)(((angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
@@ -3241,7 +3241,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
             actor->speccnt = 0;
             actor->unk103 = 0;
             actor->lastEventTime = 0.0f;
-            if (index < D_8008FD8C) {
+            if (index < gPlayerCount) {
                 Actor *player = &movement_obj[index];
 
                 player->mv->idle.active = 0;
@@ -3369,7 +3369,7 @@ void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 
     AnimInstance *data;
 
     idx = actor->character_type;
-    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (cutscene_isActorBound(actor) != 0))) {
+    if ((gCutsceneActorLock != 0) && ((gCutsceneUpdateUnboundActors[0] == 0) || (cutscene_isActorBound(actor) != 0))) {
         return;
     }
     if (actor->character_type == 0xFF) {
@@ -4015,9 +4015,9 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
             if (jumpType != 0) {
                 actor->speed = 20.0f;
                 if (jumpType == 0x29) {
-                    func_15052F58(actor->attach_char - 1, 0xE);
+                    actor_setIntelWalk(actor->attach_char - 1, 0xE);
                 } else if (jumpType == 0x8B) {
-                    func_15052F58(actor->attach_char - 1, 5);
+                    actor_setIntelWalk(actor->attach_char - 1, 5);
                     actor->speed = 30.0f;
                     if (gIsMultiplayer != 0) {
                         actor->langle = 0x3000;
@@ -4026,7 +4026,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                         }
                     }
                 } else if (jumpType == 0x24) {
-                    func_15052F58(actor->attach_char - 1, 0xE);
+                    actor_setIntelWalk(actor->attach_char - 1, 0xE);
                     actor->speed = 27.0f;
                 }
                 actor->mv->gpoint = 0;
@@ -4114,7 +4114,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                     if (actor->animseq.uh != 0xE9) {
                         sound_stopActorSound2(actor);
                         sound_addDynamicSound(0x61E, actor->xpos, actor->ypos, actor->zpos,
-                                      0x7FFF, 0x1F4, 0xC8, func_1000EFB4, actor, (s32)D_80099428, 0, 0);
+                                      0x7FFF, 0x1F4, 0xC8, sound_followOwnerAnimsCallback, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
                 }
@@ -4180,8 +4180,8 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
     expired = 0;
 
     if ((actor->mv->context_exclude_time != 0) && (nested == 0)) {
-        if (D_800BE9E4 < actor->mv->context_exclude_time) {
-            actor->mv->context_exclude_time -= D_800BE9E4;
+        if (gFrameTicks < actor->mv->context_exclude_time) {
+            actor->mv->context_exclude_time -= gFrameTicks;
         } else {
             expired = 1;
             actor->mv->context_exclude_time = 0;
@@ -4561,17 +4561,17 @@ void actor_driftOnCurrent(Actor *actor, s32 pathIdx) {
 // TODO: is this really Actor?
 /* Resets the actor's bytes 0x7..0xF. */
 void actor_resetFade(Actor *actor) {
-    actor->unk7 = 0xFF;
-    actor->unk8 = 0xFF;
-    actor->unk9 = 0;
-    actor->unkA = 0;
-    actor->unkF = 0;
-    actor->unkB[0] = actor->unkB[1] = actor->unkB[2] = actor->unkB[3] = 0xFF;
+    actor->alpha = 0xFF;
+    actor->targetAlpha = 0xFF;
+    actor->fadeStep = 0;
+    actor->fadeMode = 0;
+    actor->playerFadeBits = 0;
+    actor->playerAlphas[0] = actor->playerAlphas[1] = actor->playerAlphas[2] = actor->playerAlphas[3] = 0xFF;
 }
 
 /*
- * Actor fading. unk7 is the alpha, faded toward unk8 by unk9 per frame in mode unkA (4: in, 5/6: out,
- * then removed). Bytes unkB..unkE.ub[0] are per-player alphas, unkE.ub[1] holds per-player hide bits
+ * Actor fading. alpha is faded toward targetAlpha by fadeStep per frame in mode fadeMode (4: in, 5/6: out,
+ * then removed). playerAlphas are per-player alphas, playerFadeBits holds per-player hide bits
  * (low nibble) and pending bits (high nibble). Commands 8 and up act on player `player` only.
  */
 void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
@@ -4582,50 +4582,50 @@ void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
         if (cmd != 10) {
             if (cmd == 8) {
                 bit = 1 << (u8)player;
-                actor->unkF |= bit;
+                actor->playerFadeBits |= bit;
                 value = 0;
             } else {
                 bit = 1 << (u8)player;
-                actor->unkF &= ~bit;
+                actor->playerFadeBits &= ~bit;
                 value = 0xFF;
             }
             hi = bit << 4;
-            if (actor->unkF & hi) {
-                actor->unkB[(u8)player] = value;
+            if (actor->playerFadeBits & hi) {
+                actor->playerAlphas[(u8)player] = value;
             }
-            actor->unkF &= ~hi;
+            actor->playerFadeBits &= ~hi;
         } else {
-            actor->unkF |= (1 << (u8)player) << 4;
+            actor->playerFadeBits |= (1 << (u8)player) << 4;
             value = 0;
         }
         if ((actor->unk2FD != 0) || (gCameraSnapTimers[(u8)player] != 0)) {
-            actor->unkB[(u8)player] = value;
+            actor->playerAlphas[(u8)player] = value;
         }
-    } else if (cmd >= actor->unkA) {
+    } else if (cmd >= actor->fadeMode) {
         if (cmd == 4) {
-            actor->unkA = cmd;
-            actor->unk7 = 0;
-            actor->unk8 = 0xFF;
-            actor->unk9 = 0x20;
+            actor->fadeMode = cmd;
+            actor->alpha = 0;
+            actor->targetAlpha = 0xFF;
+            actor->fadeStep = 0x20;
         } else if (cmd == 5) {
-            actor->unkA = cmd;
-            actor->unk8 = 0;
-            actor->unk9 = 0x20;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = 0;
+            actor->fadeStep = 0x20;
         } else if (cmd == 6) {
-            actor->unkA = cmd;
-            actor->unk8 = 0;
-            actor->unk9 = 8;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = 0;
+            actor->fadeStep = 8;
         } else if (cmd == 2) {
-            actor->unkA = cmd;
-            actor->unk8 = value;
-            actor->unk9 = step;
+            actor->fadeMode = cmd;
+            actor->targetAlpha = value;
+            actor->fadeStep = step;
         } else if (cmd == 1) {
-            actor->unkA = 0;
-            actor->unk7 = value;
-            actor->unk8 = value;
+            actor->fadeMode = 0;
+            actor->alpha = value;
+            actor->targetAlpha = value;
         }
         if (*(s32 *)gCameraSnapTimers != 0) {
-            actor->unk7 = actor->unk8;
+            actor->alpha = actor->targetAlpha;
         }
     }
 }
@@ -4639,34 +4639,34 @@ void actor_updateFade(Actor *actor) {
     if (actor->type != 0) {
         mask = 1;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (actor->unkF & mask) {
-                if (actor->unkB[i] > 0) {
+            if (actor->playerFadeBits & mask) {
+                if (actor->playerAlphas[i] > 0) {
                     if (gCameraSnapTimers[i] == 0) {
-                        value = actor->unkB[i] - 50;
+                        value = actor->playerAlphas[i] - 50;
                         if (value < 0) {
                             value = 0;
                         }
                     } else {
                         value = 0;
                     }
-                    actor->unkB[i] = value;
+                    actor->playerAlphas[i] = value;
                 }
             } else {
-                if (actor->unkB[i] < 0xFF) {
+                if (actor->playerAlphas[i] < 0xFF) {
                     if (gCameraSnapTimers[i] == 0) {
-                        value = actor->unkB[i] + 50;
+                        value = actor->playerAlphas[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
                         }
                     } else {
                         value = 0xFF;
                     }
-                    actor->unkB[i] = value;
+                    actor->playerAlphas[i] = value;
                 }
             }
             mask <<= 1;
         }
-        /* matching: byte indexing (7: unk7, 8: unk8, 9: unk9, 0xA: unkA); field access loads in another order */
+        /* matching: byte indexing (7: alpha, 8: targetAlpha, 9: fadeStep, 0xA: fadeMode); field access loads in another order */
         if (((u8 *)actor)[0xA] != 0) {
             if (((u8 *)actor)[8] != ((u8 *)actor)[7]) {
                 if (((u8 *)actor)[7] < ((u8 *)actor)[8]) {
@@ -4697,7 +4697,7 @@ void actor_updateFade(Actor *actor) {
 
 /* The actor's alpha as seen by `player` (0..255). */
 s32 actor_getAlpha(Actor *actor, s32 player) {
-    s32 alpha = actor->unk7 * actor->unkB[player];
+    s32 alpha = actor->alpha * actor->playerAlphas[player];
 
     if (alpha == 255 * 255) {
         alpha = 255;
@@ -4708,7 +4708,7 @@ s32 actor_getAlpha(Actor *actor, s32 player) {
 }
 
 /*
- * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when actor_isVisible says the
+ * Per-frame fade and visibility update of all actors: activeFlags bit 0 is set when actor_isVisible says the
  * actor is visible, or when one of its linked actors (keys in unk20B) is.
  */
 void actor_updateVisibility(void) {
@@ -4729,9 +4729,9 @@ void actor_updateVisibility(void) {
             }
             actor_updateFade(actor);
             if (actor_isVisible(actor) != 0) {
-                actor->unk2FA |= 1;
+                actor->activeFlags |= 1;
             } else {
-                actor->unk2FA &= ~1;
+                actor->activeFlags &= ~1;
                 if (actor->unk20B[0] != 0 || actor->unk20B[1] != 0 || actor->unk20B[2] != 0 || actor->unk20B[3] != 0) {
                     list[count] = i;
                     count++;
@@ -4746,8 +4746,8 @@ void actor_updateVisibility(void) {
             for (j = 0; j < 4; j++) {
                 if (actor->unk20B[j] != 0) {
                     other = collision_findObjectById(actor->unk20B[j]);
-                    if (other != NULL && (other->unk2FA & 1)) {
-                        actor->unk2FA |= 1;
+                    if (other != NULL && (other->activeFlags & 1)) {
+                        actor->activeFlags |= 1;
                         break;
                     }
                 }
@@ -4766,7 +4766,7 @@ void actor_updateTypeAnims(void) {
 
     bzero(done, sizeof(done));
     for (i = 0; i < 25; i++) {
-        if ((movement_obj[i].type == 0) || (movement_obj[i].unk2FA == 0)) {
+        if ((movement_obj[i].type == 0) || (movement_obj[i].activeFlags == 0)) {
             continue;
         }
         id = movement_obj[i].character_type;
@@ -4788,14 +4788,14 @@ void actor_updateTypeAnims(void) {
             }
             actor_scrollTypeTexture(id, 4, -4, D_800CC298.unk8, 0, 0);
             if (gModelVtxIndices[id] != NULL) {
-                func_15062E24(id, gModelVtxIndices[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
-                func_15062E24(id, gModelVtxIndices[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
+                actor_rotateModelTexCoords(id, gModelVtxIndices[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
+                actor_rotateModelTexCoords(id, gModelVtxIndices[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
             }
-            D_800CC298.unk0 += -4.0f * D_800BE9E4;
+            D_800CC298.unk0 += -4.0f * gFrameTicks;
             if (D_800CC298.unk0 <= 0.0f) {
                 D_800CC298.unk0 += 360.0f;
             }
-            D_800CC298.unk4 += -0.5f * D_800BE9E4;
+            D_800CC298.unk4 += -0.5f * gFrameTicks;
             if (D_800CC298.unk4 <= 0.0f) {
                 D_800CC298.unk4 += 360.0f;
             }
@@ -4846,7 +4846,7 @@ void actor_updateTypeAnims(void) {
                 }
                 movement_obj[i].unk68[0] += 0xF;
             } else {
-                D_800CC298.unkF += D_800BE9E4;
+                D_800CC298.unkF += gFrameTicks;
             }
         } else if (id == 0x45) {
             s32 val = movement_obj[i].eyeCode[1];
@@ -4899,7 +4899,7 @@ void actor_updateTypeAnims(void) {
                 }
             } else {
                 if (movement_obj[i].animseq.uh == 1) {
-                    delta = D_800BE9E4 * -40;
+                    delta = gFrameTicks * -40;
                 } else {
                     delta = 0;
                 }
@@ -4956,7 +4956,7 @@ s32 actor_isVisible(Actor *actor) {
     if (actor->playernumber != 0xFF) {
         return 1;
     }
-    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
+    if ((gCutsceneActorLock != 0) && (cutscene_isActorBound(actor) != 0)) {
         return 1;
     }
     sum = 0;
@@ -4970,13 +4970,13 @@ s32 actor_isVisible(Actor *actor) {
     if (sum == 0) {
         return 0;
     }
-    if ((actor->unk74 & 0xF) != 0xF) {
+    if ((actor->cullMask & 0xF) != 0xF) {
         return 1;
     }
     idx = actor->listpos;
     if (gSpawnPathCounts[idx] != 0) {
         hidden = 1;
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             dx = gSpawnPaths[idx]->x - movement_obj[i].xpos;
             dz = gSpawnPaths[idx]->z - movement_obj[i].zpos;
             if ((dx * dx) + (dz * dz) < gSpawnPaths[idx]->param * gSpawnPaths[idx]->param) {
@@ -5190,7 +5190,7 @@ void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 ab
 }
 
 /* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
-void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {
+void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {
     s32 i;
     s32 w;
     s32 h;
@@ -5200,7 +5200,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type == 0) continue;
             if (type != movement_obj[i].character_type) continue;
-            if (movement_obj[i].unk2FA == 0) continue;
+            if (movement_obj[i].activeFlags == 0) continue;
             w = gModelTextures[type][set].width;
             h = gModelTextures[type][set].height;
             if (doubleSize != 0) {
@@ -5266,7 +5266,7 @@ void actor_igniteTouching(Actor *actor) {
     ActorCtl *movement;
 
     self = actor - movement_obj;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         if (i == self) {
             continue;
         }

@@ -17,8 +17,8 @@ glabel math_mtxRotateRPY
     /* D52B4 150A7E04 E7BA0010 */  swc1       $f26, 0x10($sp)
     /* D52B8 150A7E08 E7BC0014 */  swc1       $f28, 0x14($sp)
     /* D52BC 150A7E0C E7BE0018 */  swc1       $f30, 0x18($sp)
-    /* D52C0 150A7E10 3C01800A */  lui        $at, %hi(D_8009F6B0)
-    /* D52C4 150A7E14 C43EF6B0 */  lwc1       $f30, %lo(D_8009F6B0)($at)
+    /* D52C0 150A7E10 3C01800A */  lui        $at, %hi(gRotateRPYDegToRad)
+    /* D52C4 150A7E14 C43EF6B0 */  lwc1       $f30, %lo(gRotateRPYDegToRad)($at)
     /* D52C8 150A7E18 4485C000 */  mtc1       $a1, $f24
     /* D52CC 150A7E1C 27BDFFF8 */  addiu      $sp, $sp, -0x8
     /* D52D0 150A7E20 4486D000 */  mtc1       $a2, $f26
@@ -164,6 +164,6 @@ glabel math_mtxRotateRPY
 
 .section .rodata
 
-glabel D_8009F6B0
+glabel gRotateRPYDegToRad
     .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
     .balign 16

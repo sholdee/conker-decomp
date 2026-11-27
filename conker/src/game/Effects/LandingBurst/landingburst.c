@@ -46,11 +46,11 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
     CollisionHit ground;
     s32 profile;
 
-    if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
         collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
-            if (gBloodProfiles[profile].unkE != 2) {
+            if (gBloodProfiles[profile].bloodKind != 2) {
                 shade = (actor->langle >> 8) + 0x40;
                 math_transformOffset(&gJointImpactPoint, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
@@ -72,7 +72,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.speedBase = 6.0f;
                 impact.spray.speedRange = 13.90000057f;
                 impact.spray.unk38 = 0.5f;
-                if (gBloodProfiles[profile].unkE == 1) {
+                if (gBloodProfiles[profile].bloodKind == 1) {
                     impact.spray.kind = 1;
                 } else {
                     impact.spray.kind = 0;
@@ -249,10 +249,10 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
     if (profile == 99) {
         return NULL;
     }
-    if (gBloodProfiles[profile].unkE == 2) {
+    if (gBloodProfiles[profile].bloodKind == 2) {
         return NULL;
     }
-    if (gBloodProfiles[profile].unkE == 1) {
+    if (gBloodProfiles[profile].bloodKind == 1) {
         emitter.profileFlag = 1;
     } else {
         emitter.profileFlag = 0;
@@ -339,7 +339,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
         s32 i;
         u32 freeCount;
 
-        if (emitter->owner->ob_matrix_ptr != NULL && (emitter->owner->unk74 & 0xF) != 0xF) {
+        if (emitter->owner->ob_matrix_ptr != NULL && (emitter->owner->cullMask & 0xF) != 0xF) {
             head = NULL;
             last = NULL;
             freeCount = 0;
@@ -353,7 +353,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                                   &slot->particle->head.def.pos,
                                   emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, gJointEmitterMounts36[i].joint)
                                                              : JOINT_MTX(emitter->owner, gJointEmitterMounts[i].joint));
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= gFrameTicks;
                     if (slot->timer < 0) {
                         Vec3f *velocity = &slot->particle->motion.velocity;
 
@@ -607,8 +607,8 @@ s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
     f32 swingW;
     f32 swingH;
 
-    motion->phaseWidth += motion->phaseSpeedWidth * D_800BE9E4;
-    motion->phaseHeight += motion->phaseSpeedHeight * D_800BE9E4;
+    motion->phaseWidth += motion->phaseSpeedWidth * gFrameTicks;
+    motion->phaseHeight += motion->phaseSpeedHeight * gFrameTicks;
     swingW = math_cosBinAngleMasked(motion->phaseWidth - 0x40);
     swingH = math_cosBinAngleMasked(motion->phaseHeight - 0x40);
     particle->head.def.width += (motion->baseWidth + motion->swingWidth * swingW - particle->head.def.width) * 0.5f;

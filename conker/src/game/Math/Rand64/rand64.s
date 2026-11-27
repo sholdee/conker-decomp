@@ -89,8 +89,8 @@ glabel math_randomFloat
     /* DAF58 150ADAA8 0002103F */  dsra32     $v0, $v0, 0
     /* DAF5C 150ADAAC 3042FFFF */  andi       $v0, $v0, 0xFFFF
     /* DAF60 150ADAB0 44821000 */  mtc1       $v0, $f2
-    /* DAF64 150ADAB4 3C01800A */  lui        $at, %hi(D_8009F740)
-    /* DAF68 150ADAB8 C424F740 */  lwc1       $f4, %lo(D_8009F740)($at)
+    /* DAF64 150ADAB4 3C01800A */  lui        $at, %hi(gRandomFloatScale)
+    /* DAF68 150ADAB8 C424F740 */  lwc1       $f4, %lo(gRandomFloatScale)($at)
     /* DAF6C 150ADABC 46801020 */  cvt.s.w    $f0, $f2
     /* DAF70 150ADAC0 46040002 */  mul.s      $f0, $f0, $f4
     /* DAF74 150ADAC4 03E00008 */  jr         $ra
@@ -109,7 +109,7 @@ glabel math_seedRandom
 
 .section .rodata
 
-glabel D_8009F740
+glabel gRandomFloatScale
     .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of math_randomFloat's random value */
     .balign 16
 

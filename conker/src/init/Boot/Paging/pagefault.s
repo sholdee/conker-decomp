@@ -10,8 +10,8 @@
 
 /* Handwritten function */
 glabel boot_handleGamePageFault
-    /* 5C2C 10005C2C 3C088003 */  lui        $t0, %hi(D_8002AAE0)
-    /* 5C30 10005C30 9108AAE0 */  lbu        $t0, %lo(D_8002AAE0)($t0)
+    /* 5C2C 10005C2C 3C088003 */  lui        $t0, %hi(gPageFaultsDisabled)
+    /* 5C30 10005C30 9108AAE0 */  lbu        $t0, %lo(gPageFaultsDisabled)($t0)
     /* 5C34 10005C34 1500016E */  bnez       $t0, .L100061F0
     /* 5C38 10005C38 00000000 */   nop
     /* 5C3C 10005C3C 40082000 */  mfc0       $t0, $4 /* handwritten instruction */
@@ -326,7 +326,7 @@ glabel boot_handleGamePageFault
     /* 60C4 100060C4 00000000 */  nop
     /* 60C8 100060C8 00000000 */  nop
     /* 60CC 100060CC 00000000 */  nop
-    /* 60D0 100060D0 0800183C */  j          func_100060F0
+    /* 60D0 100060D0 0800183C */  j          boot_invalidateLoadedPage
     /* 60D4 100060D4 00000000 */   nop
   .L100060D8:
     /* 60D8 100060D8 00000000 */  nop
@@ -335,7 +335,7 @@ glabel boot_handleGamePageFault
     /* 60E4 100060E4 00000000 */  nop
     /* 60E8 100060E8 00000000 */  nop
     /* 60EC 100060EC 00000000 */  nop
-  glabel func_100060F0
+  glabel boot_invalidateLoadedPage
     /* 60F0 100060F0 00000000 */  nop
     /* 60F4 100060F4 408A5000 */  mtc0       $t2, $10 /* handwritten instruction */
     /* 60F8 100060F8 00000000 */  nop

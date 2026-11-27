@@ -235,7 +235,7 @@ static AttachmentHook gAttachHooks[] = {
     attach_hookScrollTexV,
     func_15033E00,
     beam_hookSlideTexture,
-    func_150333A8,
+    attach_hookRemoveInWater,
     func_15033F0C,
     func_15033F70,
 };
@@ -421,8 +421,8 @@ void attach_updateAll(void) {
             }
             if ((timer = att->timer) != 0xFFFF) {
                 if (timer != 0) {
-                    if (timer > D_800BE9E4) {
-                        att->timer = timer - D_800BE9E4;
+                    if (timer > gFrameTicks) {
+                        att->timer = timer - gFrameTicks;
                     } else {
                         att->timer = 0;
                     }
@@ -559,7 +559,7 @@ Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass) {
             continue;
         }
         owner = collision_findObjectById(att->ownerId);
-        if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
+        if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->cullMask & (1 << view)) == (1 << view))) {
             att = next;
             continue;
         }
@@ -2309,7 +2309,7 @@ s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner) {
     }
     if (owner->inwater == 0) {
         if (owner->waterHeight < owner->floorY) {
-            delta = D_800BE9E4;
+            delta = gFrameTicks;
             if (delta < att->hookState) {
                 att->hookState -= delta;
                 return 0;
@@ -2323,7 +2323,7 @@ s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner) {
 }
 
 /* Hook: hides the attachment while the owner is below waterHeight + 300; removes it in water. */
-s32 func_150333A8(ModelAttachment *att, Actor *owner) {
+s32 attach_hookRemoveInWater(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
     if (gCutsceneStates[0] == 1) {
@@ -2351,7 +2351,7 @@ s32 func_15033440(ModelAttachment *att, Actor *owner) {
     case 0x35:
         if (owner->drawtype == 5) {
             att->bone = 0;
-            att->rotZ += D_800BE9E4 * 0xAAA;
+            att->rotZ += gFrameTicks * 0xAAA;
         }
         break;
     case 0x29:
@@ -2499,7 +2499,7 @@ s32 func_1503378C(ModelAttachment *att, Actor *owner) {
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
 s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
-    att->hookState += D_800BE9E4;
+    att->hookState += gFrameTicks;
     if (att->hookState >= 16) {
         att->hookState = 0;
         att->hookState2 ^= 1;
@@ -2584,7 +2584,7 @@ s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     }
     if (att->hookState == 0) {
         if (att->hookState2 < 30) {
-            att->hookState2 += D_800BE9E4;
+            att->hookState2 += gFrameTicks;
         } else {
             att->hookState2 = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, attach_soundCallback, att, (s32)owner, 0, 0);

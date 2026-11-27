@@ -21,7 +21,7 @@
 void game_clearBss(void);
 
 /* game/Game/LevelStart/levelstart.c */
-void func_15007A70(s16 arg0, s16 arg1, s16 arg2);
+void game_startMatch(s16 arg0, s16 arg1, s16 arg2);
 void game_loadLevel(void);
 void game_clearLevelPointers(void);
 void game_clearPendingCutscene(void);
@@ -35,26 +35,26 @@ void game_initLevelSubsystems(s32 levelId);
 void game_mainLoop(void);
 s32 game_processMessage(void);
 void game_updateActors(void);
-Gfx *func_15018E88(Gfx *gfx, s16 player);
-Gfx *func_15018F08(Gfx *gfx, s16 player);
+Gfx *game_drawObjectGroup0Pass(Gfx *gfx, s16 player);
+Gfx *game_drawObjectGroup1Pass(Gfx *gfx, s16 player);
 void game_prepareView(s16 player);
 void game_beginFrame(void);
 s32 game_updateFrame(void);
-void func_15019414(void);
+void game_updateAfterMainPass(void);
 Gfx *game_drawWorldPass(Gfx *gfx, s16 player);
 Gfx *game_drawMainPass(Gfx *gfx, s16 player);
 Gfx *game_drawScreenPass(Gfx *gfx);
 Gfx *game_drawViewOverlays(Gfx *gfx, s32 player);
-Gfx *func_15019CC8(Gfx *gfx, s32 player);
-Gfx *func_15019E60(Gfx *gfx);
+Gfx *game_drawObjectGroup5Pass(Gfx *gfx, s32 player);
+Gfx *game_drawModeOverlayPass(Gfx *gfx);
 void game_updateFrameTiming(void);
-extern u8 D_800BE5E0; // the ticks of this frame
+extern u8 gStepTicks; // the ticks of this frame
 extern f32 gFrameDeltaHistory[10]; // the last 10 frame deltas
 extern u32 gTickRemainder; // the leftover tick remainder
 extern u8 gRebuildFrameDisplayLists;
 extern u8 gLevelChangeRequest;
 extern u8 gIsMultiplayer;
-extern u8 D_800BE617;
+extern u8 gViewLayoutChanged;
 extern s8 D_800BE618;
 extern u8 gFrameDeltaHistoryNext;
 extern u8 gFrameDeltaHistoryCount;
@@ -65,8 +65,8 @@ extern u8 gFrameSteps; // frame steps of this frame (half the ticks, see game_up
 extern f32 gFrameDelta; // frame delta: half the ticks of this frame
 extern f32 gFrameDeltaInv; // 1 / gFrameDelta (0 when that is 0)
 extern s32 gTotalTicks; // ticks since the start
-extern s32 D_800BE9B0; // gTotalTicks % 30
-extern u8 D_800BE9B4;
+extern s32 gTotalTicksMod30; // gTotalTicks % 30
+extern u8 gLevelLoadState;
 extern f32 gAvgFrameDelta; // the average of the last 10 frame deltas
 extern f32 gAvgFrameDeltaInv; // 1 / gAvgFrameDelta
 extern u8 gDrawBufferIndex; // which of the two matrix buffers is being built this frame
@@ -74,28 +74,28 @@ extern u16 *gZBuffer; // z-buffer (gScreenWidth x gScreenHeight)
 extern Gfx *gDisplayListBuffers[2]; // display-list buffer per framebuffer (gDrawBufferIndex)
 extern Gfx *gDisplayListHead; // display-list write head
 extern Gfx *gDisplayListPrologueEnds[2]; // per framebuffer: end of the prologue built by view_initFrameDisplayLists
-extern OSMesg D_800BE9E0;
-extern s32 D_800BE9E4; // frames elapsed this update
-extern s32 D_800BE9E8; // number of players minus one
+extern OSMesg gSiEventMesg;
+extern s32 gFrameTicks; // frames elapsed this update
+extern s32 gLastPlayerIndex; // number of players minus one
 extern u8 D_800BE9EC;
-extern u8 D_800BE9ED;
+extern u8 gClearToWhite;
 extern s32 level; // the current map
 extern s32 gNextLevel; // current scene / game mode id
 extern s32 gPrevLevel; // the previous map
-extern s32 D_800BEA00;
-extern s32 D_800BEA04;
+extern s32 gNextMatchPlayerMask;
+extern s32 gNextMatchMode;
 extern s32 gRawFrameTicks; // the ticks of this frame, before the gFrameRateDivider divider
 extern u8 gFrameRateDivider; // frame rate divider (0: none; 1: time stands still)
 extern OSMesgQueue gGameMesgQueue; // graphics task done messages
 extern OSMesg gGameMesgBuf[16]; // gGameMesgQueue's buffer
 extern OSScMsg gTaskDoneMsgs[2]; // "task done" messages, one per frame buffer
 extern s16 gPendingGfxTasks; // graphics tasks sent
-extern u8 D_800BEAAA;
+extern u8 gCullLevelDisplayList;
 extern u8 gTextLanguage;
 extern u8 gPaused;
 extern u8 gPauseRequested;
 extern u8 gPauseCooldown;
-extern u8 D_800BEAC3;
+extern u8 gRumbleStopRequest;
 
 /* game/Game/FrameStub/framestub.c */
 void func_1501C860(void);

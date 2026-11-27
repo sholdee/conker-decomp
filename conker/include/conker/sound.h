@@ -25,11 +25,11 @@ s32 sound_actorSound1DelayCallback(SoundRecord *record, s32 *active, u32 *volume
 s32 sound_actorUntrackedDelayCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 sound_followOwnerCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 sound_stopWhenSilentCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 sound_followOwnerAnimsCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void sound_resetVoices(void);
 void sound_initLevel(s32 mode);
 s32 sound_isPlaying(u16 handle);
-s32 func_1000F44C(u16 handle);
+s32 sound_isLooping(u16 handle);
 s32 sound_isSoundPlaying(u16 sound);
 s32 sound_pickVariant(s32 base, s32 count);
 s32 sound_getNearestListenerVolume(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32 farDistance);
@@ -70,18 +70,18 @@ s32 sound_getPlayingSound(u16 handle);
 s32 sound_getPanVolumeAt(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDistance, s32 *pan, s32 *volumeOut, s32 *distance);
 void sound_updateRecords(SoundRecord *records, s32 *count, s32 start, s32 end);
 void sound_update(void);
-void func_10011E88(s32 mode);
+void sound_emptyInitLevel(s32 mode);
 void sound_setMuted(s32 mute);
 u16 sound_pickEffectVariant(s32 effect, s16 *volume, s32 variant);
-extern s8 D_80041FD8;
+extern s8 gSoundFxMixBoost;
 extern u8 D_80041FD9;
-extern s32 D_80041FDC;
+extern s32 gSoundTargetVolume;
 
 /* game/Audio/ObjectSound/objectsound.c */
 void sound_clearCooldowns(void);
 void sound_updateCooldowns(void);
-s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_15103AA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 sound_followDelayedCameraCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 sound_followDelayedCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void sound_playWithCooldown(s32 sound, s32 objId, u32 variantCount, s32 slot, s32 pairVariants);
 
 #endif

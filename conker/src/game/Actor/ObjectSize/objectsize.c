@@ -7,7 +7,7 @@ void actor_updateSizes(void) {
     s32 i;
     Actor *obj = movement_obj;
 
-    for (i = 0; i < D_8008FD8C; i++, obj++) {
+    for (i = 0; i < gPlayerCount; i++, obj++) {
         ActorCtl *ext = obj->mv;
         if (ext != NULL) {
             actor_computeSize(obj, &ext->height, &ext->width, &ext->depth);

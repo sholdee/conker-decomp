@@ -15,7 +15,7 @@ WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObject
 void **gObjectBlocks; // per object: handle released with heap_free
 u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
 u8 gUngroupedObjectCount;
-MtxF D_800DBF08[2]; // per frame buffer
+MtxF gObjectIdentityMtxs[2]; // per frame buffer
 u8 D_800DBF88;
 Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
 Vtx *D_800DBF90; // its source vertices
@@ -68,7 +68,7 @@ void gfx_buildDrawLists(s32 player) {
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see gfx_buildDrawLists notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
-                          (D_800C3658[player] != 0 || gCutsceneStates[player] != 1 || cutscene_isActorIndexBound(i, player) != 0) &&
+                          (gCutsceneShowUnboundObjects[player] != 0 || gCutsceneStates[player] != 1 || cutscene_isActorIndexBound(i, player) != 0) &&
                           ((gCutsceneStates[player] == 1 && cutscene_isActorIndexBound(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || zone_isPointHiddenFromView(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
@@ -96,7 +96,7 @@ void gfx_buildDrawLists(s32 player) {
                             obj->dst_fade_alpha[view] = 0;
                         } else {
                             if (*dp < drawDist - 200) {
-                                step = D_800BE9E4 * 10;
+                                step = gFrameTicks * 10;
                                 if (obj->fadeDistance != 0) {
                                     if (*dp < obj->fadeDistance) {
                                         if (step < obj->dst_fade_alpha[view]) {
@@ -207,7 +207,7 @@ void gfx_updateObjectMatrices(void) {
                         guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     }
                 } else {
-                    guMtxF2L(D_800DBF08[gDrawBufferIndex], &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
+                    guMtxF2L(gObjectIdentityMtxs[gDrawBufferIndex], &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                 }
             }
     }
@@ -230,7 +230,7 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)gViewDrawListPtrs + viewOffset);
-    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)gViewGfxLights + viewOffset), gViewGfxLightMax, D_800D9E21,
+    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)gViewGfxLights + viewOffset), gViewGfxLightMax, gViewGfxLightCount,
                         &gViewAmbients[view][gDrawBufferIndex]);
     for (i = 0; i < gViewDrawCounts[view]; i++) {
         gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[gDrawBufferIndex])[(**list)[i].index], view,
@@ -271,11 +271,11 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     effects = obj->effectFlags;
     if (obj->effectFlags != 0) {
         if (effects & 1) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->u, view);
+            gfx = prop_emptyDrawEffectAngled(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->u, view);
         } else if (effects & 0x10) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->touch.floor.unk7C, view);
+            gfx = prop_emptyDrawEffectAngled(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->touch.floor.unk7C, view);
         } else if (effects & 0x20) {
-            gfx = func_1511FC44(gfx, obj->x, obj->y + obj->yOffset, obj->z, view);
+            gfx = prop_emptyDrawEffect(gfx, obj->x, obj->y + obj->yOffset, obj->z, view);
         }
     }
     gDPPipeSync(gfx++);
@@ -333,9 +333,9 @@ void gfx_updateObjectShadows(void) {
                 break;
             }
         }
-        do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
+        do { // matching: without this wrapper uopt stops keeping &gCutsceneShowUnboundObjects in a saved register
             if ((obj->state & 8) || obj->unk4C == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(i, 0) == 0) || !(obj->object_status & 1)) {
+                (gCutsceneShowUnboundObjects[0] == 0 && gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(i, 0) == 0) || !(obj->object_status & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;

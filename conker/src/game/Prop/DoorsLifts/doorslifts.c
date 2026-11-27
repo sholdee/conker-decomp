@@ -50,7 +50,7 @@ typedef union {
  * Lowers the prop by a level-dependent distance (state MOVING -> ARRIVED) and raises it back to its
  * saved home height (RETURNING -> REST).
  */
-void func_151177C0(WorldObject *prop) {
+void prop_lowerAndRaise(WorldObject *prop) {
     s32 kind;
     s32 travel;
     s32 step;
@@ -168,8 +168,8 @@ void prop_slideOut(WorldObject *prop) {
             offset = distance;
         }
         if (delay != 0 && !(prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
-            if (D_800BE9E4 < WORK(prop)->slide.timer) {
-                WORK(prop)->slide.timer -= D_800BE9E4;
+            if (gFrameTicks < WORK(prop)->slide.timer) {
+                WORK(prop)->slide.timer -= gFrameTicks;
             } else {
                 motion = TASK_FLAG_GOING_OFF;
             }
@@ -263,7 +263,7 @@ void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
  * A hinged prop that grabs an object close to its anchor point, swings rotX up to a level-dependent
  * angle carrying the object along, then swings back down.
  */
-void func_15117F3C(WorldObject *prop) {
+void prop_grabAndSwingCharacter(WorldObject *prop) {
     f32 maxAngle;
     s32 pad1; // matching: pad1-pad4 are unused stack slots of the original frame
     f32 speed;
@@ -385,7 +385,7 @@ void func_15117F3C(WorldObject *prop) {
     prop_localToWorld(prop, anchorX, anchorY, anchorZ, anchor);
     target = NULL;
     if (motion != TASK_FLAG_ON && motion != TASK_FLAG_GOING_OFF) {
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             obj = &movement_obj[i];
             if (obj->attach_char) {
                 continue;
@@ -417,7 +417,7 @@ void func_15117F3C(WorldObject *prop) {
         }
     }
     if (target == NULL && motion == TASK_FLAG_GOING_ON) {
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             obj = &movement_obj[i];
             if (obj->mv->unk6B != 0) {
                 target = obj;
@@ -444,8 +444,8 @@ void func_15117F3C(WorldObject *prop) {
                 }
             }
             if (timer != 0) {
-                if (D_800BE9E4 < timer) {
-                    timer -= D_800BE9E4;
+                if (gFrameTicks < timer) {
+                    timer -= gFrameTicks;
                 } else {
                     timer = 0;
                 }
@@ -492,8 +492,8 @@ void func_15117F3C(WorldObject *prop) {
                     started = 0;
                 }
                 if (timer != 0) {
-                    if (D_800BE9E4 < timer) {
-                        timer -= D_800BE9E4;
+                    if (gFrameTicks < timer) {
+                        timer -= gFrameTicks;
                     } else {
                         timer = 0;
                     }
@@ -548,11 +548,11 @@ void func_15117F3C(WorldObject *prop) {
 }
 
 /* Door behaviours: prop_swingDoor with prop_registerLink mode 0 or 3. */
-void func_1511896C(WorldObject *prop) {
+void prop_swingDoorLink0(WorldObject *prop) {
     prop_swingDoor(prop, 0);
 }
 
-void func_1511898C(WorldObject *prop) {
+void prop_swingDoorLink3(WorldObject *prop) {
     prop_swingDoor(prop, 3);
 }
 
@@ -663,7 +663,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
         }
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->u) {
+    if (gLevelLoadState != 0 || angle != prop->u) {
         if (gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(prop - db_Object_array, 0) != 0) {
             angle = prop->u;
         } else {
@@ -771,7 +771,7 @@ void prop_swingFlap(WorldObject *prop) {
         PROP_SET_MOTION(prop, motion);
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->v) {
+    if (gLevelLoadState != 0 || angle != prop->v) {
         prop->v = angle;
         index = (prop->moveData.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
@@ -793,7 +793,7 @@ void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj) {
  * Moves the prop's height towards home + range * position / 256 at work.follow.speed per frame,
  * where range is the high half of params. Motion becomes ARRIVED on reaching it.
  */
-void func_151193F4(WorldObject *prop) {
+void prop_followHeight(WorldObject *prop) {
     s32 speed;
     s32 targetY;
     s32 diff;

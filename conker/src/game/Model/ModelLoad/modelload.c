@@ -45,8 +45,8 @@ typedef struct ModelHeader {
     /* 0x24 */ u32 unk24;
     /* 0x28 */ Gfx **dlists2; // D_800C48F0
     /* 0x2C */ u32 dlists2Size;
-    /* 0x30 */ u8 *unk30; // byte table read by func_1503DA3C
-    /* 0x34 */ u32 unk30Size;
+    /* 0x30 */ u8 *levelChannels; // per model: the bone channels of bone_addLevelCommands (entries 0 and 1), read by model_getLevelChannel
+    /* 0x34 */ u32 levelChannelsSize;
 } ModelHeader; // size 0x38
 
 /* Byte view of a Gfx command. */
@@ -395,8 +395,8 @@ void model_countTris(s32 id) {
     gModelTriCounts[id] = count;
 }
 
-/* Returns entry `index` of model id's unk30 byte table, or 0xFF if there is none. */
-s32 func_1503DA3C(s32 id, s32 index) {
+/* Returns entry `index` of model id's levelChannels byte table, or 0xFF if there is none. */
+s32 model_getLevelChannel(s32 id, s32 index) {
     u8 *data = gModelData[id];
     ModelHeader *hdr = (ModelHeader *)data - 1;
     u8 *table;
@@ -405,10 +405,10 @@ s32 func_1503DA3C(s32 id, s32 index) {
     if (data == NULL) {
         return 0xFF;
     }
-    if (hdr->unk30Size < index + 1) {
+    if (hdr->levelChannelsSize < index + 1) {
         return 0xFF;
     }
-    table = hdr->unk30;
+    table = hdr->levelChannels;
     ret = (table != NULL) ? table[index] : 0xFF;
     return ret;
 }

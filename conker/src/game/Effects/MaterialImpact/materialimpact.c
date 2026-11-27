@@ -222,8 +222,8 @@ void func_150E4CBC(Struct150E4CBC *fx) {
         fx->unkA4 = fx->timer * 90 / 9 * fx->unk96 / 256.0f;
     } else {
         fx->unkA4 = (90 - (fx->timer * 90 - 810) / 600) * fx->unk96 / 256.0f;
-        if (fx->alpha > D_800BE9E4 * 17) {
-            fx->alpha -= D_800BE9E4 * 17;
+        if (fx->alpha > gFrameTicks * 17) {
+            fx->alpha -= gFrameTicks * 17;
         } else {
             fx->unk98 = -1;
         }
@@ -232,7 +232,7 @@ void func_150E4CBC(Struct150E4CBC *fx) {
     if (fx->timer > 608) {
         fx->unk98 = -1;
     }
-    fx->timer += D_800BE9E4;
+    fx->timer += gFrameTicks;
 }
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in gTriPlaneNormalX..gTriPlaneNormalZ. */

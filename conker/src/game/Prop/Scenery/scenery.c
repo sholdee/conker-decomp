@@ -10,7 +10,7 @@ const s16 D_800A00E0[4][4] = {
     { -479, 1035, 0, 200 },
 };
 
-void func_150BEF70(s32 arg0) {
+void prop_emptyLevelUpdateHook2(s32 arg0) {
 }
 
 /* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
@@ -33,7 +33,7 @@ void prop_startMirroredEmitters(s32 arg0) {
     }
 }
 
-/* Steps the entry by D_800BE9E4 frames; returns 1 once it has faded out or shrunk to nothing. */
+/* Steps the entry by gFrameTicks frames; returns 1 once it has faded out or shrunk to nothing. */
 s32 func_150BF0F4(Struct150BF0F4 *entry) {
     s32 intensity;
     s32 limit;
@@ -45,14 +45,14 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     limit = entry->maxLevel;
     if (entry->rising) {
         if (intensity != limit) {
-            intensity += D_800BE9E4 * entry->riseRate;
+            intensity += gFrameTicks * entry->riseRate;
             if (intensity > limit) {
                 intensity = limit;
             }
             entry->level = intensity;
         }
     } else if (intensity != 0) {
-        intensity -= D_800BE9E4 * entry->fallRate;
+        intensity -= gFrameTicks * entry->fallRate;
         if (intensity < 0) {
             intensity = 0;
         }
@@ -64,11 +64,11 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     }
 
     delta = entry->unk14Rate;
-    delta *= D_800BE9E4;
+    delta *= gFrameTicks;
     entry->unk14 += delta;
     size = entry->unk14;
     delta = entry->unk16Rate;
-    delta *= D_800BE9E4;
+    delta *= gFrameTicks;
     entry->unk16 += delta;
     if (size <= 0 || size <= 0) { /* sic: unk16 is never tested */
         entry->unk16 = 0;
@@ -77,7 +77,7 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     }
 
     age = entry->age;
-    age += D_800BE9E4;
+    age += gFrameTicks;
     if (age >= 0x80) {
         age = 0x7F;
     }
@@ -125,7 +125,7 @@ void func_150BF21C(WorldObject *obj) {
     } else {
         paused = TRUE;
     }
-    if (D_800BE9B4 != 0) {
+    if (gLevelLoadState != 0) {
         height = obj->moveData.word;
         BOB_WORK(obj)->height = height;
     }
@@ -223,7 +223,7 @@ void func_150BF760(WorldObject *obj) {
     f32 progress = 0.0f;
 
     if (gCutsceneStates[0] != 1 || gCutsceneIds[0] == 1) {
-        func_1511B51C(obj);
+        prop_swingAndFadeColours(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = flamethrower_addObjectTexScroll(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
@@ -327,9 +327,9 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
         return;
     }
     if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
-        func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
+        particle_spawnModelBurstWithBillboard(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
         if (state == TASK_FLAG_OFF) {
-            camera_startWobblePreset(3, D_800BE9E8, NULL, 0xFF, 0);
+            camera_startWobblePreset(3, gLastPlayerIndex, NULL, 0xFF, 0);
             fx.flags = 1;
             fx.duration = 60;
             fx.playerMask = 1;
@@ -350,7 +350,7 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
             platform->y = top;
         }
     } else if (state == TASK_FLAG_GOING_ON) {
-        WORK(platform)->unk80 += D_800BE9E4;
+        WORK(platform)->unk80 += gFrameTicks;
         if (WORK(platform)->unk80 < 0) {
             platform->t = ((math_rand() % 5) - 2.0f) * 0.125f;
             platform->v = ((math_rand() % 5) - 2.0f) * 0.125f;

@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-static s32 D_80088A90 = 0; /* 1 while the camera is in the transport mode this hook set */
+static s32 gLevelHook04TransportOn = 0; /* 1 while the camera is in the transport mode this hook set */
 
 /*
  * When both script_query queries succeed, switch flags 0x405D-0x4061 on and (unless unk2C is 0x100
- * or unk6C8 is set) put the actor into its alternate state and set D_80088A90. Otherwise leave that
+ * or unk6C8 is set) put the actor into its alternate state and set gLevelHook04TransportOn. Otherwise leave that
  * state, switch the flags off again and mirror query 0x4040 into bit 0x80 of unk84.
  */
 void camera_levelHook04(Camera *actor)
@@ -34,7 +34,7 @@ void camera_levelHook04(Camera *actor)
             actor->Tightness = 0;
             actor->height = actor->unk34C = 320.0f;
             actor->YOffsetTget = 180.0f;
-            D_80088A90 = 1;
+            gLevelHook04TransportOn = 1;
             script_command(0, 0x405C, 0);
         }
     } else {
@@ -43,7 +43,7 @@ void camera_levelHook04(Camera *actor)
             camera_attachToObject(actor, actor->CNumber);
             actor->SpecialFlags &= ~0x10;
             actor->CharTrackingSpeedTarget = 0.0f;
-            D_80088A90 = 0;
+            gLevelHook04TransportOn = 0;
         }
         script_command(0, 0x405C, 1);
         script_command(0, 0x405D, 0);

@@ -32,8 +32,8 @@ glabel gfx_copyDlCulled
     /* D25C0 150A5110 24140000 */  addiu      $s4, $zero, 0x0
     /* D25C4 150A5114 24170100 */  addiu      $s7, $zero, 0x100
     /* D25C8 150A5118 44800000 */  mtc1       $zero, $f0
-    /* D25CC 150A511C 3C01800D */  lui        $at, %hi(D_800D35E0)
-    /* D25D0 150A5120 C43C35E0 */  lwc1       $f28, %lo(D_800D35E0)($at)
+    /* D25CC 150A511C 3C01800D */  lui        $at, %hi(gFrustumSlopeX)
+    /* D25D0 150A5120 C43C35E0 */  lwc1       $f28, %lo(gFrustumSlopeX)($at)
     /* D25D4 150A5124 3C0F800D */  lui        $t7, %hi(gCullVtxFlags)
     /* D25D8 150A5128 25EF35E8 */  addiu      $t7, $t7, %lo(gCullVtxFlags)
     /* D25DC 150A512C 8FBC0054 */  lw         $gp, 0x54($sp)
@@ -52,13 +52,13 @@ glabel gfx_copyDlCulled
 .section .bss
 
 /* Data of game/Gfx/CullDl/culldl.s and game/Gfx/CullLevelDl/cullleveldl.s */
-glabel D_800D35E0
+glabel gFrustumSlopeX
     /* 800D35E0 */ .space 0x8
 glabel gCullVtxFlags
     /* 800D35E8 */ .space 0x80
-glabel D_800D3668
+glabel gShadowFaceFlags
     /* 800D3668 */ .space 0x4
-glabel D_800D366C
+glabel gShadowFaceFlagsEnd
     /* 800D366C */ .space 0x4
 glabel D_800D3670
     /* 800D3670 */ .space 0x4

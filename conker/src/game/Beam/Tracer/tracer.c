@@ -127,7 +127,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
     bone = (void *)&effect->target_z;
     texture = 0x23;
     dist = 0.0f;
-    effect->lifetime -= D_800BE9E4;
+    effect->lifetime -= gFrameTicks;
     if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->animseq.uh != effect->ownerTag)) {
         effect_destroyObject(&effect->header);
         return;
@@ -143,7 +143,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
         } else {
             effect->attachDelay--;
         }
-        effect->timer -= D_800BE9E4;
+        effect->timer -= gFrameTicks;
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId) {
@@ -165,7 +165,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->unk1D1 == gAimImpacts[aim].unk2) {
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->aimPitch == gAimImpacts[aim].unk2) {
                         effect->target_x = gAimImpacts[aim].x;
                         effect->target_y = gAimImpacts[aim].y;
                         effect->target_z = gAimImpacts[aim].z;
@@ -185,7 +185,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                         }
                         stopDist = 1.0f;
                     } else {
-                        angle = effect->owner->unk1D1 * 200;
+                        angle = effect->owner->aimPitch * 200;
                         actor_splitVelocity(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;
@@ -250,7 +250,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
         effect->dx = vx;
         effect->dy = vy;
         effect->dz = vz;
-        len = effect->speed * D_800BE9E4;
+        len = effect->speed * gFrameTicks;
         if (dist < len && effect->stopDist != 0.0f) {
             vx *= dist;
             vy *= dist;

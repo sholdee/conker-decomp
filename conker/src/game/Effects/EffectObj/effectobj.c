@@ -73,7 +73,7 @@ void effect_updateEffectObj(EffectObj *obj) {
 
     dead = FALSE;
     if (obj->head.tmpl.flags & 1) {
-        obj->head.tmpl.life -= D_800BE9E4;
+        obj->head.tmpl.life -= gFrameTicks;
         if (obj->head.tmpl.life < 0) {
             dead = TRUE;
         }

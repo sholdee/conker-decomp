@@ -25,7 +25,7 @@ s32 trail_sampleTrackerTrail(TrackerTrail *actor) {
     points = actor->points;
     owner = state->owner;
     motion = &owner->data;
-    if (D_800BE9E4 > 0) {
+    if (gFrameTicks > 0) {
         actor->head.tmpl.pos = motion->pos;
         actor->head.tmpl.flags |= 4;
         {

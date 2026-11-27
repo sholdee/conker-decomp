@@ -52,11 +52,11 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
     }
     state = ((CharacterTrail *)state)->state;
     memcpy(state, &init, sizeof(CharacterTrailState));
-    if (D_8008FD8C < 5) {
+    if (gPlayerCount < 5) {
         sound_addDynamicSound(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B3, 12, 0);
     }
     sound_addDynamicSound(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B4, 12, 0);
-    if (D_8008FD8C < 7 || owner->CameraPtr != NULL) {
+    if (gPlayerCount < 7 || owner->CameraPtr != NULL) {
         sound_addDynamicSound(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5BC, 12, 0);
     }
     {
@@ -207,7 +207,7 @@ s32 trail_updateCharacterTrail(CharacterTrail *actor) {
     if (owner->type == 0 || owner->unique_id != state->ownerId) {
         return 0;
     }
-    if (D_800BE9E4 > 0) {
+    if (gFrameTicks > 0) {
         prevPos = actor->head.tmpl.pos;
         switch (trail_getCharacterTrailEnds(&actor->head.tmpl.pos, &end, owner, attachment)) {
         case 0:
@@ -490,7 +490,7 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     state = actor->state;
     points = actor->points;
     owner = state->owner;
-    if (owner->ob_matrix_ptr == NULL || (owner->unk74 & 0xF) == 0xF) {
+    if (owner->ob_matrix_ptr == NULL || (owner->cullMask & 0xF) == 0xF) {
         return gfx;
     }
     particle_getViewBuffer(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
@@ -662,11 +662,11 @@ void trail_onCharacterTrailMessage(CharacterTrail *actor, ActorMsg *msg, u8 id) 
 static const s32 gCharacterTrailTextures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
 /* The trail's start and end points in the attachment's model space. */
-static const Vec3f D_800A09D0 = { -151.7874f, -23.267801f, -20.8778f };
-static const Vec3f D_800A09DC = { -283.44f, -23.267801f, -20.8778f };
+static const Vec3f gCharacterTrailStart = { -151.7874f, -23.267801f, -20.8778f };
+static const Vec3f gCharacterTrailEnd = { -283.44f, -23.267801f, -20.8778f };
 
 /*
- * Computes the trail's start and end points: the points D_800A09D0 / D_800A09DC of `attachment`
+ * Computes the trail's start and end points: the points gCharacterTrailStart / gCharacterTrailEnd of `attachment`
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
 s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
@@ -674,8 +674,8 @@ s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAtt
     Vec3f *out[2];
 
     if (owner->ob_matrix_ptr != NULL) {
-        modelPoints[0] = &D_800A09D0;
-        modelPoints[1] = &D_800A09DC;
+        modelPoints[0] = &gCharacterTrailStart;
+        modelPoints[1] = &gCharacterTrailEnd;
         out[0] = start;
         out[1] = end;
         if (math_transformAttachmentOffsets(owner, attachment, 0, modelPoints, out, 2) != 0) {
@@ -708,7 +708,7 @@ void trail_stopCharacterTrailFx(CharacterTrail *actor) {
     CharacterTrailState *state;
 
     state = actor->state;
-    if (D_8008FD8C < 5) {
+    if (gPlayerCount < 5) {
         sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B3);
     }
     sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B4);
@@ -725,7 +725,7 @@ void trail_stopCharacterTrailFx(CharacterTrail *actor) {
 s32 trail_updateTrailGlow(TrailGlow *particle) {
     GlowShape *sub = &particle->shape;
 
-    particle->tail.timer -= D_800BE9E4;
+    particle->tail.timer -= gFrameTicks;
     if (particle->tail.timer < 0) {
         particle->head.def.texture = gCharacterTrailTextures[math_random() & 3];
         particle->tail.timer = (math_random() & 7) + 3;
@@ -852,7 +852,7 @@ s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 
             targetVolume = 16000;
             targetPitch = 400;
             volume = targetVolume;
-        } else if (state->mode == 1 || D_8008FD8C >= 5) {
+        } else if (state->mode == 1 || gPlayerCount >= 5) {
             targetVolume = 12000;
         } else {
             targetPitch = 400;
@@ -861,12 +861,12 @@ s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 
 
     if (volume != targetVolume) {
         if (volume < targetVolume) {
-            volume += D_800BE9E4 * 256;
+            volume += gFrameTicks * 256;
             if (volume > targetVolume) {
                 volume = targetVolume;
             }
         } else {
-            volume -= D_800BE9E4 * 256;
+            volume -= gFrameTicks * 256;
             if (volume < targetVolume) {
                 volume = targetVolume;
             }
@@ -874,12 +874,12 @@ s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 
     }
     if (pitch != targetPitch) {
         if (pitch < targetPitch) {
-            pitch += D_800BE9E4 * 256;
+            pitch += gFrameTicks * 256;
             if (pitch > targetPitch) {
                 pitch = targetPitch;
             }
         } else {
-            pitch -= D_800BE9E4 * 8;
+            pitch -= gFrameTicks * 8;
             if (pitch < targetPitch) {
                 pitch = targetPitch;
             }

@@ -131,7 +131,7 @@ void trail_updateEmitter(TrailEmitter *emitter) {
     TrailEmitterLink *link;
 
     for (i = 0; i < 2; i++) {
-        emitter->timers[i] -= D_800BE9E4;
+        emitter->timers[i] -= gFrameTicks;
         owner = emitter->params.owner;
         if (owner != NULL && owner->type != 0 && owner->ob_matrix_ptr != NULL &&
             owner->unique_id == emitter->params.ownerId) {

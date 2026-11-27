@@ -109,17 +109,17 @@ static u64 gAudioThreadStack[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread st
 
 /*
  * The bank loader's state: five separate variables that the code mostly uses as one BankState.
- * matching: the ROM needs both forms. Most accesses go through one base register at D_800406A0 with
+ * matching: the ROM needs both forms. Most accesses go through one base register at gBankListsReady with
  * offsets 0x4 to 0x10, which IDO emits only for one object (BANK_STATE). Three stores in audio_retireBank
  * and audio_fetchBank have their own lui, which IDO emits only for a separate symbol (gLoadedBanks,
- * D_800406B0). Separate variables read by name, or a defined BankState, each change those functions.
+ * gReleaseBanks). Separate variables read by name, or a defined BankState, each change those functions.
  */
-static u8 D_800406A0;          /* the lists are set up */
+static u8 gBankListsReady;          /* the lists are set up */
 static struct BankRecord *gLoadedBanks; /* loaded */
 static struct BankRecord *gFreeBanks; /* free */
 static struct BankRecord *gDmaBanks; /* DMA in flight */
-static struct BankRecord *D_800406B0; /* unreferenced, buffer still allocated */
-#define BANK_STATE (*(BankState *)&D_800406A0)
+static struct BankRecord *gReleaseBanks; /* unreferenced, buffer still allocated */
+#define BANK_STATE (*(BankState *)&gBankListsReady)
 
 static DMABuffer gAudioDmaBuffers[NUM_DMA_BUFFERS];
 static struct BankRecord gBankRecords[NUM_BANK_RECORDS];
@@ -524,7 +524,7 @@ void audio_retireBank(BankRecord *record) {
         if (BANK_STATE.releaseList != NULL) {
             LIST_LINK(BankRecord, record, BANK_STATE.releaseList);
         } else {
-            D_800406B0 = record;
+            gReleaseBanks = record;
             record->next = NULL;
             record->prev = NULL;
         }

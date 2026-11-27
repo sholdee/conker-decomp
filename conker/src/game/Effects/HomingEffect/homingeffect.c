@@ -230,7 +230,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     effect = arg0;
     spawned = 0;
     if (effect->lifetime != -99) {
-        effect->lifetime -= D_800BE9E4;
+        effect->lifetime -= gFrameTicks;
         if (effect->lifetime < 0) {
             effect_destroyHomingEffect(effect);
         }
@@ -253,7 +253,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     delta.y = effect->target.y - effect->pos.y;
     delta.z = effect->target.z - effect->pos.z;
     dist = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
-    move = effect->speed * D_800BE9E4;
+    move = effect->speed * gFrameTicks;
     if (effect->follow == NULL) {
         if (effect->lingerTimer == 0) {
             if (dist <= move) {
@@ -269,7 +269,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
                 }
             }
         } else {
-            effect->lingerTimer -= D_800BE9E4;
+            effect->lingerTimer -= gFrameTicks;
             if (effect->lingerTimer <= 0) {
                 effect_destroyHomingEffect(effect);
                 return;

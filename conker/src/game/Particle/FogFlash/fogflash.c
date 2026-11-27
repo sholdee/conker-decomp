@@ -134,7 +134,7 @@ void particle_updateFogFlash(EmitterEffect *effect) {
 }
 
 /* Runs sight_spawnFloorImpact on obj and flashes it green. */
-void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
+void particle_spawnFloorImpactGreenFlash(Actor *obj, u8 owner, s32 kind) {
     sight_spawnFloorImpact(obj, owner, kind);
     particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
@@ -153,7 +153,7 @@ static f32 gEasedColorVelB = 0.0f;
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise
  * resets the colour to white. Then eases the current colour toward the target and sends it out. */
-void func_150ECC70(Camera *obj) {
+void particle_levelHook17(Camera *obj) {
     s32 value9C;
     s32 value9A;
     s32 half;

@@ -52,6 +52,6 @@ void effect_updateOwnerEffect(OwnerEffect *effect) {
         return;
     }
     if (owner->CameraPtr != NULL) {
-        data->timer -= D_800BE9E4;
+        data->timer -= gFrameTicks;
     }
 }

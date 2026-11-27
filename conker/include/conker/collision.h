@@ -149,7 +149,7 @@ extern f32 gLedgeZ; // ledge probe results (written by collision_findLedge, game
 extern f32 gLedgeAngle1;
 extern f32 gLedgeAngle2;
 extern u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
-extern u8 D_800CBDD2;
+extern u8 gWallProbeIsCamera;
 extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;
 extern f32 gLedgeHeight1; // ledge heights, -32768.0f if none
@@ -363,9 +363,9 @@ void script_runTask(IdRecord *node, s32 mode);
 void script_exitTask(void);
 
 /* game/Collision/WobbleQuad/wobblequad.c */
-s32 func_150AE2A0(struct Foo150AE280 *arg0);
+s32 collision_updateWobble(struct Foo150AE280 *arg0);
 s32 func_150AE35C(s32 arg0);
-s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1);
+s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *arg0, s16 arg1);
 
 /* game/Collision/ObjectRay/objectray.c */
 s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
@@ -396,7 +396,7 @@ extern s32 gCurMapTriCount;
 extern s32 gCurMap;
 extern u32 *gMeshTriMaterials; // per world-mesh triangle: material / surface flags
 extern u8  gMeshBuilt;
-extern u8  D_800DBE63;
+extern u8  gTriBoundsFull;
 extern f32 gFloorQueryReach;
 extern f32 gFloorQueryX;
 extern f32 gFloorQueryY;

@@ -8,10 +8,10 @@ static s16 D_800E0C78;
 static u8 *gCodeEntryText; /* text entry buffer (0x1A8 bytes) */
 static s8 gCodeEntryColumn;  /* text entry cursor column */
 static s8 gCodeEntryRow;  /* text entry cursor row */
-static s8 D_800E0C82;
-static s8 D_800E0C83;
-static s8 D_800E0C84;
-static u8 D_800E0C85; /* not referenced */
+static s8 gCodeEntryKeyPress;
+static s8 gCodeEntryLength;
+static s8 gCodeEntryRepeatCount;
+static u8 gHudImagePanelImage; /* not referenced */
 static u8 gHudSlotAlphas[4]; /* alpha of each player slot */
 
 #include "functions.h"
@@ -19,7 +19,7 @@ static u8 gHudSlotAlphas[4]; /* alpha of each player slot */
 
 /* Per-mode (gFrontEndState) overlay drawers, called by hud_drawModeOverlay. */
 Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {
-    hud_drawSinglePlayerHud, NULL, NULL, func_151EC3E8, NULL, NULL, hud_drawResults,
+    hud_drawSinglePlayerHud, NULL, NULL, hud_drawMenuOverlay, NULL, NULL, hud_drawResults,
     NULL, NULL, NULL, NULL, func_151EBB50, NULL,
 };
 
@@ -57,7 +57,7 @@ Gfx *hud_drawMain(Gfx *gfx) {
     }
 
     if (D_80000300 != 0) {
-        if (gIsMultiplayer != 0 && D_8008FD90 >= 2) {
+        if (gIsMultiplayer != 0 && gHumanCount >= 2) {
             if ((gConnectedPads & 0xF) == 0) {
                 if (D_800E0BD3 == 1) {
                     message = 0x33;
@@ -118,14 +118,14 @@ Gfx *hud_drawModeOverlay(Gfx *gfx) {
 Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
     f32 yScale;
 
-    if (D_8008FE1C != 1.0f) {
-        xl = xl * D_8008FE1C;
-        yScale = D_8008FE20;
-        xh = xh * D_8008FE1C;
+    if (gHudScaleX != 1.0f) {
+        xl = xl * gHudScaleX;
+        yScale = gHudScaleY;
+        xh = xh * gHudScaleX;
         yl = yl * yScale;
         yh = yh * yScale;
-        dsdx = dsdx / D_8008FE1C;
-        dtdy = dtdy / D_8008FE20;
+        dsdx = dsdx / gHudScaleX;
+        dtdy = dtdy / gHudScaleY;
     }
     gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, tile, s, t, dsdx, dtdy);
     return gfx;
@@ -169,7 +169,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
     s32 s;
 
     flags = 0;
-    D_8008FDBC &= ~0x10;
+    gMatchFlags &= ~0x10;
     gSPDisplayList(gfx++, gHudSpriteDl);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
     if (gScreenLayout == 0) {
@@ -183,7 +183,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
     D_800E0BCC = 0;
     nearTarget = 0;
     team = -1;
-    for (i = 0; i < D_8008FD8C; i++) {
+    for (i = 0; i < gPlayerCount; i++) {
         obj = &movement_obj[i];
         sub = obj->mv;
         kind = sub->context_b & 0x7F;
@@ -191,7 +191,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             team = obj->team;
             (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
         }
-        if ((team != -1) && (D_8008FDC0 & 0x8000)) {
+        if ((team != -1) && (gMatchHudFlags & 0x8000)) {
             if (team == 0) {
                 flags |= 2;
             } else {
@@ -199,7 +199,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             }
             team = -1;
         }
-        if ((obj->team == 1) && (obj->taskint[0] != 0) && (D_8008FDC0 & 0x4000)) {
+        if ((obj->team == 1) && (obj->taskint[0] != 0) && (gMatchHudFlags & 0x4000)) {
             flags |= 4;
         }
         if (kind == 0x25) {
@@ -208,7 +208,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             pz -= obj->zpos;
             pz = px * px + pz * pz;
             if (pz < 6250000.0f) {
-                D_8008FDBC |= 0x10;
+                gMatchFlags |= 0x10;
                 nearTarget = 1;
             }
             {
@@ -224,7 +224,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
         flags = 0;
     }
     image = 0;
-    if (D_8008FDC0 & 9) {
+    if (gMatchHudFlags & 9) {
         image = texture_getAddress((s32)&D_D14, 0, 3, 0);
         if (image != TEXTURE_NOT_LOADED) {
             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
@@ -239,7 +239,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             image = 0;
         }
     }
-    if ((D_8008FDC0 & 8) && (image != 0)) {
+    if ((gMatchHudFlags & 8) && (image != 0)) {
         x = spacing >> 1;
         for (i = 0; i < D_800E0BB0; i++) {
             score = player_getStat(i, 6);
@@ -271,11 +271,11 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             x += spacing;
         }
     }
-    if (D_8008FDC0 & 1) {
+    if (gMatchHudFlags & 1) {
         gfx = hud_drawScorePips(gfx, y, team, 0, 1);
     }
     if (nearTarget || (team != -1)) {
-        if (D_8008FDC0 & 0x4000) {
+        if (gMatchHudFlags & 0x4000) {
             i = (s32)(&D_D16 + 1); // matching: the loop counter doubles as the texture id
         } else {
             i = (s32)&D_D16;
@@ -298,11 +298,11 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
                 gfx = hud_texRectScaled(gfx, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
             }
             if (team != -1) {
-                if (D_8008FDC0 & 0x4000) {
+                if (gMatchHudFlags & 0x4000) {
                     gfx = hud_texRectScaled(gfx, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
                 } else {
                     rowOffset = 0;
-                    if (D_8008FDC0 & 1) {
+                    if (gMatchHudFlags & 1) {
                         t = 0x1A;
                     } else {
                         t = 0x26;
@@ -347,7 +347,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             }
         }
     }
-    if (D_8008FDC0 & 0x6340) {
+    if (gMatchHudFlags & 0x6340) {
         gfx = hud_drawTeamTotals(gfx, y, 1);
     }
     return gfx;
@@ -389,7 +389,7 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
     }
     if (refresh) {
         inactiveTeams = 0xF;
-        for (i = 0; i < D_8008FD8C; i++) {
+        for (i = 0; i < gPlayerCount; i++) {
             if (player_getStat(i, 3)) {
                 inactiveTeams &= ~(1 << gRosterTeams[i]);
             }
@@ -473,7 +473,7 @@ Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
     s32 i;
 
     y = rowY - 0x10;
-    if ((D_8008FDC0 & 0x4000) || (gMenuState->selection == 8)) {
+    if ((gMatchHudFlags & 0x4000) || (gMenuState->selection == 8)) {
         tex = (s32)((gMenuState->selection == 8) ? &D_D10 + 2 : &D_D10 + 1);
         width = 0x10;
         leftIconS = 0;
@@ -505,11 +505,11 @@ Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
     team0Total = 0;
     team1Total = 0;
     if (refresh != 0) {
-        if (D_8008FDC0 & 0x6040) {
+        if (gMatchHudFlags & 0x6040) {
             team0Total = player_getStat(0, 6);
             team1Total = player_getStat(1, 6);
-        } else if (D_8008FDC0 & 0x100) {
-            for (i = 0; i < D_8008FD8C; i++) {
+        } else if (gMatchHudFlags & 0x100) {
+            for (i = 0; i < gPlayerCount; i++) {
                 amount = player_getStat(i, 3);
                 if (amount < 0) {
                     amount = 0;
@@ -522,7 +522,7 @@ Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
             }
         } else {
             iconT = 0x200;
-            for (i = 0; i < D_8008FD8C; i++) {
+            for (i = 0; i < gPlayerCount; i++) {
                 amount = gMenuState->score[i];
                 if (amount < 0) {
                     amount = 0;
@@ -600,13 +600,13 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     }
 
     y = topY;
-    if (D_8008FDC0 & 1) {
+    if (gMatchHudFlags & 1) {
         xbase = 0x1A;
     } else {
         xbase = 0x34;
     }
     if (gFrontEndState != 0) {
-        if (D_8008FDC8 != 0) {
+        if (gFreeForAll != 0) {
             y = topY - 0x28;
         }
     }
@@ -650,7 +650,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
                 gDPSetOtherMode(gfx++, 0x000C3F, 0x504244);
                 x = (xbase - 0x28) << 2;
-                if (D_8008FDC0 & 1) {
+                if (gMatchHudFlags & 1) {
                     iconY = (y - 0x11) << 2;
                     gfx = hud_texRectScaled(gfx, x + 0x1D4, iconY, x + 0x214, iconY + 0x40, 0, 0x200, 0, 0x400, 0x400);
                     x += 0x78;
@@ -707,15 +707,15 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             if (live != 0) {
                 total = movement_obj[i].mv->shotsfired;
             } else {
-                total = gMenuState->stats[i].unk6;
+                total = gMenuState->stats[i].shotsFired;
             }
             if (total > 0) {
-                percent = (gMenuState->stats[i].unk0 * 100) / total;
+                percent = (gMenuState->stats[i].hits * 100) / total;
             }
             if (percent >= 10000) {
                 percent = 9999;
             }
-            if (D_8008FDC8 != 0) {
+            if (gFreeForAll != 0) {
                 team = i;
             }
             x = xbase;
@@ -724,7 +724,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 nameIndex = 0;
             }
             text_printAt(x + 0x3C, y, 0x81, "%s", gTextStrings[nameIndex + nameBase]);
-            if (D_8008FDC0 & 1) {
+            if (gMatchHudFlags & 1) {
                 text_printAt(xbase + 0x54, y, 0x81, "%d", D_800E0AA0[team]);
                 x = xbase + 0x1E;
             }
@@ -745,13 +745,13 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             y += 0xF;
         }
     }
-    if (D_8008FDC0 & 0x6340) {
+    if (gMatchHudFlags & 0x6340) {
         gSPDisplayList(gfx++, gHudSpriteDl);
         gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
         gfx = hud_drawTeamTotals(gfx, 0x320, refreshScores);
     }
     if (live != 0) {
-        if (D_8008FDC0 & 1) {
+        if (gMatchHudFlags & 1) {
             gfx = hud_drawScorePips(gfx, 0x320, -1, 1, refreshScores);
         }
     }
@@ -818,7 +818,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
 
     show = (gTaskDoneBits[0x19] & 4) || (gCurrentSaveSlot < 0);
     if (gIsMultiplayer && !gPaused && !gPauseRequested) {
-        if (!func_151E564C() || gMenuState->selection == 1) {
+        if (!save_isFreeForAll() || gMenuState->selection == 1) {
             gfx = hud_drawTeamScores(gfx, 0, 0xFF);
         }
     } else {
@@ -896,11 +896,11 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
                     value = 0;
                 }
             }
-            if (gCutsceneStates[0] == 1 && D_800C3C9E != -1) {
-                if (D_800C3C9E == 0) {
+            if (gCutsceneStates[0] == 1 && gCutsceneCashOffset != -1) {
+                if (gCutsceneCashOffset == 0) {
                     value = 0;
                 } else {
-                    value = (D_800C3C9E == 0x7D00) ? 1000000 : value - D_800C3C9E;
+                    value = (gCutsceneCashOffset == 0x7D00) ? 1000000 : value - gCutsceneCashOffset;
                 }
             }
             if (value > 0) {
@@ -982,7 +982,7 @@ Gfx *hud_drawFadingMessage(Gfx *gfx) {
     s32 x;
     s32 firstX;
     u8 *line;
-    if (D_800E0A80 < 0) {
+    if (gCreditsLine < 0) {
         return gfx;
     }
     if (gFrontEndTimer < 0x168) {
@@ -1000,7 +1000,7 @@ Gfx *hud_drawFadingMessage(Gfx *gfx) {
             alpha = 0xFF;
         }
     }
-    i = D_800E0A80;
+    i = gCreditsLine;
     count = 0;
     alpha8 = alpha;
     while (gTextStrings[i][0] != '*') {
@@ -1014,7 +1014,7 @@ Gfx *hud_drawFadingMessage(Gfx *gfx) {
     }
     text_setColor(0xFF, 0, 0, alpha8);
     x = (0xD0 - count * spacing) >> 1;
-    i = D_800E0A80;
+    i = gCreditsLine;
     line = gTextStrings[i];
     firstX = x;
     while (*line != '*') {
@@ -1211,8 +1211,8 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by gMenuState->unk2C (or the func_151EC648 / hud_updateCodeEntry screens). */
-Gfx *func_151EC3E8(Gfx *gfx) {
+/* Draws the fading image picked by gMenuState->displayedStop (or the func_151EC648 / hud_updateCodeEntry screens). */
+Gfx *hud_drawMenuOverlay(Gfx *gfx) {
     static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
     static u8 D_800900D4 = 0;
     s32 alpha;
@@ -1221,7 +1221,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         D_800900D4 = 0;
         return gfx;
     }
-    alpha = D_800900D4 + (D_800BE9E4 * 4);
+    alpha = D_800900D4 + (gFrameTicks * 4);
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
@@ -1231,10 +1231,10 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         return func_151EC648(gfx);
     }
     if (gMenuState->menu == 0) {
-        if (gMenuState->unk2C == 1 && D_8008FEF8 != 0) {
+        if (gMenuState->displayedStop == 1 && D_8008FEF8 != 0) {
             gfx = hud_updateCodeEntry(gfx);
         } else {
-            alpha = (gMenuState->unk0 - 0.5f) * 512.0f;
+            alpha = (gMenuState->stepProgress - 0.5f) * 512.0f;
             if (alpha < 0) {
                 alpha = -alpha;
             }
@@ -1244,7 +1244,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             if (D_800900D4 < alpha) {
                 alpha = D_800900D4;
             }
-            if (gMenuState->unk2C == 1) {
+            if (gMenuState->displayedStop == 1) {
                 alpha = (gMenuPageFade * alpha) >> 8;
                 if (alpha >= 0xFE) {
                     alpha = 0xFF;
@@ -1252,13 +1252,13 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            gHudSprite.texId = D_800900BC[gMenuState->unk2C];
+            gHudSprite.texId = D_800900BC[gMenuState->displayedStop];
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
-        if (gMenuState->unk8 >= 0.5f) {
-            if (gMenuState->unk2C >= 3) {
-                if (gSaveSlots[gMenuState->unk2C - 3].sequence != -1) {
-                    gfx = hud_drawImagePanel(gfx, gSaveSlots[gMenuState->unk2C - 3].unkC);
+        if (gMenuState->pathProgress >= 0.5f) {
+            if (gMenuState->displayedStop >= 3) {
+                if (gSaveSlots[gMenuState->displayedStop - 3].sequence != -1) {
+                    gfx = hud_drawImagePanel(gfx, gSaveSlots[gMenuState->displayedStop - 3].checkpointLevel);
                 }
             }
         }
@@ -1294,7 +1294,7 @@ Gfx *func_151EC648(Gfx *gfx) {
     s32 diff;
     f32 sc;
 
-    fadeAlpha = (gMenuState->unk0 - 0.5f) * 512.0f;
+    fadeAlpha = (gMenuState->stepProgress - 0.5f) * 512.0f;
     if (fadeAlpha < 0) {
         fadeAlpha = -fadeAlpha;
     }
@@ -1303,13 +1303,13 @@ Gfx *func_151EC648(Gfx *gfx) {
     }
     gDPPipeSync(gfx++);
     state = gMenuState;
-    progress = state->unk8;
-    if (0.0f == state->unk8 && 0.0f == state->unkC) {
-        page = state->unk2C;
+    progress = state->pathProgress;
+    if (0.0f == state->pathProgress && 0.0f == state->pathSpeed) {
+        page = state->displayedStop;
         D_800900F8 = page;
     } else {
-        page = state->unk2C;
-        if (page == 0 && state->unkC < 0.0f) {
+        page = state->displayedStop;
+        if (page == 0 && state->pathSpeed < 0.0f) {
             D_800900F8 = 4;
         }
     }
@@ -1342,7 +1342,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             gHudSprite.texId = *image;
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, y, diff, v, scale, 0);
             state = gMenuState;
-            progress = state->unk8;
+            progress = state->pathProgress;
         }
         alpha = 0xFF - (s32)(progress * 300.0f);
         progress = 2.0f;
@@ -1360,7 +1360,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         gHudSlotAlphas[1] = 0xFF;
         gHudSlotAlphas[2] = 0xFF;
         gHudSlotAlphas[3] = 0xFF;
-        if (state->unk8 >= 0.5f && state->unk2C == 4) {
+        if (state->pathProgress >= 0.5f && state->displayedStop == 4) {
             listAlpha = (gMenuBrightness * gMenuPageFade) >> 8;
             if (listAlpha >= 0xFE) {
                 listAlpha = 0xFF;
@@ -1418,14 +1418,14 @@ Gfx *func_151EC648(Gfx *gfx) {
         sc = (gTotalTicks & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
         pulse = (gMenuPageFade * (s32)((sc + 1.0f) * 127.0f)) >> 8;
-        if (gMenuState->unk2C == 7) {
+        if (gMenuState->displayedStop == 7) {
             x = 0x70;
             slotCount = 2;
         } else {
             x = 0x28;
             slotCount = 4;
         }
-        count = func_151E24F0(values);
+        count = save_addPartnerPlayers(values);
         if (count != 0) {
             valueIndex = 0;
         }
@@ -1451,7 +1451,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                 }
             }
             alpha = gHudSlotAlphas[slot];
-            alpha += dir * (D_800BE9E4 << 3);
+            alpha += dir * (gFrameTicks << 3);
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             } else if (alpha < 0) {
@@ -1585,12 +1585,12 @@ Gfx *hud_drawSprite(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 
         scaleX = scale;
     }
     texId = (s32)sprite->texId + frame;
-    width = (u32)sprite->width * scaleX * D_8008FE1C;
-    height = (u32)sprite->height * scale * D_8008FE20;
-    dtdy = 1024.0f / (scale * D_8008FE20);
-    dsdx = 1024.0f / (scaleX * D_8008FE1C);
-    x *= D_8008FE1C;
-    y *= D_8008FE20;
+    width = (u32)sprite->width * scaleX * gHudScaleX;
+    height = (u32)sprite->height * scale * gHudScaleY;
+    dtdy = 1024.0f / (scale * gHudScaleY);
+    dsdx = 1024.0f / (scaleX * gHudScaleX);
+    x *= gHudScaleX;
+    y *= gHudScaleY;
     x -= (width * columns) >> 1;
     top = y - ((height * rows) >> 1);
     for (column = 0; column < columns; column++) {
@@ -1712,12 +1712,12 @@ void hud_freeModel(HudModel *model) {
     }
 }
 
-Gfx D_80090110[] = {
+Gfx gHudModelTexOnDl[] = {
     gsDPPipeSync(),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_80090128[] = {
+Gfx gHudModelTexOffDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
@@ -1731,10 +1731,10 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     s32 i;
 
     start = gfx;
-    if (D_8008FE1C != 1.0f) {
-        x *= D_8008FE1C;
-        y *= D_8008FE20;
-        scale *= D_8008FE1C;
+    if (gHudScaleX != 1.0f) {
+        x *= gHudScaleX;
+        y *= gHudScaleY;
+        scale *= gHudScaleX;
     }
 
     guMtxIdentF(model->matrices[gDrawBufferIndex]);
@@ -1748,7 +1748,7 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
 
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gHudOrthoMtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPDisplayList(gfx++, D_80090110);
+    gSPDisplayList(gfx++, gHudModelTexOnDl);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFFBFD);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
@@ -1779,12 +1779,12 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     for (i = 0; i < model->displayListCount; i++) {
         gSPDisplayList(gfx++, model->displayLists[i]);
     }
-    gSPDisplayList(gfx++, D_80090128);
+    gSPDisplayList(gfx++, gHudModelTexOffDl);
     return gfx;
 }
 
-Struct151EDF4C *D_80090138 = NULL;
-HudSprite D_8009013C = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
+Struct151EDF4C *gCodeEntryKeys = NULL;
+HudSprite gHudImagePanelSprite = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
 
 /*
  * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the
@@ -1800,16 +1800,16 @@ void hud_initCodeEntry(void) {
     s32 cmd;
     Vtx *vtx;
 
-    D_80090138 = NULL;
+    gCodeEntryKeys = NULL;
     gCodeEntryText = allocate_memory(0x1A8, 1, 0, 0);
     if (gCodeEntryText != NULL) {
-        D_80090138 = (Struct151EDF4C *)(gCodeEntryText + 0x40);
+        gCodeEntryKeys = (Struct151EDF4C *)(gCodeEntryText + 0x40);
         for (i = 0x1C5, j = 0; i < 0x1E3; i++, j++) {
             data = rom_loadPathTable(0, 1, 0, 2, 9, i);
-            D_80090138[j].data = data;
-            D_80090138[j].dl = (Gfx *)*data;
-            texture_resolveDl(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].usedTextures);
-            dl = D_80090138[j].dl;
+            gCodeEntryKeys[j].data = data;
+            gCodeEntryKeys[j].dl = (Gfx *)*data;
+            texture_resolveDl(gCodeEntryKeys[j].dl, 0, 1, 0x3E, &gCodeEntryKeys[j].usedTextures);
+            dl = gCodeEntryKeys[j].dl;
             do {
                 cmd = (dl->words.w0 >> 24) & 0xFF;
                 if (cmd == 1) {
@@ -1838,11 +1838,11 @@ void hud_initCodeEntry(void) {
         }
         gCodeEntryColumn = 0;
         gCodeEntryRow = 0;
-        D_800E0C82 = 0;
-        D_800E0C83 = 0;
+        gCodeEntryKeyPress = 0;
+        gCodeEntryLength = 0;
         gCodeEntryText[0] = 0;
         gCodeEntryText[0x20] = 0;
-        D_800E0C84 = 0;
+        gCodeEntryRepeatCount = 0;
     }
 }
 
@@ -1872,7 +1872,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
     u8 *word;
 
     sfx = 0;
-    if (D_80090138 == NULL) {
+    if (gCodeEntryKeys == NULL) {
         return gfx;
     }
     cursorMoved = 0;
@@ -1923,15 +1923,15 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
     if (gPads[0].button & A_BUTTON) {
-        D_800E0C82 += 8;
+        gCodeEntryKeyPress += 8;
     } else {
-        D_800E0C82 -= 8;
+        gCodeEntryKeyPress -= 8;
     }
-    if (D_800E0C82 < 0) {
-        D_800E0C82 = 0;
+    if (gCodeEntryKeyPress < 0) {
+        gCodeEntryKeyPress = 0;
     }
-    if (D_800E0C82 >= 13) {
-        D_800E0C82 = 12;
+    if (gCodeEntryKeyPress >= 13) {
+        gCodeEntryKeyPress = 12;
     }
     if (gMenuState->input & 0x10) {
         i = selectedKey + 'A';
@@ -1941,11 +1941,11 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
             i = ' ';
         } else if (gCodeEntryRow == 4) {
             if (gCodeEntryColumn == 0) {
-                if (D_800E0C83 > 0) {
-                    D_800E0C83--;
+                if (gCodeEntryLength > 0) {
+                    gCodeEntryLength--;
                 }
                 i = 0;
-                gCodeEntryText[D_800E0C83] = 0;
+                gCodeEntryText[gCodeEntryLength] = 0;
             } else if (gCodeEntryColumn == 1) {
                 i = '.';
             } else if (gCodeEntryColumn == 4) {
@@ -1953,7 +1953,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                 for (i = 0x90; i < 0xA3; i++) {
                     str = gTextStrings[i];
                     temp = i - 0x90;
-                    if (temp < D_800E0C83) {
+                    if (temp < gCodeEntryLength) {
                         typed = gCodeEntryText[temp];
                     } else {
                         typed = ' ';
@@ -2014,15 +2014,15 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                             i++;
                         }
                         if (gCodeEntryText[i + 0x20] == 0 && gCodeEntryText[i] == 0) {
-                            D_800E0C84++;
-                            if (D_800E0C84 == 1) {
+                            gCodeEntryRepeatCount++;
+                            if (gCodeEntryRepeatCount == 1) {
                                 sfx = 0xC7;
                             }
                         } else {
-                            D_800E0C84 = 0;
+                            gCodeEntryRepeatCount = 0;
                         }
                     } else {
-                        D_800E0C84 = 0;
+                        gCodeEntryRepeatCount = 0;
                     lbl2:; // matching: an empty label here ends a basic block for IDO's scheduler
                     }
                 }
@@ -2042,22 +2042,22 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                     obj->scriptCmd = script_getScript(0, obj->intelwalk);
                     obj->unk21C = 0;
                 }
-                D_800E0C83 = 0;
-                gCodeEntryText[D_800E0C83] = 0;
+                gCodeEntryLength = 0;
+                gCodeEntryText[gCodeEntryLength] = 0;
             } else {
                 i -= 2;
             }
         }
         if (i > 0) {
-            gCodeEntryText[D_800E0C83] = i;
-            if (D_800E0C83 < 19) {
-                D_800E0C83++;
+            gCodeEntryText[gCodeEntryLength] = i;
+            if (gCodeEntryLength < 19) {
+                gCodeEntryLength++;
             }
-            gCodeEntryText[D_800E0C83] = 0;
+            gCodeEntryText[gCodeEntryLength] = 0;
         }
     }
     math_mtxRotTrans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
-    math_mtxTranslate(mtx + 1, 0.0f, 0.0f, -(f32)D_800E0C82);
+    math_mtxTranslate(mtx + 1, 0.0f, 0.0f, -(f32)gCodeEntryKeyPress);
     guPerspective(&gHudOrthoMtx, &perspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
     gSPPerspNormalize(gfx++, perspNorm);
     gSPMatrix(gfx++, &gHudOrthoMtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -2072,7 +2072,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
         } else {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuPageFade);
         }
-        gSPDisplayList(gfx++, D_80090138[i].dl);
+        gSPDisplayList(gfx++, gCodeEntryKeys[i].dl);
         if (i == selectedKey) {
             gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         }
@@ -2092,7 +2092,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
     return gfx;
 }
 
-/* Draws a framed panel showing image `index` of table 0x1D (the texture id is cached in D_8009013C). */
+/* Draws a framed panel showing image `index` of table 0x1D (the texture id is cached in gHudImagePanelSprite). */
 Gfx *hud_drawImagePanel(Gfx *gfx, s32 index) {
     s32 image;
 
@@ -2126,24 +2126,24 @@ Gfx *hud_drawImagePanel(Gfx *gfx, s32 index) {
         gfx = hud_texRectScaled(gfx, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
     }
 
-    if (D_800E0C85 != index + 1) {
+    if (gHudImagePanelImage != index + 1) {
         u16 *table;
         u32 size;
 
         table = NULL;
         size = rom_loadPathTo(&table, 1, 0x1D);
         if ((u32)index < size >> 1) {
-            D_8009013C.texId = (void *)table[index];
+            gHudImagePanelSprite.texId = (void *)table[index];
         } else {
-            D_8009013C.texId = NULL;
+            gHudImagePanelSprite.texId = NULL;
         }
         heap_free(table);
-        D_800E0C85 = index + 1;
+        gHudImagePanelImage = index + 1;
     }
 
-    if (D_8009013C.texId != NULL) {
+    if (gHudImagePanelSprite.texId != NULL) {
         gDPPipeSync(gfx++);
-        gfx = hud_drawSprite(gfx, &D_8009013C, 0x94, 0x60, 1, 2, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &gHudImagePanelSprite, 0x94, 0x60, 1, 2, 1.0f, 0);
     }
     return gfx;
 }

@@ -219,7 +219,7 @@ void texture_updateUvWobbles(void) {
                 f32 sn;
                 f32 cs;
 
-                wob->phase += wob->rate * D_800BE9E4;
+                wob->phase += wob->rate * gFrameTicks;
                 vtx = gLevelVertices[0]; // matching: &gLevelVertices[0][index] schedules differently
                 vtx += wob->primaryIndex;
                 angle = wob->phase * 9.587380191e-05f; /* 2pi / 0x10000 */

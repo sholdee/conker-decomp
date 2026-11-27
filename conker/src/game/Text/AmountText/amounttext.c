@@ -22,7 +22,7 @@ void func_151D6970(Actor *character, void *obj) {
 
 
 /* Spawns the particle_spawnSplashSprayAtAngles and particle_spawnDropSprayAtAngles bursts at `pickup`, on the ground under `player`. */
-void func_151D69B4(WorldObject *pickup, Actor *player) {
+void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player) {
     CollisionHit ground;
     SplashSpraySpec first;
 
@@ -87,7 +87,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
 
 
 /*
- * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
+ * Spawns model effect 0xA5 on `owner` (updated by text_updateCashModel, drawn with text_preDrawCashModel) and a text box
  * showing a random amount as "$ %d" (style 3: text_updateAmount / text_handleAmountMessage).
  */
 void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
@@ -164,7 +164,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
  * Effect update (gModelEffectUpdate2Funcs[3]): this frame's matrix is math_mtxRotateRPYF's for (0, math_getCameraYaw(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.
  */
-s32 func_151D6E60(ModelEffect *fx) {
+s32 text_updateCashModel(ModelEffect *fx) {
     f32 scale;
 
     math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, math_getCameraYaw(0) + 25.0f, 0.0f);
@@ -232,7 +232,7 @@ void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type) {
  * Effect pre-draw (gModelEffectPreDrawFuncs[1]): binds segment 8 to gEffectXluRenderModes while the effect's alpha is below 0xFF
  * (else gEffectOpaRenderModes), then texture 0xC3 to segments 6 and 7.
  */
-Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+Gfx *text_preDrawCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     if (fx->params.color0.alpha < 0xFF) {
         gSPSegment(gfx++, 8, gEffectXluRenderModes);
     } else {

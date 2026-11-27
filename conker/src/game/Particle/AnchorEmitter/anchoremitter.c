@@ -59,15 +59,15 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
 };
 /* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
-   their own view (effect_updateBurnDamage and func_151906C4, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
+   their own view (effect_updateBurnDamage and effect_clearOnFire, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
 static s32 (*gAnchorEmitterUpdateFuncs[])() = { effect_updateBurnDamage };
-static void (*gAnchorEmitterExpireFuncs[])() = { func_151906C4 };
+static void (*gAnchorEmitterExpireFuncs[])() = { effect_clearOnFire };
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
 s32 particle_wobbleSpriteSize(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
-    state->timer1 -= D_800BE9E4;
+    state->timer1 -= gFrameTicks;
     if (state->timer1 < 0) {
         state->timer1 = math_random() % 6U;
         if (math_random() & 3) {
@@ -77,13 +77,13 @@ s32 particle_wobbleSpriteSize(EffectSprite *sprite) {
         }
     }
     sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
-    state->timer0 -= D_800BE9E4;
+    state->timer0 -= gFrameTicks;
     if (state->timer0 < 0) {
         state->timer0 = math_random() % 17U;
         state->target0 = math_randomFloat() * (state->hi0 - state->lo0) + state->lo0;
     }
     sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
-    state->timer2 -= D_800BE9E4;
+    state->timer2 -= gFrameTicks;
     if (state->timer2 < 0) {
         state->timer2 = math_random() % 15U;
         state->target2 = math_randomFloat() * (state->hi2 - state->lo2) + state->lo2;
@@ -237,7 +237,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
     owner = emitter->group.actor;
     params = &emitter->params;
     if (params->accum > 1.0f) {
-        if ((owner->ob_matrix_ptr != NULL) && ((owner->unk74 & 0xF) != 0xF)) {
+        if ((owner->ob_matrix_ptr != NULL) && ((owner->cullMask & 0xF) != 0xF)) {
             do {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;

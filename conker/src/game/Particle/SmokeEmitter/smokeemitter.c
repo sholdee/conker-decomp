@@ -110,7 +110,7 @@ s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
 }
 
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
-void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
+void particle_startGreyscaleScreen(s16 lifetime, u8 arg1, s32 arg2) {
     EffectDesc desc;
 
     desc.flags = 1;
@@ -121,7 +121,7 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     colourfb_createScreenEffect(&desc, 0, arg1, arg2);
 }
 
-void func_150AF790(void *arg0, u8 *arg1) {
+void particle_drawGreyscaleScreen(void *arg0, u8 *arg1) {
     colourfb_toGreyscale(arg1, arg1 + 0x1ECC0);
 }
 
@@ -148,7 +148,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     ScreenSpriteInfo spark;
 
     timers = &source->timers;
-    timers->puff -= D_800BE9E4;
+    timers->puff -= gFrameTicks;
     if (timers->puff < 0) {
         motion.x = math_randomFloat() * 280.0f + -140.0f;
         motion.y = math_randomFloat() * 50.0f;
@@ -193,12 +193,12 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         }
         timers->puff = math_random() % 41U + 45;
     }
-    timers->spark -= D_800BE9E4;
+    timers->spark -= gFrameTicks;
     if (timers->spark < 0) {
         spark.x = math_randomFloat() * 280.0f + -140.0f;
         spark.y = math_randomFloat() * 200.0f + -100.0f;
         spark.halfWidth = spark.halfHeight = 2.0f * math_randomFloat() + 1.0f;
-        spark.texture = func_151D8E6C();
+        spark.texture = particle_pickKind0Texture();
         spark.timer = math_random() % 7U + 5;
         if (source->base.header.state < spark.timer) {
             spark.timer = source->base.header.state;

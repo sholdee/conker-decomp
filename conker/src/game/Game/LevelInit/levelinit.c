@@ -62,5 +62,5 @@ void game_initLevelSubsystems(s32 levelId) {
     effect_resetRain();
     level_resetScreenCopy();
 
-    func_151645C4(!(gTaskDoneBits[0x4] & 0x80));
+    light_setDaylight(!(gTaskDoneBits[0x4] & 0x80));
 }

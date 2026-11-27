@@ -19,7 +19,7 @@ s32 script_initSpringValue(s32 arg0, ScriptCmd *record) {
 }
 
 // Empty end handler of gScriptEndHandlers: it has the table's s32 type but no return statement.
-s32 func_1509DFB4(s32 arg0, ScriptCmd *record) {
+s32 script_emptyMiscEnd(s32 arg0, ScriptCmd *record) {
 }
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
@@ -38,7 +38,7 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 1:
         text_setColor(255, 255, 255, 255);
         text_printAt(150, 86, 1, "%d", (args->a[0].w + 59) / 60);
-        D_8008FDBC |= 0x80;
+        gMatchFlags |= 0x80;
         break;
     case 2:
         gHudClockTime = args->a[0].w;
@@ -96,7 +96,7 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 22:
         return mp_crossFinishLine(args->a[0].w, args->a[1].w);
     case 23:
-        func_1508B1D4(args->a[0].w);
+        mp_clearTeamKills(args->a[0].w);
         return 0;
     case 25:
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
@@ -148,7 +148,7 @@ s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 4:
         return mp_updateLineOfSight(args->a[0].w, args->a[1].w);
     case 5:
-        return D_800E0BD0;
+        return gBotDifficulty;
     case 6:
         return mp_pickOpponentInRange(args->a[0].w);
     case 7:
@@ -168,11 +168,11 @@ s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 14:
         return func_150887F8();
     case 15:
-        return D_8008FDBC & 0x40;
+        return gMatchFlags & 0x40;
     case 16:
         return gSettings[args->a[0].w];
     case 17:
-        return func_1508B194(args->a[0].w);
+        return mp_getTeamKills(args->a[0].w);
     case 20:
     case 21:
         return gScriptSpringValues[args->a[0].w] * 65536.0f;

@@ -37,6 +37,6 @@ f32 func_150CF040(s32 arg0, s32 arg1) {
     return math_atan2(arg0, arg1) * 57.295776f;
 }
 
-void func_150CF080(s32 *arg0) {
+void effect_levelHook16(s32 *arg0) {
     arg0[0x21] |= 0x4000;
 }

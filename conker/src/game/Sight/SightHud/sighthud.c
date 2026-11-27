@@ -30,7 +30,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
             break;
         case 27:
             if (level == 0x27) {
-                func_151C9DE8(player, 1, -1, 0xFF, 1);
+                sight_spawnScopeSight(player, 1, -1, 0xFF, 1);
             } else {
                 if (gScreenLayout == 0) {
                     sight_spawnCrossBars(player, 0xFF, 0, 0, 1, 0xFF);
@@ -59,7 +59,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
 }
 
 /* Effects for state 27 when level is 0x27 (see sight_startPlayerEffects). */
-void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
+void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     sight_spawnRing(player, 4, arg1, arg2, arg3);
     sight_spawnCrossBars(player, 0, 50, 0xFF, arg1, arg3);
     sight_spawnCrossSight(player, 0, 50, 0xFF, arg1, arg3);

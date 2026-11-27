@@ -194,7 +194,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     if (obj->ob_matrix_ptr == NULL) {
         return;
     }
-    if ((obj->unk74 & 0xF) == 0xF) {
+    if ((obj->cullMask & 0xF) == 0xF) {
         return;
     }
     moving = math_vec3Normalize(&vel, &vel, &ignored0, &ignored1) ? 1 : 0; // matching: != 0 and a plain store differ
@@ -366,7 +366,7 @@ void particle_spawnRandomSwell(Vec3f *pos, u8 arg1, s32 arg2) {
     particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
-/* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or D_8008FD8C >= 8, else 0. */
+/* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or gPlayerCount >= 8, else 0. */
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk00 = 6;
     info->unk04 = 3;
@@ -390,7 +390,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk4C = 12;
     info->unk4E = 20;
 
-    if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
+    if (gScreenLayout >= 2 || gPlayerCount >= 8) {
         info->unk50 = -1;
     } else {
         info->unk50 = 0;

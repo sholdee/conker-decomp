@@ -90,7 +90,7 @@ Gfx *hud_drawFadingMessage(Gfx *gfx);
 Gfx *func_151EBB50(Gfx *gfx);
 Gfx *func_151EC178(Gfx *gfx);
 Gfx *func_151EC1F0(Gfx *gfx);
-Gfx *func_151EC3E8(Gfx *gfx);
+Gfx *hud_drawMenuOverlay(Gfx *gfx);
 Gfx *func_151EC648(Gfx *gfx);
 Gfx *func_151ED09C(Gfx *gfx);
 Gfx *hud_darkenScreen(Gfx *gfx);
@@ -113,10 +113,10 @@ extern u8 gScoreDigitCols[4];
 extern u8 gScoreDigitRows[3];
 extern s32 gHudDigitTextures[10];
 extern PlaceValueTable gPlaceValues;
-extern Gfx D_80090110[];
-extern Gfx D_80090128[];
-extern Struct151EDF4C *D_80090138;
-extern HudSprite D_8009013C;
+extern Gfx gHudModelTexOnDl[];
+extern Gfx gHudModelTexOffDl[];
+extern Struct151EDF4C *gCodeEntryKeys;
+extern HudSprite gHudImagePanelSprite;
 
 /* Texture asset ids of the HUD. Each is a link-time symbol whose address is the id (undefined_syms_auto.txt);
  * the code passes the address, and &D_D16 + n is the id 0xD16 + n. */

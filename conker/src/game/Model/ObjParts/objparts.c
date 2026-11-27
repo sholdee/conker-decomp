@@ -87,7 +87,7 @@ void model_updateParts(s32 objIndex) {
     ps = &gObjPartsStates[objIndex];
     state = ps->state;
     if (state == PARTS_STATE_START) {
-        movement_obj[objIndex].unk74 |= 0x80;
+        movement_obj[objIndex].cullMask |= 0x80;
         state = PARTS_STATE_SETUP;
         if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
             return;
@@ -170,7 +170,7 @@ void model_stopParts(s32 objIndex) {
             heap_free((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
         }
         gObjPartsStates[objIndex].parts = NULL;
-        movement_obj[objIndex].unk74 &= ~0x80;
+        movement_obj[objIndex].cullMask &= ~0x80;
     }
 }
 
@@ -341,7 +341,7 @@ void model_moveFreeParts(s32 objIndex) {
     f32 dt;
 
     count = gPartCounts[gObjPartsStates[objIndex].kind];
-    dt = D_800BE9E4;
+    dt = gFrameTicks;
     for (i = 0; i < count; i++) {
         if (!gObjPartsStates[objIndex].parts[i].active) {
             continue;
@@ -451,7 +451,7 @@ void model_updatePartsTimed(s32 objIndex) {
     model_bounceParts(objIndex);
     ps = &gObjPartsStates[objIndex];
     timer = ps->timer;
-    timer -= D_800BE9E4;
+    timer -= gFrameTicks;
     ps->timer = timer;
     if (timer <= 0) {
         actor_remove(&movement_obj[objIndex], 1);
@@ -535,7 +535,7 @@ void model_updatePartsKind2(s32 objIndex) {
 
     model_bounceParts(objIndex);
     ps = &gObjPartsStates[objIndex];
-    ps->timer -= D_800BE9E4;
+    ps->timer -= gFrameTicks;
     if (ps->timer > 0) {
         return;
     }

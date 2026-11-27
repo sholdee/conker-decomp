@@ -90,7 +90,7 @@ s32 trail_ageScatterTrail(ScatterTrail *trail) {
             }
 
             points[i].alpha = 0xFF;
-            points[i].life -= D_800BE9E4;
+            points[i].life -= gFrameTicks;
             if (points[i].life < 0) {
                 expired = TRUE;
             }
@@ -138,7 +138,7 @@ s32 trail_emitScatterTrail(ScatterTrail *trail) {
 
     state = trail->state;
     points = trail->points;
-    state->phase += (math_random() % (state->phaseJitter + 1)) * D_800BE9E4;
+    state->phase += (math_random() % (state->phaseJitter + 1)) * gFrameTicks;
     state->speedTarget = math_cosBinAngleMasked(state->phase - 0x40) * state->speedSwing + state->speedBase;
     state->emitAccum += state->emitRate * gFrameDelta;
     if (state->emitAccum > 1.0f) {

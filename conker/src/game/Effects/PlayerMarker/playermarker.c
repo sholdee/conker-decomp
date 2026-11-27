@@ -78,13 +78,13 @@ void effect_updatePlayerMarker(PlayerMarker *marker) {
         break;
     case 1:
         timer = marker->header.state;
-        timer -= D_800BE9E4; // matching: a single `timer = marker->header.state - D_800BE9E4;` schedules differently
+        timer -= gFrameTicks; // matching: a single `timer = marker->header.state - gFrameTicks;` schedules differently
         if ((timer <= 0) || (movement_obj[playerId].mv->context_b == 0)) {
             marker->state = 2;
             timer = 0;
         }
         marker->header.state = timer;
-        marker->bobPhase += D_800BE9E4 * 2;
+        marker->bobPhase += gFrameTicks * 2;
         if (marker->light != NULL) {
             f32 extraHeight;
 
@@ -112,14 +112,14 @@ void effect_updatePlayerMarker(PlayerMarker *marker) {
         break;
     case 3:
         timer = marker->header.state;
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer <= 0) {
             marker->state = 2;
             marker->header.state = 0;
             break;
         }
         marker->header.state = timer;
-        marker->bobPhase += D_800BE9E4 * 2;
+        marker->bobPhase += gFrameTicks * 2;
         if (marker->light != NULL) {
             marker->light->x = player->xpos;
             marker->light->y = math_sinBinAngle(marker->bobPhase) * 15.0f + (player->ypos + 160.0f);

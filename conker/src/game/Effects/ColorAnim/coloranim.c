@@ -112,7 +112,7 @@ void effect_updateColorAnims(void) {
                 gColorAnims[i].timer.i = -8;
                 gColorAnims[i].blend = 1.0f;
             } else if (gColorAnims[i].timer.i < 0) {
-                gColorAnims[i].timer.i += D_800BE9E4;
+                gColorAnims[i].timer.i += gFrameTicks;
                 if (gColorAnims[i].timer.i >= 0) {
                     gColorAnims[i].blend = 0.0f;
                     gColorAnims[i].state.u++;
@@ -122,7 +122,7 @@ void effect_updateColorAnims(void) {
                     gColorAnims[i].timer.i = gColorFlickerWaits[gColorAnims[i].state.u];
                 }
             } else {
-                gColorAnims[i].timer.i -= D_800BE9E4;
+                gColorAnims[i].timer.i -= gFrameTicks;
                 if (gColorAnims[i].timer.i < 0) {
                     gColorAnims[i].timer.i = 0;
                 }
@@ -131,7 +131,7 @@ void effect_updateColorAnims(void) {
         case COLOR_ANIM_RANDOM:
             switch (gColorAnims[i].state.i) {
             case 0: /* fade up towards the target */
-                gColorAnims[i].blend += gColorAnims[i].rate * D_800BE9E4;
+                gColorAnims[i].blend += gColorAnims[i].rate * gFrameTicks;
                 if (gColorAnims[i].timer.f <= gColorAnims[i].blend) {
                     gColorAnims[i].blend = gColorAnims[i].timer.f;
                     if (gColorAnims[i].timer.f == 1.0f) {
@@ -148,7 +148,7 @@ void effect_updateColorAnims(void) {
                 }
                 break;
             case 1: /* hold at half, then fade up to "to" or down to "from" */
-                gColorAnims[i].timer.i -= D_800BE9E4;
+                gColorAnims[i].timer.i -= gFrameTicks;
                 if (gColorAnims[i].timer.i <= 0) {
                     gColorAnims[i].state.i = (math_rand() % 2) * 2;
                     if (gColorAnims[i].state.i == 0) {
@@ -159,7 +159,7 @@ void effect_updateColorAnims(void) {
                 }
                 break;
             case 2: /* fade down towards the target */
-                gColorAnims[i].blend -= gColorAnims[i].rate * D_800BE9E4;
+                gColorAnims[i].blend -= gColorAnims[i].rate * gFrameTicks;
                 if (gColorAnims[i].blend <= gColorAnims[i].timer.f) {
                     gColorAnims[i].blend = gColorAnims[i].timer.f;
                     if (gColorAnims[i].timer.f == 0.0f) {
@@ -172,7 +172,7 @@ void effect_updateColorAnims(void) {
                 }
                 break;
             case 3: /* hold at "from", then fade up to half or "to" */
-                gColorAnims[i].timer.i -= D_800BE9E4;
+                gColorAnims[i].timer.i -= gFrameTicks;
                 if (gColorAnims[i].timer.i <= 0) {
                     gColorAnims[i].state.i = 0;
                     if (!(math_rand() & 1)) {

@@ -74,7 +74,7 @@ void particle_updateWakePuff(PuffParticle *particle) {
     if (alpha > 200) {
         alpha = 200;
     }
-    alpha -= D_800BE9E4 * particle->fadeRate;
+    alpha -= gFrameTicks * particle->fadeRate;
     if (alpha < 0) {
         particle->life = 0;
         return;

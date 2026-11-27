@@ -81,7 +81,7 @@ void effect_updatePathMover(WorldObject *mover) {
     speed = mover->moveData.half.hi * (1.0f / 16384.0f);
     progress = mover->moveData.half.lo * (1.0f / 16384.0f);
     speed -= speed * D_800A0068[0];
-    progress += speed * D_800BE9E4;
+    progress += speed * gFrameTicks;
 
     mover->x = (toX - fromX) * progress + fromX;
     mover->y = (toY - fromY) * progress + fromY;

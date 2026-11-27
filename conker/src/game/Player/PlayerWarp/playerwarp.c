@@ -37,7 +37,7 @@ void player_cancelWarp(s32 player) {
 void player_respawnAt(Actor *actor, s32 spawnIndex) {
     player_moveToSpawn(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
-    if (D_800BE9B4 == 0 && actor->mv != NULL) {
+    if (gLevelLoadState == 0 && actor->mv != NULL) {
         actor->mv->unk56 = 3;
     }
 }

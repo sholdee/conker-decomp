@@ -716,7 +716,7 @@ typedef struct ScreenSpriteInfo {
     /* 0x0C */ f32 halfHeight;
     /* 0x10 */ u8 texture;    /* index into gEffectTextures, 0xFF = none */
     /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
+    /* 0x12 */ s16 timer;     /* counts down by gFrameTicks when (flags & 1) */
     /* 0x14 */ u16 flags;
     /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
     /* 0x18 */ s16 fadeRate;
@@ -2775,9 +2775,9 @@ typedef struct CharacterWatcher {
     /* 0x1D */ u8 mode; /* from effect_pickWatcherMode */
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ Vec3f lastPosition;
-    /* 0x2C */ u8 state0; /* func_15159084 */
-    /* 0x2D */ u8 state1; /* func_15159120 */
-    /* 0x2E */ u8 state2; /* func_15159184 */
+    /* 0x2C */ u8 state0; /* effect_watcherIsOutOfWater */
+    /* 0x2D */ u8 state1; /* effect_watcherIsDeepWater */
+    /* 0x2E */ u8 state2; /* effect_watcherIsNearWaterSurface */
     /* 0x2F */ u8 moveState; /* effect_getWatcherMoveState */
     /* 0x30 */ u8 surfaceState; /* func_151592B8 */
     /* 0x31 */ u8 flags; /* 1: run state-change actions */
@@ -2993,7 +2993,7 @@ typedef struct OwnerEffectData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
+    /* 0x06 */ s16 timer;  /* counts down by gFrameTicks while the owner has a camera */
 } OwnerEffectData; /* size 0x8 */
 
 /* Timed effect 0x4E (effect_newTimedEffect), spawned by effect_spawnOwnerEffect (game/Effects/OwnerEffect/ownereffect.c) and updated by effect_updateOwnerEffect. */

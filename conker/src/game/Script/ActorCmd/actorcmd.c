@@ -202,7 +202,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x62: {
         s32 pad;
 
-        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < gPlayerCount) {
             player_setStat(OBJ_INDEX(obj), 10, cmd->a[0].w);
         }
         D_800BE3E4 = player_getStat(OBJ_INDEX(obj), 6);
@@ -211,7 +211,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x63: {
         s32 pad;
 
-        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < gPlayerCount) {
             player_setStat(OBJ_INDEX(obj), 9, cmd->a[0].w);
         }
         D_800BE3E4 = player_getStat(OBJ_INDEX(obj), 6);
@@ -224,13 +224,13 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (gIsMultiplayer == 0 && (D_800E9D00 & 0x200)) {
             v = 0x33;
         }
-        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < gPlayerCount) {
             player_setStat(OBJ_INDEX(obj), 2, v);
         }
         break;
     }
     case 0x65:
-        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < gPlayerCount) {
             player_setStat(OBJ_INDEX(obj), 3, cmd->a[0].w);
         }
         break;
@@ -324,9 +324,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x1E:
         if (cmd->a[0].w != 0) {
-            obj->unk2FA |= 0x80;
+            obj->activeFlags |= 0x80;
         } else {
-            obj->unk2FA &= ~0x80;
+            obj->activeFlags &= ~0x80;
         }
         break;
     case 0x1F:
@@ -656,7 +656,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unique_id = cmd->a[0].w;
         break;
     case 0x50:
-        obj->unk74 = (obj->unk74 & ~cmd->a[1].w) | cmd->a[0].w;
+        obj->cullMask = (obj->cullMask & ~cmd->a[1].w) | cmd->a[0].w;
         break;
     case 0x51:
         obj->mv->chased = cmd->a[0].w;
@@ -803,7 +803,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
             v = 0x79;
             collision_createPartSet(obj, v, 0.0f, 0);
-            if (OBJ_INDEX(obj) < D_8008FD90) {
+            if (OBJ_INDEX(obj) < gHumanCount) {
                 obj->mv->transport = 2;
                 actor_playAnim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
@@ -884,10 +884,10 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x82: {
         u16 saved;
 
-        saved = D_8008FDBC;
-        D_8008FDBC = 0;
+        saved = gMatchFlags;
+        gMatchFlags = 0;
         actor_respawn(obj);
-        D_8008FDBC = saved;
+        gMatchFlags = saved;
     }
         break;
     case 0x83:
@@ -1401,7 +1401,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return v;
     }
     case 0xD5:
-        return func_151E564C();
+        return save_isFreeForAll();
     case 0xD6:
         return save_checkMatchOver();
     case 0xD7:
@@ -1432,7 +1432,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return OBJ_INDEX(obj);
     case 0xC6:
         ret = OBJ_INDEX(obj);
-        if (ret >= 0 && ret < D_8008FD8C) {
+        if (ret >= 0 && ret < gPlayerCount) {
             return player_getStat(OBJ_INDEX(obj), 6);
         }
         break;
@@ -1448,7 +1448,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE2:
         return obj->mv->matrix_physics;
     case 0xE3:
-        return D_800D18A9;
+        return gLastDeathKind;
     case 0xE4:
         return D_800D18A8;
     case 0xE5:
@@ -1578,7 +1578,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xF0:
         return gPlayerRanks[obj->team];
     case 0xF1:
-        return (obj->unk74 & 0xF) == 0xF;
+        return (obj->cullMask & 0xF) == 0xF;
     case 0xF2:
         if (obj->lifting != 0) {
             return movement_obj[obj->lifting].listpos | 0x2000;

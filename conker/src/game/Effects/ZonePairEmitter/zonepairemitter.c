@@ -11,7 +11,7 @@ void func_150DE320(s32 arg0) {
 
 /* For each of eight zones records that zone_containsPoint accepts, sets the moving state of the
  * matching gfx_findObjectById object, or (for records without one) calls zone_setDisabled(id, 1). */
-void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
+void effect_onBulletImpactZones(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     WorldObject *prop;
     u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
@@ -44,7 +44,7 @@ void func_150DE458(WorldObject *prop) {
     s32 nextSlot;
 
     if ((prop->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
-        frames = D_800BE9E4;
+        frames = gFrameTicks;
 
         prop->t += prop->spinX * frames;
         angle = prop->t;
@@ -71,12 +71,12 @@ void func_150DE458(WorldObject *prop) {
         }
 
         timer = prop->alpha;
-        prop->moveY -= prop->moveData.word * D_800BE9E4;
-        prop->x += prop->moveX * D_800BE9E4;
-        prop->y += prop->moveY * D_800BE9E4;
-        prop->z += prop->moveZ * D_800BE9E4;
+        prop->moveY -= prop->moveData.word * gFrameTicks;
+        prop->x += prop->moveX * gFrameTicks;
+        prop->y += prop->moveY * gFrameTicks;
+        prop->z += prop->moveZ * gFrameTicks;
 
-        timer -= D_800BE9E4;
+        timer -= gFrameTicks;
         if (timer > 0) {
             prop->alpha = timer;
         } else {
@@ -106,9 +106,9 @@ void func_150DE6D8(WorldObject *prop) {
     prop->y = math_sinBinAngle(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
     prop->t = math_sinBinAngle(prop->touch.i.b >> 3) * 1.100000024f;
     prop->v = math_sinBinAngle(prop->touch.i.c >> 3) * 1.100000024f;
-    prop->touch.i.a += D_800BE9E4 * 12;
-    prop->touch.i.b += D_800BE9E4 * 16;
-    prop->touch.i.c += D_800BE9E4 * 24;
+    prop->touch.i.a += gFrameTicks * 12;
+    prop->touch.i.b += gFrameTicks * 16;
+    prop->touch.i.c += gFrameTicks * 24;
 }
 
 /* State effect_updateZonePairEmitter stores after each particle it spawns. */
@@ -155,7 +155,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
     f32 speed;
 
     link = &emitter->link;
-    link->timer -= D_800BE9E4;
+    link->timer -= gFrameTicks;
     if (link->timer < 0) {
         textures = gTravelParticleTextures;
         // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
@@ -240,22 +240,22 @@ Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 arg1) {
 }
 
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
-static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
-static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
+static const s32 gLightGlowEventLights[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
+static const s32 gLightGlowEventGlows[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
 
-/* Runs func_150DEC28 on entries 0-3. */
-void func_150DEBE0(s32 arg0) {
+/* Runs effect_sendLightAndGlowEvent on entries 0-3. */
+void effect_sendFirstLightAndGlowEvents(s32 arg0) {
     u8 i;
 
     for (i = 0; i < 4; i++) {
-        func_150DEC28(i, 1);
+        effect_sendLightAndGlowEvent(i, 1);
     }
 }
 
-/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and flare_sendGlowEvent. */
-void func_150DEC28(u8 index, u8 arg1) {
+/* Passes entry `index` of the gLightGlowEventLights and gLightGlowEventGlows tables to light_sendEvent and flare_sendGlowEvent. */
+void effect_sendLightAndGlowEvent(u8 index, u8 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
-    light_sendEvent(D_800A0D08[i], 0x22, 0);
-    flare_sendGlowEvent(D_800A0D28[i], 0x22);
+    light_sendEvent(gLightGlowEventLights[i], 0x22, 0);
+    flare_sendGlowEvent(gLightGlowEventGlows[i], 0x22);
 }

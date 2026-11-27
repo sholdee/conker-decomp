@@ -32,7 +32,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 static s32 (*gModelParticleUpdateFuncs[])() = {
     NULL, particle_movePhysics, particle_moveBallisticConstAccel, particle_moveTumbler,
     effect_moveTumblingBurst, particle_updateSoundPulse, particle_updatePulseWobble, effect_moveBurstParticle,
-    particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
+    particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, collision_updateWobble,
     particle_settleWobble, particle_moveBallisticFloor, particle_bobModelParticle, particle_updateGrowFade,
     effect_updateSway, particle_updateFallingDebris, particle_updateSwell, effect_updateProjectile,
     effect_updatePuffFollower, cutscene_updateTrackEffect, particle_moveSpiral, func_151C7038,
@@ -45,7 +45,7 @@ static s32 (*gModelParticleUpdate2Funcs[])() = {
 static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     NULL, particle_floorShatter, effect_bounceOnGround, effect_bounceOffTriangle,
     blood_onDebrisFloorHit, pipeexplode_onChunkFloorHit, particle_floorBounce, particle_floorStop,
-    blood_onChunkLand, func_15139578, particle_floorBounceSettle, func_15133D20,
+    blood_onChunkLand, blood_onGorePartLand, particle_floorBounceSettle, func_15133D20,
     func_15133C58, func_150C01DC, prop_onPieceFloorHit,
 };
 static ParticleFloorType3Fn gModelParticleFloorType3Funcs[] = { NULL };
@@ -100,7 +100,7 @@ void particle_updateModelParticle(ModelParticle *particle) {
     }
 
     if ((particle->flags & 0x80) && !dead) {
-        particle->lifetime -= D_800BE9E4;
+        particle->lifetime -= gFrameTicks;
         if (particle->lifetime < 0) {
             dead = TRUE;
         }
@@ -529,7 +529,7 @@ s32 particle_updateSquash(ModelParticle *particle) {
         particle->rot.y += particle->rotVel.y * gFrameDelta;
         particle->rot.z += particle->rotVel.z * gFrameDelta;
     }
-    particle->squashPhase += (s32)(576.0f * particle->invSpeed) * D_800BE9E4;
+    particle->squashPhase += (s32)(576.0f * particle->invSpeed) * gFrameTicks;
     if (particle->squashPhase < 0x80) {
         amplitude = math_cosBinAngleMasked(particle->squashPhase - 0x40);
         amplitude = (1.0f - particle->elasticity) * (1.0f - particle->invSpeed) * amplitude;
@@ -714,7 +714,7 @@ s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     if (ownerMtxs == NULL) {
         return 0;
     }
-    if ((owner->unk74 & 0xF) == 0xF) {
+    if ((owner->cullMask & 0xF) == 0xF) {
         return 0;
     }
     if (gBoneMatricesFlushed) {

@@ -76,7 +76,7 @@ OSContPad **cont_readPads(void) {
         }
     }
     if (level != 0x1D) {
-        numPlayers = D_8008FD90;
+        numPlayers = gHumanCount;
     } else {
         numPlayers = 4;
     }
@@ -188,7 +188,7 @@ void cont_stopRumble(u8 player) {
 
 
 /* Per-frame rumble update: (re)detects rumble paks when gRumbleRedetect is set, forces motors off
-   while D_800BEAC3 / gRumbleSuppressed are set, and otherwise drives each motor's on/off cycle. */
+   while gRumbleStopRequest / gRumbleSuppressed are set, and otherwise drives each motor's on/off cycle. */
 void cont_updateRumble(void) {
     s32 channel;
     s32 motorOn;
@@ -212,13 +212,13 @@ void cont_updateRumble(void) {
             }
         }
         if (gRumblePakPresent[channel]) {
-            if (D_800BEAC3 || gRumbleSuppressed) {
+            if (gRumbleStopRequest || gRumbleSuppressed) {
                 osMotorInit(&gSiMesgQueue, &gRumblePaks[channel], channel);
                 osMotorStop(&gRumblePaks[channel]);
                 gMotorRunning[channel] = 0;
                 gRumbleOn[channel] = 0;
             }
-            if (!gPauseRequested && !gPaused && !gPauseCooldown && !D_800BEAC3 && !gRumbleSuppressed) {
+            if (!gPauseRequested && !gPaused && !gPauseCooldown && !gRumbleStopRequest && !gRumbleSuppressed) {
                 switch (gRumbleOn[channel]) {
                 case 0:
                     if (gRumbleWasOn[channel] == 1) {
@@ -248,7 +248,7 @@ void cont_updateRumble(void) {
         }
     }
     gRumbleRedetect = 0;
-    D_800BEAC3 = 0;
+    gRumbleStopRequest = 0;
     gRumbleSuppressed = 0;
 }
 

@@ -31,7 +31,7 @@ MosaicEffect *screen_spawnMosaic(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) 
 }
 
 /* Offset that screen_updateMosaic transforms by the owner's bone matrix to centre the mosaic rectangle. */
-static const Vec3f D_800A07F0 = { 0.0f, -49.0f, -2.0f };
+static const Vec3f gMosaicCentreOffset = { 0.0f, -49.0f, -2.0f };
 
 /*
  * Update handler: projects the owner's bone 52 to the screen and sets the mosaic rectangle,
@@ -53,7 +53,7 @@ s32 screen_updateMosaic(MosaicEffect *effect) {
     if (mosaic->owner->ob_matrix_ptr == NULL) {
         mosaic->flags &= ~1;
     } else {
-        math_transformOffset(&D_800A07F0, &pos, &mosaic->owner->ob_matrix_ptr[52]);
+        math_transformOffset(&gMosaicCentreOffset, &pos, &mosaic->owner->ob_matrix_ptr[52]);
         if (math_projectToScreen(&pos, mosaic->center, &projectedZ, &projectedW, &scale, gCurrentView)) {
             f32 dx;
             f32 dy;

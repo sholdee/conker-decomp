@@ -21,7 +21,7 @@ MtxF gViewMatrices[4];            // per view: view matrix
 MtxF gViewProjMatrices[4];            // per view: view matrix * projection
 PointLightGfx *gViewGfxLights[4];  // per view
 u8 gViewGfxLightMax;
-u8 D_800D9E21;                 // light count byte light_pickLights stored for player 0
+u8 gViewGfxLightCount;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
 
 #include "functions.h"
@@ -141,7 +141,7 @@ void view_buildProjection(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)gViews)
 
-// matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
+// matching: 0x800D35E4 has no symbol; addressing it as gFrustumSlopeX[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&gCullVtxFlags)[-1])
 
@@ -177,12 +177,12 @@ Gfx *view_emitRspSetup(Gfx *gfx, s32 view) {
     return gfx;
 }
 
-/* Sets D_800D35E0/E4 to unk64/unk68 offset by how far the frustum FOV is below the view FOV (1 - frustum/fov). */
+/* Sets gFrustumSlopeX/E4 to unk64/unk68 offset by how far the frustum FOV is below the view FOV (1 - frustum/fov). */
 void func_1510B958(s32 view) {
     RenderView *rv;
 
     rv = &gRenderViews[view];
-    D_800D35E0 = (rv->frustumFovX / rv->fovX - 1.0f) * -1.0f + rv->unk64;
+    gFrustumSlopeX = (rv->frustumFovX / rv->fovX - 1.0f) * -1.0f + rv->unk64;
     D_800D35E4 = (rv->frustumFovY / rv->fovY - 1.0f) * -1.0f + rv->unk68;
 }
 
@@ -231,11 +231,11 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][gDrawBufferIndex], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = light_pickLights(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,
-                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][gDrawBufferIndex], &D_800D9E21, 1, 0, 0x25,
+                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][gDrawBufferIndex], &gViewGfxLightCount, 1, 0, 0x25,
                         gPickedLights);
     if (!skipWorld) {
         if (level != 5) {
-            if (D_800BEAAA) {
+            if (gCullLevelDisplayList) {
                 gDPPipeSync(gfx++);
                 if (gMeshBuilt) {
                     if (level != 0x14 && level != 0x33 && level != 0x32) {
@@ -260,13 +260,13 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 } else {
                     gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                 }
-            } else if (D_800BEAAA) {
+            } else if (gCullLevelDisplayList) {
                 gfx = gfx_copyDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
             } else {
                 gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }
         }
-        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, D_800D9E21, &gViewAmbients[view][gDrawBufferIndex]);
+        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, gViewGfxLightCount, &gViewAmbients[view][gDrawBufferIndex]);
         if (gLevelDisplayLists[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);

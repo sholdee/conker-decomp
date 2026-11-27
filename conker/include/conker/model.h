@@ -92,7 +92,7 @@ s32 model_loadAnimTable(s32 id, s32 arg1);
 s32 model_loadDef(s32 id, s32 arg1);
 s32 model_saveTexCoords(s32 id);
 void model_countTris(s32 id);
-s32 func_1503DA3C(s32 id, s32 index);
+s32 model_getLevelChannel(s32 id, s32 index);
 s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures);
 s32 model_loadTextures(s32 id);
 void model_freeTextures(s32 id);

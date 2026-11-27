@@ -75,7 +75,7 @@ void effect_updateFallingObject(FallingObject *obj) {
     if (obj->unkA4 < obj->unk96) {
         obj->unkA4 = ((obj->timer >> 2) * 24) / 3;
         obj->unkA2 = ((obj->timer >> 2) * 6) / 3;
-        obj->timer += D_800BE9E4;
+        obj->timer += gFrameTicks;
         return;
     }
 
@@ -84,7 +84,7 @@ void effect_updateFallingObject(FallingObject *obj) {
         obj->fallSpeed = 20;
     }
 
-    obj->y -= (obj->fallSpeed * D_800BE9E4) >> 1;
+    obj->y -= (obj->fallSpeed * gFrameTicks) >> 1;
     if (obj->y < obj->floorY) {
         if (obj->unkB3 == 1) {
             pos[0] = obj->x;

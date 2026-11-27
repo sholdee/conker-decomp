@@ -819,7 +819,7 @@ void trail_getPissAnchor(Actor *actor, Vec3f *out);
 void trail_getPissLaunchDir(Actor *actor, Vec3f *out);
 void trail_spawnPissTrail(Actor *actor);
 void trail_stepBallistic(Vec3f *pos, Vec3f *vel, f32 dt);
-void func_150D8E1C(PissTrail *trail);
+void trail_endPissTrail(PissTrail *trail);
 s32 trail_movePissPoints(PissTrail *trail);
 s32 trail_emitPissPoints(PissTrail *trail);
 s32 trail_tracePissTrail(PissTrail *trail);
@@ -829,7 +829,7 @@ void trail_destroyPissTrail(PissTrail *trail);
 void trail_freePissTrail(PissTrail *trail);
 void trail_onPissTrailMessage(PissTrail *trail, TrailMessage *msg, u8 type);
 void trail_setPissSpeedScale(Actor *actor, f32 speedScale);
-s32 func_150DA628(SpriteParticle *particle, s32 arg1);
+s32 trail_updatePissSpark(SpriteParticle *particle, s32 arg1);
 void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /* game/Trail/MotionTrail/motiontrail.c */
@@ -908,7 +908,7 @@ s32 trail_getAttachPoint(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z,
 void trail_restartTrailPair(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 void trail_updateStartTask(TrailTask *task);
 void trail_onTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId);
-void func_1519E61C(EffectHeader *task, TrailEvent *event, u8 eventId);
+void trail_destroyOnEndEvent(EffectHeader *task, TrailEvent *event, u8 eventId);
 void trail_stopTrailPair(s32 unused);
 void trail_cancelTrailPair(void);
 void trail_queueTrailPair(Actor *owner);
@@ -923,7 +923,7 @@ void trail_freeTrailPairTask(TimedEffect *task);
 void trail_destroySurfaceTrail(SurfaceTrail *trail);
 void trail_freeSurfaceTrail(SurfaceTrail *trail);
 void trail_startSurfaceTrails(SurfaceTrailOwner *owner);
-/* (SurfaceTrailOwner *owner); declared without a prototype: func_151AA1D0 and func_151AA1F0 pass no argument
+/* (SurfaceTrailOwner *owner); declared without a prototype: effect_watcherReleaseSurfaceTrails1 and effect_watcherReleaseSurfaceTrails2 pass no argument
    (the owner is still in a0) */
 void trail_releaseSurfaceTrails();
 void trail_detachSurfaceTrail(SurfaceTrail *trail);

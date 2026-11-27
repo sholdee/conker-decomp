@@ -78,7 +78,7 @@ static s32 (*gSpriteUpdateFuncs[])() = {
     particle_updateAreaFlash, particle_wobbleRandomEmitterParticle, particle_updateDragY, particle_updateFloorBounce,
     particle_updateDragFloorBounce, particle_updateDragXZFloorBounce, particle_updateFollowDrift, particle_updateFollowGrow,
     particle_updatePointPuff, particle_updateSteamParticle, particle_wobbleSteamSize, particle_steamFloorHit,
-    func_150DA628, beam_updateFollowParticle, particle_updatePulse, particle_updateFlash,
+    trail_updatePissSpark, beam_updateFollowParticle, particle_updatePulse, particle_updateFlash,
 };
 /* Death functions, indexed by ParticleDesc.deathFunc. */
 static void (*gSpriteDeathFuncs[])() = { particle_releasePoolSlot };
@@ -95,7 +95,7 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
 
     dead = FALSE;
     if (p->head.desc.flags & PARTICLE_LIFETIME) {
-        p->head.desc.timer -= D_800BE9E4;
+        p->head.desc.timer -= gFrameTicks;
         if (p->head.desc.timer < 0) {
             dead = TRUE;
         }
@@ -119,7 +119,7 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
     }
     if ((p->head.desc.flags & PARTICLE_SCALE) && (p->head.desc.timer < p->head.desc.scaleStart)) {
         if (p->head.desc.flags & PARTICLE_SCALE_MUL) {
-            i = D_800BE9E4;
+            i = gFrameTicks;
             if (p->head.desc.flags & PARTICLE_SCALE_WIDTH_ONLY) {
                 for (; i != 0; i--) {
                     p->head.desc.width *= p->head.desc.scaleRate;
@@ -136,10 +136,10 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
             }
         } else {
             if (!(p->head.desc.flags & PARTICLE_SCALE_WIDTH_ONLY)) {
-                p->head.desc.height += p->head.desc.scaleRate * D_800BE9E4;
+                p->head.desc.height += p->head.desc.scaleRate * gFrameTicks;
             }
             if (!(p->head.desc.flags & PARTICLE_SCALE_HEIGHT_ONLY)) {
-                p->head.desc.width += p->head.desc.scaleRate * D_800BE9E4;
+                p->head.desc.width += p->head.desc.scaleRate * gFrameTicks;
             }
         }
     }
@@ -148,7 +148,7 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
         if (rate != 0) {
             frameCount = gEffectTextures[p->head.desc.texture].frameCount;
             maxFrame = (frameCount << 16) - 1;
-            p->head.desc.frame += rate * D_800BE9E4;
+            p->head.desc.frame += rate * gFrameTicks;
             if (maxFrame < p->head.desc.frame) {
                 if (p->head.desc.flags & PARTICLE_ANIM_END_KILLS) {
                     dead = TRUE;
@@ -517,15 +517,15 @@ s32 particle_hideSpriteDraw(s32 arg0, s32 arg1) {
 void particle_wobbleSpriteOffset(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
     head->desc.offset.x = amplitude[0] * math_cosBinAngleMasked(phase[0] - 0x40);
     head->desc.offset.z = amplitude[1] * math_cosBinAngleMasked(phase[1] - 0x40);
-    phase[0] += phaseStep[0] * D_800BE9E4;
-    phase[1] += phaseStep[1] * D_800BE9E4;
+    phase[0] += phaseStep[0] * gFrameTicks;
+    phase[1] += phaseStep[1] * gFrameTicks;
 }
 
 /* Scales vel->y by drag once per elapsed tick. */
 void particle_applyDragY(Vec3f *vel, f32 drag) {
     s32 i;
 
-    for (i = D_800BE9E4; i > 0; i--) {
+    for (i = gFrameTicks; i > 0; i--) {
         vel->y *= drag;
     }
 }
@@ -534,7 +534,7 @@ void particle_applyDragY(Vec3f *vel, f32 drag) {
 void particle_applyDragXZ(Vec3f *vel, f32 drag) {
     s32 i;
 
-    for (i = D_800BE9E4; i > 0; i--) {
+    for (i = gFrameTicks; i > 0; i--) {
         vel->x *= drag;
         vel->z *= drag;
     }
@@ -544,7 +544,7 @@ void particle_applyDragXZ(Vec3f *vel, f32 drag) {
 void particle_applyDrag(Vec3f *vel, f32 drag) {
     s32 i;
 
-    for (i = D_800BE9E4; i > 0; i--) {
+    for (i = gFrameTicks; i > 0; i--) {
         vel->x *= drag;
         vel->y *= drag;
         vel->z *= drag;
@@ -636,8 +636,8 @@ void particle_onSpriteEvent(SpriteParticle *p, s32 arg1, u8 arg2) {
 
 /* Advances phase[0..1] and sets *outX/*outY to base plus amplitude[i] times the phase's wave value. */
 void particle_wobblePair(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
-    phase[0] += phaseStep[0] * D_800BE9E4;
-    phase[1] += phaseStep[1] * D_800BE9E4;
+    phase[0] += phaseStep[0] * gFrameTicks;
+    phase[1] += phaseStep[1] * gFrameTicks;
     *outX = amplitude[0] * math_cosBinAngleMasked(phase[0] - 0x40) + base;
     *outY = amplitude[1] * math_cosBinAngleMasked(phase[1] - 0x40) + base;
 }

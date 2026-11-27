@@ -4,7 +4,7 @@
 
 /* This file's .bss, defined before the headers declare the globals. IDO's .bss order depends on the
  * declarations before it (see init/Sched/SchedInit/schedinit.c): after exactly these three headers it is the definition order. */
-static s8 D_8003A580;
+static s8 gSchedGfxResumed;
 static u8 gSchedAudioRunning;
 static u8 gSchedGfxState; // graphics task state
 static u8 gSchedGfxRspBusy;
@@ -98,7 +98,7 @@ void sched_threadMain(void *arg) {
                 if (gSchedGfxState == 4) {
                     osSpTaskLoad(&gSchedGfxTask->list);
                     osSpTaskStartGo(&gSchedGfxTask->list);
-                    D_8003A580 = 1;
+                    gSchedGfxResumed = 1;
                     gSchedGfxState = 1;
                 }
             } else {
@@ -163,7 +163,7 @@ void sched_startGfxTask(void) {
     if (gResetPending == 0) {
         osSpTaskLoad(&gSchedGfxTask->list);
         osSpTaskStartGo(&gSchedGfxTask->list);
-        D_8003A580 = 0;
+        gSchedGfxResumed = 0;
         gSchedLastGfxTask = gSchedGfxTask;
         gSchedGfxRspBusy = 1;
         gSchedGfxRdpDone = 0;
@@ -171,7 +171,7 @@ void sched_startGfxTask(void) {
             ((gSchedRetraceCount >= 11) && ((gSchedRetraceCount >= 21) || (gCutsceneStates[0] != 1)))) {
             gSchedRetraceCount = 2;
         }
-        D_800BE9E4 = gSchedRetraceCount;
+        gFrameTicks = gSchedRetraceCount;
         gSchedRetraceCount = 0;
         gSchedGfxState = 1;
         osSendMesg(gSchedRetraceQueue, &gSchedRetraceMsg, OS_MESG_NOBLOCK);

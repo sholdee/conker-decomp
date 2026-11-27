@@ -124,7 +124,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
-    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
+    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->cullMask & 0xF) != 0xF)) {
         if (arg2 || ((gScreenLayout < 2) && (math_random() & 1))) {
             particle_spawnShortLightFlash(&origin, arg5, arg6);
         }
@@ -162,7 +162,7 @@ void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
     math_transformOffset(&gJointShotMuzzles[side], out, matrix);
 }
 
-/* The object whose shot description func_151C6A28 copies. */
+/* The object whose shot description weapon_fireJointShotProjectile copies. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ RayHit shot; /* the ray of the last shot */
@@ -176,7 +176,7 @@ typedef struct {
 
 /* Emits this side's effects (particle_spawnShortLightFlash, particle_spawnBoneDirParticle, weapon_spawnJointBeam) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
-void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
+void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     Vec3f origin;
     Vec3f start;
     Vec3f dir;

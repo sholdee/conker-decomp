@@ -9,13 +9,13 @@ static f32 gChainAnchor[3]; /* chain anchor position */
 
 /* The bone chain tables (bone_updateChain). */
 static const f32 gChainLinkLengths[4] = { 52.26f, 55.3f, 50.0f, 26.0f }; /* link lengths */
-static const f32 D_80098700[4] = { 40.32f, 66.96f, 53.7f, 59.4f }; /* link lengths for objects 0x80 and 0xB0 */
+static const f32 gChainLinkLengths80B0[4] = { 40.32f, 66.96f, 53.7f, 59.4f }; /* link lengths for objects 0x80 and 0xB0 */
 static const f32 gChainFollowXZ[4] = { 0.3f, 0.2f, 0.1f, 0.05f }; /* per-link x/z follow factors */
 static const f32 gChainFollowY[4] = { 0.225f, 0.15f, 0.75f, 0.8f }; /* per-link y follow factors */
 static const f32 gChainBendLimits[4] = { 45.0f, 45.0f, 45.0f, 45.0f }; /* per-link bend limits, degrees */
 static const f32 gChainLiftWeights[5] = { 0.4f, 5.6f, -0.6f, -0.64f, 1.0f }; /* per-joint lift weights */
-static const f32 D_80098754[5] = { -0.4f, 0.0f, 0.0f, 0.0f, 0.0f }; /* per-joint lift weights for animations 0x1B and 0x18B */
-static const f32 D_80098768[5] = { 0.16f, 0.66f, -0.62f, -0.42f, 0.98f }; /* per-joint lift weights for objects 0x80 and 0xB0 */
+static const f32 gChainLiftWeights1B[5] = { -0.4f, 0.0f, 0.0f, 0.0f, 0.0f }; /* per-joint lift weights for animations 0x1B and 0x18B */
+static const f32 gChainLiftWeights80B0[5] = { 0.16f, 0.66f, -0.62f, -0.42f, 0.98f }; /* per-joint lift weights for objects 0x80 and 0xB0 */
 /* Animations that pose the bone chain themselves (bone_updateChainPoseFlags). */
 static const u16 gChainPosingAnims[90] = {
     0xCE, 0xE9, 0xB, 0x30, 0xF0, 0xF1, 0xF2, 0x58, 0x59, 0x13, 7, 0x28, 0x24, 0x2C, 0x2D,
@@ -25,7 +25,7 @@ static const u16 gChainPosingAnims[90] = {
     0x211, 0x212, 0x218, 0x21D, 0x21F, 0x1F2, 0x1E9, 0x1E6, 0x201, 0x202, 0x1E5, 0x1E7, 0x200, 0x205, 0x1CD,
     0x1CE, 0x1CF, 0x1D0, 0x321, 0x322, 0x31C, 0x31D, 0x169, 0x2FD, 0x2FF, 0x2FE, 0x2FC, 0x300, 0xF5, 0x27,
 };
-static const u16 D_80098830[3] = { 0xE9, 0x48, 0x4B };
+static const u16 gChainPosingAnimsBit1[3] = { 0xE9, 0x48, 0x4B };
 
 /* Allocates and initialises the bone chain state of an object. */
 void bone_initChain(Actor *obj) {
@@ -37,14 +37,14 @@ void bone_initChain(Actor *obj) {
 
 /*
  * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
- * bit 1 for the animations in D_80098830, bit 0 for those in gChainPosingAnims.
+ * bit 1 for the animations in gChainPosingAnimsBit1, bit 0 for those in gChainPosingAnims.
  */
 void bone_updateChainPoseFlags(Actor *obj) {
     s32 i;
 
     if (obj->type == 1) {
         for (i = 0; i < 3; i++) {
-            if (obj->animseq.uh == D_80098830[i]) {
+            if (obj->animseq.uh == gChainPosingAnimsBit1[i]) {
                 obj->unk2FB |= 2;
                 return;
             }
@@ -153,9 +153,9 @@ void bone_updateChain(s32 objIndex) {
         chain->swayTimer = math_random() % 30U;
     }
     if (mode == 0) {
-        if (D_800BE9E4 < chain->blendTimer) {
+        if (gFrameTicks < chain->blendTimer) {
             if (gPaused == 0) {
-                chain->blendTimer -= D_800BE9E4;
+                chain->blendTimer -= gFrameTicks;
             }
             mode = 2;
         } else {
@@ -184,7 +184,7 @@ void bone_updateChain(s32 objIndex) {
     chain->pos[0][1] = bone[3][1];
     chain->pos[0][2] = bone[3][2];
     if (obj->character_type == 0x80 || obj->character_type == 0xB0) {
-        linkLen = D_80098700;
+        linkLen = gChainLinkLengths80B0;
     } else {
         linkLen = gChainLinkLengths;
     }
@@ -271,9 +271,9 @@ void bone_updateChain(s32 objIndex) {
             bob *= 0.01f;
         }
         if (obj->character_type == 0x80 || obj->character_type == 0xB0) {
-            liftWeights = D_80098768;
+            liftWeights = gChainLiftWeights80B0;
         } else if (anim == 0x1B || anim == 0x18B) {
-            liftWeights = D_80098754;
+            liftWeights = gChainLiftWeights1B;
             for (i = 0; i < 5; i++) {
                 offsets[i][1] = 0.0f;
             }
@@ -291,7 +291,7 @@ void bone_updateChain(s32 objIndex) {
         offsets[4][1] += bob * liftWeights[4];
         if (speed == 0.0f) {
             if (chain->swayTimer != 0 && facingCamera == 0) {
-                chain->swayTimer -= D_800BE9E4;
+                chain->swayTimer -= gFrameTicks;
                 if (chain->swayTimer <= 0) {
                     chain->swayAngle = 0.0f;
                     chain->swayAmp = math_random() % 100U;

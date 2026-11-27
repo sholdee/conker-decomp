@@ -81,7 +81,7 @@ extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorl
 extern void **gObjectBlocks; // per object: handle released with heap_free
 extern u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
 extern u8 gUngroupedObjectCount;
-extern MtxF D_800DBF08[2]; // per frame buffer
+extern MtxF gObjectIdentityMtxs[2]; // per frame buffer
 extern u8 D_800DBF88;
 extern Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
 extern Vtx *D_800DBF90; // its source vertices

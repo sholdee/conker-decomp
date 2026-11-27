@@ -17,7 +17,7 @@ MtxF gSpriteViewMtx[4];
 u8 gSpritePrimR;
 u8 gSpritePrimG;
 u8 gSpritePrimB;
-u8 D_800D2DAB;
+u8 gSpriteKeepPrimColor;
 
 #include "functions.h"
 #include "variables.h"
@@ -344,7 +344,7 @@ Gfx *sprite_drawPlacedEx(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffse
     dsdx = (iz << 10) / scaleX;
     dtdy = (iz << 10) / scaleY;
     unused = ((s32)z << 10) / scaleX; // matching: dead early division sets uopt's spill-slot colouring
-    if (D_800D2DAB == 0) {
+    if (gSpriteKeepPrimColor == 0) {
         gDPSetPrimColor(gfx++, 1, 0, gSpritePrimR, gSpritePrimG, gSpritePrimB, sprite->alpha);
     }
     tfrac = ((32.0f - (y - (s32)y) * 32) * z) / scaleY;
@@ -507,9 +507,9 @@ Gfx *sprite_drawImage(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x
 }
 
 
-/* Emits display list gSpriteEndDl and clears D_800D2DAB (back to the sprite prim colour). */
+/* Emits display list gSpriteEndDl and clears gSpriteKeepPrimColor (back to the sprite prim colour). */
 Gfx *sprite_endDraw(Gfx *gfx) {
     gSPDisplayList(gfx++, gSpriteEndDl);
-    D_800D2DAB = 0;
+    gSpriteKeepPrimColor = 0;
     return gfx;
 }

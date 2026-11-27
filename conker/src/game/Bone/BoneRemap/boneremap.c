@@ -10,108 +10,108 @@
  * Per-model bone remap lists: (bone, value) byte pairs terminated by 0xFF. actor_computeBones (game/Actor/ObjectUpdate/objectupdate)
  * copies the list of a model's remap set (1-based: 0 is none) into its per-bone remap buffer.
  */
-static const u8 D_80097B70[] = { 5, 2, 0xFF };
-static const u8 D_80097B74[] = { 2, 2, 0xFF };
-static const u8 D_80097B78[] = { 1, 2, 16, 2, 0xFF };
-static const u8 D_80097B80[] = { 12, 2, 13, 2, 0xFF };
-static const u8 D_80097B88[] = { 4, 2, 0xFF };
-static const u8 D_80097B8C[] = { 4, 2, 0xFF };
-static const u8 D_80097B90[] = { 1, 4, 4, 5, 14, 4, 18, 4, 22, 4, 0xFF };
-static const u8 D_80097B9C[] = { 7, 1, 12, 1, 0xFF };
-static const u8 D_80097BA4[] = { 12, 1, 0xFF };
-static const u8 D_80097BA8[] = { 1, 3, 0xFF };
-static const u8 D_80097BAC[] = { 5, 2, 0xFF };
-static const u8 D_80097BB0[] = { 1, 2, 0xFF };
-static const u8 D_80097BB4[] = { 4, 2, 0xFF };
-static const u8 D_80097BB8[] = { 5, 2, 0xFF };
-static const u8 D_80097BBC[] = { 4, 2, 0xFF };
-static const u8 D_80097BC0[] = { 2, 2, 3, 2, 0xFF };
-static const u8 D_80097BC8[] = { 3, 2, 0xFF };
-static const u8 D_80097BCC[] = { 1, 2, 0xFF };
-static const u8 D_80097BD0[] = { 43, 2, 44, 2, 0xFF };
-static const u8 D_80097BD8[] = { 1, 2, 0xFF };
-static const u8 D_80097BDC[] = { 1, 2, 0xFF };
-static const u8 D_80097BE0[] = { 13, 2, 0xFF };
-static const u8 D_80097BE4[] = { 5, 2, 0xFF };
-static const u8 D_80097BE8[] = { 1, 2, 3, 2, 5, 2, 0xFF };
-static const u8 D_80097BF0[] = { 29, 2, 0xFF };
-static const u8 D_80097BF4[] = { 2, 2, 0xFF };
-static const u8 D_80097BF8[] = { 4, 2, 0xFF };
-static const u8 D_80097BFC[] = { 3, 2, 0xFF };
-static const u8 D_80097C00[] = { 4, 2, 0xFF };
-static const u8 D_80097C04[] = { 17, 2, 0xFF };
-static const u8 D_80097C08[] = { 4, 2, 0xFF };
-static const u8 D_80097C0C[] = { 4, 2, 0xFF };
-static const u8 D_80097C10[] = { 4, 2, 0xFF };
-static const u8 D_80097C14[] = { 3, 2, 5, 2, 0xFF };
-static const u8 D_80097C1C[] = { 4, 2, 0xFF };
-static const u8 D_80097C20[] = { 27, 2, 0xFF };
-static const u8 D_80097C24[] = { 25, 2, 0xFF };
-static const u8 D_80097C28[] = { 3, 2, 22, 2, 26, 2, 0xFF };
-static const u8 D_80097C30[] = { 1, 2, 0xFF };
-static const u8 D_80097C34[] = { 4, 2, 5, 2, 0xFF };
-static const u8 D_80097C3C[] = { 4, 2, 5, 2, 0xFF };
-static const u8 D_80097C44[] = { 4, 2, 5, 2, 0xFF };
-static const u8 D_80097C4C[] = { 4, 2, 0xFF };
-static const u8 D_80097C50[] = { 33, 2, 0xFF };
-static const u8 D_80097C54[] = { 5, 2, 0xFF };
-static const u8 D_80097C58[] = { 4, 2, 0xFF };
-static const u8 D_80097C5C[] = { 4, 2, 0xFF };
-static const u8 D_80097C60[] = { 12, 2, 0xFF };
-static const u8 D_80097C64[] = { 4, 2, 5, 2, 0xFF };
-static const u8 D_80097C6C[] = { 4, 2, 0xFF };
-static const u8 D_80097C70[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList13[] = { 5, 2, 0xFF };
+static const u8 gBoneRemapList02[] = { 2, 2, 0xFF };
+static const u8 gBoneRemapList01[] = { 1, 2, 16, 2, 0xFF };
+static const u8 gBoneRemapList03[] = { 12, 2, 13, 2, 0xFF };
+static const u8 gBoneRemapList04[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList07[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList08[] = { 1, 4, 4, 5, 14, 4, 18, 4, 22, 4, 0xFF };
+static const u8 gBoneRemapList05[] = { 7, 1, 12, 1, 0xFF };
+static const u8 gBoneRemapList28[] = { 12, 1, 0xFF };
+static const u8 gBoneRemapList06[] = { 1, 3, 0xFF };
+static const u8 gBoneRemapList00[] = { 5, 2, 0xFF };
+static const u8 gBoneRemapList09[] = { 1, 2, 0xFF };
+static const u8 gBoneRemapList10[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList11[] = { 5, 2, 0xFF };
+static const u8 gBoneRemapList12[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList14[] = { 2, 2, 3, 2, 0xFF };
+static const u8 gBoneRemapList15[] = { 3, 2, 0xFF };
+static const u8 gBoneRemapList16[] = { 1, 2, 0xFF };
+static const u8 gBoneRemapList17[] = { 43, 2, 44, 2, 0xFF };
+static const u8 gBoneRemapList18[] = { 1, 2, 0xFF };
+static const u8 gBoneRemapList19[] = { 1, 2, 0xFF };
+static const u8 gBoneRemapList20[] = { 13, 2, 0xFF };
+static const u8 gBoneRemapList21[] = { 5, 2, 0xFF };
+static const u8 gBoneRemapList22[] = { 1, 2, 3, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList23[] = { 29, 2, 0xFF };
+static const u8 gBoneRemapList24[] = { 2, 2, 0xFF };
+static const u8 gBoneRemapList25[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList26[] = { 3, 2, 0xFF };
+static const u8 gBoneRemapList27[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList29[] = { 17, 2, 0xFF };
+static const u8 gBoneRemapList30[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList31[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList32[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList33[] = { 3, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList43[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList34[] = { 27, 2, 0xFF };
+static const u8 gBoneRemapList35[] = { 25, 2, 0xFF };
+static const u8 gBoneRemapList36[] = { 3, 2, 22, 2, 26, 2, 0xFF };
+static const u8 gBoneRemapList37[] = { 1, 2, 0xFF };
+static const u8 gBoneRemapList38[] = { 4, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList39[] = { 4, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList40[] = { 4, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList41[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList42[] = { 33, 2, 0xFF };
+static const u8 gBoneRemapList44[] = { 5, 2, 0xFF };
+static const u8 gBoneRemapList45[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList46[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList47[] = { 12, 2, 0xFF };
+static const u8 gBoneRemapList48[] = { 4, 2, 5, 2, 0xFF };
+static const u8 gBoneRemapList49[] = { 4, 2, 0xFF };
+static const u8 gBoneRemapList50[] = { 4, 2, 0xFF };
 
 const u8 *gBoneRemapLists[] = {
-    D_80097BAC,
-    D_80097B78,
-    D_80097B74,
-    D_80097B80,
-    D_80097B88,
-    D_80097B9C,
-    D_80097BA8,
-    D_80097B8C,
-    D_80097B90,
-    D_80097BB0,
-    D_80097BB4,
-    D_80097BB8,
-    D_80097BBC,
-    D_80097B70,
-    D_80097BC0,
-    D_80097BC8,
-    D_80097BCC,
-    D_80097BD0,
-    D_80097BD8,
-    D_80097BDC,
-    D_80097BE0,
-    D_80097BE4,
-    D_80097BE8,
-    D_80097BF0,
-    D_80097BF4,
-    D_80097BF8,
-    D_80097BFC,
-    D_80097C00,
-    D_80097BA4,
-    D_80097C04,
-    D_80097C08,
-    D_80097C0C,
-    D_80097C10,
-    D_80097C14,
-    D_80097C20,
-    D_80097C24,
-    D_80097C28,
-    D_80097C30,
-    D_80097C34,
-    D_80097C3C,
-    D_80097C44,
-    D_80097C4C,
-    D_80097C50,
-    D_80097C1C,
-    D_80097C54,
-    D_80097C58,
-    D_80097C5C,
-    D_80097C60,
-    D_80097C64,
-    D_80097C6C,
-    D_80097C70,
+    gBoneRemapList00,
+    gBoneRemapList01,
+    gBoneRemapList02,
+    gBoneRemapList03,
+    gBoneRemapList04,
+    gBoneRemapList05,
+    gBoneRemapList06,
+    gBoneRemapList07,
+    gBoneRemapList08,
+    gBoneRemapList09,
+    gBoneRemapList10,
+    gBoneRemapList11,
+    gBoneRemapList12,
+    gBoneRemapList13,
+    gBoneRemapList14,
+    gBoneRemapList15,
+    gBoneRemapList16,
+    gBoneRemapList17,
+    gBoneRemapList18,
+    gBoneRemapList19,
+    gBoneRemapList20,
+    gBoneRemapList21,
+    gBoneRemapList22,
+    gBoneRemapList23,
+    gBoneRemapList24,
+    gBoneRemapList25,
+    gBoneRemapList26,
+    gBoneRemapList27,
+    gBoneRemapList28,
+    gBoneRemapList29,
+    gBoneRemapList30,
+    gBoneRemapList31,
+    gBoneRemapList32,
+    gBoneRemapList33,
+    gBoneRemapList34,
+    gBoneRemapList35,
+    gBoneRemapList36,
+    gBoneRemapList37,
+    gBoneRemapList38,
+    gBoneRemapList39,
+    gBoneRemapList40,
+    gBoneRemapList41,
+    gBoneRemapList42,
+    gBoneRemapList43,
+    gBoneRemapList44,
+    gBoneRemapList45,
+    gBoneRemapList46,
+    gBoneRemapList47,
+    gBoneRemapList48,
+    gBoneRemapList49,
+    gBoneRemapList50,
 };

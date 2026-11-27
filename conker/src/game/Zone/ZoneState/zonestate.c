@@ -406,7 +406,7 @@ void zone_updateActor(Actor *actor) {
                     break;
                 case ZONE_TYPE_AUDIO_CONTROL:
                     if (zones[i].subTypeData == 0) {
-                        D_80041FD8 = zones[i].data1;
+                        gSoundFxMixBoost = zones[i].data1;
                     }
                     break;
                 case ZONE_TYPE_MINI_SHAPE:
@@ -685,7 +685,7 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
             *timer = 30;
             sound_playActorSound1(0x66F, actor, 0x5DC0, 0x190, 0x1F4);
         }
-        *timer += D_800BE9E4;
+        *timer += gFrameTicks;
         if (*timer >= 31) {
             if (actor->underwaterTime > 1440) {
                 actor->underwaterTime = 1200;

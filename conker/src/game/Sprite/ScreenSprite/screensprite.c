@@ -52,7 +52,7 @@ void sprite_updateScreenSprite(ScreenSprite *sprite) {
 
     finished = 0;
     if (sprite->info.flags & 1) {
-        sprite->info.timer -= D_800BE9E4;
+        sprite->info.timer -= gFrameTicks;
         if (sprite->info.timer < 0) {
             finished = 1;
         }

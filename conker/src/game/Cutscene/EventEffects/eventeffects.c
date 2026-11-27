@@ -4,7 +4,7 @@
 #include "libc/string.h"
 
 
-/* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
+/* Starts a timer effect that expires after `duration` frames of gFrameTicks. */
 EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
                        s32 arg6) {
     EvTimer *timer = effect_newObject(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
@@ -27,7 +27,7 @@ void cutscene_updateTimer(EvTimer *timer) {
     if (timer->flags & 1) {
         s32 expired = FALSE;
 
-        timer->timeLeft -= D_800BE9E4;
+        timer->timeLeft -= gFrameTicks;
         if (timer->timeLeft < 0) {
             expired = TRUE;
         }

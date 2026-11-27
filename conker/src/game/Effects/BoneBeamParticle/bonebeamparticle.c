@@ -163,7 +163,7 @@ s32 effect_updateBoneBeamParticle(BoneBeamParticle *particle) {
     if (target->unique_id != beam->targetId || target->type == 0) {
         return 0;
     }
-    if (target->ob_matrix_ptr == NULL || (target->unk74 & 0xF) == 0xF) {
+    if (target->ob_matrix_ptr == NULL || (target->cullMask & 0xF) == 0xF) {
         return 1;
     }
     src[0] = &particle->head.def.pos;

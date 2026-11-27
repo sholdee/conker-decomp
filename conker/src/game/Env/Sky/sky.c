@@ -36,7 +36,7 @@ s32 *gSkyTextureSets[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_800
  * entry label as address-taken, which its scheduling needs.
  */
 static SkyDrawFunc gSkyDrawFuncs[] = {
-    env_drawBackgroundFill, func_150F9AB0, env_drawSkyGradient, env_drawMapBackgroundFill, env_drawSkybox,
+    env_drawBackgroundFill, screen_drawStarSky, env_drawSkyGradient, env_drawMapBackgroundFill, env_drawSkybox,
 };
 
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
@@ -123,7 +123,7 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     x = camera_global_Cameras[gCurrentView].eye.x;
     y = camera_global_Cameras[gCurrentView].eye.y;
     z = camera_global_Cameras[gCurrentView].eye.z;
-    if (D_800C3682 != 0) {
+    if (gCutsceneSolidSky != 0) {
         view = &RENDER_VIEWS[gCurrentView];
         return env_fillRect(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
     }

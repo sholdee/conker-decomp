@@ -114,13 +114,13 @@ void effect_updateFadeBurst(FadeBurstEffect *burst) {
         effect_destroyObject(&burst->header);
         return;
     }
-    burst->timer += D_800BE9E4;
+    burst->timer += gFrameTicks;
     if (burst->duration < burst->timer) {
         burst->timer = -10;
     } else if (burst->timer >= 0) {
         for (i = 0; i < BURST_NUM_PIECES; i++) {
             if (burst->pieces[i].elapsed < burst->pieces[i].duration) {
-                burst->pieces[i].elapsed += D_800BE9E4;
+                burst->pieces[i].elapsed += gFrameTicks;
                 if (burst->pieces[i].duration < burst->pieces[i].elapsed) {
                     burst->pieces[i].elapsed = burst->pieces[i].duration;
                 }

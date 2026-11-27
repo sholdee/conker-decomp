@@ -5,9 +5,9 @@
 #define OBJTYPE_TEXTBOX 0x51
 
 /* TextBoxConfig.flags */
-#define TEXTBOX_BUBBLES         0x2     /* body drawn with D_8009056C plus three fading D_8009058C circles */
+#define TEXTBOX_BUBBLES         0x2     /* body drawn with gTextBubbleTexture plus three fading gTextBubbleCircleTexture circles */
 #define TEXTBOX_DARK            0x4     /* translucent black body, no drop shadow */
-#define TEXTBOX_ALT_TAIL        0x8     /* tail drawn with D_8009059C */
+#define TEXTBOX_ALT_TAIL        0x8     /* tail drawn with gTextBoxAltTailTexture */
 #define TEXTBOX_INPUT           0x10    /* A/B buttons advance or close the box */
 #define TEXTBOX_INPUT_CHECK     0x20    /* ... but only while func_151F2CDC() returns 0 */
 #define TEXTBOX_NO_B_SKIP       0x40    /* B does not skip to the end */
@@ -256,8 +256,8 @@ void text_updateBox(TextBox *box) {
 #define SPRITE_FLIP_X 1 /* set while the body is left of the anchor */
 #define SPRITE_FLIP_Y 2 /* set while the body is below the anchor */
 
-/* Text box textures: D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
- * D_8009058C bubble circle. */
+/* Text box textures: gTextBoxTexture body, gTextBubbleTexture bubble body, gTextBoxTailTexture / gTextBoxAltTailTexture tails,
+ * gTextBubbleCircleTexture bubble circle. */
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via text_drawBoxText.
  * Returns gfx unchanged if the display list would overflow. */
@@ -289,12 +289,12 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     fade = D_800E0BDC + 1;
     sprite.flip = 0;
     sprite.alpha = (64 * fade) >> 8;
-    texW = D_8009055C.width;
-    texH = D_8009055C.height;
-    sprite.scaleX = (2.0f * box->width + 1.0f) / D_8009055C.width * 2355.2f * box->scale;
-    sprite.scaleY = (box->height + 1.0f) / D_8009055C.height * 4259.84f * box->scale;
-    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
-    yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f * box->scale;
+    texW = gTextBoxTexture.width;
+    texH = gTextBoxTexture.height;
+    sprite.scaleX = (2.0f * box->width + 1.0f) / gTextBoxTexture.width * 2355.2f * box->scale;
+    sprite.scaleY = (box->height + 1.0f) / gTextBoxTexture.height * 4259.84f * box->scale;
+    xoff = box->width / gTextBoxTexture.width * gTextBoxTailTexture.width * 0.25f * box->scale;
+    yoff = box->height / gTextBoxTexture.height * gTextBoxTailTexture.height * 0.5f * box->scale;
     box->bodyX = cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale + box->x - xoff;
     box->bodyY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f * box->scale + box->y - yoff;
     /* shadow pass */
@@ -305,9 +305,9 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = sprite_loadDescFrame(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleTexture, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
-        gfx = sprite_loadDescFrame(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBoxTexture, 0, &sprite, 0, 0, 0, 2, 3);
     }
     if (!dark) {
         gfx = sprite_drawScreen(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
@@ -330,7 +330,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
         if (box->state == TEXTBOX_STATE_INIT) {
             box->bubbleX = box->anchorX;
         }
-        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleCircleTexture, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[1] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
         if (box->angle > 1.5707964f) {
@@ -344,14 +344,14 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
         sprite.scaleY /= 2;
         sprite.alpha = box->bubbleAlpha[2] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleCircleTexture, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
             gfx = sprite_drawScreen(gfx, &sprite, box->x - 2.5f, box->y + -2.5f);
         } else {
             gfx = sprite_drawScreen(gfx, &sprite, box->x + 2.5f, box->y + -2.5f);
         }
     } else {
-        gfx = sprite_loadDescFrame(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBoxTailTexture, 0, &sprite, 0, 0, 0, 2, 3);
         if (!dark) {
             if (box->angle > 1.5707964f) {
                 gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff - 2.5f, box->y - yoff + -2.5f);
@@ -393,16 +393,16 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     } else {
         sprite.flip &= ~SPRITE_FLIP_X;
     }
-    sprite.scaleX = box->width / D_8009055C.width * 2355.2f * box->scale;
-    sprite.scaleY = box->height / D_8009055C.height * 4259.84f * box->scale;
+    sprite.scaleX = box->width / gTextBoxTexture.width * 2355.2f * box->scale;
+    sprite.scaleY = box->height / gTextBoxTexture.height * 4259.84f * box->scale;
     if (box->config->flags & TEXTBOX_BUBBLES) {
-        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleCircleTexture, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[1];
         sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = sprite_drawScreen(gfx, &sprite, box->bubbleX, box->y - yoff);
         sprite.scaleX /= 2;
         sprite.scaleY /= 2;
-        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleCircleTexture, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[2];
         sprite.alpha = (sprite.alpha * fade) >> 8;
         if (box->angle > 1.5707964f) {
@@ -411,28 +411,28 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
             gfx = sprite_drawScreen(gfx, &sprite, box->x, box->y);
         }
     } else if (box->config->flags & TEXTBOX_ALT_TAIL) {
-        gfx = sprite_loadDescFrame(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBoxAltTailTexture, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
             gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
             gfx = sprite_drawScreen(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     } else {
-        gfx = sprite_loadDescFrame(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBoxTailTexture, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
             gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
             gfx = sprite_drawScreen(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     }
-    sprite.scaleX = 2.0f * box->width / D_8009055C.width * 2355.2f * box->scale;
-    sprite.scaleY = box->height / D_8009055C.height * 4259.84f * box->scale;
+    sprite.scaleX = 2.0f * box->width / gTextBoxTexture.width * 2355.2f * box->scale;
+    sprite.scaleY = box->height / gTextBoxTexture.height * 4259.84f * box->scale;
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0];
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = sprite_loadDescFrame(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBubbleTexture, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
-        gfx = sprite_loadDescFrame(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gTextBoxTexture, 0, &sprite, 0, 0, 0, 2, 3);
     }
     gfx = sprite_drawScreen(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
     overflow = (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) ? TRUE : FALSE;
@@ -609,8 +609,8 @@ void text_placeBox(TextBox *box) {
     }
     box->x = box->anchorX;
     box->y = box->anchorY;
-    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f;
-    yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f;
+    xoff = box->width / gTextBoxTexture.width * gTextBoxTailTexture.width * 0.25f;
+    yoff = box->height / gTextBoxTexture.height * gTextBoxTailTexture.height * 0.5f;
     box->centerX = (s32)(cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f + box->anchorX - xoff);
     box->centerY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f + box->anchorY - yoff;
 }
@@ -626,7 +626,7 @@ void text_clampBoxToView(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     f32 h;
     f32 bodyX;
 
-    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
+    xoff = box->width / gTextBoxTexture.width * gTextBoxTailTexture.width * 0.25f * box->scale;
     bodyX = *x + cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale - xoff;
     halfW = box->width * 0.5f;
     h = box->height;

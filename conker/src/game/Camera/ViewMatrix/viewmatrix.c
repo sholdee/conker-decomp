@@ -102,7 +102,7 @@ void camera_buildViewMatrix(Camera *camera) {
                       0.0f, 1.0f, 0.0f);
         if (camera->Mode & 0x80000) {
             camera_applyBreathing(camera);
-            func_1512D368(camera);
+            camera_emptyViewMatrixHook(camera);
             return;
         }
         if (camera->Mode == 0x40000) {
@@ -183,7 +183,7 @@ void camera_buildViewMatrix(Camera *camera) {
             }
             math_springTo(&camera->Roll, swayTarget, &camera->RollVel, stiffness, damping, camera->SpringTime);
         }
-        func_1512D368(camera);
+        camera_emptyViewMatrixHook(camera);
         if (camera->Mode != 0x8000) {
             if (camera->Mode == 1) {
                 camera->CameraPitch -= camera->ClampYAngle;
@@ -224,7 +224,7 @@ void camera_applyBreathing(Camera *camera) {
     }
 
     if ((camera->Mode & 0x80000) || (camera->SpecialFlags & 1) || (camera->Mode != 0x40000 && (camera->SpecialFlags & 8))) {
-        camera->WaterDx += 0.04363323003f * D_800BE9E4; // 2.5 degrees per frame
+        camera->WaterDx += 0.04363323003f * gFrameTicks; // 2.5 degrees per frame
         if (camera->WaterDx > 3.141592741f) {
             camera->WaterDx -= 6.283185482f;
         }
@@ -272,7 +272,7 @@ void camera_updateShake(Camera *camera) {
         camera->DoingDeltas = 2;
         break;
     case 2:
-        frame = camera->DeltaCurrentIndex + D_800BE9E4;
+        frame = camera->DeltaCurrentIndex + gFrameTicks;
         camera->DeltaCurrentIndex = frame;
         // matching: the explicit mask makes IDO store the unmasked sum and re-mask a copy
         if ((frame & 0xFF) >= gCameraShakeLengths[camera->DeltaPlaying]) {
@@ -282,5 +282,5 @@ void camera_updateShake(Camera *camera) {
     }
 }
 
-void func_1512D368(Camera *camera) {
+void camera_emptyViewMatrixHook(Camera *camera) {
 }

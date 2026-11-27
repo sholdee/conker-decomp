@@ -61,7 +61,7 @@ void music_startLevelMusic(void) {
     case 3:
         a2 = 1;
     case 1:
-        if (D_800BE9B4 == 2) {
+        if (gLevelLoadState == 2) {
             music_freeStoppedTunes();
         } else if (gPrevLevel != 0x22) {
             a2 = 0;
@@ -187,7 +187,7 @@ void music_startLevelMusic(void) {
     func_10017944(1, q.unkD);
 }
 
-void func_150006E0() {
+void music_initLevelViewState() {
     s32 i;
     s32 j;
 
@@ -236,7 +236,7 @@ void func_150006E0() {
     gClipChangePending = 0;
 }
 // NON-MATCHING: almost only reg remaining
-// void func_150006E0(void) {
+// void music_initLevelViewState(void) {
 //     s32 i;
 //     s32 j;
 //

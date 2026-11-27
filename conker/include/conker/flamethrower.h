@@ -212,7 +212,7 @@ extern void (*gJetDestroyProcs[])(void *);
 extern s16 (*gJetSoundStartProcs[])(void);
 extern void (*gJetSoundUpdateProcs[])(void *);
 extern void (*gJetSoundStopProcs[])(void *);
-extern void (*D_8008F89C[])(void *);
+extern void (*gFlamethrowerJetProcs[])(void *);
 extern void (*gFlameInitProcs[])(void *);
 extern void (*gFlameAttackProcs[])(void *);
 extern void (*gFlameDestroyProcs[])(void *);

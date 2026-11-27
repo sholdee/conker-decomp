@@ -169,7 +169,7 @@ void trail_updateBoneTrails(s32 listIndex) {
     for (trail = *head; trail != NULL; trail = next) {
         next = trail->next;
         if (trail->timer != 0) {
-            trail->timer -= D_800BE9E4;
+            trail->timer -= gFrameTicks;
         }
         if (trail->timer < 0) {
             trail->timer = 0;
@@ -179,7 +179,7 @@ void trail_updateBoneTrails(s32 listIndex) {
         alpha = trail->alpha;
         if (trail->timer != 0) {
             if (alpha != 255) {
-                alpha += D_800BE9E4 * 16;
+                alpha += gFrameTicks * 16;
                 if (alpha >= 256) {
                     alpha = 255;
                 }
@@ -187,7 +187,7 @@ void trail_updateBoneTrails(s32 listIndex) {
             }
             prev = trail;
         } else if (alpha != 0) {
-            alpha -= D_800BE9E4 * 8;
+            alpha -= gFrameTicks * 8;
             if (alpha < 0) {
                 alpha = 0;
             }

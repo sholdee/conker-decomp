@@ -284,8 +284,8 @@ glabel collision_resolveMapWalls
     /* D8AB8 150AB608 00000000 */   nop
   glabel D_150AB60C
     /* D8ABC 150AB60C C4F40040 */  lwc1       $f20, 0x40($a3)
-    /* D8AC0 150AB610 3C01800A */  lui        $at, %hi(D_8009F6F0)
-    /* D8AC4 150AB614 C435F6F0 */  lwc1       $f21, %lo(D_8009F6F0)($at)
+    /* D8AC0 150AB610 3C01800A */  lui        $at, %hi(gWallCollideDegToRad)
+    /* D8AC4 150AB614 C435F6F0 */  lwc1       $f21, %lo(gWallCollideDegToRad)($at)
     /* D8AC8 150AB618 4615A502 */  mul.s      $f20, $f20, $f21
     /* D8ACC 150AB61C 00000000 */  nop
     /* D8AD0 150AB620 4600A306 */  mov.s      $f12, $f20
@@ -659,8 +659,8 @@ glabel collision_resolveMapWalls
     /* D903C 150ABB8C 8FAA016C */   lw        $t2, 0x16C($sp)
     /* D9040 150ABB90 3C083F00 */  lui        $t0, (0x3F000000 >> 16)
     /* D9044 150ABB94 15400007 */  bnez       $t2, .L150ABBB4
-    /* D9048 150ABB98 3C09800D */   lui       $t1, %hi(D_800CBDD2)
-    /* D904C 150ABB9C 9129BDD2 */  lbu        $t1, %lo(D_800CBDD2)($t1)
+    /* D9048 150ABB98 3C09800D */   lui       $t1, %hi(gWallProbeIsCamera)
+    /* D904C 150ABB9C 9129BDD2 */  lbu        $t1, %lo(gWallProbeIsCamera)($t1)
     /* D9050 150ABBA0 15200004 */  bnez       $t1, .L150ABBB4
     /* D9054 150ABBA4 44885000 */   mtc1      $t0, $f10
     /* D9058 150ABBA8 460FA103 */  div.s      $f4, $f20, $f15
@@ -1321,8 +1321,8 @@ glabel func_150AC480
     /* D99D4 150AC524 46002984 */  sqrt.s     $f6, $f5
     /* D99D8 150AC528 46123032 */  c.eq.s     $f6, $f18
     /* D99DC 150AC52C 4501FC70 */  bc1t       func_150AB6F0
-    /* D99E0 150AC530 3C01800A */   lui       $at, %hi(D_8009F6F0 + 0x4)
-    /* D99E4 150AC534 C422F6F4 */  lwc1       $f2, %lo(D_8009F6F0 + 0x4)($at)
+    /* D99E0 150AC530 3C01800A */   lui       $at, %hi(gWallCollideDegToRad + 0x4)
+    /* D99E4 150AC534 C422F6F4 */  lwc1       $f2, %lo(gWallCollideDegToRad + 0x4)($at)
     /* D99E8 150AC538 4606A043 */  div.s      $f1, $f20, $f6
     /* D99EC 150AC53C 46020836 */  c.ole.s    $f1, $f2
     /* D99F0 150AC540 4501FC6B */  bc1t       func_150AB6F0
@@ -1592,8 +1592,8 @@ glabel func_150AC480
     /* D9DC0 150AC910 44816000 */  mtc1       $at, $f12
     /* D9DC4 150AC914 0D412128 */  jal        math_atan2
     /* D9DC8 150AC918 46003B86 */   mov.s     $f14, $f7
-    /* D9DCC 150AC91C 3C01800A */  lui        $at, %hi(D_8009F700)
-    /* D9DD0 150AC920 C421F700 */  lwc1       $f1, %lo(D_8009F700)($at)
+    /* D9DCC 150AC91C 3C01800A */  lui        $at, %hi(gWallCollideRadToDeg)
+    /* D9DD0 150AC920 C421F700 */  lwc1       $f1, %lo(gWallCollideRadToDeg)($at)
     /* D9DD4 150AC924 3C0142B4 */  lui        $at, (0x42B40000 >> 16)
     /* D9DD8 150AC928 44811000 */  mtc1       $at, $f2
     /* D9DDC 150AC92C 46010002 */  mul.s      $f0, $f0, $f1
@@ -1640,13 +1640,13 @@ glabel func_150AC480
 
 .section .rodata
 
-glabel D_8009F6F0
+glabel gWallCollideDegToRad
     .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
-    .word 0x3F666666 /* 0.9f; collision_findLedge reads it as D_8009F6F0 + 4 */
+    .word 0x3F666666 /* 0.9f; collision_findLedge reads it as gWallCollideDegToRad + 4 */
 glabel D_8009F6F8
     .word 0x47AFC800 /* 90000.0f */
 glabel D_8009F6FC
     .word 0x43DC8000 /* 441.0f */
-glabel D_8009F700
+glabel gWallCollideRadToDeg
     .word 0x42652EE1 /* 57.29578f (180/pi) */
     .balign 16

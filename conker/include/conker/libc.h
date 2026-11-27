@@ -36,10 +36,10 @@ typedef struct {
 } _Pft; /* size 0x38 */
 
 /* init/Libc/Xldtob/xldtob.c */
-void func_10001420(void);
-void func_10001444(void);
-void func_100014A0(void);
-void func_100014C4(s32 arg0);
+void libc_clearPageSlots(void);
+void libc_resetPaging(void);
+void libc_stopMainThread(void);
+void libc_reinitPaging(s32 arg0);
 void _Ldtob(void *arg0, unsigned char code);
 s16 _Ldunscale(s16 *pex, _Pft *px);
 void _Genld(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);

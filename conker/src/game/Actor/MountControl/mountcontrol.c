@@ -69,8 +69,8 @@ void actor_updateMount(Actor *obj) {
     if ((obj->norun == 0) && ((gIsMultiplayer == 0) || (obj->mv->bot == 0))) {
         if (gIsMultiplayer != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].CameraAngle * 182.0444488525390625f;
-            heading = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0) + D_800CC280;
+            gCameraYawAngle = camera_global_Cameras[dc_glbl_CharNum].CameraAngle * 182.0444488525390625f;
+            heading = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0) + gCameraYawAngle;
             obj->stickspeed = actor_getStickDeflection(gCurrentPad);
         } else {
             obj->stickspeed = movement_obj[obj->owner].stickspeed * 1.75f;
@@ -118,7 +118,7 @@ void actor_updateMount(Actor *obj) {
         }
     }
 control_done:
-    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
+    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= gPlayerCount) || (obj->mv->death_State == 0)) {
         actor_updateCommon(obj);
     }
     if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != D_800A0818[isType21]) || (obj->stunned != 0))) {

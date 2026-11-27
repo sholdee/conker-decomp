@@ -269,7 +269,7 @@ s32 particle_dampYawSpriteXZ(DecayParticle *p, s32 arg1) {
     s32 i;
 
     decay = &p->decay; // matching: IDO keeps the factor's address in a register only via this pointer
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         p->head.desc.vel.x *= *decay;
         p->head.desc.vel.z *= *decay;
     }

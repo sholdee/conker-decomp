@@ -9,7 +9,7 @@ f32 gLedgeAngle1;
 f32 gLedgeAngle2;
 s32 D_800CBD9C; // cleared by func_15044370
 u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
-u8 D_800CBDD2;
+u8 gWallProbeIsCamera;
 u8 D_800CBDD3;
 u8 D_800CBDD4;
 f32 gProbeHeight; // collision probe height (collision_setProbeHeights)
@@ -154,7 +154,7 @@ void collision_setProbeHeights(Actor *obj, f32 x, f32 y, f32 z) {
         gProbeMidHeight = half + gProbeHeight * 0.5f;
         return;
     }
-    if (index >= 0 && index < D_8008FD8C && obj->shad != 0.0f) {
+    if (index >= 0 && index < gPlayerCount && obj->shad != 0.0f) {
         gProbeHeight = height;
         gProbeMidHeight = height >> 1;
         return;
@@ -237,7 +237,7 @@ void collision_updateTriggers(void) {
                 gTriggerActions[node->action]();
             }
         } else {
-            delay = countdown - D_800BE9E4;
+            delay = countdown - gFrameTicks;
             if (delay < 0) {
                 delay = 0;
             }
@@ -245,7 +245,7 @@ void collision_updateTriggers(void) {
         }
         lifetime = node->lifetime;
         if (lifetime != -1) {
-            lifetime -= D_800BE9E4;
+            lifetime -= gFrameTicks;
             if (lifetime <= 0) {
                 if (prev == NULL) {
                     gTriggerNodes = node->next;

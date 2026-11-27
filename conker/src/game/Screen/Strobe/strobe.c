@@ -72,7 +72,7 @@ Gfx *screen_drawStrobe(Gfx *gfx, StrobeEffect *effect, s16 view) {
 void screen_updateStrobeSpawner(StrobeSpawner *spawner) {
     StrobeSpawnerData *data = &spawner->data;
 
-    data->delay -= D_800BE9E4;
+    data->delay -= gFrameTicks;
     if (data->delay < 0) {
         screen_spawnStrobe(math_random() % (data->durationRange + 1) + data->minDuration, data->litTime,
                       data->darkTime, data->litAlpha, data->darkAlpha, spawner->owner, spawner->kind);

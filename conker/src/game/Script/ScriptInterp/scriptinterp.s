@@ -686,9 +686,9 @@ glabel D_80088628
     /* 22D160 800886A0 150ADEE4 */ .word .L150ADEE4
 
 glabel D_800886A4
-    /* 22D164 800886A4 1509DD10 */ .word func_1509DD10
-    /* 22D168 800886A8 1509DD20 */ .word func_1509DD20
-    /* 22D16C 800886AC 1509DD30 */ .word func_1509DD30
+    /* 22D164 800886A4 1509DD10 */ .word script_alwaysTrue0
+    /* 22D168 800886A8 1509DD20 */ .word script_alwaysTrue1
+    /* 22D16C 800886AC 1509DD30 */ .word script_alwaysTrue2
     /* 22D170 800886B0 150AE0F8 */ .word func_150AE0F8
     /* 22D174 800886B4 150AE108 */ .word .L150AE108
     /* 22D178 800886B8 150AE118 */ .word .L150AE118
@@ -699,7 +699,7 @@ glabel D_800886A4
     /* 22D18C 800886CC 150AE234 */ .word func_150AE234
     /* 22D190 800886D0 150AE1C0 */ .word func_150AE1C0
     /* 22D194 800886D4 150AE1DC */ .word func_150AE1DC
-    /* 22D198 800886D8 1509DD40 */ .word func_1509DD40
+    /* 22D198 800886D8 1509DD40 */ .word script_alwaysTrue13
     /* 22D19C 800886DC 00000000 */ .word 0x00000000
 
 .section .bss

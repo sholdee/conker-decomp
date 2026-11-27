@@ -163,31 +163,31 @@ extern u8 gCutsceneStates[2]; // per cutscene scene slot (0/1): cutscene state, 
 extern SeqTrackInfo *gSeqTrackInfos[2]; // per scene: what each track drives
 extern u8 gSeqCameraTrack;
 extern CamShot gCamShot; // scripted camera shot
-extern u8 D_800C3638;
+extern u8 gCutsceneActorLock;
 extern u8 gSeqTrackCounts[2]; /*track count */
 extern s32 gCutsceneEndTimes[2]; /*end time */
 extern f32 gViewFovOffset; // added to both FOVs of every view
 extern f32 gNearPlaneOverride; // near-plane override when non-zero
 extern f32 gFarPlaneOverride; // far-plane override when non-zero
-extern u8 D_800C3654[2];
-extern u8 D_800C3656[2];
-extern u8 D_800C3658[2];
+extern u8 gCutsceneUpdateUnboundActors[2];
+extern u8 gCutsceneShowUnboundActors[2];
+extern u8 gCutsceneShowUnboundObjects[2];
 extern u8 gCutsceneKeepSpawnedActors[2];
 extern u8 D_800C365C[2];
-extern u8 D_800C365E[2];
+extern u8 gCutsceneRunTimedEvents[2];
 extern u8 D_800C3660[2];
 extern u8 gCutsceneHideWorld;
 extern u8 gCutsceneAnchorSet;
-extern u8 D_800C3670;
-extern u8 D_800C3671;
+extern u8 gCutsceneIgnorePlayed;
+extern u8 gSpawnCutsceneActive;
 extern u8 gCutsceneSkipped;
 extern f32 gCutsceneCutbackAngle;
 extern f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
 extern s32 gCutsceneEndTransitionTime;
 extern u8 D_800C3680;
 extern u8 gCutsceneHideSky;
-extern u8 D_800C3682;
-extern u8 D_800C3683;
+extern u8 gCutsceneSolidSky;
+extern u8 gCutsceneNoPause;
 extern SeqEvent *gSeqEventTracks[2][30]; // cutscene script event tracks per scene
 extern SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
 extern SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
@@ -208,7 +208,7 @@ extern u8 gCutsceneChained;
 extern u16 gSeqEventQueueSize;
 extern u8 gCutsceneNoSkip;
 extern u8 gCutsceneChainBobScale;
-extern s16 D_800C3C9E;
+extern s16 gCutsceneCashOffset;
 extern SeqSubtitle gSubtitles[3];
 extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
 /* Defined outside the C files; sequence.c uses them: */

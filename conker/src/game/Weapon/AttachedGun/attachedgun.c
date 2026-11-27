@@ -55,7 +55,7 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
         particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
-        if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
             valid = TRUE;
         } else {
             valid = FALSE;
@@ -122,7 +122,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
 }
 
 /* Like weapon_fireAttachedGun, but spawns its shot through effect_spawnProjectile. */
-void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
+void weapon_fireAttachedGunProjectile(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
     Vec3f direction;

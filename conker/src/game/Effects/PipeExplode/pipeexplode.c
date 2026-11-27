@@ -26,7 +26,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     Vec3f origin;
     TrailStateParams argsD;
 
-    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
+    camera_startEnvelope(&camera_global_Cameras[gLastPlayerIndex], 7, 1);
     argsA.count = (math_random() & 1) + 3;
     argsA.pos = gPipeSpots[pipe].pos;
     argsA.radius = 170.0f;
@@ -413,7 +413,7 @@ typedef struct PipeKinds {
 } PipeKinds;
 
 /* The particle kinds pipeexplode_spawnLandParticle picks from. */
-static PipeKinds D_80088700 = { { 15, 16, 17 } };
+static PipeKinds gPipeLandParticleKinds = { { 15, 16, 17 } };
 
 /* Spawns a random particle and a trail at the actor's current point, at the given height. */
 s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
@@ -431,7 +431,7 @@ s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, 
         s32 rand0;
         state = actor->state;
         particle.points = actor->points; // matching: kept in the request, a separate local mismatches
-        kinds = D_80088700;
+        kinds = gPipeLandParticleKinds;
         state->unk20 = 4;
         size = math_randomFloat() * 50.0f + 50.0f;
         particle.kind = *(kinds.kind + math_random() % 3U); // matching: kinds.kind[i] grows the frame by 8

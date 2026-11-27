@@ -4,7 +4,7 @@
 
 /* Mirrors game flag 0x4054 into camera->AvailableModes bit 0x10000; when 0x405B is set but 0x405C is not (and
  * camera->Mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
-void func_150B1E20(Camera *camera) {
+void particle_levelHook29(Camera *camera) {
     Actor *target;
 
     if (script_query(1, 0x4054, 6, 0x9000)) {
@@ -103,7 +103,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
 }
 
 /* Sets camera distances (unk190, unk348/unk34C/unk374) and flag bits in unk84/unk5F0 from game flags. */
-void func_150B2340(Camera *camera) {
+void particle_levelHook21(Camera *camera) {
     s32 flagBC;
     s32 flagBB;
 

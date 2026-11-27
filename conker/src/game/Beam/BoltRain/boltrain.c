@@ -66,7 +66,7 @@ void beam_updateBoltRain(BoltRainObj *obj) {
 
     state = &obj->state;
     if (state->timer >= 0) {
-        state->timer -= D_800BE9E4;
+        state->timer -= gFrameTicks;
         if (state->timer < 0) {
             sound_stopByCallback(sound_stopWhenSilentCallback, state->region, 0);
         }
@@ -152,7 +152,7 @@ void beam_updateBoltArc(BoltArcObj *obj) {
         return;
     }
     state->region->inactive = 0;
-    state->timer -= D_800BE9E4;
+    state->timer -= gFrameTicks;
     if (state->timer < 0) {
         effect_sendEventToTimedEffects(0, 0x39);
         effect_sendEventToTimedEffects(0, 0x4B);

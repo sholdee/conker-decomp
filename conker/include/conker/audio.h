@@ -56,7 +56,7 @@ typedef struct AudioInfo_s AudioInfo;
 
 /* init/Audio/SeqPlayer/seqplayer.c */
 void audio_init(void);
-void func_100084D8(u8 player);
+void audio_playSeqIfStopped(u8 player);
 s32 audio_getSeqState(u8 player);
 void audio_setSeqMsgQueue(u8 player, OSMesgQueue *queue);
 void func_100085A4(s32 arg0, s32 arg1, s32 arg2);
@@ -74,13 +74,13 @@ void audio_setChannelMask(u8 player, s32 mask, s32 enable);
 u8 func_10008A4C(u8 player, u8 chan);
 void func_10008A94(u8 player, s32 mask, s32 arg2);
 void func_10008B2C(u8 player);
-void func_10008B60(u8 player, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_10008BC0(u8 player, f32 arg1, f32 arg2);
+void audio_setSeqFxParam(u8 player, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+void audio_setSeqFxMix(u8 player, f32 arg1, f32 arg2);
 void audio_findSeqLoopMarkers(u8 player, u8 count, s32 base);
 void audio_jumpToSeqMarker(u8 player, u8 marker);
 s32 audio_playSequence(u8 player, s32 sequence);
 void audio_setSeqVolume(u8 player, s32 vol);
-void func_10008F24(u8 player);
+void audio_endSeqTrack(u8 player);
 void audio_stopSeq(u8 player);
 extern ALBank *gSoundBank; // sound bank
 extern ALHeap gAudioHeap;  // audio heap

@@ -146,7 +146,7 @@ f32 effect_stepOscillator(OscillatorObject *obj) {
     f32 value;
 
     value = math_cosBinAngleMasked((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;
-    oscillator->phase += oscillator->phaseStep * D_800BE9E4;
+    oscillator->phase += oscillator->phaseStep * gFrameTicks;
     return value;
 }
 
@@ -271,7 +271,7 @@ void func_150EA944(WorldObject *entry) {
     s32 timer;
 
     if ((entry->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
-        frames = D_800BE9E4;
+        frames = gFrameTicks;
 
         entry->t += entry->spinX * frames;
         angle = entry->t;
@@ -298,13 +298,13 @@ void func_150EA944(WorldObject *entry) {
         }
 
         timer = entry->alpha;
-        entry->moveY -= entry->moveData.word * D_800BE9E4;
-        entry->x += entry->moveX * D_800BE9E4;
-        entry->touch.i.a += entry->moveY * D_800BE9E4;
+        entry->moveY -= entry->moveData.word * gFrameTicks;
+        entry->x += entry->moveX * gFrameTicks;
+        entry->touch.i.a += entry->moveY * gFrameTicks;
         entry->y = entry->touch.i.a >> 3;
-        entry->z += entry->moveZ * D_800BE9E4;
+        entry->z += entry->moveZ * gFrameTicks;
 
-        timer -= D_800BE9E4 * 4;
+        timer -= gFrameTicks * 4;
         if (timer > 0) {
             entry->alpha = timer;
         } else {

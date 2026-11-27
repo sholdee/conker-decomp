@@ -71,7 +71,7 @@ void rope_updateEffect(HoltenRopeEffect *effect) {
 
     finished = FALSE;
     if (effect->flags & ROPE_FLAG_TIMED) {
-        effect->timer -= D_800BE9E4;
+        effect->timer -= gFrameTicks;
         if (effect->timer < 0) {
             finished = TRUE;
         }

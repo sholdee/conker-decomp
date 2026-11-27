@@ -82,7 +82,7 @@ void trail_stepBallistic(Vec3f *pos, Vec3f *vel, f32 dt) {
     pos->z += v0.z * dt;
 }
 
-void func_150D8E1C(PissTrail *trail) {
+void trail_endPissTrail(PissTrail *trail) {
     trail->head.updateKind2 = 0;
     trail->head.tmpl.flags &= ~2;
     trail->head.tmpl.flags |= 8;
@@ -119,7 +119,7 @@ s32 trail_movePissPoints(PissTrail *trail) {
         trail->head.modelPos.z = 0.0f;
     }
 
-    data->timer += D_800BE9E4;
+    data->timer += gFrameTicks;
     if (data->timer >= 61) {
         if (data->owner != NULL && data->owner->mv != NULL) {
             data->owner->mv->shotsfired++;
@@ -148,7 +148,7 @@ s32 trail_emitPissPoints(PissTrail *trail) {
     points = trail->points;
     actor = data->owner;
     if ((actor->mv->rt_context_b != 3) || (actor->energy <= 0)) {
-        func_150D8E1C(trail);
+        trail_endPissTrail(trail);
     }
     if ((actor->type == 0) || (actor->unique_id != data->ownerId)) {
         return 0;
@@ -668,7 +668,7 @@ void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     effect_sendEventToEffectObjs((s32)&msg, 0x44);
 }
 
-s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
+s32 trail_updatePissSpark(SpriteParticle *particle, s32 arg1) {
     WobbleData *spark;
 
     spark = &particle->data.wobble;

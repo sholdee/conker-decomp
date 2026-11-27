@@ -157,7 +157,7 @@ void camera_updateFreeFly(Camera *cam) {
                   cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
 }
 
-/* Runs func_151E6C1C for this camera's slot. */
-void func_1512A360(Camera *cam) {
-    func_151E6C1C(cam->CNumber);
+/* Runs save_updateMenuCamera for this camera's slot. */
+void camera_updateFrontEndPath(Camera *cam) {
+    save_updateMenuCamera(cam->CNumber);
 }

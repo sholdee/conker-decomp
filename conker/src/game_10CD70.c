@@ -82,7 +82,7 @@ void effect_levelUpdateMaterialScroll(s32 arg0) {
         active = effect_isMaterialZoneActive(i);
         if (active) {
             if (gMaterialGlowLevels[i] < 0x60) {
-                gMaterialGlowLevels[i] += D_800BE9E4;
+                gMaterialGlowLevels[i] += gFrameTicks;
                 if (gMaterialGlowLevels[i] > 0x60) {
                     gMaterialGlowLevels[i] = 0x60;
                 }
@@ -116,7 +116,7 @@ void effect_levelUpdateMaterialScroll(s32 arg0) {
                 if (active) {
                     uls = (dl[j].w0.word >> 12) & 0xFFF;
                     ult = dl[j].w0.word & 0xFFF;
-                    ult += (gMaterialGlowLevels[i] / 16) * D_800BE9E4;
+                    ult += (gMaterialGlowLevels[i] / 16) * gFrameTicks;
                 } else {
                     ult = 2;
                     uls = 2;
@@ -170,7 +170,7 @@ void effect_updateSwingObject(SwingObject *obj) {
     f32 maxSpeed = 0.55f; // matching: -0.55f as a literal folds; IDO negates the variable at run time
 
     // matching: the step shares target's register
-    target = obj->speed * D_800BE9E4;
+    target = obj->speed * gFrameTicks;
     obj->pos += target;
     pos = obj->pos;
     if (pos < 11.0f) {
@@ -264,7 +264,7 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
         emitter->base.header.state = -1;
         return;
     }
-    src->flashTimer -= D_800BE9E4;
+    src->flashTimer -= gFrameTicks;
     if (src->flashTimer < 0) {
         pos.x = obj->xpos;
         pos.y = obj->ypos;
@@ -277,7 +277,7 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
                       emitter->base.header.owner, emitter->base.header.kind);
         src->flashTimer = math_random() % 81U + 69;
     }
-    src->boltTimer -= D_800BE9E4;
+    src->boltTimer -= gFrameTicks;
     if (src->boltTimer < 0) {
         u8 colour[4];
 
@@ -295,7 +295,7 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
         } while (count > 0);
         src->boltTimer = math_random() % 141U + 25;
     }
-    src->timer2 -= D_800BE9E4;
+    src->timer2 -= gFrameTicks;
     if (src->timer2 < 0) {
         beam_spawnBoundsImpact(obj, math_random() & 0xFF, (math_random() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);

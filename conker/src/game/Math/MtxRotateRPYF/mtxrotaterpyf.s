@@ -17,8 +17,8 @@ glabel math_mtxRotateRPYF
     /* D5514 150A8064 E7BE0028 */  swc1       $f30, 0x28($sp)
     /* D5518 150A8068 4486D000 */  mtc1       $a2, $f26
     /* D551C 150A806C AFBF0010 */  sw         $ra, 0x10($sp)
-    /* D5520 150A8070 3C01800A */  lui        $at, %hi(D_8009F6C0)
-    /* D5524 150A8074 C43EF6C0 */  lwc1       $f30, %lo(D_8009F6C0)($at)
+    /* D5520 150A8070 3C01800A */  lui        $at, %hi(gRotateRPYFDegToRad)
+    /* D5524 150A8074 C43EF6C0 */  lwc1       $f30, %lo(gRotateRPYFDegToRad)($at)
     /* D5528 150A8078 AFA40008 */  sw         $a0, 0x8($sp)
     /* D552C 150A807C 4487E000 */  mtc1       $a3, $f28
     /* D5530 150A8080 E7B60018 */  swc1       $f22, 0x18($sp)
@@ -96,6 +96,6 @@ glabel math_mtxRotateRPYF
 
 .section .rodata
 
-glabel D_8009F6C0
+glabel gRotateRPYFDegToRad
     .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
     .balign 16

@@ -201,7 +201,7 @@ void rope_update(Rope *rope) {
 
     motion = 0.0f;
     if (rope->regrabTimer != 0) {
-        rope->regrabTimer -= D_800BE9E4;
+        rope->regrabTimer -= gFrameTicks;
         if (rope->regrabTimer < 0) {
             rope->regrabTimer = 0;
         }

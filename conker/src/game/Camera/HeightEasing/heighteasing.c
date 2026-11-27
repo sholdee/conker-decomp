@@ -15,7 +15,7 @@ void camera_easeHeight(Camera *camera) {
     s32 cappedByCeiling; // left unset when unk84 bit 4 is set or unk180 >= unk17C (as in the original)
     f32 ceiling;
 
-    if (D_800C3671 != 0) {
+    if (gSpawnCutsceneActive != 0) {
         return;
     }
     if (!(camera->Mode & 0x100) && camera->DoingRail != 0 && !(camera->RailFlags & 8)) {

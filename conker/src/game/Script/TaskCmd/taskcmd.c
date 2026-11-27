@@ -163,13 +163,13 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         }
         break;
     case 19:
-        D_800BE3DF = args->unk8;
+        gCheckpointLevel = args->unk8;
         // matching: the redundant '& 0xFF' uses up a temp register that the case 19/23 allocation needs
-        D_800BE3E0 = args->unkC & 0xFF;
-        gNextLevel = D_800BE3DF;
+        gCheckpointSpawn = args->unkC & 0xFF;
+        gNextLevel = gCheckpointLevel;
         break;
     case 20:
-        func_151E8214();
+        save_startCredits();
         return 0;
     case 21:
         func_151E4DC4();
@@ -218,7 +218,7 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
         return level;
     case 29:
         mask = 0;
-        for (j = 0; j < D_8008FD8C; j++) {
+        for (j = 0; j < gPlayerCount; j++) {
             if (D_80087270[j] != 10) {
                 mask |= 1 << j;
             }
@@ -230,9 +230,9 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
     case 31:
         return gPrevLevel;
     case 32:
-        return D_800BE3DF;
+        return gCheckpointLevel;
     case 33:
-        return D_800BE3E0;
+        return gCheckpointSpawn;
     case 34:
         /* Weighted pick: index of the first nonzero weight whose running total reaches math_randomFloat() * total. */
         sum = 0;
@@ -249,13 +249,13 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
         }
         return args->unk8 - 1;
     case 35:
-        return D_8008FD90;
+        return gHumanCount;
     case 36:
         return D_800E0BB1;
     case 37:
-        return D_8008FDBC & 0x10;
+        return gMatchFlags & 0x10;
     case 38:
-        return D_8008FD8C;
+        return gPlayerCount;
     case 39:
         return gMenuButtonsPressed[args->unk8];
     case 40:

@@ -196,7 +196,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             self->scale = *self->scaleSrc->unk18 * 0.009999999776f;
         }
         if (self->params.flags & 1) {
-            self->params.lifetime -= D_800BE9E4;
+            self->params.lifetime -= gFrameTicks;
             if (self->params.lifetime < 0) {
                 if (self->params.expireCb != -1) {
                     done = gActorEmitterExpireFuncs[self->params.expireCb](self);
@@ -206,7 +206,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             }
         }
         freeSlot = NULL;
-        if (self->params.owner->unk74 & (1 << gCurrentView)) {
+        if (self->params.owner->cullMask & (1 << gCurrentView)) {
             if (!(self->state & 1)) {
                 particle_freeActorEmitterParticles(self);
                 self->state |= 1;
@@ -216,7 +216,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
             numFree = 0;
             prevFree = NULL;
             table = gActorEmitterTables[self->params.table];
-            if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
+            if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->cullMask & 0xF) != 0xF) {
                 attach = 4;
                 row = &table->infos[self->params.owner->current_lod * (table->n + 2)];
                 i = 0;
@@ -267,7 +267,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         math_transformOffset(&info->points[k].pos, &slot->particle->head.def.pos,
                                       self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
-                    slot->timer -= D_800BE9E4;
+                    slot->timer -= gFrameTicks;
                     if (slot->timer < 0) {
                         ActorEmitterParticleData *data;
 

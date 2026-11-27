@@ -102,7 +102,7 @@ src/game/Actor/MountControl/mountcontrol.c	actor	mount control
 src/game/Camera/LevelHook13/levelhook13.c	camera	per-level camera preset hook
 src/game/Camera/LevelHook22/levelhook22.c	camera	per-level camera hook
 src/game_FE850.c	effect	spin-decay object with colour pulse
-src/game_10B7C0.c	effect	effect stub (empty)
+src/game/Effects/LevelHook14/levelhook14.c	effect	effect stub (empty)
 src/game/Camera/LevelHook09/levelhook09.c	camera	per-level camera hook (water)
 src/game_10CD70.c	effect	swing objects, bolt emitters, scrolling material textures
 src/game/Camera/LevelHook33/levelhook33.c	camera	per-level camera flag hook
@@ -113,11 +113,11 @@ src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
 src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook
-src/game_126F60.c	screen	black view fill with view-projection matrix
+src/game/Screen/StarSky/starsky.c	screen	black view fill with view-projection matrix
 src/game_127060.c	effect	impact bursts with sparks and glows
 src/game/Effects/StarField/starfield.s	effect	hand-written asm (subsystem from its header group)
 src/game/Camera/LevelHook19/levelhook19.c	camera	per-level camera preset hook
-src/game_12D7E0.c	effect	effect stub (empty)
+src/game/Effects/LevelHook08/levelhook08.c	effect	effect stub (empty)
 src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
 src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
 src/game_193420.c	effect	effect stub (empty)

@@ -111,7 +111,7 @@ void beam_updateBolt(BoltObj *bolt) {
     }
 
     if (bolt->desc.flags & 1) {
-        bolt->desc.life -= D_800BE9E4;
+        bolt->desc.life -= gFrameTicks;
         if (bolt->desc.life < 0) {
             effect_destroyObject(&bolt->header);
         }
@@ -121,7 +121,7 @@ void beam_updateBolt(BoltObj *bolt) {
         beam_sampleBolt(bolt);
     }
 
-    bolt->rejitterTimer -= D_800BE9E4;
+    bolt->rejitterTimer -= gFrameTicks;
     if (bolt->rejitterTimer < 0) {
         beam_jitterBolt(bolt);
         bolt->rejitterTimer = (math_random() % (bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;

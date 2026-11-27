@@ -57,7 +57,7 @@ void effect_updateEffectActor(EffectActor *actor) {
 
     expired = 0;
     if (actor->tmpl.flags & 1) {
-        actor->tmpl.lifetime -= D_800BE9E4;
+        actor->tmpl.lifetime -= gFrameTicks;
         if (actor->tmpl.lifetime < 0) {
             expired = 1;
         }
@@ -140,7 +140,7 @@ s32 effect_moveEffectActor(EffectActor *actor) {
 
     motion = &actor->data.motion;
     prevVelocity = motion->vel;
-    for (i = D_800BE9E4; i != 0; i--) {
+    for (i = gFrameTicks; i != 0; i--) {
         motion->vel.x *= motion->drag;
         motion->vel.z *= motion->drag;
     }

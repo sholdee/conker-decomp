@@ -28,7 +28,7 @@ s32 gScriptCmdBuffer[16];
 #include "variables.h"
 
 Struct_80087410 D_80087410 = { 0, 0 };
-char D_80087414[] = "<NO TASK NAME SET!>"; /* not referenced */
+char gNoTaskNameString[] = "<NO TASK NAME SET!>"; /* not referenced */
 
 /* Bit `id` of the 0x1B-byte bit array at gTaskDoneBits: the task is done. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
@@ -456,7 +456,7 @@ s32 script_canAutoSave(void) {
 
 void script_autoSave(void) {
     if (gAutoSavePending && !gAutoSaveDisabled && script_canAutoSave()) {
-        D_800BE3DF = gNextLevel;
+        gCheckpointLevel = gNextLevel;
         if (gPendingCutscene == 0) {
             save_requestWriteSlot(gCurrentSaveSlot);
         }

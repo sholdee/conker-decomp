@@ -79,11 +79,11 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2);
 void sight_spawnFloorImpact(Actor *actor, u8 arg1, s32 arg2);
 s32 sight_updateStatusLight(LightEffect *obj);
 s32 func_151C9B64(SightStatusObject *obj, u8 *visible);
-extern const s32 D_800AAC30[];
+extern const s32 gSightBeamBreakHits[];
 
 /* game/Sight/SightHud/sighthud.c */
 void sight_startPlayerEffects(Camera *player, s32 state);
-void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
+void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void sight_resetPlayerEffects(Camera *player);
 void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
 void sight_spawnBasicSight(Camera *player, u8 big);

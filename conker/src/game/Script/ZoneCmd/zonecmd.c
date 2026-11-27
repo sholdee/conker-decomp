@@ -159,7 +159,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
         if (zone_findActorInZone(slot) == -1) {
             s32 i;
 
-            for (i = 0; i < D_8008FD90; i++) {
+            for (i = 0; i < gHumanCount; i++) {
                 if (zone_isCameraOutsideId(i, slot) == 0) {
                     if (gScriptCmdWordCount == 2) {
                         return 1;

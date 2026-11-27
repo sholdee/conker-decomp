@@ -7,14 +7,14 @@ f32 gAmbientEaseRed;
 f32 gAmbientEaseGreen;
 f32 gAmbientEaseBlue;
 f32 gAmbientEasePhase;
-f32 D_800DCDA4;
-f32 D_800DCDA8;
-f32 D_800DCDAC;
-f32 D_800DCDB0;
-f32 D_800DCDB4;
-f32 D_800DCDB8;
-f32 D_800DCDBC;
-f32 D_800DCDC0;
+f32 gSavedAmbientRed;
+f32 gSavedAmbientGreen;
+f32 gSavedAmbientBlue;
+f32 gSavedDirLightAmbientTintRed;
+f32 gSavedDirLightAmbientTintGreen;
+f32 gSavedDirLightAmbientTintBlue;
+f32 gSavedDirLightAmount;
+f32 gSavedDirLightAmbientAmount;
 RegionNode *gDustRegions;
 
 #include "functions.h"
@@ -76,7 +76,7 @@ void func_1515F2B8(Actor *obj, TriggerZone *zone) {
 }
 
 /* Ambient effects per zone->data2 */
-static ZoneHandler gAmbientZoneEffects[3] = { light_easeAmbientToGrey, func_1515F5C4, light_easeAmbientToPulse };
+static ZoneHandler gAmbientZoneEffects[3] = { light_easeAmbientToGrey, light_easeAmbientToYellowGreen, light_easeAmbientToPulse };
 
 /* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
 void light_runAmbientZoneEffect(Actor *obj, TriggerZone *zone) {
@@ -115,7 +115,7 @@ void light_easeAmbientToGrey(Actor *obj, TriggerZone *zone) {
 }
 
 /* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
-void func_1515F5C4(Actor *obj, TriggerZone *zone) {
+void light_easeAmbientToYellowGreen(Actor *obj, TriggerZone *zone) {
     u8 red;
     u8 green;
     u8 blue;

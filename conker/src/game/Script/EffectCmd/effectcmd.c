@@ -213,7 +213,7 @@ void script_freeResourceTable(void) {
  * Returns 1 if every dependency of loaded resource `index` is loaded. Also reports its first
  * dependency (0xBF if missing) and the first halfword of its unk0 list (0 if missing).
  */
-s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
+s32 script_areResourceDepsLoaded(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     ResourceSlot *table;
     ResourceSlot *slot;
     LoadedResource *resource;
@@ -292,7 +292,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
         case 46:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
-                func_150ECC00(obj, 0xFF, 1);
+                particle_spawnFloorImpactGreenFlash(obj, 0xFF, 1);
             }
             break;
         case 44:
@@ -549,7 +549,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             }
             break;
         case 45:
-            func_151645C4(phase == 6);
+            light_setDaylight(phase == 6);
             break;
         case 40:
             if (phase == 2) {
@@ -625,7 +625,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             break;
         }
         case 17:
-            func_150DEC28(cmd->a[0].w, phase == 3);
+            effect_sendLightAndGlowEvent(cmd->a[0].w, phase == 3);
             break;
     }
 }

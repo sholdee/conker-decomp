@@ -20,8 +20,8 @@ glabel view_getQuadViewDepth
     /* D36E0 150A6230 C7B10018 */  lwc1       $f17, 0x18($sp)
     /* D36E4 150A6234 3C01800E */  lui        $at, %hi(gDefaultNear)
     /* D36E8 150A6238 C4259B20 */  lwc1       $f5, %lo(gDefaultNear)($at)
-    /* D36EC 150A623C 3C01800A */  lui        $at, %hi(D_8009F6A0)
-    /* D36F0 150A6240 C428F6A0 */  lwc1       $f8, %lo(D_8009F6A0)($at)
+    /* D36EC 150A623C 3C01800A */  lui        $at, %hi(gQuadInViewHalfSqrt2)
+    /* D36F0 150A6240 C428F6A0 */  lwc1       $f8, %lo(gQuadInViewHalfSqrt2)($at)
     /* D36F4 150A6244 C5000008 */  lwc1       $f0, 0x8($t0)
     /* D36F8 150A6248 C5010018 */  lwc1       $f1, 0x18($t0)
     /* D36FC 150A624C 460C0102 */  mul.s      $f4, $f0, $f12
@@ -50,8 +50,8 @@ glabel view_getQuadViewDepth
     /* D3758 150A62A8 460D12C2 */  mul.s      $f11, $f2, $f13
     /* D375C 150A62AC 460A2240 */  add.s      $f9, $f4, $f10
     /* D3760 150A62B0 46035900 */  add.s      $f4, $f11, $f3
-    /* D3764 150A62B4 3C01800D */  lui        $at, %hi(D_800D35E0)
-    /* D3768 150A62B8 C42635E0 */  lwc1       $f6, %lo(D_800D35E0)($at)
+    /* D3764 150A62B4 3C01800D */  lui        $at, %hi(gFrustumSlopeX)
+    /* D3768 150A62B8 C42635E0 */  lwc1       $f6, %lo(gFrustumSlopeX)($at)
     /* D376C 150A62BC 46044A40 */  add.s      $f9, $f9, $f4
     /* D3770 150A62C0 C5000004 */  lwc1       $f0, 0x4($t0)
     /* D3774 150A62C4 46087BC2 */  mul.s      $f15, $f15, $f8
@@ -73,8 +73,8 @@ glabel view_getQuadViewDepth
     /* D37B4 150A6304 460D12C2 */  mul.s      $f11, $f2, $f13
     /* D37B8 150A6308 460A2240 */  add.s      $f9, $f4, $f10
     /* D37BC 150A630C 46035900 */  add.s      $f4, $f11, $f3
-    /* D37C0 150A6310 3C01800D */  lui        $at, %hi(D_800D35E0 + 0x4)
-    /* D37C4 150A6314 C42735E4 */  lwc1       $f7, %lo(D_800D35E0 + 0x4)($at)
+    /* D37C0 150A6310 3C01800D */  lui        $at, %hi(gFrustumSlopeX + 0x4)
+    /* D37C4 150A6314 C42735E4 */  lwc1       $f7, %lo(gFrustumSlopeX + 0x4)($at)
     /* D37C8 150A6318 46044A40 */  add.s      $f9, $f9, $f4
     /* D37CC 150A631C 46088402 */  mul.s      $f16, $f16, $f8
     /* D37D0 150A6320 46104901 */  sub.s      $f4, $f9, $f16
@@ -99,6 +99,6 @@ glabel func_150A6354
 
 .section .rodata
 
-glabel D_8009F6A0
+glabel gQuadInViewHalfSqrt2
     .word 0x3F3504F3 /* 0.70710677f (sqrt(1/2)) */
     .balign 16

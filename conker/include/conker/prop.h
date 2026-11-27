@@ -160,7 +160,7 @@ void prop_clearWaveChains(void);
 void prop_startWaveChain(s32 arg0);
 
 /* game/Prop/Scenery/scenery.c */
-void func_150BEF70(s32 arg0);
+void prop_emptyLevelUpdateHook2(s32 arg0);
 void prop_startMirroredEmitters(s32 arg0);
 s32 func_150BF0F4(Struct150BF0F4 *entry);
 void func_150BF21C(WorldObject *obj);
@@ -174,20 +174,20 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
 /* game/Prop/Pendulum/pendulum.c */
 extern EffectHeader *gLevelSprayEffects[4]; /* level spray effects (game/Level/LevelSetup08/levelsetup08.c), destroyed by prop_destroyLevelSprays */
 void prop_swingPendulum(WorldObject *pendulum);
-void func_150C4E9C(WorldObject *obj);
+void prop_rampTextureScroll(WorldObject *obj);
 void prop_destroyLevelSprays(void);
 s32 func_150C5280(void);
 s32 func_150C52CC(void *fx);
 s32 func_150C5310(Struct150C5310 *obj);
-/* Texture asset ids 0x2C1 and 0x1C0 of func_150C4E9C: link-time symbols whose address is the id (undefined_syms.us.txt). */
+/* Texture asset ids 0x2C1 and 0x1C0 of prop_rampTextureScroll: link-time symbols whose address is the id (undefined_syms.us.txt). */
 extern u8 D_2C1;
 extern u8 D_1C0;
 
 /* game/Prop/LinkedSpinners/linkedspinners.c */
 void func_150C7870(WorldObject *obj);
-void func_150C78E0(WorldObject *obj);
-void func_150C7930(WorldObject *obj);
-void func_150C7968(WorldObject *obj);
+void prop_spinOppositeObject3(WorldObject *obj);
+void prop_spinWithObject3(WorldObject *obj);
+void prop_scrollTextureByObject3(WorldObject *obj);
 void func_150C79BC(s32 view);
 void func_150C7C90(WorldObject *obj);
 void func_150C7D7C(WorldObject *obj);
@@ -198,14 +198,14 @@ void func_150CF0A0(WorldObject *arg0);
 /* game/Prop/MoverSwing/moverswing.c */
 s32 prop_shotHitsCylinders(Vec3f *start, Vec3f *delta, Vec3f *hit);
 s32 prop_segmentHitsCylinders(Vec3f *start, Vec3f *end, Vec3f *hit);
-void func_150EB614(WorldObject *obj);
+void prop_springTiltByPlayerDistance(WorldObject *obj);
 void func_150EB8C4(void);
 void prop_spawnCylinderBurst(TriggerZone *gate, u8 owner, s32 kind);
 
 /* game/Prop/Clock/clock.c */
-void func_1510AA20(s32 arg0);
+void prop_levelUpdateRainOnly(s32 arg0);
 void prop_updateClock(WorldObject *minuteHand);
-void func_1510ADD8(WorldObject *obj);
+void prop_swingClockPendulum(WorldObject *obj);
 s32 prop_isOutsideFrustum(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY, f32 *marginX,
                   f32 *marginY);
 
@@ -220,11 +220,11 @@ typedef struct SoundTriple {
 } SoundTriple;
 extern const VertexPivots gPivotVertexPairs;
 extern const SoundTriple D_800A2F84;
-void func_151150B0(WorldObject *obj);
+void prop_emptyBehavior22(WorldObject *obj);
 void prop_spinZ(WorldObject *obj);
 void prop_spinY(WorldObject *obj);
 void prop_spinX(WorldObject *obj);
-void func_1511529C(s32 arg0);
+void prop_emptyBehavior55(s32 arg0);
 void prop_sinkWhileTriggered(WorldObject *obj);
 void prop_shakeAndSink(WorldObject *obj);
 
@@ -232,7 +232,7 @@ void prop_shakeAndSink(WorldObject *obj);
 void prop_moveToHeight(WorldObject *obj);
 void prop_moveByOffset(WorldObject *obj);
 void prop_addSeesawWeight(WorldObject *obj, Actor *player);
-void func_15115EDC(WorldObject *obj, Actor *player);
+void prop_addSeesawWeightBoosted(WorldObject *obj, Actor *player);
 void prop_tiltSeesaw(WorldObject *obj);
 void prop_scrollTexture(WorldObject *obj);
 
@@ -245,13 +245,13 @@ void prop_bob(WorldObject *obj);
 void prop_bobAndSway(WorldObject *obj);
 void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale);
 s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other);
-void func_15116924(s32 arg0);
+void prop_emptyBehavior71(s32 arg0);
 
 /* game/Prop/PropMover/propmover.c */
-void func_15116930(WorldObject *obj, Actor *actor);
+void prop_triggerMover(WorldObject *obj, Actor *actor);
 void prop_updateMover(WorldObject *obj);
 void prop_stepToTarget(WorldObject *obj);
-void func_15116BAC(WorldObject *obj);
+void prop_stepToTargetWithSounds(WorldObject *obj);
 void prop_spinToTarget(WorldObject *obj);
 void prop_animateVertices(WorldObject *obj);
 f32 prop_springAngle(WorldObject *obj, f32 angle);
@@ -268,17 +268,17 @@ void prop_bounceX(WorldObject *obj);
 void prop_bounceZ(WorldObject *obj);
 
 /* game/Prop/DoorsLifts/doorslifts.c */
-void func_151177C0(WorldObject *prop);
+void prop_lowerAndRaise(WorldObject *prop);
 void prop_slideOut(WorldObject *prop);
 void prop_triggerOnPlayer(WorldObject *prop, Actor *obj);
 void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out);
-void func_15117F3C(WorldObject *prop);
-void func_1511896C(WorldObject *prop);
-void func_1511898C(WorldObject *prop);
+void prop_grabAndSwingCharacter(WorldObject *prop);
+void prop_swingDoorLink0(WorldObject *prop);
+void prop_swingDoorLink3(WorldObject *prop);
 void prop_swingDoor(WorldObject *prop, s32 arg1);
 void prop_swingFlap(WorldObject *prop);
 void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj);
-void func_151193F4(WorldObject *prop);
+void prop_followHeight(WorldObject *prop);
 void prop_floodFillVertexGroup(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group);
 void prop_initSwayGroups(WorldObject *prop);
 void prop_swayVertexGroups(WorldObject *prop);
@@ -289,43 +289,43 @@ void prop_updatePickup(WorldObject *obj);
 /* game/Prop/TextureAnim/textureanim.c */
 s32 prop_findSetTimg(Gfx *dl, s32 *second);
 void prop_animateTexture(WorldObject *obj, s32 *texIndices, s32 *animState);
-void func_1511A6FC(WorldObject *obj);
-void func_1511A738(WorldObject *obj);
+void prop_scrollAndAnimateTexture(WorldObject *obj);
+void prop_bobAndAnimateTexture(WorldObject *obj);
 
 /* game/Prop/RippleMesh/ripplemesh.c */
 void prop_startRipple(WorldObject *mesh);
 void prop_updateRippleMesh(WorldObject *mesh);
 
 /* game/Prop/PropUpdates/propupdates.c */
-void func_1511AF30(WorldObject *obj);
+void prop_wobbleTilt(WorldObject *obj);
 void prop_slideWaypoints(WorldObject *obj);
-void func_1511B51C(WorldObject *obj);
+void prop_swingAndFadeColours(WorldObject *obj);
 void prop_rotateAboutPivots(WorldObject *obj);
-void func_1511BA24(WorldObject *obj);
+void prop_setAlphaFromColorAnim(WorldObject *obj);
 void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT);
 void prop_projectTextureUnderRef(Game1483E0State *obj);
 void prop_faceCamera(WorldObject *obj);
-void func_1511BEBC(WorldObject *obj);
+void prop_grabAndLowerCharacter(WorldObject *obj);
 void prop_updateNone(void);
 void prop_sway(WorldObject *obj);
 void func_1511C638(WorldObject *obj);
 void prop_getWaveOriginZ(WorldObject *obj, f32 *originZ);
 void prop_animateWaveMesh(WorldObject *obj);
-void func_1511D394(WorldObject *obj);
+void prop_scrollWithOwnerWave(WorldObject *obj);
 void prop_wobbleTexture(Game1483E0WaveMesh *mesh);
 void prop_rotateTexture(WorldObject *obj);
-void func_1511DBC4(WorldObject *obj);
+void prop_swingOpen90(WorldObject *obj);
 void prop_playImpactSound(WorldObject *obj, Actor *character);
-void func_1511DF6C(WorldObject *obj);
+void prop_pulseUntilTouched(WorldObject *obj);
 void prop_swingHinge(WorldObject *prop);
 void prop_raiseWhileTriggered(WorldObject *prop);
-void func_1511ED84(WorldObject *prop);
+void prop_slideZUntilTriggered(WorldObject *prop);
 
 /* game/Prop/PropMotions/propmotions.c */
-void func_1511EF40(WorldObject *prop);
+void prop_carryCharacterInArc(WorldObject *prop);
 void func_1511F31C(WorldObject *prop);
 void prop_fadeOutAfterDelay(WorldObject *prop);
-void func_1511F4D0(WorldObject *prop);
+void prop_partFourPieces(WorldObject *prop);
 void prop_start(WorldObject *prop, s32 arg1);
 void prop_bobThenSink(WorldObject *prop);
 void prop_copyLinkedPos(WorldObject *prop);
@@ -335,9 +335,9 @@ void prop_clearLinks(void);
 void prop_registerLink(WorldObject *prop, s32 mode);
 
 /* game/Prop/DrawHooks/drawhooks.c */
-void func_1511FC20(s32 arg0);
-Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
-Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
+void prop_emptyFrameHook(s32 arg0);
+Gfx *prop_emptyDrawEffectAngled(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
+Gfx *prop_emptyDrawEffect(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 
 /* game/Prop/WaveDeformer/wavedeformer.c */
 extern WaveDeformer *gWaveDeformers[2]; /* the wave deformers, gNumWaveDeformers of them in use */

@@ -189,7 +189,7 @@ void func_15081E0C(Actor *obj, u16 part, u8 skip) {
             obj->energy = 7;
         }
         if ((skip == 0) || (part != 10)) {
-            func_1507DF10(obj, part);
+            actor_applyPartHit(obj, part);
         }
     }
 }
@@ -312,7 +312,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         if (hit->part == 10 && (obj->mv == NULL || obj->mv->unk1AD == 0) && longShot == 0) {
             // matching: unsigned compares keep the constants as immediates
             if ((u32)kind != 2 && (u32)kind != 18 && (u32)kind != 11 && (u32)kind != 12) {
-                func_1507DE4C(obj);
+                actor_applyHeadShot(obj);
                 if (obj->mv != NULL) {
                     obj->mv->unk1AD = 1;
                 }

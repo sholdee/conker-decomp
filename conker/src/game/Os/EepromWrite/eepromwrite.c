@@ -158,12 +158,12 @@ void os_playDemoInput(void) {
     D_800E0BD2 = 0;
     if (idx < 0x1F3) {
         next = e[1].time;
-        if (D_800BE9E4 < next) {
-            D_800E0BD2 = next - D_800BE9E4;
+        if (gFrameTicks < next) {
+            D_800E0BD2 = next - gFrameTicks;
         }
     }
     time = e->time;
-    D_800BE9E4 = time;
+    gFrameTicks = time;
     gDemoInputIndex = idx + 1;
     if (gDemoInputIndex >= 0x1F3) {
         gDemoInputIndex = 0x1F3;

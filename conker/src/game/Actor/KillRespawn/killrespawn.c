@@ -5,7 +5,7 @@ u16 gEliminatedPlayers;
 u16 D_800D18A2;
 u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
 u8 D_800D18A8;
-u8 D_800D18A9;
+u8 gLastDeathKind;
 
 #include "functions.h"
 #include "variables.h"
@@ -26,7 +26,7 @@ void actor_updatePlayerStates(void) {
 
     if (gPaused == 0) {
         player = movement_obj;
-        for (i = 0; i < D_8008FD8C; i++, player++) {
+        for (i = 0; i < gPlayerCount; i++, player++) {
             if (player->mv == NULL) {
                 continue;
             }
@@ -55,24 +55,24 @@ void actor_updatePlayerStates(void) {
                 }
                 if (player->mv->death_State == 2) {
                     if (player->mv->deathTimer > 0) {
-                        player->mv->deathTimer -= D_800BE9E4;
+                        player->mv->deathTimer -= gFrameTicks;
                     } else {
                         actor_closeDeathIris(player);
                     }
                 } else if (player->mv->death_State == 7) {
                     if (player->mv->deathTimer > 0) {
-                        player->mv->deathTimer -= D_800BE9E4;
+                        player->mv->deathTimer -= gFrameTicks;
                     } else {
                         player->mv->death_State = 8;
                         actor_fadeCommand(player, 2, 0, 60, 0);
                     }
                 }
-                player->mv->deathTime += D_800BE9E4;
+                player->mv->deathTime += gFrameTicks;
                 if ((gButtonsPressed[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
                     player_getStat(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
                     player->mv->respawnReady = TRUE;
                 }
-                if (D_8008FDBC & 0x80) {
+                if (gMatchFlags & 0x80) {
                     player->mv->respawnReady = FALSE;
                 }
                 actor_getTrackPoint(player, &x, &y, &z);
@@ -88,13 +88,13 @@ void actor_updatePlayerStates(void) {
                 continue;
             } else if (player->mv->death_State == 2) {
                 if (player->mv->deathTimer > 0) {
-                    player->mv->deathTimer -= D_800BE9E4;
+                    player->mv->deathTimer -= gFrameTicks;
                 } else {
                     player->mv->death_State = 7;
                 }
             } else {
-                player->mv->deathTime += D_800BE9E4;
-                if (player->unk7 == 0xFF && player->mv->deathTime >= 161) {
+                player->mv->deathTime += gFrameTicks;
+                if (player->alpha == 0xFF && player->mv->deathTime >= 161) {
                     actor_fadeCommand(player, 2, 0, 60, 0);
                 }
                 if (player->mv->deathTime >= 181 && player->mv->death_State != 10) {
@@ -102,7 +102,7 @@ void actor_updatePlayerStates(void) {
                 }
             }
         }
-        D_8008FDBC &= ~0x80;
+        gMatchFlags &= ~0x80;
     }
 }
 
@@ -133,7 +133,7 @@ void actor_kill(Actor *obj, s32 cause) {
         return;
     }
     slot = obj - movement_obj;
-    if (slot >= D_8008FD8C) {
+    if (slot >= gPlayerCount) {
         return;
     }
     if (obj->mv->death_State != 0) {
@@ -149,20 +149,20 @@ void actor_kill(Actor *obj, s32 cause) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
-        if ((D_8008FDBC & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
+        if ((gMatchFlags & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
             player_setStat(1, 10, 1);
         }
     }
     msg.actor = obj;
     msg.uniqueId = obj->unique_id;
     effect_broadcastEvent((s32)&msg, 3);
-    D_800D18A9 = 0;
+    gLastDeathKind = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;
     flag = 0;
     mode = 0;
     if (obj->mv->on_fire) {
-        D_800D18A9 = 2;
+        gLastDeathKind = 2;
     }
     switch (cause) {
     case 11:
@@ -184,17 +184,17 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         break;
     case 3:
         sound = 0x28;
-        D_800D18A9 = 1;
+        gLastDeathKind = 1;
         break;
     case 4:
         sound = 0x24;
         mode = 1;
-        D_800D18A9 = 1;
+        gLastDeathKind = 1;
         break;
     case 5:
         sound = 0x24;
         mode = 1;
-        D_800D18A9 = 3;
+        gLastDeathKind = 3;
         break;
     case 6:
         if (obj->type == 1 || obj->type == 0x15 || obj->drawtype == 3 ||
@@ -209,19 +209,19 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     case 8:
         sound = 0x170;
         mode = 1;
-        D_800D18A9 = 3;
+        gLastDeathKind = 3;
         break;
     case 15:
         sound = 0x170;
         mode = 3;
-        D_800D18A9 = 3;
+        gLastDeathKind = 3;
         break;
     case 9:
         mode = 2;
         break;
     case 10:
         sound = 0x2F;
-        D_800D18A9 = 3;
+        gLastDeathKind = 3;
         break;
     case 14:
         sound = 0x1E;
@@ -355,7 +355,7 @@ void actor_finishDeath(s32 slot) {
     Actor *obj;
     ActorCtl *state;
 
-    if (!(D_8008FDBC & 1)) {
+    if (!(gMatchFlags & 1)) {
         player_setStat(slot, 4, 1);
     }
 
@@ -378,7 +378,7 @@ void actor_finishDeath(s32 slot) {
             game_requestLevelChange(1, 0x22, 0, 0, 0);
             return;
         }
-        game_requestLevelChange(2, D_800BE3DF, D_800BE3E0, 0, 0);
+        game_requestLevelChange(2, gCheckpointLevel, gCheckpointSpawn, 0, 0);
         return;
     }
 
@@ -397,7 +397,7 @@ void actor_finishDeath(s32 slot) {
     state = obj->mv;
     if (state->bot == 0) {
         // matching: the volatile store and load make IDO reload mv after the decrement, as the original does
-        *(volatile s8 *)&D_8008FD94 = D_8008FD94 - 1;
+        *(volatile s8 *)&gHumansRemaining = gHumansRemaining - 1;
         state = *(ActorCtl *volatile *)&obj->mv;
     }
     state->death_State = 10;
@@ -510,7 +510,7 @@ s32 actor_runDeathEffect(Actor *obj) {
         func_150E0870(obj, 0xFF, 1);
         break;
     case 0x44:
-        func_151D22B0(obj, 0xFF, 1);
+        effect_spawnDeathDebrisBurst(obj, 0xFF, 1);
         break;
     }
     return 0;
@@ -593,7 +593,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
 
 
 /* Sets bits in obj->unk9C (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
-void func_1507DE4C(Actor *obj) {
+void actor_applyHeadShot(Actor *obj) {
     if (obj->type == 1) {
         collision_removePartSet(obj, 0x44);
         collision_removePartSet(obj, 0x23);
@@ -617,7 +617,7 @@ void func_1507DE4C(Actor *obj) {
 }
 
 /* Sets obj's unk94/unk9C flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
-void func_1507DF10(Actor *obj, s32 part) {
+void actor_applyPartHit(Actor *obj, s32 part) {
     switch (part) {
     case 9:
         obj->unk94 |= 0x20;
@@ -672,14 +672,14 @@ void func_1507DFE4(s32 resource, s32 arg1) {
         cutscene_setAnchor(pos[0], pos[1], pos[2], yaw);
         savedMode = level;
         level = 0x25;
-        D_800C3671 = 1;
+        gSpawnCutsceneActive = 1;
         cutscene_start(0x25, kind, 0, 0, 0);
-        D_800C3670 = 1;
+        gCutsceneIgnorePlayed = 1;
         level = savedMode;
     }
 }
 
-/* Returns 0, or 1 + the type player_getSpawnPoint reports for D_800BE3E0 (after setting gNextLevel from D_800BE3DF). */
+/* Returns 0, or 1 + the type player_getSpawnPoint reports for gCheckpointSpawn (after setting gNextLevel from gCheckpointLevel). */
 s32 func_1507E114(s32 *arg0) {
     s32 type;
     s16 pos[3];
@@ -697,8 +697,8 @@ s32 func_1507E114(s32 *arg0) {
     if (mode == 0x22 || mode == 0x18) {
         return 0;
     }
-    gNextLevel = D_800BE3DF;
-    player_getSpawnPoint(0, D_800BE3E0, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    gNextLevel = gCheckpointLevel;
+    player_getSpawnPoint(0, gCheckpointSpawn, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
 

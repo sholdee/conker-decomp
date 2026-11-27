@@ -713,7 +713,7 @@ s32 trail_followWaveTrail(WaveTrail *trail) {
     if (owner != NULL && (owner->type == 0 || owner->unique_id != info->ownerId)) {
         return 0;
     }
-    if (D_800BE9E4 > 0) {
+    if (gFrameTicks > 0) {
         prev = trail->head.tmpl.pos;
         if (trail_getWaveTrailAnchor(&trail->head.tmpl.pos, owner, anchor)) {
             if (!(trail->head.tmpl.flags & TRAIL_HAS_POS)) {
@@ -1441,8 +1441,8 @@ void trail_onOwnedEffectMessage(OwnedEffect *effect, void *msg, u8 type) {
 }
 
 /* The two model points (in joint 2's space) that trail_emitLineBursts's bursts run between. */
-static const Vec3f D_800AAF84 = { 0.0f, -26.0f, -20.0f };
-static const Vec3f D_800AAF90 = { 0.0f, 29.0f, 131.0f };
+static const Vec3f gLineBurstStart = { 0.0f, -26.0f, -20.0f };
+static const Vec3f gLineBurstEnd = { 0.0f, 29.0f, 131.0f };
 
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a trail_spawnWaveTrail effect. */
@@ -1457,8 +1457,8 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             const Vec3f *srcs[2];
             Vec3f *dsts[2];
 
-            srcs[0] = &D_800AAF84;
-            srcs[1] = &D_800AAF90;
+            srcs[0] = &gLineBurstStart;
+            srcs[1] = &gLineBurstEnd;
             dsts[0] = &pos;
             dsts[1] = &dir;
             math_transformOffsets(srcs, dsts, &obj->ob_matrix_ptr[2], 2);

@@ -81,7 +81,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
 
 /*
  * Spawns a effect_spawnBoneBeamParticle effect for `obj` between its bone points D_800A1FC8 and D_800A1FE0, from `position`;
- * when the object has bone matrices and unk74's low nibble isn't 0xF.
+ * when the object has bone matrices and cullMask's low nibble isn't 0xF.
  */
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
     ParticleSize motion;
@@ -91,7 +91,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
     s32 random0;
 
     if (obj->ob_matrix_ptr != NULL) {
-        if ((obj->unk74 & 0xF) != 0xF) {
+        if ((obj->cullMask & 0xF) != 0xF) {
             motion.height = math_randomFloat() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
             motion.width = math_randomFloat() * 15.0f + 35.0f;
 
