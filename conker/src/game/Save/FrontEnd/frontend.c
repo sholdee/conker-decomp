@@ -3097,7 +3097,8 @@ void func_151E4DD8(void) {
     }
 }
 
-/* Returns to state 3 and plays cue 0x1D. */
+/* Requests the front-end level (LEVEL_FRONTEND, mode 6) in state 3 with the save files read again (gMenuLoadStep 0);
+ * run as gPendingTransition once the screen has faded. */
 void save_returnToFrontEnd(void) {
     D_8008FDCC = 0;
     save_resetControllerMap();
