@@ -395,6 +395,8 @@ void collision_allocActorLights(Actor *obj) {
     }
 }
 
+/* Applies the look of character choice arg1 (player stat 1, or a front-end menu character): hidden part
+ * masks for choices 9, 15 and 17-32, part set 0x76 / 0x78 / 0x77 for choices 13-15, and mv->unk1B2 = 1 for 37 and 38. */
 void collision_applyCharacterVariant(Actor *obj, s32 arg1) {
     s32 partSet;
     s32 group;
