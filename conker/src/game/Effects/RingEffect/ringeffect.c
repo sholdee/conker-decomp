@@ -456,10 +456,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     packet.elasticity = 0.200000003f;
     packet.rotVel.y = 0.0f;
     packet.radius = 1.0f;
-    // matching: the original math_random returned a full word; its spill is the
-    // call-argument slot at sp+0x20, 0x14 below packet
-    ((s32 *)&packet)[-5] = math_random();
-    math_dirFromBinAngles(heading, (((s32 *)&packet)[-5] % 26U) - 45,
+    math_dirFromBinAngles(heading, (math_random() % 26U) - 45,
                   (math_randomFloat() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
                   &packet.vel);
     packet.rotVel.x = (math_randomFloat() * 260.0f + -130.0f) * 0.1000000015f;

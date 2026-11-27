@@ -685,9 +685,6 @@ s32 collision_buildVertexRuns(s32 map) {
     s32 verts[32];
     s8 *list;
     s32 opcode;
-    s32 first;
-    s32 tri[3];
-    VtxRun swap;
 
     mtxIndex = 0;
     if (*RUNS != NULL) {
@@ -725,27 +722,24 @@ s32 collision_buildVertexRuns(s32 map) {
             opcode = *(u8 *)CMD;
             k = 0;
             if (opcode == G_VTX) {
-                {
-                    /* matching: this block (its extern takes no stack slot) steers IDO's frame layout */
-                    extern u16 gModelTriCounts[];
+                s32 first;
 
-                    count = (W0 >> 12) & 0xFF;
-                    first = (W0 >> 1) & 0x7F;
-                    first -= count;
-                    vaddr = (W1 & 0xFFFFFF) - 0x38;
-                    vtxIndex = (u32)((W1 - 0x38) & 0xFFFFFF) >> 4;
-                    for (k = 0; k < count; k++) {
-                        verts[k + first] = (k << 4) + vaddr;
-                    }
-                    if (numRuns != 0 && base + vtxIndex * 16 == (u32)(*RUNS)[numRuns - 1].start + (*RUNS)[numRuns - 1].count * 16 &&
-                        mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
-                        (*RUNS)[numRuns - 1].count += count;
-                    } else {
-                        (*RUNS)[numRuns].start = (Vtx *)(vtxIndex * 16 + base);
-                        (*RUNS)[numRuns].mtxIndex = mtxIndex;
-                        (*RUNS)[numRuns].count = count;
-                        numRuns++;
-                    }
+                count = (W0 >> 12) & 0xFF;
+                first = (W0 >> 1) & 0x7F;
+                first -= count;
+                vaddr = (W1 & 0xFFFFFF) - 0x38;
+                vtxIndex = (u32)((W1 - 0x38) & 0xFFFFFF) >> 4;
+                for (k = 0; k < count; k++) {
+                    verts[k + first] = (k << 4) + vaddr;
+                }
+                if (numRuns != 0 && base + vtxIndex * 16 == (u32)(*RUNS)[numRuns - 1].start + (*RUNS)[numRuns - 1].count * 16 &&
+                    mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
+                    (*RUNS)[numRuns - 1].count += count;
+                } else {
+                    (*RUNS)[numRuns].start = (Vtx *)(vtxIndex * 16 + base);
+                    (*RUNS)[numRuns].mtxIndex = mtxIndex;
+                    (*RUNS)[numRuns].count = count;
+                    numRuns++;
                 }
             } else if (opcode == G_MTX) {
                 mtxIndex = (u32)W1 & 0xFFFFFF;
@@ -765,6 +759,8 @@ s32 collision_buildVertexRuns(s32 map) {
                     numTris++;
                 }
             } else if ((opcode >> 4) == 1) {
+                s32 tri[3];
+
                 for (m = 0; m < 4; m++) {
                     if (m == 0) {
                         tri[0] = (W1 >> 25) & 0x1F;
@@ -802,6 +798,8 @@ s32 collision_buildVertexRuns(s32 map) {
         }
         run = &(*RUNS)[j];
         if (run->start < run[-1].start) {
+            VtxRun swap;
+
             swap = *run;
             *run = run[-1];
             (*RUNS)[j - 1] = swap;
