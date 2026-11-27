@@ -921,10 +921,10 @@ void sight_spawnFloorImpact(Actor *actor, u8 owner, s32 list) {
     effect_spawnImpact(&pos, &collision, 2, owner, list);
 }
 
-/* Light effect update: turns the light off while its status block's unk6F is set. */
+/* Light attach callback 3 (gLightAttachCallbacks): turns the light off while its actor's expression is set. */
 s32 sight_updateStatusLight(LightEffect *obj) {
-    SightStatusBlock *status = obj->data.object;
-    if (status->unk6F == 0) {
+    Actor *actor = obj->data.attach.actor;
+    if (actor->expression == 0) {
         obj->light->disabled = 0;
     } else {
         obj->light->disabled = 1;
@@ -932,13 +932,14 @@ s32 sight_updateStatusLight(LightEffect *obj) {
     return 1;
 }
 
-/* Reports through `visible` whether the status block's unk6F is clear; clears flag 2 otherwise. */
-s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
-    SightStatusBlock *status = obj->status;
-    if (status->unk6F == 0) {
+/* Bone glow follow handler 3 (gBoneGlowFollowFuncs): reports through `visible` whether the glow's target actor's
+ * expression is clear; clears flag 2 otherwise. */
+s32 func_151C9B64(BoneGlow *emitter, u8 *visible) {
+    Actor *target = emitter->attach.target;
+    if (target->expression == 0) {
         *visible = 1;
     } else {
-        obj->flags &= ~2;
+        emitter->head.def.flags &= ~2;
         *visible = 0;
     }
     return 1;

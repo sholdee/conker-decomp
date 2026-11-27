@@ -26,10 +26,10 @@ Gfx gLightningRenderTeardownDl[] = {
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
  * from (0, 0, 0) to (0, 0, 1); beam_displaceLightning fills in the ones between.
  */
-Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 fxOwner, s32 fxList) {
     Bolt *bolt;
 
-    bolt = effect_newObject(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
+    bolt = effect_newObject(0x2D, fxList, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, fxOwner, 1);
     if (bolt == NULL) {
         return NULL;
     }
@@ -316,7 +316,7 @@ void beam_freeLightning(Bolt *bolt) {
 Bolt *beam_spawnBoneLightning(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
                     f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
                     f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
-                    s8 update2, s32 extraSize, u8 argD, s32 argE) {
+                    s8 update2, s32 extraSize, u8 fxOwner, s32 fxList) {
     Bolt *bolt;
     BoltDef def;
     BoltLink link;
@@ -381,7 +381,7 @@ Bolt *beam_spawnBoneLightning(Actor *owner, Vec3f *boneOffset, u8 bone, s16 life
     def.type = 2;
     def.invLength = 1.0f;
 
-    bolt = beam_newLightning(&def, extraSize + sizeof(BoltLink), argD, argE);
+    bolt = beam_newLightning(&def, extraSize + sizeof(BoltLink), fxOwner, fxList);
     if (bolt != NULL) {
         memcpy(bolt->link, &link, sizeof(link));
     }

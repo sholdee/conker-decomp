@@ -87,7 +87,7 @@ void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
                         ext->SniperState != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }
-                    height += ext->unk1A6;
+                    height += ext->extraHeight;
                 }
             }
             if (ext != NULL && (ext->transport & 0xF) == 1 && ext->transport_surface == 0 &&

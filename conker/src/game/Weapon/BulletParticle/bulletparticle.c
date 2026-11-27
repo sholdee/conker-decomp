@@ -59,7 +59,7 @@ BulletParticle *weapon_spawnBulletParticle(Bullet *bullet) {
     return particle;
 }
 
-/* Keeps the particle on its bullet and advances unk28 by unk34; flags the particle (bit 0) once the
+/* Keeps the particle on its bullet and advances def.rot by def.scale; flags the particle (bit 0) once the
  * bullet is gone. */
 s32 weapon_updateBulletParticle(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;
@@ -97,7 +97,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     return blood_spawnTrail(&desc, 0, fxOwner, fxList);
 }
 
-/* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
+/* Emitter callback (gBloodTrailEmitters): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
 void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;

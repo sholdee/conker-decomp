@@ -336,8 +336,8 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         anim->frame[0] = time;
     }
 
-    if (anim->unk3C > 0) {
-        anim->unk3C -= anim->unk3A * gFrameTicks;
+    if (anim->blendTimer > 0) {
+        anim->blendTimer -= anim->blendStep * gFrameTicks;
     }
     if (obj != NULL) {
         if (jumped) {

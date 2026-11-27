@@ -655,7 +655,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         if (gRoster[i] < 0) {
             continue;
         }
-        if (D_80087270[i] == 0xA) {
+        if (gDefaultCharacters[i] == 0xA) {
             continue;
         }
         team = gRosterTeams[i];
@@ -758,7 +758,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             text_printAt(x, y, 0x81, "%d", gMenuState->score[i]);
             x += 0x1E;
             if (gMenuState->selection != 1) {
-                if ((D_80087270[i] == 9) || ((i == 0) && (D_8008FD7C == 9))) {
+                if ((gDefaultCharacters[i] == 9) || ((i == 0) && (D_8008FD7C == 9))) {
                     text_printAt(x, y, 0x81, "X");
                 } else {
                     text_printAt(x, y, 0x81, "%d", gMenuState->stats[i].unk4);

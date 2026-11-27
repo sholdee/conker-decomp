@@ -4,17 +4,18 @@
 #include "conker/gfx.h"
 #include "conker/weapon.h"
 
-/* On event 0x2D, switch the object's id to the other end of the pair (with that end's tag). */
-void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
-    GameStruct151C4AB0b *state = &obj->state;
+/* Projectile message handler (gQuadParticleEventFuncs[8]): on message 0x2D (two actors swap identities), a
+ * projectile owned by one of them takes the other as its owner. */
+void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event) {
+    Game1EF500TrailExt *state = &obj->trail;
 
     if (event == 0x2D) {
-        if (state->unk90 == pair->idA) {
-            state->unk90 = pair->idB;
-            state->unk94 = pair->tagB;
-        } else if (state->unk90 == pair->idB) {
-            state->unk90 = pair->idA;
-            state->unk94 = pair->tagA;
+        if (state->owner == swap->actorA) {
+            state->owner = swap->actorB;
+            state->ownerId = swap->idB;
+        } else if (state->owner == swap->actorB) {
+            state->owner = swap->actorA;
+            state->ownerId = swap->idA;
         }
     }
 }
@@ -27,7 +28,7 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
  */
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
-                  f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast) {
+                  f32 defaultRemaining, void *owner, s8 filter, u8 collide, u8 hitModels, s32 ignoreMask, u8 recast) {
     RayHit recastHit;
 
     if (knownHit != NULL) {
@@ -43,7 +44,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
         }
         if (recast && (hit->hitType == 2 || hit->hitType == 3)) {
             collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z,
-                          &recastHit, 0.0f, 0, 1, 1, -1, 0, arg16);
+                          &recastHit, 0.0f, 0, 1, 1, -1, 0, ignoreMask);
             if (recastHit.hitType != 0) {
                 *hit = recastHit;
             }
@@ -62,7 +63,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             hit->dir = *dir;
         }
         collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z, hit,
-                      0.0f, 0, collide ? 0 : 1, (arg15 && collide) ? 0 : 1, arg13, 0, arg16);
+                      0.0f, 0, collide ? 0 : 1, (hitModels && collide) ? 0 : 1, filter, 0, ignoreMask);
         if (hit->surface == NULL) {
             index = -1;
         } else {

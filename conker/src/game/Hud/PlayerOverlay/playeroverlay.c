@@ -958,7 +958,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
                 vpLeft = gViews[i].left;
                 y = gViews[i].top + scaled[6];
                 if (gMatchHudFlags & 2) {
@@ -1009,7 +1009,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
                 vpLeft = gViews[i].left + scaled[5];
                 vpRight = gViews[i].right - scaled[5];
                 y = gViews[i].top + scaled[5];
@@ -1139,7 +1139,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         texLoaded = 0;
         texOk = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (D_80087270[i] != 10) {
+            if (gDefaultCharacters[i] != 10) {
 
                 vpRight = gViews[i].right - 5.0f;
                 y = gViews[i].top + 5.0f;
@@ -1162,9 +1162,9 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                     }
                     if (icon >= 0 && icon != 3) {
                         if (barShift > 0) {
-                            barLen.b[i] = movement_obj[i].mv->unk12C >> barShift;
+                            barLen.b[i] = movement_obj[i].mv->itemRemaining >> barShift;
                         } else {
-                            barLen.b[i] = movement_obj[i].mv->unk12C << -barShift;
+                            barLen.b[i] = movement_obj[i].mv->itemRemaining << -barShift;
                         }
                         barMode = 1;
                     }
@@ -1186,7 +1186,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         icon = 6;
                         break;
                     case 0x3E:
-                        barLen.b[i] = movement_obj[i].mv->unk12C >> 4;
+                        barLen.b[i] = movement_obj[i].mv->itemRemaining >> 4;
                         barMode = 2;
                         break;
                     }

@@ -2815,12 +2815,12 @@ s32 func_15065A5C(Actor *actor, s32 heldButtons, s32 pressedButtons, f32 height,
             if (actor->count5 == 0) {
                 actor->count5 = 1;
             }
-            if (actor->mv->unk12C >= gFrameTicks) {
-                actor->mv->unk12C -= gFrameTicks;
+            if (actor->mv->itemRemaining >= gFrameTicks) {
+                actor->mv->itemRemaining -= gFrameTicks;
                 actor->speedPercent = 0x96;
             } else {
                 actor->speedPercent = 0x4B;
-                actor->mv->unk12C = 0;
+                actor->mv->itemRemaining = 0;
             }
         }
         break;

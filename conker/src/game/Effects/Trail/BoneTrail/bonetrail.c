@@ -661,7 +661,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
         spawn.fadeRate = 0;
         spawn.scaleStart = 1;
         spawn.scaleRate = 1.0f;
-        spawn.unk64 = 0;
+        spawn.kind = 0;
         spawn.yawBase = angle - 25;
         spawn.pitchBase = -44;
         spawn.yawRange = 50;

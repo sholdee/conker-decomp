@@ -11,7 +11,7 @@ void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *
                    u8 b, u8 owner, s32 list);
 
 
-void attach_emptyLevelUpdateHook1(s32 arg0) {
+void attach_emptyLevelUpdateHook1(s32 unused) {
 }
 
 
@@ -99,7 +99,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
 }
 
 /* Writes the two-halfword command { 0x42, 0 } and returns the position after it. */
-GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
+GameCommand *func_150D8590(GameCommand *cmd, s32 index) {
     cmd->opcode = 0x42;
     cmd->value = 0;
     return cmd + 1;
@@ -182,25 +182,20 @@ void attach_spawnFootImpact(Actor *actor) {
             burst.deathFunc = -1;
             burst.primColorMode = 8;
             burst.envColorMode = 6;
-            burst.unk64 = 1;
+            burst.kind = 1;
             burst.extra = 0.9054819942f;
             particle_spawnSpriteBurst(&burst, 255, 255, 1);
         }
     }
 }
 
-struct S150D88AC {
-    u8 pad0[0x14];
-    u8 *unk14;
-    u8 *unk18;
-};
-
-/* Sets unk14[9] to whether unk18[0x6F] is clear. */
-s32 func_150D88AC(struct S150D88AC *arg0) {
-    if (arg0->unk18[0x6F] != 0) {
-        arg0->unk14[9] = 0;
+/* Light attach callback 2 (gLightAttachCallbacks): disables the effect's light while its actor's expression is 0
+ * and enables it otherwise. */
+s32 attach_disableLightWithoutExpression(LightEffect *effect) {
+    if (effect->data.attach.actor->expression != 0) {
+        effect->light->disabled = 0;
     } else {
-        arg0->unk14[9] = 1;
+        effect->light->disabled = 1;
     }
     return 1;
 }

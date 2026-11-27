@@ -78,7 +78,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
     weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
     if (surface != NULL && withParticles) {
         if (math_getTriEdges(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
-            func_151C0644(pos, fxOwner, fxList);
+            weapon_startHitRandomEmitter(pos, fxOwner, fxList);
         }
     }
     if (surface != NULL && withParticles) {
@@ -161,7 +161,7 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
             markPos.y = floor.height;
             markPos.z = probe.z;
             weapon_spawnHitDecal(&floor.tri, &markPos, fxOwner, fxList);
-            func_151C0644(pos, fxOwner, fxList);
+            weapon_startHitRandomEmitter(pos, fxOwner, fxList);
         }
     }
 }
@@ -234,21 +234,10 @@ void weapon_rumbleNearbyPlayers(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startPlayerRumbles(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
-void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_startHitRandomEmitter(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startRandomEmitter(pos, math_random() % 62 + 120, fxOwner, fxList);
 }
 
-
-typedef struct FollowFx {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-} FollowFx;
-
-typedef struct Bullet88 {
-    /* 0x000 */ u8 pad0[0x110];
-    /* 0x110 */ s32 unk110;
-} Bullet88;
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
 void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
@@ -410,21 +399,21 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.y = pos.y;
             header2.z = pos.z;
             bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
-            bulletState->follow = (struct FollowFx *)weapon_spawnBulletSprite(obj);
+            bulletState->follow = weapon_spawnBulletSprite(obj);
             bulletState->sound = sound_addDynamicSound(math_random() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
-            bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
+            bulletState->particle = weapon_spawnBulletParticle(obj);
             if (gScreenLayout < 2 && gPlayerCount < 4) {
-                bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
+                bulletState->bloodTrail = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
-                bulletState->unk8C = NULL;
+                bulletState->bloodTrail = NULL;
             }
         } else {
             if (state.trail != NULL) {
                 effect_destroyObject(state.trail);
             }
             if (state.follow != NULL) {
-                effect_destroyObject(&state.follow->header);
+                effect_destroyObject(&state.follow->head.header);
             }
         }
         if (shooter->ob_matrix_ptr != NULL && (shooter->cullMask & 0xF) != 0xF) {
@@ -457,18 +446,18 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
 }
 
 /* Sound callback registered by weapon_fireBullet: keeps the bullet's sound at the bullet's position. */
-s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+s32 weapon_bulletSoundCallback(SoundRecord *emitter, s32 active, void **volume, s32 pan, s32 cents, s32 mix, s16 *sound) {
     Bullet *bullet;
 
-    bullet = emitter->bullet;
-    if (bullet != NULL && *arg2 != NULL) {
+    bullet = emitter->callback_param1.bullet;
+    if (bullet != NULL && *volume != NULL) {
         emitter->x = bullet->head.pos.x;
         emitter->y = bullet->head.pos.y;
         emitter->z = bullet->head.pos.z;
         return 0;
     }
 
-    *arg6 = 0;
+    *sound = 0;
     return 0;
 }
 
@@ -540,7 +529,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
         trail->light->z = bullet->head.pos.z;
     }
     if (state->follow != NULL) {
-        state->follow->pos = bullet->head.pos;
+        state->follow->head.desc.pos = bullet->head.pos;
     }
     return TRUE;
 }
@@ -554,16 +543,16 @@ void weapon_releaseBullet(Bullet *bullet) {
         effect_destroyObject(state->trail);
     }
     if (state->follow != NULL) {
-        effect_destroyObject(&state->follow->header);
+        effect_destroyObject(&state->follow->head.header);
     }
-    if (state->unk88 != NULL) {
+    if (state->particle != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs
-        s32 *flag = &state->unk88->unk110;
+        Bullet **ref = &state->particle->bullet;
 
-        *flag = 0;
+        *ref = NULL;
     }
-    if (state->unk8C != NULL) {
-        effect_destroyObject(state->unk8C);
+    if (state->bloodTrail != NULL) {
+        effect_destroyObject(state->bloodTrail);
     }
     sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }
@@ -746,8 +735,8 @@ s32 weapon_traceBullet(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec
  * Ray cast that continues through pass-through surfaces; the first one it passes is reported in
  * passPos/passDist/pass. ray->dist is the total distance travelled.
  */
-void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
+void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 maxDist,
+                   s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode) {
     WorldObject *part;
     Vec3f pos;
@@ -759,8 +748,8 @@ void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ra
     pos = *start;
 
     do {
-        collision_castRay(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, arg4, arg5,
-                      arg6, arg7, arg8, ignore, mode);
+        collision_castRay(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, maxDist, skipWorld,
+                      skipObjs, skipModels, filter, ignore, mode);
         dist += ray->dist;
         if (ray->surface != NULL) {
             WorldObject *p = ray->surface;

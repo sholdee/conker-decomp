@@ -102,8 +102,8 @@ void beam_updateCastBeam(BeamObj *obj) {
 
     if (gCutsceneStates[0] == 1) {
         if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
-            beam->ends[0]->mode = 3;
-            beam->ends[1]->mode = 3;
+            beam->ends[0]->head.desc.drawFunc = 3;
+            beam->ends[1]->head.desc.drawFunc = 3;
         }
         return;
     }
@@ -125,22 +125,22 @@ void beam_updateCastBeam(BeamObj *obj) {
 
     if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
         if (beam->ray.hitType == 0) {
-            beam->ends[0]->mode = beam->ends[1]->mode = 3;
+            beam->ends[0]->head.desc.drawFunc = beam->ends[1]->head.desc.drawFunc = 3;
         } else {
             hitPos = beam->ray.pos;
-            beam->ends[1]->pos = hitPos;
-            beam->ends[0]->pos = hitPos;
+            beam->ends[1]->head.desc.pos = hitPos;
+            beam->ends[0]->head.desc.pos = hitPos;
 
             if (beam->ray.hitType == 1) {
-                beam->ends[0]->mode = -1;
-                beam->ends[1]->mode = 3;
+                beam->ends[0]->head.desc.drawFunc = -1;
+                beam->ends[1]->head.desc.drawFunc = 3;
             } else if (actor_getAlpha(beam->ray.obj, 0) < 0xFF) {
-                beam->ends[0]->mode = -1;
-                beam->ends[1]->mode = 3;
+                beam->ends[0]->head.desc.drawFunc = -1;
+                beam->ends[1]->head.desc.drawFunc = 3;
             } else {
                 actor_flashFog(beam->ray.obj, 0xFF, 0, 0, 0x7F, 0, 0x10);
-                beam->ends[0]->mode = 3;
-                beam->ends[1]->mode = -1;
+                beam->ends[0]->head.desc.drawFunc = 3;
+                beam->ends[1]->head.desc.drawFunc = -1;
             }
         }
     }
@@ -172,7 +172,7 @@ void beam_teardownCastBeam(BeamObj *obj) {
     beam = &obj->beam;
     for (i = 0; i < 2; i++) {
         if (beam->ends[i] != NULL) {
-            effect_destroyObject(&beam->ends[i]->header);
+            effect_destroyObject(&beam->ends[i]->head.header);
         }
     }
     effect_detachHandle(obj, beam->owner);

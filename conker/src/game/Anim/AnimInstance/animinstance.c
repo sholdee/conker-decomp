@@ -22,9 +22,9 @@ void anim_updateInstance(AnimInstance *anim) {
         unk8 = 0x1000;
         transform = anim->matrices[gDrawBufferIndex];
         mtx = anim->partMtx[gDrawBufferIndex];
-        anim_buildBoneMatrices(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
+        anim_buildBoneMatrices(&mtx, transform, anim, anim->bones, anim->numParts, &unk8, NULL, 0);
         math_mtxFToLInPlace(anim->partMtx[gDrawBufferIndex], anim->numParts);
-        anim->unk3F6 = TRUE;
+        anim->partMtxReady = TRUE;
     }
     anim_advance(anim, gFrameDelta, NULL, 0);
     if (frameBuf != NULL) {
@@ -53,10 +53,10 @@ s32 anim_createInstance(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **
     bzero(*out, 0x40);
     (*out)->header[1][5] = 1;
     (*out)->header[0][5] = 1;
-    attach_loadModel(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
+    attach_loadModel(model, dlists, numDLists, data, arg5, &(*out)->bones, &numParts);
     (*out)->numParts = numParts;
     (*out)->bank = bank;
-    (*out)->unk3F6 = FALSE;
+    (*out)->partMtxReady = FALSE;
     (*out)->partMtx[0] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
     (*out)->partMtx[1] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
     // matching: model's variable is reused for *out; a separate AnimInstance * local makes IDO spill model

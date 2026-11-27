@@ -108,7 +108,7 @@ void (*gActorUpdateHandlers[])(Actor *) = {
     func_150C3994, player_updateFlying, NULL, NULL,
     func_150C3574, actor_removeIfDead, func_150E0BE0, actor_removeAtAnimEnd,
     actor_updateWeaponProp, NULL, weapon_updateTank, actor_updateMount,
-    func_150D7928, func_1505528C, NULL, func_150EEDA8,
+    func_150D7928, func_1505528C, NULL, weapon_updateHidden,
     actor_updateFollower, weapon_releaseTankCamera, func_150C3230, actor_updateFrozenRemoval,
     actor_updateSpinDown, actor_updateOverEdge, actor_updateSinkAway,
 };
@@ -2069,11 +2069,11 @@ void actor_updatePlayer(Actor *actor) {
             }
             actor->heightOffset = 0x1E;
             actor->targetHeightOffset = actor->heightOffset;
-            if ((gFrameTicks < actor->mv->unk12C) && (actor->energy != 0)) {
-                actor->mv->unk12C -= gFrameTicks;
+            if ((gFrameTicks < actor->mv->itemRemaining) && (actor->energy != 0)) {
+                actor->mv->itemRemaining -= gFrameTicks;
                 actor->speed = 254.0f;
             } else {
-                actor->mv->unk12C = 0;
+                actor->mv->itemRemaining = 0;
             }
             if ((actor->mv->pressedButtons & 0x2000) && (actor->energy != 0)) {
                 func_150D7790(actor, actor->mv->context_b & 0x7F);
@@ -2971,13 +2971,13 @@ void actor_updatePathFollower(Actor *obj) {
     if (obj->unk226 == 0xFF) {
         f32 vel;
         if (obj->mv != NULL) {
-            if (gFrameTicks < obj->mv->unk12C) {
-                obj->mv->unk12C -= gFrameTicks;
+            if (gFrameTicks < obj->mv->itemRemaining) {
+                obj->mv->itemRemaining -= gFrameTicks;
                 if (obj->energy > 0) {
                     obj->speed = 254.0f;
                 }
             } else {
-                obj->mv->unk12C = 0;
+                obj->mv->itemRemaining = 0;
             }
             if ((obj->mv->pressedButtons & 0x2000) && (obj->energy != 0)) {
                 func_150D7790(obj, obj->mv->context_b & 0x7F);
@@ -3795,7 +3795,7 @@ void actor_updateWeaponProp(Actor *obj) {
             }
         }
     }
-    if (other->animseq.uh == 0x10A && otherAnim->unk3C <= 0 && ready &&
+    if (other->animseq.uh == 0x10A && otherAnim->blendTimer <= 0 && ready &&
         (state->buttons & 0x2000)) {
         if (obj->taskint[1] == 0) {
             particle_startObjRayBeam(other, -1, 3, 1, 0xFF, 1);

@@ -18,14 +18,14 @@
 /* game_43B20.c */
 void player_clearIdleRequests(void);
 void player_clearSpawnPoints(void);
-void player_loadSpawnPoints(s32 arg0);
+void player_loadSpawnPoints(s32 levelId);
 
 /* game/Player/StatsInit/statsinit.c */
-void player_initMatch(s16 arg0, s16 arg1);
-void func_1501748C(s16 arg0);
+void player_initMatch(s16 mode, s16 playerMask);
+void func_1501748C(s16 playerMask);
 void player_clearMatch(void);
-void player_offsetLinkGroupObjects(s32 arg0);
-void player_loadLinkGroups(s32 arg0);
+void player_offsetLinkGroupObjects(s32 offset);
+void player_loadLinkGroups(s32 levelId);
 
 /* game/Player/HudBlockInit/hudblockinit.c */
 void player_initHudBlockCount(void);
@@ -55,11 +55,11 @@ extern SpawnPoint *gSpawnPoints; /* the level's spawn point table */
 void player_setStat(s16 player, s16 stat, s32 value);
 s32 player_getStat(s16 player, s16 stat);
 void player_syncHealth(s16 players);
-extern s8 D_80087260;      /* match default of stat 2 (unk8) */
-extern s8 D_80087264;      /* match default of stat 9 (unkC) */
+extern s8 gDefaultLives;      /* match default of stat 2 (lives) */
+extern s8 gDefaultScore;      /* match default of stat 9 (score) */
 extern s8 D_80087268;
 extern s8 gDefaultHealth;      /* match default of stat 5 (health) */
-extern s8 D_80087270[16];  /* per player: match default of stat 0 (unk0) */
+extern s8 gDefaultCharacters[16];  /* per player: match default of stat 0 (character) */
 extern u8 gModePlayerCounts[8];   /* indexed by gMatchState.mode */
 extern s8 gSpawnGrenadeCount;
 extern s16 gCarriedUnderwaterTime;

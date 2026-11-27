@@ -32,7 +32,7 @@ f32 weapon_getAngleDelta(f32 from, f32 to) {
     return delta;
 }
 
-/* Signed angle in degrees from `self`'s heading (unk40) to the direction of `target`. */
+/* Signed angle in degrees from `self`'s heading (theta) to the direction of `target`. */
 f32 weapon_getAngleToTarget(Actor *self, Actor *target) {
     s32 angle;
 
@@ -165,7 +165,7 @@ void weapon_scrollTreads(Actor *obj, s32 left, s32 right) {
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
- * - The controlling player (movement_obj[unk127] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
+ * - The controlling player (movement_obj[playernumber] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (weapon_scrollTreads).
  * - The gun angles (mv->gunYaw/gunPitch) either lead STATE->target, or turn with C-left/C-right while
@@ -240,17 +240,17 @@ void weapon_updateTank(Actor *obj) {
             driver = &movement_obj[player];
             if (driver->energy != 0) {
                 if (driver->mv->unk128 & 0x80) {
-                    if (driver->mv->unk12C != 0) {
+                    if (driver->mv->itemRemaining != 0) {
                         obj->imune = 0xFF;
-                        if (gFrameTicks < movement_obj[player].mv->unk12C) {
-                            movement_obj[player].mv->unk12C -= gFrameTicks;
+                        if (gFrameTicks < movement_obj[player].mv->itemRemaining) {
+                            movement_obj[player].mv->itemRemaining -= gFrameTicks;
                         } else {
-                            movement_obj[player].mv->unk12C = 0;
+                            movement_obj[player].mv->itemRemaining = 0;
                             mp_releaseSlot(player, 0);
                             obj->imune = 0;
                         }
                     }
-                } else if ((driver->mv->unk128 & 0x10) && (driver->mv->unk12C == 0)) {
+                } else if ((driver->mv->unk128 & 0x10) && (driver->mv->itemRemaining == 0)) {
                     mp_releaseSlot(player, 0);
                 }
             }
@@ -269,15 +269,15 @@ void weapon_updateTank(Actor *obj) {
             obj->intel_decel = 50;
             throttleScale = 0.6399999857f;
             stateFlags = movement_obj[player].mv->unk128;
-            if ((stateFlags & 1) && (gPadTable[player]->button & A_BUTTON) && (movement_obj[player].mv->unk12C != 0)) {
+            if ((stateFlags & 1) && (gPadTable[player]->button & A_BUTTON) && (movement_obj[player].mv->itemRemaining != 0)) {
                 obj->intel_accel = 28;
                 obj->intel_decel = 28;
                 gPads[player].stick_y = 80;
                 throttleScale += throttleScale;
-                if (gFrameTicks < movement_obj[player].mv->unk12C) {
-                    movement_obj[player].mv->unk12C -= gFrameTicks;
+                if (gFrameTicks < movement_obj[player].mv->itemRemaining) {
+                    movement_obj[player].mv->itemRemaining -= gFrameTicks;
                 } else {
-                    movement_obj[player].mv->unk12C = 0;
+                    movement_obj[player].mv->itemRemaining = 0;
                     mp_releaseSlot(player, 0);
                 }
             }
@@ -407,8 +407,8 @@ void weapon_updateTank(Actor *obj) {
                 dirX = sinf(bearing) * cosf(obj->lean_angle * 0.01745329238f);
                 dirZ = cosf(bearing) * cosf(obj->vtilt * 0.01745329238f);
                 angle = math_atan2(dirX * 1000.0f, dirZ * 1000.0f);
-                aimOffset = obj->mv->unk12A * 400.0f;
-                obj->mv->gunYaw -= weapon_getAngleDelta(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->gunYaw) * 0.125f;
+                aimOffset = obj->mv->aimMiss * 400.0f;
+                obj->mv->gunYaw -= weapon_getAngleDelta(angle * 57.29577637f + obj->mv->aimMiss * 10.0f, obj->mv->gunYaw) * 0.125f;
                 obj->mv->gunPitch += weapon_getShellAimError(obj, obj->mv->gunPitch - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
                 target->xpos -= leadX;
                 target->zpos -= leadZ;
@@ -630,8 +630,9 @@ void weapon_releaseTankCamera(Actor *obj) {
 }
 
 
-/* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
-void func_150EEDA8(Actor *obj) {
+/* Update handler 35: on its first run hides `obj` (drawtype 3: not drawn, skipped by ray casts) with no body radius and
+ * immune, then runs the common object update every frame. */
+void weapon_updateHidden(Actor *obj) {
     if (obj->drawtype != 3) {
         func_151045E0(obj, 15, 250.0f);
         obj->drawtype = 3;

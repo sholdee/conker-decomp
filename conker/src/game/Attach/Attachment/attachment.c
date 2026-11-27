@@ -28,7 +28,7 @@ ModelAttachment *gAttachments; // head of the model attachment list
 
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
-s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
+s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *numParts) {
     AttachModelHeader *header;
     s32 i;
 
@@ -56,9 +56,9 @@ s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *ar
         *arg4 = header->unk10;
     }
     if (arg5 != NULL) {
-        *arg5 = header->unk8;
-        if (arg6 != NULL) {
-            *arg6 = header->unkC >> 4;
+        *arg5 = header->bones;
+        if (numParts != NULL) {
+            *numParts = header->bonesSize >> 4;
         }
     }
     return 0;
@@ -75,12 +75,12 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
     s32 size;
 
     if (att->dlists == NULL) {
-        if (att->unk17 == -1) {
+        if (att->animBank == -1) {
             if (attach_loadModel(att->model, &att->dlists, &att->numDLists, &data, &att->unk30, NULL, NULL) != 0) {
                 return 1;
             }
         } else {
-            if (anim_createInstance(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
+            if (anim_createInstance(att->model, att->animBank, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
                 return 1;
             }
         }
@@ -254,7 +254,7 @@ static AttachmentHook gAttachHooks[] = {
     attach_hookScrollTileSound,
     attach_hookDelayedSound,
     attach_hookScrollTexV,
-    func_15033E00,
+    attach_hookRemoveWhenHidden,
     beam_hookSlideTexture,
     attach_hookRemoveInWater,
     func_15033F0C,
@@ -460,7 +460,7 @@ void attach_updateAll(void) {
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
 ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
-                          s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
+                          s32 setId, s32 handler, const u16 *ownerStates, s32 animBank, s32 parentSet, s32 parentMtx) {
     ModelAttachment *att;
     ModelAttachment *next;
     s32 err;
@@ -513,7 +513,7 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
     att->ownerStates[0] = ownerStates[0];
     att->ownerStates[1] = ownerStates[1];
     att->ownerStates[2] = ownerStates[2];
-    att->unk17 = unk17;
+    att->animBank = animBank;
     att->anim = NULL;
     att->unk15 = unk15;
     att->unk16 = unk16;
@@ -608,7 +608,7 @@ Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass) {
 }
 
 /* Draws the visible attachments of `owner` in viewport `view`. */
-Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
+Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 reflections) {
     ModelAttachment *att;
     ModelAttachment *next;
 
@@ -622,7 +622,7 @@ Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
             att = next;
             continue;
         }
-        gdl = attach_draw(gdl, att, owner, view, arg3);
+        gdl = attach_draw(gdl, att, owner, view, reflections);
         att = next;
     }
     return gdl;
@@ -634,7 +634,7 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
     ModelAttachment *parent;
 
     if (att->anim != NULL) {
-        if (att->anim->unk3F6 == 0) {
+        if (att->anim->partMtxReady == 0) {
             return 0;
         }
         *mtx = att->anim->partMtx[gDrawBufferIndex];
@@ -665,9 +665,9 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
 
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
- * `arg4` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
+ * `reflections` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
  * original `gdl` if the display list would overflow. */
-Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
+Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 reflections) {
     Mtx *mtx;
     Mtx *boneMtx;
     s32 segScratch[3];
@@ -775,7 +775,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         v = texture_getAddress((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
-    if (arg4 == 0) {
+    if (reflections == 0) {
         gSPSetGeometryMode(gdl++, G_CULL_BACK);
         for (i = 0; i < att->numDLists; i++) {
             if (!(att->hiddenDLists & (1 << i))) {
@@ -878,7 +878,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
     case 0x5A:
         unk = owner->mv;
         if (unk != NULL) {
-            unk->unk1A6 += 0xAA;
+            unk->extraHeight += 0xAA;
         }
         break;
     case 0x90:
@@ -932,7 +932,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x5A:
             unk = owner->mv;
             if (unk != NULL) {
-                unk->unk1A6 -= 0xAA;
+                unk->extraHeight -= 0xAA;
             }
             break;
         case 0x90:
@@ -2259,7 +2259,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         if (animId != curAnimId) {
             goto copy_frame;
         }
-        if (ownerAnim->unk3C != 0x3FF) {
+        if (ownerAnim->blendTimer != 0x3FF) {
             goto copy_frame;
         }
         actor_saveBlendAnim(anim);
@@ -2268,8 +2268,8 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         anim->frame[0] = ownerAnim->frame[0];
         anim = att->anim;
         if (syncAll && (anim->nextFrameOffset[1] != 0 || anim->header[1][5] == 0)) {
-            anim->unk3A = ownerAnim->unk3A;
-            att->anim->unk3C = ownerAnim->unk3C;
+            anim->blendStep = ownerAnim->blendStep;
+            att->anim->blendTimer = ownerAnim->blendTimer;
             anim = att->anim;
         }
         lastFrame = anim->numFrames[0] - 1.0f;
@@ -2673,8 +2673,8 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
     return 1;
 }
 
-/* Hook: removes the attachment once its owner's unk5 becomes 3. */
-s32 func_15033E00(ModelAttachment *att, Actor *owner) {
+/* Hook: removes the attachment once its owner's drawtype becomes 3 (hidden). */
+s32 attach_hookRemoveWhenHidden(ModelAttachment *att, Actor *owner) {
     if (owner->drawtype == 3) {
         return 1;
     }

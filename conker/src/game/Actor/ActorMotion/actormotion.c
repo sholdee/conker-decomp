@@ -3277,17 +3277,17 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
             }
         }
         if (state->frameRom[0] != 0) {
-            blend = state->unk3C;
+            blend = state->blendTimer;
             if (blendFrames >= 1.0f) {
-                state->unk3A = 500 / (s16)blendFrames;
-                if (state->unk3C > 0 && anim == (state->anim[1] & 0xFFFF7FFF)) {
-                    state->unk3C = 0x3FF - state->unk3C;
+                state->blendStep = 500 / (s16)blendFrames;
+                if (state->blendTimer > 0 && anim == (state->anim[1] & 0xFFFF7FFF)) {
+                    state->blendTimer = 0x3FF - state->blendTimer;
                     blend = 0;
                 } else if (blend < 600) {
-                    state->unk3C = 0x3FF;
+                    state->blendTimer = 0x3FF;
                 }
             } else {
-                state->unk3C = 0;
+                state->blendTimer = 0;
             }
             if (blend < 600) {
                 state->anim[1] = state->anim[0];
@@ -4142,7 +4142,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                         sound_stopActorSound2(actor);
                         sound_addDynamicSound(0x61E, actor->xpos, actor->ypos, actor->zpos,
                                       0x7FFF, 0x1F4, 0xC8, sound_followOwnerAnimsCallback, actor, (s32)D_80099428, 0, 0);
-                        func_151C6EA0(actor, 0xFF, 1);
+                        weapon_spawnHoverModel(actor, 0xFF, 1);
                     }
                 }
             } else {

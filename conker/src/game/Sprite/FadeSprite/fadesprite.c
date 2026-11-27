@@ -28,7 +28,7 @@ void sprite_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut) {
     desc.red = 0xFF;
     desc.green = 0xFF;
     desc.blue = 0xFF;
-    desc.unk37 = 0x11;
+    desc.combiner = 0x11;
     desc.alpha = 0;
     desc.frame = 0;
     desc.x = 228.0f;

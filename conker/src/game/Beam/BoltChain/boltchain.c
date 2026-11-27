@@ -26,15 +26,15 @@ Gfx gBoltRenderTeardownDl[] = {
 static s32 (*gBoltUpdateHandlers[])(BoltObj *bolt, u8 *moved) = { beam_followBoundsBolt, beam_followBoneBolt };
 /* Per BoltDesc.kind: cleanup, then message handlers. */
 static void (*gBoltCleanupHandlers[])(BoltObj *bolt) = { NULL, beam_unlinkChainBolt, NULL, NULL };
-static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
+static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 event, u8 eventType) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
 /* Per BoltChain.kind: message handlers. */
-static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, effect_boltRingMessage, beam_destroyOnMessage4B };
+static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 data, u8 msg) = { NULL, effect_boltRingMessage, beam_destroyOnMessage4B };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
- * end flares. arg2 and arg3 go through to the allocators; callers pass their own header bytes 0xC and 0x1.
+ * end flares. fxOwner and fxList go through to the allocators; callers pass their own header bytes 0xC and 0x1.
  */
-BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
+BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 fxOwner, s32 fxList) {
     BoltObj *bolt;
     s32 segments;
     u8 i;
@@ -42,7 +42,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
     segments = desc->segments;
     points = desc->segments + 2;
-    bolt = effect_newObject(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, arg2, 1);
+    bolt = effect_newObject(0x40, fxList, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, fxOwner, 1);
     if (bolt == NULL) {
         return NULL;
     }
@@ -98,7 +98,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         for (i = 0; i < 2; i++) {
             spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
             spawn.flags = (math_random() ? 0x40 : 0) | (math_random() ? 0x80 : 0);
-            bolt->flares[i] = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0, arg2, arg3);
+            bolt->flares[i] = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0, fxOwner, fxList);
         }
     }
     return bolt;
@@ -108,7 +108,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 void beam_updateBolt(BoltObj *bolt) {
     s32 (*update)(BoltObj *, u8 *);
     u8 moved;
-    BoltFlare *flare;
+    SpriteParticle *flare;
 
     moved = FALSE;
     if (bolt->desc.updateKind != -1) {
@@ -137,12 +137,12 @@ void beam_updateBolt(BoltObj *bolt) {
 
     flare = bolt->flares[0];
     if (flare != NULL) {
-        flare->pos = bolt->desc.ctrl[0];
+        flare->head.desc.pos = bolt->desc.ctrl[0];
     }
 
     flare = bolt->flares[1];
     if (flare != NULL) {
-        flare->pos = bolt->desc.ctrl[3];
+        flare->head.desc.pos = bolt->desc.ctrl[3];
     }
 }
 
@@ -393,7 +393,7 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
 /* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
 void beam_releaseBolt(BoltObj *bolt) {
     void (*cleanup)(BoltObj *);
-    BoltFlare *flare;
+    SpriteParticle *flare;
 
     cleanup = gBoltCleanupHandlers[bolt->desc.kind];
     if (cleanup != NULL) {
@@ -401,11 +401,11 @@ void beam_releaseBolt(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        effect_destroyObject(&flare->header);
+        effect_destroyObject(&flare->head.header);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        effect_destroyObject(&flare->header);
+        effect_destroyObject(&flare->head.header);
     }
     particle_freeViewBuffers(bolt->vtxBuf);
 }
@@ -423,15 +423,15 @@ void beam_freeBolt(BoltObj *bolt) {
 }
 
 /* Dispatches to the bolt kind's handler in gBoltMsgHandlers. */
-void beam_boltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
+void beam_boltMessage(BoltObj *bolt, s32 event, u8 eventType) {
     void (*fn)(BoltObj *, s32, u8) = gBoltMsgHandlers[bolt->desc.kind];
     if (fn != NULL) {
-        fn(bolt, arg1, arg2);
+        fn(bolt, event, eventType);
     }
 }
 
 /* Creates a bolt chain from start to end with (1 << depth) + 1 randomly spaced points. */
-BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
+BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 fxOwner, s32 fxList) {
     BoltChainObj *obj;
     BoltChain chain;
     BoltChain *data;
@@ -442,7 +442,7 @@ BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainCo
     chain.config = *config;
     chain.kind = kind;
 
-    obj = effect_newTimedEffect(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
+    obj = effect_newTimedEffect(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), fxOwner, fxList);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));
@@ -558,9 +558,9 @@ void beam_freeBoltChain(BoltChainObj *obj) {
 }
 
 /* Dispatches to the chain kind's handler in gBoltChainMsgHandlers. */
-void beam_boltChainMessage(BoltChainObj *obj, s32 arg1, u8 arg2) {
+void beam_boltChainMessage(BoltChainObj *obj, s32 data, u8 msg) {
     if (gBoltChainMsgHandlers[obj->chain.kind] != NULL) {
-        gBoltChainMsgHandlers[*(volatile u8 *)&obj->chain.kind](&obj->base.header, arg1, arg2); // matching: the original reloads the kind
+        gBoltChainMsgHandlers[*(volatile u8 *)&obj->chain.kind](&obj->base.header, data, msg); // matching: the original reloads the kind
     }
 }
 
@@ -588,7 +588,7 @@ typedef struct BoltBoneAnchor {
  * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
  * from that point away from the actor hits. life -1 means it never runs out.
  */
-BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
+BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 fxOwner, s32 fxList) {
     BoltAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -637,7 +637,7 @@ BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 se
     desc.ctrl[3] = hit.pos;
 
     beam_getStraightCtrlPoints(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
-    bolt = beam_newBolt(&desc, sizeof(BoltAnchor), argA, argB);
+    bolt = beam_newBolt(&desc, sizeof(BoltAnchor), fxOwner, fxList);
     if (bolt != NULL) {
         memcpy(bolt->userData, &anchor, sizeof(BoltAnchor));
     }
@@ -645,8 +645,8 @@ BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 se
 }
 
 /* gBoltMsgHandlers handler for kind 2. */
-void beam_boundsBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
+void beam_boundsBoltMessage(BoltObj *bolt, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }
 
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
@@ -705,7 +705,7 @@ void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *c
 }
 
 /* Calls weapon_spawnImpactBurst at the point on the actor's bounds in direction yaw/pitch. */
-void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
+void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 fxOwner, s32 fxList) {
     Vec3f pos;
     Vec3f center;
     f32 radius;
@@ -718,7 +718,7 @@ void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4)
         pos.x += center.x;
         pos.y += center.y;
         pos.z += center.z;
-        weapon_spawnImpactBurst(&pos, arg3, arg4);
+        weapon_spawnImpactBurst(&pos, fxOwner, fxList);
     }
 }
 
@@ -726,7 +726,7 @@ void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4)
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 fxOwner, s32 fxList) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -775,7 +775,7 @@ BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 ya
     }
 
     beam_getStraightCtrlPoints(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
-    bolt = beam_newBolt(&desc, sizeof(BoltBoneAnchor), argC, argD);
+    bolt = beam_newBolt(&desc, sizeof(BoltBoneAnchor), fxOwner, fxList);
     if (bolt != NULL) {
         memcpy(bolt->userData, &anchor, sizeof(BoltBoneAnchor));
     }
@@ -812,6 +812,6 @@ void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f
 }
 
 /* gBoltMsgHandlers handler for kind 3. */
-void beam_boneBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
+void beam_boneBoltMessage(BoltObj *bolt, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }

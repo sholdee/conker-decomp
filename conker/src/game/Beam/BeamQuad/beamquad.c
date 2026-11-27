@@ -21,7 +21,7 @@ static f32 gBoneQuadScaleXRates[] = { 0.007f };
 static f32 gBoneQuadScaleYRates[] = { 0.012f };
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
-void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
+void beam_spawnBoneQuad(Actor *owner, s32 type, u8 fxOwner, s32 fxList) {
     MtxF *mtx;
     Vec3f from;
     Vec3f to;
@@ -59,7 +59,7 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
             spawn.rot.x = vel.z * invDist;
             spawn.rot.y = 0.0f;
             spawn.rot.z = vel.x * invDist;
-            effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+            effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, fxOwner, fxList);
             if (effect != NULL) {
                 effect->u.beam.vel = vel;
                 effect->u.beam.size = gBoneQuadSizes[type];
@@ -80,13 +80,13 @@ s32 beam_updateQuad(BeamQuad *effect) {
     s16 alpha;
 
     beam = &effect->u.beam;
-    alpha = effect->alpha;
+    alpha = effect->head.def.alpha;
     beam->vel.x *= beam->damping;
     beam->vel.y *= beam->damping;
     beam->vel.z *= beam->damping;
-    effect->pos.x += beam->vel.x * gFrameDelta;
-    effect->pos.y += beam->vel.y * gFrameDelta;
-    effect->pos.z += beam->vel.z * gFrameDelta;
+    effect->head.def.pos.x += beam->vel.x * gFrameDelta;
+    effect->head.def.pos.y += beam->vel.y * gFrameDelta;
+    effect->head.def.pos.z += beam->vel.z * gFrameDelta;
     beam->scaleX += beam->scaleXRate * gFrameDelta;
     if (beam->scaleX > 1.2f) {
         beam->scaleX = 1.2f;
@@ -104,18 +104,18 @@ s32 beam_updateQuad(BeamQuad *effect) {
         beam->scaleYRate = -beam->scaleYRate;
     }
     beam->size += beam->sizeRate * gFrameDelta;
-    effect->halfWidth = beam->size * beam->scaleX;
-    effect->halfHeight = beam->size * beam->scaleY;
+    effect->head.def.width = beam->size * beam->scaleX;
+    effect->head.def.height = beam->size * beam->scaleY;
     alpha -= beam->fadeRate;
     if (alpha < 0) {
-        effect->alpha = 0;
+        effect->head.def.alpha = 0;
         return 0;
     }
-    effect->alpha = alpha;
+    effect->head.def.alpha = alpha;
     return 1;
 }
 
-/* Beam draw: fills this frame's vertex buffer with a quad facing along dir. */
+/* Beam draw: fills this frame's vertex buffer with a quad facing along its direction (head.def.rot). */
 Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
@@ -123,60 +123,60 @@ Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex) {
     f32 offsetZ;
     u8 fresh;
 
-    particle_getViewBuffer(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    particle_getViewBuffer(effect->head.vtxBuffers, bufferIndex, sizeof(effect->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
-            memcpy(effect->buffers[bufferIndex] + 4, effect->template, sizeof(effect->template));
+            memcpy(effect->head.vtxBuffers[bufferIndex], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->head.vtxBuffers[bufferIndex] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    offsetX = effect->halfWidth * effect->dir.x;
-    offsetZ = -effect->halfWidth * effect->dir.z;
+    offsetX = effect->head.def.width * effect->head.def.rot.x;
+    offsetZ = -effect->head.def.width * effect->head.def.rot.z;
 
-    vertices[0].ob[0] = effect->pos.x + offsetX;
-    vertices[0].ob[1] = effect->pos.y + effect->halfHeight;
-    vertices[0].ob[2] = effect->pos.z + offsetZ;
+    vertices[0].ob[0] = effect->head.def.pos.x + offsetX;
+    vertices[0].ob[1] = effect->head.def.pos.y + effect->head.def.height;
+    vertices[0].ob[2] = effect->head.def.pos.z + offsetZ;
     vertices[0].flag = 0;
-    vertices[1].ob[0] = effect->pos.x + offsetX;
-    vertices[1].ob[1] = effect->pos.y - effect->halfHeight;
-    vertices[1].ob[2] = effect->pos.z + offsetZ;
+    vertices[1].ob[0] = effect->head.def.pos.x + offsetX;
+    vertices[1].ob[1] = effect->head.def.pos.y - effect->head.def.height;
+    vertices[1].ob[2] = effect->head.def.pos.z + offsetZ;
     vertices[1].flag = 0;
-    vertices[2].ob[0] = effect->pos.x - offsetX;
-    vertices[2].ob[1] = effect->pos.y - effect->halfHeight;
-    vertices[2].ob[2] = effect->pos.z - offsetZ;
+    vertices[2].ob[0] = effect->head.def.pos.x - offsetX;
+    vertices[2].ob[1] = effect->head.def.pos.y - effect->head.def.height;
+    vertices[2].ob[2] = effect->head.def.pos.z - offsetZ;
     vertices[2].flag = 0;
-    vertices[3].ob[0] = effect->pos.x - offsetX;
-    vertices[3].ob[1] = effect->pos.y + effect->halfHeight;
-    vertices[3].ob[2] = effect->pos.z - offsetZ;
+    vertices[3].ob[0] = effect->head.def.pos.x - offsetX;
+    vertices[3].ob[1] = effect->head.def.pos.y + effect->head.def.height;
+    vertices[3].ob[2] = effect->head.def.pos.z - offsetZ;
     vertices[3].flag = 0;
 
     return result;
 }
 
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
-void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
+void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 lifetime, u8 fxOwner, s32 fxList) {
     ParticleDef spawn;
     BeamQuad *effect;
 
-    if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
+    if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && lifetime != 0) {
         spawn.texture = 0x17;
         spawn.frameSpeed = 0x243A;
         spawn.flags = 0x401;
         spawn.alpha = 255;
         spawn.frame = 0;
-        spawn.lifetime = arg5;
+        spawn.lifetime = lifetime;
         spawn.colorLevel = 255;
         // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
         spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
         spawn.rgba[3] = 200;
         spawn.renderModes = 0x401;
 
-        effect = particle_newQuadParticleWhite(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
+        effect = particle_newQuadParticleWhite(&spawn, 0, 0xA, 0, 8, 0, 0x14, fxOwner, fxList);
         if (effect != NULL) {
             effect->u.linked.pos = pos;
             effect->u.linked.angle = angle;
@@ -195,13 +195,13 @@ s32 beam_updateLinkedQuad(BeamQuad *effect) {
     // matching: reading through a second path to the field makes IDO reload it in the else branch
     source = &effect->u.linked.alpha;
     if (*effect->u.linked.alpha > 255.0f) {
-        effect->alpha = 255;
+        effect->head.def.alpha = 255;
     } else {
         alpha = **source;
         if (alpha < 0.0f) {
-            effect->alpha = 0;
+            effect->head.def.alpha = 0;
         } else {
-            effect->alpha = (u32)alpha;
+            effect->head.def.alpha = (u32)alpha;
         }
     }
     return 1;
@@ -219,13 +219,13 @@ Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex) {
     LinkedQuad *linked;
     u8 fresh;
 
-    particle_getViewBuffer(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    particle_getViewBuffer(effect->head.vtxBuffers, bufferIndex, sizeof(effect->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
-            memcpy(effect->buffers[bufferIndex] + 4, effect->template, sizeof(effect->template));
+            memcpy(effect->head.vtxBuffers[bufferIndex], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->head.vtxBuffers[bufferIndex] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
         }
     } else {
         return NULL;

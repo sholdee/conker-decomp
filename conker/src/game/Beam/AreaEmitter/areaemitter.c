@@ -12,7 +12,7 @@
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
  * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.
  */
-Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4) {
+Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 fxOwner, s32 fxList) {
     Emitter *emitter;
     EmitterState init;
     EmitterState *state;
@@ -26,7 +26,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
     init.ground.source = 0;
     init.ground.surface = 0;
 
-    emitter = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
+    emitter = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), fxOwner, fxList);
     if (emitter != NULL) {
         state = &emitter->state;
         memcpy(state, &init, sizeof(EmitterState));
@@ -218,33 +218,9 @@ typedef struct {
     s16 ids[3];
 } SpriteChoices;
 
-
-/* Spawn descriptor passed to particle_spawnSurfaceQuadSprite. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-} SpriteSpawn;
-
 /* Spawn hook 0: a sprite of random size (50 to 100) using one of three images, at pos. */
 void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
-    SpriteSpawn spawn;
+    SpriteDef2C spawn;
     f32 size;
     SpriteChoices choices = { 15, 16, 17 };
     u32 pick;
@@ -254,21 +230,21 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     size = math_randomFloat() * 50.0f + 50.0f;
     pick = math_random() % 3;
 
-    spawn.unk6 = choices.ids[pick];
-    spawn.unk7 = 0;
-    spawn.unk16 = 0;
-    spawn.unk17 = 7;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
+    spawn.texture = choices.ids[pick];
+    spawn.handlerSet = 0;
+    spawn.primMode = 0;
+    spawn.envMode = 7;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
     spawn.flags = 0x1701;
     spawn.lifetime = 60;
-    spawn.unk10 = 0xA0;
-    spawn.unk11 = 0xFF;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0;
-    spawn.unk14 = 0;
-    spawn.unk15 = 0xFF;
-    spawn.unk18 = 0x3B0002;
+    spawn.alpha = 0xA0;
+    spawn.colorLevel = 0xFF;
+    spawn.rgba[0] = 0;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x3B0002;
 
     rand1 = math_random();
     rand2 = math_random();
@@ -303,11 +279,11 @@ void beam_switchEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType) {
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 rateRange;
-    /* 0x08 */ u8 unk8;              /* unk8..unkC go to light_createJitterAt */
-    /* 0x09 */ u8 unk9;
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
+    /* 0x08 */ u8 lightR;            /* lightR..jitterKind go to light_createJitterAt */
+    /* 0x09 */ u8 lightG;
+    /* 0x0A */ u8 lightB;
+    /* 0x0B */ u8 lightType;
+    /* 0x0C */ u8 jitterKind;
     /* 0x10 */ const ParticleSettings *settings;
 } EmitterPreset;
 
@@ -339,7 +315,7 @@ static EmitterPreset gEmitterPresets[] = {
  * flags 1 and 2. lifetime -1 means untimed.
  */
 void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
-                   f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
+                   f32 bottom, f32 radius, s16 lifetime, u8 fxOwner, s32 fxList) {
     EmitterDef def;
     Emitter *emitter;
 
@@ -365,7 +341,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
     def.update = -1;
     def.spawn = 1;
 
-    emitter = beam_newAreaEmitter(&def, lifetime, sizeof(ParticleSettings), arg7, arg8);
+    emitter = beam_newAreaEmitter(&def, lifetime, sizeof(ParticleSettings), fxOwner, fxList);
     if (emitter != NULL) {
         ParticleSettings *settings;
 
@@ -386,7 +362,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
         spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.update = 2;
         spawn.lifetime = (lifetime == -1) ? 300 : lifetime;
-        spawn.lightType = gEmitterPresets[preset].unkB;
+        spawn.lightType = gEmitterPresets[preset].lightType;
 
         if (pos != NULL) {
             spawnPos.x = pos->x;
@@ -398,8 +374,8 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
             spawnPos.z = obj->z;
         }
 
-        light_createJitterAt(&spawn, &spawnPos, gEmitterPresets[preset].unk8, gEmitterPresets[preset].unk9,
-                      gEmitterPresets[preset].unkA, 0xFF, 0, 0, gEmitterPresets[preset].unkC,
+        light_createJitterAt(&spawn, &spawnPos, gEmitterPresets[preset].lightR, gEmitterPresets[preset].lightG,
+                      gEmitterPresets[preset].lightB, 0xFF, 0, 0, gEmitterPresets[preset].jitterKind,
                       0xFF, 1);
     }
 }
@@ -421,9 +397,9 @@ void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGroun
     u32 rand1;
 
     settings = (ParticleSettings *)emitter->data;
-    vec[0] = math_randomFloat() * settings->vec0Range + settings->vec0Base;
-    vec[1] = math_randomFloat() * settings->vec1Range + settings->vec1Base;
-    extra.gravity = math_randomFloat() * settings->unk20Range + settings->unk20Base;
+    vec[0] = math_randomFloat() * settings->widthRange + settings->widthBase;
+    vec[1] = math_randomFloat() * settings->heightRange + settings->heightBase;
+    extra.gravity = math_randomFloat() * settings->relaunchGravityRange + settings->relaunchGravityBase;
     extra.lifetime = math_random() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
     rand1 = math_random();
     rand2 = math_random();
@@ -440,9 +416,9 @@ void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGroun
     flags = (settings->flags & 2) ? 0 : 2;
     particle = particle_spawnJitterParticle(pos, vec,
         (s16)(rand1 % (settings->life.range + 1) + settings->life.base),
-        (rand2 % (settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
+        (rand2 % (settings->alpha.range + 1) + settings->alpha.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
+        settings->fadeStart, settings->fadeRate, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {
         memcpy(particle + 0x160, &extra, sizeof(extra));
     }
@@ -457,7 +433,7 @@ static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = {
  * NULL uses a local one.
  */
 void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
-                   s32 count, u8 spawnFunc, void *arg6, u8 arg7, s32 arg8) {
+                   s32 count, u8 spawnFunc, void *data, u8 fxOwner, s32 fxList) {
     CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;
@@ -485,7 +461,7 @@ void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit 
             spawnPos.x = probe.x;
             spawnPos.y = hit->height;
             spawnPos.z = probe.z;
-            gGroundSpawnFuncs[spawnFunc](&spawnPos, hit, arg6, arg7, arg8);
+            gGroundSpawnFuncs[spawnFunc](&spawnPos, hit, data, fxOwner, fxList);
         }
     }
 }

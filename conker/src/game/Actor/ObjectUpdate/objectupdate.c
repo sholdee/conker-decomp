@@ -767,7 +767,7 @@ void actor_loadAnimFrames(AnimInstance *anim, Actor *actor, u8 *buf) {
     if (anim == NULL) {
         return;
     }
-    if (anim->unk3C > 0) {
+    if (anim->blendTimer > 0) {
         channels = 2;
     }
     for (i = 0; i < channels; i++) {

@@ -18,15 +18,15 @@
 /* This file's .data. */
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
-static void (*D_8008FBD0[])() = {
-    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, func_150EC45C, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
+static void (*gProjectileExpireHandlers[])() = {
+    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, weapon_spawnHitEffectsNoFlash, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
 typedef struct {
     u16 sound;
     u16 range;
 } FlybySound;
-static FlybySound D_8008FBE8[] = {
+static FlybySound gProjectileFlybySounds[] = {
     { 0x327, 40 }, { 0x328, 30 }, { 0x329, 60 }, { 0x32A, 20 }, { 0x32B, 15 }, { 0x320, 5 }, { 0x321, 5 }, { 0x322, 5 },
 };
 
@@ -64,7 +64,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
 
 /* TrailExt flags */
 #define TRAIL_HIT_CALLBACK 1    /* call gProjectileHitCallback on expiry */
-#define TRAIL_EXPIRE_HANDLER 2  /* call D_8008FBD0[expireHandler] on expiry */
+#define TRAIL_EXPIRE_HANDLER 2  /* call gProjectileExpireHandlers[expireHandler] on expiry */
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
 
@@ -77,10 +77,10 @@ TrailHitCallback gProjectileHitCallback;
  * if that first update already ended it.
  */
 Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
-                               u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
-                               f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
-                               u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
-                               f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
+                               u8 altNormalized, RayHit *knownHit, f32 speed, f32 distScale, f32 width,
+                               f32 driftSpeed, f32 defaultRemaining, u8 alpha, Actor *owner, u8 castRay, u8 collide, u8 hitModels,
+                               u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 hitFlags,
+                               f32 dt, u8 viewportMask, s8 filter, s32 extraSize, u8 fxOwner, s32 fxList) {
     Game1EF500Trail *result;
     ParticleDef spawn;
     Game1EF500TrailExt ext;
@@ -98,11 +98,11 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         targetDir = *altDirection;
     }
     ext.flags = (hitCallback ? TRAIL_HIT_CALLBACK : 0) | (expireHandler ? TRAIL_EXPIRE_HANDLER : 0) |
-                (collide ? TRAIL_COLLIDE : 0) | (arg15 ? TRAIL_FLAG_8 : 0);
+                (collide ? TRAIL_COLLIDE : 0) | (hitModels ? TRAIL_FLAG_8 : 0);
     ext.handle = 0;
-    ext.fieldA8 = arg23;
+    ext.filter = filter;
     ext.expireHandler = handlerIndex;
-    ext.fieldA4 = arg20;
+    ext.hitFlags = hitFlags;
     ext.soundEnabled = (math_random() & 0xFFU) < soundChance ? TRUE : FALSE;
     ext.sound = 0;
     ext.listener = 0;
@@ -127,9 +127,9 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         from = origin;
         dir = &sourceDir;
     }
-    ext.handle = collide ? particle_raySphereObjectMask(from, dir, owner, arg23, NULL) : -1;
-    if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
-                      altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
+    ext.handle = collide ? particle_raySphereObjectMask(from, dir, owner, filter, NULL) : -1;
+    if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, distScale, castRay,
+                      altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, defaultRemaining, owner, filter, collide, hitModels,
                       ext.handle, 0) == 0) {
         return NULL;
     }
@@ -155,10 +155,10 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
     spawn.rgba[3] = 0xFF;
-    spawn.alpha = arg11;
+    spawn.alpha = alpha;
     spawn.colorLevel = 0xFF;
     spawn.height = driftSpeed;
-    spawn.width = arg8;
+    spawn.width = width;
     spawn.pos = *origin;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
@@ -169,8 +169,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.flags = 0xC04C0008;
     spawn.primMode = 0;
     spawn.envMode = 0;
-    spawn.viewportMask = arg22;
-    result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
+    spawn.viewportMask = viewportMask;
+    result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), fxOwner, fxList);
     if (result != NULL) {
         u8 failed;
 
@@ -233,13 +233,13 @@ s8 weapon_updateProjectile(Game1EF500Trail *trail) {
                 dz = player->eye.z - trail->head.def.pos.z;
                 /* distance of the player ahead along the flight direction */
                 dot = ext->path.dir.x * dx + dy * ext->path.dir.y + dz * ext->path.dir.z;
-                if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
-                    (D_8008FBE8[sfxIndex].range - 10) * ext->scale < dot) {
+                if (dot < (u32)gProjectileFlybySounds[sfxIndex].range * ext->scale &&
+                    (gProjectileFlybySounds[sfxIndex].range - 10) * ext->scale < dot) {
                     dist = sqrtf(dx * dx + dy * dy + dz * dz);
                     if (dist != 0.0f && dist < ext->remaining * ext->scale) {
                         dot /= dist;
                         if (0.8999999762f < dot) {
-                            sound = D_8008FBE8[sfxIndex].sound;
+                            sound = gProjectileFlybySounds[sfxIndex].sound;
                             ext->listener = i;
                             break;
                         }
@@ -366,7 +366,7 @@ s32 weapon_isOtherLiveObject(Actor *obj, Actor *self) {
     return TRUE;
 }
 
-/* As weapon_isOtherLiveObject, and obj's unk127 must also be set (not 0xFF). */
+/* As weapon_isOtherLiveObject, and obj's playernumber must also be set (not 0xFF). */
 s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
@@ -386,11 +386,11 @@ s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
 s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit) {
-    return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
+    return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.hitFlags, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-/* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
+/* Expiry handler 0 (gProjectileExpireHandlers[0]): debris, a flash and sometimes a burst where the projectile ended. */
 void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Game1EF500TrailExt *ext;
     LightEffectHeader header;
@@ -471,7 +471,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
 }
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
-void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -529,7 +529,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    particle_spawnTrailBurst(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, fxOwner, fxList);
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
     particle.setGeometryMode = 0x200005;
@@ -567,7 +567,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, fxOwner, fxList);
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() % 7U) + 6;
@@ -575,11 +575,11 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Smaller variant of weapon_spawnImpactBurst. */
-void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -637,7 +637,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    particle_spawnTrailBurst(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, fxOwner, fxList);
 
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
@@ -676,7 +676,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, fxOwner, fxList);
 
     header.flags = 3;
     header.update = -1;
@@ -685,7 +685,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /*
@@ -834,7 +834,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.deathFunc = -1;
         smoke.primColorMode = 8;
         smoke.envColorMode = 6;
-        smoke.unk64 = 1;
+        smoke.kind = 1;
         smoke.extra = 0.8702070117f;
         particle_spawnSpriteBurst(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
@@ -893,7 +893,7 @@ u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 d
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             collision_castRay(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
-                          &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
+                          &ray, length, 1, 0, solid, ext->filter, 0, ext->handle);
             if (ray.hitType >= 2) {
                 weapon_onProjectileImpact(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);
                 result = FALSE;
@@ -930,7 +930,7 @@ s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *
         if (ext->flags & TRAIL_EXPIRE_HANDLER) {
             handler = ext->expireHandler;
             if (handler != -1) {
-                D_8008FBD0[handler](trail);
+                gProjectileExpireHandlers[handler](trail);
             }
         }
         alive = FALSE;
@@ -942,7 +942,7 @@ s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *
 void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
     StreamEmitter *emitter;
     ProjectileStream data;
-    TimedEffect *effect;
+    Game1F1CD0Actor *effect;
 
     emitter = &owner->emitter;
     emitter->timer -= gFrameTicks;
@@ -968,7 +968,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         effect = effect_newTimedEffect((math_random() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
-            memcpy((u8 *)effect + 0x28, &data, sizeof(data));
+            memcpy(&effect->emission, &data, sizeof(data));
         }
 
         emitter->timer = (math_random() % (emitter->delayRange + 1)) + emitter->minDelay;

@@ -22,9 +22,9 @@ Gfx gTracerRenderSetupDl[] = {
 AimImpact gAimImpacts[4];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
-void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
+void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
-                   Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
+                   Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 hitsObjects,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
     Game10EF60Effect *effect;
     s32 i;
@@ -52,7 +52,7 @@ void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
         effect->attachDelay = 0;
         effect->impactEffect = impactEffect;
         effect->fireCounter = 0;
-        effect->unkFE = unkFE;
+        effect->hitsObjects = hitsObjects;
         effect->owner = owner;
         effect->texture = texture;
         effect->mode = mode;
@@ -173,7 +173,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->aimPitch == gAimImpacts[aim].unk2) {
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].aimYaw && effect->owner->aimPitch == gAimImpacts[aim].aimPitch) {
                         effect->target_x = gAimImpacts[aim].x;
                         effect->target_y = gAimImpacts[aim].y;
                         effect->target_z = gAimImpacts[aim].z;
@@ -225,7 +225,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                 effect->dy = 0.0f;
                 effect->dz = 0.0f;
                 if (fire) {
-                    beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->hitsObjects, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
                 effect_destroyObject(&effect->header);
@@ -269,7 +269,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
             vy *= len;
             vz *= len;
         }
-        if (effect->unkFE == 1) {
+        if (effect->hitsObjects == 1) {
             i = effect->owner != NULL ? effect->owner - movement_obj : 0;
             collision_castRayAtObjects(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
         }
@@ -383,23 +383,23 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
 
 /* Spawns a tracer attached to a bone of owner, refiring every onTime + offTime frames. */
 void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
-                   f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE) {
+                   f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 hitsObjects) {
     beam_spawnTracer(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
-                  owner, ownerId, bone, ownerTag, 0, unkFE, startX, startY, startZ, endX, endY, endZ);
+                  owner, ownerId, bone, ownerTag, 0, hitsObjects, startX, startY, startZ, endX, endY, endZ);
 }
 
 /* Like beam_spawnBoneTracer with a caller-chosen width, length and speed. */
 // matching: conker/beam.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
 void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
-                   s32 unkFE, f32 speed) {
+                   s32 hitsObjects, f32 speed) {
     beam_spawnTracer(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),
                   39, 1, *(s16 *)((u8 *)&onTime + 2), *(s16 *)((u8 *)&offTime + 2), owner, *((u8 *)&ownerId + 3),
-                  *(s16 *)((u8 *)&bone + 2), ownerTag, 0, *((u8 *)&unkFE + 3), startX, startY, startZ, endX, endY, endZ);
+                  *(s16 *)((u8 *)&bone + 2), ownerTag, 0, *((u8 *)&hitsObjects + 3), startX, startY, startZ, endX, endY, endZ);
 }
 
-s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
-    return func_150E2DA4(a0, a2);
+s32 beam_endTracerDraw(s32 gfx, s32 type, s16 view) {
+    return func_150E2DA4(gfx, view);
 }
 
 /* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */

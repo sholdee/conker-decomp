@@ -23,31 +23,31 @@ Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
     Vec3f *eye;
     f32 scale;
 
-    particle_getViewBuffer(beam->buffers, cam, 4 * sizeof(Vtx), &vtx, &fresh);
+    particle_getViewBuffer(beam->head.vtxBuffers, cam, 4 * sizeof(Vtx), &vtx, &fresh);
     result = vtx;
     // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(beam->buffers[cam], beam->vertexTemplate, sizeof(beam->vertexTemplate));
-            memcpy(beam->buffers[cam] + 4, beam->vertexTemplate, sizeof(beam->vertexTemplate));
+            memcpy(beam->head.vtxBuffers[cam], beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
+            memcpy(beam->head.vtxBuffers[cam] + 4, beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
-    progress = beam->progress;
-    dx = beam->end.x - beam->start.x;
-    dy = beam->end.y - beam->start.y;
-    dz = beam->end.z - beam->start.z;
-    tip.x = beam->start.x + dx * progress;
-    tip.y = beam->start.y + dy * progress;
-    tip.z = beam->start.z + dz * progress;
+    progress = beam->head.def.height;
+    dx = beam->head.def.rot.x - beam->head.def.pos.x;
+    dy = beam->head.def.rot.y - beam->head.def.pos.y;
+    dz = beam->head.def.rot.z - beam->head.def.pos.z;
+    tip.x = beam->head.def.pos.x + dx * progress;
+    tip.y = beam->head.def.pos.y + dy * progress;
+    tip.z = beam->head.def.pos.z + dz * progress;
     eye = &camera_global_Cameras[cam].eye;
-    dx = tip.x - beam->start.x;
-    dy = tip.y - beam->start.y;
-    dz = tip.z - beam->start.z;
-    vx = beam->start.x - eye->x;
-    vy = beam->start.y - eye->y;
-    vz = beam->start.z - eye->z;
+    dx = tip.x - beam->head.def.pos.x;
+    dy = tip.y - beam->head.def.pos.y;
+    dz = tip.z - beam->head.def.pos.z;
+    vx = beam->head.def.pos.x - eye->x;
+    vy = beam->head.def.pos.y - eye->y;
+    vz = beam->head.def.pos.z - eye->z;
     nx = dy * vz - vy * dz;
     ny = dz * vx - vz * dx;
     nz = dx * vy - vx * dy;
@@ -57,19 +57,19 @@ Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = beam->width / sqrtf(lengthSquared);
+        scale = beam->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vtx->v.ob[0] = beam->start.x + nx;
-    vtx->v.ob[1] = beam->start.y + ny;
-    vtx->v.ob[2] = beam->start.z + nz;
+    vtx->v.ob[0] = beam->head.def.pos.x + nx;
+    vtx->v.ob[1] = beam->head.def.pos.y + ny;
+    vtx->v.ob[2] = beam->head.def.pos.z + nz;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = beam->start.x - nx;
-    vtx->v.ob[1] = beam->start.y - ny;
-    vtx->v.ob[2] = beam->start.z - nz;
+    vtx->v.ob[0] = beam->head.def.pos.x - nx;
+    vtx->v.ob[1] = beam->head.def.pos.y - ny;
+    vtx->v.ob[2] = beam->head.def.pos.z - nz;
     vtx->v.flag = 0;
     vtx++;
     dx = -dx;
@@ -87,7 +87,7 @@ Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = beam->width / sqrtf(lengthSquared);
+        scale = beam->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
@@ -117,15 +117,15 @@ s32 beam_updateMotionPull(Game1BBFC0Beam *beam) {
     dx = motion->velocity.x * gFrameDelta;
     dy = motion->velocity.y * gFrameDelta;
     dz = motion->velocity.z * gFrameDelta;
-    beam->start.x += dx;
-    beam->start.y += dy;
-    beam->start.z += dz;
-    beam->end.x += dx;
-    beam->end.y += dy;
-    beam->end.z += dz;
-    beam->end.x = beam->start.x + (beam->end.x - beam->start.x) * motion->blend;
-    beam->end.y = beam->start.y + (beam->end.y - beam->start.y) * motion->blend;
-    beam->end.z = beam->start.z + (beam->end.z - beam->start.z) * motion->blend;
+    beam->head.def.pos.x += dx;
+    beam->head.def.pos.y += dy;
+    beam->head.def.pos.z += dz;
+    beam->head.def.rot.x += dx;
+    beam->head.def.rot.y += dy;
+    beam->head.def.rot.z += dz;
+    beam->head.def.rot.x = beam->head.def.pos.x + (beam->head.def.rot.x - beam->head.def.pos.x) * motion->blend;
+    beam->head.def.rot.y = beam->head.def.pos.y + (beam->head.def.rot.y - beam->head.def.pos.y) * motion->blend;
+    beam->head.def.rot.z = beam->head.def.pos.z + (beam->head.def.rot.z - beam->head.def.pos.z) * motion->blend;
     return 1;
 }
 
@@ -142,30 +142,30 @@ s32 beam_updateMotion(Game1BBFC0Beam *beam) {
     dx = motion->velocity.x * gFrameDelta;
     dy = motion->velocity.y * gFrameDelta;
     dz = motion->velocity.z * gFrameDelta;
-    beam->start.x += dx;
-    beam->start.y += dy;
-    beam->start.z += dz;
-    beam->end.x += dx;
-    beam->end.y += dy;
-    beam->end.z += dz;
+    beam->head.def.pos.x += dx;
+    beam->head.def.pos.y += dy;
+    beam->head.def.pos.z += dz;
+    beam->head.def.rot.x += dx;
+    beam->head.def.rot.y += dy;
+    beam->head.def.rot.z += dz;
     return 1;
 }
 
 /* Shrinks the beam's width and progress; sets alpha from lifetime while lifetime < motion.fadeStart. */
 s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
-    beam->progress -= beam->progress * beam->motion.shrinkRate;
-    beam->width -= beam->width * beam->motion.shrinkRate;
-    if (beam->lifetime < beam->motion.fadeStart) {
-        beam->alpha = beam->lifetime * beam->motion.fadeRate;
+    beam->head.def.height -= beam->head.def.height * beam->motion.shrinkRate;
+    beam->head.def.width -= beam->head.def.width * beam->motion.shrinkRate;
+    if (beam->head.def.lifetime < beam->motion.fadeStart) {
+        beam->head.def.alpha = beam->head.def.lifetime * beam->motion.fadeRate;
     }
     return 1;
 }
 
 /* Like beam_shrinkMotion, but shrinks only the beam's progress. */
 s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam) {
-    beam->progress -= beam->progress * beam->motion.shrinkRate;
-    if (beam->lifetime < beam->motion.fadeStart) {
-        beam->alpha = beam->lifetime * beam->motion.fadeRate;
+    beam->head.def.height -= beam->head.def.height * beam->motion.shrinkRate;
+    if (beam->head.def.lifetime < beam->motion.fadeStart) {
+        beam->head.def.alpha = beam->head.def.lifetime * beam->motion.fadeRate;
     }
     return 1;
 }

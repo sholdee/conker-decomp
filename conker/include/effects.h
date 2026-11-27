@@ -382,10 +382,6 @@ typedef struct FloorParticle {
     /* 0x170 */ f32 floorY;
 } FloorParticle;
 
-/* game/Weapon/Bullet/bullet.c's views of the objects weapon_spawnBulletSprite and weapon_spawnBulletParticle return, defined there. */
-struct FollowFx;
-struct Bullet88;
-
 /* Per-bullet state, stored at Bullet.state (0xD0 bytes). */
 typedef struct BulletState {
     /* 0x000 */ RayHit ray;
@@ -394,9 +390,10 @@ typedef struct BulletState {
     /* 0x06C */ Actor *owner;
     /* 0x070 */ IgnoreList ignore;
     /* 0x080 */ LightEffect *trail;
-    /* 0x084 */ struct FollowFx *follow; /* weapon_spawnBulletSprite (game/Weapon/BulletParticle/bulletparticle.c) */
-    /* 0x088 */ struct Bullet88 *unk88;  /* weapon_spawnBulletParticle's particle (game/Weapon/BulletParticle/bulletparticle.c) */
-    /* 0x08C */ void *unk8C;
+    /* 0x084 */ struct SpriteParticle *follow;    /* weapon_spawnBulletSprite (game/Weapon/BulletParticle/bulletparticle.c) */
+    /* 0x088 */ struct BulletParticle *particle;  /* weapon_spawnBulletParticle's particle; it follows the bullet until
+                                                  * weapon_releaseBullet clears its bullet */
+    /* 0x08C */ struct BloodTrail *bloodTrail;    /* weapon_startBulletTrail; NULL with three or more views (gScreenLayout >= 2) or gPlayerCount >= 4 */
     /* 0x090 */ u16 sound;
     /* 0x092 */ u8 impactType;
     /* 0x093 */ u8 pad93;
@@ -494,6 +491,31 @@ typedef struct ParticleDef4C {
     /* 0x47 */ u8 envMode;
     /* 0x48 */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
 } ParticleDef4C;
+
+/* matching: ParticleDef before material (0x50 bytes); see ParticleDesc64. */
+typedef struct ParticleDef50 {
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the gQuadParticleEventFuncs handler */
+    /* 0x02 */ u16 renderModes; /* low byte: gEffectRenderModes index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 alpha;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 colorLevel;
+    /* 0x46 */ u8 primMode;
+    /* 0x47 */ u8 envMode;
+    /* 0x48 */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+} ParticleDef50;
 
 /* matching: ParticleDef before fadeStart (0x54 bytes); see ParticleDesc64. */
 typedef struct ParticleDef54 {
@@ -1191,7 +1213,7 @@ typedef struct SpriteBurst {
     /* 0x61 */ s8 deathFunc;
     /* 0x62 */ u8 primColorMode;
     /* 0x63 */ u8 envColorMode;
-    /* 0x64 */ u8 unk64;            /* particle_newSpriteParticleWithFloor's second argument */
+    /* 0x64 */ u8 kind;             /* particle_newSpriteParticleWithFloor's kind: 0, 1 or 2 */
     /* 0x65 */ u8 pad65[3];
     /* 0x68 */ f32 extra;           /* copied into each particle at +0xA8 */
 } SpriteBurst; /* size 0x6C */
@@ -1487,7 +1509,7 @@ typedef struct BloodStrip {
     /* 0x78 */ f32 time;
 } BloodStrip; /* size 0x7C; extra data may follow */
 
-/* particle_spawnParticleBurst (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) func_151C5F44 particles (game/Weapon/SegmentShot/segmentshot.c)
+/* particle_spawnParticleBurst (game/Particle/BurstConfigs/burstconfigs.c): countBase + rand % (countRange + 1) weapon_spawnDragSprite particles (game/Weapon/SegmentShot/segmentshot.c)
  * from pos, each at a random yaw (the yaw fields are unused) and a pitch/speed from the ranges below. */
 typedef struct ParticleBurst {
     /* 0x00 */ s16 countBase;
@@ -1501,7 +1523,7 @@ typedef struct ParticleBurst {
     /* 0x14 */ f32 speedRange;
     /* 0x18 */ f32 gravityBase;     /* ParticleDesc.gravity */
     /* 0x1C */ f32 gravityRange;
-    /* 0x20 */ f32 unk20;           /* copied to the particle's data */
+    /* 0x20 */ f32 drag;            /* weapon_spawnDragSprite: the particle's data.dragBounce.drag */
     /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha */
     /* 0x25 */ u8 alphaRange;
     /* 0x26 */ s16 timerBase;       /* ParticleDesc.timer; -1 = 300 */
@@ -1641,7 +1663,8 @@ typedef struct SpriteDef {
     /* 0x26 */ u8 pad26[2];
 } SpriteDef; /* size 0x28 */
 
-/* matching: a 0x2C stack copy of SpriteDef (game/Particle/ShatterPieces/shatterpieces.c); the extra word keeps particle_spawnFlatMark's frame layout. */
+/* matching: a 0x2C stack copy of SpriteDef (game/Particle/ShatterPieces/shatterpieces.c, game/Particle/RegionEmitter/regionemitter.c,
+ * game/Beam/AreaEmitter/areaemitter.c); in shatterpieces.c the extra word keeps particle_spawnFlatMark's frame layout. */
 typedef struct SpriteDef2C {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
@@ -2473,7 +2496,7 @@ typedef struct Sprite2DParams {
     /* 0x34 */ u8 blue;
     /* 0x35 */ u8 alpha;
     /* 0x36 */ u8 renderMode;     /* index into gEffectRenderModes */
-    /* 0x37 */ u8 unk37;
+    /* 0x37 */ u8 combiner;       /* particle_setCombineMode's combiner */
     /* 0x38 */ u8 cycleType;      /* 2 = two-cycle */
     /* 0x39 */ u8 flags;
 } Sprite2DParams; /* size 0x3C */

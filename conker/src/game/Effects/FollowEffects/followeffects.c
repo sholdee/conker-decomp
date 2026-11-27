@@ -577,7 +577,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 owner, s32 li
                 effect_spawnRandomImpactMark(&surf, &hit, owner & 0xFF, list);
             }
             if (math_getTriEdges(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
-                func_151C0644(&hit, owner, list);
+                weapon_startHitRandomEmitter(&hit, owner, list);
             }
             fx.source.normal.x = -delta.x;
             fx.source.normal.y = -delta.y;
@@ -701,7 +701,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 owner, s32 list) 
             hit.z = probe.z;
             effect_spawnRandomImpactMark(&floor.tri, &hit, owner, list);
             if (math_getTriEdges(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
-                func_151C0644(&hit, owner, list);
+                weapon_startHitRandomEmitter(&hit, owner, list);
             }
         }
         {

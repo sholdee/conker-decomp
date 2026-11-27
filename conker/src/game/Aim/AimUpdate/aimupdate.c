@@ -22,6 +22,7 @@ u8 gAimPass; /* aim pass / slot counter */
 #include "conker/heap.h"
 #include "conker/math.h"
 #include "conker/model.h"
+#include "conker/swarm.h"
 
 /*
  * Per group (gNoAimAnimGroups[character_type] - 1): the animations during which an object does not aim
@@ -673,30 +674,11 @@ s32 aim_getFixedTarget(s32 objIndex, f32 *out) {
     return 0;
 }
 
-/* The eight node types aim_findTarget scans for aim targets. */
+/* The eight object types aim_findTarget scans for aim targets: the swarm members (SwarmActor) and, types 25 and 72, model
+ * particles (ModelParticle). */
 typedef struct {
     s32 types[8];
 } AimNodeTypes;
-
-/* Entries of the gObjectLists per-type lists, as far as aim_findTarget reads them. */
-typedef struct AimNode {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct AimNode *next;
-    /* 0x0C */ u8 padC[0x8C];
-    /* 0x98 */ f32 unk98; /* position */
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
-} AimNode;
-
-/* The entries of node types 25 and 72, which keep their position elsewhere. */
-typedef struct AimNodeAlt {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ f32 unk38; /* position */
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ u8 pad44[0x22];
-    /* 0x66 */ u16 unk66; /* skipped while non-zero */
-} AimNodeAlt;
 
 static AimNodeTypes gAimNodeTypes = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
 
@@ -722,7 +704,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
     f32 bestDist;
     f32 pz;
     f32 distSq;
-    static u32 D_80084400 = 0; /* aim point the next scan starts from */
+    static u32 gAimPointScanStart = 0; /* aim point the next scan starts from */
 
     out[0] = -99999.0f;
     out[1] = -99999.0f;
@@ -754,7 +736,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         Actor *held;
 
         if ((holder = attach_findInSet(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
-            holderData->unk3F6 != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
+            holderData->partMtxReady != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
             (held = collision_findObjectById(holder->ownerId)) != NULL) {
             if (held->drawtype == 5) {
                 target.x = held->xpos;
@@ -780,16 +762,16 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         f32 maxDist;
         AimNodeTypes types;
         s32 type;
-        AimNode *node;
+        EffectHeader *node;
         f32 dx;
         f32 dy;
         f32 dz;
 
-        if (D_80084400 >= gAimPointCount) {
-            D_80084400 = 0;
+        if (gAimPointScanStart >= gAimPointCount) {
+            gAimPointScanStart = 0;
         }
         if (gAimPointCount != 0) {
-            idx = D_80084400;
+            idx = gAimPointScanStart;
             bestIdx = -1;
             do {
                 point = &((AimPoint *)gAimPoints)[idx]; // matching: the no-op cast keeps the addu operand order
@@ -814,9 +796,9 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
                 if (idx == gAimPointCount) {
                     idx = 0;
                 }
-            } while (idx != D_80084400);
+            } while (idx != gAimPointScanStart);
             if (bestIdx != -1) {
-                D_80084400 = bestIdx;
+                gAimPointScanStart = bestIdx;
                 foundKind = 2;
             }
         }
@@ -825,27 +807,27 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
-                node = (AimNode *)gObjectLists[list][type];
+                node = gObjectLists[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
-                        AimNodeAlt *alt;
+                        ModelParticle *alt;
 
-                        alt = (AimNodeAlt *)node;
-                        if (alt->unk66 == 0) {
+                        alt = (ModelParticle *)node;
+                        if (alt->model == 0) {
                             maxDist = 250000.0f;
                             usable = 1;
-                            pos[0] = alt->unk38;
-                            pos[1] = alt->unk3C;
-                            pos[2] = alt->unk40;
+                            pos[0] = alt->pos.x;
+                            pos[1] = alt->pos.y;
+                            pos[2] = alt->pos.z;
                         } else {
                             usable = 0;
                         }
                     } else {
                         maxDist = 250000.0f;
                         usable = 1;
-                        pos[0] = node->unk98;
-                        pos[1] = node->unk9C;
-                        pos[2] = node->unkA0;
+                        pos[0] = ((SwarmActor *)node)->x;
+                        pos[1] = ((SwarmActor *)node)->y;
+                        pos[2] = ((SwarmActor *)node)->z;
                     }
                     if (usable) {
                         pz = pos[2];
@@ -1688,10 +1670,10 @@ void func_1503A60C(void) {
     mtx[3][2] = movement_obj[dc_glbl_CharNum].unk178;
 }
 
-static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
+static u8 gAimPassScaleBones[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
 
 /*
- * For object type 0x22: scales bone D_80084404[gAimPass] by 1 + unk20A / 64 in x and z (the inverse for
+ * For object type 0x22: scales bone gAimPassScaleBones[gAimPass] by 1 + unk20A / 64 in x and z (the inverse for
  * every pass after the first), keeping its translation.
  */
 void func_1503A678(void) {
@@ -1719,7 +1701,7 @@ void func_1503A678(void) {
             scale[2] = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
-        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[gAimPass] << 6));
+        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (gAimPassScaleBones[gAimPass] << 6));
         bone[3][3] = 1.0f;
         bone[0][3] = 0.0f;
         bone[1][3] = 0.0f;

@@ -52,7 +52,7 @@ static void (*gLightEffectEventHandlers[])() = {
 
 /* Callbacks of bone-attached lights (LightAttach.callback). Declared without a prototype: the
  * callbacks take the effect under their own types. */
-static s32 (*gLightAttachCallbacks[])() = { light_updateAttachedPulse, func_150B66DC, func_150D88AC, sight_updateStatusLight };
+static s32 (*gLightAttachCallbacks[])() = { light_updateAttachedPulse, func_150B66DC, attach_disableLightWithoutExpression, sight_updateStatusLight };
 
 /* Destroy and free handlers per LightEffect.lightType (light_destroyEffect, light_freeEffect) */
 static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {

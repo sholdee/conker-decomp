@@ -54,6 +54,6 @@ extern u8 gAimPass; /* aim pass / slot counter */
 /* game/Aim/AimRemove/aimremove.c */
 extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
-void aim_removePoint(s32 arg0);
+void aim_removePoint(s32 index);
 
 #endif
