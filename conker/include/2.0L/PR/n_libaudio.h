@@ -129,7 +129,7 @@ s32     n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc);
 
 
 void    n_alSynFreeVoice(N_ALVoice *voice);
-ALFxRef n_alSynGetFXRef( s16 bus, s16 index);
+ALFxRef n_alSynGetFXRef(s16 bus); /* Conker: no index argument; the bus has one effect */
 s16     n_alSynGetPriority( N_ALVoice *voice);
 void    n_alSynRemovePlayer( ALPlayer *client);
 void    n_alSynSetFXMix(N_ALVoice *v, u8 fxmix);
@@ -413,7 +413,16 @@ typedef struct {
     /* 0x50 */  ALMicroTime         curTime;
 } N_ALSndPlayer;
 
-void     n_alSndpNew(N_ALSndPlayer *sndp, ALSndpConfig *c);
+/* Conker: Rare's sound player takes its own configuration (init/Audio/SeqPlayer/seqplayer.c) and has one player, in init_15550.c. */
+typedef struct {
+    /* 0x00 */ s32     maxStates;  /* sound-state records (SndState) */
+    /* 0x04 */ s32     maxEvents;
+    /* 0x08 */ s32     maxSounds;  /* N_ALSndPlayer.maxSounds */
+    /* 0x0C */ ALHeap *heap;
+    /* 0x10 */ void   *waveRom;    /* ROM base of the wave data */
+    /* 0x14 */ u16     maxVolumes; /* entries of the volume table D_800428B8 */
+} SndPlayerConfig;
+void     n_alSndpNew(SndPlayerConfig *c);
 void     n_alSndpDelete(void);
 ALSndId  n_alSndpAllocate(ALSound *sound);
 void     n_alSndpDeallocate(ALSndId id);
@@ -445,15 +454,6 @@ s32     func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
 s32     func_10012F94(struct OscState *arg0, f32 *arg1);
 void    func_100131D8(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
-/* init_15550.c: Rare's sound player, set up by func_100155A0 from this configuration (init/Audio/SeqPlayer/seqplayer.c). */
-typedef struct {
-    /* 0x00 */ s32     maxStates;  /* sound-state records (SndState) */
-    /* 0x04 */ s32     maxEvents;
-    /* 0x08 */ s32     maxSounds;  /* N_ALSndPlayer.maxSounds */
-    /* 0x0C */ ALHeap *heap;
-    /* 0x10 */ void   *waveRom;    /* ROM base of the wave data */
-    /* 0x14 */ u16     maxVolumes; /* entries of the volume table D_800428B8 */
-} SndPlayerConfig;
 void    func_10015550(N_ALCSPlayer *seqp, ALBank *bank);                /* n_alCSPSetBank */
 void    func_100155A0(SndPlayerConfig *config);
 void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
