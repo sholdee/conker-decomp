@@ -51,6 +51,7 @@ STATIC_ASSERT(sizeof(ActorCtl) == 0x1C0, ActorCtl_size);
 STATIC_ASSERT(sizeof(SpawnRecord) == 0x30, SpawnRecord_size);
 STATIC_ASSERT(sizeof(PlayerStats) == 0x1C, PlayerStats_size);
 STATIC_ASSERT(sizeof(MatchState) == 0x20C, MatchState_size);
+STATIC_ASSERT(sizeof(TextBoxConfig) == 0x30, TextBoxConfig_size);
 STATIC_ASSERT(sizeof(AnimInstance) == 0x3F8, AnimInstance_size);
 STATIC_ASSERT(sizeof(ActorAnim) == 0x8, ActorAnim_size);
 STATIC_ASSERT(sizeof(AnimHeader) == 0x10, AnimHeader_size);

@@ -2447,7 +2447,7 @@ void cutscene_releaseSubtitle(SeqSubtitle *sub, s32 force) {
     if (force != 0) {
         text_removeBox(entry->handle);
         entry->handle = 0;
-    } else if (entry->isOpen != 0) {
+    } else if (entry->config.numPages != 0) {
         text_closeBoxSkipPages(entry->handle);
     } else {
         entry->handle = 0;
@@ -2466,7 +2466,7 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen) {
     slot = NULL;
     for (i = 0; i < 3; i++) {
         if (gSubtitles[i].active == track) {
-            if (replaceOpen != 0 && gSubtitles[i].isOpen != 0) {
+            if (replaceOpen != 0 && gSubtitles[i].config.numPages != 0) {
                 slot = gSubtitles;
                 cutscene_releaseSubtitle(slot, 1);
             } else {
@@ -2476,7 +2476,7 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen) {
         }
         if (gSubtitles[i].active == 0) {
             slot = &gSubtitles[i];
-            if (replaceOpen != 0 && slot->isOpen != 0) {
+            if (replaceOpen != 0 && slot->config.numPages != 0) {
                 cutscene_releaseSubtitle(slot, 1);
             }
             break;

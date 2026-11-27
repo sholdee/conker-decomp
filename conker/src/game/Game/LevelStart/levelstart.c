@@ -287,7 +287,7 @@ void game_resetCutscenes(s32 arg0) {
     for (i = 0; i < 3; i++)
     {
         gSubtitles[i].active = 0;
-        gSubtitles[i].isOpen = 0;
+        gSubtitles[i].config.numPages = 0;
     }
 
     gCutsceneHideSky = 0;

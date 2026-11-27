@@ -748,7 +748,7 @@ typedef struct TextBoxConfig {
     /* 0x2A */ u8 b;
     /* 0x2B */ u8 cutsceneOnly;     /* box is removed unless gCutsceneStates[0] == 1 */
     /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
-} TextBoxConfig;
+} TextBoxConfig; // size 0x30
 
 /* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
 typedef struct {
@@ -1881,24 +1881,11 @@ typedef struct AimPointDef {
     /* 0x14 */ f32 unk14;
 } AimPointDef; // size 0x18
 
-/* A cutscene subtitle slot, gSubtitles[3] (see cutscene_getSubtitleSlot). 0x04..0x33 is the TextBoxConfig passed to text_createBox. */
+/* A cutscene subtitle slot, gSubtitles[3] (see cutscene_getSubtitleSlot). */
 typedef struct {
     /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
     /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
+    /* 0x04 */ TextBoxConfig config; /* passed to text_createBox, which keeps it; config.numPages != 0 while the box is open */
     /* 0x34 */ TextBox *handle; /* text_createBox */
 } SeqSubtitle; // size 0x38
 

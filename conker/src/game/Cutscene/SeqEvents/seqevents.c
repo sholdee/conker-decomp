@@ -393,34 +393,34 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         sub = cutscene_getSubtitleSlot(track, opening);
         if (sub != NULL) {
             if (event->unk4 == 0) {
-                if (sub->isOpen != 0) {
+                if (sub->config.numPages != 0) {
                     text_removeBox(sub->handle);
                 }
                 text = gSeqTextLists[scene][event->value];
                 if (*text == 0xBE) {
-                    sub->flags = 0x8013;
+                    sub->config.flags = 0x8013;
                     text++;
                 } else if (*text == 0xBF) {
-                    sub->flags = 0x8019;
+                    sub->config.flags = 0x8019;
                     text++;
                 } else {
-                    sub->flags = 0x8011;
+                    sub->config.flags = 0x8011;
                 }
-                sub->text = text;
-                sub->unk2A = 100;
-                sub->isOpen = 1;
-                sub->unk28 = 0;
-                sub->unk1C = &gSeqTrackStates[scene][track].pitch;
-                sub->unk20 = &gSeqTrackStates[scene][track].yaw;
-                sub->unk2F = 1;
-                sub->unk24 = &gSeqTrackStates[scene][track].roll;
-                sub->r = colors[event->unk5][0];
-                sub->g = colors[event->unk5][1];
-                sub->b = colors[event->unk5][2];
+                sub->config.text = (s32)text;
+                sub->config.duration = 100;
+                sub->config.numPages = 1;
+                sub->config.unk24 = 0;
+                sub->config.screenXPercent = &gSeqTrackStates[scene][track].pitch;
+                sub->config.screenYPercent = &gSeqTrackStates[scene][track].yaw;
+                sub->config.cutsceneOnly = 1;
+                sub->config.anglePercent = &gSeqTrackStates[scene][track].roll;
+                sub->config.r = colors[event->unk5][0];
+                sub->config.g = colors[event->unk5][1];
+                sub->config.b = colors[event->unk5][2];
                 if (event->unk5 == 2) {
-                    sub->flags |= 0x40000;
+                    sub->config.flags |= 0x40000;
                 }
-                sub->handle = text_createBox(0, 0, 0, 0, (TextBoxConfig *)&sub->flags, sceneTag);
+                sub->handle = text_createBox(0, 0, 0, 0, &sub->config, sceneTag);
             } else if (event->unk4 == 1) {
                 cutscene_releaseSubtitle(sub, event->unk5);
             } else {
@@ -432,13 +432,13 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 if (event->unk6 != 0) {
                     s32 color = event->unk6 - 1;
 
-                    sub->r = colors[color][0];
-                    sub->g = colors[color][1];
-                    sub->b = colors[color][2];
+                    sub->config.r = colors[color][0];
+                    sub->config.g = colors[color][1];
+                    sub->config.b = colors[color][2];
                     if (color == 2) {
-                        sub->flags |= 0x40000;
+                        sub->config.flags |= 0x40000;
                     } else {
-                        sub->flags &= ~0x40000;
+                        sub->config.flags &= ~0x40000;
                     }
                 }
             }
