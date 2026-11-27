@@ -15,10 +15,10 @@ proof for every hand-written piece. Exit status 1 on a difference.
 import sys
 
 
-def ranges(path):
+def ranges(lines):
     """Merged (start, end, origin) ranges of a manifest."""
     rows = []
-    for line in open(path):
+    for line in lines:
         if not line.strip() or line.startswith("#"):
             continue
         f = line.rstrip("\n").split("\t")
@@ -33,9 +33,9 @@ def ranges(path):
     return [tuple(r) for r in out]
 
 
-def rows(path):
+def rows(lines):
     out = {}
-    for line in open(path):
+    for line in lines:
         if line.strip() and not line.startswith("#"):
             f = line.rstrip("\n").split("\t")
             out[int(f[1], 16)] = (f[0], int(f[2]))
@@ -43,8 +43,10 @@ def rows(path):
 
 
 def main():
-    a, b = ranges(sys.argv[1]), ranges(sys.argv[2])
-    ra, rb = rows(sys.argv[1]), rows(sys.argv[2])
+    # each file is read once, so that a pipe (bash process substitution) works too
+    la, lb = open(sys.argv[1]).read().splitlines(True), open(sys.argv[2]).read().splitlines(True)
+    a, b = ranges(la), ranges(lb)
+    ra, rb = rows(la), rows(lb)
     bad = [(k, ra[k], rb[k]) for k in sorted(set(ra) & set(rb)) if ra[k] != rb[k]]
     for k, x, y in bad[:10]:
         print(f"row 0x{k:08X}: committed {x[0]} ({x[1]} bytes), computed {y[0]} ({y[1]} bytes)")
