@@ -84,7 +84,7 @@ typedef struct {
 
 /*
  * Conker: ALWaveTable as Rare's bank loader (_bnkfPatchWaveTable, bnkf.c) and _pullSubFrame
- * (_pullSubFrame, init/Audio/Env/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
+ * (_pullSubFrame, libultra/audio/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
  */
 typedef struct WaveTable {
     /* 0x00 */  u8                  *base;
@@ -101,8 +101,8 @@ typedef struct WaveTable {
 /*
  * Conker: Rare's low-pass (pole) filter, its version of synthInternals.h's ALLowPass. `first` and
  * the filter state are swapped, and there is one A_POLEF state per main-out channel (L at DMEM
- * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init/Audio/MainBus/n_mainbus.c runs it on
- * the main outs), and so has each delay section of the reverb (n_drvrNew.c, init/Audio/Reverb/n_reverb.c).
+ * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, libultra/audio/n_mainbus.c runs it on
+ * the main outs), and so has each delay section of the reverb (n_drvrNew.c, libultra/audio/n_reverb.c).
  */
 typedef struct LowPass {
     /* 0x00 */  s16                 fc;
@@ -124,7 +124,7 @@ void    n_alSynAddPlayer(ALPlayer *client);
 void    n_alSynAddSndPlayer(ALPlayer *client);
 void    n_alSynAddSeqPlayer(ALPlayer *client);
 
-ALFxRef n_alSynAllocFX(s16 bus, ALSynConfig *c, ALHeap *hp); /* Conker: defined in init/Audio/SynAllocFx/n_synallocfx.c */
+ALFxRef n_alSynAllocFX(s16 bus, ALSynConfig *c, ALHeap *hp); /* Conker: defined in libultra/audio/n_synallocfx.c */
 s32     n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc);
 
 

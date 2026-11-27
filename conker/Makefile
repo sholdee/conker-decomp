@@ -114,14 +114,14 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/%.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqCtrl/seqctrl.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_seqplayer.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_event.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynDelete/n_syndelete.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynAllocFx/n_synallocfx.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Reverb/n_reverb.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/MainBus/n_mainbus.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Env/n_env.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_syndelete.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_synallocfx.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_reverb.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_mainbus.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_env.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/AdpcmLoad/adpcmload.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/VoiceLowPass/voicelowpass.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Resample/n_resample.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_resample.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/OutputMode/outputmode.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Player/mp3player.c.o: OPT_FLAGS := -g
 
@@ -145,7 +145,7 @@ $(BUILD_DIR)/$(SRC_DIR)/init/Heap/ExpansionPak/expansionpak.c.o: OPT_FLAGS := -O
 
 # Per-file flags (proven by the sha1 gate). libultra shipped without debug info, and the game
 # links its own private libultra copy at 0x151Dxxxx-0x151Fxxxx built at plain -O1/-O2.
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/AuxBus/n_auxbus.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_auxbus.c.o: OPT_FLAGS := -g
 # Rare's compressed-audio bitstream decoder: the whole TU is unoptimised -g output.
 $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Decoder/mp3decoder.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1

@@ -13,15 +13,15 @@
  *   init/Audio/OutputMode/outputmode.c
  *   libultra/audio/n_seqplayer.c
  *   libultra/audio/n_event.c
- *   init/Audio/SynDelete/n_syndelete.c
- *   init/Audio/SynAllocFx/n_synallocfx.c
- *   init/Audio/Reverb/n_reverb.c
- *   init/Audio/MainBus/n_mainbus.c
- *   init/Audio/Env/n_env.c
- *   init/Audio/AuxBus/n_auxbus.c
+ *   libultra/audio/n_syndelete.c
+ *   libultra/audio/n_synallocfx.c
+ *   libultra/audio/n_reverb.c
+ *   libultra/audio/n_mainbus.c
+ *   libultra/audio/n_env.c
+ *   libultra/audio/n_auxbus.c
  *   init/Audio/AdpcmLoad/adpcmload.c
  *   init/Audio/VoiceLowPass/voicelowpass.c
- *   init/Audio/Resample/n_resample.c
+ *   libultra/audio/n_resample.c
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -107,7 +107,7 @@ extern s32 gReleaseRawBanksPending;
 /* The .rodata slice at 0x2C960 of conker.us.yaml (no C file); audiomgr.c points the audio tasks at it. */
 extern u8 D_8002C960[]; /* data of the audio microcode */
 
-/* libultra/audio/n_seqplayer.c to init/Audio/Resample/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
+/* libultra/audio/n_seqplayer.c to libultra/audio/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
  * (n_libaudio.h, n_synthInternals.h) and by their own files. */
 
@@ -121,14 +121,14 @@ void audio_updateMix(void);
 /* init/Audio/OutputMode/outputmode.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
-/* Output-mode flags (init/Audio/Env/n_env.c reads them): C0 = stereo/headphone, C1 = mono, C2 = headphone. */
+/* Output-mode flags (libultra/audio/n_env.c reads them): C0 = stereo/headphone, C1 = mono, C2 = headphone. */
 extern u8 D_800428C0;
 extern u8 D_800428C1;
 extern u8 D_800428C2;
 extern u8 D_800428C4[2];
 extern u8 D_800428C6[2];
 
-/* init/Audio/Env/n_env.c */
+/* libultra/audio/n_env.c */
 extern s16 n_eqpower[128]; /* n_eqpower: equal-power pan curve */
 
 /* libultra/audio/n_sndplayer.c */
