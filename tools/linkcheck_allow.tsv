@@ -1,6 +1,8 @@
 # tools/linkcheck.py raw-pointer allow-list: data words whose value happens to fall inside a linked
 # section but that are not pointers (reviewed 2026-11-26). object, section, offset, value, reason.
 # A new entry needs review: a real pointer must be written as a symbol instead.
+# CI reads the base branch's copy of this list. A change that moves a listed object adds the new path in a
+# separate change first, and removes the old path itself.
 build/asm/data/290D0.data.s.o	.data	0x44	0x15000002	RSP microcode (extracted ROM data), not CPU data
 build/asm/data/290D0.data.s.o	.data	0x198	0x1000FFFF	RSP microcode (extracted ROM data), not CPU data
 build/asm/data/290D0.data.s.o	.data	0x16E0	0x15000003	RSP microcode (extracted ROM data), not CPU data
@@ -64,6 +66,7 @@ build/src/game/Sprite/ScreenSprite/screensprite.c.o	.data	0x1C	0x80008000	render
 build/src/game/Sprite/TexQuad/texquad.c.o	.data	0xC	0x80008000	render flag constant
 build/src/game/Texture/TextureTables/texturetables.c.o	.data	0xE7C	0x16000020	byte table / constant (high byte 0x15/0x16 is data)
 build/src/game/Trail/MatrixTrail/matrixtrail.c.o	.rodata	0x10	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Effects/Trail/MatrixTrail/matrixtrail.c.o	.rodata	0x10	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
 build/src/init/Boot/Inflate/inflateblock.s.o	.rodata	0x90	0x10011801	byte table or packed constant
 build/src/game/Camera/LevelHook10/levelhook10.c.o	.text	0x14	0x80004000	flag constant built with lui/ori, not a pointer
 build/src/game/Camera/LevelHook35/levelhook35.c.o	.text	0x78	0x80021010	flag constant built with lui/ori, not a pointer
