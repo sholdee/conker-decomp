@@ -120,9 +120,9 @@ src/game/Camera/LevelHook19/levelhook19.c	camera	per-level camera preset hook
 src/game/Effects/LevelHook08/levelhook08.c	effect	effect stub (empty)
 src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
 src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
-src/game_193420.c	effect	effect stub (empty)
+src/game/Effects/LevelUpdateStub/levelupdatestub.c	effect	effect stub (empty)
 src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
-src/game_1CC420.c	effect	effect stub (empty)
+src/game/Effects/ActorEventStub/actoreventstub.c	effect	effect stub (empty)
 src/game/Audio/Mp3Player/mp3player.c	mp3	streaming music player (StreamVoice), set up by game/Audio/Mp3Voice/mp3voice.c
 src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctlong.s	mp3	hand-written asm (subsystem from its header group)

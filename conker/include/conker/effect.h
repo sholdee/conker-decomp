@@ -90,7 +90,7 @@
  *   game/Effects/EffectActor/effectactor.c
  *   game/Effects/CharacterWatcher/characterwatcher.c
  *   game/Effects/VertexSwing/vertexswing.c
- *   game_193420.c
+ *   game/Effects/LevelUpdateStub/levelupdatestub.c
  *   game/Effects/QuadEffect/quadeffect.c
  *   game/Effects/ObjectList/objectlist.c
  *   game/Effects/ModelBurst/modelburst.c
@@ -106,7 +106,7 @@
  *   game/Effects/SurfaceHandlers/surfacehandlers.c
  *   game/Effects/FallingObject/fallingobject.c
  *   game/Effects/ContactEffects/contacteffects.c
- *   game_1CC420.c
+ *   game/Effects/ActorEventStub/actoreventstub.c
  *   game/Effects/ZoneEffect/zoneeffect.c
  *   game/Effects/DebrisBurst/debrisburst.c
  *   game/Effects/ActorTasks/actortasks.c
@@ -1174,7 +1174,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj);
 void effect_swingVertices(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, const u8 *vtxIndices,
                    u8 count);
 
-/* game_193420.c */
+/* game/Effects/LevelUpdateStub/levelupdatestub.c */
 void effect_emptyLevelUpdateHook(void);
 
 /* game/Effects/QuadEffect/quadeffect.c */
@@ -1461,7 +1461,7 @@ void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *result);
 void func_15195698(Actor *self, Actor *other, u8 *result);
 void effect_hitReactRumble(Actor *self, Actor *other, u8 *result);
 
-/* game_1CC420.c */
+/* game/Effects/ActorEventStub/actoreventstub.c */
 void effect_emptyActorEventHook(Actor *arg0, s32 arg1, s32 arg2);
 
 /* game/Effects/ZoneEffect/zoneeffect.c */

@@ -4617,7 +4617,7 @@ camera_updateWobbleEnvelope	0x151658DC	676	game	c		build/src/game/Camera/CameraW
 camera_getWobbleFalloff	0x15165B80	48	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 camera_getFalloffScale	0x15165BB0	208	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 effect_swingVertices	0x15165C80	752	game	c		build/src/game/Effects/VertexSwing/vertexswing.c.o
-effect_emptyLevelUpdateHook	0x15165F70	16	game	c		build/src/game_193420.c.o
+effect_emptyLevelUpdateHook	0x15165F70	16	game	c		build/src/game/Effects/LevelUpdateStub/levelupdatestub.c.o
 effect_spawnQuadEffect	0x15165F80	408	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
 effect_spawnRotatedQuadEffect	0x15166118	236	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
 effect_updateQuadEffect	0x15166204	100	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
@@ -5169,7 +5169,7 @@ cutscene_spawnTrackEffect	0x1519EB8C	408	game	c		build/src/game/Cutscene/EventEf
 cutscene_updateTrackEffect	0x1519ED24	96	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
 cutscene_spawnTrackParticle	0x1519ED84	384	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
 cutscene_updateTrackParticle	0x1519EF04	108	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
-effect_emptyActorEventHook	0x1519EF70	32	game	c		build/src/game_1CC420.c.o
+effect_emptyActorEventHook	0x1519EF70	32	game	c		build/src/game/Effects/ActorEventStub/actoreventstub.c.o
 trail_getSurfaceAttachPoint	0x1519EF90	376	game	c		build/src/game/Effects/Trail/SurfaceTrail/surfacetrail.c.o
 trail_destroySurfaceTrail	0x1519F108	96	game	c		build/src/game/Effects/Trail/SurfaceTrail/surfacetrail.c.o
 trail_freeSurfaceTrail	0x1519F168	96	game	c		build/src/game/Effects/Trail/SurfaceTrail/surfacetrail.c.o
