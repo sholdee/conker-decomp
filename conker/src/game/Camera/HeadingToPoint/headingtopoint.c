@@ -7,30 +7,30 @@
  * Turns the heading (unk37C) towards the point at 0x614, offset by the angle at 0x5DC,
  * then runs the follow-up updates.
  */
-void camera_turnHeadingToPoint(Camera *arg0) {
+void camera_turnHeadingToPoint(Camera *camera) {
     f32 deltaZ;
     f32 deltaX;
     f32 distance;
     f32 heading;
     Vec3f *target;
 
-    if (arg0->PadPtr->button & 4) {
-        camera_followYaw(arg0);
+    if (camera->PadPtr->button & 4) {
+        camera_followYaw(camera);
         return;
     }
-    arg0->PanButtonAddOn -= arg0->PanButtonAddOn * 0.07999999821f;
-    arg0->orbitSpeed = 0.0f;
-    camera_updateYaw(arg0);
-    target = arg0->PivotPtr;
+    camera->PanButtonAddOn -= camera->PanButtonAddOn * 0.07999999821f;
+    camera->orbitSpeed = 0.0f;
+    camera_updateYaw(camera);
+    target = camera->PivotPtr;
     if (target == NULL) {
-        camera_followYaw(arg0);
+        camera_followYaw(camera);
         return;
     }
-    deltaX = target->x - arg0->target.x;
-    deltaZ = target->z - arg0->target.z;
+    deltaX = target->x - camera->target.x;
+    deltaZ = target->z - camera->target.z;
     distance = sqrtf(deltaX * deltaX + deltaZ * deltaZ);
     if (distance == 0.0f) {
-        camera_followYaw(arg0);
+        camera_followYaw(camera);
         return;
     }
     heading = asinf(-deltaX / distance);
@@ -39,32 +39,32 @@ void camera_turnHeadingToPoint(Camera *arg0) {
     } else {
         heading = heading * 57.29577637f + 90.0f;
     }
-    heading += -90.0f + arg0->PanButtonAddOn;
+    heading += -90.0f + camera->PanButtonAddOn;
     while (heading < 0.0f) {
         heading += 360.0f;
     }
     while (heading > 360.0f) {
         heading -= 360.0f;
     }
-    if (arg0->unk698 == 0) {
-        if (arg0->Snap) {
-            arg0->AutoRotateAngleVel = 0.0f;
-            arg0->CameraAngle = heading;
-        } else if (arg0->AvailableModes & 0x40000000) {
-            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
-        } else if (arg0->AvailableModes & 0x4000000) {
-            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
+    if (camera->unk698 == 0) {
+        if (camera->Snap) {
+            camera->AutoRotateAngleVel = 0.0f;
+            camera->CameraAngle = heading;
+        } else if (camera->AvailableModes & 0x40000000) {
+            math_springAngleTo(&camera->CameraAngle, heading, &camera->AutoRotateAngleVel, 3.0f, 6.0f, camera->SpringTime);
+        } else if (camera->AvailableModes & 0x4000000) {
+            math_springAngleTo(&camera->CameraAngle, heading, &camera->AutoRotateAngleVel, 3.0f, 6.0f, camera->SpringTime);
         } else {
-            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 1.5f, 2.0f, arg0->SpringTime);
+            math_springAngleTo(&camera->CameraAngle, heading, &camera->AutoRotateAngleVel, 1.5f, 2.0f, camera->SpringTime);
         }
-        arg0->CameraAngleRad = arg0->CameraAngle * 0.01745329238f;
+        camera->CameraAngleRad = camera->CameraAngle * 0.01745329238f;
     }
-    camera_updateFloorHeights(arg0);
-    camera_updateFollow(arg0);
-    camera_easeHeight(arg0);
-    if (arg0->AvailableModes & 0x40000000) {
-        camera_updateFollow(arg0);
-        arg0->YOffsetTget = 30.0f;
-        camera_easeHeight(arg0);
+    camera_updateFloorHeights(camera);
+    camera_updateFollow(camera);
+    camera_easeHeight(camera);
+    if (camera->AvailableModes & 0x40000000) {
+        camera_updateFollow(camera);
+        camera->YOffsetTget = 30.0f;
+        camera_easeHeight(camera);
     }
 }

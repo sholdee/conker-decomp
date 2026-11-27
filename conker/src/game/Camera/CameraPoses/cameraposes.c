@@ -22,9 +22,9 @@ static struct Entry151298C0 D_800DC028[4];
 s16 gNumCameraPoses = 0; // number of entries in gCameraPoses
 
 /* Resets this camera's D_800DC028 entry when gNumCameraPoses is set. */
-void func_151298C0(cam, arg1)
+void func_151298C0(cam, resource)
     Camera *cam;
-    s32 arg1;
+    s32 resource;
 {
     if (gNumCameraPoses != 0) {
         D_800DC028[cam->CNumber].unk2 = 0;

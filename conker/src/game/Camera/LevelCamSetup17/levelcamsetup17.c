@@ -3,15 +3,15 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup17(Camera *arg0) {
-    arg0->DistIndex = 2;
-    camera_loadDistancePreset(arg0);
-    arg0->Snap = 1;
+void camera_levelSetup17(Camera *camera) {
+    camera->DistIndex = 2;
+    camera_loadDistancePreset(camera);
+    camera->Snap = 1;
 }
 
-void camera_levelSetup18(Camera *arg0) {
-    arg0->DistIndex = 1;
-    arg0->DistMask = 15;
-    camera_loadDistancePreset(arg0);
-    arg0->Tightness = 1;
+void camera_levelSetup18(Camera *camera) {
+    camera->DistIndex = 1;
+    camera->DistMask = 15;
+    camera_loadDistancePreset(camera);
+    camera->Tightness = 1;
 }

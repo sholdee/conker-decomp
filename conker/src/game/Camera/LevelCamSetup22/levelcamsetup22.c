@@ -3,5 +3,5 @@
 #include "conker/camera.h"
 
 
-void camera_emptyLevelSetup22(Camera *arg0) {
+void camera_emptyLevelSetup22(Camera *camera) {
 }

@@ -3,14 +3,14 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup01(Camera *arg0) {
-    arg0->DistIndex = 1;
-    arg0->DistMask = 3;
-    arg0->height = 230.0f;
-    arg0->unk34C = 230.0f;
-    arg0->AvailableModes |= 0x4000;
-    arg0->IdealTripodMagnitude = 290.0f;
+void camera_levelSetup01(Camera *camera) {
+    camera->DistIndex = 1;
+    camera->DistMask = 3;
+    camera->height = 230.0f;
+    camera->unk34C = 230.0f;
+    camera->AvailableModes |= 0x4000;
+    camera->IdealTripodMagnitude = 290.0f;
 }
 
-void camera_emptyLevelSetup02(Camera *arg0) {
+void camera_emptyLevelSetup02(Camera *camera) {
 }

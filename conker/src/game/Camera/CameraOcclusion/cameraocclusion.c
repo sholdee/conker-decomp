@@ -42,9 +42,9 @@ static ZScanParams gZScanParams[4][4]; // per player
 
 /* Updates the camera's floor heights (floorY, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
-void camera_updateFloorHeights(Camera *arg0) {
-    f32 unused28;
-    s32 flag4E;
+void camera_updateFloorHeights(Camera *camera) {
+    f32 unusedShad;
+    s32 transport;
     s16 height;
     s16 width;
     s16 depth;
@@ -52,141 +52,141 @@ void camera_updateFloorHeights(Camera *arg0) {
     f32 pad68; // matching: frame padding
     f32 pad64;
 
-    unused28 = arg0->CharPtr->shad;
-    if (arg0->mv != NULL) {
-        flag4E = arg0->mv->transport;
-        targetHeight = arg0->mv->height;
+    unusedShad = camera->CharPtr->shad;
+    if (camera->mv != NULL) {
+        transport = camera->mv->transport;
+        targetHeight = camera->mv->height;
     } else {
-        flag4E = 0;
-        actor_computeSize(arg0->CharPtr, &height, &width, &depth);
+        transport = 0;
+        actor_computeSize(camera->CharPtr, &height, &width, &depth);
         targetHeight = height;
     }
-    if (!arg0->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
-        arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
+    if (!camera->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
+        camera->floorY = camera->unk354 = camera->CharPtr->floorY;
         return;
     }
-    if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
-        (collision_getTriHeightAt(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
-        collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
-                      arg0->eye.x, arg0->floorY, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
+    if ((camera->Snap != 0) || (camera->AvailableModes & 0x400000) || (camera->SpecialFlags & 0x40) ||
+        (collision_getTriHeightAt(camera->eye.x, camera->eye.z, camera->TrianglePtr, camera->floorTri.v, &camera->floorY) == 0)) {
+        collision_findFloorEx(&camera->TrianglePtr, camera->floorTri.v, &camera->floorY, &camera->waterY, &camera->Attributes, 0,
+                      camera->eye.x, camera->floorY, camera->eye.z, camera->prevEye.y, 0, 0, -10000.0f, camera->eye.y, 1);
     }
-    if (unused28) {} // matching: keeps the otherwise dead unk28 load
+    if (unusedShad) {} // matching: keeps the otherwise dead shad load
     if (level == LEVEL_W2_TANKTUNNEL) {
-        arg0->zoneWaterY = -10000.0f;
-        arg0->waterY = -10000.0f;
+        camera->zoneWaterY = -10000.0f;
+        camera->waterY = -10000.0f;
     }
-    if (-10000.0f != arg0->zoneWaterY) {
-        arg0->waterY = arg0->zoneWaterY;
+    if (-10000.0f != camera->zoneWaterY) {
+        camera->waterY = camera->zoneWaterY;
     }
-    camera_updateStatus(arg0);
-    if (!(arg0->AvailableModes & 0x10) && (arg0->CharPtr->unk102 == 0) && (gSpawnCutsceneActive == 0) && (arg0->DoingRail == 0) &&
-        (arg0->CharPtr->ceilingY < arg0->floorY)) {
-        camera_placeAtObject(arg0, arg0->CharPtr);
+    camera_updateStatus(camera);
+    if (!(camera->AvailableModes & 0x10) && (camera->CharPtr->unk102 == 0) && (gSpawnCutsceneActive == 0) && (camera->DoingRail == 0) &&
+        (camera->CharPtr->ceilingY < camera->floorY)) {
+        camera_placeAtObject(camera, camera->CharPtr);
     }
-    if (-10000.0f == arg0->floorY) {
+    if (-10000.0f == camera->floorY) {
         if (gIsMultiplayer != 0) {
-            arg0->floorY = arg0->CharPtr->floorY;
+            camera->floorY = camera->CharPtr->floorY;
         } else {
-            arg0->floorY = 10000.0f;
-            arg0->AvailableModes |= 0x800000;
-            collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
-                          arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
+            camera->floorY = 10000.0f;
+            camera->AvailableModes |= 0x800000;
+            collision_findFloorEx(&camera->TrianglePtr, camera->floorTri.v, &camera->floorY, &camera->waterY, &camera->Attributes, 0,
+                          camera->eye.x, camera->eye.y, camera->eye.z, camera->prevEye.y, 0, 0, -10000.0f, camera->eye.y, 1);
         }
     } else {
-        arg0->AvailableModes &= ~0x800000;
+        camera->AvailableModes &= ~0x800000;
     }
-    if (-10000.0f != arg0->zoneWaterY) {
-        arg0->waterY = arg0->zoneWaterY;
+    if (-10000.0f != camera->zoneWaterY) {
+        camera->waterY = camera->zoneWaterY;
     }
-    if (arg0->CharPtr->unk137 != 0) {
-        arg0->floorY = arg0->unk354 = arg0->CharPtr->ypos;
+    if (camera->CharPtr->unk137 != 0) {
+        camera->floorY = camera->unk354 = camera->CharPtr->ypos;
     }
-    if ((gSpawnCutsceneActive != 0) || (arg0->transition.state != 0)) {
-        arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
+    if ((gSpawnCutsceneActive != 0) || (camera->transition.state != 0)) {
+        camera->floorY = camera->unk354 = camera->CharPtr->floorY;
         return;
     }
-    if (((arg0->Mode & 0x100) || (arg0->Mode != 0x80)) && (arg0->floorY < arg0->waterY) &&
-        (arg0->waterY < arg0->eye.y)) {
-        arg0->floorY = arg0->waterY;
-        arg0->unk354 = arg0->waterY;
+    if (((camera->Mode & 0x100) || (camera->Mode != 0x80)) && (camera->floorY < camera->waterY) &&
+        (camera->waterY < camera->eye.y)) {
+        camera->floorY = camera->waterY;
+        camera->unk354 = camera->waterY;
     } else {
-        arg0->unk354 = arg0->floorY;
+        camera->unk354 = camera->floorY;
     }
-    if (arg0->DoingRail != 0) {
-        if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->CharPtr->floorY)) ||
-            (arg0->RailMagY < fabsf(arg0->unk354 - arg0->CharPtr->floorY))) {
-            arg0->unk354 = arg0->CharPtr->floorY;
+    if (camera->DoingRail != 0) {
+        if (((-10000.0f == camera->unk354) && (camera->unk354 < camera->CharPtr->floorY)) ||
+            (camera->RailMagY < fabsf(camera->unk354 - camera->CharPtr->floorY))) {
+            camera->unk354 = camera->CharPtr->floorY;
         }
     } else if (gSpawnCutsceneActive == 0) {
-        if (!(arg0->AvailableModes & 0x20000000)) {
-            if (arg0->AvailableModes & 0x10000000) {
-                if (arg0->unk354 < arg0->CharPtr->floorY) {
-                    arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
+        if (!(camera->AvailableModes & 0x20000000)) {
+            if (camera->AvailableModes & 0x10000000) {
+                if (camera->unk354 < camera->CharPtr->floorY) {
+                    camera->floorY = camera->unk354 = camera->CharPtr->floorY;
                 }
             }
-            if ((arg0->Mode != 0x80) || ((arg0->SpecialFlags & 0x80) && (arg0->CharPtr->count3 != 0)) ||
-                (arg0->AvailableModes & 0x800)) {
-                if (arg0->unk354 < arg0->focus.y) {
-                    arg0->unk354 = arg0->focus.y;
+            if ((camera->Mode != 0x80) || ((camera->SpecialFlags & 0x80) && (camera->CharPtr->count3 != 0)) ||
+                (camera->AvailableModes & 0x800)) {
+                if (camera->unk354 < camera->focus.y) {
+                    camera->unk354 = camera->focus.y;
                 }
             }
         }
     }
-    if (!(arg0->AvailableModes & 0x10000000) && (arg0->Mode != 0x80)) {
-        if ((arg0->SpecialFlags & 1) && (flag4E != 0)) {
-            arg0->floorY = arg0->CharPtr->waterHeight;
+    if (!(camera->AvailableModes & 0x10000000) && (camera->Mode != 0x80)) {
+        if ((camera->SpecialFlags & 1) && (transport != 0)) {
+            camera->floorY = camera->CharPtr->waterHeight;
         }
-        if (arg0->Mode == 0x80) {
-            if (arg0->eye.y < arg0->unk354 + 30.0f) {
-                arg0->eye.y = arg0->unk354 + 30.0f;
+        if (camera->Mode == 0x80) {
+            if (camera->eye.y < camera->unk354 + 30.0f) {
+                camera->eye.y = camera->unk354 + 30.0f;
             }
-            camera_updatePitch(arg0);
+            camera_updatePitch(camera);
             return;
         }
-        if ((arg0->cmdRunning != 0) && (arg0->cmd.unk34 != 0)) {
-            arg0->height = arg0->cmd.unk34;
+        if ((camera->cmdRunning != 0) && (camera->cmd.unk34 != 0)) {
+            camera->height = camera->cmd.unk34;
         } else {
-            arg0->height = arg0->unk34C;
+            camera->height = camera->unk34C;
         }
     } else {
-        arg0->unk354 = arg0->floorY;
+        camera->unk354 = camera->floorY;
     }
-    arg0->unk354 = arg0->floorY + (arg0->unk354 - arg0->floorY);
-    if (!(arg0->AvailableModes & 0x4000) || (camera_isInDeepWater(arg0) == 0)) {
-        if ((arg0->CharPtr->inwater == 1) && (arg0->Mode != 0x80) && (-10000.0f != arg0->waterY)) {
-            arg0->unk354 = arg0->waterY + 50.0f;
+    camera->unk354 = camera->floorY + (camera->unk354 - camera->floorY);
+    if (!(camera->AvailableModes & 0x4000) || (camera_isInDeepWater(camera) == 0)) {
+        if ((camera->CharPtr->inwater == 1) && (camera->Mode != 0x80) && (-10000.0f != camera->waterY)) {
+            camera->unk354 = camera->waterY + 50.0f;
         }
     }
-    if ((arg0->SpecialFlags & 0x40) && (arg0->CharPtr->unk137 == 0)) {
-        if (arg0->focus.y - arg0->lastPlayerPos.y < -5.0f) {
-            arg0->RopeDirection = 2;
-            arg0->TargetRopeDisp += 10.0f;
-        } else if (arg0->focus.y - arg0->lastPlayerPos.y > 5.0f) {
-            arg0->RopeDirection = 1;
-            arg0->TargetRopeDisp -= 10.0f;
+    if ((camera->SpecialFlags & 0x40) && (camera->CharPtr->unk137 == 0)) {
+        if (camera->focus.y - camera->lastPlayerPos.y < -5.0f) {
+            camera->RopeDirection = 2;
+            camera->TargetRopeDisp += 10.0f;
+        } else if (camera->focus.y - camera->lastPlayerPos.y > 5.0f) {
+            camera->RopeDirection = 1;
+            camera->TargetRopeDisp -= 10.0f;
         } else {
-            arg0->RopeDirection = 0;
-            arg0->TargetRopeDisp = 0.0f;
+            camera->RopeDirection = 0;
+            camera->TargetRopeDisp = 0.0f;
         }
-        arg0->TargetRopeDisp = (arg0->TargetRopeDisp < -300.0f) ? -300.0f : ((arg0->TargetRopeDisp > 300.0f) ? 300.0f : arg0->TargetRopeDisp);
-        math_springTo(&arg0->RopeDisp, arg0->TargetRopeDisp, &arg0->RopeDispVel, 1.0f, 1.5f, arg0->SpringTime);
-        arg0->unk354 = arg0->focus.y + arg0->RopeDisp + (targetHeight * 0.8500000238f);
-        arg0->unk354 = (arg0->unk354 < arg0->CharPtr->floorY + arg0->height) ? arg0->CharPtr->floorY + arg0->height : arg0->unk354;
-        arg0->unk354 = (arg0->unk354 < arg0->floorY + 50.0f) ? arg0->floorY + 50.0f : arg0->unk354;
-        arg0->unk354 = (arg0->unk354 < arg0->waterY + 50.0f) ? arg0->waterY + 50.0f : arg0->unk354;
-        arg0->CharTrackingSpeedTarget = 0.0f;
-        arg0->AvailableModes |= 0x10000000;
-        arg0->ropeActive = 1;
+        camera->TargetRopeDisp = (camera->TargetRopeDisp < -300.0f) ? -300.0f : ((camera->TargetRopeDisp > 300.0f) ? 300.0f : camera->TargetRopeDisp);
+        math_springTo(&camera->RopeDisp, camera->TargetRopeDisp, &camera->RopeDispVel, 1.0f, 1.5f, camera->SpringTime);
+        camera->unk354 = camera->focus.y + camera->RopeDisp + (targetHeight * 0.8500000238f);
+        camera->unk354 = (camera->unk354 < camera->CharPtr->floorY + camera->height) ? camera->CharPtr->floorY + camera->height : camera->unk354;
+        camera->unk354 = (camera->unk354 < camera->floorY + 50.0f) ? camera->floorY + 50.0f : camera->unk354;
+        camera->unk354 = (camera->unk354 < camera->waterY + 50.0f) ? camera->waterY + 50.0f : camera->unk354;
+        camera->CharTrackingSpeedTarget = 0.0f;
+        camera->AvailableModes |= 0x10000000;
+        camera->ropeActive = 1;
     lbl1:; // matching: the label keeps as1 from filling the branch delay slot
-    } else if (arg0->ropeActive != 0) {
-        arg0->CharTrackingSpeedTarget = 1.0f;
-        arg0->AvailableModes &= ~0x10000000;
-        arg0->RopeDirection = 0;
-        arg0->ropeActive = 0;
+    } else if (camera->ropeActive != 0) {
+        camera->CharTrackingSpeedTarget = 1.0f;
+        camera->AvailableModes &= ~0x10000000;
+        camera->RopeDirection = 0;
+        camera->ropeActive = 0;
     }
-    if ((arg0->Mode != 0x100) && (arg0->CharPtr->unk137 == 0)) {
-        if (arg0->eye.y < arg0->floorY + 40.0f) {
-            arg0->eye.y = arg0->floorY + 40.0f;
+    if ((camera->Mode != 0x100) && (camera->CharPtr->unk137 == 0)) {
+        if (camera->eye.y < camera->floorY + 40.0f) {
+            camera->eye.y = camera->floorY + 40.0f;
         }
     }
 }
@@ -219,90 +219,90 @@ void camera_resetZScans(void) {
 
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (camera_getOcclusionOffset's correction, smoothed). */
-void camera_checkOcclusion(Camera *arg0) {
+void camera_checkOcclusion(Camera *camera) {
     s32 screenX;
     s32 screenY;
     f32 *q; // matching: one local carries the projected depth (as s32) and later &gOcclusionEyeDrop
     f32 targetY;
     Vec3f pos;
 
-    targetY = arg0->target.y;
-    if (camera_clearZRow(arg0) != 0) {
+    targetY = camera->target.y;
+    if (camera_clearZRow(camera) != 0) {
         return;
     }
-    if (!(arg0->AvailableModes & 0x10)) {
-        if (arg0->CharPtr->floorY < arg0->CharPtr->ceilingY) {
-            if (arg0->CharPtr->ceilingY - 40.0f <= targetY) {
-                targetY = arg0->CharPtr->ceilingY - 40.0f;
+    if (!(camera->AvailableModes & 0x10)) {
+        if (camera->CharPtr->floorY < camera->CharPtr->ceilingY) {
+            if (camera->CharPtr->ceilingY - 40.0f <= targetY) {
+                targetY = camera->CharPtr->ceilingY - 40.0f;
             }
         }
     }
-    view_projectPoint(arg0->CNumber, arg0->target.x, targetY, arg0->target.z, &gCameraTargetScreenX, &gCameraTargetScreenY, &gCameraTargetScreenDepth);
+    view_projectPoint(camera->CNumber, camera->target.x, targetY, camera->target.z, &gCameraTargetScreenX, &gCameraTargetScreenY, &gCameraTargetScreenDepth);
     q = (f32 *)(s32)gCameraTargetScreenDepth;
-    screenX = ((s32)gCameraTargetScreenX < (s32)gViews[arg0->CNumber].left) ? (s32)gViews[arg0->CNumber].left : (((s32)gViews[arg0->CNumber].right < (s32)gCameraTargetScreenX) ? (s32)gViews[arg0->CNumber].right : (s32)gCameraTargetScreenX);
-    screenY = ((s32)gCameraTargetScreenY < (s32)gViews[arg0->CNumber].top) ? (s32)gViews[arg0->CNumber].top : (((s32)gViews[arg0->CNumber].bottom < (s32)gCameraTargetScreenY) ? (s32)gViews[arg0->CNumber].bottom : (s32)gCameraTargetScreenY);
-    if ((screenX < gViews[arg0->CNumber].left) || (gViews[arg0->CNumber].right <= screenX) || (screenY < gViews[arg0->CNumber].top) || (gViews[arg0->CNumber].bottom <= screenY)) {
-        arg0->SideHitsClear = 1;
-        arg0->HitsZBufferReadFlag = 0;
+    screenX = ((s32)gCameraTargetScreenX < (s32)gViews[camera->CNumber].left) ? (s32)gViews[camera->CNumber].left : (((s32)gViews[camera->CNumber].right < (s32)gCameraTargetScreenX) ? (s32)gViews[camera->CNumber].right : (s32)gCameraTargetScreenX);
+    screenY = ((s32)gCameraTargetScreenY < (s32)gViews[camera->CNumber].top) ? (s32)gViews[camera->CNumber].top : (((s32)gViews[camera->CNumber].bottom < (s32)gCameraTargetScreenY) ? (s32)gViews[camera->CNumber].bottom : (s32)gCameraTargetScreenY);
+    if ((screenX < gViews[camera->CNumber].left) || (gViews[camera->CNumber].right <= screenX) || (screenY < gViews[camera->CNumber].top) || (gViews[camera->CNumber].bottom <= screenY)) {
+        camera->SideHitsClear = 1;
+        camera->HitsZBufferReadFlag = 0;
         return;
     }
-    arg0->HitsZBufferReadFlag = 1;
-    arg0->HitsZBufferRowIndex = screenY;
-    camera_scanZRow(arg0, screenX, screenY, (s32)q);
-    pos = arg0->eye;
-    camera_getOcclusionOffset(arg0, &arg0->SideHitsRxz, &gOcclusionEyeDrop);
-    if (fabsf(arg0->SideHitsRxz) > 3.0f) {
-        math_rotateAroundY(&pos, &arg0->target, arg0->SideHitsRxz, &pos);
+    camera->HitsZBufferReadFlag = 1;
+    camera->HitsZBufferRowIndex = screenY;
+    camera_scanZRow(camera, screenX, screenY, (s32)q);
+    pos = camera->eye;
+    camera_getOcclusionOffset(camera, &camera->SideHitsRxz, &gOcclusionEyeDrop);
+    if (fabsf(camera->SideHitsRxz) > 3.0f) {
+        math_rotateAroundY(&pos, &camera->target, camera->SideHitsRxz, &pos);
         {
         f32 rate1;
         f32 rate2;
 
         rate1 = 6.0f;
         rate2 = 8.0f;
-        if (arg0->PadPtr->button & 3) {
+        if (camera->PadPtr->button & 3) {
             rate1 *= 1.2f;
             rate2 *= 1.2f;
         }
-        math_springTo(&arg0->eye.x, pos.x, &arg0->HitVelX, rate1, rate2, arg0->SpringTime);
-        math_springTo(&arg0->eye.y, pos.y, &arg0->HitVelY, rate1, rate2, arg0->SpringTime);
-        math_springTo(&arg0->eye.z, pos.z, &arg0->HitVelZ, rate1, rate2, arg0->SpringTime);
+        math_springTo(&camera->eye.x, pos.x, &camera->HitVelX, rate1, rate2, camera->SpringTime);
+        math_springTo(&camera->eye.y, pos.y, &camera->HitVelY, rate1, rate2, camera->SpringTime);
+        math_springTo(&camera->eye.z, pos.z, &camera->HitVelZ, rate1, rate2, camera->SpringTime);
         }
-        arg0->SideHitsClear = 0;
+        camera->SideHitsClear = 0;
     lbl:; // matching: the label keeps as1 from filling the branch delay slot below
     } else {
-        arg0->SideHitsClear = 1;
+        camera->SideHitsClear = 1;
     }
     q = &gOcclusionEyeDrop;
     if (0.0f != gOcclusionEyeDrop) {
-        arg0->eye.y -= *q;
+        camera->eye.y -= *q;
     }
-    if (arg0->SpecialMove == 1) {
-        arg0->SpecialMove = 0;
+    if (camera->SpecialMove == 1) {
+        camera->SpecialMove = 0;
     }
-    arg0->unk698 = 0;
+    camera->unk698 = 0;
 }
 
 /* Runs the z-buffer occlusion check (camera_checkOcclusion) when the camera mode allows it; otherwise marks the
  * check as off and arms the unk5FC/unk5FE countdowns. */
-void camera_updateOcclusion(Camera *arg0) {
-    if ((arg0->Mode & ~0x100) && (gPaused == 0) && (gSpawnCutsceneActive == 0)) {
-        if (arg0->Mode != 0x40) {
-            if ((arg0->AvailableModes & 8) && !(arg0->AvailableModes & 0x200) && (arg0->Snap == 0)) {
-                if (!(arg0->SpecialFlags & 0x80) && !(arg0->SpecialFlags & 0x40)) {
-                    camera_checkOcclusion(arg0);
+void camera_updateOcclusion(Camera *camera) {
+    if ((camera->Mode & ~0x100) && (gPaused == 0) && (gSpawnCutsceneActive == 0)) {
+        if (camera->Mode != 0x40) {
+            if ((camera->AvailableModes & 8) && !(camera->AvailableModes & 0x200) && (camera->Snap == 0)) {
+                if (!(camera->SpecialFlags & 0x80) && !(camera->SpecialFlags & 0x40)) {
+                    camera_checkOcclusion(camera);
                     return;
                 }
             }
         }
-        arg0->SideHitsClear = 1;
-        arg0->SHitsOffLastFrame = 2;
-        arg0->unk5FE = 60;
+        camera->SideHitsClear = 1;
+        camera->SHitsOffLastFrame = 2;
+        camera->unk5FE = 60;
     }
 }
 
-/* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
+/* Scans the z-buffer row camera->HitsZBufferHoriDataPtr outwards from screenX, left then right, comparing each pixel's depth
  * with the target's depth; the first occluder on each side is recorded in that side's ZScan. */
-void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
+void camera_scanZRow(Camera *camera, s32 screenX, s32 screenY, s32 depth) {
     s32 gaps[0x281];
     s32 start;
     s32 i;
@@ -313,38 +313,38 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     ZScanParams *params;
     s16 height;
 
-    params = &gZScanParams[arg0->CNumber][arg0->DistIndex];
+    params = &gZScanParams[camera->CNumber][camera->DistIndex];
     halfWidth = params->halfWidth;
     height = params->unk2;
-    arg0->CurrentHitsWidth += (halfWidth - arg0->CurrentHitsWidth) * 0.05000000075f;
-    halfWidth = (s16)arg0->CurrentHitsWidth + 0.5f;
-    arg0->CurrentHitsHeight += (height - arg0->CurrentHitsHeight) * 0.05000000075f;
+    camera->CurrentHitsWidth += (halfWidth - camera->CurrentHitsWidth) * 0.05000000075f;
+    halfWidth = (s16)camera->CurrentHitsWidth + 0.5f;
+    camera->CurrentHitsHeight += (height - camera->CurrentHitsHeight) * 0.05000000075f;
     start = halfWidth / 4;
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (gViews[arg0->CNumber].left < screenX - i) {
+        if (gViews[camera->CNumber].left < screenX - i) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
-            zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
+            zcode = camera->HitsZBufferHoriDataPtr[screenX - i];
             }
             // decode the 14-bit z value: 3-bit exponent, 11-bit mantissa (low 2 bits are dz)
             fmt = &gZDecodeTable[zcode >> 13];
             gaps[halfWidth - i] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
-            if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[0], gaps[halfWidth - i], i, mid, 0)) {
+            if (camera_testZPixel(camera, &gZScanSets[camera->CNumber].scan[0], gaps[halfWidth - i], i, mid, 0)) {
                 i = halfWidth; // stop scanning
             }
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if (screenX + i < gViews[arg0->CNumber].right) {
+        if (screenX + i < gViews[camera->CNumber].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
-            zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
+            zcode = camera->HitsZBufferHoriDataPtr[screenX + i];
             }
             fmt = &gZDecodeTable[zcode >> 13];
             gaps[i + halfWidth] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
-            if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[1], gaps[i + halfWidth], i, mid, 0)) {
+            if (camera_testZPixel(camera, &gZScanSets[camera->CNumber].scan[1], gaps[i + halfWidth], i, mid, 0)) {
                 i = halfWidth; // stop scanning
             }
         }
@@ -354,16 +354,16 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
 
 
 /* While the unk5FC countdown runs, clears the z-buffer row to the far value and returns 1. */
-s32 camera_clearZRow(Camera *arg0) {
-    if (arg0->SHitsOffLastFrame != 0) {
+s32 camera_clearZRow(Camera *camera) {
+    if (camera->SHitsOffLastFrame != 0) {
         s32 i;
 
-        arg0->SideHitsClear = 1;
-        for (i = 0; i < gViews[arg0->CNumber].width; i++) {
-            arg0->HitsZBufferHoriDataPtr[i] = 0xFFFC;
+        camera->SideHitsClear = 1;
+        for (i = 0; i < gViews[camera->CNumber].width; i++) {
+            camera->HitsZBufferHoriDataPtr[i] = 0xFFFC;
         }
-        arg0->CurrentHitsWidth = 0.0f;
-        arg0->SHitsOffLastFrame--;
+        camera->CurrentHitsWidth = 0.0f;
+        camera->SHitsOffLastFrame--;
         return 1;
     }
     return 0;
@@ -384,16 +384,16 @@ void camera_recordZHit(ZScan *scan, s32 offset, s32 gap) {
 
 /* Tests one scanned pixel: a depth gap above the threshold is an occluder, state 2 when it lies inside mid
  * and 1 when outside. Returns 1 when the pixel is an occluder, else resets scan and returns 0. */
-s32 camera_testZPixel(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold) {
+s32 camera_testZPixel(Camera *camera, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold) {
     s32 threshold;
 
     if (useAltThreshold == 0) {
-        threshold = gZScanParams[arg0->CNumber][arg0->DistIndex].threshold;
+        threshold = gZScanParams[camera->CNumber][camera->DistIndex].threshold;
     } else {
-        threshold = gZScanParams[arg0->CNumber][arg0->DistIndex].altThreshold;
+        threshold = gZScanParams[camera->CNumber][camera->DistIndex].altThreshold;
     }
 
-    if (arg0->AvailableModes & 0x8000) {
+    if (camera->AvailableModes & 0x8000) {
         threshold = (s16)(threshold << 1);
     }
 
@@ -418,7 +418,7 @@ s32 camera_testZPixel(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s
 
 /* Turns the left/right z-buffer scans into a sideways correction *offset for the camera.
  * Returns whether either side is blocked. */
-s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused) {
+s32 camera_getOcclusionOffset(Camera *camera, f32 *offset, f32 *unused) {
     s32 blocked;
     u8 state0;
     u8 state1;
@@ -429,95 +429,95 @@ s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused) {
     f32 halfWidth;
 
     blocked = 0;
-    state0 = gZScanSets[arg0->CNumber].scan[0].state;
-    state1 = gZScanSets[arg0->CNumber].scan[1].state;
-    state2 = gZScanSets[arg0->CNumber].scan[2].state;
-    state3 = gZScanSets[arg0->CNumber].scan[3].state;
-    edge0 = gZScanSets[arg0->CNumber].scan[0].offset + 1.0f;
-    edge1 = gZScanSets[arg0->CNumber].scan[1].offset + 1.0f;
+    state0 = gZScanSets[camera->CNumber].scan[0].state;
+    state1 = gZScanSets[camera->CNumber].scan[1].state;
+    state2 = gZScanSets[camera->CNumber].scan[2].state;
+    state3 = gZScanSets[camera->CNumber].scan[3].state;
+    edge0 = gZScanSets[camera->CNumber].scan[0].offset + 1.0f;
+    edge1 = gZScanSets[camera->CNumber].scan[1].offset + 1.0f;
     if (state0 == 2 && state1 != 2) {
-        gZScanSets[arg0->CNumber].unk30 = 0;
+        gZScanSets[camera->CNumber].unk30 = 0;
     } else if (state0 != 2 && state1 == 2) {
-        gZScanSets[arg0->CNumber].unk30 = 1;
+        gZScanSets[camera->CNumber].unk30 = 1;
     }
     if (state2 == 2 && state3 != 2) {
-        gZScanSets[arg0->CNumber].unk30 = 2;
+        gZScanSets[camera->CNumber].unk30 = 2;
     } else if (state2 != 2 && state3 == 2) {
-        gZScanSets[arg0->CNumber].unk30 = 3;
+        gZScanSets[camera->CNumber].unk30 = 3;
     }
     if (state0 == 2 || state1 == 2) {
-        halfWidth = gZScanParams[arg0->CNumber][arg0->DistIndex].halfWidth + 1;
+        halfWidth = gZScanParams[camera->CNumber][camera->DistIndex].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
-            if (arg0->CharPtr->inwater != 1 && arg0->mv->death_State == 0) {
-                arg0->unk5FE -= gFrameTicks;
-                if (arg0->unk5FE < 0) {
-                    arg0->unk5FE = 0;
+            if (camera->CharPtr->inwater != 1 && camera->mv->death_State == 0) {
+                camera->unk5FE -= gFrameTicks;
+                if (camera->unk5FE < 0) {
+                    camera->unk5FE = 0;
                 }
             }
-            if (arg0->Mode != 0x80) {
-                arg0->SHitsPIPOutTimer = 30;
+            if (camera->Mode != 0x80) {
+                camera->SHitsPIPOutTimer = 30;
             }
-            if (gZScanSets[arg0->CNumber].scan[1].offset < gZScanSets[arg0->CNumber].scan[0].offset) {
+            if (gZScanSets[camera->CNumber].scan[1].offset < gZScanSets[camera->CNumber].scan[0].offset) {
                 *offset = halfWidth - edge0;
-            } else if (gZScanSets[arg0->CNumber].scan[0].offset < gZScanSets[arg0->CNumber].scan[1].offset) {
+            } else if (gZScanSets[camera->CNumber].scan[0].offset < gZScanSets[camera->CNumber].scan[1].offset) {
                 *offset = edge1 - halfWidth;
-            } else if (gZScanSets[arg0->CNumber].unk30 == 0) {
+            } else if (gZScanSets[camera->CNumber].unk30 == 0) {
                 *offset = halfWidth - edge0;
             } else {
                 *offset = edge1 - halfWidth;
             }
         } else {
-            arg0->SHitsPIPOutTimer = 0;
-            arg0->unk5FE = 60;
+            camera->SHitsPIPOutTimer = 0;
+            camera->unk5FE = 60;
             // matching: the unk23C tests below have identical branches in the original
-            if (gZScanSets[arg0->CNumber].scan[0].state == 2) {
-                if (arg0->Snap != 0) {
-                    *offset = halfWidth - (gZScanSets[arg0->CNumber].scan[0].offset + 1.0f);
+            if (gZScanSets[camera->CNumber].scan[0].state == 2) {
+                if (camera->Snap != 0) {
+                    *offset = halfWidth - (gZScanSets[camera->CNumber].scan[0].offset + 1.0f);
                 } else {
-                    *offset = halfWidth - (gZScanSets[arg0->CNumber].scan[0].offset + 1.0f);
+                    *offset = halfWidth - (gZScanSets[camera->CNumber].scan[0].offset + 1.0f);
                 }
             } else {
-                if (arg0->Snap != 0) {
-                    *offset = (gZScanSets[arg0->CNumber].scan[1].offset + 1.0f) - halfWidth;
+                if (camera->Snap != 0) {
+                    *offset = (gZScanSets[camera->CNumber].scan[1].offset + 1.0f) - halfWidth;
                 } else {
-                    *offset = (gZScanSets[arg0->CNumber].scan[1].offset + 1.0f) - halfWidth;
+                    *offset = (gZScanSets[camera->CNumber].scan[1].offset + 1.0f) - halfWidth;
                 }
             }
         }
         {
         s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
         blocked = 1;
-        arg0->SlackenK = 0.004999999888f;
+        camera->SlackenK = 0.004999999888f;
         }
     } else {
-        gZScanSets[arg0->CNumber].scan[0].state = 4;
-        gZScanSets[arg0->CNumber].scan[1].state = 4;
+        gZScanSets[camera->CNumber].scan[0].state = 4;
+        gZScanSets[camera->CNumber].scan[1].state = 4;
         *offset -= *offset * 0.1000000015f;
-        arg0->unk5FE = 60;
+        camera->unk5FE = 60;
     }
-    if (arg0->SHitsPIPOutTimer != 0) {
-        arg0->SHitsPIPOutTimer -= gFrameTicks;
-        if (arg0->SHitsPIPOutTimer < 0) {
-            arg0->SHitsPIPOutTimer = 0;
+    if (camera->SHitsPIPOutTimer != 0) {
+        camera->SHitsPIPOutTimer -= gFrameTicks;
+        if (camera->SHitsPIPOutTimer < 0) {
+            camera->SHitsPIPOutTimer = 0;
         }
-        if (arg0->SHitsPIPOutXZ == -1.0f) {
-            arg0->SHitsPIPOutXZ = arg0->IdealTripodMagnitude;
-            arg0->SHitsPIPOutY = arg0->height;
-            arg0->IdealTripodMagnitude = 150.0f;
-            arg0->height = 275.0f;
+        if (camera->SHitsPIPOutXZ == -1.0f) {
+            camera->SHitsPIPOutXZ = camera->IdealTripodMagnitude;
+            camera->SHitsPIPOutY = camera->height;
+            camera->IdealTripodMagnitude = 150.0f;
+            camera->height = 275.0f;
         }
-    } else if (arg0->SHitsPIPOutXZ != -1.0f) {
-        arg0->IdealTripodMagnitude = arg0->SHitsPIPOutXZ;
-        arg0->height = arg0->SHitsPIPOutY;
-        arg0->SHitsPIPOutXZ = -1.0f;
-        arg0->SHitsPIPOutY = -1.0f;
+    } else if (camera->SHitsPIPOutXZ != -1.0f) {
+        camera->IdealTripodMagnitude = camera->SHitsPIPOutXZ;
+        camera->height = camera->SHitsPIPOutY;
+        camera->SHitsPIPOutXZ = -1.0f;
+        camera->SHitsPIPOutY = -1.0f;
     }
     return blocked;
 }
 
 /* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
  * from the camera position through the world and applies the corrected position. */
-void camera_collide(Camera *arg0) {
+void camera_collide(Camera *camera) {
     s32 savedDD3;
     s32 flag;
     Actor probe;
@@ -526,161 +526,161 @@ void camera_collide(Camera *arg0) {
     s32 saved1;
     s32 savedDD4;
     f32 floorY;
-    ActorCtl *sub;
+    ActorCtl *ext;
 
     flag = 0;
-    // matching: sub is loaded inside the condition, after the first flag test
-    if (!(arg0->AvailableModes & 0x40000) && (sub = arg0->mv, sub->ladder == 0) && (arg0->Mode != 0x40) &&
-        !(arg0->AvailableModes & 0x80) && !(arg0->AvailableModes & 0x200)) {
+    // matching: ext is loaded inside the condition, after the first flag test
+    if (!(camera->AvailableModes & 0x40000) && (ext = camera->mv, ext->ladder == 0) && (camera->Mode != 0x40) &&
+        !(camera->AvailableModes & 0x80) && !(camera->AvailableModes & 0x200)) {
         saved2 = gFloorProbeTypeEnabled[2];
         saved1 = gFloorProbeTypeEnabled[1];
-        if (arg0->SpecialFlags & 0x800) {
-            arg0->wallProbeWidthTarget = 20.0f;
-            arg0->wallProbeHeightTarget = 40.0f;
-        } else if (arg0->SpecialFlags & 0x10) {
-            arg0->wallProbeWidthTarget = 20.0f;
-            arg0->wallProbeHeightTarget = 72.0f;
-        } else if (arg0->IdealTripodMagnitude > 580.0f) {
-            arg0->wallProbeWidthTarget = 70.0f;
-            arg0->wallProbeHeightTarget = 140.0f;
-        } else if ((level == LEVEL_W1_ROCK_SOLID) && (arg0->CharContext == 3)) {
+        if (camera->SpecialFlags & 0x800) {
+            camera->wallProbeWidthTarget = 20.0f;
+            camera->wallProbeHeightTarget = 40.0f;
+        } else if (camera->SpecialFlags & 0x10) {
+            camera->wallProbeWidthTarget = 20.0f;
+            camera->wallProbeHeightTarget = 72.0f;
+        } else if (camera->IdealTripodMagnitude > 580.0f) {
+            camera->wallProbeWidthTarget = 70.0f;
+            camera->wallProbeHeightTarget = 140.0f;
+        } else if ((level == LEVEL_W1_ROCK_SOLID) && (camera->CharContext == 3)) {
             flag = 1;
-            arg0->wallProbeWidthTarget = 20.0f;
-            arg0->wallProbeHeightTarget = 50.0f;
+            camera->wallProbeWidthTarget = 20.0f;
+            camera->wallProbeHeightTarget = 50.0f;
         } else {
-            if (((arg0->DoingAim != 0) && (arg0->DoingAim != 1) && (arg0->DoingAim != 3)) ||
-                ((arg0->CharPtr->unk102 != 0) &&
-                 ((arg0->CharPtr->xpos != arg0->lastPlayerPos.x) || (arg0->CharPtr->zpos != arg0->lastPlayerPos.z))) ||
-                (sub->unk1B3 != 0)) {
-                arg0->wallProbeWidthTarget = 20.0f;
-                arg0->wallProbeHeightTarget = 20.0f;
-            } else if (arg0->CharPtr->unk102 != 0) {
+            if (((camera->DoingAim != 0) && (camera->DoingAim != 1) && (camera->DoingAim != 3)) ||
+                ((camera->CharPtr->unk102 != 0) &&
+                 ((camera->CharPtr->xpos != camera->lastPlayerPos.x) || (camera->CharPtr->zpos != camera->lastPlayerPos.z))) ||
+                (ext->unk1B3 != 0)) {
+                camera->wallProbeWidthTarget = 20.0f;
+                camera->wallProbeHeightTarget = 20.0f;
+            } else if (camera->CharPtr->unk102 != 0) {
                 flag = 1;
-                arg0->wallProbeWidthTarget = 25.0f;
-                arg0->wallProbeHeightTarget = 30.0f;
+                camera->wallProbeWidthTarget = 25.0f;
+                camera->wallProbeHeightTarget = 30.0f;
             } else {
-                arg0->wallProbeWidthTarget = 30.0f;
-                arg0->wallProbeHeightTarget = 60.0f;
+                camera->wallProbeWidthTarget = 30.0f;
+                camera->wallProbeHeightTarget = 60.0f;
             }
         }
-        if (arg0->Snap != 0) {
-            arg0->wallProbeWidthVel = 0.0f;
-            arg0->wallProbeWidth = arg0->wallProbeWidthTarget;
-            arg0->wallProbeHeightVel = 0.0f;
-            arg0->wallProbeHeight = arg0->wallProbeHeightTarget;
+        if (camera->Snap != 0) {
+            camera->wallProbeWidthVel = 0.0f;
+            camera->wallProbeWidth = camera->wallProbeWidthTarget;
+            camera->wallProbeHeightVel = 0.0f;
+            camera->wallProbeHeight = camera->wallProbeHeightTarget;
         } else {
-            math_springTo(&arg0->wallProbeWidth, arg0->wallProbeWidthTarget, &arg0->wallProbeWidthVel, 4.0f, 6.0f, arg0->SpringTime);
-            math_springTo(&arg0->wallProbeHeight, arg0->wallProbeHeightTarget, &arg0->wallProbeHeightVel, 4.0f, 6.0f, arg0->SpringTime);
+            math_springTo(&camera->wallProbeWidth, camera->wallProbeWidthTarget, &camera->wallProbeWidthVel, 4.0f, 6.0f, camera->SpringTime);
+            math_springTo(&camera->wallProbeHeight, camera->wallProbeHeightTarget, &camera->wallProbeHeightVel, 4.0f, 6.0f, camera->SpringTime);
         }
         probe.type = 0x2D;
-        probe.CameraPtr = arg0;
-        probe.xpos = arg0->eye.x;
-        if (arg0->SpecialFlags & 0x800) {
-            probe.ypos = arg0->eye.y + arg0->YOffset;
+        probe.CameraPtr = camera;
+        probe.xpos = camera->eye.x;
+        if (camera->SpecialFlags & 0x800) {
+            probe.ypos = camera->eye.y + camera->YOffset;
         } else {
-            probe.ypos = arg0->eye.y;
+            probe.ypos = camera->eye.y;
         }
-        probe.zpos = arg0->eye.z;
-        probe.floorTriVerts = arg0->TrianglePtr;
-        probe.shad = probe.ypos - arg0->unk354;
-        probe.floorY = arg0->unk354;
+        probe.zpos = camera->eye.z;
+        probe.floorTriVerts = camera->TrianglePtr;
+        probe.shad = probe.ypos - camera->unk354;
+        probe.floorY = camera->unk354;
         probe.yspd = 0.0f;
-        probe.theta = arg0->CameraAngle;
-        if ((arg0->AvailableModes & 0x80000000) || (level == LEVEL_W1_U_BEND)) {
+        probe.theta = camera->CameraAngle;
+        if ((camera->AvailableModes & 0x80000000) || (level == LEVEL_W1_U_BEND)) {
             gFloorProbeTypeEnabled[2] = 0;
         }
-        if (arg0->AvailableModes & 0x10000) {
+        if (camera->AvailableModes & 0x10000) {
             gFloorProbeTypeEnabled[1] = 0;
         }
         gWallProbeIsCamera = 1;
         savedDD3 = D_800CBDD3;
-        if (arg0->CharPtr->unk102 != 0) {
+        if (camera->CharPtr->unk102 != 0) {
             D_800CBDD3 = 1;
         } else {
             D_800CBDD3 = 0;
         }
         savedDD4 = D_800CBDD4;
-        if ((arg0->Snap != 0) || ((arg0->Mode == 0x100) && (flag == 0))) {
+        if ((camera->Snap != 0) || ((camera->Mode == 0x100) && (flag == 0))) {
             D_800CBDD4 = 1;
         } else {
             D_800CBDD4 = 0;
         }
-        hit = collision_resolveActorWalls(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
+        hit = collision_resolveActorWalls(camera->prevEye.x, camera->prevEye.y, camera->prevEye.z, &probe, 0, 0);
         D_800CBDD4 = savedDD4;
         gWallProbeIsCamera = 0;
         D_800CBDD3 = savedDD3;
         gFloorProbeTypeEnabled[2] = saved2;
         gFloorProbeTypeEnabled[1] = saved1;
         if (hit != 0) {
-            arg0->TonyHitsClear = 0;
-            arg0->SlackenK = 0.004999999888f;
+            camera->TonyHitsClear = 0;
+            camera->SlackenK = 0.004999999888f;
         } else {
-            arg0->TonyHitsClear = 1;
-            arg0->SlackenK += (1.0f - arg0->SlackenK) * 0.1000000015f;
+            camera->TonyHitsClear = 1;
+            camera->SlackenK += (1.0f - camera->SlackenK) * 0.1000000015f;
         }
-        arg0->eye.x = probe.xpos;
-        if (arg0->Mode != 0x100) {
-            if (arg0->SpecialFlags & 0x800) {
-                arg0->eye.y = probe.ypos - arg0->YOffset;
+        camera->eye.x = probe.xpos;
+        if (camera->Mode != 0x100) {
+            if (camera->SpecialFlags & 0x800) {
+                camera->eye.y = probe.ypos - camera->YOffset;
             } else {
-                arg0->eye.y = probe.ypos;
+                camera->eye.y = probe.ypos;
             }
         }
-        arg0->eye.z = probe.zpos;
-        if ((level != LEVEL_W2_LIFTTUNNEL) && (hit != 0) && (arg0->Mode != 0x100)) {
-            collision_findFloorEx(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
-                          arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
-            if (arg0->eye.y < floorY + 40.0f) {
+        camera->eye.z = probe.zpos;
+        if ((level != LEVEL_W2_LIFTTUNNEL) && (hit != 0) && (camera->Mode != 0x100)) {
+            collision_findFloorEx(NULL, NULL, &floorY, NULL, NULL, 0, camera->eye.x, camera->eye.y, camera->eye.z,
+                          camera->prevEye.y, 0, 0, -10000.0f, camera->eye.y, 1);
+            if (camera->eye.y < floorY + 40.0f) {
                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                arg0->eye.y = floorY + 40.0f;
+                camera->eye.y = floorY + 40.0f;
             }
         }
     } else {
-        arg0->TonyHitsClear = 1;
+        camera->TonyHitsClear = 1;
     }
-    camera_updateStatus(arg0);
+    camera_updateStatus(camera);
 }
 
 /* Measures the horizontal distance to the target; when too close, swings the yaw by 90 degrees. */
-void camera_swingIfTooClose(Camera *arg0) {
+void camera_swingIfTooClose(Camera *camera) {
     f32 side;
     f32 dx;
     f32 dz;
     f32 dist;
 
-    if (arg0->CharRelAngle < 180.0f) {
+    if (camera->CharRelAngle < 180.0f) {
         side = 2.0f;
     } else {
         side = -2.0f;
     }
 
-    if ((arg0->Mode != 0x80) && (arg0->Mode != 0x40)) {
-        dx = arg0->eye.x - arg0->target.x;
-        dz = arg0->eye.z - arg0->target.z;
+    if ((camera->Mode != 0x80) && (camera->Mode != 0x40)) {
+        dx = camera->eye.x - camera->target.x;
+        dz = camera->eye.z - camera->target.z;
         dist = sqrtf((dx * dx) + (dz * dz));
-        arg0->TripodMagnitude = dist;
+        camera->TripodMagnitude = dist;
 
         if (dist < 42.0f) {
-            arg0->LockedCameraAngle = arg0->CameraAngle - (45.0f * side);
-            arg0->LockedCamAngleK = 0.0f;
-            camera_updateFollow(arg0);
-            arg0->SpecialMove |= 2;
+            camera->LockedCameraAngle = camera->CameraAngle - (45.0f * side);
+            camera->LockedCamAngleK = 0.0f;
+            camera_updateFollow(camera);
+            camera->SpecialMove |= 2;
         }
     }
 
-    camera_blendYaw(arg0);
+    camera_blendYaw(camera);
 }
 
 /* Advances the blend factor unk5CC towards 1, easing the yaw unk384 towards unk37C until it gets there. */
-void camera_blendYaw(Camera *arg0) {
-    arg0->LockedCamAngleK += 0.006000000052f;
-    arg0->LockedCamAngleK = (arg0->LockedCamAngleK > 1.0f) ? 1.0f : arg0->LockedCamAngleK;
+void camera_blendYaw(Camera *camera) {
+    camera->LockedCamAngleK += 0.006000000052f;
+    camera->LockedCamAngleK = (camera->LockedCamAngleK > 1.0f) ? 1.0f : camera->LockedCamAngleK;
 
-    if (arg0->LockedCamAngleK == 1.0f) {
-        arg0->LockedCameraAngle = 999.0f;
-        arg0->SpecialMove &= ~2;
+    if (camera->LockedCamAngleK == 1.0f) {
+        camera->LockedCameraAngle = 999.0f;
+        camera->SpecialMove &= ~2;
     } else {
-        arg0->LockedCameraAngle += math_angleDiff(arg0->LockedCameraAngle, arg0->CameraAngle) * arg0->LockedCamAngleK;
+        camera->LockedCameraAngle += math_angleDiff(camera->LockedCameraAngle, camera->CameraAngle) * camera->LockedCamAngleK;
     }
 }
 
@@ -690,40 +690,40 @@ void func_1512C200(Camera *camera) {
 #define SQ(x) ((x) * (x))
 
 /* Keeps the camera outside the circle of radius avoidRadius around avoidCenter (horizontally), pushing it out to the edge. */
-void camera_keepOutsideCircle(Camera *arg0) {
+void camera_keepOutsideCircle(Camera *camera) {
     f32 dz; // matching: also holds the target distance later (a separate local grows the frame)
     Vec3f pos;
     Vec3f offset;
     Vec3f toPos;
 
-    if (arg0->avoidActive) {
+    if (camera->avoidActive) {
         f32 dx; // matching: also holds the yaw difference later
 
-        dx = arg0->eye.x - arg0->avoidCenter.x;
-        dz = arg0->eye.z - arg0->avoidCenter.z;
-        pos = arg0->eye;
-        if (sqrtf(SQ(dx) + SQ(dz)) < arg0->avoidRadius) {
+        dx = camera->eye.x - camera->avoidCenter.x;
+        dz = camera->eye.z - camera->avoidCenter.z;
+        pos = camera->eye;
+        if (sqrtf(SQ(dx) + SQ(dz)) < camera->avoidRadius) {
             Vec3f target;
             f32 outwardYaw;
             f32 yaw;
 
-            target = arg0->focus;
+            target = camera->focus;
             target.y = 0.0f;
             pos.y = 0.0f;
-            arg0->avoidCenter.y = 0.0f;
-            math_dirTowards(&arg0->avoidCenter, &pos, &offset);
+            camera->avoidCenter.y = 0.0f;
+            math_dirTowards(&camera->avoidCenter, &pos, &offset);
             outwardYaw = math_vec3Heading(&offset) - 180.0f;
             math_normalizeDegrees(&outwardYaw);
             math_dirTowards(&target, &pos, &toPos);
-            math_vec3Scale(&offset, arg0->avoidRadius, &offset);
-            pos.x = arg0->avoidCenter.x + offset.x;
+            math_vec3Scale(&offset, camera->avoidRadius, &offset);
+            pos.x = camera->avoidCenter.x + offset.x;
             pos.y = 0.0f;
-            pos.z = arg0->avoidCenter.z + offset.z;
+            pos.z = camera->avoidCenter.z + offset.z;
             dz = sqrtf(SQ(target.x - pos.x) + SQ(target.z - pos.z));
             math_vec3Diff(&pos, &target, &offset);
             yaw = math_vec3Heading(&offset);
             math_normalizeDegrees(&yaw);
-            arg0->avoidYaw = yaw;
+            camera->avoidYaw = yaw;
             dx = math_angleDiff(outwardYaw, yaw);
             if (fabsf(dx) < 35.0f) {
                 if (dx <= 0.0f) {
@@ -731,20 +731,20 @@ void camera_keepOutsideCircle(Camera *arg0) {
                 } else {
                     dx = -5.0f;
                 }
-                math_rotateAroundY(&pos, &arg0->avoidCenter, dx, &pos);
+                math_rotateAroundY(&pos, &camera->avoidCenter, dx, &pos);
             }
             gCameraAvoidTargetDist = dz;
-            pos.y = arg0->eye.y;
-            arg0->eye = pos;
+            pos.y = camera->eye.y;
+            camera->eye = pos;
         } else {
             gCameraAvoidTargetDist = 0.0f;
-            arg0->avoidYaw = arg0->CameraAngle;
+            camera->avoidYaw = camera->CameraAngle;
         }
     } else {
         gCameraAvoidTargetDist = 0.0f;
-        arg0->avoidYaw = 0.0f;
+        camera->avoidYaw = 0.0f;
     }
-    arg0->avoidActive = 0;
+    camera->avoidActive = 0;
 }
 
 s32 func_1512C47C(s32 arg0) {

@@ -236,7 +236,7 @@ void camera_updateAim(Camera *camera) {
         f32 horizontal;
         f32 sinPitch;
         f32 rate;
-        s32 notUnk3E8;
+        s32 wallHit;
         s32 stickX;
         OSContPad *pad;
 
@@ -267,9 +267,9 @@ void camera_updateAim(Camera *camera) {
         }
         if (zone != 0xD) {
             // matching: the negated copy in a local fixes the register allocation of this block
-            notUnk3E8 = !camera->TonyHitsClear;
+            wallHit = !camera->TonyHitsClear;
             if (!aim->unk4D) {
-                if (!notUnk3E8) {
+                if (!wallHit) {
                     aim->stickLock = 0;
                 } else {
                     if (aim->stickLock == 0) {

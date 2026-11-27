@@ -1086,21 +1086,21 @@ void camera_updateSway(Camera *camera) {
 
 /* Pushes the deep-water mode 0x80 (slot 13) while camera_isInDeepWater says so, and pops it otherwise. */
 void camera_updateDeepWater(Camera *camera) {
-    s32 extUnk4E;
-    s32 extUnk1C;
+    s32 transport;
+    s32 waterUp;
 
     if (camera->mv != NULL) {
-        extUnk1C = camera->mv->water_up;
-        extUnk4E = camera->mv->transport;
+        waterUp = camera->mv->water_up;
+        transport = camera->mv->transport;
     } else {
-        extUnk1C = 0;
-        extUnk4E = 0;
+        waterUp = 0;
+        transport = 0;
     }
 
     if (!(camera->Mode & 0x40)) {
         if ((camera->AvailableModes & 0x4000) || (camera->CharPtr->unk102 != 0)) {
             if (camera_isInDeepWater(camera) != 0) {
-                if ((extUnk4E == 0) && (extUnk1C == 0)) {
+                if ((transport == 0) && (waterUp == 0)) {
                     if (camera_pushMode(camera, 0x80, 1, 1, CAMERA_MODE_SFLY) != 0) {
                         if (camera->cmdRunning == 0) {
                             camera_loadDistancePreset(camera);
@@ -1579,7 +1579,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
 
 /* Sound callback while aiming (zoom): follows the player and switches between the gAimZoomSounds[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
-s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 index;
     u32 oldZoom;
@@ -1638,7 +1638,7 @@ s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
 }
 /* Sound callback while aiming (look): plays sound 0x61C while the aim angles keep changing, 0x61D
    once they settle. Returns 1 when the aim ended. */
-s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
     Camera *camera;
     u32 count;
     u32 oldKey;
@@ -1813,7 +1813,7 @@ void camera_leaveFirstPersonAim(Camera *camera) {
 }
 
 /* Starts a transition (camera_updateTransition) from the current focus point. */
-void camera_startTransition(Camera *camera, s32 arg1, s32 arg2) {
+void camera_startTransition(Camera *camera, s32 duration, s32 yaw) {
     camera->transition.state = 1;
     camera->transition.startTarget.x = camera->focus.x;
     camera->transition.startTarget.y = camera->focus.y;

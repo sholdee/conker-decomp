@@ -37,7 +37,7 @@ typedef struct Cfg15128CB0 {
 } Cfg15128CB0;
 
 
-s32 D_80089520 = 0; // frames left before a pending yaw override applies (set by game/Script/CameraCmd/cameracmd.c)
+s32 D_80089520 = 0; // number of coming message-6 (leave cutscene mode) events to ignore (set by camera command 27 in game/Script/CameraCmd/cameracmd.c)
 s32 gSavedSniperStates[4] = { 0 }; // per view: SniperState saved over a camera switch
 s32 gSavedAimStates[4] = { 0 }; // per view: aim state saved over a camera switch
 static Vec3f gCamShotFocusOffset = { 0.0f, 0.0f, -400.0f };

@@ -6,7 +6,6 @@
 
 static f32 gOrbitHeldPitch = 0.0f; // the last pitch that moved by 10 degrees or more
 static f32 D_800894C4 = 0.0f; /* not referenced */
-static Vec3f D_800894C8 = { 0.0f, 0.0f, 0.0f };
 
 #define SQ(x) ((x) * (x))
 #define DEG2RAD 0.01745329238f
@@ -14,7 +13,7 @@ static Vec3f D_800894C8 = { 0.0f, 0.0f, 0.0f };
 /* Places the eye on an orbit around the target: yaw from the player's facing (or the camera yaw),
    pitch from the player or pitchOverride, then eases it there and keeps it out of the target. */
 void camera_placeOrbitEye(Camera *camera) {
-    Vec3f offset = D_800894C8;
+    Vec3f offset = { 0.0f, 0.0f, 0.0f };
     f32 horiz;
     f32 yaw;
     f32 pitch;

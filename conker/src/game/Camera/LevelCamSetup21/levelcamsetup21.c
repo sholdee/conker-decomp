@@ -3,8 +3,8 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup21(Camera *arg0) {
-    arg0->DistIndex = 2;
-    camera_loadDistancePreset(arg0);
-    arg0->AvailableModes |= 0x4000;
+void camera_levelSetup21(Camera *camera) {
+    camera->DistIndex = 2;
+    camera_loadDistancePreset(camera);
+    camera->AvailableModes |= 0x4000;
 }

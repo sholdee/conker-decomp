@@ -170,142 +170,142 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode);
 void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye);
 
 /* game/Camera/LevelCamSetup/levelcamsetup.c */
-void camera_runLevelSetup(Camera *arg0, s32 arg1);
+void camera_runLevelSetup(Camera *camera, s32 resource);
 
 /* game/Camera/LevelCamSetup01/levelcamsetup01.c */
-void camera_levelSetup01(Camera *arg0);
-void camera_emptyLevelSetup02(Camera *arg0);
+void camera_levelSetup01(Camera *camera);
+void camera_emptyLevelSetup02(Camera *camera);
 
 /* game/Camera/LevelCamSetup03/levelcamsetup03.c */
-void camera_emptyLevelSetup03(Camera *arg0);
+void camera_emptyLevelSetup03(Camera *camera);
 
 /* game/Camera/LevelCamSetup04/levelcamsetup04.c */
-void camera_levelSetup04(Camera *arg0);
+void camera_levelSetup04(Camera *camera);
 
 /* game/Camera/LevelCamSetup05/levelcamsetup05.c */
-void camera_emptyLevelSetup05(Camera *arg0);
+void camera_emptyLevelSetup05(Camera *camera);
 
 /* game/Camera/LevelCamSetup06/levelcamsetup06.c */
-void camera_emptyLevelSetup06(Camera *arg0);
+void camera_emptyLevelSetup06(Camera *camera);
 
 /* game/Camera/LevelCamSetup07/levelcamsetup07.c */
-void camera_levelSetup07(Camera *arg0);
+void camera_levelSetup07(Camera *camera);
 
 /* game/Camera/LevelCamSetup08/levelcamsetup08.c */
-void camera_levelSetup08(Camera *arg0);
+void camera_levelSetup08(Camera *camera);
 
 /* game/Camera/LevelCamSetup09/levelcamsetup09.c */
-void camera_levelSetup09(Camera *arg0);
+void camera_levelSetup09(Camera *camera);
 
 /* game/Camera/LevelCamSetup10/levelcamsetup10.c */
-void camera_levelSetup10(Camera *arg0);
-void camera_emptyLevelSetup11(Camera *arg0);
+void camera_levelSetup10(Camera *camera);
+void camera_emptyLevelSetup11(Camera *camera);
 
 /* game/Camera/LevelCamSetup12/levelcamsetup12.c */
-void camera_levelSetup12(Camera *arg0);
+void camera_levelSetup12(Camera *camera);
 
 /* game/Camera/LevelCamSetup13/levelcamsetup13.c */
-void camera_levelSetup13(Camera *arg0);
-void camera_emptyLevelSetup14(Camera *arg0);
+void camera_levelSetup13(Camera *camera);
+void camera_emptyLevelSetup14(Camera *camera);
 
 /* game/Camera/LevelCamSetup15/levelcamsetup15.c */
-void camera_levelSetup15(Camera *arg0);
+void camera_levelSetup15(Camera *camera);
 
 /* game/Camera/LevelCamSetup16/levelcamsetup16.c */
-void camera_levelSetup16(Camera *arg0);
+void camera_levelSetup16(Camera *camera);
 
 /* game/Camera/LevelCamSetup17/levelcamsetup17.c */
-void camera_levelSetup17(Camera *arg0);
-void camera_levelSetup18(Camera *arg0);
+void camera_levelSetup17(Camera *camera);
+void camera_levelSetup18(Camera *camera);
 
 /* game/Camera/LevelCamSetup19/levelcamsetup19.c */
-void camera_levelSetup19(Camera *arg0);
+void camera_levelSetup19(Camera *camera);
 
 /* game/Camera/LevelCamSetup20/levelcamsetup20.c */
-void camera_levelSetup20(Camera *arg0);
+void camera_levelSetup20(Camera *camera);
 
 /* game/Camera/LevelCamSetup21/levelcamsetup21.c */
-void camera_levelSetup21(Camera *arg0);
+void camera_levelSetup21(Camera *camera);
 
 /* game/Camera/LevelCamSetup22/levelcamsetup22.c */
-void camera_emptyLevelSetup22(Camera *arg0);
+void camera_emptyLevelSetup22(Camera *camera);
 
 /* game/Camera/LevelCamSetup23/levelcamsetup23.c */
-void camera_levelSetup23(Camera *arg0);
+void camera_levelSetup23(Camera *camera);
 
 /* game/Camera/LevelCamSetup24/levelcamsetup24.c */
-void camera_levelSetup24(Camera *actor);
-void camera_levelSetup25(Camera *actor);
+void camera_levelSetup24(Camera *camera);
+void camera_levelSetup25(Camera *camera);
 
 /* game/Camera/LevelCamSetup26/levelcamsetup26.c */
-void camera_levelSetup26(Camera *arg0);
+void camera_levelSetup26(Camera *camera);
 
 /* game/Camera/LevelHook07/levelhook07.c */
 void camera_levelHook07(Camera *camera);
 
 /* game/Camera/LevelHook05/levelhook05.c */
-void camera_levelHook05(s32 *arg0);
+void camera_levelHook05(Camera *camera);
 
 /* game/Camera/LevelHook18/levelhook18.c */
-void camera_levelHook18(Camera *actor);
+void camera_levelHook18(Camera *camera);
 
 /* game/Camera/LevelHook03/levelhook03.c */
-void camera_levelHook03(Camera *arg0);
+void camera_levelHook03(Camera *camera);
 
 /* game/Camera/LevelHook10/levelhook10.c */
-void camera_levelHook10(Camera *arg0);
+void camera_levelHook10(Camera *camera);
 
 /* game/Camera/LevelHook01/levelhook01.c */
-void camera_levelHook01(Camera *arg0);
+void camera_levelHook01(Camera *camera);
 
 /* game/Camera/LevelHook06/levelhook06.c */
 void camera_levelHook06(Camera *camera);
 
 /* game/Camera/LevelHook13/levelhook13.c */
-void camera_levelHook13(Camera *arg0);
+void camera_levelHook13(Camera *camera);
 
 /* game/Camera/LevelHook22/levelhook22.c */
-void camera_levelHook22(Camera *arg0);
+void camera_levelHook22(Camera *camera);
 
 /* game/Camera/SpeedDistance/speeddistance.c */
 void camera_scaleBySpeed(Camera *camera);
 
 /* game/Camera/LevelHook09/levelhook09.c */
-void camera_levelHook09(Camera *arg0);
+void camera_levelHook09(Camera *camera);
 
 /* game/Camera/LevelHook33/levelhook33.c */
-void camera_levelHook33(Camera *arg0);
+void camera_levelHook33(Camera *camera);
 
 /* game/Camera/LevelHook35/levelhook35.c */
-void camera_levelHook35(Camera *arg0);
+void camera_levelHook35(Camera *camera);
 
 /* game/Camera/LevelHook04/levelhook04.c */
-void camera_levelHook04(Camera *actor);
+void camera_levelHook04(Camera *camera);
 
 /* game/Camera/LevelHook32/levelhook32.c */
-void camera_levelHook32(Camera *arg0);
+void camera_levelHook32(Camera *camera);
 
 /* game/Camera/LevelHook34/levelhook34.c */
 void camera_levelHook34(Camera *camera);
-void camera_levelUpdateWaveChains(s32 arg0);
+void camera_levelUpdateWaveChains(s32 unused);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
-void camera_levelHook23(Camera *actor);
+void camera_levelHook23(Camera *camera);
 
 /* game/Camera/LevelHook28/levelhook28.c */
-void camera_levelHook28(Camera *arg0);
+void camera_levelHook28(Camera *camera);
 
 /* game/Camera/LevelHook19/levelhook19.c */
-void camera_levelHook19(Camera *arg0);
+void camera_levelHook19(Camera *camera);
 
 /* game/Camera/LevelHook15/levelhook15.c */
-void camera_levelHook15(Camera *actor);
+void camera_levelHook15(Camera *camera);
 
 /* game/Camera/DistanceReset/distancereset.c */
 void camera_resetDistances(Camera *camera);
 
 /* game/Camera/LevelHook25/levelhook25.c */
-void camera_levelHook25(Camera *arg0);
+void camera_levelHook25(Camera *camera);
 
 /* game/Camera/CameraData/cameradata.c (data only, linked after game/Prop/PropLinks/proplinks) */
 extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
@@ -332,10 +332,10 @@ void func_15121C64(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void camera_easeYawBehind(Camera *camera, f32 yawOffset);
 
 /* game/Camera/Heading/heading.c */
-void camera_updateHeading(Camera *arg0);
+void camera_updateHeading(Camera *camera);
 
 /* game/Camera/HeadingToPoint/headingtopoint.c */
-void camera_turnHeadingToPoint(Camera *arg0);
+void camera_turnHeadingToPoint(Camera *camera);
 
 /* game/Camera/OrbitEye/orbiteye.c */
 void camera_placeOrbitEye(Camera *camera);
@@ -377,11 +377,11 @@ void camera_filterButtons(Camera *camera);
 void camera_moveFocus(Camera *camera);
 void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView);
 s32 camera_updateFirstPersonAim(Camera *camera);
-s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
-s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
+s32 camera_onZoomSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
+s32 camera_onLookSound(CamSound *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
 s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad);
 void camera_leaveFirstPersonAim(Camera *camera);
-void camera_startTransition(Camera *camera, s32 arg1, s32 arg2);
+void camera_startTransition(Camera *camera, s32 duration, s32 yaw);
 s32 camera_updateTransition(Camera *camera);
 void camera_runModeHandler(Camera *camera);
 void camera_endUpdate(Camera *camera);
@@ -393,7 +393,7 @@ extern const f32 gCameraDistancePresets[4][2];
 extern f32 gCameraTransitionHeight; // camera transition height (see camera_updateTransition)
 
 /* game/Camera/TiltPresets/tiltpresets.c */
-void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
+void camera_updateAngleOffsets(Camera *camera, f32 *outYawAngle, f32 *outPitchAngle);
 
 /* game/Camera/CameraMessages/cameramessages.c */
 void camera_processMessages(Camera *cam);
@@ -403,7 +403,7 @@ extern s32 gSavedAimStates[4];
 extern Camera *gSavedCameras;
 
 /* game/Camera/CameraPoses/cameraposes.c */
-/* (Camera *cam, s32 arg1); declared without a prototype: game/Camera/CameraViews/cameraviews.c also passes the actor */
+/* (Camera *cam, s32 resource); declared without a prototype: game/Camera/CameraViews/cameraviews.c also passes the actor */
 void func_151298C0();
 void camera_updatePoseEye(Camera *cam);
 extern s16 gNumCameraPoses;
@@ -415,20 +415,20 @@ void camera_updateFreeFly(Camera *cam);
 void camera_updateFrontEndPath(Camera *cam);
 
 /* game/Camera/CameraOcclusion/cameraocclusion.c */
-void camera_updateFloorHeights(Camera *arg0);
+void camera_updateFloorHeights(Camera *camera);
 void camera_resetZScans(void);
-void camera_checkOcclusion(Camera *arg0);
-void camera_updateOcclusion(Camera *arg0);
-void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
-s32 camera_clearZRow(Camera *arg0);
+void camera_checkOcclusion(Camera *camera);
+void camera_updateOcclusion(Camera *camera);
+void camera_scanZRow(Camera *camera, s32 screenX, s32 screenY, s32 depth);
+s32 camera_clearZRow(Camera *camera);
 void camera_recordZHit(ZScan *scan, s32 offset, s32 gap);
-s32 camera_testZPixel(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
-s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused);
-void camera_collide(Camera *arg0);
-void camera_swingIfTooClose(Camera *arg0);
-void camera_blendYaw(Camera *arg0);
+s32 camera_testZPixel(Camera *camera, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
+s32 camera_getOcclusionOffset(Camera *camera, f32 *offset, f32 *unused);
+void camera_collide(Camera *camera);
+void camera_swingIfTooClose(Camera *camera);
+void camera_blendYaw(Camera *camera);
 void func_1512C200(Camera *camera);
-void camera_keepOutsideCircle(Camera *arg0);
+void camera_keepOutsideCircle(Camera *camera);
 s32 func_1512C47C(s32 arg0);
 extern f32 gCameraAvoidTargetDist;
 
@@ -480,12 +480,12 @@ void camera_startCommandMode(Camera *camera, s32 action);
 
 /* game/Camera/CameraWobble/camerawobble.c */
 extern CamOffset gCameraOffsets[4]; // per-player camera offset (position, rotation), summed from the wobbles
-CamWobble *camera_createWobble(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3);
+CamWobble *camera_createWobble(CamWobbleDef *def, s32 extraSize, u8 owner, s32 list);
 void camera_stopWobble(CamWobble *wobble);
 void camera_updateWobble(CamWobble *wobble);
 void camera_clearOffsets(void);
-CamWobbleEnv *camera_startWobblePreset(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 arg3, s32 arg4);
-CamWobbleEnv *camera_startEnvelopeWobble(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
+CamWobbleEnv *camera_startWobblePreset(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 owner, s32 list);
+CamWobbleEnv *camera_startEnvelopeWobble(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 owner, s32 list);
 s32 camera_updateWobbleEnvelope(CamWobbleEnv *wobble);
 f32 camera_getWobbleFalloff(CamWobbleEnv *wobble);
 f32 camera_getFalloffScale(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
