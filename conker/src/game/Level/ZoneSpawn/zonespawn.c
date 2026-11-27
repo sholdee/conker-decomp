@@ -992,7 +992,7 @@ s32 level_spawnZoneEffect(TriggerZone *obj) {
 
     obj->inactive = 1;
     data.zone = obj;
-    data.unk4 = obj->data2;
+    data.id = obj->data2;
 
     collision_selectMap(0);
     data.node = collision_findZoneLeaf(obj->x, obj->z);

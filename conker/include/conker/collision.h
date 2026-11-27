@@ -45,7 +45,7 @@ struct TriggerVolume {
 // One 0x10-byte part of a part set (gPartSets): a child object or an attachment.
 typedef struct PartDef {
     /* 0x00 */ u8 model;    // model id of the child object or the attachment
-    /* 0x01 */ u8 unk1;
+    /* 0x01 */ u8 bone;
     /* 0x02 */ u8 unk2;
     /* 0x03 */ u8 type;     // 0: child object (collision_createChildObject), otherwise attach_add
     /* 0x04 */ u8 unk4;

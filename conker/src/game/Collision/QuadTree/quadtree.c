@@ -850,7 +850,7 @@ s32 collision_xorScramble(s32 value) {
 /**
  * Loads map `map`'s settings resource into gLevelHeader (fatal error if it is missing) and
  * publishes its gLevelTaskCount/gLevelTaskIds table. If the cartridge word at 0xB0000A5C is not the
- * expected one, the table length unk12 is halved.
+ * expected one, the table length taskCount is halved.
  */
 void collision_loadMapSettings(s32 map) {
     LevelSettingsAsset *res;
@@ -876,12 +876,12 @@ void collision_loadMapSettings(s32 map) {
     romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
         info = gLevelHeader;
-        info->unk12 >>= 1;
+        info->taskCount >>= 1;
     }
 
     info = gLevelHeader;
-    if (info->unk12 != 0) {
-        gLevelTaskCount = info->unk12;
+    if (info->taskCount != 0) {
+        gLevelTaskCount = info->taskCount;
         gLevelTaskIds = res->idList;
     } else {
         gLevelTaskCount = 0;

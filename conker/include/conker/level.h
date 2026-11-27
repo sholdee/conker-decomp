@@ -72,7 +72,7 @@ typedef void (*ObjectFunc)();
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (gGroupedObjectDefaults). */
 typedef struct {
-    /* 0x0 */ u8 unk4C;
+    /* 0x0 */ u8 hasShadow;
     /* 0x1 */ u8 shadowSize;
     /* 0x2 */ s16 cullRadiusY;
     /* 0x4 */ s16 cullRadiusXZ;
@@ -101,7 +101,7 @@ typedef struct {
     /* 0x20 */ f32 scaleX;
     /* 0x24 */ f32 scaleY;
     /* 0x28 */ f32 scaleZ;
-    /* 0x2C */ u8 unk4C;
+    /* 0x2C */ u8 hasShadow;
     /* 0x2D */ u8 shadowSize;
     /* 0x2E */ u16 cullRadiusXZ;
     /* 0x30 */ u16 cullRadiusY;

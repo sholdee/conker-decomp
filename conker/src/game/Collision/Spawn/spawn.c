@@ -241,7 +241,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if ((spawn->flags & 6) || (spawn->flags & 4) || (spawn->flags & 2)) {
         actor_fadeCommand(obj, 4, 0, 0, 0);
     }
-    obj->intelwalk = spawn->unkD;
+    obj->intelwalk = spawn->intelwalk;
     if ((spawnIdx < gPlayerCount) && (gRoster[spawnIdx] == -2)) {
         obj->mv->bot = 1;
         obj->intelwalk = 1;
@@ -261,8 +261,8 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     obj->moveTurnRate = spawn->turnRate;
     obj->faceTurnRate = obj->moveTurnRate;
     obj->waypointStep = 1;
-    obj->nearRangeDefault = spawn->unk1C;
-    obj->sightRange = spawn->unk1D;
+    obj->nearRangeDefault = spawn->nearRangeDefault;
+    obj->sightRange = spawn->sightRange;
     obj->angle = spawn->angle << 8;
     angle = obj->angle;
     obj->langle = angle;
@@ -280,7 +280,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if (obj->noshove & 0x800000) {
         gZoneCursorEnabled = 1;
     }
-    obj->family = spawn->unk11;
+    obj->family = spawn->family;
     obj->unk66 = spawn->unk10;
     obj->ambientColor[0] = 120;
     obj->ambientColor[1] = 120;
@@ -294,8 +294,8 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     obj->intel_decel = 100;
     obj->unk1FC |= 2;
     collision_applyModelDefaults(obj, type, spawn);
-    t = spawn->unk13 & 0x7F;
-    obj->attachedObject = ((spawn->unk13 & 0x80) << 8) | t;
+    t = spawn->attachedObject & 0x7F;
+    obj->attachedObject = ((spawn->attachedObject & 0x80) << 8) | t;
     obj->unk90 = spawn->unk14;
     collision_setObjectModel(idx, type, 1);
     if (type != 0xFF) {
@@ -375,7 +375,7 @@ void collision_allocActorLights(Actor *obj) {
 
     spawn = obj->listpos_ptr;
     if (spawn != NULL) {
-        n = spawn->unk2F;
+        n = spawn->maxLights;
         if (n == 0) {
             if (obj->playernumber == 0) {
                 count = 5;
@@ -488,9 +488,9 @@ void *collision_createPartSet(Actor *parent, s32 setId, f32 speed, s32 lifetime)
     parts = gPartSets[setId].parts;
     for (i = 0; i < gPartSets[setId].count; i++) {
         if (parts[i].type == 0) {
-            ret = collision_createChildObject(parent, parts[i].unk1, parts[i].model, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, speed);
+            ret = collision_createChildObject(parent, parts[i].bone, parts[i].model, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, speed);
         } else {
-            ret = attach_add(parent, parts[i].model, parts[i].unk1, parts[i].flags, parts[i].unk4, parts[i].unk5, lifetime, setId + 1, parts[i].unk2,
+            ret = attach_add(parent, parts[i].model, parts[i].bone, parts[i].flags, parts[i].unk4, parts[i].unk5, lifetime, setId + 1, parts[i].unk2,
                                 parts[i].data, (parts[i].type == 2) ? parts[i].unk6 : -1, parts[i].parentSet, parts[i].parentMtx);
         }
     }
@@ -537,10 +537,10 @@ void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2) {
         obj->shadow_size = 0;
         obj->rootOffsetY = 0.0f;
     } else {
-        obj->rootOffsetY = gModelDefs[modelId]->unk6;
+        obj->rootOffsetY = gModelDefs[modelId]->rootOffsetY;
         actor_setScale(obj, obj->scale_xz, obj->scale_y);
         def = gModelDefs[modelId];
-        obj->drawtype = def->unk12;
+        obj->drawtype = def->drawType;
     }
     obj->baseCharacterType = player_getBaseCharacterType(obj);
     if (gModelAnimCounts[obj->baseCharacterType] != 0) {
@@ -568,7 +568,7 @@ s32 collision_allocAnimState(Actor *obj, s32 anim, s32 flag8000, f32 speed) {
     return 0;
 }
 
-/* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides unk10. */
+/* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides cullDistance. */
 void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     ModelDef *def;
     u16 override;
@@ -576,9 +576,9 @@ void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     if (modelId != 0xFF) {
         def = gModelDefs[modelId];
         if (spawn != NULL) {
-            override = spawn->unk2C;
+            override = spawn->cullDistance;
             if (override == 0) {
-                obj->cullDistance = def->unk2A;
+                obj->cullDistance = def->defaultCullDistance;
             } else {
                 if (override == 1) {
                     obj->cullDistance = 0;
@@ -593,18 +593,18 @@ void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
             obj->cullDistance = 0;
         }
         obj->unk13B = def->unk39;
-        obj->bouncePercent = def->unk33;
-        obj->impactSound = def->unk34;
-        obj->drawtype = def->unk12;
+        obj->bouncePercent = def->bouncePercent;
+        obj->impactSound = def->impactSound;
+        obj->drawtype = def->drawType;
         obj->swapTexture[0] = def->eyeDefault[0];
         obj->swapTexture[1] = def->eyeDefault[1];
-        obj->shadow_size = def->unk2;
+        obj->shadow_size = def->shadowSize;
         if (def->subModelCount != 0) {
             obj->modelIds = gSubModelLists[def->subModelList];
             obj->lodCount = def->subModelCount;
         }
         obj->modelCount = obj->lodCount + def->extraModelCount;
-        if (def->unk29 != 0) {
+        if (def->boneRemapList != 0) {
             aim_initState(obj);
         }
     }

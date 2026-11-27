@@ -3014,7 +3014,7 @@ typedef struct ShapeEmitter {
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
-    /* 0x04 */ u8 unk4;             /* the zone's data2 */
+    /* 0x04 */ u8 id;               /* the zone's data2 */
     /* 0x08 */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
     /* 0x0C */ u8 flags;            /* 3 when the zone's data3 is set, else 0 */
     /* 0x10 */ struct Actor *actor; /* NULL at the start; read by func_151A6B68 */

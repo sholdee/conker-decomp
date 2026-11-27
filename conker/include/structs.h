@@ -248,11 +248,11 @@ typedef struct LevelHeader {
     /* 0x0F */ u8  hookCallback;    // gLevelHooks
     /* 0x10 */ u8  sunPosition;     // index into gSunPositions
     /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
-    /* 0x12 */ u8  unk12;
+    /* 0x12 */ u8  taskCount;
     /* 0x13 */ u8  unk13;           // landing step (game/Actor/ActorMotion/actormotion)
-    /* 0x14 */ u8  unk14;
+    /* 0x14 */ u8  hasCameraLimit;
     /* 0x15 */ u8  pad15;
-    /* 0x16 */ s16 unk16;
+    /* 0x16 */ s16 cameraLimitY;
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
     /* 0x1A */ u16 bonePoolSize;    // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
@@ -281,7 +281,7 @@ typedef struct LevelHeader {
 typedef struct LevelSettingsAsset {
     /* 0x00 */ LevelHeader *header;
     /* 0x04 */ s32 unk4;     // low 24 bits nonzero when present
-    /* 0x08 */ u16 *idList;  // gLevelTaskIds, LevelHeader.unk12 entries
+    /* 0x08 */ u16 *idList;  // gLevelTaskIds, LevelHeader.taskCount entries
 } LevelSettingsAsset;
 
 /* A ring buffer of length-prefixed messages (game/Text/TextQueue/textqueue.c: text_ringInit / text_ringPush / text_ringPop). */
@@ -410,14 +410,14 @@ struct WORD {
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
     /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (aim_updatePoints)
-    /* 0x02 */ s16 unk2;
+    /* 0x02 */ s16 shadowSize;
     /* 0x04 */ u8  subModelCount;
     /* 0x05 */ u8  subModelList;    // index into gSubModelLists
-    /* 0x06 */ s16 unk6;
+    /* 0x06 */ s16 rootOffsetY;
     /* 0x08 */ u8  texture[2][3];   // texture per eye slot (Actor.unk6C) and state
     /* 0x0E */ u16 bodyRadius;
     /* 0x10 */ s16 bodyHeight;
-    /* 0x12 */ u8  unk12;
+    /* 0x12 */ u8  drawType;
     /* 0x13 */ u8  pad13;
     /* 0x14 */ s16 headHeight;
     /* 0x16 */ u8  pad16;
@@ -427,20 +427,20 @@ typedef struct ModelDef {
     /* 0x1A */ s16 unk1A;           // body cylinder (Actor.unkE4/E6/E8)
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;           // hit cylinder (Actor.hitRadius/hitHeight/hitOffsetY)
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
+    /* 0x20 */ s16 hitRadius;       // unscaled hit cylinder (actor_setScale: Actor.hitRadius/hitHeight/hitOffsetY)
+    /* 0x22 */ s16 hitHeight;
+    /* 0x24 */ s16 hitOffsetY;
     /* 0x26 */ u8  aimBone;
     /* 0x27 */ u8  headBone;
     /* 0x28 */ u8  flags;
-    /* 0x29 */ u8  unk29;
-    /* 0x2A */ u16 unk2A;
+    /* 0x29 */ u8  boneRemapList;   // 1-based index into gBoneRemapLists, 0 = none
+    /* 0x2A */ u16 defaultCullDistance; // Actor.cullDistance when SpawnRecord.cullDistance is 0
     /* 0x2C */ s8  headYaw[2];      // head turn range: yaw one way / the other (aim_turnHead)
     /* 0x2E */ s8  headPitch[2];    // pitch up / down
     /* 0x30 */ s8  aimReach;        // aim point along the aim bone's z axis
     /* 0x31 */ u8  pad31[2];
-    /* 0x33 */ s8  unk33;
-    /* 0x34 */ s32 unk34;
+    /* 0x33 */ s8  bouncePercent;
+    /* 0x34 */ s32 impactSound;
     /* 0x38 */ u8  extraModelCount;
     /* 0x39 */ u8  unk39;
     /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
@@ -645,7 +645,7 @@ typedef struct {
     /* 0x1A9 */ u8  unk1A9;
     /* 0x1AA */ s16 shotsfired;
     /* 0x1AC */ u8  on_fire;
-    /* 0x1AD */ u8  unk1AD;
+    /* 0x1AD */ u8  headShot;
     /* 0x1AE */ s8  ammo_count;
     /* 0x1AF */ s8  unk1AF;
     /* 0x1B0 */ s8  lastSpawnIndex;   // last multiplayer spawn point used
@@ -669,27 +669,27 @@ typedef struct SpawnRecord {
     /* 0x08 */ s16 y;
     /* 0x0A */ s16 z;
     /* 0x0C */ u8  angle;        // high byte of the facing angle
-    /* 0x0D */ u8  unkD;
-    /* 0x0E */ u8  unkE;
+    /* 0x0D */ u8  intelwalk;
+    /* 0x0E */ u8  unkE;         // low nibble: starting energy; 0x80: no fall damage (actor_landNonPlayer)
     /* 0x0F */ u8  turnRate;     // the spawned actor's moveTurnRate and faceTurnRate
     /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  unk11;
+    /* 0x11 */ u8  family;
     /* 0x12 */ u8  unk12;
-    /* 0x13 */ u8  unk13;
+    /* 0x13 */ u8  attachedObject; // packed Actor.attachedObject: bit 7 -> 0x8000, low 7 bits the object
     /* 0x14 */ s16 unk14;
     /* 0x16 */ u8  pad16[0x2];
-    /* 0x18 */ s32 objFlags;     // copied to the object's unkF8
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
+    /* 0x18 */ s32 objFlags;     // copied to the object's noshove
+    /* 0x1C */ u8  nearRangeDefault;
+    /* 0x1D */ u8  sightRange;
     /* 0x1E */ u8  pad1E[0x2];
     /* 0x20 */ f32 xz_scale;
     /* 0x24 */ f32 y_scale;
     /* 0x28 */ u8  unique_id;
     /* 0x29 */ u8  partSet;      // 1-based index into gPartSets, 0 for none
-    /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (actor_isVisible)
-    /* 0x2C */ u16 unk2C;
+    /* 0x2A */ u16 cullRadius;   // 0 = always drawn (actor_isVisible)
+    /* 0x2C */ u16 cullDistance; // Actor.cullDistance: 0 = the model's default, 1 = 0 (collision_applyModelDefaults)
     /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's gModelUnloadTimers counter; 0xFF = never set
-    /* 0x2F */ u8  unk2F;
+    /* 0x2F */ u8  maxLights;    // 0: 5 for player 0, else 3 (collision_allocActorLights)
 } SpawnRecord; // size 0x30
 
 /* One point of a level path (8 bytes). gSpawnPaths[n] points at path n: a centre point followed by
@@ -1366,7 +1366,7 @@ struct WorldObject {
     /* 0x40 */ s32 floorHitAttrib;   // collision material, used when materials is NULL
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
-    /* 0x4C */ u8 unk4C;            // 0: never drawn (gfx_updateObjectShadows)
+    /* 0x4C */ u8 hasShadow;          // 0: no blob shadow (gfx_updateObjectShadows)
     /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game/Shadow/BlobShadow/blobshadow.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;

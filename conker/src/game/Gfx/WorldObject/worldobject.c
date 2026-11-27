@@ -351,7 +351,7 @@ void gfx_updateObjectShadows(void) {
             }
         }
         do { // matching: without this wrapper uopt stops keeping &gCutsceneShowUnboundObjects in a saved register
-            if ((obj->state & 8) || obj->unk4C == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
+            if ((obj->state & 8) || obj->hasShadow == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
                 (gCutsceneShowUnboundObjects[0] == 0 && gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(i, 0) == 0) || !(obj->object_status & 1)) {
                 show = FALSE;
             } else {
