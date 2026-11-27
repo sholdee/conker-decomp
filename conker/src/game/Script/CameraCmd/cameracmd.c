@@ -75,9 +75,9 @@ s32 script_updatePoseCommand(s32 slot) {
         gCamShot.eye.x = pose->x;
         gCamShot.eye.y = pose->y;
         gCamShot.eye.z = pose->z;
-        gCamShot.at.aim.roll = pose->unk14;
-        gCamShot.at.aim.pitch = pose->unkC;
-        gCamShot.at.aim.yaw = pose->unk10;
+        gCamShot.at.aim.roll = pose->roll;
+        gCamShot.at.aim.pitch = pose->pitch;
+        gCamShot.at.aim.yaw = pose->yaw;
         gCamShot.fovOffset = 0.0f;
         camera_queueMessage(cam, 5, NULL);
         camera_queueMessage(cam, 7, &gCamShot);
@@ -202,9 +202,9 @@ s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd) {
         gCamShot.eye.x = pose->x;
         gCamShot.eye.y = pose->y;
         gCamShot.eye.z = pose->z;
-        gCamShot.at.aim.roll = pose->unk14;
-        gCamShot.at.aim.pitch = pose->unkC;
-        gCamShot.at.aim.yaw = pose->unk10;
+        gCamShot.at.aim.roll = pose->roll;
+        gCamShot.at.aim.pitch = pose->pitch;
+        gCamShot.at.aim.yaw = pose->yaw;
         gCamShot.fovOffset = 0.0f;
         D_800C365C[0] = 0;
         camera_queueMessage(cam, 5, NULL);

@@ -2852,9 +2852,9 @@ typedef struct CamPose {
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
     /* 0x06 */ u8  pad6[6];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x0C */ f32 pitch; // degrees
+    /* 0x10 */ f32 yaw;   // degrees
+    /* 0x14 */ f32 roll;  // degrees
 } CamPose; // size 0x18
 
 /* Mtx viewed as its s16 integer and fraction halves. */
