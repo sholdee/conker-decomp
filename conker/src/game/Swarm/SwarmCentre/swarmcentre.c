@@ -3,6 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Not referenced in this build. In the ECTS build (August 2000) swarm_updateSwarm sets this flag and returns when it
+ * is already set, and the per-frame hook that is swarm_doNothing here clears it. */
+static u8 D_800DD420;
+
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
 struct Swarm {

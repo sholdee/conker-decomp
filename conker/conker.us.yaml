@@ -1762,7 +1762,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DD300, name: game/Flare/VisProbe/visprobe}
       - {start: 0x255880, type: .bss, vram: 0x800DD400, name: game/Effects/LevelUpdate/levelupdate}
       - {start: 0x255880, type: .bss, vram: 0x800DD410, name: game/Prop/WaveDeformer/wavedeformer}
-      - {start: 0x255880, type: bss, vram: 0x800DD420, name: bss_800DD420}
+      - {start: 0x255880, type: .bss, vram: 0x800DD420, name: game/Swarm/SwarmCentre/swarmcentre}
       - {start: 0x255880, type: .bss, vram: 0x800DD430, name: game/Effects/Rain/rain}
       - {start: 0x255880, type: .bss, vram: 0x800DD450, name: game/Particle/SpinDebris/spindebris}
       - {start: 0x255880, type: .bss, vram: 0x800DD460, name: game/Anim/VertexMorph/vertexmorph}
