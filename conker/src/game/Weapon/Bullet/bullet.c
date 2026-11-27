@@ -252,17 +252,6 @@ void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impa
     Vec3f aimPos;
     Vec3f aimDir;
     s32 mode;
-    Vec3f *src;
-    Actor *who;
-    f32 angle;
-    u8 pad[8]; // matching: stack space
-    Vec3f scratch; // math_getActorAim's unused dir
-    BulletState state;
-    ParticleSpawn desc;
-    void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
-    BulletState *bulletState;
-    LightEffectHeader header;
-    Vec3i header2;
 
     passDist = 0.0f;
     if (gIsMultiplayer != 0) {
@@ -274,19 +263,21 @@ void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impa
             pos.z = shooter->zpos;
         }
     } else {
+        Vec3f *src;
+        Camera *camera;
+
         src = &shooter->mv->aimEye;
-        obj = shooter->CameraPtr;
-        if (obj != NULL) {
+        camera = shooter->CameraPtr;
+        if (camera != NULL) {
             if (shooter->attach_char != 0) {
 lbl1: // matching: an unused label splits IDO's basic block here (register choice)
                 pos.x = src->x;
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
             } else if (shooter->mv->SniperState != 0) {
-                /* matching: a declaration makes this an IDO scope block (register choice) */
-                extern u8 gIsMultiplayer;
+                f32 angle;
 
-                angle = math_getCameraYaw(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
+                angle = math_getCameraYaw(camera->CNumber, camera) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
@@ -307,8 +298,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     }
 
     if ((shooter->mv != NULL && shooter->mv->SniperState != 0) || aimer != NULL) {
-        /* matching: a declaration makes this an IDO scope block (register choice) */
-        extern u8 gIsMultiplayer;
+        Actor *who;
+        Vec3f *src;
 
         who = (aimer != NULL) ? aimer : shooter;
 
@@ -319,6 +310,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         aimDir.y = who->mv->aimDir.y;
         aimDir.z = who->mv->aimDir.z;
     } else {
+        Vec3f scratch; // math_getActorAim's unused dir
+
         math_getActorAim(shooter, &dir, &scratch, 0, 0.0f);
         useAim = FALSE;
         dir.x *= 0.001000000047f;
@@ -335,8 +328,9 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     if (weapon_traceBullet(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
                       useAim ? &aimDir : NULL, shooter, ignore, &passPos, &passDist, &pass,
                       mode) != 0) {
-        /* matching: a declaration makes this an IDO scope block (register choice) */
-        extern u8 gIsMultiplayer;
+        BulletState state;
+        ParticleSpawn desc;
+        void *obj;
 
         state.mode = mode;
         state.trail = NULL;
@@ -392,6 +386,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.fadeRate = 255;
         obj = particle_newModelParticle(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
         if (obj != NULL) {
+            BulletState *bulletState;
+            LightEffectHeader header;
+            Vec3i header2;
+
             bulletState = &((Bullet *)obj)->state;
             memcpy(bulletState, &state, sizeof(BulletState));
             header.flags = 2;
@@ -409,9 +407,6 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             if (gScreenLayout < 2 && gPlayerCount < 4) {
                 bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
-                /* matching: a declaration makes this an IDO scope block (register choice) */
-                extern u8 gIsMultiplayer;
-
                 bulletState->unk8C = NULL;
             }
         } else {
