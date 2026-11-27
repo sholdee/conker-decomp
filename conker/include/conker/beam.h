@@ -636,17 +636,18 @@ typedef struct {
 typedef struct BoltArcObj BoltArcObj;
 typedef struct SparkObj SparkObj;
 
-/* Lightning arcing between the four edges of a quad (beam_updateBoltArc, beam_boltArcMessage). */
+/* Lightning arcing between the four edges of a quad (beam_updateBoltArc, beam_boltArcMessage), set up by
+ * level_spawnBoltArcZone (game/Level/ZoneSpawn/zonespawn.c) on the zone's rotated rectangle. */
 typedef struct BoltArcState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ s16 timer;          /* frames left; negative when off */
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
-    /* 0x0C */ Vec3f edgeStart[4];
+    /* 0x0C */ Vec3f edgeStart[4]; /* the rectangle's corners */
     /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
-    /* 0x6C */ ZoneNode *zone;
-    /* 0x70 */ s32 unk70;
-} BoltArcState;
+    /* 0x6C */ ZoneNode *zone;     /* collision_findZoneLeaf at the zone's x/z */
+    /* 0x70 */ struct Actor *actor; /* NULL at the start; the player of the last message 0x38; read by func_1515FBC4 */
+} BoltArcState; // size 0x74
 
 struct BoltArcObj {
     /* 0x00 */ TimedEffect base;
@@ -803,12 +804,12 @@ void beam_updateBoltRain(BoltRainObj *obj);
 void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
 void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg);
-void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg);
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **arg1, u8 msg);
 void beam_spawnImpactEffects(ImpactObj *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);
 void beam_updateSparkZone(SparkObj *obj);
-ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone);
+BoltArcObj *beam_findZoneRectEffect(TriggerZone *zone);
 
 /* game/Beam/BoltChain/boltchain.c */
 extern Gfx gBoltRenderSetupDl[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */

@@ -217,11 +217,11 @@ void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg) {
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the arcs for 300 frames. */
-void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg) {
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
-        state->unk70 = *arg1;
+        state->actor = *arg1;
         state->timer = 300;
     }
 }
@@ -364,18 +364,18 @@ void beam_updateSparkZone(SparkObj *obj) {
     }
 }
 
-/* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
+/* Returns the BoltArcObj (callbackSet 0x2E) of `zone` in either object list, searching the two
  * object types listed in gTimedEffectTypes, or NULL. */
-ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
+BoltArcObj *beam_findZoneRectEffect(TriggerZone *zone) {
     u8 i;
     u8 list;
-    ZoneRectEffect *obj;
+    BoltArcObj *obj;
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ZoneRectEffect *)gObjectLists[list][gTimedEffectTypes[i]]; obj != NULL;
-                 obj = (ZoneRectEffect *)obj->base.header.next) {
-                if (obj->base.callbackSet == 0x2E && zone == obj->data.zone) {
+            for (obj = (BoltArcObj *)gObjectLists[list][gTimedEffectTypes[i]]; obj != NULL;
+                 obj = (BoltArcObj *)obj->base.header.next) {
+                if (obj->base.callbackSet == 0x2E && zone == obj->state.region) {
                     return obj;
                 }
             }

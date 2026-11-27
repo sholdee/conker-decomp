@@ -584,7 +584,7 @@ s32 particle_spawnYawSpinModel(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 or
 /* game/Particle/SparkEmitter/sparkemitter.c */
 /* Object data (at +0x28) of a trigger that spawns spark emitters. */
 typedef struct EmitterTrigger {
-    s16 *record;
+    TriggerZone *record; // the laser tube zone (level_spawnLaserTubeZone)
     s32 minDelay;
     s32 delayRange;
     s32 countdown;
@@ -595,7 +595,7 @@ typedef struct EmitterTrigger {
 
 /* Object data (at +0x28) of a spark emitter: created by particle_spawnSparkEmitter, updated by particle_updateSparkEmitter. */
 typedef struct RingSparkEmitter {
-    s16 *record;
+    TriggerZone *record; // its x/y/z, and the spark circle's radius xSize and height ySize (in matrix's frame)
     f32 angle;
     f32 rate;
     f32 interval;
@@ -642,7 +642,7 @@ typedef struct GameFFBA0Beam {
 } GameFFBA0Beam;
 
 void particle_updateSparkSpawner(SparkEffect *obj);
-void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 owner, s32 list);
+void particle_spawnSparkEmitter(TriggerZone *record, MtxF matrix, u8 owner, s32 list);
 void particle_updateSparkEmitter(SparkEffect *obj);
 Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index);
 s32 particle_swaySpark(RingSparkParticle *particle);
@@ -1150,19 +1150,10 @@ typedef struct {
     /* 0xA8 */ FlashParticleData data;
 } AreaFlashParticle;
 
-/* Points the emitter spawns particles around: a centre, a radius and a height range. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-} EmitterArea;
-
-/* Per-effect data of the particle_updateAreaEmitter emitter. */
+/* Per-effect data of the particle_updateAreaEmitter emitter (spawned by level_spawnAreaEmitterZone). */
 typedef struct {
     /* 0x00 */ f32 spawnAccum;
-    /* 0x04 */ EmitterArea *area;
+    /* 0x04 */ TriggerZone *area; // particles spawn around its centre, within xSize and ySize above y
     /* 0x08 */ u8 flags;
 } AreaEmitterData;
 

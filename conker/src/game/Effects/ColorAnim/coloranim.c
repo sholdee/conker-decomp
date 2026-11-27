@@ -1,8 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
-#include "conker/effect.h"
-#include "conker/game.h"
-#include "conker/math.h"
 
 /*
  * Animated RGB colours: each slot blends between a "from" and a "to" colour by a factor in [0, 1].
@@ -37,8 +33,15 @@ enum ColorAnimType {
     COLOR_ANIM_RANDOM   /* random fades between from, half and to */
 };
 
+/* This file's .bss, before the headers: after them, its order would change with the number of declarations in them. */
 static ColorAnim gColorAnims[COLOR_ANIM_MAX];
 static s32 gColorAnimCount; /* slots in use */
+
+#include <math.h>
+#include "conker/effect.h"
+#include "conker/game.h"
+#include "conker/math.h"
+
 static const u8 gColorFlickerWaits[8] = { 60, 6, 100, 6, 40, 55, 6, 90 }; /* type 2: frames to wait after each flash */
 
 

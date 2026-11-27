@@ -60,10 +60,10 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
                 extra.frame0Time = extra.frame1Time * 0.5f;
                 desc.width = math_randomFloat() * 500.0f + 600.0f;
                 desc.height = desc.width * 0.5f;
-                math_dirFromAngleXZ(math_randomFloat() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
+                math_dirFromAngleXZ(math_randomFloat() * 3.1415927f * 2.0f, data->area->xSize, &desc.pos.x, &desc.pos.z);
                 desc.pos.x += data->area->x;
                 desc.pos.z += data->area->z;
-                desc.pos.y = data->area->y + data->area->height * math_randomFloat();
+                desc.pos.y = data->area->y + data->area->ySize * math_randomFloat();
                 desc.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
                 desc.alpha = (math_random() & 0x7F) + 0x80;
                 particle = particle_newSpriteParticleWithFloor(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);

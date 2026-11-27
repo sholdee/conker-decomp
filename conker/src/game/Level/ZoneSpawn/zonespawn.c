@@ -603,25 +603,17 @@ s32 func_1501407C(TriggerZone *obj) {
 
 /* Declared s32 but returns no value; giving it a return value or void changes the code. */
 s32 level_spawnRandomPointZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        f32 unk8;
-        ZoneNode *zone;
-        u8 pad10[0x1C];
-        s8 unk2C;
-        u8 pad2D[7];
-    } data;
+    Game1FBB80Effect data;
     TimedEffect *effect;
 
     obj->flags |= 4;
-    data.unk0 = obj;
-    data.unk4 = math_getZoneArea(obj);
-    data.unk8 = 0.0f;
+    data.shape = obj;
+    data.rate = math_getZoneArea(obj);
+    data.accumulator = 0.0f;
 
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
-    data.unk2C = 0;
+    data.floor.flags = 0;
 
     effect = effect_newTimedEffect(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
@@ -650,17 +642,13 @@ s32 level_spawnFireZone(TriggerZone *obj) {
 }
 
 s32 level_spawnAreaEmitterZone(TriggerZone *obj) {
-    struct {
-        f32 unk0;
-        TriggerZone *unk4;
-        u8 unk8;
-    } data;
+    AreaEmitterData data;
     TimedEffect *effect;
 
     obj->flags |= 4;
-    data.unk8 = 1;
-    data.unk4 = obj;
-    data.unk0 = 0.0f;
+    data.flags = 1;
+    data.area = obj;
+    data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x26, -1, 0, 0x24, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -683,14 +671,7 @@ s32 level_registerSprayAreaZone(TriggerZone *obj) {
 }
 
 s32 level_spawnFlackZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-    } data;
+    BurstSpawner data;
     TimedEffect *effect;
     f32 a;
     f32 b;
@@ -715,12 +696,12 @@ s32 level_spawnFlackZone(TriggerZone *obj) {
 
     scale = math_getZoneVolume(obj);
 
-    data.unk0 = obj;
-    data.unk4 = (a * scale) * 1.271515948e-10f;
-    data.unk8 = (b * scale) * 1.271515948e-10f;
-    data.unkC = c;
-    data.unk10 = d;
-    data.unk14 = 0.0f;
+    data.source = obj;
+    data.rateBase = (a * scale) * 1.271515948e-10f;
+    data.rateRange = (b * scale) * 1.271515948e-10f;
+    data.scaleBase = c;
+    data.scaleRange = d;
+    data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x29, -1, 0, 0, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -903,32 +884,24 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
 }
 
 s32 level_spawnLaserTubeZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        s32 unk4;
-        s32 unk8;
-        s32 unkC;
-        MtxF mtx;
-        u8 unk50;
-        u8 unk51;
-    } data;
+    EmitterTrigger data;
     TimedEffect *effect;
     s32 flag;
 
     obj->flags |= 4;
-    data.unk51 = obj->data3;
+    data.params[1] = obj->data3;
     flag = (obj->data2 & 1) ? 1 : 0;
-    data.unk50 = flag;
-    data.unk0 = obj;
-    /* data1 holds a minimum and a range: unkC is random in [min, min + range] */
-    data.unk4 = obj->data1 & 0xFFFF;
-    data.unk8 = (obj->data1 >> 16) & 0xFFFF;
-    data.unkC = (math_random() % (data.unk8 + 1)) + data.unk4;
-    math_mtxRotateRPYF(data.mtx, obj->pitch, obj->yaw, 0.0f);
+    data.params[0] = flag;
+    data.record = obj;
+    /* data1 holds a minimum and a range: countdown is random in [min, min + range] */
+    data.minDelay = obj->data1 & 0xFFFF;
+    data.delayRange = (obj->data1 >> 16) & 0xFFFF;
+    data.countdown = (math_random() % (data.delayRange + 1)) + data.minDelay;
+    math_mtxRotateRPYF(data.matrix, obj->pitch, obj->yaw, 0.0f);
 
-    data.mtx[3][0] = obj->x;
-    data.mtx[3][1] = obj->y;
-    data.mtx[3][2] = obj->z;
+    data.matrix[3][0] = obj->x;
+    data.matrix[3][1] = obj->y;
+    data.matrix[3][2] = obj->z;
 
     effect = effect_newTimedEffect(300, -1, 0x31, -1, 0, 0x2A, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -976,41 +949,25 @@ s32 level_spawnZoneEffect(TriggerZone *obj) {
     return 1;
 }
 s32 level_spawnBoltRainZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        s16 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        u8 pad24[0x14];
-        s32 unk38;
-        s8 unk3C;
-        s8 unk3D;
-        s32 unk40;
-        ZoneNode *zone;
-    } data;
+    BoltRainState data;
     TimedEffect *effect;
 
     obj->flags |= 4;
     obj->inactive = 1;
 
-    data.unk0 = obj;
-    data.unk4 = 0.0f;
-    data.unk8 = -1;
-    data.unkC = obj->x;
-    data.unk10 = obj->y;
-    data.unk14 = obj->z;
-    data.unk18 = obj->xSize;
-    data.unk1C = obj->ySize;
-    data.unk20 = -10000.0f;
-    data.unk40 = 0;
-    data.unk3D = 0;
-    data.unk3C = 0;
-    data.unk38 = 0;
+    data.region = obj;
+    data.pending = 0.0f;
+    data.timer = -1;
+    data.pos.x = obj->x;
+    data.pos.y = obj->y;
+    data.pos.z = obj->z;
+    data.radius = obj->xSize;
+    data.height = obj->ySize;
+    data.ground.height = -10000.0f;
+    data.ground.surface = NULL;
+    data.ground.source = 0;
+    data.ground.flags = 0;
+    data.ground.material = 0;
 
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
@@ -1047,8 +1004,8 @@ s32 level_spawnBoltZone(TriggerZone *obj) {
 
 /** Spawns an effect on the object's rotated rectangle: its four corners and the edge vectors between them. */
 void level_spawnBoltArcZone(TriggerZone *obj) {
-    ZoneRectData data;
-    ZoneRectEffect *effect;
+    BoltArcState data;
+    BoltArcObj *effect;
     f32 z;
     f32 y;
     f32 x;
@@ -1056,9 +1013,9 @@ void level_spawnBoltArcZone(TriggerZone *obj) {
     MtxF mtx;
     u8 i;
 
-    data.zone = obj;
-    data.unk4 = -1;
-    data.unk8 = 0.0f;
+    data.region = obj;
+    data.timer = -1;
+    data.pending = 0.0f;
     obj->inactive = 1;
     x = obj->x;
     y = obj->y;
@@ -1085,49 +1042,44 @@ void level_spawnBoltArcZone(TriggerZone *obj) {
 
     for (i = 0; i < 4; i++) {
         math_transformPoint(mtx, corners[i][0], corners[i][1], corners[i][2],
-                      &data.points[i][0], &data.points[i][1], &data.points[i][2]);
+                      &data.edgeStart[i].x, &data.edgeStart[i].y, &data.edgeStart[i].z);
     }
 
-    data.edges[0][0] = data.points[1][0] - data.points[0][0];
-    data.edges[0][1] = data.points[1][1] - data.points[0][1];
-    data.edges[0][2] = data.points[1][2] - data.points[0][2];
-    data.edges[1][0] = data.points[2][0] - data.points[1][0];
-    data.edges[1][1] = data.points[2][1] - data.points[1][1];
-    data.edges[1][2] = data.points[2][2] - data.points[1][2];
-    data.edges[2][0] = data.points[3][0] - data.points[2][0];
-    data.edges[2][1] = data.points[3][1] - data.points[2][1];
-    data.edges[2][2] = data.points[3][2] - data.points[2][2];
-    data.edges[3][0] = data.points[0][0] - data.points[3][0];
-    data.edges[3][1] = data.points[0][1] - data.points[3][1];
-    data.edges[3][2] = data.points[0][2] - data.points[3][2];
+    data.edgeDelta[0].x = data.edgeStart[1].x - data.edgeStart[0].x;
+    data.edgeDelta[0].y = data.edgeStart[1].y - data.edgeStart[0].y;
+    data.edgeDelta[0].z = data.edgeStart[1].z - data.edgeStart[0].z;
+    data.edgeDelta[1].x = data.edgeStart[2].x - data.edgeStart[1].x;
+    data.edgeDelta[1].y = data.edgeStart[2].y - data.edgeStart[1].y;
+    data.edgeDelta[1].z = data.edgeStart[2].z - data.edgeStart[1].z;
+    data.edgeDelta[2].x = data.edgeStart[3].x - data.edgeStart[2].x;
+    data.edgeDelta[2].y = data.edgeStart[3].y - data.edgeStart[2].y;
+    data.edgeDelta[2].z = data.edgeStart[3].z - data.edgeStart[2].z;
+    data.edgeDelta[3].x = data.edgeStart[0].x - data.edgeStart[3].x;
+    data.edgeDelta[3].y = data.edgeStart[0].y - data.edgeStart[3].y;
+    data.edgeDelta[3].z = data.edgeStart[0].z - data.edgeStart[3].z;
 
     collision_selectMap(0);
-    data.node = collision_findZoneLeaf(obj->x, obj->z);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.actor = NULL;
 
     effect = effect_newTimedEffect(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &data, sizeof(data));
+        memcpy(&effect->state, &data, sizeof(data));
     }
 }
 
 s32 level_spawnSparkRegionZone(TriggerZone *obj) {
-    struct {
-        TriggerZone *unk0;
-        f32 unk4;
-        ZoneNode *zone;
-        s8 unkC;
-    } data;
+    SparkState data;
     TimedEffect *effect;
 
     obj->flags |= 4;
     obj->inactive = 1;
 
-    data.unk0 = obj;
-    data.unk4 = math_getZoneArea(obj);
+    data.region = obj;
+    data.rate = math_getZoneArea(obj);
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
-    data.unkC = 0;
+    data.flags = 0;
 
     effect = effect_newTimedEffect(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);
     if (effect != NULL) {

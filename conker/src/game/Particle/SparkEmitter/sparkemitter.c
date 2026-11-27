@@ -20,7 +20,7 @@ void particle_updateSparkSpawner(SparkEffect *obj) {
 }
 
 /* Spawns a spark emitter object with a random spin, rate and color. */
-void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 owner, s32 list) {
+void particle_spawnSparkEmitter(TriggerZone *record, MtxF matrix, u8 owner, s32 list) {
     RingSparkEmitter emitter;
     TimedEffect *object;
 
@@ -55,7 +55,7 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 owner, s32 list) {
  */
 void particle_updateSparkEmitter(SparkEffect *obj) {
     RingSparkEmitter *emitter;
-    s16 *record;
+    TriggerZone *record;
 
     emitter = &obj->data.emitter;
     emitter->spawnAccum += emitter->rate * gFrameDelta;
@@ -80,9 +80,9 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
         spawn.rgba[2] = emitter->color[2];
         spawn.rgba[3] = 0xFF;
         spawn.height = 1.0f;
-        spawn.pos.x = record[0];
-        spawn.pos.y = record[1];
-        spawn.pos.z = record[2];
+        spawn.pos.x = record->x;
+        spawn.pos.y = record->y;
+        spawn.pos.z = record->z;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
@@ -97,8 +97,8 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
             if (motion.life > 0.0f) {
                 Vec3f point;
 
-                math_dirFromAngleXZ(emitter->angle, record[3], &point.x, &point.z);
-                point.y = record[4];
+                math_dirFromAngleXZ(emitter->angle, record->xSize, &point.x, &point.z);
+                point.y = record->ySize;
                 math_transformPoint(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
                 spawn.width = math_randomFloat() * 25.0f + 50.0f;
                 motion.posX = motion.baseX = math_randomFloat() * 1024.0f + -2560.0f + 2048.0f;

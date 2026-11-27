@@ -312,6 +312,9 @@ STATIC_ASSERT(sizeof(BoltObj) == 0x88, BoltObj_size);
 STATIC_ASSERT(sizeof(BoltChain) == 0x44, BoltChain_size);
 STATIC_ASSERT(sizeof(ParticleSettings) == 0x2C, ParticleSettings_size);
 STATIC_ASSERT(sizeof(WavyBeamData) == 0x5A8, WavyBeamData_size);
+STATIC_ASSERT(sizeof(BoltRainState) == 0x48, BoltRainState_size);
+STATIC_ASSERT(sizeof(BoltArcState) == 0x74, BoltArcState_size);
+STATIC_ASSERT(sizeof(SparkState) == 0x10, SparkState_size);
 
 /* conker/blood.h */
 STATIC_ASSERT(sizeof(Struct15134CEC) == 0x78, Struct15134CEC_size);
@@ -383,6 +386,9 @@ STATIC_ASSERT(sizeof(SquashData) == 0xC, SquashData_size);
 STATIC_ASSERT(sizeof(ColorEmitterData) == 0x14, ColorEmitterData_size);
 STATIC_ASSERT(sizeof(AreaEffectDef) == 0x38, AreaEffectDef_size);
 STATIC_ASSERT(sizeof(RegionEmitterState) == 0x70, RegionEmitterState_size);
+STATIC_ASSERT(sizeof(EmitterTrigger) == 0x54, EmitterTrigger_size);
+STATIC_ASSERT(sizeof(BurstSpawner) == 0x18, BurstSpawner_size);
+STATIC_ASSERT(sizeof(AreaEmitterData) == 0xC, AreaEmitterData_size);
 
 /* conker/rope.h */
 STATIC_ASSERT(sizeof(HoltenRopeDesc) == 0x38, HoltenRopeDesc_size);
@@ -413,6 +419,7 @@ STATIC_ASSERT(sizeof(SprayEmitter) == 0x78, SprayEmitter_size);
 STATIC_ASSERT(sizeof(TrailEmitterParams) == 0x1C, TrailEmitterParams_size);
 STATIC_ASSERT(sizeof(TrailEmitter) == 0x44, TrailEmitter_size);
 STATIC_ASSERT(sizeof(SurfaceTrailPoint) == 0x24, SurfaceTrailPoint_size);
+STATIC_ASSERT(sizeof(Game1FBB80Effect) == 0x34, Game1FBB80Effect_size);
 
 /* conker/weapon.h */
 STATIC_ASSERT(sizeof(Game1EF500TrailExt) == 0xB0, Game1EF500TrailExt_size);

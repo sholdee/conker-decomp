@@ -3011,7 +3011,7 @@ typedef struct ShapeEmitter {
 
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
  * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
- * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
+ * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its BoltArcObj (callbackSet 0x2E, conker/beam.h). */
 typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 id;               /* the zone's data2 */
@@ -3024,21 +3024,6 @@ typedef struct ZoneEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
-
-typedef struct ZoneRectData {       /* filled by level_spawnBoltArcZone */
-    /* 0x00 */ TriggerZone *zone;
-    /* 0x04 */ s16 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 points[4][3];    /* the zone's rotated rectangle */
-    /* 0x3C */ f32 edges[4][3];     /* points[i + 1] - points[i] */
-    /* 0x6C */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
-    /* 0x70 */ struct Actor *actor; /* NULL at the start; read by func_1515FBC4 */
-} ZoneRectData;
-
-typedef struct ZoneRectEffect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ZoneRectData data;
-} ZoneRectEffect;
 
 /* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
