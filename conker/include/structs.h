@@ -3185,7 +3185,7 @@ typedef struct PathNode {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
     /* 0x6 */ u8 layer; /* height band, see path_getLayerAt */
-    /* 0x7 */ u8 unk7;  /* id looked up by mp_findNodeById */
+    /* 0x7 */ u8 id;    /* the node's level/script id, looked up by mp_findNodeById */
     /* 0x8 */ u8 unk8;
     /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
     /* 0xE */ u8 type;

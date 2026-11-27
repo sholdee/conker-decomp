@@ -1200,12 +1200,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (obj->pathNode == 0xFF) {
                 return 0xFF;
             }
-            return gPathNodes[obj->pathNode].unk7;
+            return gPathNodes[obj->pathNode].id;
         }
         if (obj->pathGoal == 0xFF) {
             return 0xFF;
         }
-        return gPathNodes[obj->pathGoal].unk7;
+        return gPathNodes[obj->pathGoal].id;
     case 0xC8: {
         f32 x;
         f32 y;
@@ -1243,13 +1243,13 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         u8 empty;
         empty = 0xFF;
         if (obj->pathNode != 0xFF) {
-            return gPathNodes[obj->pathNode].unk7;
+            return gPathNodes[obj->pathNode].id;
         }
         gPathNearerThanNode = obj->lastNearNode;
         ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &empty, &empty);
         obj->lastNearNode = ret;
         if (ret != 0xFF) {
-            return gPathNodes[ret].unk7;
+            return gPathNodes[ret].id;
         }
         return 0xFF;
     }
@@ -1319,7 +1319,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
                 path_search(foundNode, count, nAvoid, nodes, (u8 *)&nAvoid);
             }
             if (gPathGoalReached != 0xFF) {
-                ret = gPathNodes[gPathGoalReached].unk7;
+                ret = gPathNodes[gPathGoalReached].id;
             }
         }
         return ret;

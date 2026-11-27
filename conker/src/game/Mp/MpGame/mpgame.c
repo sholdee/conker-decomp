@@ -654,7 +654,7 @@ void mp_assignZoneNodes(void) {
                         if (zone[j] != -2) {
                             gMpGame->unk5C[j] = 1;
                         }
-                        zone[j] = node->unk7;
+                        zone[j] = node->id;
                     }
                 }
             }
