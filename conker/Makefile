@@ -110,10 +110,8 @@ LDFLAGS = --defsym game_us_rzip_SIZE=$(TEXT_SECTION_LENGTH)+$(DATA_SECTION_LENGT
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/%.o: OPT_FLAGS := -g
 
-# TODO: blindly move all of this into libultra/audio
-$(BUILD_DIR)/$(SRC_DIR)/init_17F10.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_17F80.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_19B50.c.o: OPT_FLAGS := -g
+# Rare's audio code outside libultra/audio is -g like the library
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqCtrl/seqctrl.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqVoice/seqvoice.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/EvtQueue/n_evtqueue.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynDelete/n_syndelete.c.o: OPT_FLAGS := -g
@@ -124,7 +122,6 @@ $(BUILD_DIR)/$(SRC_DIR)/init/Audio/Env/n_env.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/AdpcmLoad/adpcmload.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/VoiceLowPass/voicelowpass.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/Resample/n_resample.c.o: OPT_FLAGS := -g
-# Rare's audio code outside libultra/audio is -g like the library
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/OutputMode/outputmode.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Player/mp3player.c.o: OPT_FLAGS := -g
 
