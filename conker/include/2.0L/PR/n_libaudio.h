@@ -237,7 +237,7 @@ typedef struct {
 void            n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount);
 ALMicroTime     n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt);
 void            n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s32 foo);
-/* Conker: defined in init/Audio/EvtQueue/n_evtqueue.c. Conker's SDK revision returns the time until the first
+/* Conker: defined in libultra/audio/n_event.c. Conker's SDK revision returns the time until the first
  * flushed event, which the sequence player keeps as its paused delta; the 2.0L header declares it void. */
 s32             n_alEvtqFlushType(ALEventQueue *evtq, s16 type);
 
@@ -480,7 +480,7 @@ void    func_1001E350(N_ALVoice *v, u8 value);                          /* n_syn
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by n_sndplayer.c; it agrees with os_libc.h. */
 void    osSyncPrintf(const char *fmt, ...);
 
-/* Conker: Rare's instrument loading in init/Audio/SeqVoice/seqvoice.c (subsystem audio), used by n_sndplayer.c. */
+/* Conker: Rare's instrument loading in libultra/audio/n_seqplayer.c (subsystem audio), used by n_sndplayer.c. */
 void   *audio_loadInstrument(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
 void    audio_releaseInstrument(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx);
 

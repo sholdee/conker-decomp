@@ -112,8 +112,8 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/%.o: OPT_FLAGS := -g
 
 # Rare's audio code outside libultra/audio is -g like the library
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqCtrl/seqctrl.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqVoice/seqvoice.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init/Audio/EvtQueue/n_evtqueue.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_seqplayer.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/libultra/audio/n_event.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynDelete/n_syndelete.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynAllocFx/n_synallocfx.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/Reverb/n_reverb.c.o: OPT_FLAGS := -g

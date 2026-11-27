@@ -32,7 +32,7 @@
 
 
 /* Conker: __n_unmapVoice, __n_voiceNeedsNoteKill, __n_lookupVoice and __n_lookupSoundQuick are Rare's copies in
- * init/Audio/SeqVoice/seqvoice.c. Conker's __n_voiceNeedsNoteKill returns s32 (the 2.0L header says char). */
+ * libultra/audio/n_seqplayer.c. Conker's __n_voiceNeedsNoteKill returns s32 (the 2.0L header says char). */
 void            __n_unmapVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice);
 s32             __n_voiceNeedsNoteKill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
 void		__n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice,
@@ -53,7 +53,7 @@ void              __n_setInstChanState(N_ALSeqPlayer *seqp, ALInstrument *inst, 
 void              __n_seqpStopOsc(N_ALSeqPlayer *seqp, N_ALVoiceState *vs);
 void		  __n_postNextSeqEvent(N_ALSeqPlayer *seqp);
 
-/* Conker: Rare's sequence player helpers in init/Audio/SeqVoice/seqvoice.c (subsystem audio), used by n_csplayer.c. */
+/* Conker: Rare's sequence player helpers in libultra/audio/n_seqplayer.c (subsystem audio), used by n_csplayer.c. */
 u8                audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
 s32               audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
 

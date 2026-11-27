@@ -678,7 +678,7 @@ src/init/Audio/AudioMgr/audiomgr.c	audio	audio manager: synthesis driver setup, 
 src/init/Audio/AuxBus/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
 src/init/Audio/DynamicSound/dynamicsound.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
 src/init/Audio/Env/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
-src/init/Audio/EvtQueue/n_evtqueue.c	audio	libaudio node linking helpers (alLink-style)
+src/libultra/audio/n_event.c	audio	libaudio node linking helpers (alLink-style)
 src/init/Audio/MainBus/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
 src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (override/fallback/one-shot)
 src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers
@@ -686,7 +686,7 @@ src/init/Audio/Resample/n_resample.c	audio	Rare's rework of n_alResamplePull
 src/init/Audio/Reverb/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
 src/init/Audio/SeqCtrl/seqctrl.c	audio	MIDI controller handlers of the compact sequence player
 src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
-src/init/Audio/SeqVoice/seqvoice.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
+src/libultra/audio/n_seqplayer.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
 src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path
 src/init/Audio/SynAllocFx/n_synallocfx.c	audio	synth FX allocation wrapper (n_alFxNew)
 src/init/Audio/SynDelete/n_syndelete.c	audio	n_alSynDelete
