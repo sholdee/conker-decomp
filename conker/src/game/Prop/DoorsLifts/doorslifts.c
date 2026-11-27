@@ -68,15 +68,15 @@ void prop_lowerAndRaise(WorldObject *prop) {
     step = 3;
     autoReturn = FALSE;
     onArrive = NULL;
-    if (kind == 0x800B && level == 12) {
+    if (kind == 0x800B && level == LEVEL_W1_BARN_OUTSIDE) {
         travel = 34;
-    } else if (level == 49) {
+    } else if (level == LEVEL_W1_ROCK_SOLID) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (level == 10) {
+    } else if (level == LEVEL_W2_BOILERROOM) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (level == 52) {
+    } else if (level == LEVEL_WMP_TUNNELS) {
         travel = 10;
         autoReturn = TRUE;
         step = 6;
@@ -231,7 +231,7 @@ void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 c;
     f32 rotatedX;
 
-    if (prop->modelId == 0x8006 && level == 53) {
+    if (prop->modelId == 0x8006 && level == LEVEL_W1_POO_BOSS) {
         prop = gfx_findObjectById(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
@@ -298,39 +298,39 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
     flag4 = prop->task_flag & TASK_FLAG_LOCKED;
     stayOpen = prop->task_flag & 8;
     switch (level) {
-    case 1:
-    case 41:
+    case LEVEL_W1_BARN_INSIDE:
+    case LEVEL_W1_TRAINING:
         anchorX = -13.0f;
         anchorY = 76.0f;
         anchorZ = 354.0f;
         rangeSq = 10000.0f;
         break;
-    case 11:
+    case LEVEL_W1_COG_LAND:
         anchorX = 70.0f;
         anchorY = 120.0f;
         anchorZ = 329.0f;
         sound = 0x4BA;
         stayOpen = 8;
         break;
-    case 23:
+    case LEVEL_W1_DOG_FISH_NURSERY_PART1:
         anchorX = 0.0f;
         anchorY = 125.0f;
         anchorZ = 322.0f;
         break;
-    case 40:
+    case LEVEL_W2_TANKTUNNEL:
         maxAngle = 55.0f;
         anchorX = 0.0f;
         anchorY = 99.0f;
         anchorZ = 168.0f;
         stayOpen = 8;
         break;
-    case 53:
+    case LEVEL_W1_POO_BOSS:
         maxAngle = 20.0f;
         anchorX = 0.0f;
         anchorY = -328.0f;
         anchorZ = 549.0f;
         break;
-    case 47:
+    case LEVEL_W2_LAB:
         maxAngle = 90.0f;
         rangeSq = 5625.0f;
         anchorX = 0.0f;
@@ -338,7 +338,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
         anchorZ = 104.0f;
         stayOpen = 8;
         break;
-    case 60:
+    case LEVEL_W3_HAUNTED_HOUSE:
         maxAngle = 30; // matching: an int literal; 30.0f loads the constant differently
         rangeSq = 10000.0f;
         anchorX = 22.0f;
@@ -346,7 +346,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
         anchorZ = 419.0f;
         stayOpen = 8;
         break;
-    case 65:
+    case LEVEL_W3_HORROR_INTRO:
         maxAngle = 45.0f;
         if (flag4 == 4) {
             rangeSq = -1.0f;
@@ -356,7 +356,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
         anchorZ = 336.0f;
         stayOpen = 8;
         break;
-    case 64:
+    case LEVEL_W5_END_ARENA:
         maxAngle = 45.0f;
         anchorX = 0.0f;
         anchorY = 47.0f;
@@ -670,7 +670,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
             prop->u = angle;
         }
         index = (prop->moveData.word >> 24) & 0xFF;
-        if (level == 2) {
+        if (level == LEVEL_W1_BRONTO_CAVERN) {
             func_1000E75C(255.0f - fabsf(((angle - openAngle) * 255.0f) / openAngle));
             return;
         }
@@ -678,7 +678,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
             scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / openAngle);
             effect_setColorAnimBlend(index - 1, scale);
             env_fadeLevelVtxColours(scale * 255.0f, index - 1);
-            if (level == 1 && index - 1 == 0) {
+            if (level == LEVEL_W1_BARN_INSIDE && index - 1 == 0) {
                 env_fadePropVtxColours(scale * 255.0f, 0, 0xF8);
             }
         }

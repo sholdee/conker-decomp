@@ -344,7 +344,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale gHudScaleX */
 
     start = gfx;
-    if (level == 0x1D) {
+    if (level == LEVEL_FRONTEND) {
         return gfx;
     }
     gSPPerspNormalize(gfx++, gHudPerspNorm);
@@ -1057,7 +1057,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         cellShift = -3;
                         break;
                     default:
-                        if (level == 0x1A) {
+                        if (level == LEVEL_WMP_HEIST) {
                             icon = 4;
                             cellShift = 4;
                         } else {
@@ -1238,7 +1238,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 rowY = (s32)gViews[i].top + 5;
                 rowY *= 4;
                 // matching: constant-first operands; the swapped form changes the code
-                if (0x1A == level || 0x3F == level) {
+                if (LEVEL_WMP_HEIST == level || LEVEL_WMP_RAPTOR == level) {
                     cellW = 11;
                     cellH = 14;
                     texS = 0x200;

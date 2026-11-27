@@ -835,7 +835,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
         return gfx;
     }
     if (D_800B0DF0->unk8 == 4 && D_800900B8 == 0) {
-        if (level == 0x13) {
+        if (level == LEVEL_W2_HARBOUR) {
             s32 id;
             id = gSkyTextureSets[D_800B0DF0->unk9][2];
             for (i = 0; i < 0x48; i++, id++) {
@@ -1163,7 +1163,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     s32 alpha;
     s32 temp;
 
-    if (level == 0x21) {
+    if (level == LEVEL_WFRONTEND_TABLE) {
         return gfx;
     }
 

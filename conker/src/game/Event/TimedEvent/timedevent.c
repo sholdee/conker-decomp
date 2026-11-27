@@ -428,7 +428,7 @@ void event_pickPissedWalk(s32 count) {
     index = pick;
     ext = gCurrentActor->mv;
     if (ext->pissed_hangover != 0) {
-        if (level == 41) {
+        if (level == LEVEL_W1_TRAINING) {
             if ((u8)pick == 7) {
                 index = 0;
             }
@@ -2273,7 +2273,7 @@ void event_fireBullet(s32 cmd) {
     info.objs[2] = NULL;
     info.objs[0] = gCurrentActor;
 
-    if (level == 0x2B) {
+    if (level == LEVEL_WMP_BEACH) {
         mode = 3;
     } else {
         mode = 0;
@@ -3114,7 +3114,7 @@ void event_respawnObject(void) {
             gCurrentActor->unk222 = obj - movement_obj;
         }
     }
-    if (level == 0x3F && obj->character_type == 0x16) {
+    if (level == LEVEL_WMP_RAPTOR && obj->character_type == 0x16) {
         obj->unk94 |= 2;
     }
 }

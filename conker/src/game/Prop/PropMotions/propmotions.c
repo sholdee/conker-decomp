@@ -121,7 +121,7 @@ void prop_carryCharacterInArc(WorldObject *prop) {
     }
 }
 
-/* On level 0x35, places a kind-0x8005 prop at a fixed point in the frame of the prop it is linked to. */
+/* On LEVEL_W1_POO_BOSS, places a kind-0x8005 prop at a fixed point in the frame of the prop it is linked to. */
 void func_1511F31C(WorldObject *prop) {
     s32 pad[2]; // matching: unused stack slots of the original frame
     MtxF mtx;
@@ -132,7 +132,7 @@ void func_1511F31C(WorldObject *prop) {
     u16 id;
 
     id = prop->moveData.uhalf.lo;
-    if (prop->modelId == 0x8005 && level == 0x35) {
+    if (prop->modelId == 0x8005 && level == LEVEL_W1_POO_BOSS) {
         parent = gfx_findObjectById(id);
         if (parent != NULL) {
             gfx_getObjectModelMtx(mtx, parent);

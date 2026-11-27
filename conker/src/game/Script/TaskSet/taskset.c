@@ -263,7 +263,7 @@ void script_runTasks(s32 mode) {
 
     node = gTaskWorkingSet.head;
     script_updatePoseCommands();
-    if (!gIsMultiplayer && level != 50 && !script_query(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
+    if (!gIsMultiplayer && level != LEVEL_W1_VOLCANO_RACE && !script_query(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
     func_1509C228();
@@ -421,32 +421,32 @@ void func_1509C228(void) {
 /* Returns 0 when level is one of the listed values or gAutoSaveDisabled is set, else 1. */
 s32 script_canAutoSave(void) {
     s32 value = level;
-    if ((value == 3) ||
-        (value == 5) ||
-        (value == 9) ||
-        (value == 13) ||
-        (value == 15) ||
-        (value == 17) ||
-        (value == 21) ||
-        (value == 22) ||
-        (value == 24) ||
-        (value == 26) ||
-        (value == 29) ||
-        (value == 31) ||
-        (value == 32) ||
-        (value == 33) ||
-        (value == 34) ||
-        (value == 36) ||
-        (value == 37) ||
-        (value == 42) ||
-        (value == 43) ||
-        (value == 45) ||
-        (value == 48) ||
-        (value == 51) ||
-        (value == 52) ||
-        (value == 56) ||
-        (value == 62) ||
-        (value == 63) ||
+    if ((value == LEVEL__W2_MOLEHOLE) ||
+        (value == LEVEL_INTRO_CUTSCENE) ||
+        (value == LEVEL__HITS_TEST) ||
+        (value == LEVEL__W2_WARZONE) ||
+        (value == LEVEL__W2_MISSILE_SILO) ||
+        (value == LEVEL__W1_DOG_FISH_NURSERY) ||
+        (value == LEVEL__W3_ED_TEST) ||
+        (value == LEVEL__MARK_TEST) ||
+        (value == LEVEL_W5_THRONE_ROOM) ||
+        (value == LEVEL_WMP_HEIST) ||
+        (value == LEVEL_FRONTEND) ||
+        (value == LEVEL__PRESENT_CUTSCENE) ||
+        (value == LEVEL_FRONTEND_CUTSCENE) ||
+        (value == LEVEL_WFRONTEND_TABLE) ||
+        (value == LEVEL_WFRONTEND_HELL) ||
+        (value == LEVEL_WMP_TANK) ||
+        (value == LEVEL_GENERIC_CUTSCENES) ||
+        (value == LEVEL_WMP_ARENA) ||
+        (value == LEVEL_WMP_BEACH) ||
+        (value == LEVEL_WMP_MAIN_WAR) ||
+        (value == LEVEL_WMP_BEACH_WAR) ||
+        (value == LEVEL_WMP_VOLCANO_RACE) ||
+        (value == LEVEL_WMP_TUNNELS) ||
+        (value == LEVEL_W5_BLADE_BOARDROOM) ||
+        (value == LEVEL__WMP_HAUNTED_HOUSE) ||
+        (value == LEVEL_WMP_RAPTOR) ||
         (gAutoSaveDisabled != 0)
       ) {
         return 0;

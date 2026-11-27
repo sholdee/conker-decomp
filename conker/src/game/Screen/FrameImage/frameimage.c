@@ -110,7 +110,7 @@ Gfx *screen_drawImageAlpha(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
 }
 
 void screen_setFrameEcho(s32 arg0, s32 arg1) {
-    if (level == 6 && gExpansionPak == 0) {
+    if (level == LEVEL_THE_WINDMILL && gExpansionPak == 0) {
         return;
     }
     if (arg1 == 0) {
@@ -134,7 +134,7 @@ Gfx *screen_drawFrameEcho(Gfx *gfx) {
     s32 alpha;
     u16 *img;
 
-    if ((gScreenCopyAlpha == 0 && level != 0x32 && level != 0x33) || gPaused != 0) {
+    if ((gScreenCopyAlpha == 0 && level != LEVEL_W1_VOLCANO_RACE && level != LEVEL_WMP_VOLCANO_RACE) || gPaused != 0) {
         return gfx;
     }
     alpha = gScreenCopyAlpha;

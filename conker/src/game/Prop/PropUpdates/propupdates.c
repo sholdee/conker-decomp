@@ -505,7 +505,7 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
     flag8 = obj->task_flag & 8;
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
-    if (level == 10) {
+    if (level == LEVEL_W2_BOILERROOM) {
         radiusSq = (obj->zScale * 100.0f) * (obj->zScale * 100.0f);
         if (WORK(obj)->w1511BEBC.restAndTimer == 0) {
             if (obj->y == 0) {
@@ -690,7 +690,7 @@ void func_1511C638(WorldObject *obj) {
 
     next = &obj[1];
     mode = obj->task_flag & TASK_FLAG_STATE;
-    if (level == 4) {
+    if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
         third = &obj[2];
     } else {
         third = NULL;
@@ -833,9 +833,9 @@ void prop_animateWaveMesh(WorldObject *obj) {
     s32 uvArg5;
 
     uvRate = 0.0f;
-    if (level == 4) {
+    if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
         mode = 0;
-    } else if (level == 19) {
+    } else if (level == LEVEL_W2_HARBOUR) {
         mode = 1;
         if (obj->unique_id == 0xFE) {
             uvRate = 0.4530000091f;
@@ -889,7 +889,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
         }
         wave->pulseAlpha = 0;
         wave->alphaPhase = 0;
-        if (level == 4) {
+        if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
             if (obj->unique_id != 0xF2) {
                 if (obj->unique_id == 0xF1) {
                     wave->alphaPhaseOffset = 0;
@@ -1343,7 +1343,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
         break;
     case 0x54:
         anim = 0x17;
-        if (level == 45) {
+        if (level == LEVEL_WMP_MAIN_WAR) {
             data = script_getTaskBss(0xBA);
             if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
                 skip = TRUE;

@@ -398,9 +398,9 @@ s32 music_updateSeq1(s32 state, u8 channel, s32 arg2, s32 arg3) {
     if (gMusicEventFlags & 1) {
         if (state == 0) {
             audio_setChannelsEnabled(channel, 0x8000, 1);
-            if (level == 1 || level == 12) {
+            if (level == LEVEL_W1_BARN_INSIDE || level == LEVEL_W1_BARN_OUTSIDE) {
                 audio_fadeChannelsVolume(channel, 0x7000, 0, 0);
-            } else if (level != 7) {
+            } else if (level != LEVEL_W1_DOG_FISH) {
                 audio_fadeChannelsVolume(channel, 0xCA, 0, 0);
             }
             func_100085B8(channel, 15, 1);
@@ -408,16 +408,16 @@ s32 music_updateSeq1(s32 state, u8 channel, s32 arg2, s32 arg3) {
         state = 1;
     } else if (state != 0) {
         audio_setChannelsEnabled(channel, 0x8000, 0);
-        if (level == 1 || level == 12) {
+        if (level == LEVEL_W1_BARN_INSIDE || level == LEVEL_W1_BARN_OUTSIDE) {
             audio_fadeChannelsVolume(channel, 0x7000, 255, 0);
-        } else if (level != 7) {
+        } else if (level != LEVEL_W1_DOG_FISH) {
             audio_fadeChannelsVolume(channel, 0xCA, 255, 0);
         }
         func_100085B8(channel, 15, 0);
         state = 0;
     }
 
-    if (level == 39) {
+    if (level == LEVEL_W1_BEE_CAVERN) {
         audio_requestMixSelector(4);
         if (bit1 == 0) {
             bit1 = 2;
@@ -449,7 +449,7 @@ s32 music_updateSeq16(s32 state, s32 channel, s32 arg2, s32 arg3) {
 s32 music_updateSeq19(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 volume;
 
-    if (level == 4) {
+    if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
         if ((state & 1) && D_80041F0C == 0) {
             music_fadeChannelVolume(19, 0, 0x1000, 0);
             state &= ~1;
@@ -550,7 +550,7 @@ s32 music_updateSeq33(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         audio_fadeChannelsVolume(*&channel, 3, 16, 0);
         func_1000886C(channel, 4, 0);
         state = 1;
-    } else if (level == 19) {
+    } else if (level == LEVEL_W2_HARBOUR) {
         x -= 24.0f;
         z -= 3015.0f;
         distance = x * x + z * z;
@@ -608,7 +608,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         started = 1;
     }
 
-    if (level != 29) {
+    if (level != LEVEL_FRONTEND) {
         audio_endSeqTrack(channel);
         return state;
     }
@@ -714,7 +714,7 @@ s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         }
         return state;
     }
-    if (level != 29) {
+    if (level != LEVEL_FRONTEND) {
         audio_endSeqTrack(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
@@ -811,7 +811,7 @@ s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 music_updateSeq62(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     f32 volume;
 
-    if (level == 49) {
+    if (level == LEVEL_W1_ROCK_SOLID) {
         if (state != 2) {
             if (music_findTune(9) == NULL) {
                 func_1000E704(62, 0, 0xFFFF);
@@ -852,7 +852,7 @@ s32 music_updateSeq76(s32 state, s32 channel, s32 arg2, s32 arg3) {
     } else {
         maxVolume = 12000;
     }
-    if (level == 55 && flag == 0) {
+    if (level == LEVEL_W1_U_BEND && flag == 0) {
         sound_getPanVolumeAt(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
         volume &= 0xFF00;
         volume = maxVolume - volume;
@@ -868,7 +868,7 @@ s32 music_updateSeq76(s32 state, s32 channel, s32 arg2, s32 arg3) {
 s32 music_updateSeq84(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
-    if (level == 55) {
+    if (level == LEVEL_W1_U_BEND) {
         if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
@@ -892,7 +892,7 @@ s32 music_updateSeq88(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     bit1 = state & 2;
     state &= 1;
-    if (level == 66) {
+    if (level == LEVEL_W1_BRONTO_THROAT) {
         audio_requestMixSelector(4);
         if (state == 0) {
             state = 1;
