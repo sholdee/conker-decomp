@@ -63,8 +63,8 @@ void game_mainLoop(void) {
 
     gStepTicks = 1;
     gEliminatedPlayers = 0;
-    D_800D18A2 = 0;
-    *(s32 *)D_800D18A4 = 0; // clears all four players with one word store
+    gTakeoverPlayers = 0;
+    *(s32 *)gEliminatedSquareSizes = 0; // clears all four players with one word store
     gRacersUpdated = 0;
 
     while (game_processMessage() != 0) {
@@ -526,7 +526,7 @@ Gfx *game_drawViewOverlays(Gfx *gfx, s32 player) {
     gfx = screen_drawViewFlash(gfx, player);
     gfx = screen_drawViewFade(gfx, player);
     gfx = screen_drawIris(gfx, player);
-    if ((gEliminatedPlayers & (1 << player)) || (D_800D18A2 & (1 << player))) {
+    if ((gEliminatedPlayers & (1 << player)) || (gTakeoverPlayers & (1 << player))) {
         gfx = func_1507DB6C(gfx, player);
     }
     gfx = effect_drawObjectGroup(gfx, 4, player, 0);

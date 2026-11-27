@@ -300,9 +300,9 @@ void actor_rotateModelTexCoords(s32 type, s32 firstVtx, s32 count, s32 firstCoor
 void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void actor_igniteTouching(Actor *actor);
 void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 scale);
-extern const u16 D_80099420[4];
+extern const u16 gLongAnimFrameCounts[4];
 extern const u16 D_80099428[2];
-extern const s32 D_8009942C[3];
+extern const s32 gEyeCodeFrames[3];
 
 /* game/Actor/ActorActions/actoractions.c */
 s16 actor_getAngleToLinked(Actor *arg0);
@@ -369,8 +369,8 @@ void actor_startSpawnCutscene(s32 resource, s32 arg1);
 s32 actor_resumeAtCheckpoint(s32 *arg0);
 void actor_getTrackPoint(Actor *actor, f32 *x, f32 *y, f32 *z);
 extern u16 gEliminatedPlayers;
-extern u16 D_800D18A2;
-extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+extern u16 gTakeoverPlayers;
+extern u8 gEliminatedSquareSizes[4]; // per player: half-size of the square, minus 4
 extern u8 gRespawnPending;
 extern u8 gLastDeathKind;
 

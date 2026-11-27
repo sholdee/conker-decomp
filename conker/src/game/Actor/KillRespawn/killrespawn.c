@@ -2,8 +2,8 @@
 
 /* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
 u16 gEliminatedPlayers;
-u16 D_800D18A2;
-u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+u16 gTakeoverPlayers;
+u8 gEliminatedSquareSizes[4]; // per player: half-size of the square, minus 4
 u8 gRespawnPending;
 u8 gLastDeathKind;
 
@@ -60,7 +60,7 @@ void actor_updatePlayerStates(void) {
                 continue;
             }
             if (i <= gScreenLayout) {
-                if (gIsMultiplayer != 0 && (D_800D18A2 & (1 << i))) {
+                if (gIsMultiplayer != 0 && (gTakeoverPlayers & (1 << i))) {
                     player->mv->death_State = 2;
                     player->mv->deathTimer = 60;
                 }
@@ -552,7 +552,7 @@ void func_1507DB64(void) {
 }
 
 /* Sets up the textured square of func_1507DB6C. */
-static Gfx D_80086B80[] = {
+static Gfx gEliminatedSquareDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
@@ -561,7 +561,7 @@ static Gfx D_80086B80[] = {
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the
- * player's D_800D18A2 bit is set the square shrinks each frame and, once gone, the bit is cleared; otherwise it
+ * player's gTakeoverPlayers bit is set the square shrinks each frame and, once gone, the bit is cleared; otherwise it
  * grows back to its full size.
  */
 Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
@@ -571,7 +571,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     s32 right, left, bottom, top;
     s32 scale;
 
-    gSPDisplayList(gfx++, D_80086B80);
+    gSPDisplayList(gfx++, gEliminatedSquareDl);
     texture = texture_getAddress((s32)&D_D0F, NULL, 3, 0);
     gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, texture);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
@@ -584,22 +584,22 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
                     0xF /* blend mask bits */ | G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE |
                         G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE,
                     G_AC_NONE | G_ZS_PRIM | G_RM_OPA_SURF | G_RM_OPA_SURF2);
-    if (D_800D18A2 & (1 << player)) {
-        if (D_800D18A4[player] >= 4) {
-            D_800D18A4[player] -= 4;
+    if (gTakeoverPlayers & (1 << player)) {
+        if (gEliminatedSquareSizes[player] >= 4) {
+            gEliminatedSquareSizes[player] -= 4;
         } else {
-            D_800D18A2 &= ~(1 << player);
+            gTakeoverPlayers &= ~(1 << player);
             screen_openIris(player);
             screen_startViewFade(0, 0, 0, 120, 0, player);
             return gfx;
         }
     } else {
-        D_800D18A4[player] += 4;
-        if (D_800D18A4[player] > 60) {
-            D_800D18A4[player] = 60;
+        gEliminatedSquareSizes[player] += 4;
+        if (gEliminatedSquareSizes[player] > 60) {
+            gEliminatedSquareSizes[player] = 60;
         }
     }
-    size = D_800D18A4[player] + 4;
+    size = gEliminatedSquareSizes[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
     view = &((RenderView *)gViews)[player]; // matching: the no-op cast changes the code
     left = right = (s32)(view->right + view->left) * 2;

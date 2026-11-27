@@ -38,11 +38,11 @@
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
 
 /* Frame counts of actor type 0x92's animations 20..23, too long for the header's u8 count (actor_startAnimState). */
-const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
+const u16 gLongAnimFrameCounts[4] = { 0x215, 0x10E, 0x108, 0x249 };
 /* 0-terminated animation ids that keep sound 0x61E playing: anim 0xE9 is the hover (sound_followOwnerAnimsCallback, actor_updatePlayerControls). */
 const u16 D_80099428[2] = { 0xE9, 0 };
 /* Eye frame for eye codes 0..2 (actor_updateTypeAnims). */
-const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
+const s32 gEyeCodeFrames[3] = { 0x12, 0x0B, 0x13 };
 
 
 struct HitReaction;
@@ -1360,9 +1360,9 @@ void actor_applyWaterCurrent(Actor *actor) {
 }
 
 /* Per carry variant (see actor_attachToHost): the host's animation, its speed and the carried actor's reaction. */
-static s16 D_800860C0[] = { 0x00D5, 0x0114, 0x0017, 0x0288, 0x0034, 0x01FA };
-static f32 D_800860CC[] = { 3.0f, 1.0f, 1.0f, 1.0f, 1.5f, 1.0f };
-static u16 D_800860E4[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x000D };
+static s16 gCarryHostAnims[] = { 0x00D5, 0x0114, 0x0017, 0x0288, 0x0034, 0x01FA };
+static f32 gCarryHostAnimSpeeds[] = { 3.0f, 1.0f, 1.0f, 1.0f, 1.5f, 1.0f };
+static u16 gCarryReactionKinds[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x000D };
 
 /* Attaches the actor to movement_obj[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void actor_attachToHost(Actor *actor, s32 hostIdx) {
@@ -1396,10 +1396,10 @@ void actor_attachToHost(Actor *actor, s32 hostIdx) {
     if (actor->character_type == 0x89) {
         variant = 5;
     }
-    actor_playAnim(&movement_obj[hostIdx], D_800860C0[variant], D_800860CC[variant], 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(&movement_obj[hostIdx], gCarryHostAnims[variant], gCarryHostAnimSpeeds[variant], 0.0f, 0.0f, 0.0f, 0);
     actor->stunned = 0xFE;
     actor->stunnednum = 0;
-    actor->stunnedseq = actor_findReaction(D_800860E4[variant], actor);
+    actor->stunnedseq = actor_findReaction(gCarryReactionKinds[variant], actor);
     actor->animseq.uh = 0xFFFF;
     actor_advanceReaction(dc_glbl_CharNum, actor);
     animTable = gModelAnimTables[actor->character_type];
@@ -3340,7 +3340,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         if (state->header[0][3] == 0xFF && actor != NULL) {
             switch (actor->character_type) {
             case 0x92:
-                state->numFrames[0] = D_80099420[actor->animseq.uh - 20];
+                state->numFrames[0] = gLongAnimFrameCounts[actor->animseq.uh - 20];
                 break;
             case 0xB7:
             case 0xB8:
@@ -4895,7 +4895,7 @@ void actor_updateTypeAnims(void) {
                 if (v >= 10) {
                     v -= 10;
                 } else {
-                    v = D_8009942C[v];
+                    v = gEyeCodeFrames[v];
                 }
                 ((u8 *)&movement_obj[i])[0x68 + k] = v; // unk68[k]
             }

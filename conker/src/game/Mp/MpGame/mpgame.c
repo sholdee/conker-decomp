@@ -1944,10 +1944,10 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
     MpGame *res;
 
     obj = &movement_obj[player];
-    if (D_800D18A4[player] > 50) {
-        if (!(D_800D18A2 & (1 << player))) {
+    if (gEliminatedSquareSizes[player] > 50) {
+        if (!(gTakeoverPlayers & (1 << player))) {
             bit0 = 1 << player;
-            D_800D18A2 |= bit0;
+            gTakeoverPlayers |= bit0;
             gEliminatedPlayers &= ~bit0;
             gEliminatedPlayers |= (1 << source);
             tmp = player_getStat(source, 3);
