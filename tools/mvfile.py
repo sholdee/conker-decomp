@@ -9,7 +9,8 @@ asm unit (`.s`) moves the same way. The batch:
   1. validates: each old file exists; each new path is free; new file names (the last part) are unique in
      the tree; path parts are lowercase-or-CamelCase identifiers;
   2. under the land lock: git-moves the files, then rewrites every reference: the yaml entries (code and
-     data slices), per-file Makefile flags, tools/subsystems.tsv, tools/hasm_proofs.tsv, and mentions of the
+     data slices), per-file Makefile flags, tools/subsystems.tsv, tools/hasm_proofs.tsv,
+     tools/linkcheck_allow.tsv, and mentions of the
      old name in conker/src and conker/include (header group comments, `game_X.c` in comments);
   3. re-runs splat (the yaml changed), rebuilds with make -B, and commits only if the whole-ROM sha1 still
      matches (also regenerating tools/accounting.tsv); otherwise it restores everything exactly.
@@ -122,6 +123,8 @@ def rewrite(moves):
             for p in M.glob(g):
                 edit(p, lambda s: word.sub(rf"\g<1>{new}", s))
         edit(REPO / "tools" / "hasm_proofs.tsv", lambda s: word.sub(rf"\g<1>{new}", s))
+        # the reviewed exceptions of tools/linkcheck.py name the object: build/src/<path>.c.o
+        edit(REPO / "tools" / "linkcheck_allow.tsv", lambda s: re.sub(rf"^(build/src/){o}(\.[cs]\.o\t)", rf"\g<1>{new}\g<2>", s, flags=re.M))
     return changed
 
 
@@ -191,7 +194,7 @@ def main():
                 d.rmdir()
                 d = d.parent
         git("add", "-A", "--", "conker/src", "conker/include", "conker/conker.us.yaml", "conker/Makefile",
-            "tools/subsystems.tsv", "tools/hasm_proofs.tsv", "tools/accounting.tsv")
+            "tools/subsystems.tsv", "tools/hasm_proofs.tsv", "tools/linkcheck_allow.tsv", "tools/accounting.tsv")
         msg = a.message or "move: " + ", ".join(f"{o} -> {n}" for o, n in moves[:4]) + (" ..." if len(moves) > 4 else "")
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: " + COAUTHOR)
         print(f"MOVED {len(moves)} file(s): " + git("rev-parse", "--short", "HEAD").stdout.strip())
