@@ -15,46 +15,38 @@ game text.
 
 ![The US code by source file](../../raw/progress/treemap.svg)
 
-The map shows every source file, sized by its code. Green is C that compiles to byte-identical code, and
-blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it and the
-badges from the committed files after each change to `master` (`tools/progress.py`).
+The map shows every source file, sized by its code. Green is C and blue is hand-written assembly. CI
+redraws the map and the badges after each merge to `master` (`tools/progress.py`).
+[progress.json](../../blob/progress/progress.json) has the figures behind them, and also counts the named
+struct fields and data symbols.
 
-- **Code: 100% decompiled and byte-matching.** All CPU code in the init, game and debugger segments is
-  matched. As in other N64 decomps, a small part is hand-written assembly: 2.8% of the code, in 289
-  labelled pieces. Examples are the exception handler and the 64-bit math helpers. 281 pieces have a
-  recorded proof that they were never C. The other 8 (592 bytes) are accepted as hand-written because no
-  compiler search reproduced them. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs and the evidence.
-- **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
-  data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
-  relocation. Emulator tests added code to each segment (init, game, debugger) and data to each
-  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence.
-  `tools/shifttest/shift_test.sh` repeats the code test for the init and game segments
-  ([CONTRIBUTING.md](CONTRIBUTING.md)). A few fixed
-  sizes remain, for example the 0x1FC000 bytes of game code that the page-fault handler maps (room for
-  about 7.9 KB more). The build stops with a message before one of them breaks the game.
-  [CONTRIBUTING.md](CONTRIBUTING.md) lists them.
-- **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
-  `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
-  Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
-  extracts from your ROM.
-- **Names.** About 85% of the functions have names. The rest keep address names (`func_XXXXXXXX`)
-  because no evidence makes their meaning clear yet. `progress.json` on the `progress` branch also
-  counts the named struct fields and data symbols. Names follow [tools/RENAMING.md](tools/RENAMING.md):
-  original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
-  descriptive names.
-- **Source layout.** The files follow the pattern of the source paths in the game's own strings, for
-  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only nine paths are known: five from the US
-  ROM and four from the prerelease builds (`tools/RENAMING.md` lists them). Those files are at Rare's
-  paths. The other directory and file names are descriptive.
-- **Clean C.** Each function and global is declared in the subsystem header of the file that defines
-  it. Each C file includes the headers that it uses: there are no umbrella headers. About 70 local
-  declarations remain in C files. Each is there because IDO needs it to reproduce the original code,
-  and a `/* matching: */` comment says why. Most are callers that saw a different prototype than the
-  definition, or block-scope declarations that shape the generated code. The number
-  of compiler type warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails
-  above it.
-- **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
-  not decompiled and their builds are not verified.
+- All the game's CPU code is matched. Each function in the init, game and debugger segments is C that
+  compiles to the original bytes, or hand-written assembly.
+- A small part of the code is hand-written assembly, as in other N64 games. Examples are the exception
+  handler, the memory paging and some matrix maths. Most pieces have a recorded proof that the compiler
+  did not produce them. For a few pieces, the evidence is compiler searches that found no match from
+  natural C. [ACCOUNTING.md](ACCOUNTING.md) gives the counts, the proofs and the evidence.
+- The code and data can move. Each reference uses a symbol, not a fixed address, and CI checks this on
+  every change. A separate test, `tools/shifttest/shift_test.sh`, adds code and boots the game in an
+  emulator. A few fixed sizes remain. [CONTRIBUTING.md](CONTRIBUTING.md) lists them, and the build stops
+  with a message if a change goes past one.
+- The data is in the source. Each file defines its own data, with real types. A few small pieces stay
+  extracted, because the evidence does not show which file owns them. Assets and game text stay out of
+  the repository, and the build extracts them from your ROM. The code's data holds some assets:
+  microcode, fonts and the resource manifest, whose names are game text.
+- Each function and global that other files use is declared once, in the header of its subsystem. Some
+  C files still declare a few symbols themselves, for example data that the build extracts, or a
+  declaration that IDO needs to give the original code.
+- The files follow the pattern of Rare's own source paths, for example
+  `src/game/Effects/PipeExplode/pipeexplode.c`. A few files have Rare's exact path, from path strings in
+  the ROM and in prerelease builds. The other names are descriptive.
+- Naming is the main open work. Some functions, struct fields and data keep names made from their
+  address or offset (`func_XXXXXXXX`, `D_XXXXXXXX`, `unk1C`), because no evidence shows yet what they do.
+  [tools/RENAMING.md](tools/RENAMING.md) gives the rules. Other open work is the C files that still have
+  address names (`conker/src/*.c`), a few known fake matches, and the assembly pieces that rest only on
+  search evidence. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to help.
+- Only the US version is decompiled. The EU, debug and ECTS versions have splat configurations (they
+  split a ROM into code and data), but their builds are not verified.
 
 ## Building
 
@@ -119,9 +111,10 @@ gitignored and must never be committed.
 | `conker/src/init/<Area>/<Name>/` | The init segment (boot, audio, OS and controller code) |
 | `conker/src/debugger/` | The debugger segment |
 | `conker/src/libultra/` | libultra (SDK) files, some built from [ultralib](https://github.com/decompals/ultralib) source |
+| `conker/src/checks/` | Struct size checks (`structsizes.c`), compiled but not linked |
 | `conker/src/*.c` | A few files whose purpose is not clear yet. They keep address names |
 | `conker/include/conker/<subsystem>.h` | One header for each subsystem: the declarations of its functions and globals |
-| `conker/include/` | Shared types (`structs.h`, `effects.h`), the umbrella headers and the SDK 2.0L headers |
+| `conker/include/` | Shared types and macros (`structs.h`, `effects.h`, `macros.h`) and the SDK 2.0L headers, with small libc headers (`libc/`) and assembler macros (`macro.inc`) |
 | `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |
 | `tools/` | Build tools, checks (`accounting.py`, `linkcheck.py`, `warncheck.py`) and contributor tooling |
 
@@ -134,7 +127,7 @@ whole ROM had to build byte-identically.
 
 The project relies on mechanical checks rather than on the agents' word. CI rebuilds the ROM on every
 change, and its checks run from the trusted base branch:
-- Every function is compiled C or hand-written assembly with a recorded proof (or, for 8 pieces,
+- Every function is compiled C or hand-written assembly with a recorded proof (or, for a few pieces,
   search evidence).
 - No address is pinned, and no pointer or address is written as a number, in data or in code.
 - The committed accounting manifest agrees with the build.
