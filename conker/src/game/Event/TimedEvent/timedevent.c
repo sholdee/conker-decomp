@@ -320,9 +320,9 @@ void func_1506B078(void) {
     event_playAnim(209, speed, 4.0f);
 }
 
-/* actor_playAnim on the current object with the given id and two float arguments. */
-void event_playAnim(s32 id, f32 arg1, f32 arg2) {
-    actor_playAnim(gCurrentActor, id, arg1, arg2, 0.0f, 0.0f, 0);
+/* actor_playAnim on the current object with the given anim, speed and blend. */
+void event_playAnim(s32 anim, f32 speed, f32 blend) {
+    actor_playAnim(gCurrentActor, anim, speed, blend, 0.0f, 0.0f, 0);
 }
 
 void event_playNextAnim(void) {
@@ -823,8 +823,8 @@ void event_stopSound2(void) {
  * aims it: 1 = no auto-aim, 2 = face the player, 4 = arc onto the player, 8 = random yaw spread,
  * 0x10 = lead the target targetIndex, 0x20 = remember targetIndex. Returns the new object.
  */
-u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, f32 *pos, s32 flags, s32 arg10) {
+u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 count5, s32 kind, f32 minHeight,
+                  f32 scale, f32 *pos, s32 flags, s32 sweep) {
     Actor *obj;
     u16 aimAngle;
     s16 angle;
@@ -1000,7 +1000,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     obj->ygrav = gravity;
     obj->yspd = yVelocity;
     obj->speed = speed;
-    obj->count5 = *((u8 *)&unk83 + 3); // matching: lbu from the arg slot (a cast emits andi)
+    obj->count5 = *((u8 *)&count5 + 3); // matching: lbu from the arg slot (a cast emits andi)
     obj->count3 = 0;
     obj->count1 = 0;
     obj->count2 = 0xFF;
@@ -1008,7 +1008,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         obj->homingTarget = obj->count2 = gCurrentActor->targetIndex;
     }
     obj->count4 = 0x26;
-    if (arg10 == 0) {
+    if (sweep == 0) {
         obj->doing_hit = gProjectileHitValues[kind] + 1;
     }
     obj->shad = 100.0f;
@@ -1024,7 +1024,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     obj->intelwalk = 0;
     obj->imune = obj->intelwalk * 0 + 0xFF; // matching: IDO reuses the zero of the unk232 store
     obj->noshove = 0x100E;
-    if (arg10) {
+    if (sweep) {
         obj->noshove |= 0x8000;
         bzero(obj->mv = allocate_memory(0x1C0, 1, 0, 0), 0x1C0);
         obj->unk103 = 1;
@@ -1033,7 +1033,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     obj->scale_y = scale;
     obj->unk66 = gCurrentActor->unk66 & 0xC;
     obj->headEffectState = kind;
-    obj->headEffectOffset[0][0] = arg10;
+    obj->headEffectOffset[0][0] = sweep;
     if (kind == 2 || kind == 18) {
         obj->headEffectTimer = 60;
     }
@@ -1077,13 +1077,13 @@ void event_fireProjectile(void) {
     f32 x;
     f32 y;
     f32 z;
-    f32 a;
-    f32 b;
+    f32 boneHeading;
+    f32 boneElevation;
     f32 pad; // matching: unused stack slot
-    s32 allocExt;
+    s32 sweep;
     s32 flags;
     f32 *pos;
-    f32 vec[3];
+    f32 origin[3];
 
     flags = 0;
     gravity = 0.0f;
@@ -1092,7 +1092,7 @@ void event_fireProjectile(void) {
     scale = 0.5f;
     heading = (gCurrentActor->langle + 0x4000) * 0.0054931640625f;
     bone = -1;
-    allocExt = 0;
+    sweep = 0;
     pos = NULL;
     kind = gEventParam;
     if (kind == 5 || kind == 9 || kind == 10) {
@@ -1105,18 +1105,18 @@ void event_fireProjectile(void) {
             x -= mtxs[bone][3][0];
             y -= mtxs[bone][3][1];
             z -= mtxs[bone][3][2];
-            a = math_atan2(x, z);
-            b = math_atan2(y, sqrtf(x * x + z * z));
-            a *= 57.295776f;
-            b *= 57.295776f;
-            if (a > 180.0f) {
-                a -= 360.0f;
+            boneHeading = math_atan2(x, z);
+            boneElevation = math_atan2(y, sqrtf(x * x + z * z));
+            boneHeading *= 57.295776f;
+            boneElevation *= 57.295776f;
+            if (boneHeading > 180.0f) {
+                boneHeading -= 360.0f;
             }
-            if (b > 180.0f) {
-                b -= 360.0f;
+            if (boneElevation > 180.0f) {
+                boneElevation -= 360.0f;
             }
-            heading = a;
-            elevation = b;
+            heading = boneHeading;
+            elevation = boneElevation;
         }
     } else if (gCurrentActor->CameraPtr != NULL && gCurrentActor->CameraPtr->Mode == 0x100) {
         elevation = gCurrentActor->CameraPtr->aim.signedPitch;
@@ -1135,7 +1135,7 @@ void event_fireProjectile(void) {
     case 11:
     case 12:
     case 18:
-        allocExt = 1;
+        sweep = 1;
         break;
     case 15:
         elevation *= 2.2f;
@@ -1148,15 +1148,15 @@ void event_fireProjectile(void) {
     case 3:
         dist = 500.0f;
         math_getHeadingElevation(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
-        vec[0] = movement_obj[0].mv->rayHit.origin.x;
-        vec[1] = movement_obj[0].mv->rayHit.origin.y;
-        vec[2] = movement_obj[0].mv->rayHit.origin.z;
-        allocExt = 1;
-        pos = vec;
+        origin[0] = movement_obj[0].mv->rayHit.origin.x;
+        origin[1] = movement_obj[0].mv->rayHit.origin.y;
+        origin[2] = movement_obj[0].mv->rayHit.origin.z;
+        sweep = 1;
+        pos = origin;
         elevation = -elevation;
         break;
     case 6:
-        allocExt = 1;
+        sweep = 1;
         elevation = 0.0f;
         dist = 500.0f;
         break;
@@ -1171,7 +1171,7 @@ void event_fireProjectile(void) {
     case 5:
     case 9:
     case 10:
-        allocExt = 1;
+        sweep = 1;
         gravity = 5.0f;
         dist = 593.0f;
         scale = 1.5f;
@@ -1179,7 +1179,7 @@ void event_fireProjectile(void) {
     }
     actor_splitVelocity((s16)(elevation * 182.04445f), dist, 0.0f, &speed, &yVelocity, &unused);
     yVelocity = -yVelocity;
-    event_spawnProjectile(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, allocExt);
+    event_spawnProjectile(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, sweep);
 }
 
 /* Spawns object gEventParam & 0xFF ahead of the current object, with its marker 5000 units out. */
@@ -1188,12 +1188,12 @@ void event_spawnObjectAhead(void) {
     f32 xOff;
     f32 zOff;
     f32 yOff;
-    s32 type;
+    s32 spawnId;
     s32 angle;
     f32 height;
 
-    type = gEventParam & 0xFF;
-    obj = actor_findOnPath(collision_findSpawnById(type));
+    spawnId = gEventParam & 0xFF;
+    obj = actor_findOnPath(collision_findSpawnById(spawnId));
     if (obj == NULL) {
         return;
     }
@@ -1255,28 +1255,28 @@ void event_resetBlink(void) {
 void event_requestExpression(void) {
     Actor *obj = gCurrentActor;
     f32 divisor;
-    u16 value;
-    u8 hi;
-    u8 lo;
+    u16 timer;
+    u8 expression;
+    u8 priority;
 
     if (obj->defaultExpression != 0x2A) {
-        hi = gEventParam >> 24;
-        lo = (gEventParam >> 16) & 0xFF;
-        value = gEventParam & 0xFFFF;
+        expression = gEventParam >> 24;
+        priority = (gEventParam >> 16) & 0xFF;
+        timer = gEventParam & 0xFFFF;
         divisor = obj->anim->speed[0];
         if (divisor == 0.0f) {
             divisor = 0.01f;
         }
-        if (value != 0xFFFF) {
-            value = value / divisor;
+        if (timer != 0xFFFF) {
+            timer = timer / divisor;
         }
-        face_requestExpression(obj, hi, lo, value, 0);
+        face_requestExpression(obj, expression, priority, timer, 0);
     }
 }
 
 void event_requestSubmergedExpression(void) {
     Actor *obj = gCurrentActor;
-    s32 sel;
+    s32 expression;
 
     if (obj->waterHeight == -10000.0f) {
         return;
@@ -1285,11 +1285,11 @@ void event_requestSubmergedExpression(void) {
         return;
     }
     if (obj->energy >= 2) {
-        sel = 0x2C;
+        expression = 0x2C;
     } else {
-        sel = 0x29;
+        expression = 0x29;
     }
-    gEventParam = (gEventParam & 0xFFFF) | (sel = (sel << 10) << 14); // matching: two-step shift + store to sel
+    gEventParam = (gEventParam & 0xFFFF) | (expression = (expression << 10) << 14); // matching: two-step shift + store to expression
     event_requestExpression();
 }
 
@@ -1881,10 +1881,10 @@ void event_clearTaskAttrib(void) {
 
 void event_setAfterimage(void) {
     s32 param = gEventParam;
-    s32 low = gEventParam & 0xFFFF;
+    s32 duration = gEventParam & 0xFFFF;
 
     if (param != 0) {
-        trail_startActorAfterimage(gCurrentActor, low, gEventParam >> 16);
+        trail_startActorAfterimage(gCurrentActor, duration, gEventParam >> 16);
         return;
     }
     trail_fadeActorAfterimage(gCurrentActor);
@@ -2296,20 +2296,20 @@ void event_attachBloodStrip(s32 cmd) {
 }
 
 void event_fireBullet(s32 cmd) {
-    IgnoreList info;
-    s32 mode;
+    IgnoreList ignore;
+    s32 impactType;
 
-    info.count = 1;
-    info.objs[1] = NULL;
-    info.objs[2] = NULL;
-    info.objs[0] = gCurrentActor;
+    ignore.count = 1;
+    ignore.objs[1] = NULL;
+    ignore.objs[2] = NULL;
+    ignore.objs[0] = gCurrentActor;
 
     if (level == LEVEL_WMP_BEACH) {
-        mode = 3;
+        impactType = 3;
     } else {
-        mode = 0;
+        impactType = 0;
     }
-    weapon_fireBullet(gCurrentActor, NULL, &info, mode, 0xFF, 1);
+    weapon_fireBullet(gCurrentActor, NULL, &ignore, impactType, 0xFF, 1);
     weapon_rumbleShooter(gCurrentActor);
 }
 
@@ -2323,73 +2323,73 @@ void event_explodeSightAtActor(s32 cmd) {
 
 void func_15070224(s32 cmd) {
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
 
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() % 5U) + 4;
     header.lightType = 0;
 
-    header2.x = gCurrentActor->xpos;
-    header2.y = gCurrentActor->ypos;
-    header2.z = gCurrentActor->zpos;
+    position.x = gCurrentActor->xpos;
+    position.y = gCurrentActor->ypos;
+    position.z = gCurrentActor->zpos;
 
-    light_createWithEffect(&header, &header2, (math_random() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_createWithEffect(&header, &position, (math_random() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 
 
 /* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect effect_spawnBoneBeamParticle at bone 4. */
 void func_15070300(s32 cmd) {
-    u8 flag;
-    Actor *obj;
-    u8 mode;
-    Actor *other;
+    u8 useBullet;
+    Actor *shooter;
+    u8 impactType;
+    Actor *aimer;
     u8 idx;
-    IgnoreList info;
+    IgnoreList ignore;
     Vec3f localPos;
-    Vec3f vec74;
+    Vec3f endPos;
     ParticleSize randoms;
     Vec3f worldPos;
     const Vec3f *srcs[1];
     Vec3f *dsts[1];
 
-    other = NULL;
+    aimer = NULL;
     if (gCurrentActor->character_type == 0x77) {
-        mode = 1;
-        obj = gCurrentActor;
+        impactType = 1;
+        shooter = gCurrentActor;
         idx = gCurrentActor - movement_obj;
         if (idx < 2 && gPartnerSlots[idx] != 0) {
-            flag = 1;
-            other = &movement_obj[gPartnerSlots[idx]];
-            goto done; // matching: an else branch drops the dead flag = 0 below
+            useBullet = 1;
+            aimer = &movement_obj[gPartnerSlots[idx]];
+            goto done; // matching: an else branch drops the dead useBullet = 0 below
         }
-        flag = 0;
-        if (obj->mv->SniperState != 0) {
-            flag = 1;
+        useBullet = 0;
+        if (shooter->mv->SniperState != 0) {
+            useBullet = 1;
         } else {
-            flag = 0;
+            useBullet = 0;
         }
     done:;
     } else if (gCurrentActor->character_type == 0x28) {
-        obj = event_getFirstLiveOwnedObject(gCurrentActor);
-        mode = 0;
-        flag = 0;
-        if (obj->mv->SniperState != 0) {
-            flag = 1;
+        shooter = event_getFirstLiveOwnedObject(gCurrentActor);
+        impactType = 0;
+        useBullet = 0;
+        if (shooter->mv->SniperState != 0) {
+            useBullet = 1;
         } else {
-            flag = 0;
+            useBullet = 0;
         }
     } else {
         return;
     }
-    weapon_rumbleShooter(obj);
-    if (other != NULL) {
-        weapon_rumbleShooter(other);
+    weapon_rumbleShooter(shooter);
+    if (aimer != NULL) {
+        weapon_rumbleShooter(aimer);
     }
     if (gIsMultiplayer != 0) {
         if (gCurrentActor->mv->unk128 & 0x10) {
             gEventParam = 10;
-            mode = 2;
+            impactType = 2;
             gCurrentActor->mv->unk12C--;
         } else {
             gEventParam = 9;
@@ -2397,12 +2397,12 @@ void func_15070300(s32 cmd) {
     } else {
         gEventParam = 5;
     }
-    if (flag) {
-        info.count = 3;
-        info.objs[0] = obj;
-        info.objs[1] = other;
-        info.objs[2] = gCurrentActor;
-        weapon_fireBullet(obj, other, &info, mode, 0xFF, 1);
+    if (useBullet) {
+        ignore.count = 3;
+        ignore.objs[0] = shooter;
+        ignore.objs[1] = aimer;
+        ignore.objs[2] = gCurrentActor;
+        weapon_fireBullet(shooter, aimer, &ignore, impactType, 0xFF, 1);
     } else {
         event_fireProjectile();
     }
@@ -2413,13 +2413,13 @@ void func_15070300(s32 cmd) {
         return;
     }
     localPos = D_80099B70;
-    vec74 = D_80099B7C;
+    endPos = D_80099B7C;
     randoms.width = (math_randomFloat() * 30.0f) + 40.0f;
     randoms.height = (math_randomFloat() * 2.512f) + 3.5900002f;
     srcs[0] = &localPos;
     dsts[0] = &worldPos;
     math_transformOffsets(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
-    effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &vec74, &randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &endPos, &randoms,
                   (math_random() % 5U) + 5, (math_random() % 56U) + 200,
                   (math_randomFloat() * 510.0f) + 1296.0f,
                   &worldPos, 0xFF, 0, -1, 0xFF, 1);
@@ -2750,14 +2750,13 @@ void event_notifyFollowersGone(s32 cmd) {
 }
 
 void event_spawnLargeObjBurst(s32 cmd) {
+    Vec3f pos;
     Actor *obj;
-    s32 pad0; // matching: unused stack slot
-    s32 buf;
 
     obj = gCurrentActor;
     if (obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
-        effect_getBone5Point(obj, &buf);
-        effect_spawnLargeObjBurstAt(&buf, 0xFF, 1);
+        effect_getBone5Point(obj, &pos);
+        effect_spawnLargeObjBurstAt(&pos, 0xFF, 1);
     }
 }
 
@@ -3026,11 +3025,11 @@ void event_launchPlayer(void) {
 }
 
 void event_runFadeCommand(void) {
-    u16 lo = gEventParam;
-    u16 mid = gEventParam >> 8;
-    u16 hi = gEventParam >> 16;
+    u16 value = gEventParam;
+    u16 step = gEventParam >> 8;
+    u16 cmd = gEventParam >> 16;
 
-    actor_fadeCommand(gCurrentActor, hi, lo, mid, 0);
+    actor_fadeCommand(gCurrentActor, cmd, value, step, 0);
 }
 
 Actor *event_getFirstOwnedObject(Actor *owner) {
@@ -3060,10 +3059,10 @@ void event_fadeOwnedObject(void) {
     Actor *child = event_getFirstOwnedObject(gCurrentActor);
 
     if (child != NULL) {
-        s32 hi = gEventParam >> 8;
-        u16 lo = gEventParam;
+        s32 value = gEventParam >> 8;
+        u16 step = gEventParam;
 
-        actor_fadeCommand(child, 2, hi, lo, 0);
+        actor_fadeCommand(child, 2, value, step, 0);
     }
 }
 
@@ -3101,26 +3100,26 @@ void event_respawnObject(void) {
     s32 spawnFlags;
     s32 angle;
     s32 slot;
-    s32 id;
+    s32 spawnIdx;
     s32 noKill;
 
     angle = (gEventParam >> 8) & 0x7F;
     noKill = (gEventParam >> 15) & 1;
     spawnFlags = (gEventParam >> 16) & 0xFF;
-    id = collision_findSpawnById(gEventParam);
-    if (id == -1) {
+    spawnIdx = collision_findSpawnById(gEventParam);
+    if (spawnIdx == -1) {
         return;
     }
-    gSpawnInUse[id] = 0;
+    gSpawnInUse[spawnIdx] = 0;
     if (!(spawnFlags & 0x80)) {
-        obj = actor_findOnPath(id);
+        obj = actor_findOnPath(spawnIdx);
         if (obj != NULL) {
             actor_remove(obj, 0);
             actor_clearSlot(obj);
         }
     }
-    gSpawnRecords[id].removed = 0;
-    slot = collision_spawnObject((SpawnRecord *)(id * 0x30 + (s32)gSpawnRecords), id, 0, 0, 0); // matching: integer address math
+    gSpawnRecords[spawnIdx].removed = 0;
+    slot = collision_spawnObject((SpawnRecord *)(spawnIdx * 0x30 + (s32)gSpawnRecords), spawnIdx, 0, 0, 0); // matching: integer address math
     if (slot == 0) {
         return;
     }
@@ -3433,7 +3432,7 @@ void func_150730D0(void) {
  * (offX, offY, offZ), or at the parent's position. Returns the new object.
  */
 Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
-                     f32 yVelocity, f32 gravity, s32 unk83) {
+                     f32 yVelocity, f32 gravity, s32 count5) {
     MtxF *mtx;
     MtxF mf;
     Actor *obj;
@@ -3446,7 +3445,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
     obj->ygrav = gravity;
     obj->yspd = yVelocity;
     obj->speed = speed;
-    obj->count5 = unk83;
+    obj->count5 = count5;
     if (parent->ob_matrix_ptr != NULL && bone != -1) {
         mtx = &parent->ob_matrix_ptr[bone];
         if (gBoneMatricesFlushed != 0) {
@@ -3500,33 +3499,33 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
 void event_fireVolley(void) {
     Actor *obj;
     s32 rot;
-    f32 y;
-    f32 x;
+    f32 yVelocity;
+    f32 speed;
     f32 pad[7]; // matching: unused stack space
 
     if (gEventParam == 0) {
         f32 dist;
-        Camera *target;
-        s32 hit;
+        Camera *camera;
+        s32 aimAtCamera;
         f32 dx;
         f32 dy;
         f32 dz;
         f32 angle;
         f32 yaw;
 
-        hit = 0;
-        target = gCurrentActor->CameraPtr;
-        if (aim_isPointInCone(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
+        aimAtCamera = 0;
+        camera = gCurrentActor->CameraPtr;
+        if (aim_isPointInCone(gCurrentActor - movement_obj, 23, 23, camera->eye.x, camera->eye.y, camera->eye.z,
                           &dist, 30.0f, 0, 0) != 0 &&
             math_random() % 1000 < 200) {
-            hit = 1;
+            aimAtCamera = 1;
         }
         obj = event_spawnAnimProjectile(gCurrentActor, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         obj->noshove |= 0x01000000;
-        if (hit != 0) {
-            dx = target->eye.x - obj->xpos;
-            dy = target->eye.y - obj->ypos;
-            dz = target->eye.z - obj->zpos;
+        if (aimAtCamera != 0) {
+            dx = camera->eye.x - obj->xpos;
+            dy = camera->eye.y - obj->ypos;
+            dz = camera->eye.z - obj->zpos;
             angle = math_atan2(dx, dz) * 57.295776f;
             yaw = angle;
             if (angle > 180.0f) {
@@ -3543,27 +3542,27 @@ void event_fireVolley(void) {
             obj->taskint[0] = 0;
         }
     } else if (gEventParam == 1) {
-        f32 t;
+        f32 jitter;
         f32 spread;
 
         spread = gCurrentActor->taskint[0] * 0.01f;
-        t = (s32)(math_random() % 40 - 20) * spread;
-        y = 58.4f + t;
-        t = (s32)(math_random() % 40 - 20) * spread;
-        x = 42.8f + t;
-        event_spawnAnimProjectile(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * spread, x, y, 2.9f, 100);
+        jitter = (s32)(math_random() % 40 - 20) * spread;
+        yVelocity = 58.4f + jitter;
+        jitter = (s32)(math_random() % 40 - 20) * spread;
+        speed = 42.8f + jitter;
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * spread, speed, yVelocity, 2.9f, 100);
     } else if (gEventParam == 2) {
         obj = event_spawnAnimProjectile(gCurrentActor, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->vtilt = 180.0f;
         obj->noshove |= 0x01000000;
     } else if (gEventParam == 3) {
-        f32 t;
+        f32 jitter;
 
-        t = (s32)(math_random() % 40 - 20) * 10.0f;
-        y = 58.4f + t;
-        t = (s32)(math_random() % 40 - 20) * 10.0f;
-        x = 42.8f + t;
-        event_spawnAnimProjectile(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        jitter = (s32)(math_random() % 40 - 20) * 10.0f;
+        yVelocity = 58.4f + jitter;
+        jitter = (s32)(math_random() % 40 - 20) * 10.0f;
+        speed = 42.8f + jitter;
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * 10.0f, speed, yVelocity, 2.9f, 100);
     }
 }
 
@@ -3629,15 +3628,15 @@ void func_15073A50(void) {
 void event_setRopeSwing(void) {
     s32 *param;
     Actor **objp;
-    f32 low;
-    f32 mid;
+    f32 force;
+    f32 swingAngle;
 
     param = &gEventParam; // matching: both globals are accessed through pointer locals
     objp = &gCurrentActor;
-    low = *param & 0xFFFF;
-    (*objp)->mv->ropeSwingForce = low;
-    mid = (*param >> 16) & 0xFF;
-    (*objp)->mv->ropeSwingAngle = mid;
+    force = *param & 0xFFFF;
+    (*objp)->mv->ropeSwingForce = force;
+    swingAngle = (*param >> 16) & 0xFF;
+    (*objp)->mv->ropeSwingAngle = swingAngle;
     (*objp)->mv->ropeSwingTimer = (*param >> 24) & 0xFF;
 }
 
@@ -3722,33 +3721,33 @@ void func_15073F78(void) {
  */
 void event_spawnThrownItem(void) {
     s32 state;
-    s32 idx;
+    s32 slot;
     s32 useDefault;
-    s32 arg;
+    s32 spawnId;
     f32 speed;
     Actor *obj;
     s32 bone;
-    s32 slot;
-    s32 cmd;
-    f32 x1;
-    f32 y1;
-    f32 z1;
-    f32 x2;
-    f32 z2;
-    f32 y2;
-    s32 rnd;
+    s32 spawnIdx;
+    s32 zeroSpeed;
+    f32 fwdSpeed;
+    f32 yVelocity;
+    f32 unused;
+    f32 xOff;
+    f32 zOff;
+    f32 yOff;
+    s32 yawJitter;
     s16 angle;
     Actor *player;
 
-    arg = gEventParam & 0xFFFF;
-    slot = collision_findSpawnById(arg);
-    if (slot != -1) {
+    spawnId = gEventParam & 0xFFFF;
+    spawnIdx = collision_findSpawnById(spawnId);
+    if (spawnIdx != -1) {
         state = 1;
-        gSpawnInUse[slot] = 0;
-        idx = collision_spawnObject((SpawnRecord *)(slot * 0x30 + (s32)gSpawnRecords), slot, 0, 0, 0); // matching: integer address math
-        if (idx != 0) {
-            idx--;
-            obj = &movement_obj[idx];
+        gSpawnInUse[spawnIdx] = 0;
+        slot = collision_spawnObject((SpawnRecord *)(spawnIdx * 0x30 + (s32)gSpawnRecords), spawnIdx, 0, 0, 0); // matching: integer address math
+        if (slot != 0) {
+            slot--;
+            obj = &movement_obj[slot];
             obj->owner = dc_glbl_CharNum + 1;
             obj->unique_id = dc_glbl_CharNum + 0x96;
             player = gCurrentActor;
@@ -3765,7 +3764,7 @@ void event_spawnThrownItem(void) {
                     bone = 19;
                     break;
                 case 0x7B:
-                    if (arg == 0x10) {
+                    if (spawnId == 0x10) {
                         bone = (gEventParam >> 16) & 0xFF;
                     } else {
                         useDefault = 1;
@@ -3776,8 +3775,8 @@ void event_spawnThrownItem(void) {
                     break;
                 }
                 if (!useDefault) {
-                    slot = (s32)&player->ob_matrix_ptr[bone];
-                    math_transformOffset(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
+                    spawnIdx = (s32)&player->ob_matrix_ptr[bone]; // matching: spawnIdx is reused for the bone matrix
+                    math_transformOffset(NULL, (Vec3f *)&obj->xpos, spawnIdx); // xpos, ypos, zpos as one Vec3f
                     {
                         typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)
                         player = gCurrentActor;
@@ -3794,32 +3793,32 @@ void event_spawnThrownItem(void) {
                 state = 5;
                 player->mv->GrenadeThrowState = 0;
                 gCurrentActor->mv->rt_context_b = 0;
-                cmd = (gEventParam >> 16) & 1;
+                zeroSpeed = (gEventParam >> 16) & 1;
                 obj->ygrav = 4.0; // matching: double literal
                 player = gCurrentActor;
                 speed = ((0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
                 speed += 40.0f;
-                if (cmd) {
+                if (zeroSpeed) {
                     speed = 0.0f;
                 }
                 if (player->mv->AimState != 0) {
                     {
                         typedef s32 padT; // matching: as above
-                        actor_splitVelocity((u16)(s32)((45.0f - player->mv->aimPitch) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
-                        obj->yspd = -y1;
+                        actor_splitVelocity((u16)(s32)((45.0f - player->mv->aimPitch) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &fwdSpeed, &yVelocity, &unused);
+                        obj->yspd = -yVelocity;
                     }
                     player = gCurrentActor;
                 } else {
                     obj->yspd = 50.0f;
                 }
                 if (player->character_type == 0x75) {
-                    slot = (s32)attach_find(player, 0x64, 0); // matching: slot is reused for the attachment
+                    spawnIdx = (s32)attach_find(player, 0x64, 0); // matching: spawnIdx is reused for the attachment
                 } else {
-                    slot = (s32)attach_find(player, 0x2C, 0);
+                    spawnIdx = (s32)attach_find(player, 0x2C, 0);
                 }
-                if (slot != 0) {
-                    obj->soundHandle2 = ((ModelAttachment *)slot)->hookState2;
-                    sound_replaceCallback((SoundRecordCallback)attach_soundCallback, (void *)slot, (s32)gCurrentActor, sound_followOwnerCallback, obj, obj->unique_id);
+                if (spawnIdx != 0) {
+                    obj->soundHandle2 = ((ModelAttachment *)spawnIdx)->hookState2;
+                    sound_replaceCallback((SoundRecordCallback)attach_soundCallback, (void *)spawnIdx, (s32)gCurrentActor, sound_followOwnerCallback, obj, obj->unique_id);
                 }
                 player = gCurrentActor;
             }
@@ -3838,15 +3837,15 @@ void event_spawnThrownItem(void) {
                 gSpawnPaths[obj->listpos][1].x = movement_obj[0].xpos;
                 gSpawnPaths[obj->listpos][1].z = movement_obj[0].zpos;
             } else if (player->character_type == 0x7B) {
-                if (arg == 0x10) {
+                if (spawnId == 0x10) {
                     state = 7;
                     gSpawnPaths[obj->listpos][1].x = movement_obj[0].xpos;
                     gSpawnPaths[obj->listpos][1].y = 980;
                     gSpawnPaths[obj->listpos][1].z = movement_obj[0].zpos;
-                    obj->unique_id = 0xFF - idx;
+                    obj->unique_id = 0xFF - slot;
                     actor_runHitHandler(obj, 0xC, NULL);
                     beam_spawnMuzzleBurst(gCurrentActor, math_random() & 1, math_random() & 3, 0xFF, 1);
-                } else if (arg == 0xA) {
+                } else if (spawnId == 0xA) {
                     state = 0xE;
                     obj->ypos = player->ypos;
                 } else {
@@ -3856,12 +3855,12 @@ void event_spawnThrownItem(void) {
                     obj->speed = 0.0f;
                 }
             } else if (player->character_type == 0x9A) {
-                rnd = (math_random() & 0xFFF) - 0x800;
+                yawJitter = (math_random() & 0xFFF) - 0x800;
                 speed = (s16)(math_random() % 800U) * 0.01f;
                 state = 7;
-                actor_splitVelocity(gCurrentActor->angle + rnd, 30.0f - speed, 0.0f, &x2, &z2, &y2);
-                obj->xpos -= x2;
-                obj->zpos -= z2;
+                actor_splitVelocity(gCurrentActor->angle + yawJitter, 30.0f - speed, 0.0f, &xOff, &zOff, &yOff);
+                obj->xpos -= xOff;
+                obj->zpos -= zOff;
                 player = gCurrentActor;
                 obj->speed = (player->speed * 1.35f) + 6.0f;
                 obj->yspd = player->yspd;
@@ -3954,15 +3953,15 @@ void func_15074870(void) {
 void event_skipEventsOnTaskBit(void) {
     u8 index;
     u8 mask;
-    u8 enabled;
+    u8 skip;
 
     index = gEventParam >> 16;
     mask = gEventParam >> 8;
-    enabled = gEventParam & 1;
+    skip = gEventParam & 1;
     if ((&gCurrentActor->taskint[0])[index] & mask) {
-        enabled ^= 1;
+        skip ^= 1;
     }
-    if (enabled != 0) {
+    if (skip != 0) {
         gCurrentActor->speccnt += (u8)(gEventParam >> 24);
     }
 }

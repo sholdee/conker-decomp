@@ -17,7 +17,7 @@ void func_1506AFE0(void);
 void func_1506B020(void);
 void event_emptyAnimState05(void);
 void func_1506B078(void);
-void event_playAnim(s32 id, f32 arg1, f32 arg2);
+void event_playAnim(s32 anim, f32 speed, f32 blend);
 void event_playNextAnim(void);
 void func_1506B198(void);
 void func_1506B1E8(void);
@@ -69,8 +69,8 @@ void event_playSoundCommand(void);
 void event_playDeferredSound(void);
 void event_stopSound1(void);
 void event_stopSound2(void);
-u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, f32 *pos, s32 flags, s32 arg10);
+u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 count5, s32 kind, f32 minHeight,
+                  f32 scale, f32 *pos, s32 flags, s32 sweep);
 void event_fireProjectile(void);
 void event_spawnObjectAhead(void);
 void event_emptyTimedEvent16(void);
@@ -291,7 +291,7 @@ void event_startCameraEnvelope(void);
 void func_150730A4(void);
 void func_150730D0(void);
 Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
-                     f32 yVelocity, f32 gravity, s32 unk83);
+                     f32 yVelocity, f32 gravity, s32 count5);
 void event_fireVolley(void);
 void event_releaseHeldObject(void);
 void event_setWaitTimer(void);
