@@ -712,3 +712,8 @@ src/game/Particle/ParticleModelIds/particlemodelids.c	particle	particle model id
 src/init/View/SetupDl/setupdl.c	view	the RDP setup display list (data only)
 src/debugger/Level/BaseSpawns/basespawns.c	level	the two base spawn tables that level_loadSpawnTable reads from ROM (data only)
 src/game/Level/LevelHeader/levelheader.c	level	one .bss word between quadtree and levelmodels
+src/game_data_800CBE10.c	cutscene	the RSP dram stack of the graphics tasks (data only, owner unknown; .bss after probe)
+src/game_data_800D9860.c	trail	the cached floor hit of the level stream (data only, owner unknown; .bss after scriptinterp)
+src/game_data_800D9920.c	level	two flags and two byte arrays that the level setup clears (data only, owner unknown; .bss after tintedobject)
+src/game_data_800DCA20.c	weapon	the effect detail shift and scale pairs (data only, owner unknown; .bss after mathutil)
+src/game_22D1B0.c	light	the daylight colours that light_setDaylight reads (data only, owner unknown; .data after attachedburst)
