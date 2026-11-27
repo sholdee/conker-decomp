@@ -315,10 +315,10 @@ audio_fadeCspChannel	0x10017C68	120	init	c		build/src/init/Audio/SeqChannel/seqc
 func_10017CE0	0x10017CE0	80	init	c		build/src/init/Audio/SeqChannel/seqchannel.c.o
 audio_setCspChannelFade	0x10017D30	80	init	c		build/src/init/Audio/SeqChannel/seqchannel.c.o
 n_alCSPSetChlPan	0x10017D80	112	init	c		build/src/libultra/audio/n_cspsetpan.c.o
-audio_setCspFxMix	0x10017DF0	92	init	c		build/src/libultra/audio/init_17DF0.c.o
-audio_setCspChannelFxBus	0x10017E4C	116	init	c		build/src/libultra/audio/init_17DF0.c.o
+audio_setCspFxMix	0x10017DF0	92	init	c		build/src/init/Audio/SeqFxMix/seqfxmix.c.o
+audio_setCspChannelFxBus	0x10017E4C	116	init	c		build/src/init/Audio/SeqFxMix/seqfxmix.c.o
 n_alCSPGetTempo	0x10017EC0	80	init	c		build/src/libultra/audio/n_cspgettempo.c.o
-audio_setCspFxParam	0x10017F10	112	init	c		build/src/libultra/audio/init_17F10.c.o
+audio_setCspFxParam	0x10017F10	112	init	c		build/src/init/Audio/SeqFxParam/seqfxparam.c.o
 n_alCSeqNew	0x10017F80	384	init	c		build/src/libultra/audio/n_csq.c.o
 n_alCSeqNextEvent	0x10018100	424	init	c		build/src/libultra/audio/n_csq.c.o
 __n_alCSeqGetTrackEvent	0x100182A8	1076	init	c		build/src/libultra/audio/n_csq.c.o
@@ -329,7 +329,7 @@ __readVarLen	0x10018BC4	156	init	c		build/src/libultra/audio/n_csq.c.o
 n_alCSPStop	0x10018C60	80	init	c		build/src/libultra/audio/n_cspstop.c.o
 n_alCSPSetSeq	0x10018CB0	80	init	c		build/src/libultra/audio/n_cspsetseq.c.o
 n_alCSPSetVol	0x10018D00	80	init	c		build/src/libultra/audio/n_cspsetvol.c.o
-audio_pauseCsp	0x10018D50	80	init	c		build/src/libultra/audio/init_18D50.c.o
+audio_pauseCsp	0x10018D50	80	init	c		build/src/init/Audio/SeqPause/seqpause.c.o
 n_alInit	0x10018DA0	108	init	c		build/src/libultra/audio/n_sl.c.o
 n_alClose	0x10018E0C	84	init	c		build/src/libultra/audio/n_sl.c.o
 n_alSynNew	0x10018E60	1592	init	c		build/src/libultra/audio/n_synthesizer.c.o
