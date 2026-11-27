@@ -1908,7 +1908,8 @@ void event_startHeadEffect(void) {
     gCurrentActor->headEffectOffset[1][1] = 0;
 }
 
-/* Stores the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of headEffectOffset. */
+/* Starts head effect 5 with no time limit, storing the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of
+   headEffectOffset. */
 void event_setHeadEffectOffset(void) {
     s32 index;
     s16 first;
@@ -3179,13 +3180,13 @@ void func_1507266C(void) {
 }
 
 void event_attachTargetToBone(void) {
-    s32 angle;
+    s32 bone;
     Actor *obj;
 
-    angle = gEventParam >> 16;
+    bone = gEventParam >> 16;
     obj = &movement_obj[gCurrentActor->targetIndex];
     obj->attach_char = dc_glbl_CharNum + 1;
-    obj->basemtx = angle;
+    obj->basemtx = bone;
     obj->unk101 = 4;
 }
 

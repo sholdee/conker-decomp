@@ -327,6 +327,11 @@ STATIC_ASSERT(sizeof(EmitterConfig) == 0x2C, EmitterConfig_size);
 /* conker/face.h */
 STATIC_ASSERT(sizeof(ExpressionRecord) == 0xA, ExpressionRecord_size);
 
+/* conker/flamethrower.h */
+STATIC_ASSERT(sizeof(FlameLineParams) == 0x44, FlameLineParams_size);
+STATIC_ASSERT(sizeof(FlameScatterParams) == 0x44, FlameScatterParams_size);
+STATIC_ASSERT(sizeof(FlameEmitParams) == 0x3C, FlameEmitParams_size);
+
 /* conker/level.h */
 STATIC_ASSERT(sizeof(ObjectSpawn) == 0x44, ObjectSpawn_size);
 
@@ -404,6 +409,3 @@ STATIC_ASSERT(sizeof(SurfaceTrailPoint) == 0x24, SurfaceTrailPoint_size);
 
 /* conker/weapon.h */
 STATIC_ASSERT(sizeof(Game1EF500TrailExt) == 0xB0, Game1EF500TrailExt_size);
-STATIC_ASSERT(sizeof(FlameLineParams) == 0x44, FlameLineParams_size);
-STATIC_ASSERT(sizeof(FlameScatterParams) == 0x44, FlameScatterParams_size);
-STATIC_ASSERT(sizeof(FlameEmitParams) == 0x3C, FlameEmitParams_size);

@@ -3289,7 +3289,7 @@ typedef struct HitReaction {
     /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
     /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
     /* 0x0B */ u8 padB;
-    /* 0x0C */ s16 offsetY; /* height of the attack point above the attacker, times its scale_y / 0.25 */
+    /* 0x0C */ s16 offsetY; /* height of the attack point above the attacker, scaled by scale_y / 0.25 */
     /* 0x0E */ u8 unkE;  /* hit-volume radius / side offset */
     /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
     /* 0x10 */ u8 headingOffset; /* added to the attacker's heading (high byte) for the victim's */
