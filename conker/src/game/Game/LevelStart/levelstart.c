@@ -33,6 +33,7 @@
 #include "conker/screen.h"
 #include "conker/script.h"
 #include "conker/sound.h"
+#include "conker/sprite.h"
 #include "conker/swarm.h"
 #include "conker/text.h"
 #include "conker/trail.h"
@@ -152,7 +153,7 @@ void game_loadLevel(void) {
     screen_resetEffects();
     collision_clearUvWobbles();
     level_resetWaveDeformers();
-    light_resetParticles();
+    sprite_resetParticles();
     func_15044370();
     player_clearIdleRequests();
     model_resetAttachments();

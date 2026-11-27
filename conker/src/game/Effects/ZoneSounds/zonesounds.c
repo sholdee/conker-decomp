@@ -7,7 +7,7 @@
 #include "conker/zone.h"
 
 /* This file's .bss. */
-u8 gRandomSoundTimer; /* frames until the next random zone sound (game_11EEB0.c runs the same countdown) */
+u8 gRandomSoundTimer; /* frames until the next random zone sound (game/Effects/ActorExplosion/actorexplosion.c runs the same countdown) */
 
 void effect_playRandomZoneSounds(s32 unused) {
     s32 zoneId;

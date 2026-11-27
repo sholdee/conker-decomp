@@ -48,7 +48,7 @@ static void (*gLevelUpdateHooks[])(s32) = {
     func_150F2A60,
     func_150B003C,
     effect_advanceTexAnimClock,
-    beam_levelUpdateRandomSounds,
+    effect_levelUpdateRandomSounds,
     effect_updateSurfaceSound,
     NULL,
 };

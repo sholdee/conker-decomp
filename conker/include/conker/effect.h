@@ -18,13 +18,13 @@
  *   game/Effects/PerimeterEmitter/perimeteremitter.c
  *   game/Effects/BoneStreak/bonestreak.c
  *   game/Effects/OwnerSpark/ownerspark.c
- *   game_E2DA0.c
+ *   game/Effects/ObjBurst/objburst.c
  *   game/Effects/BreakUp/breakup.c
  *   game/Effects/JointDecal/jointdecal.c
  *   game/Effects/ParticleBursts/particlebursts.c
  *   game/Effects/SegmentTrail/segmenttrail.c
  *   game/Effects/Sfx/effects_sfx_w1_bee_cavern.c
- *   game_EB6C0.c
+ *   game/Effects/DebrisSplash/debrissplash.c
  *   game/Effects/BoneGroundFx/bonegroundfx.c
  *   game/Effects/BoneRing/bonering.c
  *   game/Effects/PulseEffect/pulseeffect.c
@@ -37,8 +37,7 @@
  *   game/Effects/HopSprite/hopsprite.c
  *   game/Effects/TextLines/textlines.c
  *   game/Effects/ZoneSounds/zonesounds.c
- *   game_FE850.c
- *   game_FE8C0.c
+ *   game/Effects/LevelActorHooks/levelactorhooks.c
  *   game/Effects/RaySpinner/rayspinner.c
  *   game/Effects/HitSpray/hitspray.c
  *   game/Effects/TintedObject/tintedobject.c
@@ -49,7 +48,7 @@
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
- *   game_10CD70.c
+ *   game/Effects/MaterialScroll/materialscroll.c
  *   game/Effects/SplashBurst/splashburst.c
  *   game/Effects/PropEmitter/propemitter.c
  *   game/Effects/HomingEffect/homingeffect.c
@@ -59,12 +58,13 @@
  *   game/Effects/Oscillator/oscillator.c
  *   game/Effects/GroundFlash/groundflash.c
  *   game/Effects/BoneGroundHit/bonegroundhit.c
+ *   game/Effects/ActorExplosion/actorexplosion.c
  *   game/Effects/SwayObject/swayobject.c
  *   game/Effects/SurfaceSound/surfacesound.c
  *   game/Effects/BeamZones/beamzones.c
  *   game/Effects/ProjectilePuffs/projectilepuffs.c
  *   game/Effects/StageEffect/stageeffect.c
- *   game_127060.c
+ *   game/Effects/DelayedBurst/delayedburst.c
  *   game/Effects/StarField/starfield.s
  *   game/Effects/ChildEffect/childeffect.c
  *   game/Effects/ChildEffectFree/childeffectfree.c
@@ -90,7 +90,7 @@
  *   game/Effects/EffectActor/effectactor.c
  *   game/Effects/CharacterWatcher/characterwatcher.c
  *   game/Effects/VertexSwing/vertexswing.c
- *   game_193420.c
+ *   game/Effects/LevelUpdateStub/levelupdatestub.c
  *   game/Effects/QuadEffect/quadeffect.c
  *   game/Effects/ObjectList/objectlist.c
  *   game/Effects/ModelBurst/modelburst.c
@@ -106,7 +106,7 @@
  *   game/Effects/SurfaceHandlers/surfacehandlers.c
  *   game/Effects/FallingObject/fallingobject.c
  *   game/Effects/ContactEffects/contacteffects.c
- *   game_1CC420.c
+ *   game/Effects/ActorEventStub/actoreventstub.c
  *   game/Effects/ZoneEffect/zoneeffect.c
  *   game/Effects/DebrisBurst/debrisburst.c
  *   game/Effects/ActorTasks/actortasks.c
@@ -168,7 +168,7 @@ typedef struct {
 
 #define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
-/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game_EB6C0.c): the end points of its path. */
+/* Behaviour scratch state (WorldObject.touch) of effect_updatePathMover (game/Effects/DebrisSplash/debrissplash.c): the end points of its path. */
 typedef struct {
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
@@ -247,7 +247,7 @@ void effect_destroyOwnerSpark(OwnerSparkEffect *effect);
 void effect_freeOwnerSpark(OwnerSparkEffect *effect);
 void effect_ownerSparkMessage(OwnerSparkEffect *effect, ActorMsg *event, u8 eventId);
 
-/* game_E2DA0.c */
+/* game/Effects/ObjBurst/objburst.c */
 typedef struct ObjBurstEffect ObjBurstEffect;
 typedef struct BoltRingEffect BoltRingEffect;
 typedef struct Arg150B66DC Arg150B66DC;
@@ -314,7 +314,7 @@ void effect_updateEmitterSpawner(EB340Obj *obj);
 void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
 s32 effect_updateRisingScreenSprite(EB340Rising *sprite);
 
-/* game_EB6C0.c */
+/* game/Effects/DebrisSplash/debrissplash.c */
 void func_150BE210(WorldObject *obj);
 void effect_updatePathMover(WorldObject *mover);
 GameCommand *func_150BE438(GameCommand *cmd, s32 id);
@@ -449,10 +449,7 @@ s32 effect_updateSlowFadeTextBox(TextObj *obj);
 void effect_playRandomZoneSounds(s32 unused);
 extern u8 gRandomSoundTimer;
 
-/* game_FE850.c */
-void effect_spinDownActor(Actor *arg0);
-
-/* game_FE8C0.c */
+/* game/Effects/LevelActorHooks/levelactorhooks.c */
 /* A timed effect that pulses the ambient colour (effect_updateAmbientPulse, and light_updateAmbientRedDrift of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
@@ -542,7 +539,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind);
 void effect_dropPointEffect(PointEffect *effect);
 void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind);
 
-/* game_10CD70.c */
+/* game/Effects/MaterialScroll/materialscroll.c */
 typedef struct SwingObject SwingObject;
 typedef struct BoltEmitter BoltEmitter;
 extern u8 gWarpModelSetupDone;
@@ -631,6 +628,14 @@ s32 effect_getAltFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
 s32 effect_selectAltFootEffect(s32 kind, Actor *actor);
 void effect_spawnFootprintAtAltFoot(s32 actor, s32 side, s32 strength);
 
+/* game/Effects/ActorExplosion/actorexplosion.c */
+void func_150F1A00(Actor *actor);
+GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
+void func_150F1CB0(Actor *actor);
+void effect_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2);
+void effect_levelUpdateRandomSounds(s32 index);
+void effect_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2);
+
 /* game/Effects/SwayObject/swayobject.c */
 typedef struct SwayObject SwayObject;
 s32 effect_getLegBonePoint(Vec3f *out, Actor *owner, u8 slot);
@@ -680,7 +685,7 @@ void effect_spawnCutsceneBoneBeam(Actor *obj, u8 owner, s32 list);
 void effect_spawnGunMuzzleEffects(Actor *obj, u8 owner, s32 list);
 extern const u8 gStagePartObjectIds[8][8];
 
-/* game_127060.c */
+/* game/Effects/DelayedBurst/delayedburst.c */
 typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
 typedef struct FadeInSprite FadeInSprite;
@@ -1174,7 +1179,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj);
 void effect_swingVertices(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, const u8 *vtxIndices,
                    u8 count);
 
-/* game_193420.c */
+/* game/Effects/LevelUpdateStub/levelupdatestub.c */
 void effect_emptyLevelUpdateHook(void);
 
 /* game/Effects/QuadEffect/quadeffect.c */
@@ -1461,7 +1466,7 @@ void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *result);
 void func_15195698(Actor *self, Actor *other, u8 *result);
 void effect_hitReactRumble(Actor *self, Actor *other, u8 *result);
 
-/* game_1CC420.c */
+/* game/Effects/ActorEventStub/actoreventstub.c */
 void effect_emptyActorEventHook(Actor *arg0, s32 arg1, s32 arg2);
 
 /* game/Effects/ZoneEffect/zoneeffect.c */

@@ -1,13 +1,17 @@
 #include <ultra64.h>
 #include <math.h>
 #include "conker/actor.h"
-#include "conker/beam.h"
 #include "conker/collision.h"
 #include "conker/effect.h"
 #include "conker/game.h"
 #include "conker/particle.h"
 #include "conker/sound.h"
 #include "conker/weapon.h"
+
+/*
+ * Placed among the LEVEL_W2_WARBOSS files: effect_levelUpdateRandomSounds is level update hook 25, which only that
+ * level's header selects. No table ties the other functions of the file to a level.
+ */
 
 static const s32 gExplosionSprayModels[3] = { 0xBD, 0xBE, 0xBF };
 static const f32 gExplosionSprayScales[3] = { 1.0f, 1.0f, 1.0f };
@@ -95,7 +99,7 @@ void func_150F1CB0(Actor *actor) {
 
 /* Burst of effects at `actor` (particle_startPlayerRumbles and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
-void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     f32 scale;
 
@@ -158,7 +162,7 @@ void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
  * 128-255 ticks (gRandomSoundTimer counts down); sound_getPanVolumeAt derives the pan from its height. */
-void beam_levelUpdateRandomSounds(s32 index) {
+void effect_levelUpdateRandomSounds(s32 index) {
     f32 x;
     f32 z;
     s32 pan;
@@ -190,7 +194,7 @@ void beam_levelUpdateRandomSounds(s32 index) {
 
 /* Spawns weapon_spawnImpactBurst's effect at a random point 100 units around bone 19 of `actor`
  * (unless actor->cullMask's low nibble is 0xF). */
-void beam_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2) {
+void effect_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
     Vec3f pos;
 

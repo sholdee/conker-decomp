@@ -9,7 +9,6 @@ u8 gLastDeathKind;
 
 #include "conker/actor.h"
 #include "conker/attach.h"
-#include "conker/beam.h"
 #include "conker/blood.h"
 #include "conker/camera.h"
 #include "conker/collision.h"
@@ -447,7 +446,7 @@ s32 actor_runDeathEffect(Actor *actor) {
         attach_spawnFootImpact(actor);
         break;
     case 0x4A:
-        beam_spawnActorExplosion(actor, 0xFF, 1);
+        effect_spawnActorExplosion(actor, 0xFF, 1);
         break;
     case 0x47:
         sight_explodeAtActor(actor, 0xFF, 1);

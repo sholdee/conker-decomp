@@ -12,7 +12,6 @@
  *   game/Beam/BeamQuad/beamquad.c
  *   game/Beam/Tracer/tracer.c
  *   game/Beam/AimedBeam/aimedbeam.c
- *   game_11EEB0.c
  *   game/Beam/ModelBeam/modelbeam.c
  *   game/Beam/CastBeam/castbeam.c
  *   game/Beam/BoltRain/boltrain.c
@@ -752,14 +751,6 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter);
 void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type);
 void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type);
 void beam_spawnMuzzleBurst(Actor *actor, u8 slot, u8 variant, u8 arg3, s32 arg4); /* K&R definition: the callers' view */
-
-/* game_11EEB0.c */
-void func_150F1A00(Actor *actor);
-GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
-void func_150F1CB0(Actor *actor);
-void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2);
-void beam_levelUpdateRandomSounds(s32 index);
-void beam_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2);
 
 /* game/Beam/ModelBeam/modelbeam.c */
 void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);

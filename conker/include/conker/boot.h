@@ -9,7 +9,7 @@
  * that these files define, grouped by file in address order:
  *   init/Boot/BootMain/bootmain.c
  *   init/Boot/ArgStub/argstub.c
- *   init_38E0.c
+ *   init/Boot/HardwareCheck/hardwarecheck.c
  *   init/Boot/VoidStub/voidstub.c
  *   init/Boot/ScreenInit/screeninit.c
  *   init/Boot/Paging/pagesetup.s
@@ -42,7 +42,7 @@ extern u8 D_151FA130;             // game_TEXT_END: end of the chunk0 code segme
 /* init/Boot/ArgStub/argstub.c */
 void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-/* init_38E0.c */
+/* init/Boot/HardwareCheck/hardwarecheck.c */
 s32 func_100038E0(void);
 s32 func_1000390C(void);
 

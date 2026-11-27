@@ -253,7 +253,7 @@ typedef struct LevelHeader {
     /* 0x14 */ u8  unk14;
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
-    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
+    /* 0x18 */ u16 maxParticles;    // level-triangle sprites (game/Sprite/LevelSpriteSetup/levelspritesetup)
     /* 0x1A */ u16 bonePoolSize;    // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
@@ -1290,7 +1290,7 @@ struct Actor {
     /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
-    /* 0x2E4 */ s32 taskint[3]; // per-type state; game_EB6C0.c (func_150BE438) saves [0]/[1] as commands 0xE/0x68;
+    /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/DebrisSplash/debrissplash.c (func_150BE438) saves [0]/[1] as commands 0xE/0x68;
                                 // [2] is nonzero while the unk2D8 fade runs
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
@@ -1956,19 +1956,19 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game/Sprite/LevelSprites/levelsprites.c read it). */
+/* The texture of one particle resource (gParticleTexInfos[id]; game/Sprite/LevelSpriteSetup/levelspritesetup.c and game/Sprite/LevelSprites/levelsprites.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in gSpritePingPongTypes, gSpriteRandomFlipTypes; 0x04: more y jitter
-                              // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (light_setupParticleSlot)
+                              // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (sprite_setupParticleSlot)
     /* 0x1 */ u8  frameCount;
     /* 0x2 */ u16 frameSize;  // bytes of one frame
     /* 0x4 */ s16 scaleX;     // base x scale of the sprite
     /* 0x6 */ s16 scaleY;     // base y scale of the sprite
-    /* 0x8 */ u8  width;      // texture width (light_loadParticleTextures: tile extent (width << 5) - 1)
+    /* 0x8 */ u8  width;      // texture width (sprite_loadParticleTextures: tile extent (width << 5) - 1)
     /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
 } ParticleTexInfo; /* size 0xA */
 
-/* The resource picked for one of the 15 particle sprite types (gParticleSlotResources[15], game_38050.c). */
+/* The resource picked for one of the 15 particle sprite types (gParticleSlotResources[15], game/Sprite/LevelSpriteSetup/levelspritesetup.c). */
 typedef struct ParticleResource {
     /* 0x0 */ u16 id; // 0xFF: none
     /* 0x2 */ u16 flags;
