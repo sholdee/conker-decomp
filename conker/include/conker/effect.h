@@ -680,7 +680,7 @@ void effect_destroyStage(TimedEffect *object);
 void effect_freeStage(TimedEffect *object);
 void effect_spawnCutsceneBoneBeam(Actor *obj, u8 owner, s32 list);
 void effect_spawnGunMuzzleEffects(Actor *obj, u8 owner, s32 list);
-extern const u8 D_800A1C00[8][8];
+extern const u8 gStagePartObjectIds[8][8];
 
 /* game_127060.c */
 typedef struct Obj150FADC8 Obj150FADC8;
@@ -1221,7 +1221,7 @@ extern s32 gCachedOtherModeL;
 extern s32 gDrawHookTextureFrame;
 extern s32 gDrawHookTextureCm;
 extern TextureDesc *gDrawHookTexture; // texture of the current draw hook (effect_beginQuadEffectDraw, particle_beginPuffQuadDraw)
-extern SpriteParams D_800DD230;
+extern SpriteParams gDrawHookSprite;
 typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
 /*

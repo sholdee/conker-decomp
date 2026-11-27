@@ -2081,7 +2081,7 @@ typedef struct TriggerZone {
  */
 typedef struct {
     /* 0x00 */ TriggerZone *zone; /* the zone that set it up; message 0x3F (StageMsg.zone) names it */
-    /* 0x04 */ u8 set;            /* zone->data2: the column of D_800A1C00, the id of message 0x42 */
+    /* 0x04 */ u8 set;            /* zone->data2: the column of gStagePartObjectIds, the id of message 0x42 */
     /* 0x05 */ u8 mirror;         /* set >= 4; bit 0 mirrors the effect angles */
     /* 0x06 */ s16 stageTimer;
     /* 0x08 */ u8 stage;

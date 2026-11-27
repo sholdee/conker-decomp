@@ -70,21 +70,21 @@ struct StateRule {
     ((1 << (a)) | (1 << ((b) + 3)) | (1 << ((c) + 6)) | (1 << ((d) + 9)) |     \
      (1 << ((e) + 13)))
 
-/* Vertices of the effect display lists (D_8008AE60.., drawn through gEffectActorDisplayLists). */
-static const Vtx D_800A6080[5] = {
+/* Vertices of the effect display lists (gTumblePieceBipyramidDl.., drawn through gEffectActorDisplayLists). */
+static const Vtx gTumblePieceBipyramidVtx[5] = {
     { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0x00, 0xFF } } },
     { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xC8, 0xC8, 0x00, 0xFF } } },
     { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xA0, 0x50, 0x14, 0xFF } } },
     { { { 22, -12, 0 }, 0, { 0, 0 }, { 0x64, 0x82, 0x12, 0xFF } } },
     { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
 };
-static const Vtx D_800A60D0[4] = {
+static const Vtx gTumblePieceTetrahedronVtx[4] = {
     { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xC8, 0xAA, 0x14, 0xFF } } },
     { { { -22, -12, -255 }, 0, { 0, 0 }, { 0x80, 0x20, 0x08, 0xFF } } },
     { { { 22, -12, -255 }, 0, { 0, 0 }, { 0x64, 0x64, 0x00, 0xFF } } },
     { { { 0, 0, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
 };
-static const Vtx D_800A6110[6] = {
+static const Vtx gOctahedronVtx[6] = {
     { { { 0, 255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 255, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 0, -255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
@@ -92,14 +92,14 @@ static const Vtx D_800A6110[6] = {
     { { { 0, 0, 255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 0, 0, -255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
 };
-static const Vtx D_800A6170[5] = {
+static const Vtx gTumblePieceAltBipyramidVtx[5] = {
     { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFC, 0x52, 0x05, 0xFF } } },
     { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xFE, 0x8D, 0x30, 0xFF } } },
     { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xF0, 0x62, 0x1C, 0xFF } } },
     { { { 22, -12, 0 }, 0, { 0, 0 }, { 0xF9, 0x5B, 0x14, 0xFF } } },
     { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x85, 0x29, 0x00, 0xFF } } },
 };
-static const Vtx D_800A61C0[4] = {
+static const Vtx gTumblePieceAltTetrahedronVtx[4] = {
     { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xF8, 0x58, 0x14, 0xFF } } },
     { { { -22, -12, -255 }, 0, { 0, 0 }, { 0xC6, 0x3E, 0x03, 0xFF } } },
     { { { 22, -12, -255 }, 0, { 0, 0 }, { 0xFE, 0x8F, 0x3D, 0xFF } } },
@@ -107,9 +107,9 @@ static const Vtx D_800A61C0[4] = {
 };
 
 /* The effect actor display lists (EffectActorTemplate.displayList, drawn by effect_drawEffectActor of game/Effects/EffectActor/effectactor). */
-static Gfx D_8008AE60[] = {
+static Gfx gTumblePieceBipyramidDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6080, 5, 0),
+    gsSPVertex(gTumblePieceBipyramidVtx, 5, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 2, 3, 0),
     gsSP1Triangle(0, 3, 1, 0),
@@ -118,18 +118,18 @@ static Gfx D_8008AE60[] = {
     gsSP1Triangle(3, 4, 1, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AEA8[] = {
+static Gfx gTumblePieceTetrahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A60D0, 4, 0),
+    gsSPVertex(gTumblePieceTetrahedronVtx, 4, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 3, 1, 0),
     gsSP1Triangle(1, 3, 2, 0),
     gsSP1Triangle(2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AEE0[] = {
+static Gfx gOctahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6110, 6, 0),
+    gsSPVertex(gOctahedronVtx, 6, 0),
     gsSP1Triangle(0, 1, 5, 0),
     gsSP1Triangle(0, 5, 3, 0),
     gsSP1Triangle(0, 3, 4, 0),
@@ -140,9 +140,9 @@ static Gfx D_8008AEE0[] = {
     gsSP1Triangle(1, 4, 2, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AF38[] = {
+static Gfx gTumblePieceAltBipyramidDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6170, 5, 0),
+    gsSPVertex(gTumblePieceAltBipyramidVtx, 5, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 2, 3, 0),
     gsSP1Triangle(0, 3, 1, 0),
@@ -151,16 +151,16 @@ static Gfx D_8008AF38[] = {
     gsSP1Triangle(3, 4, 1, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AF80[] = {
+static Gfx gTumblePieceAltTetrahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A61C0, 4, 0),
+    gsSPVertex(gTumblePieceAltTetrahedronVtx, 4, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 3, 1, 0),
     gsSP1Triangle(1, 3, 2, 0),
     gsSP1Triangle(2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-Gfx *gEffectActorDisplayLists[] = { D_8008AE60, D_8008AEA8, D_8008AF38, D_8008AF80, D_8008AEE0, NULL };
+Gfx *gEffectActorDisplayLists[] = { gTumblePieceBipyramidDl, gTumblePieceTetrahedronDl, gTumblePieceAltBipyramidDl, gTumblePieceAltTetrahedronDl, gOctahedronDl, NULL };
 
 /* Transition rules of effect_updateCharacterWatcher, one per action slot of gWatcherModeActions. */
 static const StateRule gWatcherStateRules[28] = {

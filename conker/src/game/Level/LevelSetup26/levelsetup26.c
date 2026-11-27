@@ -34,7 +34,7 @@ s32 level_spawnStageZone(TriggerZone *zone) {
     {
         u8 i;
         for (i = 0; i < 8; i++) {
-            tmp.parts[i] = gfx_findObjectById(D_800A1C00[i][tmp.set]);
+            tmp.parts[i] = gfx_findObjectById(gStagePartObjectIds[i][tmp.set]);
         }
         tmp.eventTimer = 0;
         tmp.unk2C = 0.0f;
