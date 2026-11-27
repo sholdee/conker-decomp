@@ -542,7 +542,7 @@ void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2) {
     }
     obj->baseCharacterType = player_getBaseCharacterType(obj);
     if (gModelAnimCounts[obj->baseCharacterType] != 0) {
-        obj->unk58 = (s32)rom_findPath(0, 2, 2, obj->baseCharacterType);
+        obj->animBankTable = rom_findPath(0, 2, 2, obj->baseCharacterType);
     }
 }
 

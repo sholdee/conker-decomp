@@ -987,7 +987,7 @@ struct Actor {
     /* 0x04C */ f32 animsp;
     /* 0x050 */ f32 wantanimsp;   // not accessed in US code
     /* 0x054 */ f32 unk54;
-    /* 0x058 */ s32 unk58;
+    /* 0x058 */ u8 *animBankTable; // ROM table [2][bank] of the animation bank (rom_findPath)
     /* 0x05C */ s32 basemtx;
     /* 0x060 */ s16 texScroll;
     /* 0x062 */ s16 texScrollSpeed;

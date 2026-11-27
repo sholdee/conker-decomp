@@ -3313,8 +3313,8 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         } else {
             state->callback = 0;
         }
-        if (actor != NULL && (u8 *)actor->unk58 != NULL) {
-            info = (s32 *)rom_loadTableEntries((u8 *)actor->unk58, buf, assetId, 2);
+        if (actor != NULL && actor->animBankTable != NULL) {
+            info = (s32 *)rom_loadTableEntries(actor->animBankTable, buf, assetId, 2);
         } else {
             info = (s32 *)rom_loadSubTable(NULL, 2, buf, 3, kind, bank, assetId);
         }
