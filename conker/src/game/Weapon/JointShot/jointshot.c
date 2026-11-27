@@ -36,15 +36,6 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     Vec3f *spF4;
     Vec3f *spF0;
     Vec3f spE4;
-    const Vec3f *points[5];
-    Vec3f *results[5];
-    f32 dz;
-    f32 dx;
-    f32 invLen;
-    f32 offset;
-    RumbleParams event;
-    s32 mask;
-    u32 i;
 
     if (arg0 == NULL) {
         return NULL;
@@ -61,8 +52,9 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     }
     joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
-        /* matching: a block-scope declaration; its -g3 scope steers the schedule */
-        extern const Vec3f D_800AAB68[];
+        const Vec3f *points[5];
+        Vec3f *results[5];
+
 
         matrix = (u8 *)joints + gJointShotMatrixOffsets[side];
         results[0] = &origin;
@@ -91,11 +83,17 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
             aim.z -= origin.z;
         }
     } else {
+        f32 dz;
+        f32 dx;
+        f32 offset;
+
         if (arg2) {
             return NULL;
         }
         /* No skeleton: start 34 units to the side of the aim direction (in the xz plane), 49 units up. */
         if ((fabsf(aim.x) > 9.999999747e-05f) || (fabsf(aim.z) > 9.999999747e-05f)) {
+            f32 invLen;
+
             /* matching: a block-scope declaration; its -g3 scope steers the schedule */
             f32 sqrtf(f32);
 
@@ -116,6 +114,8 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     }
     particle_intersectAimPlane(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
     if (arg0->CameraPtr != NULL) {
+        RumbleParams event;
+
         event.flags = 1;
         event.duration = (math_random() % 11U) + 11;
         event.playerMask = 1 << arg0->CameraPtr->CNumber;
@@ -125,6 +125,9 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->cullMask & 0xF) != 0xF)) {
+        s32 mask;
+        u32 i;
+
         if (arg2 || ((gScreenLayout < 2) && (math_random() & 1))) {
             particle_spawnShortLightFlash(&origin, arg5, arg6);
         }
