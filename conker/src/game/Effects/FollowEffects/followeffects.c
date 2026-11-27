@@ -203,25 +203,15 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
-    s32 pad; // matching: unused stack slot
-    ParticleSpawn part;
-    f32 outA2, outA1, outA0, outB2, outB1, outB0;
     MtxF *mtx;
-    s32 i, j, k;
-    s32 shift;
-    f32 speed, scale, accel;
+    ParticleSpawn part;
 
     burst.angles.yawBase = 0;
     burst.angles.yawRange = 0xFF;
     burst.angles.pitchBase = -0x3F;
     burst.angles.pitchRange = 0x34;
     burst.spray.countBase = 6;
-    if (gScreenLayout >= 2) {
-        shift = 1;
-    } else {
-        shift = 0;
-    }
-    burst.spray.countRange = 5 >> shift;
+    burst.spray.countRange = 5 >> ((gScreenLayout >= 2) ? 1 : 0);
     burst.spray.pos.x = obj->xpos;
     burst.spray.pos.y = obj->ypos + 25.0f;
     burst.spray.pos.z = obj->zpos;
@@ -232,12 +222,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.sizeRange = 68.0f;
     burst.spray.sizeSlopeBase = 609.0f;
     burst.spray.sizeSlopeRange = 271.0f;
-    if ((gScreenLayout >= 2) || (gPlayerCount >= 8)) {
-        shift = 1;
-    } else {
-        shift = 0;
-    }
-    burst.spray.particleCountRange = 3 >> shift;
+    burst.spray.particleCountRange = 3 >> (((gScreenLayout >= 2) || (gPlayerCount >= 8)) ? 1 : 0);
     burst.spray.delayBase = 25;
     burst.spray.delayRange = 15;
     burst.spray.alphaBase = 100;
@@ -258,11 +243,14 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
         collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
         {
-            typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
+            f32 outA2, outA1, outA0, outB2, outB1, outB0;
+
             model_decomposeBoneMatrix(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
         }
         {
-            typedef s32 T152; // matching: as above
+            s32 i, j, k;
+            f32 speed, scale, accel;
+
             part.radius = 1.0f;
             part.scale.x = 1.0f;
             part.scale.y = 1.0f;
@@ -286,50 +274,57 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.ownerId = obj->unique_id;
             part.fadeStart = 0xC;
             part.fadeRate = 0x15;
-        }
         scale = 0.001f;
         accel = -488.0f * scale;
 
-        speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
-        part.lifetime = (math_random() % 36U) + 30;
-        part.model = 0x27;
-        part.sizeXZ = 0.75f;
-        part.sizeY = 0.75f;
-        math_randomFloat();
-        part.gravity = accel;
-        math_transformOffset(&D_800AA590, &part.pos, mtx);
-        math_transformOffset(&D_800AA59C, &part.vel, mtx);
-        part.vel.x = part.vel.x - part.pos.x;
-        part.vel.y = part.vel.y - part.pos.y;
-        part.vel.z = part.vel.z - part.pos.z;
-        part.vel.x = part.vel.x * speed;
-        part.vel.y = part.vel.y * speed;
-        part.vel.z = part.vel.z * speed;
-        part.rot = objPos;
-        part.rot.x += 109.0f;
-        part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-        part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-        particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+        {
+            f32 speed;
 
-        speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
-        part.lifetime = (math_random() % 36U) + 30;
-        part.model = 0x28;
-        part.sizeXZ = 0.5f;
-        part.sizeY = 0.5f;
-        math_randomFloat();
-        part.gravity = accel;
-        math_transformOffset(&D_800AA5A8, &part.pos, mtx);
-        math_transformOffset(&D_800AA5B4[math_random() & 1], &part.vel, mtx);
-        part.vel.x = part.vel.x - part.pos.x;
-        part.vel.y = part.vel.y - part.pos.y;
-        part.vel.z = part.vel.z - part.pos.z;
-        part.vel.x = part.vel.x * speed;
-        part.vel.y = part.vel.y * speed;
-        part.vel.z = part.vel.z * speed;
-        part.rot = objPos;
-        part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-        part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-        particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+            speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+            part.lifetime = (math_random() % 36U) + 30;
+            part.model = 0x27;
+            part.sizeXZ = 0.75f;
+            part.sizeY = 0.75f;
+            math_randomFloat();
+            part.gravity = accel;
+            math_transformOffset(&D_800AA590, &part.pos, mtx);
+            math_transformOffset(&D_800AA59C, &part.vel, mtx);
+            part.vel.x = part.vel.x - part.pos.x;
+            part.vel.y = part.vel.y - part.pos.y;
+            part.vel.z = part.vel.z - part.pos.z;
+            part.vel.x = part.vel.x * speed;
+            part.vel.y = part.vel.y * speed;
+            part.vel.z = part.vel.z * speed;
+            part.rot = objPos;
+            part.rot.x += 109.0f;
+            part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+            part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+        }
+
+        {
+            f32 speed;
+
+            speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+            part.lifetime = (math_random() % 36U) + 30;
+            part.model = 0x28;
+            part.sizeXZ = 0.5f;
+            part.sizeY = 0.5f;
+            math_randomFloat();
+            part.gravity = accel;
+            math_transformOffset(&D_800AA5A8, &part.pos, mtx);
+            math_transformOffset(&D_800AA5B4[math_random() & 1], &part.vel, mtx);
+            part.vel.x = part.vel.x - part.pos.x;
+            part.vel.y = part.vel.y - part.pos.y;
+            part.vel.z = part.vel.z - part.pos.z;
+            part.vel.x = part.vel.x * speed;
+            part.vel.y = part.vel.y * speed;
+            part.vel.z = part.vel.z * speed;
+            part.rot = objPos;
+            part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+            part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+        }
 
         part.model = 0x29;
         for (i = 0; i != 4; i++) {
@@ -404,6 +399,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
+        }
         }
     }
 }

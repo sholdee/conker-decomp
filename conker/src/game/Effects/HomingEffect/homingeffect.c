@@ -210,7 +210,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     s32 spawned;
     Vec3f point;
     Vec3f end;
-    f32 t;
+    s32 randAngle;
     Vec3f from;
     Vec3f dir;
     f32 length;
@@ -221,7 +221,6 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     f32 randWidth;
     s32 randByte;
     RayHit particle;
-    s32 randAngle;
 
     effect = arg0;
     spawned = 0;
@@ -304,21 +303,20 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         if (collision_probeFloorSurfABSet0Cached(&point, 0, point.y - 1000.0f, &effect->ground) != 0) {
             end.y = effect->ground.height;
         }
+        dir.x = end.x - from.x;
+        dir.y = end.y - from.y;
+        dir.z = end.z - from.z;
         {
-            /* matching: a declaration opens a -g3 block; its end, before the call, keeps these loads out of saved registers */
-            extern s32 math_vec3Normalize(Vec3f *, Vec3f *, f32 *, f32 *);
+            f32 t;
 
-            dir.x = end.x - from.x;
-            dir.y = end.y - from.y;
-            dir.z = end.z - from.z;
-        }
-        if (math_vec3Normalize(&dir, &dir, &length, &unusedOut) != 0) {
-            t = math_randomFloat() * gFrameDelta;
-            scale = 190.0f * t;
-            from.x += dir.x * scale;
-            from.y += dir.y * scale;
-            from.z += dir.z * scale;
-            length -= scale;
+            if (math_vec3Normalize(&dir, &dir, &length, &unusedOut) != 0) {
+                t = math_randomFloat() * gFrameDelta;
+                scale = 190.0f * t;
+                from.x += dir.x * scale;
+                from.y += dir.y * scale;
+                from.z += dir.z * scale;
+                length -= scale;
+            }
         }
         particle.obj = NULL;
         particle.dist = length;
