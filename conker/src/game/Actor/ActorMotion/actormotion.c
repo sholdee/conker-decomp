@@ -2945,7 +2945,7 @@ void actor_pushOut(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distS
     }
     gCollidedActors |= 1 << otherSlot;
     if (other->noshove & 0x10) {
-        D_800CC26C = otherSlot;
+        gPushedActorIndex = otherSlot;
         pushFactor = 0.8000000119f;
         if ((other->character_type == 0x61) && (actor->type == 1)) {
             goto end;
@@ -2965,7 +2965,7 @@ void actor_pushOut(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distS
     }
     if (otherWeight >= actorWeight) {
         if ((other->noshove & 0x400) && (other->shad == 0.0f)) {
-            D_800CC26D = otherSlot + 100;
+            gLiftableActorId = otherSlot + 100;
         }
         dist = sqrtf(distSq);
         invDist = 1.0f / dist;
@@ -3024,8 +3024,8 @@ void actor_resolveCollisions(Actor *actor, s32 selfIdx) {
     ActorCtl *movement;
 
     gCollidedActors = 0;
-    D_800CC26C = 0;
-    D_800CC26D = 0;
+    gPushedActorIndex = 0;
+    gLiftableActorId = 0;
     count = 25;
     if (((actor->type != 1) ||
          ((movement_obj[selfIdx].mv->transport == 0) && (movement_obj[selfIdx].mv->jump_on_char == 0))) &&

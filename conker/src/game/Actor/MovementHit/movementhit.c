@@ -181,9 +181,9 @@ void actor_runHitHandler(Actor *obj, s32 type, void *arg) {
         gHitOldPos.x = obj->old_xpos;
         gHitOldPos.y = obj->old_ypos;
         gHitOldPos.z = obj->old_zpos;
-        gHitNewPos.x = D_800CC254;
-        gHitNewPos.y = D_800CC258;
-        gHitNewPos.z = D_800CC25C;
+        gHitNewPos.x = gPreCollisionX;
+        gHitNewPos.y = gPreCollisionY;
+        gHitNewPos.z = gPreCollisionZ;
         if (gActorHitHandlers[type] != NULL) {
             gActorHitHandlers[type](obj, arg);
         }

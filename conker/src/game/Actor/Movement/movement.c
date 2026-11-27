@@ -5,14 +5,14 @@
    declare the globals: IDO lays out .bss in the order it first sees each name, and that order also
    depends on how many types and variables are declared before it (see init/Sched/SchedInit/schedinit.c). */
 s32 gActorClock;
-f32 D_800CC254; // object position saved at the hit test (x, y, z)
-f32 D_800CC258;
-f32 D_800CC25C;
+f32 gPreCollisionX; // object position saved at the hit test (x, y, z)
+f32 gPreCollisionY;
+f32 gPreCollisionZ;
 s32 gAttackHitMask;
 s16 gActorStepPercent; // frame speed in percent (100 = one step)
 s32 gCollidedActors;
-u8 D_800CC26C;
-u8 D_800CC26D;
+u8 gPushedActorIndex;
+u8 gLiftableActorId;
 u8 D_800CC26E;
 f32 gHitAttackerX; // attacker position saved at the hit (x, z, y)
 f32 gHitAttackerZ;
@@ -1851,27 +1851,27 @@ void actor_updatePlayer(Actor *actor) {
         cutscene_applyObjectTrack(actor, 0, -1);
         actor_applyGravity(actor);
         actor_resolveCollisions(actor, dc_glbl_CharNum);
-        if ((D_800CC26C != 0) && (actor->mv->pissed_up <= 0) && (actor->lifting == 0)) {
-            heading = actor_getDirectionAngle(movement_obj[D_800CC26C].xpos - actor->xpos, actor->zpos - movement_obj[D_800CC26C].zpos, 0);
+        if ((gPushedActorIndex != 0) && (actor->mv->pissed_up <= 0) && (actor->lifting == 0)) {
+            heading = actor_getDirectionAngle(movement_obj[gPushedActorIndex].xpos - actor->xpos, actor->zpos - movement_obj[gPushedActorIndex].zpos, 0);
             
             if ((actor->shad == 0.0f) && (moveSpeed > 15.0f) && (((gPlayerMoveAngle - heading) - 0x4000) & 0x8000)) {
                 f32 heightDiff;
 
                 follow = 0.1f;
                 carry = 1;
-                if (movement_obj[D_800CC26C].character_type == 0x61) {
+                if (movement_obj[gPushedActorIndex].character_type == 0x61) {
                     if (actor->animseq.uh == 0x7A) {
                         u16 otherFacing;
                         u16 quadrant;
 
-                        otherFacing = movement_obj[D_800CC26C].langle;
+                        otherFacing = movement_obj[gPushedActorIndex].langle;
                         diff = actor->angle - otherFacing;
                         quadrant = (diff + 0x2000) & 0xC000;
                         if (quadrant & 0x4000) {
-                            movement_obj[D_800CC26C].scriptCmd = NULL;
-                            movement_obj[D_800CC26C].intelwalk = 2;
-                            movement_obj[D_800CC26C].angle = otherFacing + quadrant;
-                            actor->angle = movement_obj[D_800CC26C].angle;
+                            movement_obj[gPushedActorIndex].scriptCmd = NULL;
+                            movement_obj[gPushedActorIndex].intelwalk = 2;
+                            movement_obj[gPushedActorIndex].angle = otherFacing + quadrant;
+                            actor->angle = movement_obj[gPushedActorIndex].angle;
                             actor->mv->turn = 1;
                             actor->unk54 *= 0.4f;
                         }
@@ -1879,22 +1879,22 @@ void actor_updatePlayer(Actor *actor) {
                 } else {
                     pushScale = 0.3f;
                     pushAccel = 0.5f;
-                    heightDiff = fabsf(actor->ypos - movement_obj[D_800CC26C].ypos);
+                    heightDiff = fabsf(actor->ypos - movement_obj[gPushedActorIndex].ypos);
                     nudgeX = heightDiff;
                     if (heightDiff > 30.0f) {
                         nudgeX = 30.0f;
                     }
-                    nudgeX = (2.0f * movement_obj[D_800CC26C].bodyRadius) - nudgeX;
+                    nudgeX = (2.0f * movement_obj[gPushedActorIndex].bodyRadius) - nudgeX;
                     actor->unk54 *= 0.6f;
-                    actor->speed = movement_obj[D_800CC26C].stickspeed;
-                    if (movement_obj[D_800CC26C].stickspeed < movement_obj[D_800CC26C].speed) {
-                        nudgeZ = movement_obj[D_800CC26C].speed;
+                    actor->speed = movement_obj[gPushedActorIndex].stickspeed;
+                    if (movement_obj[gPushedActorIndex].stickspeed < movement_obj[gPushedActorIndex].speed) {
+                        nudgeZ = movement_obj[gPushedActorIndex].speed;
                     } else {
-                        nudgeZ = movement_obj[D_800CC26C].stickspeed;
+                        nudgeZ = movement_obj[gPushedActorIndex].stickspeed;
                     }
                     actor->mv->turn = ((32.0f - nudgeZ) * 0.125f);
-                    if (movement_obj[D_800CC26C].character_type == 0x34) {
-                        if (movement_obj[D_800CC26C].unk251 != 1) {
+                    if (movement_obj[gPushedActorIndex].character_type == 0x34) {
+                        if (movement_obj[gPushedActorIndex].unk251 != 1) {
                             carry = 0;
                         }
                         pushAnim = 0x23;
@@ -1906,35 +1906,35 @@ void actor_updatePlayer(Actor *actor) {
                     } else {
                         pushAnim = 0x18;
                     }
-                    if ((pushAnim != actor->animseq.uh) && (movement_obj[D_800CC26C].character_type != 0x17)) {
+                    if ((pushAnim != actor->animseq.uh) && (movement_obj[gPushedActorIndex].character_type != 0x17)) {
                         gEventParam = 0xFF08012B;
                         pushAccel = 0.5f;
                         event_playSound1Range1800();
                     }
-                    if (movement_obj[D_800CC26C].unk224 != 0) {
-                        pushScale = movement_obj[D_800CC26C].unk224 * 0.01f;
+                    if (movement_obj[gPushedActorIndex].unk224 != 0) {
+                        pushScale = movement_obj[gPushedActorIndex].unk224 * 0.01f;
                     }
                     if (carry != 0) {
                         pushAccel = 0.5f;
                         actor_splitVelocity(actor->angle, nudgeX, 0.0f, &nudgeX, &nudgeZ, &nudgeY);
-                        actor->xpos += ((((movement_obj[D_800CC26C].xpos - nudgeX) + movement_obj[D_800CC26C].unkBC) - actor->xpos) * follow);
-                        actor->zpos += ((((movement_obj[D_800CC26C].zpos - nudgeZ) + movement_obj[D_800CC26C].unk148) - actor->zpos) * follow);
-                        movement_obj[D_800CC26C].angle = actor->angle;
+                        actor->xpos += ((((movement_obj[gPushedActorIndex].xpos - nudgeX) + movement_obj[gPushedActorIndex].unkBC) - actor->xpos) * follow);
+                        actor->zpos += ((((movement_obj[gPushedActorIndex].zpos - nudgeZ) + movement_obj[gPushedActorIndex].unk148) - actor->zpos) * follow);
+                        movement_obj[gPushedActorIndex].angle = actor->angle;
                     }
-                    movement_obj[D_800CC26C].unk87 = 1;
+                    movement_obj[gPushedActorIndex].unk87 = 1;
                     nudgeX = actor->stickspeed * pushScale;
-                    if (movement_obj[D_800CC26C].character_type == 0x25) {
+                    if (movement_obj[gPushedActorIndex].character_type == 0x25) {
                         nudgeX = actor->stickspeed * 0.6f;
                         actor->speed += 2.0f;
                         pushAccel = 1.0f;
                         actor->mv->turn += 3;
                     }
-                    if (movement_obj[D_800CC26C].character_type != 0x34) {
-                        if (movement_obj[D_800CC26C].speed < nudgeX) {
-                            movement_obj[D_800CC26C].speed += (pushAccel * gFrameDelta);
+                    if (movement_obj[gPushedActorIndex].character_type != 0x34) {
+                        if (movement_obj[gPushedActorIndex].speed < nudgeX) {
+                            movement_obj[gPushedActorIndex].speed += (pushAccel * gFrameDelta);
                         }
                     } else {
-                        actor->speed = movement_obj[D_800CC26C].speed;
+                        actor->speed = movement_obj[gPushedActorIndex].speed;
                     }
                 }
             }
@@ -3481,9 +3481,9 @@ void func_150538CC(Actor *obj) {
     if (obj->unk103 != 0) {
         actor_applyGravity(obj);
     }
-    D_800CC254 = obj->xpos;
-    D_800CC258 = obj->ypos;
-    D_800CC25C = obj->zpos;
+    gPreCollisionX = obj->xpos;
+    gPreCollisionY = obj->ypos;
+    gPreCollisionZ = obj->zpos;
     prevY = obj->ypos;
     actor_updateFloorAndWalls(obj, obj->old_ypos);
     actor_landNonPlayer(obj, obj->floorY);
@@ -3623,9 +3623,9 @@ void func_150538CC(Actor *obj) {
             } else {
                 Vec3f vec;
 
-                vec.x = D_800CC254 - obj->old_xpos;
-                vec.y = D_800CC258 - obj->old_ypos;
-                vec.z = D_800CC25C - obj->old_zpos;
+                vec.x = gPreCollisionX - obj->old_xpos;
+                vec.y = gPreCollisionY - obj->old_ypos;
+                vec.z = gPreCollisionZ - obj->old_zpos;
                 if (math_vec3Normalize(&vec, &vec, NULL, NULL) != 0) {
                     effect_spawnRaySurfaceImpact(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }

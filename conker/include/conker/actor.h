@@ -168,14 +168,14 @@ void actor_updateOverEdge(Actor *obj);
 extern s32 D_80086000;
 extern void (*gActorUpdateHandlers[])(Actor *); // per-type update handlers
 extern s32 gActorClock;
-extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
+extern f32 gPreCollisionX; // object position saved at the hit test (x, y, z)
+extern f32 gPreCollisionY;
+extern f32 gPreCollisionZ;
 extern s32 gAttackHitMask;
 extern s16 gActorStepPercent; // frame speed in percent
 extern s32 gCollidedActors;
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
+extern u8 gPushedActorIndex;
+extern u8 gLiftableActorId;
 extern u8 D_800CC26E;
 extern f32 gHitAttackerX; // attacker position saved at the hit (x, z, y)
 extern f32 gHitAttackerZ;

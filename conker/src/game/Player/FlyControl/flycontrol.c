@@ -28,7 +28,7 @@ f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch) {
 
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when level is LEVEL_W3_HAUNTED_HOUSE and fewer than 5 id-0x25 objects exist). Also picks up the
- * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
+ * gLiftableActorId object into unk13C and drops it again when unk25C bit 1 is set. */
 void player_updateFlying(Actor *actor) {
     u16 angle;
     f32 mag;
@@ -103,12 +103,12 @@ void player_updateFlying(Actor *actor) {
             actor->unk102 = 1;
         }
         actor_updateCommon(actor);
-        if (D_800CC26D != 0) {
+        if (gLiftableActorId != 0) {
             if (actor->shad > 30.0f) {
                 gEventParam = 0xFF010074;
                 event_playSound1Range1800();
-                actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
-                actor->lifting = D_800CC26D;
+                actor_attachToHost(&movement_obj[gLiftableActorId - 100], dc_glbl_CharNum);
+                actor->lifting = gLiftableActorId;
                 actor->unk102 = 1;
             }
             actor->yspd = 23.0f;
@@ -242,11 +242,11 @@ void player_updateFlying(Actor *actor) {
         floorLevel = 50.0f;
     }
     if (!(gCurrentPad->button & R_TRIG)) {
-        if ((D_800CC26D != 0) && (actor->lifting == 0) && (movement_obj[D_800CC26D - 100].shad == 0.0f)) {
-            actor->ypos = movement_obj[D_800CC26D - 100].ypos + 70.0f;
+        if ((gLiftableActorId != 0) && (actor->lifting == 0) && (movement_obj[gLiftableActorId - 100].shad == 0.0f)) {
+            actor->ypos = movement_obj[gLiftableActorId - 100].ypos + 70.0f;
             actor->yspd = 20.0f;
-            actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
-            actor->lifting = D_800CC26D;
+            actor_attachToHost(&movement_obj[gLiftableActorId - 100], dc_glbl_CharNum);
+            actor->lifting = gLiftableActorId;
             gEventParam = 0xFF010074;
             event_playSound1Range1800();
         }
