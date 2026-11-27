@@ -23,8 +23,8 @@ osSpTaskStartGo	0x1000349C	68	init	c		build/src/libultra/io/sptask.c.o
 osCreateViManager	0x100034E0	784	init	c		build/src/libultra/io/vimgr.c.o
 osCreateThread	0x100037F0	208	init	c		build/src/libultra/os/createthread.c.o
 func_100038C0	0x100038C0	32	init	c		build/src/init/Boot/ArgStub/argstub.c.o
-func_100038E0	0x100038E0	44	init	c		build/src/init_38E0.c.o
-func_1000390C	0x1000390C	20	init	c		build/src/init_38E0.c.o
+func_100038E0	0x100038E0	44	init	c		build/src/init/Boot/HardwareCheck/hardwarecheck.c.o
+func_1000390C	0x1000390C	20	init	c		build/src/init/Boot/HardwareCheck/hardwarecheck.c.o
 heap_clearExpansionPak	0x10003920	16	init	c		build/src/init/Heap/ExpansionPak/expansionpak.c.o
 heap_initMemoryLayout	0x10003930	128	init	c		build/src/init/Heap/MemoryLayout/memorylayout.c.o
 func_100039B0	0x100039B0	16	init	c		build/src/init/Boot/VoidStub/voidstub.c.o

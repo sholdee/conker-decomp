@@ -43,7 +43,7 @@ segments:
       - [0x34E0, c, libultra/io/vimgr]
       - [0x37F0, c, libultra/os/createthread]
       - [0x38C0, c, init/Boot/ArgStub/argstub]
-      - [0x38E0, c, init_38E0]
+      - [0x38E0, c, init/Boot/HardwareCheck/hardwarecheck]
       - [0x3920, c, init/Heap/ExpansionPak/expansionpak]
       - [0x3930, c, init/Heap/MemoryLayout/memorylayout]
       - [0x39B0, c, init/Boot/VoidStub/voidstub]
@@ -292,7 +292,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80036B60, name: libultra/io/sptask}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036BA0, name: libultra/io/vimgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init/Boot/Exception/exceptasm}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init/Boot/HardwareCheck/hardwarecheck}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init/Heap/ExpansionPak/expansionpak}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init/Heap/MemoryLayout/memorylayout}
       - {start: 0x2D4B0, type: .bss, vram: 0x800380A0, name: init/Boot/ScreenInit/screeninit}

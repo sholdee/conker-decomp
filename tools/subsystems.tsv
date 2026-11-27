@@ -1,5 +1,5 @@
 src/init/Boot/EntryPoint/entrypoint.s	boot	hand-written asm (subsystem from entry point)
-src/init_38E0.c	boot	early-boot helper pair (permuter-matched)
+src/init/Boot/HardwareCheck/hardwarecheck.c	boot	early-boot helper pair (permuter-matched)
 src/init/Boot/Paging/pagesetup.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/Paging/pagebitmap.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/Paging/pagefault.s	boot	hand-written asm (subsystem from its header group)
