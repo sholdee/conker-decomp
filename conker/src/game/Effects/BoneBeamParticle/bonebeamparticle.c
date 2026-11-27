@@ -39,14 +39,14 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
     material = collision_getSurfaceType(surfaceFlags);
     arg.texture = 0x5C;
     switch (level) {
-    case 0x36:
+    case LEVEL_W5_BANK:
         if (material == 9) {
             return NULL;
         }
         arg.texture = 0x85;
         size *= 0.6000000238f;
         break;
-    case 0x26:
+    case LEVEL_W2_MACHINEGUNNEST:
         if (material == 2) {
             return NULL;
         }
@@ -57,7 +57,7 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
     arg.lifetime = (duration == -1) ? 300 : duration;
     arg.frame = 0;
     arg.frameSpeed = 0;
-    if (level == 0x36) {
+    if (level == LEVEL_W5_BANK) {
         arg.unk10 = arg1 >> 1;
     } else {
         arg.unk10 = arg1;

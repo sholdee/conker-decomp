@@ -33,7 +33,7 @@ s32 effect_getFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
 }
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
-   fixed id; kind 1 depends on the current world (level) and, in world 4, on whether
+   fixed id; kind 1 depends on the current map (level) and, in LEVEL_W2_OUTSIDE_MOLEHOLE, on whether
    func_151420F8 accepts the actor; kind 6 first has to register a five-entry effect list against
    the actor's index in movement_obj, and reports -1 if that fails.  Anything from 9 up is unmapped. */
 s32 effect_selectPlayerFootEffect(s32 kind, Actor *actor) {
@@ -44,7 +44,7 @@ s32 effect_selectPlayerFootEffect(s32 kind, Actor *actor) {
     case 2: return 2;
     case 0: return 0;
     case 1:
-        if (level == 4) {
+        if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }

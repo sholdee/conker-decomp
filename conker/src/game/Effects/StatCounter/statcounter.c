@@ -50,7 +50,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         flag = arg3 ? 0x10 : 0;
         params.flags = (u8)flag | 0xE;
         params.updateFunc = 1;
-        if (level == 7) {
+        if (level == LEVEL_W1_DOG_FISH) {
             params.updateFunc2 = 6;
         } else {
             params.updateFunc2 = 2;
@@ -267,7 +267,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.variant = variantIds[variant];
         spawn.unk5C = zone;
         spawn.alpha = 0xFF;
-        if (level == 7) {
+        if (level == LEVEL_W1_DOG_FISH) {
             spawn.updateFn = 0x18;
         } else {
             spawn.updateFn = 0;

@@ -68,7 +68,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
     s32 j; // spawn loop counter, then the chosen spawn index
 
     remember = TRUE;
-    if (level == 0x2B) {
+    if (level == LEVEL_WMP_BEACH) {
         remember = FALSE;
         D_800D18A8 = 0;
     }

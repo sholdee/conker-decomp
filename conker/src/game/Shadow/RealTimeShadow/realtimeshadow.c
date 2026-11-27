@@ -965,7 +965,7 @@ void shadow_initLevelSettings(s32 levelId) {
     gShadowFlaggedFacesOnly = 1;
 
     switch (levelId) {
-    case 0x21:
+    case LEVEL_WFRONTEND_TABLE:
         gShadowVtxBudgetMax = 4800;
         D_800DE020 = gShadowVtxBudgetMax - 1;
         gShadowVtxBudgetMin = gShadowVtxBudgetMax - 2;
@@ -974,17 +974,17 @@ void shadow_initLevelSettings(s32 levelId) {
         gShadowMaxLights = 4;
         gShadowRaiseLight = 0;
         break;
-    case 0x22:
+    case LEVEL_WFRONTEND_HELL:
         gShadowVtxBudgetMax = 2400;
         D_800DE020 = gShadowVtxBudgetMax - 1;
         gShadowVtxBudgetMin = gShadowVtxBudgetMax - 2;
         gShadowMaxLights = 4;
         gShadowRaiseLight = 0;
         break;
-    case 0x14:
+    case LEVEL_W1_DINO_ARENA:
         gShadowFlaggedFacesOnly = 0;
         break;
-    case 0x29:
+    case LEVEL_W1_TRAINING:
         gShadowVtxBudgetMax = 1200;
         D_800DE020 = 600;
         gShadowVtxBudgetMin = 300;

@@ -686,8 +686,8 @@ void cutscene_skip(s32 scene) {
     gCutsceneSkipped = 1;
 }
 
-/* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
-   0x1D and 0x21). */
+/* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for
+   LEVEL_FRONTEND and LEVEL_WFRONTEND_TABLE). */
 s32 cutscene_canSkip(s32 scene) {
     s32 map;
     s32 skipRequest;
@@ -696,7 +696,7 @@ s32 cutscene_canSkip(s32 scene) {
     // matching: holding the address as an integer keeps IDO from folding it into the loads
     skipRequest = (s32)D_8008FD84;
 
-    if (map == 0x1D) {
+    if (map == LEVEL_FRONTEND) {
         // matching: the goto orders the gCutsceneIds[0] address load after the branch
         if (*(s8 *)skipRequest == 0) {
             goto noRequest;
@@ -709,7 +709,7 @@ s32 cutscene_canSkip(s32 scene) {
         }
     }
 
-    if (map == 0x21) {
+    if (map == LEVEL_WFRONTEND_TABLE) {
         if ((gButtonsPressed[0] & 0x1000) && (D_8000030C == 1) && (gCutsceneTimes[0] >= 301)) {
             return 1;
         }
@@ -909,14 +909,14 @@ void cutscene_finish(s32 skipped, s32 scene) {
 
             gCutsceneStates[scene] = 2;
             map = gNextCutsceneMap;
-            if (0x25 == gNextCutsceneMap) {
+            if (LEVEL_GENERIC_CUTSCENES == gNextCutsceneMap) {
                 savedMap = level;
-                level = 0x25;
-                map = 0x25;
+                level = LEVEL_GENERIC_CUTSCENES;
+                map = LEVEL_GENERIC_CUTSCENES;
             }
             gSpawnCutsceneActive = 0;
             cutscene_start(map, gNextCutscene - 1, scene, gCutsceneCallback, gCutsceneCallbackArg);
-            if (0x25 == gNextCutsceneMap) {
+            if (LEVEL_GENERIC_CUTSCENES == gNextCutsceneMap) {
                 level = savedMap;
             }
             return;

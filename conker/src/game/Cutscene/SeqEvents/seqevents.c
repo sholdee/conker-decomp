@@ -928,9 +928,9 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 if (found == NULL) {
                     end = 0;
                 }
-                if (level == 0x18) {
+                if (level == LEVEL_W5_THRONE_ROOM) {
                     beam_showFadeSprite(start, total - eventTime - end - start, end, event->unk5);
-                } else if (level == 0x21) {
+                } else if (level == LEVEL_WFRONTEND_TABLE) {
                     sprite_showFadeSprite(start, total - eventTime - end - start, end);
                 }
             }
@@ -1018,7 +1018,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 FS32(actor, 0x7C) = 0;
             }
         } else if (event->value == 0x7B) {
-            if (level == 0x1D) {
+            if (level == LEVEL_FRONTEND) {
                 D_800C3680 = 1;
             }
         } else if (event->value == 0x7D) {

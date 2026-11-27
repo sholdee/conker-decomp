@@ -15,7 +15,7 @@ Gfx *env_drawSkyGradient(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 
     Texture tex;
 
     tOffset = pitch * 81.0f;
-    if ((level == 0x33) || (level == 0x32) || (level == 0x3F)) {
+    if ((level == LEVEL_WMP_VOLCANO_RACE) || (level == LEVEL_W1_VOLCANO_RACE) || (level == LEVEL_WMP_RAPTOR)) {
         top = -98;
         bottom = 39;
     } else {

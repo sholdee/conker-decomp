@@ -203,7 +203,7 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         data->particle->head.desc.pos = pos;
     }
     emit = TRUE;
-    if ((level == 2) && (zone_isActorOutsideId(owner - movement_obj, 0x4065) == 0)) {
+    if ((level == LEVEL_W1_BRONTO_CAVERN) && (zone_isActorOutsideId(owner - movement_obj, 0x4065) == 0)) {
         emit = FALSE;
     }
     if (emit) {

@@ -21,10 +21,10 @@ static const u8 gEmitterPropIds[2] = { 0xF7, 0xF6 };
 
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
- * from script_query queries for the levels level == 0x1E, 0x1B and 0x2F. */
+ * from script_query queries for the maps LEVEL_W2_FLAMETUNNEL, LEVEL_W2_LIFTTUNNEL and LEVEL_W2_LAB. */
 void effect_levelHook12(Camera *camera) {
     if (camera->CharContext == 9) {
-        if (level == 0x1E) {
+        if (level == LEVEL_W2_FLAMETUNNEL) {
             script_command(0, 0x4044, 1);
         }
         if ((camera->Mode != 0x100) && (camera->cmdRunning == 0)) {
@@ -48,13 +48,13 @@ void effect_levelHook12(Camera *camera) {
             camera->height = 110.0f;
             camera->IdealTripodMagnitude = 300.0f;
         }
-        if (level == 0x1E) {
+        if (level == LEVEL_W2_FLAMETUNNEL) {
             script_command(0, 0x4044, 0);
         }
     }
-    if (level == 0x2F) {
+    if (level == LEVEL_W2_LAB) {
         camera->AvailableModes &= 0x7FFFFFFF;
-    } else if (level == 0x1E) {
+    } else if (level == LEVEL_W2_FLAMETUNNEL) {
         if (script_query(1, 0x4042, 6, 0x9000) != 0) {
             camera->AvailableModes &= 0x7FFFFFFF;
         } else {
@@ -68,7 +68,7 @@ void effect_levelHook12(Camera *camera) {
             camera->AvailableModes |= 8;
         }
     }
-    if (level == 0x1B) {
+    if (level == LEVEL_W2_LIFTTUNNEL) {
         if (script_query(1, 0x406E, 6, 0x9000) != 0) {
             camera->AvailableModes |= 0x200;
         } else {
