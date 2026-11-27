@@ -8,31 +8,6 @@
 #include "conker/sound.h"
 #include "conker/sprite.h"
 
-/* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
- * object whose +0x318 points at its owner (event 0), sends the message. */
-void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
-    if (event == 0x21) {
-        if (obj->spawn.owner == msg[0]) {
-            effect_destroyObject(&obj->base.header);
-        }
-    } else if (event == 0) {
-        Actor *sender = msg[0];
-
-        if (sender->CameraPtr == obj->spawn.owner) {
-            effect_destroyObject(&obj->base.header);
-        }
-    }
-}
-
-/* Advances y by ySpeed per frame; returns 0 once it passes 120. */
-s32 effect_updateRisingScreenSprite(EB340Rising *arg0) {
-    arg0->y += arg0->ySpeed * gFrameDelta;
-    if (arg0->y > 120.0f) {
-        return 0;
-    }
-    return 1;
-}
-
 /* Until finished (task_flag state TASK_FLAG_ON): calls prop_updatePush(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */

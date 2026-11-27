@@ -4,6 +4,14 @@
 #include "conker/game.h"
 #include "conker/sprite.h"
 
+/*
+ * Rare's ../Effects/Sfx/effects_sfx_w1_bee_cavern.c. The ECTS build (August 2000) passes this path
+ * to its debug tunables from effect_updateEmitterSpawner (12 calls, lines 87 to 171) and from
+ * effect_updateRisingScreenSprite. The US build has no tunables: their values are literals.
+ * The file is these four functions: the unit starts after alignment padding, and the next unit's
+ * const tables follow this unit's float literals in .rodata.
+ */
+
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
 void effect_newEmitterSpawner(Camera *owner, u8 arg1, s32 arg2) {
     EB340Spawn spawn;
@@ -72,4 +80,29 @@ void effect_updateEmitterSpawner(EB340Obj *obj) {
         }
         spawn->timer = (math_random() % 151U) + 25;
     }
+}
+
+/* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
+ * object whose +0x318 points at its owner (event 0), sends the message. */
+void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
+    if (event == 0x21) {
+        if (obj->spawn.owner == msg[0]) {
+            effect_destroyObject(&obj->base.header);
+        }
+    } else if (event == 0) {
+        Actor *sender = msg[0];
+
+        if (sender->CameraPtr == obj->spawn.owner) {
+            effect_destroyObject(&obj->base.header);
+        }
+    }
+}
+
+/* Advances y by ySpeed per frame; returns 0 once it passes 120. */
+s32 effect_updateRisingScreenSprite(EB340Rising *arg0) {
+    arg0->y += arg0->ySpeed * gFrameDelta;
+    if (arg0->y > 120.0f) {
+        return 0;
+    }
+    return 1;
 }

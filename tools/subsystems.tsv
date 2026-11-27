@@ -92,7 +92,7 @@ src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-wr
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game/Camera/LevelHook07/levelhook07.c	camera	per-level camera setup from game-flag queries
 src/game/Camera/LevelHook05/levelhook05.c	camera	per-level camera flag hook
-src/game_EB600.c	effect	split from game_EB340.c; same subsystem
+src/game_EB6C0.c	effect	prop push, path mover and a debris burst (the file after effects_sfx_w1_bee_cavern.c)
 src/game/Camera/LevelHook18/levelhook18.c	camera	per-level camera hook
 src/game/Camera/LevelHook03/levelhook03.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook10/levelhook10.c	camera	per-level camera flag hook
@@ -279,7 +279,7 @@ src/game/Effects/EffectActor/effectactor.c	effect	effect actors and motions
 src/game/Effects/EffectObj/effectobj.c	effect	effect object core: life and update handlers
 src/game/Effects/EffectQueue/effectqueue.c	effect	fixed-capacity FIFO with release callbacks
 src/game/Effects/EffectQueueInit/effectqueueinit.c	effect	allocates the effect FIFO queue
-src/game/Effects/EmitterSpawner/emitterspawner.c	effect	level effect spawners (bee cavern sfx effects)
+src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c	effect	screen-sprite spawner of the bee cavern (original path, from the ECTS build)
 src/game/Effects/Explosion/explosion.c	effect	explosion and dropped point effects
 src/game/Effects/FadeBurst/fadeburst.c	effect	burst effect pieces
 src/game/Effects/FallingObject/fallingobject.c	effect	falling object spawns
