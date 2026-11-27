@@ -45,7 +45,7 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
         spawn.pos.y = *floorY;
         spawn.pos.z = particle->head.pos.z;
         spawn.variant = 0;
-        spawn.unk5C = NULL;
+        spawn.zone = NULL;
         spawn.alpha = 0xFF;
         spawn.updateFn = 1;
         spawn.floorHitFn = 0;
@@ -54,7 +54,7 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 0;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
@@ -201,7 +201,7 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
         spawn.lifetime = 300;
         spawn.flags = 0x9E8;
         spawn.variant = 0;
-        spawn.unk5C = NULL;
+        spawn.zone = NULL;
         spawn.alpha = 0xFF;
         spawn.updateFn = 1;
         spawn.floorHitFn = 0;
@@ -210,7 +210,7 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 0;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 1;

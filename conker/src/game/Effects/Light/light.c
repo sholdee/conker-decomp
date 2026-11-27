@@ -103,14 +103,14 @@ static void (*gLightAttachEventHandlers[])() = { NULL, light_handleActorRefEvent
 static void (*gLightBeamEventHandlers[])() = { NULL, light_handleBeamToggleEvent };
 
 /* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
-LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
+LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 radius, s32 r, s32 g, s32 b, u8 lightMask, u8 disabled, s32 size, u8 owner, s32 list) {
     LightEffect *effect;
     PointLight *light;
 
     effect = NULL;
-    light = light_createPointLight(position->x, position->y, position->z, arg2, arg3, arg4, arg5, arg6, arg7, 0);
+    light = light_createPointLight(position->x, position->y, position->z, radius, r, g, b, lightMask, disabled, 0);
     if (light != NULL) {
-        effect = light_createEffect(header, light, size, arg9, argA);
+        effect = light_createEffect(header, light, size, owner, list);
         if (effect != NULL) {
             effect->flags |= 2;
         } else {
@@ -121,8 +121,8 @@ LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, 
 }
 
 /* Allocates an effect instance (0x18-byte header plus `size` bytes of payload) for a light. */
-LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4) {
-    LightEffect *effect = effect_newObject(53, arg4, size + 0x18, 1, arg3, 1);
+LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 owner, s32 list) {
+    LightEffect *effect = effect_newObject(53, list, size + 0x18, 1, owner, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -152,8 +152,8 @@ void light_updateEffect(LightEffect *effect) {
 }
 
 /* Event handler: events 0x17-0x22 addressed to this effect's type toggle or remove it; others go to the type's handler. */
-void light_handleEffectEvent(void *arg0, u8 *message, u8 event) {
-    LightEffect *effect = arg0;
+void light_handleEffectEvent(void *obj, u8 *message, u8 event) {
+    LightEffect *effect = obj;
     void (*handler)();
     Vec3f position;
 
@@ -287,7 +287,7 @@ void light_startFlicker(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightE
 }
 
 /* Creates a light that follows `actor` (see light_followActor). */
-LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE, s32 argF) {
+LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8 flags, s16 lifetime, s32 radius, s32 r, s32 g, s32 b, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightAttach attach;
@@ -297,7 +297,7 @@ LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8
         return NULL;
     }
 
-    header.flags = arg3;
+    header.flags = flags;
     header.update = 5;
     header.lifetime = lifetime;
     header.lightType = 16;
@@ -314,7 +314,7 @@ LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8
     attach.callback = callback;
     attach.eventHandler = eventHandler;
 
-    effect = light_createWithEffect(&header, &position, arg5, arg6, arg7, arg8, 0xFF, 0, extraSize + sizeof(LightAttach), argE, argF);
+    effect = light_createWithEffect(&header, &position, radius, r, g, b, 0xFF, 0, extraSize + sizeof(LightAttach), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &attach, sizeof(LightAttach));
     }
@@ -357,7 +357,7 @@ u8 light_followActor(LightEffect *effect) {
 }
 
 /* Creates a beam light on `actor` (see light_updateBeam). */
-LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE, s32 argF) {
+LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 flags, s16 lifetime, s32 radius, s32 r, s32 g, s32 b, u8 fromBone, u8 eventHandler, u8 flagHit, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightBeam beam;
@@ -369,7 +369,7 @@ LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const V
         return NULL;
     }
 
-    header.flags = arg5;
+    header.flags = flags;
     header.update = 6;
     header.lifetime = lifetime;
     header.lightType = 17;
@@ -390,7 +390,7 @@ LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const V
     position.y = 0;
     position.z = 0;
 
-    effect = light_createWithEffect(&header, &position, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(LightBeam), argE, argF);
+    effect = light_createWithEffect(&header, &position, radius, r, g, b, 0xFF, 0, sizeof(LightBeam), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &beam, sizeof(LightBeam));
     }
@@ -500,7 +500,7 @@ s32 light_isActorLive(Actor *actor, Actor *exclude) {
     return 1;
 }
 
-LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *func_1516127C(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightPulse pulse;
@@ -516,14 +516,14 @@ LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2) {
 
     pulse.speed = 0.1020999998f;
 
-    effect = light_createEffect(&header, light, sizeof(pulse), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(pulse), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &pulse, sizeof(pulse));
     }
     return effect;
 }
 
-LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *func_15161334(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightJitter jitter;
@@ -543,14 +543,14 @@ LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2) {
     jitter.smoothing = 0.2488999963f;
     jitter.level = 127.0f;
 
-    effect = light_createEffect(&header, light, sizeof(jitter), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(jitter), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &jitter, sizeof(jitter));
     }
     return effect;
 }
 
-LightEffect *light_createMounted(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *light_createMounted(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     WorldObject *mount;
@@ -562,14 +562,14 @@ LightEffect *light_createMounted(PointLight *light, u8 arg1, s32 arg2) {
     header.lifetime = 300;
     header.lightType = 8;
 
-    effect = light_createEffect(&header, light, sizeof(mount), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(mount), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &mount, sizeof(mount));
     }
     return effect;
 }
 
-LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *func_15161494(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightPulse pulse;
@@ -584,14 +584,14 @@ LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2) {
     pulse.phase = 0.0f;
     pulse.speed = 0.07999999821f;
 
-    effect = light_createEffect(&header, light, sizeof(pulse), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(pulse), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &pulse, sizeof(pulse));
     }
     return effect;
 }
 
-LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *func_15161540(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightPulse pulse;
@@ -606,7 +606,7 @@ LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
     header.lifetime = 300;
     header.lightType = 5;
 
-    effect = light_createEffect(&header, light, sizeof(pulse), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(pulse), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &pulse, sizeof(pulse));
     }
@@ -614,7 +614,7 @@ LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
 }
 
 /* Creates a flicker effect; `kind` picks the peak intensity from gLightFlickerPeaks. */
-LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5) {
+LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightFlicker flicker;
@@ -640,7 +640,7 @@ LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, 
     header.lifetime = 300;
     header.lightType = type;
 
-    effect = light_createEffect(&header, light, sizeof(flicker), arg4, arg5);
+    effect = light_createEffect(&header, light, sizeof(flicker), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &flicker, sizeof(flicker));
     }
@@ -648,11 +648,11 @@ LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, 
 }
 
 /* Sends event `event` to every light effect (of type lightType, for the addressed events). */
-void light_sendEvent(u8 lightType, u8 event, void *arg2) {
+void light_sendEvent(u8 lightType, u8 event, void *payload) {
     LightEventMsg message;
 
     message.lightType = lightType;
-    message.arg = arg2;
+    message.arg = payload;
 
     effect_sendEventToType(53, (s32)&message, event);
 }
@@ -702,10 +702,10 @@ void light_freeEffect(LightEffect *effect) {
 }
 
 /* Plays one of ten random sounds at `position`. */
-void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6) {
+void light_playRandomSound(u16 volume, s16 cents, u8 mix, s32 arg3, Vec3f *position, s16 nearDistance, s16 farDistance) {
     const s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
 
-    sound_playAt(sounds[math_random() % 10U], arg0, arg1, arg2, arg3, position->x, position->y, position->z, arg5, arg6);
+    sound_playAt(sounds[math_random() % 10U], volume, cents, mix, arg3, position->x, position->y, position->z, nearDistance, farDistance);
 }
 
 /*
@@ -760,7 +760,7 @@ static const f32 gLightPulseSpeeds[14] = {
 static const Vec3f gLightActorPulseOffset = { 0.0f, 35.0f, 73.0f };
 
 /* Creates a light driven by entry `index` of gSeqTrackStates (see light_updateSeqTrack). */
-LightEffect *light_createSeqTrack(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
+LightEffect *light_createSeqTrack(s32 index, s16 lifetime, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     s32 payload;
@@ -777,7 +777,7 @@ LightEffect *light_createSeqTrack(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
     position.y = 0;
     position.z = 0;
 
-    effect = light_createWithEffect(&header, &position, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(payload), arg2, arg3);
+    effect = light_createWithEffect(&header, &position, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(payload), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &payload, sizeof(payload));
     }
@@ -817,7 +817,7 @@ s32 light_updateSeqTrack(LightEffect *effect) {
 }
 
 /* Creates a light at `actor` that stays tied to it (see light_trackActorRef). */
-LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
+LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 flags, s16 lifetime, s32 radius, s32 r, s32 g, s32 b, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightActorRef ref;
@@ -827,7 +827,7 @@ LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 arg2, s16 lif
         return NULL;
     }
 
-    header.flags = arg2;
+    header.flags = flags;
     header.update = 10;
     header.lifetime = lifetime;
     header.lightType = 21;
@@ -840,7 +840,7 @@ LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 arg2, s16 lif
     position.y = actor->ypos;
     position.z = actor->zpos;
 
-    effect = light_createWithEffect(&header, &position, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(ref), arg8, arg9);
+    effect = light_createWithEffect(&header, &position, radius, r, g, b, 0xFF, 0, sizeof(ref), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &ref, sizeof(ref));
     }
@@ -879,7 +879,7 @@ void light_handleActorEvent(LightEffect *effect, ActorEvent *event, u8 eventId) 
     }
 }
 
-LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
+LightEffect *func_15162034(PointLight *light, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightJitter jitter;
@@ -899,7 +899,7 @@ LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
     jitter.smoothing = 0.2488999963f;
     jitter.level = 127.0f;
 
-    effect = light_createEffect(&header, light, sizeof(jitter), arg1, arg2);
+    effect = light_createEffect(&header, light, sizeof(jitter), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &jitter, sizeof(jitter));
     }
@@ -907,7 +907,7 @@ LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
 }
 
 /* Starts a global colour cycle object (see light_updateColourCycle). */
-void light_startColourCycle(s32 arg0) {
+void light_startColourCycle(s32 unused) {
     ColourPulseEffect *object;
     LightColourPulse pulse;
 
@@ -944,7 +944,7 @@ void light_updateColourCycle(ColourPulseEffect *object) {
 }
 
 /* Creates a colour-cycling effect; `kind` (0-2) picks the base, amplitude and speed tables. */
-LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7) {
+LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 flags, s8 update, s16 lifetime, u8 owner, s32 list) {
     LightColourPulse pulse;
     LightEffectHeader header;
     LightEffect *effect;
@@ -958,12 +958,12 @@ LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 arg
 
     pulse.phase = 0.0f;
     pulse.speed = gLightColourCycleSpeeds[kind];
-    header.flags = arg3;
+    header.flags = flags;
     header.update = update;
     header.lifetime = lifetime;
     header.lightType = type;
 
-    effect = light_createEffect(&header, light, sizeof(pulse), arg6, arg7);
+    effect = light_createEffect(&header, light, sizeof(pulse), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &pulse, sizeof(pulse));
     }
@@ -988,7 +988,7 @@ s32 light_updateColourCycleEffect(LightEffect *effect) {
 }
 
 /* Creates a jitter effect; `kind` (0-23) picks mid, low and high from tables. */
-LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
+LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightJitter jitter;
@@ -1006,12 +1006,12 @@ LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 arg3, s1
     jitter.smoothing = 0.2488999963f;
     jitter.level = 127.0f;
 
-    header.flags = arg3;
+    header.flags = flags;
     header.update = update;
     header.lifetime = lifetime;
     header.lightType = type;
 
-    effect = light_createEffect(&header, light, sizeof(jitter), arg6, arg7);
+    effect = light_createEffect(&header, light, sizeof(jitter), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &jitter, sizeof(jitter));
     }
@@ -1019,7 +1019,7 @@ LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 arg3, s1
 }
 
 /* Like light_createJitter, but also creates the light at `position`; `extraSize` bytes follow the jitter payload. */
-LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA) {
+LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s32 r, s32 g, s32 b, u8 lightMask, u8 disabled, s32 extraSize, u8 kind, u8 owner, s32 list) {
     LightEffect *effect;
     LightJitter jitter;
 
@@ -1035,7 +1035,7 @@ LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s3
     jitter.interval = 10.0f;
     jitter.smoothing = 0.2488999963f;
     jitter.level = 127.0f;
-    effect = light_createWithEffect(header, position, 0, arg2, arg3, arg4, arg5, arg6, extraSize + sizeof(jitter), arg9, argA);
+    effect = light_createWithEffect(header, position, 0, r, g, b, lightMask, disabled, extraSize + sizeof(jitter), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &jitter, sizeof(jitter));
     }
@@ -1043,7 +1043,7 @@ LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s3
 }
 
 /* Creates a cycle effect; `kind` (0-4) picks the levels and phase lengths from tables. */
-LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow, s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 argB, s32 argC) {
+LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, s8 onLow, s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightCycle cycle;
@@ -1077,7 +1077,7 @@ LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s16
         cycle.state = 4;
     }
 
-    header.flags = arg3;
+    header.flags = flags;
     header.update = update;
     header.lifetime = lifetime;
     header.lightType = type;
@@ -1085,7 +1085,7 @@ LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s16
     cycle.invRamp = 1.0f / gLightCycleRampTimes[kind];
 
     // matching: the original copies 0x30 bytes, 4 more than sizeof(cycle)
-    effect = light_createEffect(&header, light, extraSize + 0x30, argB, argC);
+    effect = light_createEffect(&header, light, extraSize + 0x30, owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &cycle, 0x30);
     }
@@ -1177,7 +1177,7 @@ void light_cycleClearObjectFlag(LightEffect *effect) {
 }
 
 /* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */
-LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
+LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightStorm storm;
@@ -1200,12 +1200,12 @@ LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 arg3,
     storm.flashesRange = gLightningFlashesRanges[kind];
     storm.flashRange = gLightningFlashRanges[kind];
 
-    header.flags = arg3;
+    header.flags = flags;
     header.update = update;
     header.lifetime = lifetime;
     header.lightType = type;
 
-    effect = light_createEffect(&header, light, sizeof(storm), arg6, arg7);
+    effect = light_createEffect(&header, light, sizeof(storm), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &storm, sizeof(storm));
     }
@@ -1256,7 +1256,7 @@ s32 light_updateLightning(LightEffect *effect) {
 }
 
 /* Creates a light at (*x, *y, *z) that follows those coordinates. */
-LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE) {
+LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 radius, u8 r, u8 g, u8 b, u8 lightMask, u8 disabled, s32 extraSize, u8 owner, s32 list) {
     LightEffect *effect;
     LightTrack track;
     Vec3i position;
@@ -1271,7 +1271,7 @@ LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32
     position.y = *y;
     position.z = *z;
 
-    effect = light_createWithEffect(header, &position, arg6, arg7, arg8, arg9, argA, argB, extraSize + sizeof(track), argD, argE);
+    effect = light_createWithEffect(header, &position, radius, r, g, b, lightMask, disabled, extraSize + sizeof(track), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &track, sizeof(track));
     }
@@ -1295,16 +1295,16 @@ s32 light_updateTracking(LightEffect *effect) {
 }
 
 /* Event handler: forwards every event to the tracked light's gLightTrackEventHandlers handler. */
-void light_handleTrackingEvent(LightEffect *effect, s32 arg1, u8 eventId) {
+void light_handleTrackingEvent(LightEffect *effect, s32 event, u8 eventId) {
     LightTrack *track = &effect->data.track;
 
     if (gLightTrackEventHandlers[track->handler] != NULL) {
-        gLightTrackEventHandlers[track->handler](effect, arg1, eventId);
+        gLightTrackEventHandlers[track->handler](effect, event, eventId);
     }
 }
 
 /* Creates a pulse effect; `kind` (0-13) picks base, amplitude and speed from tables, with a random phase. */
-LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
+LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 flags, s32 arg5, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightPulse pulse;
@@ -1321,12 +1321,12 @@ LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime
     pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = gLightPulseSpeeds[kind];
 
-    header.flags = arg4;
+    header.flags = flags;
     header.update = 1;
     header.lifetime = lifetime;
     header.lightType = type;
 
-    effect = light_createEffect(&header, light, sizeof(pulse), arg6, arg7);
+    effect = light_createEffect(&header, light, sizeof(pulse), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &pulse, sizeof(pulse));
     }
@@ -1353,18 +1353,18 @@ s32 light_updateOneShotPulse(LightEffect *effect) {
 }
 
 /* Creates an effect with no payload and no update. */
-void light_createEmptyEffect(PointLight *light, u8 type, u8 arg2, s32 arg3) {
+void light_createEmptyEffect(PointLight *light, u8 type, u8 owner, s32 list) {
     LightEffectHeader header;
 
     header.flags = 0;
     header.update = -1;
     header.lifetime = 300;
     header.lightType = type;
-    light_createEffect(&header, light, 0, arg2, arg3);
+    light_createEffect(&header, light, 0, owner, list);
 }
 
 /* Creates an effect with an uninitialised payload of `size` bytes. */
-LightEffect *light_createSizedEffect(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7) {
+LightEffect *light_createSizedEffect(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 owner, s32 list) {
     LightEffectHeader header;
 
     header.flags = flags;
@@ -1372,7 +1372,7 @@ LightEffect *light_createSizedEffect(PointLight *light, u8 flags, s8 update, s16
     header.lifetime = lifetime;
     header.lightType = type;
 
-    return light_createEffect(&header, light, size, arg6, arg7);
+    return light_createEffect(&header, light, size, owner, list);
 }
 
 s32 light_updateColourAnimFollow(LightEffect *effect) {
@@ -1388,7 +1388,7 @@ s32 light_updateColourAnimFollow(LightEffect *effect) {
 }
 
 /* Event handler: event 0x27 turns the light off (unk9 = 1), event 0x28 back on. */
-void light_handleSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId) {
+void light_handleSwitchEvent(LightEffect *effect, s32 event, u8 eventId) {
     if (eventId == 0x27) {
         effect->light->disabled = 1;
     } else if (eventId == 0x28) {
@@ -1397,7 +1397,7 @@ void light_handleSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId) {
 }
 
 /* Event handler: the inverse of light_handleSwitchEvent. */
-void light_handleInvertedSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId) {
+void light_handleInvertedSwitchEvent(LightEffect *effect, s32 event, u8 eventId) {
     if (eventId == 0x27) {
         effect->light->disabled = 0;
     } else if (eventId == 0x28) {
@@ -1406,7 +1406,7 @@ void light_handleInvertedSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId) 
 }
 
 /* Creates a pulsing light at object `objectId` that lasts until the object is inactive (see light_updateObjectPulse). */
-LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2) {
+LightEffect *light_createObjectPulse(u8 objectId, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightPulse pulse;
@@ -1431,7 +1431,7 @@ LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2) {
     header.lifetime = 300;
     header.lightType = 5;
 
-    effect = light_createWithEffect(&header, &position, gLightPulseBases[6], 0, 0xFF, 0, 0xFF, 0, sizeof(pulse) + sizeof(object), arg1, arg2);
+    effect = light_createWithEffect(&header, &position, gLightPulseBases[6], 0, 0xFF, 0, 0xFF, 0, sizeof(pulse) + sizeof(object), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data.objectPulse.pulse, &pulse, sizeof(pulse));
         memcpy(&effect->data.objectPulse.object, &object, sizeof(object));
@@ -1456,7 +1456,7 @@ s32 light_updateObjectPulse(LightEffect *effect) {
 }
 
 /* Creates a pulsing light attached to `actor`. */
-LightEffect *light_createActorPulse(Actor *actor, u8 arg1, s32 arg2) {
+LightEffect *light_createActorPulse(Actor *actor, u8 owner, s32 list) {
     LightEffect *effect;
     LightPulse pulse;
 
@@ -1465,7 +1465,7 @@ LightEffect *light_createActorPulse(Actor *actor, u8 arg1, s32 arg2) {
     pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = gLightPulseSpeeds[6];
 
-    effect = light_createAttached(actor, 1, &gLightActorPulseOffset, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
+    effect = light_createAttached(actor, 1, &gLightActorPulseOffset, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, owner, list);
     if (effect != NULL) {
         memcpy(&effect->data.attachPulse.pulse, &pulse, sizeof(pulse));
     }
@@ -1591,7 +1591,7 @@ void light_handleBeamEvent(LightEffect *effect, ActorEvent *event, u8 eventId) {
     }
 }
 
-LightEffect *light_createFlash(PointLight *light, u8 id, u8 arg2, s32 arg3) {
+LightEffect *light_createFlash(PointLight *light, u8 id, u8 owner, s32 list) {
     LightEffect *effect;
     LightEffectHeader header;
     LightFlash flash;
@@ -1604,7 +1604,7 @@ LightEffect *light_createFlash(PointLight *light, u8 id, u8 arg2, s32 arg3) {
     header.lifetime = 300;
     header.lightType = 39;
 
-    effect = light_createEffect(&header, light, sizeof(flash), arg2, arg3);
+    effect = light_createEffect(&header, light, sizeof(flash), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &flash, sizeof(flash));
     }
@@ -1634,7 +1634,7 @@ void light_handleFlashEvent(LightEffect *effect, LightFlashEvent *event, u8 even
 }
 
 /* Beam event handler: event 64 turns on casting from the bone, event 65 turns it off. */
-void light_handleBeamToggleEvent(LightEffect *effect, s32 arg1, u8 eventId) {
+void light_handleBeamToggleEvent(LightEffect *effect, s32 event, u8 eventId) {
     LightBeam *beam;
 
     beam = &effect->data.beam;

@@ -72,7 +72,7 @@ static const VtxRange gWarpModelGroupVertices[9] = {
 };
 
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
-DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
+DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 owner, s32 list) {
     DynModel *obj;
     ModelAsset *asset;
     s32 buffersSize;
@@ -82,7 +82,7 @@ DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 a
     s32 count;
     s32 i;
 
-    asset = rom_loadPathTable(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
+    asset = rom_loadPathTable(&loaded, 0, &count, 2, desc->assetTable, desc->assetIndex);
     {
         s32 type;
 
@@ -93,7 +93,7 @@ DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 a
         } else {
             type = 0x38;
         }
-        obj = effect_newObject(type, arg4, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, arg3, 1);
+        obj = effect_newObject(type, list, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, owner, 1);
         if (obj == NULL) {
             return NULL;
         }
@@ -207,14 +207,14 @@ DynModel *effect_spawnWarpModel(void) {
     desc.updateFunc = 2;
     desc.drawFunc = 5;
     desc.lifetime = 300;
-    desc.unk30 = 9;
+    desc.assetTable = 9;
     state.scrollS = 0.0f;
     state.scrollT = 0.0f;
     state.scalePhaseS = 0.0f;
     state.scalePhaseT = 0.0f;
     state.scrollTPhase = 0.0f;
     desc.flags = 0;
-    desc.unk34 = 0x1AE;
+    desc.assetIndex = 0x1AE;
     desc.unk8 = 1;
     desc.unkC = 0x220205;
     desc.unk10 = 0x40600;

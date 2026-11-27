@@ -56,7 +56,7 @@ PulseParticle *particle_spawnPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot,
     }
     spawn.model = 3;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = alpha;
     spawn.updateFn = 6;
     spawn.update2Fn = 0;
@@ -66,7 +66,7 @@ PulseParticle *particle_spawnPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot,
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 2;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = fadeTime;

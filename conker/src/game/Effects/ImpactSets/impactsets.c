@@ -5,41 +5,41 @@
 #include "conker/trail.h"
 
 typedef struct {
-    /* 0x00 */ f32 unk0;
+    /* 0x00 */ f32 radius;   /* particle_emitOnRandomCircle's radius */
     /* 0x04 */ s16 base;
     /* 0x06 */ u16 range;
 } FxSpawnRange; // size 0x8
 
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ s16 unk4;
+    /* 0x00 */ f32 size;     /* particle_startKindEffect's size and lifetime */
+    /* 0x04 */ s16 lifetime;
     /* 0x08 */ f32 unk8;
 } FxImpactEntry; // size 0xC
 
 /* Random ranges for one spray particle: each value is base + rand() % (range + 1) or
  * base + randf() * range. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
+    /* 0x00 */ u8 alphaBase;       /* TrailMotion.alpha */
+    /* 0x01 */ u8 alphaRange;
     /* 0x02 */ s16 pitchBase;
     /* 0x04 */ u16 pitchRange;
     /* 0x08 */ f32 speedBase;
     /* 0x0C */ f32 speedRange;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
+    /* 0x10 */ s32 itemCountBase;  /* EffectTemplate.itemCount */
+    /* 0x14 */ s32 itemCountRange;
+    /* 0x18 */ s16 lifeBase;       /* EffectTemplate.life */
+    /* 0x1A */ u16 lifeRange;
+    /* 0x1C */ f32 halfWidthBase;  /* TrailMotion.halfWidth */
+    /* 0x20 */ f32 halfWidthRange;
+    /* 0x24 */ f32 gravityBase;    /* TrailMotion.gravity */
+    /* 0x28 */ f32 gravityRange;
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
 /* Passed through particle_emitOnRandomCircle to the spawn callbacks (e.g. effect_spawnImpactSprayParticle). */
 struct FxSpawnPayload {
     /* 0x00 */ CollisionHit *hit;
-    /* 0x04 */ s32 unk4;
+    /* 0x04 */ s32 list;     /* the object list of the spawned effects */
     /* 0x08 */ u8 kind;
 };
 
@@ -96,7 +96,7 @@ static const FxImpactEntry gImpactGroundEffects[] = {
 
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
+void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 owner, s32 list) {
     const FxImpactSet *set;
     u8 kind;
 
@@ -109,42 +109,42 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
         FxSpawnPayload payload;
 
         payload.hit = hit;
-        payload.unk4 = arg4;
+        payload.list = list;
         payload.kind = kind;
         {
             const FxSpawnRange *spawn = &gImpactFirstEffects[set->first];
 
-            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->radius, 0, 255,
                           math_random() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
-                          &payload, arg3);
+                          &payload, owner);
         }
     }
     if (set->second != -1) {
         FxSpawnPayload payload;
 
         payload.hit = hit;
-        payload.unk4 = arg4;
+        payload.list = list;
         payload.kind = kind;
         {
             const FxSpawnRange *spawn = &gImpactSecondEffects[set->second];
 
-            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->radius, 0, 255,
                           math_random() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
-                          &payload, arg3);
+                          &payload, owner);
         }
     }
     if (set->impact != -1 && (hit->flags & 1)) {
         const FxImpactEntry *impact = &gImpactGroundEffects[set->impact];
 
-        particle_startKindEffect(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
+        particle_startKindEffect(kind, impact->size, impact->unk8, impact->lifetime, pos, &hit->tri, 150, 0, owner, list);
     }
 }
 
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
  * pitch and speed from the impact type's spray parameters. */
-s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9,
-                  s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
+s32 effect_spawnImpactSprayParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw, s32 baseAngle,
+                  f32 radius, s32 type, s32 argC, FxSpawnPayload *payload, u8 owner) {
     const FxSprayParams *params;
     EffectTemplate18 spawn;
     TrailMotion part;
@@ -168,13 +168,13 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         params = &gImpactSprays[gImpactSets[type].firstStyle];
         sinYaw = math_cosBinAngleMasked(yaw);
         cosYaw = math_cosBinAngleMasked(yaw - 0x40);
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
         style.renderMode = 1;
-        style.unk10 = 16;
-        style.unk14 = 128;
-        style.unk18 = 32;
+        style.combiner = 16;
+        style.colorDither = 128;
+        style.alphaDither = 32;
         style.primMode = 0;
         style.envMode = 9;
         spawn.kind = 1;
@@ -199,7 +199,7 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         part.flags &= ~3;
     }
     random = math_random();
-    part.alpha = random % (params->unk1 + 1) + params->unk0;
+    part.alpha = random % (params->alphaRange + 1) + params->alphaBase;
     random = math_random();
     pitch = random % (params->pitchRange + 1) + params->pitchBase;
     sinPitch = math_cosBinAngleMasked(pitch);
@@ -211,12 +211,12 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
     part.velocity.y = vertical;
     part.velocity.z = horizontal * sinYaw;
     random = math_random();
-    spawn.itemCount = random % (params->unk14 + 1) + params->unk10;
+    spawn.itemCount = random % (params->itemCountRange + 1) + params->itemCountBase;
     random = math_random();
-    spawn.life = random % (params->unk1A + 1) + params->unk18;
-    part.halfWidth = math_randomFloat() * params->unk20 + params->unk1C;
-    part.gravity = math_randomFloat() * params->unk28 + params->unk24;
-    trail_createMotionTrail(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
+    spawn.life = random % (params->lifeRange + 1) + params->lifeBase;
+    part.halfWidth = math_randomFloat() * params->halfWidthRange + params->halfWidthBase;
+    part.gravity = math_randomFloat() * params->gravityRange + params->gravityBase;
+    trail_createMotionTrail(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, owner, payload->list);
     return 1;
 }
 
@@ -233,7 +233,7 @@ typedef struct {
     /* 0x04 */ u8 pad4[0x17];
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 state;     /* TrailParams.state */
 } FxEmitterData;
 
 /* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / gMotionTrailHitFns handler tables. */
@@ -279,6 +279,6 @@ s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 he
     } else {
         particle_spawnSquash(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
     }
-    data->unk20 = 4;
+    data->state = 4;
     return 1;
 }

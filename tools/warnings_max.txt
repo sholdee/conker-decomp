@@ -1,4 +1,4 @@
 # The most IDO warnings the build may have (tools/warncheck.py). Lower it when you remove warnings.
-# 580 = 479 x 709 (handler tables whose entries have their own parameter types, see the ObjType comment
+# 575 = 474 x 709 (handler tables whose entries have their own parameter types, see the ObjType comment
 # in include/structs.h), 92 x 642, 8 x 712, 1 x 728. The git log of this file has the earlier limits.
-580
+575

@@ -54,7 +54,7 @@ static void (*gTimedEffectTickFuncs[98])() = {
     flamethrower_updateController, effect_updateOwnerSpark, beam_updateAreaEmitter, particle_updateAreaEmitter, particle_updateTwoSidedEmitter, particle_updateRandomEmitter, particle_updateRandomBurstEmitter,
     weapon_updateStreamEmitter, particle_updateWobbleStream, effect_spawnGroundFlashes, light_updateColourWave, effect_updateRaySpinner, screen_updateStrobe, screen_updateStrobeSpawner,
     particle_updateSparkSpawner, particle_updateSparkEmitter, particle_updateDustRegionSpawner, particle_updateFallingDustSpawner, particle_updateShakeTimer, particle_updateDebrisRegionSpawner, particle_updateFallingDebrisSpawner,
-    particle_updateFollowEffect, screen_updateFlash, effect_updateActorEmitter, func_150CF530, beam_updateBoltRain, beam_updateBoltArc, beam_updateBoltChain,
+    particle_updateFollowEffect, screen_updateFlash, effect_updateActorEmitter, effect_spawnGroundFxNearPlayer, beam_updateBoltRain, beam_updateBoltArc, beam_updateBoltChain,
     effect_updateRiseEmitter, effect_updateBoneBurst, particle_updatePointSmoke, trail_updateAnchoredEmitter, beam_updateCastBeam, beam_updateSparkZone, effect_updateObjBurst,
     effect_updateBoltRing, light_updateAmbientRedDrift, effect_updateAmbientPulse, particle_updatePointEmitter, particle_updateDripEffect, particle_updateSmokeSource, beam_updateTrailEmitter,
     effect_updateDelayedBurst, effect_updateOwnerEffect, effect_updateEmitterSpawner, effect_updateBoltEmitter, beam_updateBoneSparks, particle_updateOwnerEmitter, effect_updatePulseEffect,
@@ -194,14 +194,14 @@ void effect_freeTimedEffect(TimedEffect *object) {
     gTimedEffectFreeFuncs[set](object);
 }
 
-void effect_handleTimedEffectMessage(TimedEffect *object, s32 arg1, u8 arg2) {
+void effect_handleTimedEffectMessage(TimedEffect *object, s32 event, u8 eventType) {
     s32 set = object->callbackSet;
 
     if (set < 0 || set >= 74) {
         set = 0;
     }
     if (gTimedEffectMessageFuncs[set] != NULL) {
-        gTimedEffectMessageFuncs[set](object, arg1, arg2);
+        gTimedEffectMessageFuncs[set](object, event, eventType);
     }
 }
 
@@ -215,8 +215,8 @@ Gfx *effect_drawTimedEffect(Gfx *gfx, TimedEffect *object, s16 view) {
     return gfx;
 }
 
-void effect_sendEventToTimedEffects(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(gTimedEffectTypes, 2, arg0, arg1);
+void effect_sendEventToTimedEffects(s32 event, u8 eventType) {
+    effect_sendEventToTypes(gTimedEffectTypes, 2, event, eventType);
 }
 
 /* effect_handleOwnerActorEvent for effects: tracks or retargets the effect's owner on actor events. */

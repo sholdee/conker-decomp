@@ -30,7 +30,7 @@ s32 func_150BB760(Actor *actor) {
         particle.model = 1;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -40,7 +40,7 @@ s32 func_150BB760(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 1;
+        particle.lightMode = 1;
         particle.owner = actor;
         particle.scale.x = 1.0f;
         particle.scale.y = 1.0f;
@@ -136,8 +136,8 @@ s32 func_150BBB5C(Actor *actor) {
         request.x = actor->xpos;
         request.y = actor->floorY + 60.0f;
         request.z = actor->zpos;
-        request.unk92 = width;
-        request.unk94 = height;
+        request.halfWidth = width;
+        request.halfHeight = height;
         request.floorY = actor->floorY;
         request.callback = -1;
         request.animIndex = 0x2E;
@@ -150,7 +150,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.lifetime = 0x78;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -160,7 +160,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -261,7 +261,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.radius = actor->scale_xz * 20.0f;
         particle.sizeXZ = actor->scale_xz + actor->scale_xz;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -271,7 +271,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x10;
@@ -325,7 +325,7 @@ s32 func_150BC488(Actor *actor) {
         particle.model = 1;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -335,7 +335,7 @@ s32 func_150BC488(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -444,7 +444,7 @@ s32 func_150BC488(Actor *actor) {
             particle.radius = actor->scale_xz * 20.0f;
             particle.sizeXZ = actor->scale_xz * 2.0f;
             particle.variant = 0;
-            particle.unk5C = 0;
+            particle.zone = 0;
             particle.alpha = 0xFF;
             particle.updateFn = 1;
             particle.update2Fn = 0;
@@ -455,7 +455,7 @@ s32 func_150BC488(Actor *actor) {
             particle.destroyFn = 0;
             particle.squashFn = 0;
             particle.matrixFn = 0;
-            particle.unk6A = 0;
+            particle.lightMode = 0;
             particle.owner = NULL;
             particle.ownerId = 0;
             particle.fadeStart = 0x10;
@@ -508,7 +508,7 @@ s32 func_150BCBBC(Actor *actor) {
         particle.lifetime = 0x96;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -518,7 +518,7 @@ s32 func_150BCBBC(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -589,22 +589,19 @@ s32 func_150BCBBC(Actor *actor) {
 
 struct Obj150BCFB8 {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 radius;
     /* 0x14 */ f32 bounce;
-    /* 0x18 */ u8 pad18[0x3C - 0x18];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 pad40[0x44 - 0x40];
+    /* 0x18 */ u8 pad18[0x38 - 0x18];
+    /* 0x38 */ Vec3f pos;
     /* 0x44 */ Vec3f vel;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
+    /* 0x50 */ Vec3f rotVel;
     /* 0x5C */ u8 pad5C[0x60 - 0x5C];
     /* 0x60 */ s32 flags;
 };
 
 /* Ground-hit callback: comes to rest when falling slowly, otherwise bounces, scaling all motion by obj->bounce. */
-s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 floorY) {
-    obj->unk3C = obj->unk10 * 1.1f + floorY;
+s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floorY) {
+    obj->pos.y = obj->radius * 1.1f + floorY;
     if (-2.0f < obj->vel.y) {
         obj->vel.x = 0.0f;
         obj->flags &= ~0x6F;
@@ -614,15 +611,15 @@ s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3,
         obj->vel.x *= obj->bounce;
         obj->vel.y = -obj->vel.y * obj->bounce;
         obj->vel.z *= obj->bounce;
-        obj->unk50 *= obj->bounce;
-        obj->unk54 *= obj->bounce;
-        obj->unk58 *= obj->bounce;
+        obj->rotVel.x *= obj->bounce;
+        obj->rotVel.y *= obj->bounce;
+        obj->rotVel.z *= obj->bounce;
     }
     return 1;
 }
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
-void func_150BD070(u8 arg0, s32 arg1) {
+void func_150BD070(u8 owner, s32 list) {
     TriggerZone *anchors[2];
     const u8 idx[2] = {0x4C, 0x4D};
     s16 count;
@@ -637,7 +634,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         particle.flags = 0x12DE8;
         particle.model = 1;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 8;
         particle.update2Fn = 0;
@@ -648,7 +645,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         particle.squashFn = 0;
         particle.matrixFn = 2;
         particle.drawFn = -1;
-        particle.unk6A = 2;
+        particle.lightMode = 2;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0xC;
@@ -673,7 +670,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = math_random();
             math_dirFromBinAngles(rnd % 31U - 84, math_random() % 26U - 45, math_randomFloat() * 21.80000114f + 30.2f, &particle.vel);
             particle.gravity = math_randomFloat() * 1.129000068f + -1.909f;
-            particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, arg0, arg1);
+            particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, owner, list);
             count--;
         }
     }
@@ -685,9 +682,9 @@ void func_150BD070(u8 arg0, s32 arg1) {
         Vec3f pos2;
 
         count = math_random() % 9U + 17;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.renderMode = 0x5103;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.r = 0xD4;
@@ -726,7 +723,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = math_random();
             math_dirFromBinAngles(rnd % 41U - 89, math_random() % 51U - 64, math_randomFloat() * 45.60000229f + 18.80000114f, &spawn.vel);
             spawn.gravity = math_randomFloat() * 0.559f + -0.777f;
-            spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg0, arg1);
+            spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, owner, list);
             if (spawned != NULL) {
                 memcpy(&spawned->data.drag, &scale, sizeof(scale));
             }
@@ -735,11 +732,11 @@ void func_150BD070(u8 arg0, s32 arg1) {
         pos.x = anchors[0]->x;
         pos.y = anchors[0]->y;
         pos.z = anchors[0]->z;
-        particle_startPlayerCameraWobbles(&pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
+        particle_startPlayerCameraWobbles(&pos, 0.0f, 1000.0f, 0.001f, 5, owner, list);
         pos2.x = anchors[0]->x;
         pos2.y = anchors[0]->y;
         pos2.z = anchors[0]->z;
-        particle_startPlayerRumbles(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+        particle_startPlayerRumbles(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, owner, list);
     }
 }
 

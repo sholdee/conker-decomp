@@ -26,8 +26,8 @@ static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
     ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : blood_getProfile(actor)) : 4)
 
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
-s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
-                  s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 effect_spawnPitchYawSplash(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
+                  s16 pitch, s16 yaw, f32 radius, s32 argB, s32 argC, void *data, u8 owner) {
     Vec3f pos;
     Vec3f dir;
     f32 speed;
@@ -40,7 +40,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
     particle_spawnSplash(&pos, &dir, math_randomFloat() * (0.68f - 0.68f) + 0.68f, math_random() % 20 + 31,
                   math_random() % 101 + 155, math_randomFloat() * 2.33f + 6.7f,
-                  (math_random() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
+                  (math_random() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, owner, 1);
     return 1;
 }
 
@@ -69,22 +69,22 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.itemCountRange = 2;
                 impact.spray.lifeBase = 30;
                 impact.spray.lifeRange = 40;
-                impact.spray.unk30 = 155;
-                impact.spray.unk32 = 100;
+                impact.spray.alphaBase = 155;
+                impact.spray.alphaRange = 100;
                 impact.spray.scaleRange = 3.04f;
                 impact.spray.sizeBase = 0.810000062f;
                 impact.spray.sizeRange = 0.405000031f;
                 impact.spray.speedBase = 6.0f;
                 impact.spray.speedRange = 13.90000057f;
-                impact.spray.unk38 = 0.5f;
+                impact.spray.burstChance = 0.5f;
                 if (gBloodProfiles[profile].bloodKind == 1) {
                     impact.spray.kind = 1;
                 } else {
                     impact.spray.kind = 0;
                 }
-                impact.spray.unk3C = 16;
-                impact.spray.unk3E = 15;
-                impact.spray.unk40 = 0;
+                impact.spray.fadeStart = 16;
+                impact.spray.fadeRate = 15;
+                impact.spray.material = 0;
                 particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
             }
         }
@@ -92,7 +92,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
 }
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
-void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnLandingBurst(Actor *actor, u8 owner, s32 list) {
     SplashSpraySpec impact;
     CollisionHit ground;
     s32 count;
@@ -118,18 +118,18 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         impact.spray.itemCountRange = 2;
         impact.spray.lifeBase = 40;
         impact.spray.lifeRange = 20;
-        impact.spray.unk30 = 155;
-        impact.spray.unk32 = 100;
+        impact.spray.alphaBase = 155;
+        impact.spray.alphaRange = 100;
         impact.spray.kind = 0;
-        impact.spray.unk3C = 16;
-        impact.spray.unk3E = 15;
-        impact.spray.unk40 = 0;
+        impact.spray.fadeStart = 16;
+        impact.spray.fadeRate = 15;
+        impact.spray.material = 0;
         impact.spray.scaleRange = 3.02f;
         impact.spray.sizeBase = 0.807000041f;
         impact.spray.sizeRange = 0.701000035f;
         impact.spray.speedBase = 18.0f;
         impact.spray.speedRange = 11.8f;
-        impact.spray.unk38 = 0.5f;
+        impact.spray.burstChance = 0.5f;
         particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = math_random() % 6 + 12;
@@ -155,10 +155,10 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (math_random() & 1) {
                     particle_spawnKindEmitter(0, math_randomFloat() * 4.5f + 15.0f, math_randomFloat() * (f32)100 + 155.0f,
-                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
+                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, owner, list);
                 } else {
                     particle_spawnSquash(0, math_randomFloat() * 5.9f + 6.1f, math_randomFloat() * (f32)100 + 155.0f,
-                                  (Vec3f *)spot, 1, arg1, arg2);
+                                  (Vec3f *)spot, 1, owner, list);
                 }
                 if (--count == 0) {
                     break;
@@ -188,7 +188,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         center[1] += 10.0f;
         blood_spawnGrowingParticle((math_randomFloat() * 40.0f + 120.0f) * 0.001f, (math_randomFloat() * 123.0f + 123.0f) * 0.00001f,
                       math_random() % 101 + 155, math_random() % 101 + 100, math_random() % 56 + 70,
-                      &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
+                      &centerGround.tri, (Vec3f *)center, 0, 1, owner, list);
     }
 }
 
@@ -205,11 +205,11 @@ typedef struct Game1DD500Motion {
     /* 0x1C */ f32 swingWidth;
     /* 0x20 */ f32 swingHeight;
     /* 0x24 */ u8 checkGround;   /* splat when it reaches the ground */
-    /* 0x25 */ u8 unk25;
+    /* 0x25 */ u8 kind;
     /* 0x26 */ u8 pad26[2];
 } Game1DD500Motion; // size 0x28
 
-/* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.unk44 the alpha. */
+/* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.alpha the alpha. */
 struct Game1DD500Particle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1DD500Motion motion;
@@ -239,7 +239,7 @@ struct Game1DD500Task {
 };
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
+Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list) {
     Game1DD500Task *task;
     Game1DD500Emitter emitter;
     s32 profile;
@@ -285,7 +285,7 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
             emitter.slots[i].next = NULL;
         }
     }
-    task = effect_newTimedEffectNoDraw(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    task = effect_newTimedEffectNoDraw(life, -1, 0x13, timed, 0xF, sizeof(emitter), owner, list);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(emitter));
     }
@@ -410,7 +410,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     desc.rot.x = 0.0f;
                     desc.rot.y = 0.0f;
                     desc.rot.z = 0.0f;
-                    motion.unk25 = emitter->profileFlag;
+                    motion.kind = emitter->profileFlag;
                     motion.checkGround = math_random() & 1;
                     desc.width = 0.0f;
                     desc.height = 0.0f;
@@ -429,8 +429,8 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                             head = head->next;
                         }
                         index = head - emitter->slots;
-                        desc.unk45 = math_random() % 101 + 100;
-                        desc.unk44 = math_random() % 101 + 155;
+                        desc.colorLevel = math_random() % 101 + 100;
+                        desc.alpha = math_random() % 101 + 155;
                         motion.phaseSpeedWidth = math_random() % 5 + 4;
                         motion.phaseSpeedHeight = math_random() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
@@ -507,10 +507,10 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (math_random() & 1) {
-                particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
+                particle_spawnKindEmitter(motion->kind, size * 1.7f, particle->head.def.alpha, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
                               particle->head.header.owner, particle->head.header.kind);
             } else {
-                particle_spawnSquash(motion->unk25, size * 0.68f, particle->head.def.unk44, &splat, 1, particle->head.header.owner, particle->head.header.kind);
+                particle_spawnSquash(motion->kind, size * 0.68f, particle->head.def.alpha, &splat, 1, particle->head.header.owner, particle->head.header.kind);
             }
             alive = FALSE;
         }
@@ -524,8 +524,8 @@ s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle) {
 
     if (particle->head.def.lifetime < 32) {
         fade = particle->head.def.lifetime * 8;
-        if (fade < particle->head.def.unk44) {
-            particle->head.def.unk44 = fade;
+        if (fade < particle->head.def.alpha) {
+            particle->head.def.alpha = fade;
         }
     }
     return 1;

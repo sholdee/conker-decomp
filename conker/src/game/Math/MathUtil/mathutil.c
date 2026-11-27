@@ -1877,8 +1877,8 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
                 break;
             case 0:
             default:
-                gfx = light_pickLights(gfx, slot, pos->x, pos->y, pos->z, arg8, tex, link->model,
-                                    unk18, &link->unk4, link->unk1C, 0,
+                gfx = light_pickLights(gfx, slot, pos->x, pos->y, pos->z, arg8, tex, link->maxLights,
+                                    unk18, &link->lightCount, link->lightMask, 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
             }

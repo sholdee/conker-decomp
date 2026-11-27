@@ -17,14 +17,14 @@
  */
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
-void effect_newEmitterSpawner(Camera *owner, u8 arg1, s32 arg2) {
+void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList) {
     EB340Spawn spawn;
     EB340Obj *obj;
 
     spawn.owner = owner;
     spawn.timer = 0;
 
-    obj = effect_newTimedEffect(300, -1, 0x4F, -1, 0, 60, 8, arg1, arg2);
+    obj = effect_newTimedEffect(300, -1, 0x4F, -1, 0, 60, 8, fxOwner, fxList);
     if (obj != NULL) {
         memcpy(&obj->spawn, &spawn, sizeof(spawn));
     }
@@ -59,16 +59,16 @@ void effect_updateEmitterSpawner(EB340Obj *obj) {
         emitter.color2.green = 0xFF;
         emitter.color2.blue = 0xFF;
         emitter.color2.alpha = 0xFF;
-        emitter.unk23 = 0xFF;
-        emitter.otherModeH = 0;
-        emitter.unk28 = 0x200004;
-        emitter.unk2C = 0x1F0601;
-        emitter.combineMode = 3;
-        emitter.unk34 = 0x22;
-        emitter.unk38 = 0x80;
-        emitter.unk3C = 0x20;
-        emitter.unk40 = 0;
-        emitter.unk41 = 7;
+        emitter.colorLevel = 0xFF;
+        emitter.render.otherModeH = 0;
+        emitter.render.setGeometryMode = 0x200004;
+        emitter.render.clearGeometryMode = 0x1F0601;
+        emitter.render.renderMode = 3;
+        emitter.render.combiner = 0x22;
+        emitter.render.colorDither = 0x80;
+        emitter.render.alphaDither = 0x20;
+        emitter.render.primMode = 0;
+        emitter.render.envMode = 7;
         emitter.viewport = spawn->owner->CNumber;
         emitter.scaleX = 1.0f;
         emitter.scaleY = 1.0f;
@@ -103,9 +103,9 @@ void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
 }
 
 /* Advances y by ySpeed per frame; returns 0 once it passes 120. */
-s32 effect_updateRisingScreenSprite(EB340Rising *arg0) {
-    arg0->y += arg0->ySpeed * gFrameDelta;
-    if (arg0->y > 120.0f) {
+s32 effect_updateRisingScreenSprite(EB340Rising *sprite) {
+    sprite->y += sprite->ySpeed * gFrameDelta;
+    if (sprite->y > 120.0f) {
         return 0;
     }
     return 1;

@@ -7,7 +7,7 @@
 
 /*
  * Spawns a QuadFx (animation 0x45, callback 15) at the emitter's position, resting on its floor height (or 200 units
- * below it, clearing pos.unk8, when it has none), then rearms the emitter's cooldown to 100..227.
+ * below it, clearing pos.markOnLanding, when it has none), then rearms the emitter's cooldown to 100..227.
  */
 // matching: volatile keeps `emitter` in its stack slot (reloaded after each call) instead of $s0
 void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
@@ -23,20 +23,20 @@ void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
         spawn.floorY = floorY;
     } else {
         spawn.floorY = pos->y - 200.0f;
-        pos->unk8 = 0;
+        pos->markOnLanding = 0;
     }
 
     spawn.x = pos->x;
     spawn.y = pos->y;
     spawn.z = pos->z;
-    spawn.unk92 = 0;
-    spawn.unk94 = 0;
+    spawn.halfWidth = 0;
+    spawn.halfHeight = 0;
     spawn.callback = 15;
     spawn.animIndex = 0x45;
     spawn.unk86 = 10;
-    spawn.unkA3 = pos->unk8;
+    spawn.unkA3 = pos->markOnLanding;
     spawn.flags = 0x4880;
-    spawn.unkA4 = 0x80;
+    spawn.alpha = 0x80;
 
     effect_initQuadFxTemplate(&spawn, 0xFF, 0xFF, 0xFF, 0x80);
     // matching: one load of the volatile `emitter` serves both arguments
@@ -46,38 +46,35 @@ void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
 }
 
 struct FallingObject {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x87];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x84];
     /* 0x94 */ s16 fallSpeed;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ s16 unk98;
+    /* 0x96 */ s16 maxHalfHeight;
+    /* 0x98 */ s16 frame;
     /* 0x9A */ u8 pad9A[2];
     /* 0x9C */ s16 x;
     /* 0x9E */ s16 y;
     /* 0xA0 */ s16 z;
-    /* 0xA2 */ s16 unkA2;
-    /* 0xA4 */ s16 unkA4;
+    /* 0xA2 */ s16 halfWidth;
+    /* 0xA4 */ s16 halfHeight;
     /* 0xA6 */ s16 floorY;
     /* 0xA8 */ u8 padA8[2];
     /* 0xAA */ s16 timer;
     /* 0xAC */ u8 padAC[7];
-    /* 0xB3 */ s8 unkB3;
+    /* 0xB3 */ s8 markOnLanding;
 };
 
 /*
- * While unkA4 is below unk96, grows unkA4/unkA2 with the timer. After that the object falls with
- * a speed that ramps up to 20; once it drops below floorY it sets unk98 to -1, first spawning a
- * particle_spawnKindMark effect at the landing point when unkB3 is 1.
+ * While halfHeight is below maxHalfHeight, grows halfHeight/halfWidth with the timer. After that the object falls with
+ * a speed that ramps up to 20; once it drops below floorY it sets frame to -1, first spawning a
+ * particle_spawnKindMark effect at the landing point when markOnLanding is 1.
  */
 void effect_updateFallingObject(FallingObject *obj) {
     f32 pos[4]; // matching: a 4th (unused) slot keeps pos at its original stack offset
 
-    if (obj->unkA4 < obj->unk96) {
-        obj->unkA4 = ((obj->timer >> 2) * 24) / 3;
-        obj->unkA2 = ((obj->timer >> 2) * 6) / 3;
+    if (obj->halfHeight < obj->maxHalfHeight) {
+        obj->halfHeight = ((obj->timer >> 2) * 24) / 3;
+        obj->halfWidth = ((obj->timer >> 2) * 6) / 3;
         obj->timer += gFrameTicks;
         return;
     }
@@ -89,12 +86,12 @@ void effect_updateFallingObject(FallingObject *obj) {
 
     obj->y -= (obj->fallSpeed * gFrameTicks) >> 1;
     if (obj->y < obj->floorY) {
-        if (obj->unkB3 == 1) {
+        if (obj->markOnLanding == 1) {
             pos[0] = obj->x;
             pos[1] = obj->floorY;
             pos[2] = obj->z;
-            particle_spawnKindMark(5, 30.0f, 0xFF, 0, pos, obj->unkC, obj->unk1);
+            particle_spawnKindMark(5, 30.0f, 0xFF, 0, pos, obj->header.owner, obj->header.kind);
         }
-        obj->unk98 = -1;
+        obj->frame = -1;
     }
 }

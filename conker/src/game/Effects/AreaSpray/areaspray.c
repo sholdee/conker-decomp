@@ -229,7 +229,7 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     def.rgba[1] = 0;
     def.rgba[2] = 0;
     def.rgba[3] = 0xFF;
-    def.unk44 = 0xFF;
+    def.alpha = 0xFF;
     def.width = 0.0f;
     def.height = 1500.0f;
     def.pos = pos;
@@ -238,12 +238,12 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     def.scale.y = 0.0f;
     def.scale.z = 1.0f;
     def.flags = 0x24EC0008;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 6;
-    def.unk48 = 0;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 6;
+    def.zone = 0;
     def.viewportMask = 0xFF;
-    def.unk50 = 0;
+    def.material = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
     particle = particle_newQuadParticle(&def, gActorBeamColors, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
@@ -276,7 +276,7 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
             groundDef.rgba[1] = 0;
             groundDef.rgba[2] = 0;
             groundDef.rgba[3] = 0xFF;
-            groundDef.unk44 = 0xFF;
+            groundDef.alpha = 0xFF;
             groundDef.width = 1.0f;
             groundDef.height = 1.0f;
             groundDef.pos.x = pos.x;
@@ -287,12 +287,12 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
             groundDef.scale.y = 1.0f;
             groundDef.scale.z = 1.0f;
             groundDef.flags = 0x04EC0008;
-            groundDef.unk45 = 0xFF;
-            groundDef.unk46 = 0;
-            groundDef.unk47 = 6;
-            groundDef.unk48 = 0;
+            groundDef.colorLevel = 0xFF;
+            groundDef.primMode = 0;
+            groundDef.envMode = 6;
+            groundDef.zone = 0;
             groundDef.viewportMask = 0xFF;
-            groundDef.unk50 = 0;
+            groundDef.material = 0;
             groundDef.fadeStart = 1;
             groundDef.fadeRate = 0xFF;
             dst->groundParticle = particle_spawnAxisQuadParticle(&groundDef, &gWhiteVtxColors, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
@@ -358,7 +358,7 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
             }
         }
     }
-    particle->head.def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
+    particle->head.def.alpha = sinf(ext->pulsePhase) * 57.0f + 198.0f;
     ext->pulsePhase += 0.28500003f * gFrameDelta;
     ext->pulsePhase = math_wrapRadians(ext->pulsePhase);
     ext->texPhase0 += 0.10700001f * gFrameDelta;
@@ -369,7 +369,7 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
     ext->texS1 = math_sin(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {
         ext->groundParticle->head.def.width = ext->groundParticle->head.def.height = particle->head.def.width * 0.02f;
-        ext->groundParticle->head.def.unk44 = particle->head.def.unk44;
+        ext->groundParticle->head.def.alpha = particle->head.def.alpha;
         ext->groundParticle->head.def.pos.x = x;
         ext->groundParticle->head.def.pos.z = z;
     }

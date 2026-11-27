@@ -104,8 +104,8 @@ void particle_updateUnderwaterRiseEmitter(EmitterObject *obj) {
 
         desc.texture = 47;
         desc.renderMode = 0xC01;
-        desc.unk0 = 0x200005;
-        desc.unk4 = 0;
+        desc.setGeometryMode = 0x200005;
+        desc.clearGeometryMode = 0;
         desc.b2 = 0;
         desc.g2 = 0;
         desc.r2 = 0;
@@ -220,16 +220,16 @@ void particle_spawnSlidingSprites(s16 player) {
     info.color2.green = 255;
     info.color2.blue = 255;
     info.color2.alpha = 255;
-    info.unk23 = 255;
-    info.otherModeH = 0;
-    info.unk28 = 0;
-    info.unk2C = 0;
-    info.unk40 = 0;
-    info.unk41 = 9;
-    info.combineMode = 7;
-    info.unk34 = 60;
-    info.unk38 = 0x80;
-    info.unk3C = 0x20;
+    info.colorLevel = 255;
+    info.render.otherModeH = 0;
+    info.render.setGeometryMode = 0;
+    info.render.clearGeometryMode = 0;
+    info.render.primMode = 0;
+    info.render.envMode = 9;
+    info.render.renderMode = 7;
+    info.render.combiner = 60;
+    info.render.colorDither = 0x80;
+    info.render.alphaDither = 0x20;
     while (count--) {
         data.acceleration = ((math_randomFloat() * 105.0f) + 105.0f) * 0.001000000047f;
         data.velocity = math_randomFloat() * 3008.0f * 0.001000000047f;

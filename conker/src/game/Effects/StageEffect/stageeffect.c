@@ -15,7 +15,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Read by game/Level/LevelSetup26/levelsetup26.c. */
-const u8 D_800A1C00[8][8] = {
+const u8 gStagePartObjectIds[8][8] = {
     { 0xFD, 0xFB, 0xF9, 0xF7, 0xF5, 0xF3, 0xF1, 0xEF },
     { 0xFC, 0xFA, 0xF8, 0xF6, 0xF4, 0xF2, 0xF0, 0xEE },
     { 0xE6, 0xE5, 0xE4, 0xE3, 0xE2, 0xE1, 0xE0, 0xDF },
@@ -30,7 +30,7 @@ static const Vec3f gCutsceneBoneBeamStart = { -124.0f, -8.0f, 28.0f };
 static const Vec3f gCutsceneBoneBeamEnd = { -170.0f, -8.0f, 28.0f };
 
 /* Effects 50 units above `obj`: a light_createWithEffect burst and a particle_spawnTrailBurst emitter. */
-void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
+void effect_hitReactLightBurst(s32 self, Actor *obj, s32 result) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -92,7 +92,7 @@ void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
         spawn.colorLevelBase = 0xFF;
         spawn.colorLevelRange = 0;
         spawn.renderMode = 3;
-        spawn.unk21 = 0x24;
+        spawn.combiner = 0x24;
         spawn.setGeometryMode = 0x200005;
         spawn.clearGeometryMode = 0x60600;
         spawn.fadeStart = 8;
@@ -100,8 +100,8 @@ void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
         spawn.shrinkStart = 1;
         spawn.shrinkPaused = 0;
         spawn.shrinkFactor = 1.0f;
-        spawn.unk38 = -1;
-        spawn.unk39 = 0;
+        spawn.moveFn = -1;
+        spawn.shapeFn = 0;
         spawn.unk72 = -1;
         spawn.unk73 = -1;
         particle_spawnTrailBurst(&spawn, 0xFF, 1);
@@ -123,11 +123,8 @@ void effect_stageZoneHandler(Actor *obj, TriggerZone *zone) {
 }
 
 struct StageObj {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ StageState stage;
 };
 
@@ -185,13 +182,13 @@ void effect_advanceStage(StageObj *obj) {
             state->parts[state->stage]->inactive = 1;
             state->stage++;
             state->parts[state->stage]->inactive = 0;
-            camera_startWobblePreset(7, 0, 0, obj->unkC, obj->unk1);
+            camera_startWobblePreset(7, 0, 0, obj->header.owner, obj->header.kind);
             event.flags = 1;
             event.duration = 25;
             event.playerMask = 1;
             event.strength = 8;
             event.updateKind = -1;
-            cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
+            cont_spawnRumble(&event, 0, obj->header.owner, obj->header.kind);
             state->stageTimer = math_random() % 31U + 70;
         }
     }
@@ -203,14 +200,14 @@ void effect_advanceStage(StageObj *obj) {
         event.playerMask = 1;
         event.strength = (math_random() & 3) + 1;
         event.updateKind = -1;
-        cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
+        cont_spawnRumble(&event, 0, obj->header.owner, obj->header.kind);
         sound_playAt((math_random() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
                       state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
         state->eventTimer = math_random() % 151U + 150;
     }
 
-    state->unk38 += (0.02000000142f + math_randomFloat() * 0.025f) * (gFrameDelta * count);
-    if (state->unk38 > 1.0f) {
+    state->burstAccum += (0.02000000142f + math_randomFloat() * 0.025f) * (gFrameDelta * count);
+    if (state->burstAccum > 1.0f) {
         s16 side;
         Vec3f pos;
         side = (state->mirror & 1) ? -1 : 1;
@@ -219,13 +216,13 @@ void effect_advanceStage(StageObj *obj) {
             pos.y = math_randomFloat() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            weapon_spawnImpactBurst(&pos, obj->unkC, obj->unk1);
-            state->unk38 -= 1.0f;
-        } while (state->unk38 > 1.0f);
+            weapon_spawnImpactBurst(&pos, obj->header.owner, obj->header.kind);
+            state->burstAccum -= 1.0f;
+        } while (state->burstAccum > 1.0f);
     }
 
-    state->unk34 += (0.02000000142f + math_randomFloat() * 0.06000000238f) * (gFrameDelta * count);
-    if (state->unk34 > 1.0f) {
+    state->debrisAccum += (0.02000000142f + math_randomFloat() * 0.06000000238f) * (gFrameDelta * count);
+    if (state->debrisAccum > 1.0f) {
         s16 pieces;
         s16 side;
         ParticleSpawn spawn;
@@ -238,7 +235,7 @@ void effect_advanceStage(StageObj *obj) {
         spawn.flags = 0x39E8;
         spawn.model = 0x86;
         spawn.variant = 0;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.updateFn = 8;
         spawn.update2Fn = 0;
@@ -248,7 +245,7 @@ void effect_advanceStage(StageObj *obj) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 0;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 12;
@@ -278,20 +275,20 @@ void effect_advanceStage(StageObj *obj) {
                 spawn.gravity = math_randomFloat() * 0.337f + -1.177f;
                 particle_newModelParticleWithFloor(&spawn, 3, 1, 0, 0, 0xFF, 1);
             }
-            state->unk34 -= 1.0f;
-        } while (state->unk34 > 1.0f);
+            state->debrisAccum -= 1.0f;
+        } while (state->debrisAccum > 1.0f);
     }
 
-    state->unk30 += (0.05500000343f + math_randomFloat() * 0.05f) * (gFrameDelta * count);
-    if (state->unk30 > 1.0f) {
+    state->flareAccum += (0.05500000343f + math_randomFloat() * 0.05f) * (gFrameDelta * count);
+    if (state->flareAccum > 1.0f) {
         s16 side;
         s32 flares;
         ParticleDesc flare;
         side = (state->mirror & 1) ? -1 : 1;
         flare.texture = 0x86;
         flare.renderMode = 0x4404;
-        flare.unk0 = 0x200005;
-        flare.unk4 = 0x9F0600;
+        flare.setGeometryMode = 0x200005;
+        flare.clearGeometryMode = 0x9F0600;
         flare.frame = 0;
         flare.frameRate = 0;
         flare.r = 0xFF;
@@ -341,12 +338,12 @@ void effect_advanceStage(StageObj *obj) {
                 flare.gravity = math_randomFloat() * 0.268f + -0.3870000243f;
                 particle_newSpriteParticleWithFloor(&flare, 1, 0, 0, 0xFF, 1);
             }
-            state->unk30 -= 1.0f;
-        } while (state->unk30 > 1.0f);
+            state->flareAccum -= 1.0f;
+        } while (state->flareAccum > 1.0f);
     }
 
-    state->unk2C += (0.3360000253f + math_randomFloat() * 0.126f) * (gFrameDelta * count);
-    if (state->unk2C > 1.0f) {
+    state->kindSpriteAccum += (0.3360000253f + math_randomFloat() * 0.126f) * (gFrameDelta * count);
+    if (state->kindSpriteAccum > 1.0f) {
         s16 side;
         Vec3f pos;
         Vec3f vel;
@@ -364,8 +361,8 @@ void effect_advanceStage(StageObj *obj) {
             particle_spawnKindSprite(8, &pos.x, &vel.x, math_randomFloat() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
                           math_randomFloat() * 0.2070000172f + -0.1690000147f, math_random() % 21U + 35,
                           math_random() % 121U + 100, 50, 5, 0, 0xFF, 1);
-            state->unk2C -= 1.0f;
-        } while (state->unk2C > 1.0f);
+            state->kindSpriteAccum -= 1.0f;
+        } while (state->kindSpriteAccum > 1.0f);
     }
 }
 
@@ -381,26 +378,26 @@ void effect_jumpStagesToEnd(u8 index) {
     effect_sendEventToTimedEffects((s32)&msg, 0x42);
 }
 
-void effect_releaseStage(TimedEffect *arg0) {
+void effect_releaseStage(TimedEffect *object) {
 }
 
-void effect_destroyStage(TimedEffect *arg0) {
-    effect_releaseStage(arg0);
-    effect_defaultDestroyTimedEffect(arg0);
+void effect_destroyStage(TimedEffect *object) {
+    effect_releaseStage(object);
+    effect_defaultDestroyTimedEffect(object);
 }
 
-void effect_freeStage(TimedEffect *arg0) {
-    effect_releaseStage(arg0);
-    effect_defaultFreeTimedEffect(arg0);
+void effect_freeStage(TimedEffect *object) {
+    effect_releaseStage(object);
+    effect_defaultFreeTimedEffect(object);
 }
 
 static u8 gCutsceneBoneBeamBone = 23; /* the bone of effect_spawnCutsceneBoneBeam's effect */
 
 /* Effect at the point gCutsceneBoneBeamStart on bone gCutsceneBoneBeamBone of `obj`. */
-void effect_spawnCutsceneBoneBeam(obj, arg1, arg2)
+void effect_spawnCutsceneBoneBeam(obj, owner, list)
 Actor *obj;
-u8 arg1;
-s32 arg2;
+u8 owner;
+s32 list;
 {
     Vec3f pos;
     f32 one;
@@ -424,14 +421,14 @@ s32 arg2;
     random0 = math_random();
     random1 = math_random();
     effect_spawnBoneBeamParticle(obj, gCutsceneBoneBeamBone, &gCutsceneBoneBeamStart, &gCutsceneBoneBeamEnd, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
-                  math_randomFloat() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
+                  math_randomFloat() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, owner, list);
 }
 
 /* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */
-void effect_spawnGunMuzzleEffects(obj, arg1, arg2)
+void effect_spawnGunMuzzleEffects(obj, owner, list)
 Actor *obj;
-u8 arg1;
-s32 arg2;
+u8 owner;
+s32 list;
 {
     Vec3f points[6];
     Vec3f position;
@@ -443,9 +440,9 @@ s32 arg2;
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
         if (weapon_getGunMuzzlePoints(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
-            particle_spawnShortLightFlash(&position, arg1, arg2);
-            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
-            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
+            particle_spawnShortLightFlash(&position, owner, list);
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, owner, list);
+            weapon_spawnMuzzleFlashes(&position, points, owner, list);
         }
     }
 }

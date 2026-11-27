@@ -317,7 +317,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
         if (count > 1.0f) {
             spawn.flags = 0x15;
             spawn.kind = 10;
-            spawn.unk14 = -1;
+            spawn.shapeKind = -1;
             part.flags = 4;
             part.primMode = 2;
             part.envMode = 3;
@@ -330,7 +330,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
             part.color2.alpha = 0xFF;
             part.colorLevel = 0xFF;
             part.renderMode = 3;
-            part.unk21 = 0x24;
+            part.combiner = 0x24;
             part.setGeometryMode = 0x200005;
             part.clearGeometryMode = 0x60600;
             part.fadeStart = 20;
@@ -338,8 +338,8 @@ void beam_updateSparkRegion(SparkObj *obj) {
             part.shrinkStart = 1;
             part.shrinkPaused = 0;
             part.shrinkFactor = 1.0f;
-            part.unk38 = -1;
-            part.unk39 = 0;
+            part.moveFn = -1;
+            part.shapeFn = 0;
             spawn.pos.y = state->region->y;
             do {
                 part.color.alpha = math_random() % 101U + 155;

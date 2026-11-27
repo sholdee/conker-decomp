@@ -33,9 +33,9 @@ Gfx gModelEffectRenderTeardownDl[] = {
 
 /* Update callbacks (EffectParams.updateFunc, .updateFunc2, the third set): each returns 0 when the effect
    is done. Declared without a prototype where the entries take their own effect views. */
-s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, func_151BECB8, particle_bobEffect, effect_updateFadeInEffect };
+s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, effect_updateStatPickup, particle_bobEffect, effect_updateFadeInEffect };
 s32 (*gModelEffectUpdate2Funcs[])(ModelEffect *) = { effect_resetModelEffectRoot, effect_setModelEffectRootRotScale };
-s32 (*gModelEffectUpdate2FuncsTail[])() = { func_151BEB20, text_updateCashModel, effect_placeScreenCashModel, effect_setModelEffectRootFromExtra, func_150C52CC };
+s32 (*gModelEffectUpdate2FuncsTail[])() = { effect_buildStatPickupMatrix, text_updateCashModel, effect_placeScreenCashModel, effect_setModelEffectRootFromExtra, func_150C52CC };
 
 /* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
 Gfx *(*gModelEffectPreDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
@@ -47,7 +47,7 @@ Gfx *(*gModelEffectPostDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *) = { effect_
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
  * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
  */
-ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
+ModelEffect *effect_newModelEffect(EffectParams *params, s32 anim, f32 speed, s32 attachArg, s32 arg4, s32 extraSize,
                       u8 owner, s32 list) {
     ModelEffect *fx;
     s32 type;
@@ -64,16 +64,16 @@ ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32
         return NULL;
     }
     memcpy(&fx->params, params, sizeof(EffectParams));
-    anim_createInstance(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
+    anim_createInstance(fx->params.model, fx->params.bank, &fx->displayLists, &fx->displayListCount, &fx->segment1,
                   &fx->unk78, &fx->model);
     guMtxIdentF(fx->mtx[0]);
     guMtxIdentF(fx->mtx[1]);
     fx->model->matrices[0] = fx->mtx[0];
     fx->model->matrices[1] = fx->mtx[1];
-    anim_play(fx->model, 1, arg1, arg2, 0.0f, 0);
-    fx->attach.model = attachArg;
-    fx->attach.unk1C = arg4;
-    fx->attach.unk4 = 0;
+    anim_play(fx->model, 1, anim, speed, 0.0f, 0);
+    fx->attach.maxLights = attachArg;
+    fx->attach.lightMask = arg4;
+    fx->attach.lightCount = 0;
     for (i = 0; i < 4; i++) {
         fx->attach.handles[i] = NULL;
     }
@@ -199,13 +199,13 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
                   fx->params.color1.alpha, 0xFF, fx->params.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-    gfx = particle_setCombineMode(gfx, ((u8 *)&fx->params.render.unk10)[3] /* matching: reads the low byte */, &needSync);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&fx->params.render.combiner)[3] /* matching: reads the low byte */, &needSync);
     gfx = math_gfxSetOtherMode(gfx,
-                        fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
-                            fx->params.render.unk18,
+                        fx->params.render.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.colorDither |
+                            fx->params.render.alphaDither,
                         gEffectRenderModes[fx->params.render.renderMode].cycle1 | gEffectRenderModes[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
-        gfx = math_emitPointLights(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
+        gfx = math_emitPointLights(gfx, &fx->attach, fx->params.lightMode, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);
     }
     gDPPipeSync(gfx++);
@@ -233,11 +233,11 @@ s32 effect_resetModelEffectRoot(ModelEffect *fx) {
 }
 
 /* effect_newModelEffect plus a 0x38-byte extension copied from `extra`. */
-ModelEffect *effect_newMovingModelEffect(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+ModelEffect *effect_newMovingModelEffect(EffectParams *params, EffectMotion *motion, s32 anim, f32 speed, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
     ModelEffect *fx;
 
-    fx = effect_newModelEffect(params, arg2, arg3, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
+    fx = effect_newModelEffect(params, anim, speed, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
     if (fx == NULL) {
         return NULL;
     }

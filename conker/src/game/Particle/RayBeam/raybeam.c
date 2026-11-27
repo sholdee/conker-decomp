@@ -133,10 +133,10 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
     def.scale.y = 1.0f;
     def.scale.z = 1.0f;
     def.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | 0x80000000;
-    def.unk44 = 0xFF;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 6;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 6;
     particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
     if (particle != NULL) {
         state = &particle->state;
@@ -176,10 +176,10 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 subDef.scale.y = 1.0f;
                 subDef.scale.z = 1.0f;
                 subDef.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x400000;
-                subDef.unk44 = 0xFF;
-                subDef.unk45 = 0xFF;
-                subDef.unk46 = 0;
-                subDef.unk47 = 6;
+                subDef.alpha = 0xFF;
+                subDef.colorLevel = 0xFF;
+                subDef.primMode = 0;
+                subDef.envMode = 6;
                 if ((state->subParticle = particle_newQuadParticleNoModel(&subDef, &gWhiteVtxColors, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
                                                    argD, argE)) != NULL) {
                     memcpy(state->subParticle + 0x110, &subData, sizeof(SubParticleData));
@@ -211,8 +211,8 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 particleAData.unk24 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
                 descA.texture = 0x2B;
                 descA.renderMode = 0x3303;
-                descA.unk0 = 0x200005;
-                descA.unk4 = 0;
+                descA.setGeometryMode = 0x200005;
+                descA.clearGeometryMode = 0;
                 descA.timer = lifetime;
                 descA.frame = 0;
                 descA.frameRate = 0;
@@ -283,10 +283,10 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                     glowDef.scale.z = 1.0f;
                     glowDef.flags = (hasLifetime ? 1 : 0) | 0x2 | 0x10 | 0x2000 | 0x20000 | 0x40000 | 0x80000 |
                                     0x400000;
-                    glowDef.unk45 = 0xFF;
-                    glowDef.unk44 = 0xFF;
-                    glowDef.unk46 = 0;
-                    glowDef.unk47 = 6;
+                    glowDef.colorLevel = 0xFF;
+                    glowDef.alpha = 0xFF;
+                    glowDef.primMode = 0;
+                    glowDef.envMode = 6;
                     glowParams.height0 = 0.0f;
                     glowParams.width0 = 0.0f;
                     glowParams.alpha0 = 0.0f;
@@ -313,8 +313,8 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                         particleBData.parent = particle;
                         descB.texture = 0x15;
                         descB.renderMode = 0x3203;
-                        descB.unk0 = 0x200005;
-                        descB.unk4 = 0;
+                        descB.setGeometryMode = 0x200005;
+                        descB.clearGeometryMode = 0;
                         descB.timer = lifetime;
                         descB.frame = 0;
                         descB.frameRate = 0;

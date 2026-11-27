@@ -35,14 +35,14 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
         math_transformObjectPoints(placement, ring, points, count + 1);
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.r = 0xE7;
         spawn.g = 0xE7;
         spawn.b = 0xB6;
         spawn.r2 = 0x9E;
         spawn.g2 = 0x9E;
         spawn.b2 = 0x62;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.a = 0xFF;

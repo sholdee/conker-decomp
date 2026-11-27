@@ -22,8 +22,8 @@ void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
         drops.angles.pitchRange = 60;
         drops.spray.lifeBase = 36;
         drops.spray.lifeRange = 60;
-        drops.spray.unk24 = 200;
-        drops.spray.unk25 = 55;
+        drops.spray.alphaBase = 200;
+        drops.spray.alphaRange = 55;
         drops.spray.unk30 = 0;
         drops.spray.kind = 12;
         drops.spray.wobbles = 1;
@@ -84,10 +84,10 @@ void particle_updateColorEmitter(ColorEmitter *emitter) {
         extra.drag = 0.97047f;
         desc.texture = 0x6C;
         desc.renderMode = 0x5103;
-        desc.unk0 = 0x200005;
+        desc.setGeometryMode = 0x200005;
         extra.phase[0] = 0;
         extra.phase[1] = 0;
-        desc.unk4 = 0;
+        desc.clearGeometryMode = 0;
         desc.frame = 0;
         desc.frameRate = 0;
         desc.fadeStart = 40;

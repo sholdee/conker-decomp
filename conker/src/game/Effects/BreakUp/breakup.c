@@ -109,7 +109,7 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
         chunk.scale.z = 1.0f;
         chunk.flags = 0x197D;
         chunk.variant = 0;
-        chunk.unk5C = NULL;
+        chunk.zone = NULL;
         chunk.alpha = 0xFF;
         chunk.updateFn = 1;
         chunk.update2Fn = 0;
@@ -119,7 +119,7 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
         chunk.destroyFn = 0;
         chunk.squashFn = 0;
         chunk.matrixFn = 0;
-        chunk.unk6A = 0;
+        chunk.lightMode = 0;
         chunk.owner = NULL;
         chunk.ownerId = 0;
         chunk.fadeStart = 1;
@@ -199,20 +199,20 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
             burst.blue = 0;
             burst.alphaBase = 0x9B;
             burst.alphaRange = 0x64;
-            burst.unk58 = 3;
-            burst.unk5C = 0xFF;
-            burst.render.unk0 = 0;
+            burst.maxLights = 3;
+            burst.lightMask = 0xFF;
+            burst.render.otherModeH = 0;
             burst.render.setGeometryMode = 0x220005;
             burst.render.clearGeometryMode = 0x1D0600;
             burst.render.renderMode = 1;
-            burst.render.unk10 = 0x3B;
-            burst.render.unk14 = 0x80;
-            burst.render.unk18 = 0x20;
+            burst.render.combiner = 0x3B;
+            burst.render.colorDither = 0x80;
+            burst.render.alphaDither = 0x20;
             burst.render.primMode = 0;
             burst.render.envMode = 7;
-            burst.unk80 = 10;
-            burst.unk82 = 25;
-            burst.unk84 = obj->floorMaterial;
+            burst.fadeStart = 10;
+            burst.fadeRate = 25;
+            burst.material = obj->floorMaterial;
             particle_spawnPuffSpray(&burst, arg1, arg2);
         }
     }
@@ -265,8 +265,8 @@ void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timer = (math_random() % 11U) + 35;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -312,8 +312,8 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     extra = 0.9172409773f;
     spawn.timer = (math_random() & 0xF) + 25;
     spawn.frame = 0;

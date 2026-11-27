@@ -278,33 +278,33 @@ void light_killActorInZone(Actor *obj, TriggerZone *zone);
 
 /* game/Effects/Light/light.c */
 extern u8 gDaylight;
-LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                           u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
-LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
+LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 radius, s32 r, s32 g, s32 b,
+                           u8 lightMask, u8 disabled, s32 size, u8 owner, s32 list);
+LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 owner, s32 list);
 void light_updateEffect(LightEffect *effect);
-void light_handleEffectEvent(void *arg0, u8 *message, u8 event);
+void light_handleEffectEvent(void *obj, u8 *message, u8 event);
 s32 light_updateDebugScale(LightEffect *effect);
 s32 light_updatePulse(LightEffect *effect);
 s32 light_updateJitter(LightEffect *effect);
 s32 light_updateMounted(LightEffect *effect);
 s32 light_updateFlicker(LightEffect *effect);
 void light_startFlicker(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
-LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7,
-                           s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE,
-                           s32 argF);
+LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8 flags, s16 lifetime, s32 radius, s32 r, s32 g,
+                           s32 b, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 owner,
+                           s32 list);
 u8 light_followActor(LightEffect *effect);
-LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime,
-                           s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE,
-                           s32 argF);
+LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 flags, s16 lifetime,
+                           s32 radius, s32 r, s32 g, s32 b, u8 fromBone, u8 eventHandler, u8 flagHit, u8 owner,
+                           s32 list);
 s32 light_updateBeam(LightEffect *effect);
 s32 light_isActorLive(Actor *actor, Actor *exclude);
-LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *light_createMounted(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void light_sendEvent(u8 lightType, u8 event, void *arg2);
+LightEffect *func_1516127C(PointLight *light, u8 owner, s32 list);
+LightEffect *func_15161334(PointLight *light, u8 owner, s32 list);
+LightEffect *light_createMounted(PointLight *light, u8 owner, s32 list);
+LightEffect *func_15161494(PointLight *light, u8 owner, s32 list);
+LightEffect *func_15161540(PointLight *light, u8 owner, s32 list);
+LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, u8 owner, s32 list);
+void light_sendEvent(u8 lightType, u8 event, void *payload);
 void light_destroyAttached(LightEffect *effect);
 void light_freeAttached(LightEffect *effect);
 void light_destroyBeam(LightEffect *effect);
@@ -313,42 +313,42 @@ void light_defaultDestroy(LightEffect *effect);
 void light_defaultFree(LightEffect *effect);
 void light_destroyEffect(LightEffect *effect);
 void light_freeEffect(LightEffect *effect);
-void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
-LightEffect *light_createSeqTrack(s32 index, s16 lifetime, u8 arg2, s32 arg3);
+void light_playRandomSound(u16 volume, s16 cents, u8 mix, s32 arg3, Vec3f *position, s16 nearDistance, s16 farDistance);
+LightEffect *light_createSeqTrack(s32 index, s16 lifetime, u8 owner, s32 list);
 s32 light_updateSeqTrack(LightEffect *effect);
-LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6,
-                           s32 arg7, u8 arg8, s32 arg9);
+LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 flags, s16 lifetime, s32 radius, s32 r, s32 g,
+                           s32 b, u8 owner, s32 list);
 s32 light_updateAtActor(LightEffect *effect);
 void light_handleActorEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
-LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2);
-void light_startColourCycle(s32 arg0);
+LightEffect *func_15162034(PointLight *light, u8 owner, s32 list);
+void light_startColourCycle(s32 unused);
 void light_updateColourCycle(ColourPulseEffect *object);
-LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7);
+LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 flags, s8 update, s16 lifetime, u8 owner, s32 list);
 s32 light_updateColourCycleEffect(LightEffect *effect);
-LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
-                           u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
-LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow,
-                           s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 argB, s32 argC);
+LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, u8 owner, s32 list);
+LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s32 r, s32 g, s32 b, u8 lightMask,
+                           u8 disabled, s32 extraSize, u8 kind, u8 owner, s32 list);
+LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, s8 onLow,
+                           s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 owner, s32 list);
 s32 light_updateCycle(LightEffect *effect);
 void light_cycleSetObjectFlag(LightEffect *effect);
 void light_cycleClearObjectFlag(LightEffect *effect);
-LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
+LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 flags, s16 lifetime, s8 update, u8 owner, s32 list);
 s32 light_updateLightning(LightEffect *effect);
-LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6,
-                           u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
+LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 radius,
+                           u8 r, u8 g, u8 b, u8 lightMask, u8 disabled, s32 extraSize, u8 owner, s32 list);
 s32 light_updateTracking(LightEffect *effect);
-void light_handleTrackingEvent(LightEffect *effect, s32 arg1, u8 eventId);
-LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+void light_handleTrackingEvent(LightEffect *effect, s32 event, u8 eventId);
+LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 flags, s32 arg5, u8 owner, s32 list);
 s32 light_updateOneShotPulse(LightEffect *effect);
-void light_createEmptyEffect(PointLight *light, u8 type, u8 arg2, s32 arg3);
-LightEffect *light_createSizedEffect(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
+void light_createEmptyEffect(PointLight *light, u8 type, u8 owner, s32 list);
+LightEffect *light_createSizedEffect(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 owner, s32 list);
 s32 light_updateColourAnimFollow(LightEffect *effect);
-void light_handleSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId);
-void light_handleInvertedSwitchEvent(LightEffect *effect, s32 arg1, u8 eventId);
-LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2);
+void light_handleSwitchEvent(LightEffect *effect, s32 event, u8 eventId);
+void light_handleInvertedSwitchEvent(LightEffect *effect, s32 event, u8 eventId);
+LightEffect *light_createObjectPulse(u8 objectId, u8 owner, s32 list);
 s32 light_updateObjectPulse(LightEffect *effect);
-LightEffect *light_createActorPulse(Actor *actor, u8 arg1, s32 arg2);
+LightEffect *light_createActorPulse(Actor *actor, u8 owner, s32 list);
 s32 light_updateAttachedPulse(LightEffect *effect);
 void light_applyPulse(LightPulse *pulse, LightEffect *effect);
 void light_applyJitter(LightEffect *effect, LightJitter *jitter);
@@ -356,10 +356,10 @@ s32 light_trackActorRef(LightEffect *effect, LightActorRef *ref);
 void light_handleAttachEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
 void light_handleActorRefEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
 void light_handleBeamEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
-LightEffect *light_createFlash(PointLight *light, u8 id, u8 arg2, s32 arg3);
+LightEffect *light_createFlash(PointLight *light, u8 id, u8 owner, s32 list);
 s32 light_updateFlash(LightEffect *effect);
 void light_handleFlashEvent(LightEffect *effect, LightFlashEvent *event, u8 eventId);
-void light_handleBeamToggleEvent(LightEffect *effect, s32 arg1, u8 eventId);
+void light_handleBeamToggleEvent(LightEffect *effect, s32 event, u8 eventId);
 s32 light_updateTransformed(LightEffect *effect);
 void light_placeTransformed(LightEffect *effect, LightTransformed *point);
 s32 light_updateSwing(LightEffect *effect);
@@ -379,7 +379,7 @@ extern u8 gDaylightOffAmbient[3];
 void light_updateActorFlicker(LightEffect *effect);
 
 /* game/Effects/LampParticle/lampparticle.c */
-void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3);
+void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list);
 s32 light_updateLampParticle(LampParticle *particle);
 s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle);
 s32 light_updateLampParticleLight(LightEffect *effect);

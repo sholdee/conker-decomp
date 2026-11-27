@@ -172,7 +172,7 @@ void swarm_loadModelWithAltVerts(s32 slot) {
             gEffectModelSlots[slot + 1].resource = res;
             gEffectModelSlots[slot + 1].unk4 = res->unk0;
             gEffectModelSlots[slot + 1].unk8 = res->unk8;
-            gEffectModelSlots[slot + 1].unk10 = NULL;
+            gEffectModelSlots[slot + 1].usedTextures = NULL;
             gEffectModelSlots[slot + 1].displayList = gEffectModelSlots[slot].displayList;
             gEffectModelSlotStates[slot + 1] = 1;
         }
@@ -204,7 +204,7 @@ void swarm_loadModelWithExtra(s32 slot, s32 extraSlot) {
             gEffectModelSlots[extraSlot].unk4 = res->unk0;
             gEffectModelSlots[extraSlot].unk8 = res->unk8;
             gEffectModelSlots[extraSlot].displayList = res->unk18;
-            gEffectModelSlots[extraSlot].unk10 = NULL;
+            gEffectModelSlots[extraSlot].usedTextures = NULL;
             gEffectModelSlotStates[extraSlot] = 1;
         }
     }
@@ -222,7 +222,7 @@ void swarm_loadModel(s32 slot) {
             gEffectModelSlots[slot].unk8 = res->unk8;
             gEffectModelSlots[slot].displayList = res->unk18;
             gEffectModelSecondDls[slot] = res->unk10;
-            texture_resolveDl(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].unk10);
+            texture_resolveDl(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].usedTextures);
             gEffectModelSlotStates[slot] = 1;
         }
     }
@@ -250,9 +250,9 @@ Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
 /* Frees model `slot`. Slots 8 and 9 are a pair: slot 8's model is kept until slot 9 is unused too, and freeing
  * slot 9 after slot 8 also frees slot 8's model. */
 void swarm_freeModel(s32 slot) {
-    if (gEffectModelSlots[slot].unk10 != NULL) {
-        texture_releaseList(gEffectModelSlots[slot].unk10);
-        gEffectModelSlots[slot].unk10 = NULL;
+    if (gEffectModelSlots[slot].usedTextures != NULL) {
+        texture_releaseList(gEffectModelSlots[slot].usedTextures);
+        gEffectModelSlots[slot].usedTextures = NULL;
     }
     if (slot == 8) {
         if (gEffectModelSlotStates[9] != -2) {

@@ -65,7 +65,7 @@ s32 effect_createFallingStream(u8 kind) {
         spawn.itemCount = 25;
         spawn.life = 133;
         state.timer = 120;
-        state.unk28 = 255;
+        state.colorLevel = 255;
         state.alpha = 255;
         state.widthAngleRange = 12;
         state.texCoordStep = 2;
@@ -75,10 +75,10 @@ s32 effect_createFallingStream(u8 kind) {
         state.angleZRange = 5;
         spawn.flags |= 1;
         state.trailTexture = 24;
-        state.unk42 = 81;
+        state.renderModes = 81;
         state.unk44 = 8;
         state.unk58 = 5;
-        state.unk60 = 1;
+        state.texAxis = 1;
         state.pitchBase = 63;
         state.lifetime = 56;
         state.dropRate = 1.48f;
@@ -187,7 +187,7 @@ s32 effect_createFallingStream(u8 kind) {
         spawn.life = 160;
         state.splashSizeBase = 2.75f;
         state.timer = 110;
-        state.unk28 = 255;
+        state.colorLevel = 255;
         state.alpha = 255;
         state.widthAngleRange = 12;
         state.texCoordStep = 1;
@@ -197,10 +197,10 @@ s32 effect_createFallingStream(u8 kind) {
         state.splashSizeRange = 1.19f;
         spawn.flags |= 1;
         state.trailTexture = 25;
-        state.unk42 = 81;
+        state.renderModes = 81;
         state.unk44 = 8;
         state.unk4C = 6;
-        state.unk60 = 2;
+        state.texAxis = 2;
         state.pitchBase = 36;
         state.pitchRange = 26;
         state.lifetime = 600;
@@ -401,8 +401,8 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     ring.frameSpeed = 0;
                     ring.flags = 1;
                     ring.lifetime = 100;
-                    ring.unk10 = 0xFF;
-                    ring.unk11 = 0xFF;
+                    ring.alpha = 0xFF;
+                    ring.colorLevel = 0xFF;
                     ring.rgba[0] = 0;
                     ring.rgba[1] = 0;
                     ring.rgba[2] = 0;
@@ -644,7 +644,7 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
 /*
  * Draws the trail as a flat ribbon from the newest record back to actor->head.start, two vertices per record
  * spread sideways by the view's camera sin/cos and the record's width, with the texture running along the
- * ribbon (S, or T when state->unk60 == 2).
+ * ribbon (S, or T when state->texAxis == 2).
  */
 Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
     Vtx *vtx;
@@ -660,7 +660,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
     u8 prevTexCoord;
     u8 update;
     u8 mode;
-    u8 unk42High;
+    u8 renderModesHigh;
     StreamState *state;
     StreamPoint *records;
 
@@ -670,11 +670,11 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             state = actor->state;
             records = actor->records;
             update = 1;
-            mode = state->unk42 & 0xF;
+            mode = state->renderModes & 0xF;
             sinYaw = gCameraAngleSines[view];
-            unk42High = (state->unk42 & 0xF0) >> 4;
+            renderModesHigh = (state->renderModes & 0xF0) >> 4;
             cosYaw = gCameraAngleCosines[view];
-            if (state->unk60 == 2) {
+            if (state->texAxis == 2) {
                 tcAxis[0] = 1;
                 tcAxis[1] = 0;
             } else {
@@ -682,8 +682,8 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
                 tcAxis[1] = 1;
             }
             gfx = math_gfxLoadTextureFrame(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
-            gfx = math_gfxSetEnvColor(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
-            gfx = particle_setCombineMode(gfx, unk42High, &update);
+            gfx = math_gfxSetEnvColor(gfx, state->colorLevel, state->colorLevel, state->colorLevel, 0xFF, &update);
+            gfx = particle_setCombineMode(gfx, renderModesHigh, &update);
             gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
             gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &update);
             if (actor->head.tmpl.flags & 2) {

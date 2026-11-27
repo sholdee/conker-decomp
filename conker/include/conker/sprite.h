@@ -37,7 +37,8 @@ typedef struct ScreenSprite {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ ScreenSpriteInfo info;
     /* 0x68 */ u8 unk68;      /* low nibble: index into gScreenSpriteUpdates */
-} ScreenSprite;
+    /* 0x69 */ u8 pad69[7];
+} ScreenSprite; /* size 0x70 */
 
 /* Animated, textured quad (update sprite_updateTexQuad, draw sprite_drawTexQuad). */
 typedef struct TexturedQuad {

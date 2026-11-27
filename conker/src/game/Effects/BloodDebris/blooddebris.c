@@ -11,7 +11,7 @@
  * each followed by a BloodTrail. mode picks the launch velocity: 0 = horizontal speed along the yaw
  * plus a separate vertical speed, 1 = speed along the spawn direction, 2 = dir, 3 = dir * speed.
  */
-void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
+void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 owner, s32 list) {
     s16 count;
     ParticleSpawn spawn;
     s32 pad; // matching: unused stack slot
@@ -44,7 +44,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     debris.landPuffFlag = emitter->landPuffFlag;
     debris.landPuffLifeBase = emitter->landPuffLifeBase;
     debris.landPuffLifeRange = emitter->landPuffLifeRange;
-    spawn.unk5C = NULL;
+    spawn.zone = NULL;
     spawn.alpha = 0xFF;
     spawn.updateFn = 1;
     spawn.update2Fn = 5;
@@ -54,7 +54,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     spawn.destroyFn = 1;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = NULL;
     spawn.ownerId = 0;
     spawn.fadeStart = 32;
@@ -107,7 +107,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         spawn.gravity = math_randomFloat() * emitter->gravityRange + emitter->gravityBase;
         spawn.rotVel.x = math_randomFloat() * emitter->spinRange + emitter->spinBase;
         spawn.rotVel.z = math_randomFloat() * emitter->spinRange + emitter->spinBase;
-        particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
+        particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), owner, list);
         if (particle != NULL) {
             BloodTrailDesc18 trailDesc;
             DebrisData *data;
@@ -123,7 +123,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             trailDesc.emitter = 1;
             trailDesc.rate = 0.3580000103f;
             data->trail = NULL;
-            trail = blood_spawnTrail(&trailDesc, sizeof(f32), arg2, arg3);
+            trail = blood_spawnTrail(&trailDesc, sizeof(f32), owner, list);
             data->trail = trail;
             if (trail != NULL) {
                 memcpy(&trail->size, &size, sizeof(f32));
@@ -239,7 +239,7 @@ void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBlo
 }
 
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
-void func_151A77C0(BillboardParticle *particle) {
+void blood_billboardFadeGrowThenTint(BillboardParticle *particle) {
     AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
     if (particle->tmpl.life < data->fadeStart) {
@@ -259,8 +259,8 @@ void func_151A77C0(BillboardParticle *particle) {
     }
 }
 
-/* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
-void func_151A787C(BillboardParticle *particle) {
+/* Callback 0x15: blood_billboardFadeGrowThenTint after the switch, with the env colour following life. */
+void blood_billboardFadeGrowTint(BillboardParticle *particle) {
     AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
     if (particle->tmpl.life < data->fadeStart) {

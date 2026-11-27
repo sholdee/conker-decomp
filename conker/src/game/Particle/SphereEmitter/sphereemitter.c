@@ -626,8 +626,8 @@ s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag
     data.fade.eventFunc = eventFunc;
     desc.texture = 39;
     desc.renderMode = 0x5203;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = timer;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -829,7 +829,7 @@ void particle_spawnTrailBurstAtSprite(SpriteParticle *particle) {
     config.colorLevelBase = 255;
     config.colorLevelRange = 0;
     config.renderMode = 1;
-    config.unk21 = 0x24;
+    config.combiner = 0x24;
     config.setGeometryMode = 0x200005;
     config.clearGeometryMode = 0x60600;
     config.fadeStart = 7;
@@ -837,8 +837,8 @@ void particle_spawnTrailBurstAtSprite(SpriteParticle *particle) {
     config.shrinkStart = 1;
     config.shrinkPaused = 0;
     config.shrinkFactor = 1.0f;
-    config.unk38 = -1;
-    config.unk39 = 0;
+    config.moveFn = -1;
+    config.shapeFn = 0;
     config.unk72 = -1;
     config.unk73 = -1;
 
@@ -894,7 +894,7 @@ void func_151A3150(SpriteParticle *particle) {
     config.colorLevelBase = 255;
     config.colorLevelRange = 0;
     config.renderMode = 1;
-    config.unk21 = 0x24;
+    config.combiner = 0x24;
     config.setGeometryMode = 0x200005;
     config.clearGeometryMode = 0x60600;
     config.fadeStart = 15;
@@ -902,8 +902,8 @@ void func_151A3150(SpriteParticle *particle) {
     config.shrinkStart = 1;
     config.shrinkPaused = 0;
     config.shrinkFactor = 1.0f;
-    config.unk38 = -1;
-    config.unk39 = 0;
+    config.moveFn = -1;
+    config.shapeFn = 0;
     config.unk72 = -1;
     config.unk73 = -1;
 

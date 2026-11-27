@@ -58,8 +58,8 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
             zero = 0.0f;
             spawn.texture = 0x29;
             spawn.renderMode = 0xE03;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.r2 = 0xB0;
             spawn.g2 = 0xA0;
             spawn.b2 = 0x2A;

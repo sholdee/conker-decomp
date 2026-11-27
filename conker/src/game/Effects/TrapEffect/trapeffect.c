@@ -6,7 +6,7 @@
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 state;     /* TrailParams.state */
 } EffectSpawnState;
 
 typedef struct {
@@ -74,7 +74,7 @@ s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     state = source->state;
     points = source->points;
     size = math_randomFloat() * 70.0f + 10.0f;
-    state->unk20 = 4;
+    state->state = 4;
 
     switch (math_random() & 1) {
     case 0:
@@ -89,8 +89,8 @@ s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     def.frameSpeed = 0;
     def.flags = 0x11;
     def.lifetime = 100;
-    def.unk10 = 0xFF;
-    def.unk11 = 0xFF;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
     def.rgba[0] = 0;
     def.rgba[1] = 0;
     def.rgba[2] = 0;
@@ -119,7 +119,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     state = source->state;
     points = source->points;
     size = math_randomFloat() * 10.0f + 10.0f;
-    state->unk20 = 4;
+    state->state = 4;
 
     switch (math_random() & 1) {
     case 0:
@@ -134,8 +134,8 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     def.frameSpeed = 0;
     def.flags = 0x11;
     def.lifetime = 100;
-    def.unk10 = 0xFF;
-    def.unk11 = 0xFF;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
     def.rgba[0] = 0;
     def.rgba[1] = 0;
     def.rgba[2] = 0;
@@ -151,12 +151,12 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     return 1;
 }
 
-/* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
+/* Sprite update callback 5: fades def.alpha out over the sprite's last 32 frames. */
 s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 32) {
-        sprite->def.unk10 = lifetime * 8;
+        sprite->def.alpha = lifetime * 8;
     }
     return 1;
 }

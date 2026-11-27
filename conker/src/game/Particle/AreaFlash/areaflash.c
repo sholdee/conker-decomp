@@ -22,8 +22,8 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
 
             desc.texture = 0x74;
             desc.renderMode = 0x5310;
-            desc.unk0 = 0x200005;
-            desc.unk4 = 0x9F0600;
+            desc.setGeometryMode = 0x200005;
+            desc.clearGeometryMode = 0x9F0600;
             desc.r = 0xFF;
             desc.g = 0xFF;
             desc.b = 0xFF;

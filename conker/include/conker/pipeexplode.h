@@ -19,7 +19,7 @@ typedef struct PipeChunk {
 
 /* Per-actor effect state reached through PipeExplodeActor::state. */
 typedef struct PipeExplodeState {
-    /* 0x00 */ f32 unk00;
+    /* 0x00 */ f32 halfWidth; /* TrailMotion.halfWidth */
     /* 0x04 */ f32 velocityX; /* TrailMotion.velocity.x */
     /* 0x08 */ u8 pad08[4];
     /* 0x0C */ f32 velocityZ; /* TrailMotion.velocity.z */
@@ -29,7 +29,7 @@ typedef struct PipeExplodeState {
     /* 0x1A */ u8 shade;      /* TrailMotion.shade */
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 state;     /* TrailParams.state */
 } PipeExplodeState;
 
 typedef struct PipeExplodePoint {
@@ -50,14 +50,14 @@ typedef struct PipeExplodeActor {
 
 /* game/Effects/PipeExplode/pipeexplode.c */
 extern const PipeSpot gPipeSpots[3]; // the three exploding pipes
-void pipeexplode_explode(u8 pipe, u8 arg1);
-s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
-                  f32 argC, s32 argD, u8 argE);
-s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
-                  f32 argC, s32 argD, u8 argE);
-s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
+void pipeexplode_explode(u8 pipe, u8 owner);
+s32 pipeexplode_spawnChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 arg8, s32 baseAngle, f32 radius, s32 argB,
+                  f32 argC, void *data, u8 owner);
+s32 pipeexplode_spawnTunableChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 arg8, s32 baseAngle, f32 radius, s32 argB,
+                  f32 argC, void *data, u8 owner);
+s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, f32 x, f32 y, f32 z, f32 floorHeight);
 s32 pipeexplode_fadeByLife(PipeExplodeActor *actor);
 s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 

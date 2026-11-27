@@ -19,7 +19,7 @@
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
 static void (*D_8008FBD0[])() = {
-    weapon_onProjectileExpire, func_150E4010, func_150E411C, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
+    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
 typedef struct {
@@ -155,8 +155,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
     spawn.rgba[3] = 0xFF;
-    spawn.unk44 = arg11;
-    spawn.unk45 = 0xFF;
+    spawn.alpha = arg11;
+    spawn.colorLevel = 0xFF;
     spawn.height = driftSpeed;
     spawn.width = arg8;
     spawn.pos = *origin;
@@ -167,8 +167,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.scale.y = 0.0f;
     spawn.scale.z = 0.0f;
     spawn.flags = 0xC04C0008;
-    spawn.unk46 = 0;
-    spawn.unk47 = 0;
+    spawn.primMode = 0;
+    spawn.envMode = 0;
     spawn.viewportMask = arg22;
     result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
@@ -329,7 +329,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x - nx;
     vertices->v.ob[1] = start.y - ny;
     vertices->v.ob[2] = start.z - nz;
-    vertices->v.cn[3] = trail->head.def.unk44;
+    vertices->v.cn[3] = trail->head.def.alpha;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x - nx;
@@ -347,7 +347,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x + nx;
     vertices->v.ob[1] = start.y + ny;
     vertices->v.ob[2] = start.z + nz;
-    vertices->v.cn[3] = trail->head.def.unk44;
+    vertices->v.cn[3] = trail->head.def.alpha;
     vertices->v.flag = 0;
     return result;
 }
@@ -453,7 +453,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
             burst.colorLevelBase = 0xFF;
             burst.colorLevelRange = 0;
             burst.renderMode = 3;
-            burst.unk21 = 0x24;
+            burst.combiner = 0x24;
             burst.setGeometryMode = 0x200005;
             burst.clearGeometryMode = 0x60600;
             burst.fadeStart = 10;
@@ -461,8 +461,8 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
             burst.shrinkStart = 1;
             burst.shrinkPaused = 0;
             burst.shrinkFactor = 1.0f;
-            burst.unk38 = -1;
-            burst.unk39 = 0;
+            burst.moveFn = -1;
+            burst.shapeFn = 0;
             burst.unk72 = -1;
             burst.unk73 = -1;
             particle_spawnTrailBurst(&burst, trail->head.header.owner, trail->head.header.kind);
@@ -517,7 +517,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.colorLevelBase = 0xFF;
     burst.colorLevelRange = 0;
     burst.renderMode = 3;
-    burst.unk21 = 0x24;
+    burst.combiner = 0x24;
     burst.setGeometryMode = 0x200005;
     burst.clearGeometryMode = 0x60600;
     burst.fadeStart = 8;
@@ -525,15 +525,15 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shrinkStart = 1;
     burst.shrinkPaused = 0;
     burst.shrinkFactor = 1.0f;
-    burst.unk38 = -1;
-    burst.unk39 = 0;
+    burst.moveFn = -1;
+    burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     particle_spawnTrailBurst(&burst, arg1, arg2);
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
-    particle.unk0 = 0x200005;
-    particle.unk4 = 0x20000;
+    particle.setGeometryMode = 0x200005;
+    particle.clearGeometryMode = 0x20000;
     particle.timer = (math_random() % 7U) + 6;
     particle.frame = 0;
     particle.frameRate = 0;
@@ -625,7 +625,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.colorLevelBase = 0xFF;
     burst.colorLevelRange = 0;
     burst.renderMode = 3;
-    burst.unk21 = 0x24;
+    burst.combiner = 0x24;
     burst.setGeometryMode = 0x200005;
     burst.clearGeometryMode = 0x60600;
     burst.fadeStart = 8;
@@ -633,16 +633,16 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shrinkStart = 1;
     burst.shrinkPaused = 0;
     burst.shrinkFactor = 1.0f;
-    burst.unk38 = -1;
-    burst.unk39 = 0;
+    burst.moveFn = -1;
+    burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     particle_spawnTrailBurst(&burst, arg1, arg2);
 
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
-    particle.unk0 = 0x200005;
-    particle.unk4 = 0x20000;
+    particle.setGeometryMode = 0x200005;
+    particle.clearGeometryMode = 0x20000;
     particle.timer = (math_random() % 5U) + 4;
     particle.frame = 0;
     particle.frameRate = 0;
@@ -730,21 +730,21 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
 
         scale = (math_randomFloat() * 15.0f) + 15.0f;
         debris.texture = shade[type];
-        debris.unk7 = 0;
+        debris.handlerSet = 0;
         debris.flags = (gIsMultiplayer ? 0x20000 : 0) | 0xBF01;
         debris.lifetime = (math_random() % 61U) + 0x3C;
         debris.frame = 0;
         debris.frameSpeed = 0;
-        debris.unk10 = (math_random() % 56U) + 0xC8;
-        debris.unk11 = 0xFF;
+        debris.alpha = (math_random() % 56U) + 0xC8;
+        debris.colorLevel = 0xFF;
         debris.rgba[0] = 0;
         debris.rgba[1] = 0;
         debris.rgba[2] = 0;
         debris.rgba[3] = 0xFF;
         big = (type == 4);
         debris.renderModes = ((big ? 0x48 : 0x3B) << 16) + 2;
-        debris.unk16 = 0;
-        debris.unk17 = big ? 6 : 7;
+        debris.primMode = 0;
+        debris.envMode = big ? 6 : 7;
         debris.viewportMask = debrisArg;
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;
@@ -777,11 +777,11 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.scale.y = 1.0f;
         spark.scale.z = 56.81999969f;
         spark.flags = (gIsMultiplayer ? 0x40000000 : 0) | 0x08DC0009;
-        spark.unk44 = (math_random() % 76U) + 0xB4;
-        spark.unk45 = 0xFF;
-        spark.unk46 = 0;
-        spark.unk47 = 7;
-        spark.unk48 = 0;
+        spark.alpha = (math_random() % 76U) + 0xB4;
+        spark.colorLevel = 0xFF;
+        spark.primMode = 0;
+        spark.envMode = 7;
+        spark.zone = 0;
         spark.viewportMask = sparkArg;
         spark.fadeStart = 8;
         spark.fadeRate = 0x1F;
@@ -798,8 +798,8 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.countRange = 15;
         smoke.texture = 0x6C;
         smoke.renderMode = 0x5103;
-        smoke.unk8 = 0x200005;
-        smoke.unkC = 0;
+        smoke.setGeometryMode = 0x200005;
+        smoke.clearGeometryMode = 0;
         smoke.timerBase = 0x14;
         smoke.timerRange = 0xF;
         smoke.frameRateBase = 0;

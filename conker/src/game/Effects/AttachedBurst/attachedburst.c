@@ -10,35 +10,35 @@
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
    checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
-void effect_levelHook02(Camera *arg0) {
+void effect_levelHook02(Camera *camera) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
-            if (camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
-                arg0->AvailableModes |= 0x1000000;
-                camera_attachToObject(arg0, movement_obj[0].attach_char - 1);
+            if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
+                camera->AvailableModes |= 0x1000000;
+                camera_attachToObject(camera, movement_obj[0].attach_char - 1);
             }
-        } else if (camera_popMode(arg0, CAMERA_MODE_PICKED_UP) != 0) {
-            camera_attachToObject(arg0, 0);
+        } else if (camera_popMode(camera, CAMERA_MODE_PICKED_UP) != 0) {
+            camera_attachToObject(camera, 0);
         }
     }
-    arg0->AvailableModes &= ~0x4000;
+    camera->AvailableModes &= ~0x4000;
     if (!(gTaskDoneBits[0x1] & 4)) {
         if (script_query(1, 0x2000, 0x95, script_query(0, 0x2014, 0xB7) | 0x2000) != 0) {
-            arg0->AvailableModes |= 0x1000000;
-            if ((arg0->Mode & 1) && camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
-                arg0->DistIndex = 3;
-                arg0->AvailableModes &= ~4;
-                camera_loadDistancePreset(arg0);
+            camera->AvailableModes |= 0x1000000;
+            if ((camera->Mode & 1) && camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_NORMAL) != 0) {
+                camera->DistIndex = 3;
+                camera->AvailableModes &= ~4;
+                camera_loadDistancePreset(camera);
             }
-        } else if (camera_popMode(arg0, CAMERA_MODE_NORMAL) != 0) {
-            camera_loadDistancePreset(arg0);
-            arg0->AvailableModes &= ~0x1000000;
+        } else if (camera_popMode(camera, CAMERA_MODE_NORMAL) != 0) {
+            camera_loadDistancePreset(camera);
+            camera->AvailableModes &= ~0x1000000;
         }
     }
     if (script_query(1, 0x4082, 6, 0x9000) != 0) {
-        arg0->AvailableModes |= 0x10000;
+        camera->AvailableModes |= 0x10000;
     } else {
-        arg0->AvailableModes &= ~0x10000;
+        camera->AvailableModes &= ~0x10000;
     }
 }
 
@@ -98,13 +98,13 @@ void effect_updateAttachedBurst(AttachedEffect *effect) {
         motion.flags = 8;
         motion.alpha = 0xFF;
         count = math_random() % 9U + 12;
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
         style.renderMode = 3;
-        style.unk10 = 0x10;
-        style.unk14 = 0x80;
-        style.unk18 = 0x20;
+        style.combiner = 0x10;
+        style.colorDither = 0x80;
+        style.alphaDither = 0x20;
         style.primMode = 0;
         style.envMode = 9;
         for (; count != 0; count--) {
@@ -224,15 +224,15 @@ void effect_spawnAttachedBursts(Actor *actor) {
 
 /* Accelerates unk96 by unk94 per elapsed frame (capped at 0x1400), moves unk9E down by unk96 / 256,
    and counts unkA4 up to 25. */
-void func_150AECCC(struct42 *arg0) {
-    arg0->unk96 += arg0->unk94 * gFrameTicks;
-    if (arg0->unk96 > 0x1400) {
-        arg0->unk96 = 0x1400;
+void func_150AECCC(struct42 *particle) {
+    particle->unk96 += particle->unk94 * gFrameTicks;
+    if (particle->unk96 > 0x1400) {
+        particle->unk96 = 0x1400;
     }
-    arg0->unk9E -= arg0->unk96 >> 8;
-    arg0->unkA4 += gFrameTicks;
-    if (arg0->unkA4 > 25) {
-        arg0->unkA4 = 25;
+    particle->unk9E -= particle->unk96 >> 8;
+    particle->unkA4 += gFrameTicks;
+    if (particle->unkA4 > 25) {
+        particle->unkA4 = 25;
     }
 }
 
@@ -247,37 +247,26 @@ void effect_growBillboard(BillboardParticle *p) {
     p->tmpl.height = p->tmpl.width;
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
-} Sprite150AED9C;
-
-struct Particle150AED9C {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ Sprite150AED9C *sprite;
-};
-
-/* Sets the sprite's unk1B to unk1C * 8, capped at 255. Always returns 1. */
-s32 func_150AED9C(Particle150AED9C *particle) {
-    Sprite150AED9C *sprite = particle->sprite;
-    s32 value = particle->unk1C * 8;
+/* Motion trail update (gMotionTrailUpdateProcs[2]): sets the alpha to 8 per unit of the trail's life, capped at 255.
+ * Always returns 1. */
+s32 func_150AED9C(MotionTrail *trail) {
+    TrailParams *params = trail->params;
+    s32 value = trail->head.tmpl.life * 8;
 
     if (value > 255) {
         value = 255;
     }
-    sprite->unk1B = value;
-    if (sprite->unk1B < 0) { // always false for a u8, but the original tests it
+    params->motion.alpha = value;
+    if (params->motion.alpha < 0) { // always false for a u8, but the original tests it
         return 0;
     }
     return 1;
 }
 
-/* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
+/* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.alpha falls with it (lifetime * 8). */
 s32 effect_fadeQuadSpriteByLife(QuadSprite *sprite) {
     if (sprite->def.lifetime < 32) {
-        sprite->def.unk10 = sprite->def.lifetime * 8;
+        sprite->def.alpha = sprite->def.lifetime * 8;
     }
     return 1;
 }

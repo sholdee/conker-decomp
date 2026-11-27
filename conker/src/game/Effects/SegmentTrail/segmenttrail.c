@@ -26,7 +26,7 @@ const Vec3f D_8009FFA0[4] = {
 };
 
 /* Transforms three 4-point tables by the actor's ob_matrix_ptr and emits two segments (point 2->3 and 3->0). */
-void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
+void func_150BD740(Actor *actor, u8 owner, s32 list) {
     Vec3f points[4];
     Vec3f dirFrom[4];
     Vec3f dirTo[4];
@@ -44,33 +44,33 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
             dir[2].y = dirTo[2].y - dirFrom[2].y;
             dir[2].z = dirTo[2].z - dirFrom[2].z;
             particle_emitOnLine(points[2].x, points[2].y, points[2].z, points[3].x, points[3].y, points[3].z,
-                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], arg1);
+                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], owner);
             dir[3].x = dirTo[3].x - dirFrom[3].x;
             dir[3].y = dirTo[3].y - dirFrom[3].y;
             dir[3].z = dirTo[3].z - dirFrom[3].z;
             particle_emitOnLine(points[3].x, points[3].y, points[3].z, points[0].x, points[0].y, points[0].z,
-                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], arg1);
+                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], owner);
         }
     }
 }
 
 /* Spawns one trail at (x, y, z) moving along dir. */
-s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, f32 *dir, u8 arg14) {
+s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11,
+                  s32 arg12, f32 *dir, u8 owner) {
     u8 pad[4]; // matching: frame size
     EffectTemplate spawn;
     TrailMotion motion;
     f32 speed;
     TrailRender render;
 
-    render.unk0 = 0;
+    render.otherModeH = 0;
     render.setGeometryMode = 1;
     render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10 = 0x10;
-    render.unk14 = 0x80;
-    render.unk18 = 0x20;
+    render.combiner = 0x10;
+    render.colorDither = 0x80;
+    render.alphaDither = 0x20;
     render.primMode = 0;
     render.envMode = 9;
     spawn.kind = 1;
@@ -92,7 +92,7 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.life = math_random() % 31U + 39;
     motion.halfWidth = (math_randomFloat() * 602.0f + 407.0f) * 0.01f;
     motion.gravity = (math_randomFloat() * 356.0f + 1017.0f) * 0.001f;
-    trail_createMotionTrail(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);
+    trail_createMotionTrail(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, owner, 1);
     return 1;
 }
 

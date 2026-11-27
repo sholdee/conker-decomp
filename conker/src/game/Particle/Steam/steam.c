@@ -127,8 +127,8 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
     desc.texture = gKindParticleTexturePickers[kind]();
     desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r = 0;
@@ -374,18 +374,18 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     }
     desc.frame = 0;
     desc.frameSpeed = 0;
-    desc.unk10 = arg2;
-    desc.unk11 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.rgba[2] = 0;
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
     desc.renderModes = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
-    desc.unk7 = 0;
-    desc.unk16 = 0;
-    desc.unk17 = 7;
+    desc.handlerSet = 0;
+    desc.primMode = 0;
+    desc.envMode = 7;
     desc.viewportMask = 0xFF;
-    desc.unk1C = 0;
+    desc.material = 0;
     if (particle_spawnSurfaceQuadSprite(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
                       math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
@@ -493,14 +493,14 @@ SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s
             desc.fadeRate = 0xFF / lifetime;
         }
     }
-    desc.unk44 = arg3;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg3;
+    desc.colorLevel = 0xFF;
     desc.type = 0;
-    desc.unk46 = 4;
-    desc.unk47 = 5;
-    desc.unk48 = 0;
+    desc.primMode = 4;
+    desc.envMode = 5;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     rand1 = math_random();
     rand2 = math_random();
     rand3 = math_random();
@@ -608,7 +608,7 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     spawn.life = lifetime + 16;
     spawn.flags = 0x35;
     spawn.kind = 1;
-    spawn.unk14 = -1;
+    spawn.shapeKind = -1;
     spawn.material = material;
     motion.halfWidth = scale;
     motion.velocity = *vel;
@@ -620,8 +620,8 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     motion.texture = gKindSplashTextures[kind];
     motion.shade = 0xFF;
     motion.alpha = arg4;
-    motion.unk1C = argD;
-    motion.unk1E = argE;
+    motion.fadeStart = argD;
+    motion.fadeRate = argE;
     if (arg7 != 0) {
         motion.flags |= 3;
         a = 7;
@@ -636,13 +636,13 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     {
         s32 pad; // matching: unused stack slot
 
-        style.unk0 = 0;
+        style.otherModeH = 0;
         style.setGeometryMode = 0x220005;
         style.clearGeometryMode = 0x50600;
         style.renderMode = 3;
-        style.unk10 = 0x46;
-        style.unk14 = 0x80;
-        style.unk18 = 0x20;
+        style.combiner = 0x46;
+        style.colorDither = 0x80;
+        style.alphaDither = 0x20;
         style.primMode = 0;
         style.envMode = 0xC;
         if (argA != 0) {
@@ -717,8 +717,8 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
-    desc.unk44 = arg2;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.pos = *pos;
     desc.flags = (D_800AB330[kind] ? 0x40000000 : 0) | 0x0CDC0009;
 
@@ -732,16 +732,16 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.frameSpeed = 0;
     desc.height = size;
     desc.width = size;
-    desc.unk46 = 0;
-    desc.unk47 = 7;
+    desc.primMode = 0;
+    desc.envMode = 7;
     squash.phase = 0;
     squash.step = (math_random() % 3U) + 6;
     squash.amplitudeX = (math_randomFloat() * 0.2f) + 0.1f;
     squash.amplitudeY = (math_randomFloat() * 0.2f) + 0.1f;
     desc.type = 0;
-    desc.unk48 = 0;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     desc.fadeStart = 32;
     desc.fadeRate = 7;
     coinFlip = (math_random() & 1) ? 1 : 0;
@@ -957,8 +957,8 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     gEffectKindColorFuncs[(u8)kind](&desc);
     desc.texture = 0x6C;
     desc.renderMode = 0x5103;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x9F0600;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x9F0600;
     desc.timer = (lifetime == -1) ? 300 : lifetime;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -1043,7 +1043,7 @@ void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.itemCountRange = 2;
     splash.spray.lifeBase = 30;
     splash.spray.lifeRange = 30;
-    splash.spray.unk30 = 155;
+    splash.spray.alphaBase = 155;
     splash.spray.scaleBase = 5.5f;
 
     splash.spray.scaleRange = 2.9399998f;
@@ -1052,11 +1052,11 @@ void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedBase = 10.0f;
     splash.spray.speedRange = 10.2f;
 
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
-    splash.spray.unk38 = 0.5f;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
+    splash.spray.burstChance = 0.5f;
 
     splash.spray.kind = kind;
 
@@ -1095,20 +1095,20 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
     desc.flags = 0x67B02;
     desc.lifetime = 300;
     desc.frame = 0;
-    desc.unk10 = arg2;
-    desc.unk11 = 0xFF;
+    desc.alpha = arg2;
+    desc.colorLevel = 0xFF;
     desc.rgba[0] = gKindColors[kind].r;
     desc.rgba[1] = gKindColors[kind].g;
     desc.rgba[2] = gKindColors[kind].b;
     desc.rgba[3] = 0xFF;
     desc.renderModes = 0x440001;
-    desc.unk7 = 0;
-    desc.unk16 = 0;
-    desc.unk17 = 6;
+    desc.handlerSet = 0;
+    desc.primMode = 0;
+    desc.envMode = 6;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.viewportMask = 0xFF;
-    desc.unk1C = 0;
+    desc.material = 0;
     if (surface != NULL) {
         particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, surface, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
                       ((Vec3f *)pos)->z, size, size, math_random() & 0xFF,
@@ -1140,14 +1140,14 @@ void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *
 
     desc.scale.x = arg2;
     desc.flags = 0x466C0001;
-    desc.unk44 = arg6;
-    desc.unk45 = 0xFF;
+    desc.alpha = arg6;
+    desc.colorLevel = 0xFF;
     desc.type = 0;
-    desc.unk46 = 0;
-    desc.unk47 = 6;
-    desc.unk48 = 0;
+    desc.primMode = 0;
+    desc.envMode = 6;
+    desc.zone = 0;
     desc.viewportMask = 0xFF;
-    desc.unk50 = 0;
+    desc.material = 0;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.scale.y = 1.0f;
@@ -1169,8 +1169,8 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
 
     desc.texture = gKindPlainTextures[kind];
     desc.renderMode = 0x4403;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x9F0600;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x9F0600;
     desc.timer = lifetime;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -1233,17 +1233,17 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.itemCountRange = 1;
     splash.spray.lifeBase = 60;
     splash.spray.lifeRange = 40;
-    splash.spray.unk30 = 100;
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
+    splash.spray.alphaBase = 100;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
     splash.spray.scaleRange = 4.0f;
     splash.spray.sizeBase = 0.80700004f;
     splash.spray.sizeRange = 0.51000005f;
     splash.spray.speedBase = 12.0f;
     splash.spray.speedRange = 11.0f;
-    splash.spray.unk38 = 1.0f;
+    splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
 
@@ -1260,8 +1260,8 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.angles.pitchRange = 36;
         drops.spray.lifeBase = 35;
         drops.spray.lifeRange = 15;
-        drops.spray.unk24 = 155;
-        drops.spray.unk25 = 100;
+        drops.spray.alphaBase = 155;
+        drops.spray.alphaRange = 100;
         drops.spray.speedRange = 8.0f;
         drops.spray.unk30 = 1;
         drops.spray.gravityBase = -1.266f;
@@ -1298,17 +1298,17 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.itemCountRange = 0;
     splash.spray.lifeBase = 60;
     splash.spray.lifeRange = 40;
-    splash.spray.unk30 = 100;
-    splash.spray.unk32 = 100;
-    splash.spray.unk3C = 16;
-    splash.spray.unk3E = 15;
-    splash.spray.unk40 = 0;
+    splash.spray.alphaBase = 100;
+    splash.spray.alphaRange = 100;
+    splash.spray.fadeStart = 16;
+    splash.spray.fadeRate = 15;
+    splash.spray.material = 0;
     splash.spray.scaleRange = 2.0f;
     splash.spray.sizeBase = 0.642f;
     splash.spray.sizeRange = 0.314f;
     splash.spray.speedBase = 8.0f;
     splash.spray.speedRange = 5.0f;
-    splash.spray.unk38 = 1.0f;
+    splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
 
@@ -1324,8 +1324,8 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.angles.pitchRange = 26;
         drops.spray.lifeBase = 35;
         drops.spray.lifeRange = 15;
-        drops.spray.unk24 = 155;
-        drops.spray.unk25 = 100;
+        drops.spray.alphaBase = 155;
+        drops.spray.alphaRange = 100;
         drops.spray.sizeBase = 59.0f;
         drops.spray.sizeRange = 59.0f;
         drops.spray.unk30 = 1;

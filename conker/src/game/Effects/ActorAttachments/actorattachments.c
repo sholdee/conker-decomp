@@ -15,20 +15,20 @@
 
 /* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
-    NULL,           func_1514E00C, func_1514E194, func_1514E31C, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
+    NULL,           effect_attachBone6GlowAndBone5Trail, effect_attachNarrowBone6GlowAndBone5Trail, effect_attachBone12GlowAndLight, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
-    func_1514D64C,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, func_1514D564, func_1514DA38,
+    effect_attachRedBoneGlowsAndLight,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, effect_attachFixedPointStripToBone6, func_1514DA38,
     func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
 static void (*gAttachSpawnFuncsById[])(Actor *) = {
-    effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
+    effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, effect_attachBone1RedLightAndGlow,
     func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
-    func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
-    func_1514DC98, func_1514DC38, effect_attachBone2Light, effect_attachFrontendFireImpEffect, level_spawnBoltEmitter, effect_attachTrailToBone1,
+    func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, effect_hidePart1, effect_spawnActorEmitter, func_1514DE2C,
+    effect_hideParts4And8To10, effect_attachObjBurst, effect_attachBone2Light, effect_attachFrontendFireImpEffect, level_spawnBoltEmitter, effect_attachTrailToBone1,
     effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, func_1514F590, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
-    particle_spawnBoneBurstEmitter, level_attachDripEmitter, func_1514DC5C, effect_attachTrailToBone4, func_1514D978,
+    particle_spawnBoneBurstEmitter, level_attachDripEmitter, effect_spawnFloorPointTracker, effect_attachTrailToBone4, func_1514D978,
 };
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
@@ -524,7 +524,7 @@ s32 effect_isAttachTypeInTree(s16 root, s16 type) {
 }
 
 /** Spawns a beam_newStrip object running from a fixed point to `obj` and attaches it (type 0x15). */
-void func_1514D564(Actor *obj) {
+void effect_attachFixedPointStripToBone6(Actor *obj) {
     StripDesc desc;
     StripObj *spawned;
     StripTarget payload;
@@ -552,7 +552,7 @@ void func_1514D564(Actor *obj) {
 }
 
 /** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a light_createAttached effect. */
-void func_1514D64C(Actor *obj) {
+void effect_attachRedBoneGlowsAndLight(Actor *obj) {
     GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -562,7 +562,7 @@ void func_1514D64C(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
@@ -609,7 +609,7 @@ void func_1514D64C(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
@@ -765,24 +765,24 @@ void effect_attachBone2Light(Actor *obj) {
     light_createAttached(obj, 2, &gBone2LightOffset, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-void func_1514DC38(Actor *obj) {
+void effect_attachObjBurst(Actor *obj) {
     level_spawnObjBurst(obj, 0xFF, 1);
 }
 
-void func_1514DC5C(Actor *obj) {
+void effect_spawnFloorPointTracker(Actor *obj) {
     trail_spawnTrackerEffect(obj, 0, 0xFF, 1);
 }
 
-void func_1514DC84(Actor *obj) {
+void effect_hidePart1(Actor *obj) {
     obj->hiddenParts |= 2;
 }
 
-void func_1514DC98(Actor *obj) {
+void effect_hideParts4And8To10(Actor *obj) {
     obj->hiddenParts |= 0x710;
 }
 
 /** Sets obj->hiddenBones to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
-void func_1514DCAC(Actor *obj) {
+void effect_attachHeadPartSets(Actor *obj) {
     obj->hiddenBones = 0x6000;
     collision_createPartSet(obj, 0x23, 1.0f, 0);
     collision_createPartSet(obj, 0x44, 1.0f, 0);
@@ -796,35 +796,35 @@ void func_1514DCF4(Actor *obj) {
 }
 
 void func_1514DD2C(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DD4C(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DD6C(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DD8C(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DDAC(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DDCC(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DDEC(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DE0C(Actor *obj) {
-    func_1514DCAC(obj);
+    effect_attachHeadPartSets(obj);
 }
 
 void func_1514DE2C(Actor *obj) {
@@ -838,7 +838,7 @@ void func_1514DE44(Actor *obj) {
 
 void func_1514DE50(Actor *obj) {
     if (gTaskDoneBits[0x11] & 8) { // low byte of gTaskDoneBits[0x10]
-        func_1514DCAC(obj);
+        effect_attachHeadPartSets(obj);
     }
 }
 
@@ -863,7 +863,7 @@ void effect_linkToObjectId9(Actor *obj) {
     obj->unk101 |= 0x34;
 }
 
-void func_1514E00C(Actor *obj) {
+void effect_attachBone6GlowAndBone5Trail(Actor *obj) {
     GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -873,7 +873,7 @@ void func_1514E00C(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12002;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0x8E;
     spawn.rgba[2] = 0x19;
@@ -917,7 +917,7 @@ void func_1514E00C(Actor *obj) {
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E194(Actor *obj) {
+void effect_attachNarrowBone6GlowAndBone5Trail(Actor *obj) {
     GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -927,7 +927,7 @@ void func_1514E194(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x12002;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0x8E;
     spawn.rgba[2] = 0x19;
@@ -971,7 +971,7 @@ void func_1514E194(Actor *obj) {
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E31C(Actor *obj) {
+void effect_attachBone12GlowAndLight(Actor *obj) {
     GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -981,7 +981,7 @@ void func_1514E31C(Actor *obj) {
     spawn.frameSpeed = 0;
     spawn.flags = 0x2012;
     spawn.lifetime = 0;
-    spawn.unk45 = 0xFF;
+    spawn.colorLevel = 0xFF;
     spawn.rgba[0] = 0xFF;
     spawn.rgba[1] = 0xE6;
     spawn.rgba[2] = 0;
@@ -1085,7 +1085,7 @@ void effect_attachCharacterEffect3(Actor *obj) {
     effect_attach(handle, obj, 0xF);
 }
 
-/* Emitter offsets of func_1514EECC and effect_attachTankEffects. */
+/* Emitter offsets of effect_attachBone1RedLightAndGlow and effect_attachTankEffects. */
 static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
 static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
 static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
@@ -1390,7 +1390,7 @@ void effect_attachActorTracker(Actor *obj) {
 }
 
 
-void func_1514EECC(Actor *obj) {
+void effect_attachBone1RedLightAndGlow(Actor *obj) {
     void *handle;
 
     handle = light_createAttached(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
@@ -1405,7 +1405,7 @@ void func_1514EECC(Actor *obj) {
         spawn.lifetime = 300;
         spawn.frame = 0;
         spawn.frameSpeed = 0;
-        spawn.unk45 = 0xFF;
+        spawn.colorLevel = 0xFF;
         spawn.rgba[0] = 0xFF;
         spawn.rgba[1] = 0;
         spawn.rgba[2] = 0;
@@ -1423,12 +1423,12 @@ void func_1514EECC(Actor *obj) {
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
-        spawn.unk44 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 6;
-        spawn.unk48 = 0;
+        spawn.alpha = 0xFF;
+        spawn.primMode = 0;
+        spawn.envMode = 6;
+        spawn.zone = 0;
         spawn.viewportMask = 0xFF;
-        spawn.unk50 = 0;
+        spawn.material = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
 
@@ -1503,7 +1503,7 @@ void effect_attachBone5LightBeam(Actor *obj) {
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514F3CC(Actor *obj) {
+void effect_spawnActorEmitter(Actor *obj) {
     struct {
         Actor *obj;
         u8 uniqueId;

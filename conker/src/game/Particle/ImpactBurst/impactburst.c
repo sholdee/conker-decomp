@@ -25,8 +25,8 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     spawn.scaleRate = ((math_randomFloat() * 18.0f) + 1016.0f) * 0.001f;
     spawn.texture = 22;
     spawn.renderMode = 0x2001;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.a = 0xFF;
@@ -65,7 +65,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     piece.rot.z = 0.0f;
     piece.rotVel.y = 0.0f;
     piece.variant = 0;
-    piece.unk5C = 0;
+    piece.zone = 0;
     piece.updateFn = 1;
     piece.update2Fn = 0;
     piece.floorHitFn = 0;
@@ -74,7 +74,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     piece.destroyFn = 0;
     piece.squashFn = 0;
     piece.matrixFn = 0;
-    piece.unk6A = 2;
+    piece.lightMode = 2;
     piece.owner = NULL;
     piece.ownerId = 0;
     piece.fadeStart = 20;

@@ -120,10 +120,10 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x1C0001;
-        spawn.unk44 = (math_random() % (def->unk10Range + 1)) + def->unk10Min;
-        spawn.unk45 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 6;
+        spawn.alpha = (math_random() % (def->unk10Range + 1)) + def->unk10Min;
+        spawn.colorLevel = 0xFF;
+        spawn.primMode = 0;
+        spawn.envMode = 6;
         extra.growDelay = (spawn.lifetime - (math_random() % (def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((math_randomFloat() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = particle_spawnAxisQuadParticleNoModel(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
@@ -210,8 +210,8 @@ s32 particle_spawnYawDampedSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timer = (math_random() & 0xF) + 20;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -314,7 +314,7 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     spawn.sizeXZ = spawn.sizeY = (math_randomFloat() * 500.0f + 100.0f) * 0.001000000047f;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
 
     spawn.alpha = (math_random() % 101U) + 155;
     spawn.updateFn = 3;
@@ -325,7 +325,7 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 0x20;

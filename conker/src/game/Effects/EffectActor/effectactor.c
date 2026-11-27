@@ -22,19 +22,19 @@ Gfx gEffectActorRenderTeardownDl[] = {
 };
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
-EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
-                           s32 arg6) {
+EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment, s32 lightMask, u8 large, s32 extraSize, u8 owner,
+                           s32 list) {
     EffectActor *actor;
     s32 i;
 
-    actor = effect_newObject(large ? 0x55 : 0x37, arg6, extraSize + 0xF8, 1, arg5, 1);
+    actor = effect_newObject(large ? 0x55 : 0x37, list, extraSize + 0xF8, 1, owner, 1);
     if (actor == NULL) {
         return NULL;
     }
     memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
-    actor->attachment.model = attachment;
-    actor->attachment.unk1C = arg2;
-    actor->attachment.unk4 = 0;
+    actor->attachment.maxLights = attachment;
+    actor->attachment.lightMask = lightMask;
+    actor->attachment.lightCount = 0;
     for (i = 0; i < 4; i++) {
         actor->attachment.handles[i] = NULL;
     }
@@ -49,8 +49,8 @@ EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment
     return actor;
 }
 
-EffectActor *effect_newUnattachedEffectActor(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
-    return effect_newEffectActor(template, 0, 0, large, extraSize, arg3, arg4);
+EffectActor *effect_newUnattachedEffectActor(EffectActorTemplate *template, u8 large, s32 extraSize, u8 owner, s32 list) {
+    return effect_newEffectActor(template, 0, 0, large, extraSize, owner, list);
 }
 
 /* Update callbacks (EffectActorTemplate.updateCallback): each returns 0 when the actor is done. */
@@ -85,7 +85,7 @@ void effect_updateEffectActor(EffectActor *actor) {
 static s32 (*gEffectActorMatrixFuncs[])(Mtx *, EffectActor *) = { effect_buildEffectActorRotScaleMtx, effect_buildTumblingPieceMtx, effect_buildEffectActorScaleMtx };
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
-Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
+Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 view) {
     s32 pad; // matching: IDO's frame has an unused slot here
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
@@ -104,11 +104,11 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
                   actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
     gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
-    gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
+    gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.combiner)[3] /* matching: reads the low byte */, &update);
+    gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.colorDither | actor->tmpl.render.alphaDither,
                         gEffectRenderModes[actor->tmpl.render.renderMode].cycle1 | gEffectRenderModes[actor->tmpl.render.renderMode].cycle2, &update);
     if (actor->tmpl.flags & 2) {
-        gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
+        gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, view,
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
     gSPMatrix(gfx++, &actor->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD);

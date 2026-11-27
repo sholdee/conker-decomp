@@ -70,21 +70,21 @@ struct StateRule {
     ((1 << (a)) | (1 << ((b) + 3)) | (1 << ((c) + 6)) | (1 << ((d) + 9)) |     \
      (1 << ((e) + 13)))
 
-/* Vertices of the effect display lists (D_8008AE60.., drawn through gEffectActorDisplayLists). */
-static const Vtx D_800A6080[5] = {
+/* Vertices of the effect display lists (gTumblePieceBipyramidDl.., drawn through gEffectActorDisplayLists). */
+static const Vtx gTumblePieceBipyramidVtx[5] = {
     { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0x00, 0xFF } } },
     { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xC8, 0xC8, 0x00, 0xFF } } },
     { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xA0, 0x50, 0x14, 0xFF } } },
     { { { 22, -12, 0 }, 0, { 0, 0 }, { 0x64, 0x82, 0x12, 0xFF } } },
     { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
 };
-static const Vtx D_800A60D0[4] = {
+static const Vtx gTumblePieceTetrahedronVtx[4] = {
     { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xC8, 0xAA, 0x14, 0xFF } } },
     { { { -22, -12, -255 }, 0, { 0, 0 }, { 0x80, 0x20, 0x08, 0xFF } } },
     { { { 22, -12, -255 }, 0, { 0, 0 }, { 0x64, 0x64, 0x00, 0xFF } } },
     { { { 0, 0, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
 };
-static const Vtx D_800A6110[6] = {
+static const Vtx gOctahedronVtx[6] = {
     { { { 0, 255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 255, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 0, -255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
@@ -92,14 +92,14 @@ static const Vtx D_800A6110[6] = {
     { { { 0, 0, 255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
     { { { 0, 0, -255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
 };
-static const Vtx D_800A6170[5] = {
+static const Vtx gTumblePieceAltBipyramidVtx[5] = {
     { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFC, 0x52, 0x05, 0xFF } } },
     { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xFE, 0x8D, 0x30, 0xFF } } },
     { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xF0, 0x62, 0x1C, 0xFF } } },
     { { { 22, -12, 0 }, 0, { 0, 0 }, { 0xF9, 0x5B, 0x14, 0xFF } } },
     { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x85, 0x29, 0x00, 0xFF } } },
 };
-static const Vtx D_800A61C0[4] = {
+static const Vtx gTumblePieceAltTetrahedronVtx[4] = {
     { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xF8, 0x58, 0x14, 0xFF } } },
     { { { -22, -12, -255 }, 0, { 0, 0 }, { 0xC6, 0x3E, 0x03, 0xFF } } },
     { { { 22, -12, -255 }, 0, { 0, 0 }, { 0xFE, 0x8F, 0x3D, 0xFF } } },
@@ -107,9 +107,9 @@ static const Vtx D_800A61C0[4] = {
 };
 
 /* The effect actor display lists (EffectActorTemplate.displayList, drawn by effect_drawEffectActor of game/Effects/EffectActor/effectactor). */
-static Gfx D_8008AE60[] = {
+static Gfx gTumblePieceBipyramidDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6080, 5, 0),
+    gsSPVertex(gTumblePieceBipyramidVtx, 5, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 2, 3, 0),
     gsSP1Triangle(0, 3, 1, 0),
@@ -118,18 +118,18 @@ static Gfx D_8008AE60[] = {
     gsSP1Triangle(3, 4, 1, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AEA8[] = {
+static Gfx gTumblePieceTetrahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A60D0, 4, 0),
+    gsSPVertex(gTumblePieceTetrahedronVtx, 4, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 3, 1, 0),
     gsSP1Triangle(1, 3, 2, 0),
     gsSP1Triangle(2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AEE0[] = {
+static Gfx gOctahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6110, 6, 0),
+    gsSPVertex(gOctahedronVtx, 6, 0),
     gsSP1Triangle(0, 1, 5, 0),
     gsSP1Triangle(0, 5, 3, 0),
     gsSP1Triangle(0, 3, 4, 0),
@@ -140,9 +140,9 @@ static Gfx D_8008AEE0[] = {
     gsSP1Triangle(1, 4, 2, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AF38[] = {
+static Gfx gTumblePieceAltBipyramidDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A6170, 5, 0),
+    gsSPVertex(gTumblePieceAltBipyramidVtx, 5, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 2, 3, 0),
     gsSP1Triangle(0, 3, 1, 0),
@@ -151,16 +151,16 @@ static Gfx D_8008AF38[] = {
     gsSP1Triangle(3, 4, 1, 0),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008AF80[] = {
+static Gfx gTumblePieceAltTetrahedronDl[] = {
     gsDPPipeSync(),
-    gsSPVertex(D_800A61C0, 4, 0),
+    gsSPVertex(gTumblePieceAltTetrahedronVtx, 4, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 3, 1, 0),
     gsSP1Triangle(1, 3, 2, 0),
     gsSP1Triangle(2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-Gfx *gEffectActorDisplayLists[] = { D_8008AE60, D_8008AEA8, D_8008AF38, D_8008AF80, D_8008AEE0, NULL };
+Gfx *gEffectActorDisplayLists[] = { gTumblePieceBipyramidDl, gTumblePieceTetrahedronDl, gTumblePieceAltBipyramidDl, gTumblePieceAltTetrahedronDl, gOctahedronDl, NULL };
 
 /* Transition rules of effect_updateCharacterWatcher, one per action slot of gWatcherModeActions. */
 static const StateRule gWatcherStateRules[28] = {
@@ -219,10 +219,10 @@ static const s8 gWatcherMode4Actions[28] = {
 /* Character-watcher actions (indices of the action tables). Declared without a prototype: each takes
    its own task view of the watcher. */
 static void (*gWatcherActions[])() = {
-    func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
-    func_151A9FC8, func_151AA09C, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
-    effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
-    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, func_151AE6B0,
+    effect_watcherStepIntoShallowWater, effect_watcherStepIntoDeepWater, effect_watcherFallIntoShallowWater, effect_watcherFallIntoDeepWater, func_151A9DC0, func_151A9EC0,
+    effect_watcherLeaveShallowWater, effect_watcherLeaveDeepWater, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
+    effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, effect_watcherSubmerge, effect_watcherStartFootSplashes, particle_keepFlickerSprite,
+    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, effect_watcherEnterWater,
 };
 
 /* The action table of each watcher mode. */
@@ -267,7 +267,7 @@ void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
     watcher->lastPosition.x = watcher->character->xpos;
     watcher->lastPosition.y = watcher->character->ypos;
     watcher->lastPosition.z = watcher->character->zpos;
-    watcher->surfaceState = func_151592B8(watcher->character, watcher->mode);
+    watcher->surfaceState = effect_getWatcherSurfaceState(watcher->character, watcher->mode);
 
     if (watcher->flags & 1) {
         newBits = STATE_BITS(watcher->state0, watcher->state1, watcher->state2, watcher->moveState,
@@ -382,8 +382,8 @@ s32 effect_getWatcherMoveState(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     return ret;
 }
 
-/* Returns 3 on one of two animation ids (mode 0 only), 2 in water, 1 if unk28 is set, else 4. */
-s32 func_151592B8(Actor *chr, u8 mode) {
+/* Returns 3 on one of two animation ids (mode 0 only), 2 in water, 1 if shad is set, else 4. */
+s32 effect_getWatcherSurfaceState(Actor *chr, u8 mode) {
     s32 i;
     s32 found;
 
@@ -548,24 +548,18 @@ struct EffectMotionParticle {
     } motion;
 };
 
-/* Second argument of the particle update callbacks; only unk4 is read here. */
-struct ParticleUpdateArg {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ f32 unk4;
-};
-
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, Vec3f *prevPos) {
     u8 alive;
     s32 found;
 
     alive = 1;
-    if (effect_updateRiseParticle(particle, arg1) != 0) {
+    if (effect_updateRiseParticle(particle, prevPos) != 0) {
         if (particle->head.desc.vel.y > 0.0f) {
             Vec3f pos;
 
             pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-            pos.y = arg1->unk4;
+            pos.y = prevPos->y;
             pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
             if (math_isInWorldBounds(&pos) == 0) {
                 return 0;
@@ -587,7 +581,7 @@ u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUp
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateRiseParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -625,7 +619,7 @@ s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg 
 }
 
 /* Spawns one rising particle (effect_updateRiseParticle family) at pos with the given velocity. */
-EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
+EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 owner, s32 list) {
     f32 size;
     ParticleDesc6C spawn;
     EffectMotionParticle *particle;
@@ -633,8 +627,8 @@ EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 
 
     spawn.texture = 0x2F;
     spawn.renderMode = 0xC01;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.b2 = 0;
     spawn.g2 = 0;
     spawn.r2 = 0;
@@ -698,7 +692,7 @@ EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 
 }
 
 /* Spawns one stationary rising particle at (x, y, z). */
-void effect_emitRiseParticle(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
+void effect_emitRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -753,8 +747,8 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
             spawn.texture = 0x2F;
             spawn.renderMode = 0xC01;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.b2 = 0;
             spawn.g2 = 0;
             spawn.r2 = 0;
@@ -835,7 +829,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateOscillateParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -859,8 +853,8 @@ s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdat
 }
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
-                        s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
+EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocity, f32 gravity, f32 damping, CollisionHit *ground, f32 size,
+                        s16 lifetime, u8 alpha, u8 lands, u8 owner, s32 list) {
     EffectMotionParticle *particle;
     ParticleDesc spawn;
     ParticleDriftMotion drift;
@@ -870,8 +864,8 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
 
     spawn.texture = 0x2F;
     spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.b2 = 0;
     spawn.g2 = 0;
     spawn.r2 = 0;
@@ -889,7 +883,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     spawn.flags = flipY | 0x1007 | flipX | 0x8000 | 0x4000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 8;
-    if (arg8) {
+    if (lands) {
         spawn.updateFunc = 0x15;
     } else {
         spawn.updateFunc = 0x14;
@@ -921,7 +915,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     spawn.handlerSet = 0;
     spawn.timer = lifetime;
     spawn.alpha = alpha;
-    spawn.gravity = arg2;
+    spawn.gravity = gravity;
     drift.damping = damping;
     if (velocity->x != 0 || velocity->z != 0) {
         drift.groundHeight = GROUND_UNKNOWN;
@@ -942,7 +936,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
             drift.groundHeight = 10000.0f;
         }
     }
-    particle = particle_newSpriteParticleWithFloor(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 2, ground, sizeof(ParticleDriftMotion), owner, list);
     if (particle != NULL) {
         memcpy(&particle->motion, &drift, sizeof(ParticleDriftMotion));
     }
@@ -950,7 +944,7 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateDriftParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     ParticleDriftMotion *drift;
     s32 i;
 
@@ -974,19 +968,19 @@ s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, Vec3f *prevPos) {
     ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
 
     alive = 1;
     drift = &particle->motion.drift;
-    effect_updateDriftParticle(particle, arg1);
+    effect_updateDriftParticle(particle, prevPos);
     if (particle->head.desc.vel.y < 0.0f) {
         return 1;
     }
     pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
-    pos.y = arg1->unk4;
+    pos.y = prevPos->y;
     pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
         if (math_isInWorldBounds(&pos) == 0) {
@@ -1030,8 +1024,8 @@ typedef struct {
     /* 0x04 */ f32 rateRandom;
     /* 0x08 */ f32 sizeBase;
     /* 0x0C */ f32 sizeRandom;
-    /* 0x10 */ f32 unk54Base;
-    /* 0x14 */ f32 unk54Random;
+    /* 0x10 */ f32 gravityBase;
+    /* 0x14 */ f32 gravityRandom;
     /* 0x18 */ f32 maxRiseSpeed;
     /* 0x1C */ f32 swayPerSpeed;
     /* 0x20 */ u8 alphaBase;
@@ -1076,7 +1070,7 @@ struct SpawnerSource {
 
 /* Creates a spawner object for src from template gRiseSpawnerTemplates[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
-void effect_spawnRiseZoneEmitter(SpawnerSource *volatile src, s32 arg1) {
+void effect_spawnRiseZoneEmitter(SpawnerSource *volatile src, s32 kind) {
     EmitterDef info;
     s32 pad[2]; // matching: 8 unused frame bytes between data and info
     SpawnerData data;
@@ -1120,7 +1114,7 @@ struct RiseEmitterObject {
 };
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
-void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
+void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 noGround) {
     RiseEmitter emitter;
     SpawnerData *data;
     RiseEmitterObject *obj;
@@ -1160,8 +1154,8 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
         rise.ceiling = emitter->ceiling;
         spawn.texture = 0x2F;
         spawn.renderMode = 0x4403;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0x9F0600;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0x9F0600;
         spawn.timer = 300;
         spawn.frame = 0;
         spawn.frameRate = 0;
@@ -1201,7 +1195,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
             rise.swayPhaseStepZ = (math_random() % 5U) + 4;
             rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
             rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            spawn.gravity = (math_randomFloat() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
+            spawn.gravity = (math_randomFloat() * emitter->settings.gravityRandom) + emitter->settings.gravityBase;
             spawn.alpha = (math_random() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
             flipX = (math_random() & 1) ? 0x40 : 0;
             flipY = (math_random() & 1) ? 0x80 : 0;

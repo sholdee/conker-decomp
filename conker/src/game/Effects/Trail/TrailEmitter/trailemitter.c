@@ -143,13 +143,13 @@ void trail_updateEmitter(TrailEmitter *emitter) {
                 cosA = math_cosBinAngleMasked(angle - 0x40);
                 speed = math_randomFloat() * emitter->params.speedRange + emitter->params.speedMin;
                 emitter->timers[i] = math_random() % 23U + 5;
-                render.unk0 = 0;
+                render.otherModeH = 0;
                 render.setGeometryMode = 1;
                 render.clearGeometryMode = 0x160600;
                 render.renderMode = 3;
-                render.unk10 = 0x10;
-                render.unk14 = 0x80;
-                render.unk18 = 0x20;
+                render.combiner = 0x10;
+                render.colorDither = 0x80;
+                render.alphaDither = 0x20;
                 render.primMode = 0;
                 render.envMode = 9;
                 spawn.itemCount = math_random() % (emitter->params.pointRange + 1) + 3;
@@ -287,7 +287,7 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
     return 1;
 }
 
-/* MotionTrail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
+/* MotionTrail fade: alpha (motion.alpha) follows 8 * head.tmpl.life, capped at 0xFF. */
 s32 trail_fadeEmittedTrail(MotionTrail *trail) {
     s32 alpha;
     TrailParams *params;
@@ -305,7 +305,7 @@ s32 trail_fadeEmittedTrail(MotionTrail *trail) {
 }
 
 /* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
-s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+s32 trail_spawnHitPuff(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -317,8 +317,8 @@ s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hit
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = math_random() % 21U + 35;
-    fx.unk92 = fx.unk94;
+    fx.halfHeight = math_random() % 21U + 35;
+    fx.halfWidth = fx.halfHeight;
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
@@ -343,8 +343,8 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = math_random() % 21U + 35;
-    fx.unk92 = fx.unk94;
+    fx.halfHeight = math_random() % 21U + 35;
+    fx.halfWidth = fx.halfHeight;
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;

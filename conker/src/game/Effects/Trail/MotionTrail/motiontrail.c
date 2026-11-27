@@ -11,22 +11,22 @@
 
 /* Creates a trail object from a spawn description, motion block and render settings. Returns the MotionTrail
  * as void *: callers whose params extend TrailParams (extraSize bytes) keep it in their own view. */
-void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
-                    s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                    CollisionHit *hit, u8 arg13, s32 arg14) {
+void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 updateFn, s32 finishFn,
+                    s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 maxLights, s32 lightMask, TrailRender *render,
+                    CollisionHit *hit, u8 owner, s32 list) {
     MotionTrail *trail;
     TrailParams *params;
 
     spawn->kind = 1;
-    trail = effect_newEffectObj(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
-                          hit, arg13, arg14);
+    trail = effect_newEffectObj(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, maxLights, lightMask,
+                          hit, owner, list);
     if (trail == NULL) {
         return NULL;
     }
     params = trail->params;
     memcpy(&params->motion, motion, sizeof(TrailMotion));
     params->state = state;
-    params->unk21 = arg4;
+    params->updateFn = updateFn;
     params->finishFn = finishFn;
     params->hitFn = hitFn;
     params->hitKind3Fn = hitKind3Fn;
@@ -40,7 +40,7 @@ void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 ex
  * handlers are declared without a prototype: each trail kind keeps its own view of the object.
  */
 typedef s32 (*TrailFunc)();
-/* Update handlers (TrailParams.state, then .unk21); 0 ends the trail. */
+/* Update handlers (TrailParams.state, then .updateFn); 0 ends the trail. */
 static TrailFunc gMotionTrailStateProcs[6] = {
     NULL, trail_moveAndAppendPoint, trail_movePoints, trail_movePointsGroundTest, trail_dropNewestPoint, trail_updateEmittedTrail,
 };
@@ -57,11 +57,11 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc gMotionTrailHitFns[8] = {
-    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
+    NULL,          trail_dropPointsOnGroundHit, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
 static TrailHitFunc gMotionTrailHitKind3Fns[5] = {
-    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, func_15189FD0, particle_splashSpray,
+    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, trail_ignoreGroundHit, particle_splashSpray,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
@@ -81,15 +81,15 @@ s8 trail_updateMotionTrail(MotionTrail *trail) {
             done = 1;
         }
     }
-    if (params->unk21 != 0 && !done) {
-        if (gMotionTrailUpdateProcs[params->unk21]() == 0) {
+    if (params->updateFn != 0 && !done) {
+        if (gMotionTrailUpdateProcs[params->updateFn]() == 0) {
             done = 1;
         }
     }
     if ((params->motion.flags & 0x40) && !done) {
         unk1C = trail->head.tmpl.life;
-        if (unk1C < params->motion.unk1C) {
-            fade = unk1C * params->motion.unk1E;
+        if (unk1C < params->motion.fadeStart) {
+            fade = unk1C * params->motion.fadeRate;
             if (fade < params->motion.alpha) {
                 params->motion.alpha = fade;
             }
@@ -113,7 +113,7 @@ s8 trail_updateMotionTrail(MotionTrail *trail) {
 }
 
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
-Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 view) {
     TrailParams *params;
     Vtx *vtx;
     u8 update;
@@ -145,7 +145,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
 
     params = trail->params;
     if (trail->head.count >= 2) {
-        particle_getViewBuffer(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
+        particle_getViewBuffer(trail->buffers, view, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
@@ -154,7 +154,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
                 vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
-            cam = math_getCameraPos(arg2);
+            cam = math_getCameraPos(view);
             points = trail->points;
             tex = math_getTextureFrameId(0, params->motion.texture, 0, 2);
             if (tex != gCachedTextureId) {
@@ -167,8 +167,8 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             gfx = math_gfxUpdateGeometryMode(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = math_gfxSetEnvColor(gfx, primR, primG, primB, primA, &update);
             gfx = math_gfxSetPrimColor(gfx, 0, 0, envR, envG, envB, envA, &update);
-            gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].cycle1 | gEffectRenderModes[params->render.renderMode].cycle2, &update);
+            gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.combiner)[3] /* matching: reads the low byte */, &update);
+            gfx = math_gfxSetOtherMode(gfx, params->render.otherModeH | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.colorDither | params->render.alphaDither, gEffectRenderModes[params->render.renderMode].cycle1 | gEffectRenderModes[params->render.renderMode].cycle2, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
@@ -456,7 +456,7 @@ s32 trail_dropNewestPoint(MotionTrail *trail) {
 }
 
 /* Handler: switches the trail to state 4. */
-s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
+s32 trail_dropPointsOnGroundHit(MotionTrail *trail, f32 x, f32 y, f32 z) {
     TrailParams *params = trail->params;
 
     params->state = 4;
@@ -464,8 +464,8 @@ s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 /* Spawns a trail at (x, y, z), launched at speed along the direction given by the yaw and pitch angles. */
-void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
-                   f32 halfWidth, f32 gravity, u8 arg11) {
+void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 life,
+                   f32 halfWidth, f32 gravity, u8 owner) {
     f32 yawWaveQ;
     EffectTemplate18 spawn;
     f32 horizontal;
@@ -503,21 +503,21 @@ void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw,
     motion.velocity.z = horizontal * yawWave;
     motion.alpha = 0xFF;
     spawn.itemCount = arg4 + 3;
-    spawn.life = arg8;
+    spawn.life = life;
 
-    render.unk0 = 0;
+    render.otherModeH = 0;
     render.setGeometryMode = 1;
     render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10 = 0x10;
-    render.unk14 = 0x80;
-    render.unk18 = 0x20;
+    render.combiner = 0x10;
+    render.colorDither = 0x80;
+    render.alphaDither = 0x20;
     render.primMode = 0;
     render.envMode = 9;
-    trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
+    trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, owner, 1);
 }
 
-/* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
+/* Fades the trail in: alpha = 8 per tick of head.tmpl.life, capped at 255. */
 s32 trail_fadeIn(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life * 8;

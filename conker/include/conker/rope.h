@@ -225,10 +225,10 @@ void rope_tiedRopeMessage(TiedRope *self, s32 arg1, u8 event);
 /* game/Effects/HoltenRope/holtenrope.c */
 extern Gfx gRopeRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
 extern Gfx gRopeRenderResetDl[]; /* render teardown (object type table gObjectTypes) */
-HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
+HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 owner, s32 list);
 void rope_updateEffect(HoltenRopeEffect *effect);
 Gfx *rope_drawEffect(Gfx *gfx, HoltenRopeEffect *effect, s16 view);
-void rope_effectMessage(HoltenRopeEffect *effect, s32 arg1, u8 arg2);
+void rope_effectMessage(HoltenRopeEffect *effect, s32 event, u8 eventType);
 s32 rope_layStraight(HoltenRopeEffect *effect);
 s32 rope_layHalfCircle(HoltenRopeEffect *effect);
 s32 rope_actorEndpoint(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart);

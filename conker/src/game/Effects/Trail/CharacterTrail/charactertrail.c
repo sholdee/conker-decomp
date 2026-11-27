@@ -25,7 +25,7 @@
 static const s32 gCharacterTrailTextures[4];
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
-void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
+void trail_spawnCharacterTrail(Actor *owner, u8 fxOwner, s32 fxList) {
     EffectTemplate spawn;
     CharacterTrailState init;
     ModelAttachment *attachment;
@@ -36,7 +36,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
     spawn.life = 300;
     spawn.flags = 0x12;
     spawn.kind = 15;
-    spawn.unk14 = 1;
+    spawn.shapeKind = 1;
     init.targetWidth = 20.0f;
     init.width = 20.0f;
     init.mode = 1;
@@ -60,7 +60,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-    state = effect_newEffectObj(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    state = effect_newEffectObj(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, fxOwner, fxList);
     if (state == NULL) {
         return;
     }
@@ -124,13 +124,13 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0xCD2006;
-        desc.unk44 = 0xFF;
-        desc.unk45 = 0xFF;
-        desc.unk46 = 0;
-        desc.unk47 = 6;
-        desc.unk48 = 0;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
+        desc.primMode = 0;
+        desc.envMode = 6;
+        desc.zone = 0;
         desc.viewportMask = 0xFF;
-        state->effects[0] = flare_spawnGlow(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
+        state->effects[0] = flare_spawnGlow(&params, 0x60, &desc, 0, 0, 0, 0, -1, fxOwner, fxList);
     }
     {
         GlowShape params;
@@ -181,16 +181,16 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         desc.pos = spawn.pos;
         desc.rot = end;
         desc.flags = 0xCD2006;
-        desc.unk44 = 0xFF;
-        desc.unk45 = 0xFF;
-        desc.unk46 = 0;
-        desc.unk47 = 7;
-        desc.unk48 = 0;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
+        desc.primMode = 0;
+        desc.envMode = 7;
+        desc.zone = 0;
         desc.viewportMask = 0xFF;
         desc.scale.x = 1.0f;
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
-        state->effects[1] = flare_spawnGlow(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
+        state->effects[1] = flare_spawnGlow(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, fxOwner, fxList);
         if (state->effects[1] != NULL) {
             memcpy(&state->effects[1]->tail, &tail, sizeof(TrailGlowData));
         }
@@ -750,7 +750,7 @@ s32 trail_updateTrailGlow(TrailGlow *particle) {
 }
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
+void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 owner, s32 list) {
     ParticleDesc spawn;
     s32 count;
     s16 yaw;
@@ -760,8 +760,8 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
 
     count = math_random() % 11U + 10;
     spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;
@@ -807,7 +807,7 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
         r1 = (math_random() & 1) ? 0x80 : 0;
         r2 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
-        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg3, arg4);
+        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, owner, list);
         count--;
     } while (count > 0);
 }
@@ -816,8 +816,8 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward
  * targets picked from the trail mode, follows the owner's position and stops when silenced.
  */
-s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
-                  s32 arg5, u16 *playing) {
+s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 *active, u32 *volumeOut, s32 *pan, s32 *pitchOut,
+                  s32 *mix, u16 *playing) {
     CharacterTrailState *state;
     s32 volume;
     s32 pitch;
@@ -913,13 +913,13 @@ s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 
 
     if (gCutsceneStates[0] == 1) {
         snd->volume = volume >> 1;
-        *arg2 >>= 1;
+        *volumeOut >>= 1;
     } else {
         snd->volume = volume;
     }
     *pitchOut = snd->pitch = pitch;
 
-    if (*arg2 == 0) {
+    if (*volumeOut == 0) {
         if (snd->voiceHandle != 0) {
             sound_stop(snd->voiceHandle);
             snd->voiceHandle = 0;

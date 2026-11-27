@@ -172,10 +172,10 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    spawn.unk45 = 0xFF;
-    spawn.unk44 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 6;
+    spawn.colorLevel = 0xFF;
+    spawn.alpha = 0xFF;
+    spawn.primMode = 0;
+    spawn.envMode = 6;
     spawn.type = 3;
     emit.visibility[0] = 0;
     emit.visibility[1] = 0;
@@ -187,9 +187,9 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     emit.fadeRate = 9.999999975e-07f;
     if (onGround) {
         collision_selectMap(0);
-        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
+        spawn.zone = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
-        spawn.unk48 = 0;
+        spawn.zone = 0;
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
     }
     emit.type = 0;

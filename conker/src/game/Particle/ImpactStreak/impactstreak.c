@@ -26,8 +26,8 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
     info.rgba[2] = 0;
     info.lifetime = life;
     info.rgba[3] = 0xFF;
-    info.unk44 = arg8;
-    info.unk45 = 0xFF;
+    info.alpha = arg8;
+    info.colorLevel = 0xFF;
     info.width = arg3;
     info.height = arg4;
     info.pos = *start;
@@ -172,7 +172,7 @@ void *particle_buildImpactStreakQuad(Streak *streak, s16 viewIdx) {
     vertices->x = start.x - nx;
     vertices->y = start.y - ny;
     vertices->z = start.z - nz;
-    vertices->alpha = streak->head.def.unk44;
+    vertices->alpha = streak->head.def.alpha;
     vertices->flag = 0;
     vertices++;
     vertices->x = end.x - nx;
@@ -190,7 +190,7 @@ void *particle_buildImpactStreakQuad(Streak *streak, s16 viewIdx) {
     vertices->x = start.x + nx;
     vertices->y = start.y + ny;
     vertices->z = start.z + nz;
-    vertices->alpha = streak->head.def.unk44;
+    vertices->alpha = streak->head.def.alpha;
     vertices->flag = 0;
     return result;
 }
@@ -202,8 +202,8 @@ s32 particle_fadeImpactStreak(Streak *streak) {
     if (timer < 8) {
         s32 fade = timer * 32;
 
-        if (fade < streak->head.def.unk44) {
-            streak->head.def.unk44 = fade;
+        if (fade < streak->head.def.alpha) {
+            streak->head.def.alpha = fade;
         }
     }
     return 1;

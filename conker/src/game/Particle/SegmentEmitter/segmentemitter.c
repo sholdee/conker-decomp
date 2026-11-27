@@ -169,8 +169,8 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     speed = (math_randomFloat() * 851.0f + 525.0f) * 0.001000000047f;
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4401;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x20000;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x20000;
     spawn.timer = (math_random() & 0xF) + 10;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -248,7 +248,7 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     emitter.colorLevelBase = 0xFF;
     emitter.colorLevelRange = 0;
     emitter.renderMode = 3;
-    emitter.unk21 = 0x24;
+    emitter.combiner = 0x24;
     emitter.setGeometryMode = 0x200005;
     emitter.clearGeometryMode = 0x60600;
     emitter.fadeStart = 10;
@@ -256,8 +256,8 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     emitter.shrinkStart = 1;
     emitter.shrinkPaused = 0;
     emitter.shrinkFactor = 1.0f;
-    emitter.unk38 = -1;
-    emitter.unk39 = 0;
+    emitter.moveFn = -1;
+    emitter.shapeFn = 0;
     emitter.unk72 = -1;
     emitter.unk73 = -1;
     particle_spawnTrailBurst(&emitter, effect->base.header.owner, effect->base.header.kind);
@@ -299,7 +299,7 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     }
 
     debris.variant = 0;
-    debris.unk5C = 0;
+    debris.zone = 0;
     debris.alpha = 0xFF;
     debris.updateFn = 8;
     debris.update2Fn = 0;
@@ -310,9 +310,9 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     debris.squashFn = 0;
     debris.matrixFn = 2;
     if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (particle_updateSegmentEmitter) */
-        debris.unk6A = 1;
+        debris.lightMode = 1;
     } else {
-        debris.unk6A = 2;
+        debris.lightMode = 2;
     }
     debris.owner = object;
     debris.ownerId = object->unique_id;
@@ -476,8 +476,8 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
         extra = 0.9108009934f;
         spawn.texture = 0x29;
         spawn.renderMode = 0xE03;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.fadeStart = 25;

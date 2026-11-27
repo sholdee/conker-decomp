@@ -22,14 +22,8 @@ struct OscillatorObject {
     /* 0x80 */ FrameOscillator oscillator;
 };
 
-/* The owner whose +0x74 scales the spawned particle's velocity. */
-struct struct_EA11C_arg5 {
-    /* 0x00 */ u8  pad0[0x74];
-    /* 0x74 */ f32 unk74;
-};
-
 /* Creates a blood_spawnStrip object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+OscillatorObject *effect_attachBone8SegmentStrip(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList) {
     BloodStripDesc desc;
     OscillatorObject *obj;
     FrameOscillator oscillator;
@@ -46,7 +40,7 @@ OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     desc.flags = 2;
     desc.duration = 60;
     desc.pause = 60;
-    desc.lifetime = arg1;
+    desc.lifetime = lifetime;
     desc.sampleCallback = 2;
     desc.emitCallback = 2;
     desc.rateCallback = 2;
@@ -73,15 +67,15 @@ s32 effect_resetOscillator(OscillatorObject *obj) {
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
+void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *strip) {
     ParticleDesc desc;
     u8 *particle;
     RiseMotion extra;
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.b2 = 0;
     desc.g2 = 0;
     desc.r2 = 0;
@@ -111,9 +105,9 @@ void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32
     extra.maxRiseSpeed = 3.5f;
     extra.swayPerSpeed = 0.2857143f;
 
-    desc.vel.x = (to->x - from->x) * arg5->unk74;
-    desc.vel.y = (to->y - from->y) * arg5->unk74;
-    desc.vel.z = (to->z - from->z) * arg5->unk74;
+    desc.vel.x = (to->x - from->x) * strip->power;
+    desc.vel.y = (to->y - from->y) * strip->power;
+    desc.vel.z = (to->z - from->z) * strip->power;
     desc.pos = *from;
     desc.pos.x += desc.vel.x * t;
     desc.pos.y += desc.vel.y * t;
@@ -156,7 +150,7 @@ f32 effect_stepOscillator(OscillatorObject *obj) {
 }
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
+void *effect_attachDriftEmitter(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;
@@ -177,7 +171,7 @@ void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     desc.flags = ((lifetime == -1) ? 0 : 4) | 0xA;
     desc.emitter = 7;
     desc.callback = -1;
-    desc.unk2D = 6;
+    desc.handlerSet = 6;
     return blood_spawnDrip(&desc, 0, 0xFF, 0);
 }
 
@@ -193,8 +187,8 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     extra.swayPerSpeed = 0.25f;
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.b2 = 0;
     desc.g2 = 0;
     desc.r2 = 0;
@@ -254,7 +248,7 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
 }
 
 /* Callback that ignores its argument and calls effect_updateDistantTracers. */
-void effect_levelUpdateDistantTracers(s32 arg0) {
+void effect_levelUpdateDistantTracers(s32 unused) {
     effect_updateDistantTracers();
 }
 

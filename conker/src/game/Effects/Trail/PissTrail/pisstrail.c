@@ -71,7 +71,7 @@ void trail_spawnPissTrail(Actor *actor) {
         spawn.life = 300;
         spawn.flags = 54;
         spawn.kind = 2;
-        spawn.unk14 = 5;
+        spawn.shapeKind = 5;
         spawn.material = 0;
 
         trail = effect_newEffectObj(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
@@ -678,7 +678,7 @@ void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     effect_sendEventToEffectObjs((s32)&msg, 0x44);
 }
 
-s32 trail_updatePissSpark(SpriteParticle *particle, s32 arg1) {
+s32 trail_updatePissSpark(SpriteParticle *particle, Vec3f *prevPos) {
     WobbleData *spark;
 
     spark = &particle->data.wobble;
@@ -705,7 +705,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
                 spawn.renderMode = 0x5103;
-                spawn.unk0 = 0x200005;
+                spawn.setGeometryMode = 0x200005;
                 spawn.fadeStart = 0x2E;
                 spawn.fadeRate = 5;
                 spawn.flags = 0x90DE07;
@@ -713,7 +713,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 spawn.envColorMode = 6;
                 spawn.updateFunc = 0x24;
                 spawn.deathFunc = -1;
-                spawn.unk4 = 0;
+                spawn.clearGeometryMode = 0;
                 spawn.frame = 0;
                 spawn.frameRate = 0;
                 spawn.drawFunc = -1;
@@ -768,18 +768,18 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 emit.itemCountRange = 1;
                 emit.lifeBase = 20;
                 emit.lifeRange = 10;
-                emit.unk30 = 200;
-                emit.unk32 = 55;
-                emit.unk3C = 16;
-                emit.unk3E = 15;
-                emit.unk40 = 0;
+                emit.alphaBase = 200;
+                emit.alphaRange = 55;
+                emit.fadeStart = 16;
+                emit.fadeRate = 15;
+                emit.material = 0;
                 emit.kind = 3;
                 emit.scaleRange = 2.659999847f;
                 emit.sizeBase = 1.33100009f;
                 emit.sizeRange = 1.160000086f;
                 emit.speedBase = 0.01499999966f;
                 emit.speedRange = 0.00699999975f;
-                emit.unk38 = 0.200000003f;
+                emit.burstChance = 0.200000003f;
                 if (hit->hitType >= 2) {
                     ConeBasis cone;
 

@@ -40,10 +40,10 @@ DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     packet.scale.x = 0.0f;
     packet.scale.y = 0.0f;
     packet.scale.z = 0.0f;
-    packet.unk44 = spawn->color.alpha;
-    packet.unk45 = 0xFF;
-    packet.unk46 = 0;
-    packet.unk47 = 6;
+    packet.alpha = spawn->color.alpha;
+    packet.colorLevel = 0xFF;
+    packet.primMode = 0;
+    packet.envMode = 6;
 
     drift.vel = spawn->vel;
     drift.minVy = spawn->minVy;

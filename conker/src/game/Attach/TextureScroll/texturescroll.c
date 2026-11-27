@@ -144,8 +144,8 @@ void attach_spawnFootImpact(Actor *actor) {
             burst.countRange = 7;
             burst.texture = 0x6C;
             burst.renderMode = 0x5103;
-            burst.unk8 = 0x200005;
-            burst.unkC = 0;
+            burst.setGeometryMode = 0x200005;
+            burst.clearGeometryMode = 0;
             burst.timerBase = 30;
             burst.timerRange = 10;
             burst.frameRateBase = 0;

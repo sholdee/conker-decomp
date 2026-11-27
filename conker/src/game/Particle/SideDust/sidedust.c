@@ -141,12 +141,12 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0x401C0000;
-        desc.unk44 = (math_random() % 51U) + 160;
-        desc.unk45 = 0xFF;
+        desc.alpha = (math_random() % 51U) + 160;
+        desc.colorLevel = 0xFF;
         growth.growTime = (math_random() & 3) + 7;
         growth.growRate = (((math_randomFloat() * 30.0f) + 30.0f) * desc.width) * 0.001f;
-        desc.unk46 = 0;
-        desc.unk47 = 6;
+        desc.primMode = 0;
+        desc.envMode = 6;
         angleOffset = (side == 1) ? -8 : 8;
         particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x17, 0, 0, (actor->langle >> 8) - angleOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
@@ -168,14 +168,14 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+/* QuadSprite update: fades the sprite (def.alpha) out over the last 32 frames of its lifetime. */
 s32 particle_fadeSideDustSprite(QuadSprite *sprite) {
     s32 fade;
 
     if (sprite->def.lifetime < 32) {
         fade = sprite->def.lifetime * 8;
-        if (fade < sprite->def.unk10) {
-            sprite->def.unk10 = fade;
+        if (fade < sprite->def.alpha) {
+            sprite->def.alpha = fade;
         }
     }
     return 1;
@@ -213,7 +213,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.gravity = (math_randomFloat() * 603.0f + -2402.0f) * 0.001f;
     desc.sizeY = (math_randomFloat() * 300.0f + 101.0f) * 0.001f;
     desc.variant = 0;
-    desc.unk5C = 0;
+    desc.zone = 0;
     desc.sizeXZ = desc.sizeY;
     desc.alpha = (math_random() % 101U) + 155;
     desc.updateFn = 2;
@@ -224,7 +224,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.destroyFn = 0;
     desc.squashFn = 0;
     desc.matrixFn = 0;
-    desc.unk6A = 2;
+    desc.lightMode = 2;
     desc.owner = 0;
     desc.ownerId = 0;
     desc.fadeStart = 32;
@@ -270,8 +270,8 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
 
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = (math_random() % 41U) + 40;
     desc.frame = 0;
     desc.frameRate = 0;

@@ -6,7 +6,7 @@
 
 /* ActorTask callback (see game/Effects/ActorTasks/actortasks.c; only the task's CharacterWatcher is read here): ground effect 5
  * under the task's actor, with sound 0x5208. */
-void func_151AE6B0(CharacterWatcher *task) {
+void effect_watcherEnterWater(CharacterWatcher *task) {
     Actor *actor = task->character;
 
     {

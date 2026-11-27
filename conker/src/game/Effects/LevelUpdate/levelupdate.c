@@ -64,11 +64,11 @@ static Gfx *(*gLevelDrawHooks2[5])(Gfx *, s32) = { NULL, NULL, NULL, NULL, NULL 
     _g->words.w1 = (u32)(b);        \
 }
 
-void effect_advanceLevelTexFrame(s32 arg0, s32 arg1) {
+void effect_advanceLevelTexFrame(s32 frameTime, s32 frameCount) {
     gLevelTexFrameTime += gFrameTicks;
-    if (arg0 < gLevelTexFrameTime) {
+    if (frameTime < gLevelTexFrameTime) {
         gLevelTexFrame++;
-        if (gLevelTexFrame >= arg1) {
+        if (gLevelTexFrame >= frameCount) {
             gLevelTexFrame = 0;
         }
         gLevelTexFrameTime = 0;

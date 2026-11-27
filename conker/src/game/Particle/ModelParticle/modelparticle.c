@@ -309,9 +309,9 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
         particle->floor.material = 0;
     }
     gModelParticleCount++;
-    particle->link.unk4 = 0;
-    particle->link.model = arg1;
-    particle->link.unk1C = arg2;
+    particle->link.lightCount = 0;
+    particle->link.maxLights = arg1;
+    particle->link.lightMask = arg2;
     for (i = 0; i < ARRAY_COUNT(particle->link.handles); i++) {
         particle->link.handles[i] = NULL;
     }
@@ -342,7 +342,7 @@ void particle_buildModelParticleMatrix(ModelParticle *particle) {
     }
 
     if (particle->flags & 0x400) {
-        zone = particle->unk6C;
+        zone = particle->zone;
         if (zone != NULL && math_isZoneHiddenFromViews(zone) != 0) {
             return;
         }
@@ -401,7 +401,7 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
                         ((particle->flags & 0x800) ? 0 : G_LIGHTING) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
-        gfx = math_emitPointLights(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
+        gfx = math_emitPointLights(gfx, &particle->link, particle->lightMode, particle->owner, particle->ownerId, arg2,
                             &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

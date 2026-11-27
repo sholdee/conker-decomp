@@ -137,7 +137,7 @@ Gfx *particle_drawPuffQuad(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
 /* Loads texture D_8009054C, using the frame and mode already in gDrawHookTextureFrame/gDrawHookTextureCm. */
 Gfx *particle_beginPuffQuadDraw(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     gDrawHookTexture = &D_8009054C;
-    return sprite_loadDescFrame(gfx, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3);
+    return sprite_loadDescFrame(gfx, gDrawHookTexture, gDrawHookTextureFrame, &gDrawHookSprite, 0, 0, 0, gDrawHookTextureCm, 3);
 }
 
 

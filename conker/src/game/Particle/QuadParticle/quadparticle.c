@@ -100,7 +100,7 @@ Gfx gQuadParticleEndDl[] = {
     gsSPEndDisplayList(),
 };
 
-/* Destroy and free handlers of a sprite (SpriteDef.unk7) and of a particle (ParticleDef.type). */
+/* Destroy and free handlers of a sprite (SpriteDef.handlerSet) and of a particle (ParticleDef.type). */
 static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadSpriteDefault, particle_destroyQuadSpriteDefault };
 static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
 static void (*gQuadParticleDestroyFuncs[])() = {
@@ -148,8 +148,8 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
     if ((sprite->def.flags & 0x8000) && !expired) {
         if (sprite->def.lifetime < sprite->def.fadeStart) {
             faded = sprite->def.lifetime * sprite->def.fadeRate;
-            if (faded < sprite->def.unk10) {
-                sprite->def.unk10 = faded;
+            if (faded < sprite->def.alpha) {
+                sprite->def.alpha = faded;
             }
         }
     }
@@ -157,7 +157,7 @@ void particle_updateQuadSprite(QuadSprite *sprite) {
         if (!expired) {
             if (sprite->def.lifetime < sprite->def.fadeStart) {
                 faded = sprite->def.lifetime * sprite->def.fadeRate;
-                if (faded < sprite->def.unk10) {
+                if (faded < sprite->def.alpha) {
                     sprite->def.rgba[3] = faded;
                 }
             }
@@ -245,10 +245,10 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
     particle_setQuadColors(sprite->vtx, colors);
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
-    sprite->link.model = model;
+    sprite->link.maxLights = model;
     sprite->active = 1;
     sprite->unk14 = 0;
-    sprite->link.unk1C = arg6;
+    sprite->link.lightMask = arg6;
     for (i = 0; i < 4; i++) {
         sprite->link.handles[i] = NULL;
     }
@@ -377,7 +377,7 @@ void particle_destroyQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
-        index = sprite->def.unk7;
+        index = sprite->def.handlerSet;
     } else {
         index = 0;
     }
@@ -388,7 +388,7 @@ void particle_freeQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
-        index = sprite->def.unk7;
+        index = sprite->def.handlerSet;
     } else {
         index = 0;
     }
@@ -508,13 +508,13 @@ Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         combiner = (sprite->def.renderModes & 0xFFFF0000) >> 16;
         cullFlags = sprite->def.flags & 0x30;
         gfx = math_emitPointLights(gfx, &sprite->link, 0, 0, 0, viewport, &sprite->pos, 2,
-                            (sprite->def.flags & 0x4000) ? sprite->def.unk1C : 0);
+                            (sprite->def.flags & 0x4000) ? sprite->def.material : 0);
         math_pickPrimColour(&primR, &primG, &primB, &primA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
-                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
-                      (sprite->def.flags & 0x100) ? sprite->def.unk16 : 3);
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.alpha, sprite->def.colorLevel,
+                      (sprite->def.flags & 0x100) ? sprite->def.primMode : 3);
         math_pickEnvColour(&envR, &envG, &envB, &envA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
-                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
-                      (sprite->def.flags & 0x200) ? sprite->def.unk17 : 4);
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.alpha, sprite->def.colorLevel,
+                      (sprite->def.flags & 0x200) ? sprite->def.envMode : 4);
         geometry = 0;
         if (cullFlags & 0x10) {
             geometry = G_CULL_FRONT;
@@ -584,8 +584,8 @@ void particle_updateQuadParticle(DefParticleHead *particle) {
     if ((particle->def.flags & 0x8000000) && !expired) {
         if (particle->def.lifetime < particle->def.fadeStart) {
             faded = particle->def.lifetime * particle->def.fadeRate;
-            if (faded < particle->def.unk44) {
-                particle->def.unk44 = faded;
+            if (faded < particle->def.alpha) {
+                particle->def.alpha = faded;
             }
         }
     }
@@ -593,7 +593,7 @@ void particle_updateQuadParticle(DefParticleHead *particle) {
         if (!expired) {
             if (particle->def.lifetime < particle->def.fadeStart) {
                 faded = particle->def.lifetime * particle->def.fadeRate;
-                if (faded < particle->def.unk44) {
+                if (faded < particle->def.alpha) {
                     particle->def.rgba[3] = faded;
                 }
             }
@@ -681,9 +681,9 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
     particle->ground.source = 0;
     particle->ground.flags = 0;
     particle->ground.material = 0;
-    particle->link.model = model;
-    particle->link.unk1C = arg8;
-    particle->link.unk4 = 0;
+    particle->link.maxLights = model;
+    particle->link.lightMask = arg8;
+    particle->link.lightCount = 0;
     for (i = 0; i < 4; i++) {
         particle->link.handles[i] = NULL;
     }
@@ -884,8 +884,8 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
         blendMode = particle->def.renderModes & 0xFF;
         combiner = (particle->def.renderModes & 0xFF00) >> 8;
         cullFlags = particle->def.flags & 0xC000;
-        if ((particle->def.flags & 0x1000000) && particle->def.unk48 != NULL &&
-            !(particle->def.unk48->views & (1 << viewport))) {
+        if ((particle->def.flags & 0x1000000) && particle->def.zone != NULL &&
+            !(particle->def.zone->views & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
                 heap_setTag((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
@@ -901,13 +901,13 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
             return gfx;
         }
         gfx = math_emitPointLights(gfx, &particle->link, 0, 0, 0, viewport, &particle->def.pos, 2,
-                            (particle->def.flags & 0x4000000) ? particle->def.unk50 : 0);
+                            (particle->def.flags & 0x4000000) ? particle->def.material : 0);
         math_pickPrimColour(&primR, &primG, &primB, &primA, particle->def.rgba[0], particle->def.rgba[1],
-                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
-                      particle->def.unk45, (particle->def.flags & 0x40000) ? particle->def.unk46 : 4);
+                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.alpha,
+                      particle->def.colorLevel, (particle->def.flags & 0x40000) ? particle->def.primMode : 4);
         math_pickEnvColour(&envR, &envG, &envB, &envA, particle->def.rgba[0], particle->def.rgba[1],
-                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
-                      particle->def.unk45, (particle->def.flags & 0x80000) ? particle->def.unk47 : 5);
+                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.alpha,
+                      particle->def.colorLevel, (particle->def.flags & 0x80000) ? particle->def.envMode : 5);
         geometry = 0;
         if (cullFlags & 0x4000) {
             geometry = G_CULL_FRONT;
@@ -1202,7 +1202,7 @@ s32 particle_updateDriftMotion(DefParticleHead *particle) {
         particle->def.scale.y += motion->drift.scaleVel.y * gFrameDelta;
         particle->def.scale.z += motion->drift.scaleVel.z * gFrameDelta;
     }
-    particle->def.unk45 = 0xFF;
+    particle->def.colorLevel = 0xFF;
     return 1;
 }
 

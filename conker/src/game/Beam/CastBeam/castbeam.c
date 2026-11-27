@@ -39,8 +39,8 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
             ParticleDesc spawn;
 
             spawn.renderMode = 0x4417;
-            spawn.unk0 = 0x200004;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200004;
+            spawn.clearGeometryMode = 0;
             spawn.timer = 300;
             spawn.frame = 0;
             spawn.frameRate = 0;

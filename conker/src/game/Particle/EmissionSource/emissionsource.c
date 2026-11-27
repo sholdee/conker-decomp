@@ -364,16 +364,16 @@ void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 unk12, u8 flags, 
     arg.color2.green = 0xFF;
     arg.color2.blue = 0xFF;
     arg.color2.alpha = 0xFF;
-    arg.unk23 = unk23;
-    arg.otherModeH = 1;
-    arg.unk28 = 0;
-    arg.unk2C = 0;
-    arg.unk40 = 0;
-    arg.unk41 = 10;
-    arg.combineMode = 7;
-    arg.unk34 = 60;
-    arg.unk38 = 0x80;
-    arg.unk3C = 0x20;
+    arg.colorLevel = unk23;
+    arg.render.otherModeH = 1;
+    arg.render.setGeometryMode = 0;
+    arg.render.clearGeometryMode = 0;
+    arg.render.primMode = 0;
+    arg.render.envMode = 10;
+    arg.render.renderMode = 7;
+    arg.render.combiner = 60;
+    arg.render.colorDither = 0x80;
+    arg.render.alphaDither = 0x20;
     sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
@@ -399,16 +399,16 @@ void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
     arg.color2.green = 0xFF;
     arg.color2.blue = 0xFF;
     arg.color2.alpha = 0xFF;
-    arg.unk23 = unk23;
-    arg.otherModeH = 1;
-    arg.unk28 = 0;
-    arg.unk2C = 0;
-    arg.unk40 = 0;
-    arg.unk41 = 10;
-    arg.combineMode = 7;
-    arg.unk34 = 60;
-    arg.unk38 = 0x80;
-    arg.unk3C = 0x20;
+    arg.colorLevel = unk23;
+    arg.render.otherModeH = 1;
+    arg.render.setGeometryMode = 0;
+    arg.render.clearGeometryMode = 0;
+    arg.render.primMode = 0;
+    arg.render.envMode = 10;
+    arg.render.renderMode = 7;
+    arg.render.combiner = 60;
+    arg.render.colorDither = 0x80;
+    arg.render.alphaDither = 0x20;
     arg.halfHeight = size;
     arg.halfWidth = size;
 
@@ -553,20 +553,20 @@ void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *p
     arg.fadeStart = 20;
     arg.fadeRate = 12;
     arg.texture = 0x4F;
-    arg.unk7 = 0;
+    arg.handlerSet = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
     arg.lifetime = (duration == -1) ? 300 : duration + 20;
     arg.frame = 0;
     arg.frameSpeed = 0;
-    arg.unk10 = arg1;
-    arg.unk11 = 0xFF;
+    arg.alpha = arg1;
+    arg.colorLevel = 0xFF;
     arg.rgba[0] = arg7;
     arg.rgba[1] = arg8;
     arg.rgba[2] = arg9;
     arg.rgba[3] = 0xFF;
     arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
-    arg.unk16 = 0;
-    arg.unk17 = 6;
+    arg.primMode = 0;
+    arg.envMode = 6;
     if (arg5 != 0) {
         argB = 3;
         argC = 0xFF;
@@ -677,7 +677,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
 
         arg.texture = 0x6C;
         arg.renderMode = 0x5103;
-        arg.unk0 = 0x200005;
+        arg.setGeometryMode = 0x200005;
         arg.fadeStart = 0x73;
         arg.fadeRate = 2;
         arg.flags = 0x80DE07;
@@ -687,7 +687,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
         arg.deathFunc = -1;
         extra.phase[0] = 0;
         extra.phase[1] = 0;
-        arg.unk4 = 0;
+        arg.clearGeometryMode = 0;
         arg.frame = 0;
         arg.frameRate = 0;
         arg.drawFunc = -1;
@@ -875,8 +875,8 @@ void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect) {
 
             arg.texture = 0x16;
             arg.renderMode = 0xE01;
-            arg.unk0 = 0x200005;
-            arg.unk4 = 0;
+            arg.setGeometryMode = 0x200005;
+            arg.clearGeometryMode = 0;
             arg.frame = 0;
             arg.frameRate = 0;
             arg.flags = 0x801E05;
@@ -1047,7 +1047,7 @@ void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
             arg.vel.z = 0.0f;
             arg.rotVel.y = 0.0f;
             arg.variant = 0;
-            arg.unk5C = 0;
+            arg.zone = 0;
             arg.alpha = 0xFF;
             arg.update2Fn = 0;
             arg.floorHitFn = 0;
@@ -1056,7 +1056,7 @@ void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
             arg.destroyFn = 0;
             arg.squashFn = 0;
             arg.matrixFn = 2;
-            arg.unk6A = 2;
+            arg.lightMode = 2;
             arg.owner = 0;
             arg.ownerId = 0;
             arg.fadeStart = 1;
@@ -1103,20 +1103,20 @@ s32 particle_updateFallingDebris(Game113D60Debris *debris) {
             size = (math_randomFloat() * 20.0f) + 20.0f;
 
             splash.texture = 0xB;
-            splash.unk7 = 0;
+            splash.handlerSet = 0;
             splash.flags = 0x9701;
             splash.lifetime = 100;
             splash.frame = 0;
             splash.frameSpeed = 0;
-            splash.unk10 = 0xFF;
-            splash.unk11 = 0xFF;
+            splash.alpha = 0xFF;
+            splash.colorLevel = 0xFF;
             splash.rgba[0] = 0xFF;
             splash.rgba[1] = 0xFF;
             splash.rgba[2] = 0xFF;
             splash.rgba[3] = 0xFF;
             splash.renderModes = 0x3B0003;
-            splash.unk16 = 0;
-            splash.unk17 = 7;
+            splash.primMode = 0;
+            splash.envMode = 7;
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 

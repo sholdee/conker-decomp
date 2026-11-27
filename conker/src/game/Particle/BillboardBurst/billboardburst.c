@@ -30,7 +30,7 @@ void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3
     sp.gravity = -1.3f;
     sp.flags = 0x29E8;
     sp.variant = 0;
-    sp.unk5C = 0;
+    sp.zone = 0;
     sp.alpha = 0xFF;
     sp.updateFn = 1;
     sp.update2Fn = 0;
@@ -40,7 +40,7 @@ void particle_spawnModelBurstWithBillboard(f32 arg0, f32 arg1, f32 arg2, u8 arg3
     sp.destroyFn = 0;
     sp.squashFn = 0;
     sp.matrixFn = 0;
-    sp.unk6A = 2;
+    sp.lightMode = 2;
     sp.owner = 0;
     sp.ownerId = 0;
     sp.fadeStart = 0x4000;

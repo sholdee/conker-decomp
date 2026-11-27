@@ -9,7 +9,7 @@
 static const Vec3f D_8009FBC0 = { 58.0f, -30.0f, 0.0f }; // a point in bone space
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a particle_spawnLightFlash at the same point. */
-void func_150B3AB0(Actor *obj, u8 arg1) {
+void effect_spawnBone25StreakBurst(Actor *obj, u8 arg1) {
     s16 yaw;
     Vec3f pos;
     RumbleParams event;
@@ -33,7 +33,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
 }
 
 /* Spawns a streak particle at (x, y, z) heading along yaw/pitch (256-step angles) at speed 10. */
-s32 func_150B3C0C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 effect_spawnPitchYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 pitch, s32 yaw, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 owner) {
     f32 yawCos;

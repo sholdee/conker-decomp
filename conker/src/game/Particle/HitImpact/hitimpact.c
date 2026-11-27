@@ -141,7 +141,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         sparks.colorLevelBase = 255;
         sparks.colorLevelRange = 0;
         sparks.renderMode = 1;
-        sparks.unk21 = 36;
+        sparks.combiner = 36;
         sparks.setGeometryMode = 0x200005;
         sparks.clearGeometryMode = 0x60600;
         sparks.fadeStart = 10;
@@ -149,8 +149,8 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         sparks.shrinkStart = 1;
         sparks.shrinkPaused = 0;
         sparks.shrinkFactor = 1.0f;
-        sparks.unk38 = -1;
-        sparks.unk39 = 0;
+        sparks.moveFn = -1;
+        sparks.shapeFn = 0;
         sparks.unk72 = -1;
         sparks.unk73 = -1;
         particle_spawnTrailBurst(&sparks, arg4, arg5);
@@ -170,7 +170,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         p.scale.z = 1.0f;
         p.model = particleType;
         p.variant = 0;
-        p.unk5C = 0;
+        p.zone = 0;
         p.alpha = 255;
         p.update2Fn = 0;
         p.floorHitFn = 0;
@@ -179,7 +179,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         p.destroyFn = 0;
         p.squashFn = 0;
         p.matrixFn = 2;
-        p.unk6A = 0;
+        p.lightMode = 0;
         p.owner = NULL;
         p.ownerId = 0;
         p.fadeStart = 12;
@@ -393,7 +393,7 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.lifetime = (math_random() & 7) + 28;
     p.model = 37;
     p.variant = 0;
-    p.unk5C = 0;
+    p.zone = 0;
     p.alpha = 255;
     p.updateFn = 8;
     p.update2Fn = 0;
@@ -403,7 +403,7 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.destroyFn = 0;
     p.squashFn = 0;
     p.matrixFn = 2;
-    p.unk6A = 1;
+    p.lightMode = 1;
     p.owner = owner;
     p.ownerId = owner->unique_id;
     p.fadeStart = 6;
@@ -491,7 +491,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             extra.drag = 0.9156860113f;
             spawn.texture = 108;
             spawn.renderMode = 0x5103;
-            spawn.unk0 = 0x200005;
+            spawn.setGeometryMode = 0x200005;
             spawn.fadeStart = 70;
             spawn.fadeRate = 3;
             spawn.flags = 0x90DE07;
@@ -499,7 +499,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             spawn.envColorMode = 6;
             spawn.updateFunc = 32;
             spawn.deathFunc = -1;
-            spawn.unk4 = 0;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.drawFunc = -1;

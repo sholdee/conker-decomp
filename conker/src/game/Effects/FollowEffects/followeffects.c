@@ -21,7 +21,7 @@
 
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
-void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
+void *effect_spawnOwnerModel(Actor *owner, u8 fxOwner, s32 fxList) {
     DynModel *effect;
     DynModelDesc desc;
     ActorRef ref;
@@ -35,8 +35,8 @@ void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
     desc.updateFunc = -1;
     desc.drawFunc = 3;
     desc.lifetime = 300;
-    desc.unk30 = 9;
-    desc.unk34 = 0x1AD;
+    desc.assetTable = 9;
+    desc.assetIndex = 0x1AD;
     desc.viewportMask = 0xFF;
     {
         s32 objIndex = owner - movement_obj;
@@ -63,7 +63,7 @@ void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
     desc.unk1C = 0x80;
     desc.unk20 = 0x20;
     desc.kind = 2;
-    effect = effect_newDynModel(&desc, 1, 8, arg1, arg2);
+    effect = effect_newDynModel(&desc, 1, 8, fxOwner, fxList);
     if (effect != NULL) {
         memcpy(DYNMODEL_USERDATA(effect), &ref, sizeof(ref));
     }
@@ -185,36 +185,36 @@ void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType) {
 
 /* The launch paths of effect_spawnTankExplosion's particles, in the space of the object's model matrix: start and
  * end points (the end minus the start gives the direction), sizes and extra rotations. */
-static const Vec3f D_800AA590 = { 0.0f, 131.0f, 0.0f };
-static const Vec3f D_800AA59C = { 0.0f, 210.0f, 0.0f };
-static const Vec3f D_800AA5A8 = { 0.0f, 116.0f, 200.0f };
-static const Vec3f D_800AA5B4[2] = { { 90.0f, 189.0f, 201.0f }, { -75.0f, 192.0f, 183.0f } };
-static const Vec3f D_800AA5CC[4] = {
+static const Vec3f gTankDebrisTopStart = { 0.0f, 131.0f, 0.0f };
+static const Vec3f gTankDebrisTopEnd = { 0.0f, 210.0f, 0.0f };
+static const Vec3f gTankDebrisFrontStart = { 0.0f, 116.0f, 200.0f };
+static const Vec3f gTankDebrisFrontEnds[2] = { { 90.0f, 189.0f, 201.0f }, { -75.0f, 192.0f, 183.0f } };
+static const Vec3f gTankDebrisOuterCornerStarts[4] = {
     { 128.0f, -29.0f, -67.0f }, { -128.0f, -29.0f, -67.0f }, { -128.0f, -29.0f, 62.0f }, { 128.0f, -29.0f, 62.0f },
 };
-static const Vec3f D_800AA5FC[4] = {
+static const Vec3f gTankDebrisOuterCornerEnds[4] = {
     { 223.0f, 24.0f, -93.0f }, { -223.0f, 24.0f, -93.0f }, { -205.0f, 8.0f, 119.0f }, { 205.0f, 8.0f, 119.0f },
 };
-static const f32 D_800AA62C[4] = { 0.6000000238f, 0.6000000238f, 0.5f, 0.5f };
-static const Vec3f D_800AA63C = { 0.0f, 132.0f, 0.0f };
-static const Vec3f D_800AA648[2] = { { 95.0f, 125.0f, 32.0f }, { -95.0f, 125.0f, 32.0f } };
-static const Vec3f D_800AA660[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 180.0f, 0.0f } };
-static const Vec3f D_800AA678[4] = {
+static const f32 gTankDebrisOuterCornerSizes[4] = { 0.6000000238f, 0.6000000238f, 0.5f, 0.5f };
+static const Vec3f gTankDebrisSideStart = { 0.0f, 132.0f, 0.0f };
+static const Vec3f gTankDebrisSideEnds[2] = { { 95.0f, 125.0f, 32.0f }, { -95.0f, 125.0f, 32.0f } };
+static const Vec3f gTankDebrisSideRotations[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 180.0f, 0.0f } };
+static const Vec3f gTankDebrisInnerCornerStarts[4] = {
     { 114.0f, -17.0f, 45.0f }, { -114.0f, -17.0f, 45.0f }, { 114.0f, -17.0f, -58.0f }, { -114.0f, -17.0f, -58.0f },
 };
-static const Vec3f D_800AA6A8[4] = {
+static const Vec3f gTankDebrisInnerCornerEnds[4] = {
     { 198.0f, 20.0f, 104.0f }, { -198.0f, 20.0f, 104.0f }, { 189.0f, 50.0f, -108.0f }, { -189.0f, 50.0f, -108.0f },
 };
-static const Vec3f D_800AA6D8[4] = {
+static const Vec3f gTankDebrisInnerCornerRotations[4] = {
     { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { -21.0f, 179.0f, 0.0f }, { -21.0f, 179.0f, 0.0f },
 };
-static const f32 D_800AA708[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 0.6200000048f };
+static const f32 gTankDebrisInnerCornerSizes[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 0.6200000048f };
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
  * the object's model matrix (several of them picked at random).
  */
-void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
@@ -253,7 +253,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     } else {
         burst.spray.eventFunc = 0;
     }
-    particle_spawnJetSprayBursts(&burst, arg1, arg2);
+    particle_spawnJetSprayBursts(&burst, owner, list);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
         collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
@@ -274,7 +274,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.rotVel.y = 0.0f;
             part.flags = 0x39E9;
             part.variant = 0;
-            part.unk5C = 0;
+            part.zone = 0;
             part.alpha = 0xFF;
             part.updateFn = 0xD;
             part.update2Fn = 0;
@@ -284,7 +284,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.destroyFn = 0;
             part.squashFn = 0;
             part.matrixFn = 2;
-            part.unk6A = 0;
+            part.lightMode = 0;
             part.owner = obj;
             part.ownerId = obj->unique_id;
             part.fadeStart = 0xC;
@@ -302,8 +302,8 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.sizeY = 0.75f;
             math_randomFloat();
             part.gravity = accel;
-            math_transformOffset(&D_800AA590, &part.pos, mtx);
-            math_transformOffset(&D_800AA59C, &part.vel, mtx);
+            math_transformOffset(&gTankDebrisTopStart, &part.pos, mtx);
+            math_transformOffset(&gTankDebrisTopEnd, &part.vel, mtx);
             part.vel.x = part.vel.x - part.pos.x;
             part.vel.y = part.vel.y - part.pos.y;
             part.vel.z = part.vel.z - part.pos.z;
@@ -314,7 +314,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.rot.x += 109.0f;
             part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
             part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
         }
 
         {
@@ -327,8 +327,8 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.sizeY = 0.5f;
             math_randomFloat();
             part.gravity = accel;
-            math_transformOffset(&D_800AA5A8, &part.pos, mtx);
-            math_transformOffset(&D_800AA5B4[math_random() & 1], &part.vel, mtx);
+            math_transformOffset(&gTankDebrisFrontStart, &part.pos, mtx);
+            math_transformOffset(&gTankDebrisFrontEnds[math_random() & 1], &part.vel, mtx);
             part.vel.x = part.vel.x - part.pos.x;
             part.vel.y = part.vel.y - part.pos.y;
             part.vel.z = part.vel.z - part.pos.z;
@@ -338,7 +338,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             part.rot = objPos;
             part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
             part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+            particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
         }
 
         part.model = 0x29;
@@ -346,11 +346,11 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             if (math_random() & 1) {
                 speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (math_random() % 36U) + 30;
-                part.sizeXZ = part.sizeY = D_800AA62C[i];
+                part.sizeXZ = part.sizeY = gTankDebrisOuterCornerSizes[i];
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA5CC[i], &part.pos, mtx);
-                math_transformOffset(&D_800AA5FC[i], &part.vel, mtx);
+                math_transformOffset(&gTankDebrisOuterCornerStarts[i], &part.pos, mtx);
+                math_transformOffset(&gTankDebrisOuterCornerEnds[i], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -360,12 +360,12 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot = objPos;
                 part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
             }
         }
 
         part.model = 0x2B;
-        math_transformOffset(&D_800AA63C, &part.pos, mtx);
+        math_transformOffset(&gTankDebrisSideStart, &part.pos, mtx);
         part.sizeXZ = part.sizeY = 0.551f;
         for (j = 0; j != 2; j++) {
             if (math_random() & 1) {
@@ -373,7 +373,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
                 part.lifetime = (math_random() % 36U) + 30;
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA648[j], &part.vel, mtx);
+                math_transformOffset(&gTankDebrisSideEnds[j], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -381,12 +381,12 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
                 part.rot = objPos;
-                part.rot.x += D_800AA660[j].x;
-                part.rot.y += D_800AA660[j].y;
-                part.rot.z += D_800AA660[j].z;
+                part.rot.x += gTankDebrisSideRotations[j].x;
+                part.rot.y += gTankDebrisSideRotations[j].y;
+                part.rot.z += gTankDebrisSideRotations[j].z;
                 part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
             }
         }
 
@@ -395,11 +395,11 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
             if (math_random() & 1) {
                 speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (math_random() % 36U) + 30;
-                part.sizeXZ = part.sizeY = D_800AA708[k];
+                part.sizeXZ = part.sizeY = gTankDebrisInnerCornerSizes[k];
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA678[k], &part.pos, mtx);
-                math_transformOffset(&D_800AA6A8[k], &part.vel, mtx);
+                math_transformOffset(&gTankDebrisInnerCornerStarts[k], &part.pos, mtx);
+                math_transformOffset(&gTankDebrisInnerCornerEnds[k], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -407,12 +407,12 @@ void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
                 part.rot = objPos;
-                part.rot.x += D_800AA6D8[k].x;
-                part.rot.y += D_800AA6D8[k].y;
-                part.rot.z += D_800AA6D8[k].z;
+                part.rot.x += gTankDebrisInnerCornerRotations[k].x;
+                part.rot.y += gTankDebrisInnerCornerRotations[k].y;
+                part.rot.z += gTankDebrisInnerCornerRotations[k].z;
                 part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
-                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
             }
         }
         }
@@ -445,8 +445,8 @@ struct SoundChannel {
  * Update callback of the sounds started by effect_startTankSound: follows the object, switches between the
  * 0x4A7/0x4A8/0x4A9 sounds by how it moves, and fades the volume. Returns 1 when the sound should stop.
  */
-s32 effect_updateTankSound(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
-                  s32 arg5, u16 *soundId) {
+s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan, s32 *speedOut,
+                  s32 mix, u16 *soundId) {
     Actor *obj;
     s32 state;
     s32 prevState;
@@ -552,7 +552,7 @@ end:
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
-void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
+void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 owner, s32 list) {
     CollisionTri surf;
     Vec3f hit;
     Vec3f delta;
@@ -567,17 +567,17 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
         delta.x = to->x - from->x;
         delta.y = to->y - from->y;
         delta.z = to->z - from->z;
-        weapon_wobbleNearbyCameras(from, arg3, arg4);
-        weapon_rumbleNearbyPlayers(from, arg3, arg4);
-        weapon_spawnHitGrowFade(from, arg3, arg4);
-        effect_spawnImpactLight(from, arg3, arg4);
+        weapon_wobbleNearbyCameras(from, owner, list);
+        weapon_rumbleNearbyPlayers(from, owner, list);
+        weapon_spawnHitGrowFade(from, owner, list);
+        effect_spawnImpactLight(from, owner, list);
         if (collision_castRayWorld(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
             if (math_isObjectHidden(hitInfo) != 0) {
-                func_151BBFBC(&surf, &hit, arg3 & 0xFF, arg4);
+                effect_spawnRandomImpactMark(&surf, &hit, owner & 0xFF, list);
             }
             if (math_getTriEdges(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
-                func_151C0644(&hit, arg3, arg4);
+                func_151C0644(&hit, owner, list);
             }
             fx.source.normal.x = -delta.x;
             fx.source.normal.y = -delta.y;
@@ -606,7 +606,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
             fx.spray.fadeStart = 12;
             fx.spray.fadeOutStart = 20;
             fx.spray.eventFunc = 0;
-            particle_spawnSurfaceJetSpray(&fx, arg3, arg4);
+            particle_spawnSurfaceJetSpray(&fx, owner, list);
             {
                 const s32 variantIds[9] = { 4, 4, 7, 8, 24, 25, 29, 30, 32 };
                 const f32 variantScales[9] = { 1.0f, 1.0f, 0.150000006f, 0.150000006f, 1.0f, 1.0f, 0.09700000286f,
@@ -630,7 +630,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
                 desc.scaleBase = 0.499f;
                 desc.scaleRange = 0.7010000348f;
                 desc.spin = 21.502f;
-                particle_spawnSurfaceDebrisBurst(&desc, variantIds, variantScales, 9, arg3, arg4);
+                particle_spawnSurfaceDebrisBurst(&desc, variantIds, variantScales, 9, owner, list);
             }
         }
     }
@@ -641,7 +641,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
  * and a shower of debris.
  */
-void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
+void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 owner, s32 list) {
     Vec3f center;
     JetSpraySpec burst;
     CollisionHit floor;
@@ -655,11 +655,11 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         center.x = (b[0] + a[0]) * 0.5f;
         center.y = (b[1] + a[1]) * 0.5f;
         center.z = (b[2] + a[2]) * 0.5f;
-        weapon_spawnHitGrowFade(&center, arg3, arg4);
-        weapon_wobbleNearbyCameras(&center, arg3, arg4);
-        weapon_rumbleNearbyPlayers(&center, arg3, arg4);
+        weapon_spawnHitGrowFade(&center, owner, list);
+        weapon_wobbleNearbyCameras(&center, owner, list);
+        weapon_rumbleNearbyPlayers(&center, owner, list);
         actor_playImpactSound(1, center.x, center.y, center.z, 0);
-        effect_spawnImpactLight(&center, arg3, arg4);
+        effect_spawnImpactLight(&center, owner, list);
         burst.angles.yawBase = 0;
         burst.angles.yawRange = 0xFF;
         burst.angles.pitchBase = -0x40;
@@ -690,7 +690,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         } else {
             burst.spray.eventFunc = 0;
         }
-        particle_spawnJetSprayBursts(&burst, arg3, arg4);
+        particle_spawnJetSprayBursts(&burst, owner, list);
         collision_initHitFromObject(&floor, obj);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
@@ -699,9 +699,9 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
-            func_151BBFBC(&floor.tri, &hit, arg3, arg4);
+            effect_spawnRandomImpactMark(&floor.tri, &hit, owner, list);
             if (math_getTriEdges(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
-                func_151C0644(&hit, arg3, arg4);
+                func_151C0644(&hit, owner, list);
             }
         }
         {
@@ -725,32 +725,32 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             debris.scaleBase = 0.2480000108f;
             debris.scaleRange = 0.09900000691f;
             debris.spin = 22.85900116f;
-            particle_spawnDebrisBurst(&debris, variantIds, variantScales, 3, 0.0f, 1, arg3, arg4);
+            particle_spawnDebrisBurst(&debris, variantIds, variantScales, 3, 0.0f, 1, owner, list);
         }
     }
 }
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
-void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnImpactLight(Vec3f *pos, u8 owner, s32 list) {
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
 
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() & 0xF) + 5;
     header.lightType = 0;
 
-    header2.x = pos->x;
-    header2.y = pos->y;
-    header2.z = pos->z;
+    position.x = pos->x;
+    position.y = pos->y;
+    position.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (math_random() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &position, (math_random() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, owner, list);
 }
 
 /* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 /* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
-void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void effect_spawnRandomImpactMark(CollisionTri *surf, Vec3f *pos, s32 owner, s32 list) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;
@@ -760,7 +760,7 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     rnd1 = math_random();
     rnd2 = math_random();
     particle_spawnImpactMark(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
-                  (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
+                  (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)owner, 0);
 }
 
 static const Vec3f gTankHeadlightBeamStart = { 0.0f, 100.0f, 80.0f };
@@ -776,27 +776,11 @@ void effect_attachTankHeadlightBeam(Actor *obj) {
 
 
 
-/* Data block of the object returned by effect_newEffectObj. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-} Data15147A80;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x98];
-    /* 0x98 */ Data15147A80 *data;
-} Fx15147A80;
-
 /*
  * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and gPlayerCount < 5),
  * each with a reference back to its owner.
  */
-void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
+void func_151BC104(Actor *obj, u8 fxOwner, s32 fxList) {
     BloodTrail *fx1;
 
     if ((gScreenLayout < 2) && (gPlayerCount < 5)) {
@@ -811,19 +795,19 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.rate = 0.3033999801f * gLayoutDetailScale;
         desc.flags = 4;
         desc.emitter = 4;
-        desc.unk18 = 1;
+        desc.mode = 1;
         desc.callback = 0;
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
-        fx1 = blood_spawnTrail(&desc, 8, arg1, arg2);
+        fx1 = blood_spawnTrail(&desc, 8, fxOwner, fxList);
         if (fx1 != NULL) {
             memcpy(fx1 + 1, &ref, sizeof(ref)); /* the owner reference, in the 8 extra bytes after the trail */
         }
     }
     {
         EffectTemplate desc;
-        Fx15147A80 *fx2;
-        Data15147A80 data;
+        RibbonTrail *fx2;
+        RibbonTrailData data;
 
         desc.itemCount = 40;
         desc.pos.x = obj->xpos;
@@ -832,14 +816,14 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.life = 300;
         desc.flags = 6;
         desc.kind = 12;
-        data.owner = obj;
-        data.ownerId = obj->unique_id;
-        data.pos = desc.pos;
-        data.unk14 = 0.0f;
+        data.owner.actor = obj;
+        data.owner.uniqueId = obj->unique_id;
+        data.lastPos = desc.pos;
+        data.pending = 0.0f;
         data.unk18 = 0.0f;
-        data.unk20 = -16384.0f;
-        data.unk1C = -16384.0f;
-        fx2 = effect_newEffectObj(&desc, 40, 20, 10, 10, 10, 0, 0, 0, arg1, arg2);
+        data.lastTexU = -16384.0f;
+        data.texU = -16384.0f;
+        fx2 = effect_newEffectObj(&desc, 40, 20, 10, 10, 10, 0, 0, 0, fxOwner, fxList);
         if (fx2 != NULL) {
             memcpy(fx2->data, &data, sizeof(data));
         }
@@ -856,7 +840,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         header.lifetime = 300;
         header.lightType = 31;
         fx3 = light_createTracking(&header, &obj->xpos, &obj->ypos, &obj->zpos,
-                           0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
+                           0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, fxOwner, fxList);
         if (fx3 != NULL) {
             memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));
         }
@@ -916,7 +900,7 @@ void effect_bloodTrailOwnerMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgI
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            effect_destroyObject(&effect->header);
+            effect_destroyObject(&effect->trail.header);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {
@@ -1266,7 +1250,7 @@ s32 effect_isLightTrackOwnerValid(OwnedEffect28 *effect) {
 }
 
 /* Spawns two mirrored blood strips on bone 1 of actor. */
-void effect_spawnBloodStrips(Actor *actor, s32 arg1, s32 arg2) {
+void effect_spawnBloodStrips(Actor *actor, s32 owner, s32 list) {
     BloodStripDesc desc;
     struct {
         s16 value;
@@ -1335,8 +1319,8 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
     if ((owner->cullMask & 0xF) != 0xF) {
         desc.texture = 0x29;
         desc.renderMode = 0xE03;
-        desc.unk0 = 0x200005;
-        desc.unk4 = 0;
+        desc.setGeometryMode = 0x200005;
+        desc.clearGeometryMode = 0;
         desc.frame = 0;
         desc.frameRate = 0;
         desc.gravity = ((math_randomFloat() * 251.0f) + 44.0f) * 0.001000000047f;
@@ -1422,7 +1406,7 @@ void effect_sendBurstOwnerGone(Actor *actor) {
 }
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
-void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnBoneBurst(Actor *actor, u8 owner, s32 list) {
     BurstEffect *effect;
     BurstData burst;
     BurstData *data;
@@ -1433,7 +1417,7 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
     burst.sparks[1] = NULL;
     burst.glows[0] = NULL;
     burst.glows[1] = NULL;
-    effect = effect_newTimedEffect(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), owner, list);
     if (effect != NULL) {
         data = &effect->data;
         memcpy(data, &burst, sizeof(burst));
@@ -1482,14 +1466,14 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             sparkEffect.scale.y = 1.0f;
             sparkEffect.scale.z = 1.0f;
             sparkEffect.flags = 0x40EC0000;
-            sparkEffect.unk44 = 0;
-            sparkEffect.unk45 = 0xFF;
-            sparkEffect.unk46 = 0;
-            sparkEffect.unk47 = 7;
-            sparkEffect.unk48 = 0;
+            sparkEffect.alpha = 0;
+            sparkEffect.colorLevel = 0xFF;
+            sparkEffect.primMode = 0;
+            sparkEffect.envMode = 7;
+            sparkEffect.zone = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = particle_newQuadParticle(&sparkEffect, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
-                    ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
+                    ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, list);
                 if (data->sparks[spark.index] != NULL) {
                     memcpy(&data->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -1552,14 +1536,14 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             glowEffect.scale.y = 1.0f;
             glowEffect.scale.z = 1.0f;
             glowEffect.flags = 0xCD2002;
-            glowEffect.unk44 = 0xFF;
-            glowEffect.unk45 = 0xFF;
-            glowEffect.unk46 = 0;
-            glowEffect.unk47 = 7;
-            glowEffect.unk48 = 0;
+            glowEffect.alpha = 0xFF;
+            glowEffect.colorLevel = 0xFF;
+            glowEffect.primMode = 0;
+            glowEffect.envMode = 7;
+            glowEffect.zone = 0;
             glowEffect.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
-                data->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
+                data->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, owner, list);
                 if (data->glows[glow.index] != NULL) {
                     memcpy(&data->glows[glow.index]->data, &glow, sizeof(glow));
                 }
@@ -1740,7 +1724,7 @@ s32 effect_updateBurstSpark(BurstSpark *spark) {
         data->alphaTarget = math_randomFloat() * data->alphaRange + data->alphaBase;
     }
     data->alpha += (data->alphaTarget - data->alpha) * 0.4f;
-    spark->head.def.unk44 = data->alpha;
+    spark->head.def.alpha = data->alpha;
     data->beamWidth += (data->beamWidthTarget - data->beamWidth) * 0.65000004f;
     data->beamLength += (data->beamLengthTarget - data->beamLength) * 0.65000004f;
     return 1;

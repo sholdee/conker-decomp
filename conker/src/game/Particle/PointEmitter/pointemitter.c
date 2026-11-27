@@ -54,7 +54,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
         extra.drag = 0.9794009924f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
-        spawn.unk0 = 0x200005;
+        spawn.setGeometryMode = 0x200005;
         spawn.fadeStart = 80;
         spawn.fadeRate = 3;
         spawn.flags = 0x90DE07;
@@ -63,7 +63,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
         spawn.updateFunc = 0x16;
         extra.phase[0] = 0;
         extra.phase[1] = 0;
-        spawn.unk4 = 0;
+        spawn.clearGeometryMode = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
         spawn.deathFunc = -1;

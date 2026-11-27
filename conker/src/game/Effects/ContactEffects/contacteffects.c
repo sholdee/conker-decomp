@@ -14,7 +14,7 @@
 #include "conker/zone.h"
 
 // Spawns one of several effects at the point gHitPointX, picked by obj's id.
-void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
+void effect_spawnHitSplash(Actor *obj, u8 small, u8 owner, s32 list) {
     Vec3f pos;
     CollisionHit ground;
     s32 type;
@@ -42,7 +42,7 @@ void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         }
     }
     if (obj->character_type == 6 || obj->character_type == 6 || obj->character_type == 9 || obj->character_type == 0xC || obj->character_type == 0xF || obj->character_type == 0x10 || obj->character_type == 0x12 || obj->character_type == 0x17 || obj->character_type == 0x1B || obj->character_type == 0x1E || obj->character_type == 0x28 || obj->character_type == 0x29 || obj->character_type == 0x2A || obj->character_type == 0x2B || obj->character_type == 0x2C || obj->character_type == 0x2D || obj->character_type == 0x2E || obj->character_type == 0x30 || obj->character_type == 0x34 || obj->character_type == 0x38 || obj->character_type == 0x3A || obj->character_type == 0x41 || obj->character_type == 0x42 || obj->character_type == 0x4B || obj->character_type == 0x46 || obj->character_type == 0x47 || obj->character_type == 0x49 || obj->character_type == 0x4A || obj->character_type == 0x4C || obj->character_type == 0x4D || obj->character_type == 0x4E || obj->character_type == 0x4F || obj->character_type == 0x51 || obj->character_type == 0x52 || obj->character_type == 0x55 || obj->character_type == 0x56 || obj->character_type == 0x5D || obj->character_type == 0x60 || obj->character_type == 0x61 || obj->character_type == 0x62 || obj->character_type == 0x63 || obj->character_type == 0x66 || obj->character_type == 0x67 || obj->character_type == 0x6F || obj->character_type == 0x70 || obj->character_type == 0x73 || obj->character_type == 0x77 || obj->character_type == 0x7B || obj->character_type == 0x7D || obj->character_type == 0x7E || obj->character_type == 0x7F || obj->character_type == 0x82 || obj->character_type == 0x83 || obj->character_type == 0x84 || obj->character_type == 0x89 || obj->character_type == 0x8C || obj->character_type == 0x8E || obj->character_type == 0x8F || obj->character_type == 0x91 || obj->character_type == 0x94 || obj->character_type == 0x9E || obj->character_type == 0xA1 || obj->character_type == 0xA6 || obj->character_type == 0xAB || obj->character_type == 0xAC || obj->character_type == 0xB2 || obj->character_type == 0xB4 || obj->character_type == 0xB7 || obj->character_type == 0xB8 || obj->character_type == 0xB9) { // matching: the repeated first id test is in the original
-        weapon_spawnImpactBurst(&pos, arg2, arg3);
+        weapon_spawnImpactBurst(&pos, owner, list);
         return;
     }
     if (obj->character_type == 5 || obj->character_type == 5 || obj->character_type == 7 || obj->character_type == 0x13 || obj->character_type == 0x20 || obj->character_type == 0x23 || obj->character_type == 0x44 || obj->character_type == 0x5A || obj->character_type == 0x5C || obj->character_type == 0x5E || obj->character_type == 0x5F || obj->character_type == 0x6D || obj->character_type == 0x74 || obj->character_type == 0x75 || obj->character_type == 0x78 || obj->character_type == 0x7A || obj->character_type == 0x8A || obj->character_type == 0x8D || obj->character_type == 0xAD || obj->character_type == 0xAE || obj->character_type == 0xAF || obj->character_type == 0xB1) { // matching: repeated first test, as above
@@ -58,26 +58,26 @@ void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     } else {
         return;
     }
-    if (arg1) {
-        particle_spawnSmallSplashAndDrops(&pos, &ground, type, arg2, arg3);
+    if (small) {
+        particle_spawnSmallSplashAndDrops(&pos, &ground, type, owner, list);
         return;
     }
-    particle_spawnSplashAndDrops(&pos, &ground, type, arg2, arg3);
+    particle_spawnSplashAndDrops(&pos, &ground, type, owner, list);
 }
 
-void effect_hitReactSplash(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSplash(Actor *self, Actor *other, u8 *result) {
     effect_spawnHitSplash(other, FALSE, 0xFF, 1);
 }
 
-void effect_hitReactSmallSplash(self, other, arg2)
+void effect_hitReactSmallSplash(self, other, result)
     Actor *self;
     Actor *other;
-    u8 *arg2;
+    u8 *result;
 {
     effect_spawnHitSplash(other, TRUE, 0xFF, 1);
 }
 
-void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *result) {
     switch (other->character_type) {
     case 0:
     case 1:
@@ -89,7 +89,7 @@ void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void effect_hitReactFireImp(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactFireImp(Actor *self, Actor *other, u8 *result) {
     switch (other->character_type) {
     case 0:
     case 1:
@@ -134,28 +134,28 @@ void func_15194408(Actor *self, Actor *other) {
     burst.spray.itemCountRange = 2;
     burst.spray.lifeBase = 30;
     burst.spray.lifeRange = 30;
-    burst.spray.unk30 = 100;
-    burst.spray.unk32 = 100;
-    burst.spray.unk3C = 16;
-    burst.spray.unk3E = 15;
-    burst.spray.unk40 = 0;
+    burst.spray.alphaBase = 100;
+    burst.spray.alphaRange = 100;
+    burst.spray.fadeStart = 16;
+    burst.spray.fadeRate = 15;
+    burst.spray.material = 0;
     burst.spray.kind = 0;
     burst.spray.scaleRange = 3.0f;
     burst.spray.sizeBase = 0.21f;
     burst.spray.sizeRange = 0.406f;
     burst.spray.speedBase = 13.0f;
     burst.spray.speedRange = 8.0f;
-    burst.spray.unk38 = 0.3f;
+    burst.spray.burstChance = 0.3f;
     particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
-void func_15194588(Actor *self, Actor *other, u8 *arg2) {
+void func_15194588(Actor *self, Actor *other, u8 *result) {
     blood_attachMirroredStrips(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
-void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *result) {
     Vec3f pos;
     s16 facingYaw;
     SplashSpraySpec burst;
@@ -190,26 +190,26 @@ void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *arg2) {
                 burst.spray.itemCountRange = 1;
                 burst.spray.lifeBase = 31;
                 burst.spray.lifeRange = 19;
-                burst.spray.unk30 = 155;
-                burst.spray.unk32 = 100;
-                burst.spray.unk3C = 16;
-                burst.spray.unk3E = 15;
-                burst.spray.unk40 = 0;
+                burst.spray.alphaBase = 155;
+                burst.spray.alphaRange = 100;
+                burst.spray.fadeStart = 16;
+                burst.spray.fadeRate = 15;
+                burst.spray.material = 0;
                 burst.spray.speedRange = 5.300000191f;
-                burst.spray.unk38 = 0.5f;
+                burst.spray.burstChance = 0.5f;
                 if (profile == 1) {
                     burst.spray.kind = 1;
                 } else {
                     burst.spray.kind = 0;
                 }
                 particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
-                func_151B4CD0(other, 0xFF, 1);
+                blood_attachBleedDrip(other, 0xFF, 1);
             }
         }
     }
 }
 
-void func_15194794(Actor *self, Actor *other, u8 *arg2) {
+void func_15194794(Actor *self, Actor *other, u8 *result) {
     effect_spawnJointImpact(self, other);
     effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
     switch (other->character_type) {
@@ -224,7 +224,7 @@ void func_15194794(Actor *self, Actor *other, u8 *arg2) {
 }
 
 // For ids 0-4 and 0x53, spawns a burst of effects above other and calls cont_spawnRumble.
-void func_15194810(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSprayAndRumble(Actor *self, Actor *other, u8 *result) {
     Vec3f pos;
     SplashSpraySpec burst;
     CollisionHit ground;
@@ -254,18 +254,18 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         burst.spray.itemCountRange = 2;
         burst.spray.lifeBase = 70;
         burst.spray.lifeRange = 22;
-        burst.spray.unk30 = 155;
-        burst.spray.unk32 = 100;
-        burst.spray.unk3C = 16;
-        burst.spray.unk3E = 15;
-        burst.spray.unk40 = 0;
+        burst.spray.alphaBase = 155;
+        burst.spray.alphaRange = 100;
+        burst.spray.fadeStart = 16;
+        burst.spray.fadeRate = 15;
+        burst.spray.material = 0;
         burst.spray.kind = 0;
         burst.spray.scaleRange = 5.0f;
         burst.spray.sizeBase = 0.6750000119f;
         burst.spray.sizeRange = 0.2310000062f;
         burst.spray.speedBase = 5.0f;
         burst.spray.speedRange = 25.10000038f;
-        burst.spray.unk38 = 0.5f;
+        burst.spray.burstChance = 0.5f;
         particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.flags = 1;
         params.duration = (math_random() % 11U) + 20;
@@ -277,18 +277,18 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void effect_hitReactNone(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactNone(Actor *self, Actor *other, u8 *result) {
 }
 
 // Calls screen_spawnFade when gHumanCount == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
-void effect_spawnHitScreenFade(s32 arg0, Actor *self, Actor *other) {
+void effect_spawnHitScreenFade(s32 mode, Actor *self, Actor *other) {
     if (gHumanCount == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
-        screen_spawnFade(arg0, self, other);
+        screen_spawnFade(mode, self, other);
         self->mv->unk1A0 = 1200;
     }
 }
 
-void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *result) {
     actor_applyHeadShot(other);
     blood_spawnBoneHit(other, 0xFF, 1);
     effect_spawnHitScreenFade(0, self, other);
@@ -324,16 +324,16 @@ void func_15194B1C(Actor *obj) {
     func_15194AB4(obj);
 }
 
-void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
+void func_15194B94(Actor *self, Actor *other, u8 *result) {
     if (other->character_type == 0x53) {
-        effect_hitReactSplash(self, other, arg2);
+        effect_hitReactSplash(self, other, result);
         return;
     }
     func_15194B1C(other);
     effect_spawnHitScreenFade(1, self, other);
 }
 
-void effect_hitReactKill(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactKill(Actor *self, Actor *other, u8 *result) {
     switch (other->character_type) {
     case 0x16:
         blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
@@ -387,19 +387,19 @@ void effect_hitReactKill(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *result) {
     effect_setOnFire(self, other, FALSE);
 }
 
-void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *result) {
     effect_setOnFire(self, other, TRUE);
 }
 
-void effect_hitReactLava(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactLava(Actor *self, Actor *other, u8 *result) {
     CollisionHit ground;
 
     if (gIsMultiplayer != 0) {
-        effect_hitReactSetOnFireDamaging(self, other, arg2);
+        effect_hitReactSetOnFireDamaging(self, other, result);
     } else {
         particle_startActorEmitter(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
@@ -407,7 +407,7 @@ void effect_hitReactLava(Actor *self, Actor *other, u8 *arg2) {
     particle_spawnGroundCluster((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
-void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *result) {
     if (other->character_type == 0x3E || other->character_type == 0xA6) {
         effect_spawnActorImpactDebris(other, self, 0xFF, 1);
     }
@@ -428,7 +428,7 @@ void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2) {
     effect_hitReactKill(self, other, &result);
 }
 
-void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *result) {
     Vec3f pos;
 
     pos.x = other->xpos;
@@ -440,10 +440,10 @@ void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *arg2) {
     actor_kill(other, 6);
 }
 
-void effect_setOnFire(self, other, arg2)
+void effect_setOnFire(self, other, damaging)
 Actor *self;
 Actor *other;
-u8 arg2;
+u8 damaging;
 {
     PeriodicObject *spawned;
     PeriodicTrigger trigger;
@@ -463,8 +463,8 @@ u8 arg2;
             } else {
                 trigger.target = self;
             }
-            spawned = particle_startAnchorEmitter(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
-            if (spawned != NULL && arg2 != 0) {
+            spawned = particle_startAnchorEmitter(other, 0, 250, damaging ? 0 : -1, damaging ? 0 : -1, 8, damaging ? 1 : 0, damaging ? 12 : 0, 0xFF, 1);
+            if (spawned != NULL && damaging != 0) {
                 memcpy(&spawned->trigger, &trigger, sizeof(trigger));
                 {
                     ActorCtl *ext = other->mv;
@@ -528,7 +528,7 @@ void effect_killAndSplitActor(Actor *obj) {
 }
 
 // Calls blood_spawnActorImpact on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
-void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *result) {
     f32 angle;
     Vec3f from;
     Vec3f to;
@@ -556,12 +556,12 @@ void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *arg2) {
     blood_spawnActorImpact(other, &from, &to, (Vec3f *)dir, 0xFF, 1);
 }
 
-void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *result) {
     effect_spawnJointImpact(self, other);
     effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
 }
 
-void func_15195698(Actor *self, Actor *other, u8 *arg2) {
+void func_15195698(Actor *self, Actor *other, u8 *result) {
     if (other->energy == 0 && other->playernumber != 0xFF) {
         blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
@@ -572,7 +572,7 @@ void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void effect_hitReactRumble(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactRumble(Actor *self, Actor *other, u8 *result) {
     RumbleParams params;
 
     params.flags = 1;

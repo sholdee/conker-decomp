@@ -46,7 +46,7 @@ typedef struct {
     /* 0x04 */ u8 keepAlive;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ u16 soundHandle;
-    /* 0x08 */ f32 unk8;
+    /* 0x08 */ f32 waterHeight; /* the actor's waterHeight at spawn */
 } LoopSoundFxPayload;
 
 struct LoopSoundFx {
@@ -69,7 +69,7 @@ struct ActorTask {
 };
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
-void func_151A99D0(ActorTask *task) {
+void effect_watcherStepIntoShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -89,8 +89,8 @@ void func_151A99D0(ActorTask *task) {
     }
 }
 
-/* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
-void func_151A9AA4(ActorTask *task) {
+/* Ground effect 3 under the actor (with sound 0x5208), then effect_stopActorDripEmitters. */
+void effect_watcherStepIntoDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -111,11 +111,11 @@ void func_151A9AA4(ActorTask *task) {
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151ABE00(actor);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
-void func_151A9BA0(ActorTask *task) {
+void effect_watcherFallIntoShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -139,8 +139,8 @@ void func_151A9BA0(ActorTask *task) {
 }
 
 
-/* Unless the actor's mv->ladder is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
-void func_151A9CA0(ActorTask *task) {
+/* Unless the actor's mv->ladder is set: ground effect 1 (sound 0x6978), effect_attachFallingDriftIfSolid, effect_stopActorDripEmitters. */
+void effect_watcherFallIntoDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
     Vec3f pos;
 
@@ -160,8 +160,8 @@ void func_151A9CA0(ActorTask *task) {
         effect_spawnImpact(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
     }
-    func_151AA264(actor, &task->watcher.hit);
-    func_151ABE00(actor);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
@@ -188,7 +188,7 @@ void func_151A9DC0(ActorTask *task) {
     }
 }
 
-/* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
+/* Ground effect 2 (sound 0x6978), then effect_attachFallingDriftIfSolid and effect_stopActorDripEmitters. */
 void func_151A9EC0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
@@ -210,12 +210,12 @@ void func_151A9EC0(ActorTask *task) {
             sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->watcher.hit);
-    func_151ABE00(actor);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
+    effect_stopActorDripEmitters(actor);
 }
 
 /* Ground effect 4 under the actor. */
-void func_151A9FC8(ActorTask *task) {
+void effect_watcherLeaveShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -236,7 +236,7 @@ void func_151A9FC8(ActorTask *task) {
 }
 
 /* Ground effect 4 under the actor. */
-void func_151AA09C(ActorTask *task) {
+void effect_watcherLeaveDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -257,7 +257,7 @@ void func_151AA09C(ActorTask *task) {
 }
 
 /* Empty callback. */
-void effect_watcherNoAction(s32 arg0) {
+void effect_watcherNoAction(s32 task) {
 }
 
 typedef struct {
@@ -304,7 +304,7 @@ void effect_watcherStartSurfaceTrails2(SurfaceTrailOwner *owner) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a blood_spawnDrip effect on the actor. */
-void func_151AA264(Actor *actor, CollisionHit *hit) {
+void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit) {
     BloodDripDesc desc;
 
     if (hit->flags & 1) {
@@ -321,7 +321,7 @@ void func_151AA264(Actor *actor, CollisionHit *hit) {
         desc.flags = 14;
         desc.emitter = 2;
         desc.callback = -1;
-        desc.unk2D = 0;
+        desc.handlerSet = 0;
         desc.owner = actor;
         blood_spawnDrip(&desc, 0, 0xFF, 0);
     }
@@ -334,7 +334,7 @@ struct Task151AA30C {
 };
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task) {
     Vec3f pos;
     Vec3f vel;
     Actor *actor;
@@ -410,21 +410,16 @@ s32 effect_restartTaskPulse(PulseFx *fx) {
     return 1;
 }
 
-struct Obj151AA6D8 {
-    /* 0x00 */ u8 pad0[0x74];
-    /* 0x74 */ f32 unk74;
-};
-
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;
@@ -454,9 +449,9 @@ void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f3
     payload.maxRiseSpeed = 3.5f;
     payload.swayPerSpeed = 0.2857142985f;
 
-    burst.vel.x = (to->x - from->x) * obj->unk74;
-    burst.vel.y = (to->y - from->y) * obj->unk74;
-    burst.vel.z = (to->z - from->z) * obj->unk74;
+    burst.vel.x = (to->x - from->x) * obj->power;
+    burst.vel.y = (to->y - from->y) * obj->power;
+    burst.vel.z = (to->z - from->z) * obj->power;
     burst.pos = *from;
     burst.pos.x += burst.vel.x * t;
     burst.pos.y += burst.vel.y * t;
@@ -596,13 +591,13 @@ void effect_spawnBoneGroundMark(Actor *actor, u8 index) {
                 c.spray.itemCountRange = 1;
                 c.spray.lifeBase = 0x1E;
                 c.spray.lifeRange = 0x14;
-                c.spray.unk30 = 0x9B;
-                c.spray.unk32 = 0x64;
+                c.spray.alphaBase = 0x9B;
+                c.spray.alphaRange = 0x64;
                 c.spray.kind = color;
-                c.spray.unk3C = 0x10;
-                c.spray.unk3E = 0xF;
-                c.spray.unk40 = 0;
-                c.spray.unk38 = 0.0f;
+                c.spray.fadeStart = 0x10;
+                c.spray.fadeRate = 0xF;
+                c.spray.material = 0;
+                c.spray.burstChance = 0.0f;
                 particle_spawnSplashSprayAtAngles(&c.angles, &c.spray, &floor, 0xFF, 1);
             }
         }
@@ -670,16 +665,16 @@ void effect_keepTaskFlicker(ActorTask *task) {
         part.texture = 0x38;
         part.flags = 0x60300;
         part.lifetime = 300;
-        part.unk10 = 150;
+        part.alpha = 150;
         part.frame = 0;
-        part.unk11 = 0xFF;
+        part.colorLevel = 0xFF;
         part.rgba[0] = gKindColors[color].r;
         part.rgba[1] = gKindColors[color].g;
         part.rgba[2] = gKindColors[color].b;
         part.rgba[3] = 0xFF;
         part.renderModes = 0x440001;
-        part.unk16 = 0;
-        part.unk17 = 6;
+        part.primMode = 0;
+        part.envMode = 6;
         fx->flicker = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
                                                  size, size, math_random() & 0xFF,
                                                  (math_random() & 1) + ((math_random() & 1) * 2), 0x20, 0xFF, 1);
@@ -719,8 +714,8 @@ s32 effect_detachTaskFlicker(FlickerSprite *fx) {
     return 0;
 }
 
-/* Ground effect 3 (sound 0x5208), then func_151AA264. */
-void func_151AB1C4(ActorTask *task) {
+/* Ground effect 3 (sound 0x5208), then effect_attachFallingDriftIfSolid. */
+void effect_watcherSubmerge(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -741,7 +736,7 @@ void func_151AB1C4(ActorTask *task) {
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->watcher.hit);
+    effect_attachFallingDriftIfSolid(actor, &task->watcher.hit);
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
@@ -753,7 +748,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     payload.owner = task;
     payload.soundHandle = 0;
     payload.keepAlive = 1;
-    payload.unk8 = actor->waterHeight;
+    payload.waterHeight = actor->waterHeight;
     desc.target[0] = 0;
     desc.target[1] = 0;
     desc.ownerId = actor->unique_id;
@@ -765,7 +760,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     desc.flags = 10;
     desc.emitter = 3;
     desc.callback = 0;
-    desc.unk2D = 1;
+    desc.handlerSet = 1;
     desc.owner = actor;
     desc.radius = 25.0f;
     desc.rate = 0.2649700046f;
@@ -777,21 +772,16 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     return fx;
 }
 
-struct Obj151AB3A4 {
-    /* 0x00 */ u8 pad0[0x60];
-    /* 0x60 */ f32 unk60;
-};
-
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
-void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
+void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, LoopSoundFx *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;
@@ -817,7 +807,7 @@ void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz,
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    payload.ceiling = obj->unk60;
+    payload.ceiling = obj->payload.waterHeight;
     payload.maxRiseSpeed = 4.0f;
     payload.swayPerSpeed = 0.25f;
     payload.widthPhase = 0;
@@ -896,7 +886,7 @@ void effect_freeLoopSound(LoopSoundFx *fx) {
 }
 
 /* effect_tryAttachActorEffect(actor, 0, 4). */
-void func_151AB828(ActorTask *task) {
+void effect_watcherStartFootSplashes(ActorTask *task) {
     effect_tryAttachActorEffect(task->watcher.character, 0, 4);
 }
 
@@ -1054,7 +1044,7 @@ typedef struct {
 } Msg151ABE00;
 
 /* Broadcasts message 0x20 ({actor, unique_id}) via effect_sendEventToType. */
-void func_151ABE00(Actor *actor) {
+void effect_stopActorDripEmitters(Actor *actor) {
     Msg151ABE00 msg;
 
     msg.actor = actor;

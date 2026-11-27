@@ -279,22 +279,22 @@ void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f
     s32 flag;
 
     packet.texture = kind;
-    packet.unk7 = 0;
+    packet.handlerSet = 0;
     packet.flags = 0x6F701;
     packet.lifetime = (math_random() % 61U) + 100;
     packet.frame = 0;
     packet.frameSpeed = 0;
-    packet.unk10 = (math_random() & 0x7F) + 128;
-    packet.unk11 = 0xFF;
+    packet.alpha = (math_random() & 0x7F) + 128;
+    packet.colorLevel = 0xFF;
     packet.rgba[0] = 0xFF;
     packet.rgba[1] = 0xFF;
     packet.rgba[2] = 0xFF;
     packet.rgba[3] = 0xFF;
     packet.renderModes = 0x3B0002;
-    packet.unk16 = 0;
-    packet.unk17 = 7;
+    packet.primMode = 0;
+    packet.envMode = 7;
     packet.viewportMask = 0xFF;
-    packet.unk1C = src->material;
+    packet.material = src->material;
     packet.fadeStart = 40;
     packet.fadeRate = 6;
 
@@ -351,12 +351,12 @@ void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scal
     params.spray.itemCountRange = 1;
     params.spray.lifeBase = 9;
     params.spray.lifeRange = 15;
-    params.spray.unk30 = 180;
-    params.spray.unk32 = 75;
-    params.spray.unk38 = 0.0f;
-    params.spray.unk3C = 12;
-    params.spray.unk3E = 21;
-    params.spray.unk40 = arg2;
+    params.spray.alphaBase = 180;
+    params.spray.alphaRange = 75;
+    params.spray.burstChance = 0.0f;
+    params.spray.fadeStart = 12;
+    params.spray.fadeRate = 21;
+    params.spray.material = arg2;
     params.spray.kind = kind;
     particle_spawnSplashSprayAtAngles(&params.angles, &params.spray, 0, 0xFF, 1);
 }

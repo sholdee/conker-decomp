@@ -57,24 +57,24 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
         }
         break;
     }
-    arg.unk7 = 0;
+    arg.handlerSet = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x8000 | 0x20000;
     arg.lifetime = (duration == -1) ? 300 : duration;
     arg.frame = 0;
     arg.frameSpeed = 0;
     if (level == LEVEL_W5_BANK) {
-        arg.unk10 = arg1 >> 1;
+        arg.alpha = arg1 >> 1;
     } else {
-        arg.unk10 = arg1;
+        arg.alpha = arg1;
     }
-    arg.unk11 = 0xFF;
+    arg.colorLevel = 0xFF;
     arg.rgba[2] = 0;
     arg.rgba[1] = 0;
     arg.rgba[0] = 0;
     arg.rgba[3] = 0xFF;
     arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
-    arg.unk16 = 0;
-    arg.unk17 = 7;
+    arg.primMode = 0;
+    arg.envMode = 7;
     if (arg5 != 0) {
         argB = 3;
         argC = 0xFF;
@@ -124,10 +124,10 @@ BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec
     def.pos = *start;
     def.rot = *end;
     def.flags = 0x40CC0009;
-    def.unk44 = alpha;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 7;
+    def.alpha = alpha;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 7;
     def.scale.x = 0.0f;
     def.scale.y = 0.0f;
     def.scale.z = 0.0f;
@@ -279,8 +279,8 @@ void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 
     index = math_random() & 3;
     desc.texture = gFlashTextures[index];
     desc.renderMode = 0x2203;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0x20000;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0x20000;
     desc.timer = lifetime + 1;
     desc.frame = 0;
     desc.frameRate = 0;

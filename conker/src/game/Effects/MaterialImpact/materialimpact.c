@@ -114,9 +114,9 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         obj.slot = gMaterialImpactScales[size][0];
         obj.unk86 = gMaterialImpactScales[size][1];
         obj.flags = 0x2A00;
-        obj.unk92 = 1;
-        obj.unk94 = 1;
-        obj.unkA4 = 0xFF;
+        obj.halfWidth = 1;
+        obj.halfHeight = 1;
+        obj.alpha = 0xFF;
         effect_initQuadFxTemplate(&obj, 0xB4, 0xB4, 0xB4, 0xFF);
         effect_spawnQuadFx(&obj, 0xFF, 0);
     }
@@ -209,36 +209,37 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
 }
 
 struct Struct150E4CBC {
-    /* 0x00 */ u8 pad0[0x90];
+    /* 0x00 */ EffectHeader link;
+    /* 0x10 */ Vtx vtx[8];
     /* 0x90 */ s32 timer;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ s16 unk98; // set to -1 when the effect is finished
+    /* 0x94 */ s16 widthScale;  // halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0])
+    /* 0x96 */ s16 heightScale; // halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1])
+    /* 0x98 */ s16 frame;       // QuadFxData.frame; set to -1 when the effect is finished
     /* 0x9A */ u8 pad9A[8];
-    /* 0xA2 */ s16 unkA2;
-    /* 0xA4 */ s16 unkA4;
+    /* 0xA2 */ s16 halfWidth;   // QuadFxData.halfWidth
+    /* 0xA4 */ s16 halfHeight;
     /* 0xA6 */ u8 padA6[0xE];
     /* 0xB4 */ u8 alpha;
 };
 
 /*
- * Per-frame update (from a handler table): unkA4 ramps up to 90/256 of unk96 over the first 9 ticks
+ * Per-frame update (gParticleCallbacks[13]): halfHeight ramps up to 90/256 of heightScale over the first 9 ticks
  * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
  */
 void func_150E4CBC(Struct150E4CBC *fx) {
     if (fx->timer < 9) {
-        fx->unkA4 = fx->timer * 90 / 9 * fx->unk96 / 256.0f;
+        fx->halfHeight = fx->timer * 90 / 9 * fx->heightScale / 256.0f;
     } else {
-        fx->unkA4 = (90 - (fx->timer * 90 - 810) / 600) * fx->unk96 / 256.0f;
+        fx->halfHeight = (90 - (fx->timer * 90 - 810) / 600) * fx->heightScale / 256.0f;
         if (fx->alpha > gFrameTicks * 17) {
             fx->alpha -= gFrameTicks * 17;
         } else {
-            fx->unk98 = -1;
+            fx->frame = -1;
         }
     }
-    fx->unkA2 = (s32)(fx->unk94 * 14.0f) >> 8;
+    fx->halfWidth = (s32)(fx->widthScale * 14.0f) >> 8;
     if (fx->timer > 608) {
-        fx->unk98 = -1;
+        fx->frame = -1;
     }
     fx->timer += gFrameTicks;
 }
@@ -448,7 +449,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     chunk.rotVel.z = math_randomFloat() * 6.0f + -3.0f;
     rand = math_randomFloat() * 6.0f + -3.0f;
     chunk.variant = 0;
-    chunk.unk5C = 0;
+    chunk.zone = 0;
     chunk.rotVel.y = rand;
     chunk.alpha = 0xFF;
     chunk.updateFn = 1;
@@ -459,7 +460,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     chunk.destroyFn = 0;
     chunk.squashFn = 0;
     chunk.matrixFn = 0;
-    chunk.unk6A = 2;
+    chunk.lightMode = 2;
     chunk.owner = 0;
     chunk.ownerId = 0;
     chunk.fadeStart = 0x20;
@@ -470,17 +471,14 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
 
 struct Struct150E5810 {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 radius; // ModelParticle.radius: it comes to rest this far above the ground
     /* 0x14 */ f32 bounce; // restitution applied on each ground hit
-    /* 0x18 */ u8 pad18[0x24];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
+    /* 0x18 */ u8 pad18[0x20];
+    /* 0x38 */ Vec3f pos;
     /* 0x44 */ f32 velX;
     /* 0x48 */ f32 velY;
     /* 0x4C */ f32 velZ;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
+    /* 0x50 */ Vec3f rotVel;
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 flags;
 };
@@ -489,7 +487,7 @@ struct Struct150E5810 {
  * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
  * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
  */
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
+s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
     Tri3f tri;
     s32 i;
     f32 len;
@@ -499,7 +497,7 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, 
     Vec3f normal;
     Vec3f unit;
 
-    obj->unk3C = obj->unk10 * 1.100000024f + groundY;
+    obj->pos.y = obj->radius * 1.100000024f + groundY;
     if (obj->velY > -2.0f) {
         obj->velX = 0.0f;
         obj->flags &= ~0x6F;
@@ -535,9 +533,9 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, 
             obj->velY = -obj->velY * obj->bounce;
             obj->velZ *= obj->bounce;
         }
-        obj->unk50 *= obj->bounce;
-        obj->unk54 *= obj->bounce;
-        obj->unk58 *= obj->bounce;
+        obj->rotVel.x *= obj->bounce;
+        obj->rotVel.y *= obj->bounce;
+        obj->rotVel.z *= obj->bounce;
     }
     return 1;
 }

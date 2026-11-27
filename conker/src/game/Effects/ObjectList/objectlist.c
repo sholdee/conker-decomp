@@ -35,7 +35,7 @@ s32 gCachedOtherModeL;
 s32 gDrawHookTextureFrame;
 s32 gDrawHookTextureCm;
 TextureDesc *gDrawHookTexture;
-SpriteParams D_800DD230; /* the sprite of the current draw hook: quadeffect.c and puffquad.c load the texture frame through it */
+SpriteParams gDrawHookSprite; /* the sprite of the current draw hook: quadeffect.c and puffquad.c load the texture frame through it */
 
 #include <math.h>
 #include "conker/beam.h"
@@ -223,7 +223,7 @@ static void (*gParticleCallbacks[])() = {
     NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
     effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
     particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
-    func_151A77C0, func_151A787C,
+    blood_billboardFadeGrowThenTint, blood_billboardFadeGrowTint,
 };
 
 /* Object callbacks (SpriteFx and ModelFx callback, BillboardTemplate onDeath, Sprite2D behavior),
@@ -382,7 +382,7 @@ void effect_preDrawObjects(void) {
  * drop any object that overflows the display list buffer; on overflow the pass is abandoned and the
  * display list is rewound to the start of the type that overflowed.
  */
-Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
+Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 view, s32 list) {
     s32 type;
     s32 first;
     s32 last;
@@ -434,7 +434,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gSPDisplayList(gfx++, gObjectTypes[type].drawBeginDL);
                 }
                 if (gObjectTypes[type].drawBegin != NULL) {
-                    gfx = gObjectTypes[type].drawBegin(gfx, type, list, arg2);
+                    gfx = gObjectTypes[type].drawBegin(gfx, type, list, view);
                 }
                 gSPClearGeometryMode(gfx++, G_LIGHTING);
                 node = *head;
@@ -443,7 +443,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     while (node != NULL) {
                         prev = gfx;
                         gObjectWalkNext[gObjectWalkDepth] = node->next;
-                        gfx = gObjectTypes[type].draw(gfx, node, arg2);
+                        gfx = gObjectTypes[type].draw(gfx, node, view);
                         full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
@@ -456,7 +456,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gObjectWalkDepth++;
                     while (node != NULL) {
                         gObjectWalkNext[gObjectWalkDepth] = node->next;
-                        gfx = gObjectTypes[type].draw(gfx, node, arg2);
+                        gfx = gObjectTypes[type].draw(gfx, node, view);
                         node = gObjectWalkNext[gObjectWalkDepth];
                     }
                     gObjectWalkDepth--;
@@ -465,7 +465,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gSPDisplayList(gfx++, gObjectTypes[type].drawEndDL);
                 }
                 if (gObjectTypes[type].drawEnd != NULL) {
-                    gfx = gObjectTypes[type].drawEnd(gfx, type, arg2);
+                    gfx = gObjectTypes[type].drawEnd(gfx, type, view);
                 }
                 if (overflowed) {
                     full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
@@ -490,17 +490,17 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
 }
 
 /* Allocates a `size`-byte object (heap_alloc) and links it into gObjectLists[list][type]. */
-void *effect_newObject(type, list, size, arg3, owner, arg5)
+void *effect_newObject(type, list, size, align, owner, mode)
     s32 type;
     s32 list;
     s32 size;
-    s32 arg3;
+    s32 align;
     u8 owner;
-    u8 arg5;
+    u8 mode;
 {
     EffectHeader *obj;
 
-    obj = (EffectHeader *)heap_alloc(size, 1, arg3, 0, arg5);
+    obj = (EffectHeader *)heap_alloc(size, 1, align, 0, mode);
     if (obj != NULL) {
         obj->kind = list;
         effect_linkObject(obj, type);
@@ -558,11 +558,11 @@ void effect_updateSpriteFx(SpriteFx *fx) {
     }
 }
 typedef struct {
-    s32 unk0;
+    s32 needSync;
     s32 unk4;
 } PaddedFlag;
 /* Type 3 draw: the current animation frame as a billboard. */
-Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
+Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 view) {
     SpriteParams params;
     Gfx *gfx;
     PaddedFlag update; // matching: 8-byte stack object; only the first word (the update flag) is used
@@ -570,8 +570,8 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     s32 renderMode;
     s16 frame;
 
-    if (arg2) {} // matching: references the otherwise unused arg2
-    update.unk0 = 1;
+    if (view) {} // matching: references the otherwise unused view
+    update.needSync = 1;
     frame = fx->frame;
     anim = fx->anim;
     gfx = math_gfxLoadTextureFrame(gdl, anim, frame << 8, 2, 0x100, 0x100,
@@ -1113,7 +1113,7 @@ void effect_spawnModelFx(src, owner, list)
 }
 
 /* Type 0x10 draw: builds this frame's matrix, sets fade/tile/render state and calls the display list. */
-Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
+Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 view) {
     s32 pad; // matching: stack layout of the target frame
     s32 renderMode;
     u8 update;

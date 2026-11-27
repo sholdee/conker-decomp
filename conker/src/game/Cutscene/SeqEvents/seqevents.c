@@ -1601,7 +1601,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150E9FE0(obj, duration, sceneTag, 0);
+                effect_attachBone8SegmentStrip(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x51) {
             s32 duration;
@@ -1609,7 +1609,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150EA500(obj, duration, sceneTag, 0);
+                effect_attachDriftEmitter(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x48) {
             Vec2f offset;
@@ -2021,13 +2021,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             splash.spray.itemCountRange = 4;
             splash.spray.lifeBase = 0x28;
             splash.spray.lifeRange = 0x1E;
-            splash.spray.unk30 = 0x64;
-            splash.spray.unk32 = 0x64;
+            splash.spray.alphaBase = 0x64;
+            splash.spray.alphaRange = 0x64;
             splash.spray.kind = 0;
-            splash.spray.unk3C = 0x10;
-            splash.spray.unk3E = 0xF;
-            splash.spray.unk40 = 0;
-            splash.spray.unk38 = 0.5f;
+            splash.spray.fadeStart = 0x10;
+            splash.spray.fadeRate = 0xF;
+            splash.spray.material = 0;
+            splash.spray.burstChance = 0.5f;
             particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             Vec3f p;
@@ -2135,7 +2135,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             particle_spawnModelDroplets(pos, dist, speed, n, 0x1E, 0x64, sceneTag);
         } else if (event->value == 0x28) {
             if (actor != NULL) {
-                func_15171600(actor, sceneTag, 0);
+                effect_spawnObjectRectangleParticles(actor, sceneTag, 0);
             } else if (obj != NULL) {
                 func_15171BF4(obj, sceneTag);
             }

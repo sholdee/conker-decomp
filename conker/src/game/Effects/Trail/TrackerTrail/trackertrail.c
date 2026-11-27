@@ -229,7 +229,7 @@ s32 trail_shapeTrackerTrail(TrackerTrail *actor) {
 }
 
 /* Draws the trail as a textured ribbon: one quad per pair of samples, head to tail. */
-Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 view) {
     TrackerTrailData *state;
     Vec3f next;
     Vec3f first;
@@ -252,7 +252,7 @@ Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
     }
     state = actor->state;
     points = actor->points;
-    particle_getViewBuffer(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    particle_getViewBuffer(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

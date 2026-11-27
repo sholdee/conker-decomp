@@ -116,8 +116,8 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     s32 flipS;
 
     desc.renderMode = 0x4401;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r = 0;

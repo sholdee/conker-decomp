@@ -9,8 +9,8 @@
 
 /* Trail types (see game/Effects/Trail/MotionTrail/motiontrail.c). */
 
-/* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
-void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
+/* Creates a spray emitter from desc; bit 0 of its flags records whether floorSplash was set. */
+void trail_createSprayEmitter(SprayDesc *desc, u8 floorSplash) {
     SprayEmitter *emitter;
     s32 flag;
 
@@ -20,7 +20,7 @@ void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
         collision_selectMap(0);
         emitter->zone = collision_findZoneLeaf(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f),
                                       emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f));
-        if (arg1 != 0) {
+        if (floorSplash != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -81,19 +81,19 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
         floorY = emitter->floorY;
         spawn.kind = 1;
         spawn.flags = 5;
-        motion.unk1C = 16;
-        motion.unk1E = 15;
+        motion.fadeStart = 16;
+        motion.fadeRate = 15;
         motion.unk14 = -10000.0f;
         motion.flags = 0x48;
         motion.texture = 3;
         motion.shade = 0xFF;
-        render.unk0 = 0;
+        render.otherModeH = 0;
         render.setGeometryMode = 1;
         render.clearGeometryMode = 0x160600;
         render.renderMode = 3;
-        render.unk10 = 0x22;
-        render.unk14 = 0x80;
-        render.unk18 = 0x20;
+        render.combiner = 0x22;
+        render.colorDither = 0x80;
+        render.alphaDither = 0x20;
         render.primMode = 0;
         render.envMode = 7;
         do {
@@ -127,8 +127,8 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
             motion.gravity = (math_randomFloat() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.alpha = (math_random() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.life = (math_random() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            motion.alpha = (math_random() % (emitter->desc.alphaRange + 1)) + emitter->desc.alpha;
+            spawn.life = (math_random() % (emitter->desc.lifeRange + 1)) + emitter->desc.life;
             trail = trail_createMotionTrail(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
@@ -163,7 +163,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
 }
 
 /* Empty handler with four arguments. */
-s32 func_15189FD0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    (void)&arg0; // matching: taking an argument's address makes IDO home all four argument registers
+s32 trail_ignoreGroundHit(MotionTrail *trail, f32 x, f32 y, f32 z) {
+    (void)&trail; // matching: taking an argument's address makes IDO home all four argument registers
     return 1;
 }

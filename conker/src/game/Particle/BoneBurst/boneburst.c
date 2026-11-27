@@ -135,7 +135,7 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                     if (!math_buildPerpendicularBasis(&dir, &particle.axisU, &particle.axisV)) {
                         return;
                     }
-                    def.unk44 = particle.fadeFrom;
+                    def.alpha = particle.fadeFrom;
                     def.texture = 0x79;
                     def.type = 0xC;
                     def.renderModes = 0x4405;
@@ -153,12 +153,12 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                     def.scale.y = 1.0f;
                     def.scale.z = 1.0f;
                     def.flags = 0x04EC0000;
-                    def.unk45 = 0xFF;
-                    def.unk46 = 0;
-                    def.unk47 = 6;
-                    def.unk48 = NULL;
+                    def.colorLevel = 0xFF;
+                    def.primMode = 0;
+                    def.envMode = 6;
+                    def.zone = NULL;
                     def.viewportMask = 0xFF;
-                    def.unk50 = 0;
+                    def.material = 0;
                     def.fadeStart = 1;
                     def.fadeRate = 0xFF;
                     spawned = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->base.header.owner, emitter->base.header.kind);
@@ -202,7 +202,7 @@ s32 particle_updateBoneBurstParticle(BoneBurstParticle *particle) {
     particle->head.def.height = size;
     particle->head.def.width = size;
 
-    particle->head.def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
+    particle->head.def.alpha = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
     state->age = state->age + gFrameDelta;
 
     if (state->lifetime < state->age) {

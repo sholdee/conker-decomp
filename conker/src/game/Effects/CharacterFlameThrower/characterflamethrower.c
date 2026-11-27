@@ -621,7 +621,7 @@ void flamethrower_freeJet(CharacterFlamethrowerActor *actor) {
 /* Preset in gJetChildPresets for the child particles a jet point spawns (flamethrower_shedJetLines). */
 struct JetChildPreset {
     /* 0x0 */ f32 sizeScale;
-    /* 0x4 */ f32 unk4;
+    /* 0x4 */ f32 heightScale; /* scales the height terms of flamethrower_shedJetLines (sizeScale scales the widths) */
     /* 0x8 */ s16 lifeMin;
     /* 0xA */ s16 lifeRange;
 };
@@ -665,7 +665,7 @@ const CharacterFlamethrowerJetTemplate gJetTemplates[] = {
 };
 
 /* Spawns a jet effect from preset gJetTemplates[preset], attached to a bone of `owner`. */
-CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 fxOwner, s32 fxList) {
     EffectTemplate spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
@@ -734,7 +734,7 @@ CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 a
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
     jet.timeCarry = 0.0f;
-    actor = effect_newEffectObj(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
+    actor = effect_newEffectObj(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, fxOwner, fxList);
     if (actor != NULL) {
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
@@ -855,7 +855,7 @@ s32 flamethrower_updateJet(CharacterFlamethrowerActor *actor) {
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
  * emitAccum particles interpolated between last frame's and this frame's points (and sparks/smoke).
  */
-s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
+s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 dead) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     Vec3f end;
@@ -890,7 +890,7 @@ s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
         return 0;
     }
     if (jet->speedFn != -1) {
-        jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, arg1);
+        jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, dead);
     }
     matrix = &jet->owner->ob_matrix_ptr[jet->bone];
     math_transformOffset(&jet->startOffset, &actor->head.tmpl.pos, matrix);
@@ -1269,7 +1269,7 @@ s32 flamethrower_fadeJetLine(SceneParticle *p) {
     p->head.def.height = p->head.def.height - (p->head.def.height * p->data.jet.shrinkRate);
     p->head.def.width = p->head.def.width - (p->head.def.width * p->data.jet.shrinkRate);
     if (life < p->data.jet.fadeStart) {
-        p->head.def.unk44 = life * p->data.jet.alphaPerLife;
+        p->head.def.alpha = life * p->data.jet.alphaPerLife;
     }
     return 1;
 }
@@ -1446,15 +1446,15 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         data.unk1C = 0;
         spawn.width = (data.unk0 + data.unk4) * 0.5f;
         data.unk8 = spawn.width;
-        data.unkC = preset->unk4 * 3.961740017f;
-        data.unk10 = preset->unk4 * 2.919177055f;
-        data.unk14 = preset->unk4 * 8.116548538f;
+        data.unkC = preset->heightScale * 3.961740017f;
+        data.unk10 = preset->heightScale * 2.919177055f;
+        data.unk14 = preset->heightScale * 8.116548538f;
         data.unk1E = 0;
         spawn.scale.x = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x40000001;
-        spawn.unk44 = 255;
-        spawn.unk45 = 255;
+        spawn.alpha = 255;
+        spawn.colorLevel = 255;
         spawn.height = (data.unkC + data.unk10) * 0.5f;
         data.unk18 = spawn.height;
         spawn.scale.y = 0.0f;
@@ -1748,13 +1748,13 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
     motion.flags = 0x28;
     motion.alpha = 0x82;
     spawn.pos = actor->head.tmpl.pos;
-    style.unk0 = 0;
+    style.otherModeH = 0;
     style.setGeometryMode = 1;
     style.clearGeometryMode = 0x160600;
     style.renderMode = 3;
-    style.unk10 = 0x10;
-    style.unk14 = 0x80;
-    style.unk18 = 0x20;
+    style.combiner = 0x10;
+    style.colorDither = 0x80;
+    style.alphaDither = 0x20;
     style.primMode = 0;
     style.envMode = 9;
     do {
@@ -1955,7 +1955,7 @@ void (*gFlameSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopFl
 s32 (*gFlameUpdateProcs[])(void *) = { (s32 (*)(void *))flamethrower_checkOwnerAlive };
 
 /* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
-CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 fxOwner, s32 fxList) {
     CharacterFlamethrowerActor *result;
     EffectTemplate spawn;
     CharacterFlamethrowerFlame initial;
@@ -1972,7 +1972,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
     spawn.life = 300;
     spawn.flags = 0x12;
     spawn.kind = 0xE;
-    spawn.unk14 = 0;
+    spawn.shapeKind = 0;
     initial.seed = setup->seed;
     inputs[0] = &initial.seed.startOffset;
     inputs[1] = &initial.seed.endOffset;
@@ -2007,7 +2007,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
         initial.sparkTimer = 0;
         initial.timer151 = 0;
         result = effect_newEffectObj(&spawn, extraSize + 0x158, sizeof(FlamePoint), 0xC,
-                               0xC, 0xC, 0, 0, 0, arg2, arg3);
+                               0xC, 0xC, 0, 0, 0, fxOwner, fxList);
         if (result != NULL) {
             state = result->state;
             memcpy(state, &initial, sizeof(CharacterFlamethrowerFlame));
@@ -2021,7 +2021,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
             }
             if (setup->flags & 1) {
                 state->light = flamethrower_createFlameLight(result, &spawn.pos, setup->red, setup->green, setup->blue,
-                                         setup->alpha, arg2, arg3);
+                                         setup->alpha, fxOwner, fxList);
             } else {
                 state->light = NULL;
             }
@@ -2287,21 +2287,21 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             style.setGeometryMode = 0x200005;
             style.clearGeometryMode = 0x1F0600;
             style.renderMode = 3;
-            style.unk10 = 0x22;
-            style.unk0 = 0;
-            style.unk14 = 0x80;
-            style.unk18 = 0x20;
+            style.combiner = 0x22;
+            style.otherModeH = 0;
+            style.colorDither = 0x80;
+            style.alphaDither = 0x20;
             style.primMode = 0;
             style.envMode = 7;
             spawn.flags = 0x15;
             spawn.kind = 1;
-            spawn.unk14 = -1;
+            spawn.shapeKind = -1;
             motion.flags = 0x68;
             motion.texture = 0xA;
             motion.shade = 0xFF;
             motion.unk14 = -10000.0f;
-            motion.unk1C = flame->scatter.fadeStart;
-            motion.unk1E = flame->scatter.fadeRate;
+            motion.fadeStart = flame->scatter.fadeStart;
+            motion.fadeRate = flame->scatter.fadeRate;
             do {
                 spawn.itemCount = (math_random() % (flame->scatter.itemCountRange + 1)) + flame->scatter.itemCountMin;
                 spawn.life = (math_random() % (flame->scatter.lifeRange + 1)) + flame->scatter.lifeMin;
@@ -2341,8 +2341,8 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
 
             part.texture = 0x28;
             part.renderMode = 0x2203;
-            part.unk0 = 0x200005;
-            part.unk4 = 0x1F0600;
+            part.setGeometryMode = 0x200005;
+            part.clearGeometryMode = 0x1F0600;
             part.frame = 0;
             part.frameRate = 0;
             part.r = 0xFF;
@@ -2650,10 +2650,10 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
             spawn.scale.y = 0.0f;
             spawn.scale.z = 1.0f;
             spawn.flags = 0x40CC05E1;
-            spawn.unk45 = 0xFF;
-            spawn.unk46 = 0;
-            spawn.unk47 = 7;
-            spawn.unk48 = 0;
+            spawn.colorLevel = 0xFF;
+            spawn.primMode = 0;
+            spawn.envMode = 7;
+            spawn.zone = 0;
             a = &points[head];
             b = &points[next];
             do {
@@ -2688,7 +2688,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 spawn.rot.x = spawn.pos.x + dir.x;
                 spawn.rot.y = spawn.pos.y + dir.y;
                 spawn.rot.z = spawn.pos.z + dir.z;
-                spawn.unk44 = math_random() % (flame->line.alphaRange + 1) + flame->line.alphaMin;
+                spawn.alpha = math_random() % (flame->line.alphaRange + 1) + flame->line.alphaMin;
                 particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((math_random() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
@@ -3030,11 +3030,11 @@ typedef struct FlameLightData {
 } FlameLightData;
 
 /* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
-LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
-                         s32 arg7) {
+LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 fxOwner,
+                         s32 fxList) {
     LightEffect *light;
     LightEffectHeader header;
-    Vec3i header2;
+    Vec3i position;
     CharacterFlamethrowerActor *owner;
     LightJitter params;
 
@@ -3051,11 +3051,11 @@ LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Ve
     params.interval = 7.0f;
     params.smoothing = 0.2488999963f;
     params.level = 127.0f;
-    header2.x = pos->x;
-    header2.y = pos->y;
-    header2.z = pos->z;
+    position.x = pos->x;
+    position.y = pos->y;
+    position.z = pos->z;
 
-    light = light_createWithEffect(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
+    light = light_createWithEffect(&header, &position, red, green, blue, alpha, 0xFF, 0, 0x24, fxOwner, fxList);
     if (light != NULL) {
         memcpy(&light->data.jitter, &params, sizeof(params));
         memcpy(&((FlameLightData *)&light->data)->flame, &owner, sizeof(owner));
@@ -3134,8 +3134,8 @@ s32 flamethrower_fadeFlameLine(SceneParticle *beam) {
     }
     if (beam->head.def.lifetime < p->fadeStart) {
         s32 alpha = beam->head.def.lifetime * p->alphaPerLife;
-        if (alpha < beam->head.def.unk44) {
-            beam->head.def.unk44 = alpha;
+        if (alpha < beam->head.def.alpha) {
+            beam->head.def.alpha = alpha;
         }
     }
     return 1;

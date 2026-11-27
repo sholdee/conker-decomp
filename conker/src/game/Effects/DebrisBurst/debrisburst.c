@@ -7,7 +7,7 @@
 
 
 /* Spawns a debris burst plus the follow-up effects at the object's position. */
-void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
+void func_151A6C90(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
     DebrisEmitter emitter;
 
@@ -42,12 +42,12 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         emitter.dir.y = 0.0f;
         emitter.dir.z = 0.0f;
 
-        blood_spawnDebris(&emitter, 0, arg1, arg2);
-        particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-        particle_spawnLightFlash(&pos, arg1, arg2);
-        particle_spawnBlastSpray(&pos, arg1, arg2);
+        blood_spawnDebris(&emitter, 0, owner, list);
+        particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, owner, list);
+        particle_spawnLightFlash(&pos, owner, list);
+        particle_spawnBlastSpray(&pos, owner, list);
         particle_spawnGrowFade(&pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f,
-                      math_random() % 56U + 200, 0.0f, arg1, arg2);
+                      math_random() % 56U + 200, 0.0f, owner, list);
         particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }

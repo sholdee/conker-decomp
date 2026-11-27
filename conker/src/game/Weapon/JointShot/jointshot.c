@@ -306,7 +306,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     spawn.lifetime = 300;
     spawn.model = 15;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 100;
     spawn.updateFn = 23;
     spawn.update2Fn = 0;
@@ -317,7 +317,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     spawn.squashFn = 0;
     spawn.matrixFn = 5;
     spawn.drawFn = -1;
-    spawn.unk6A = 1;
+    spawn.lightMode = 1;
     spawn.gravity = 0.0f;
     spawn.owner = owner;
     spawn.ownerId = owner->unique_id;

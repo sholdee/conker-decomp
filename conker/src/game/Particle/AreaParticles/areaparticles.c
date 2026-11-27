@@ -85,7 +85,7 @@ void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -127,7 +127,7 @@ void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
                 part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -170,10 +170,10 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
 
         minFrac = 0.200000003f;
         part.renderMode = 0x4403;
-        part.unk0 = 0x200005;
+        part.setGeometryMode = 0x200005;
         part.a = 0xFF;
         fracRange = 0.25f;
-        part.unk4 = 0;
+        part.clearGeometryMode = 0;
         part.frame = 0;
         part.frameRate = 0;
         part.r = 0;
@@ -292,9 +292,9 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
         part.scale.y = 0.0f;
         part.scale.z = 0.0f;
         part.flags = 0x037C0000;
-        part.unk45 = 0xFF;
-        part.unk46 = 0;
-        part.unk47 = 6;
+        part.colorLevel = 0xFF;
+        part.primMode = 0;
+        part.envMode = 6;
         extra.unk14 = 0.0f;
         part.rgba[0] = 0xFF;
         part.rgba[1] = 0xFF;
@@ -324,9 +324,9 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
             part.rot.x = RANDOM_U16() * inv65535 * 360.0f;
             part.rot.y = RANDOM_U16() * inv65535 * 360.0f;
             part.rot.z = RANDOM_U16() * inv65535 * 360.0f;
-            part.unk44 = RANDOM() % 156 + 100;
+            part.alpha = RANDOM() % 156 + 100;
             collision_selectMap(0);
-            part.unk48 = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             obj = particle_newQuadParticle(&part, &gWhiteVtxColors, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
@@ -367,7 +367,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -398,7 +398,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.rotVel.z = RANDOM_U16() * inv65535 * 1.600000024f;
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -433,7 +433,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -474,7 +474,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
                 part.sizeY *= 0.349999994f;
             }
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -501,11 +501,11 @@ void func_1500DE88(TriggerZone *region, f32 density) {
 
         minFrac = 0.3000000119f;
         part.renderMode = 0x5103;
-        part.unk0 = 0x200005;
+        part.setGeometryMode = 0x200005;
         part.a = 0xFF;
         part.brightness = 0xFF;
         fracRange = 0.150000006f;
-        part.unk4 = 0;
+        part.clearGeometryMode = 0;
         part.frame = 0;
         part.frameRate = 0;
         part.g = 0;

@@ -45,10 +45,10 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
             def.rgba[3] = 0xFF;
             def.width = def.height = ((math_randomFloat() * 25.0f) + 25.0f) * 0.001f;
             def.flags = 0x0C5C0001;
-            def.unk44 = 0xFF;
-            def.unk45 = 0xFF;
-            def.unk46 = 0;
-            def.unk47 = 7;
+            def.alpha = 0xFF;
+            def.colorLevel = 0xFF;
+            def.primMode = 0;
+            def.envMode = 7;
             def.pos.x = x;
             def.rot.x = 0.0f;
             def.rot.y = 0.0f;
@@ -59,12 +59,12 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
             def.pos.y = floorHeight;
             def.pos.z = z;
             extra[0] = ((math_randomFloat() * 80.0f) + 50.0f) * 1e-05f;
-            def.unk50 = particle->floor.material;
+            def.material = particle->floor.material;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
             surface = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (math_random() & 1) * 2 + (math_random() & 1),
                                             math_random() & 0xFF, 500.0f, 500.0f, NULL, surface,
-                                            particle->link.model, particle->link.unk1C, 0, 8, particle->header.owner,
+                                            particle->link.maxLights, particle->link.lightMask, 0, 8, particle->header.owner,
                                             particle->header.kind);
             if (surface != NULL) {
                 memcpy(((AxisParticle *)surface)->motion, extra, 8);
@@ -103,20 +103,20 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
                 burst.pos.z = z;
                 burst.growthBase = 0.661f;
                 burst.growthRange = 0; // matching: 0.0f would keep the float zero above live in $f20 across the calls
-                burst.unk58 = particle->link.model;
-                burst.unk5C = particle->link.unk1C;
-                burst.render.unk0 = 0;
+                burst.maxLights = particle->link.maxLights;
+                burst.lightMask = particle->link.lightMask;
+                burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
                 burst.render.renderMode = 1;
-                burst.render.unk10 = 0x3B;
-                burst.render.unk14 = 0x80;
-                burst.render.unk18 = 0x20;
+                burst.render.combiner = 0x3B;
+                burst.render.colorDither = 0x80;
+                burst.render.alphaDither = 0x20;
                 burst.render.primMode = 0;
                 burst.render.envMode = 7;
-                burst.unk80 = 10;
-                burst.unk82 = 25;
-                burst.unk84 = particle->floor.material;
+                burst.fadeStart = 10;
+                burst.fadeRate = 25;
+                burst.material = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             sound_playAt(gShatterSounds[math_random() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
@@ -185,10 +185,10 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     def.width = def.height = (math_randomFloat() * 25.0f + 25.0f) * 0.001f;
                     def.pos = hit;
                     def.flags = 0x0C5C0001;
-                    def.unk44 = 0xFF;
-                    def.unk45 = 0xFF;
-                    def.unk46 = 0;
-                    def.unk47 = 7;
+                    def.alpha = 0xFF;
+                    def.colorLevel = 0xFF;
+                    def.primMode = 0;
+                    def.envMode = 7;
                     def.rot.x = 0.0f;
                     def.rot.y = 0.0f;
                     def.rot.z = 0.0f;
@@ -196,11 +196,11 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
                     extra = (math_randomFloat() * 80.0f + 50.0f) * 1e-05f;
-                    def.unk50 = particle->floor.material;
+                    def.material = particle->floor.material;
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                                             (math_random() & 1) * 2 + (math_random() & 1),
                                                             math_random() & 0xFF, 500.0f, 500.0f, NULL,
-                                                            &triangle, particle->link.model, particle->link.unk1C, 0,
+                                                            &triangle, particle->link.maxLights, particle->link.lightMask, 0,
                                                             8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
@@ -241,15 +241,15 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
-                    burst.unk74 = particle->link.model;
-                    burst.unk78 = particle->link.unk1C;
-                    burst.render.unk0 = 0;
+                    burst.unk74 = particle->link.maxLights;
+                    burst.unk78 = particle->link.lightMask;
+                    burst.render.otherModeH = 0;
                     burst.render.setGeometryMode = 0x220005;
                     burst.render.clearGeometryMode = 0x1D0600;
                     burst.render.renderMode = 1;
-                    burst.render.unk10 = 0x3B;
-                    burst.render.unk14 = 0x80;
-                    burst.render.unk18 = 0x20;
+                    burst.render.combiner = 0x3B;
+                    burst.render.colorDither = 0x80;
+                    burst.render.alphaDither = 0x20;
                     burst.render.primMode = 0;
                     burst.render.envMode = 7;
                     burst.unk9C = 10;
@@ -302,12 +302,12 @@ s32 particle_fallAndGrow(FallGrowParticle *particle) {
     return 1;
 }
 
-/* Sets def.unk44 to 8x the lifetime once it drops below 32. */
+/* Sets def.alpha to 8x the lifetime once it drops below 32. */
 s32 particle_fadeFallGrowParticle(FallGrowParticle *particle) {
     s16 lifetime = particle->head.def.lifetime;
 
     if (lifetime < 32) {
-        particle->head.def.unk44 = lifetime * 8;
+        particle->head.def.alpha = lifetime * 8;
     }
     return 1;
 }
@@ -317,7 +317,7 @@ s32 particle_fadeQuadSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {
-        sprite->def.unk10 = lifetime * 4;
+        sprite->def.alpha = lifetime * 4;
     }
     return 1;
 }
@@ -390,10 +390,10 @@ s32 particle_updateKickable(ModelParticle *particle) {
                     def.width = def.height = ((math_randomFloat() * 25.0f) + 25.0f) * 0.001f;
                     def.pos = pos;
                     def.flags = 0x0C5C0001;
-                    def.unk44 = 0xFF;
-                    def.unk45 = 0xFF;
-                    def.unk46 = 0;
-                    def.unk47 = 7;
+                    def.alpha = 0xFF;
+                    def.colorLevel = 0xFF;
+                    def.primMode = 0;
+                    def.envMode = 7;
                     def.rot.x = 0.0f;
                     def.rot.y = 0.0f;
                     def.rot.z = 0.0f;
@@ -401,11 +401,11 @@ s32 particle_updateKickable(ModelParticle *particle) {
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
                     extra = ((math_randomFloat() * 80.0f) + 50.0f) * 1e-05f;
-                    def.unk50 = particle->floor.material;
+                    def.material = particle->floor.material;
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (math_random() & 1) * 2 + (math_random() & 1), math_random() & 0xFF,
-                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
-                                            particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
+                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.maxLights,
+                                            particle->link.lightMask, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
                         memcpy(spawned->motion, &extra, 8);
@@ -443,20 +443,20 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.growthRange = 0.31f;
                 burst.speedBase = 5.0f;
                 burst.speedRange = 7.0f;
-                burst.unk58 = particle->link.model;
-                burst.unk5C = particle->link.unk1C;
-                burst.render.unk0 = 0;
+                burst.maxLights = particle->link.maxLights;
+                burst.lightMask = particle->link.lightMask;
+                burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
                 burst.render.renderMode = 1;
-                burst.render.unk10 = 0x3B;
-                burst.render.unk14 = 0x80;
-                burst.render.unk18 = 0x20;
+                burst.render.combiner = 0x3B;
+                burst.render.colorDither = 0x80;
+                burst.render.alphaDither = 0x20;
                 burst.render.primMode = 0;
                 burst.render.envMode = 7;
-                burst.unk80 = 10;
-                burst.unk82 = 25;
-                burst.unk84 = particle->floor.material;
+                burst.fadeStart = 10;
+                burst.fadeRate = 25;
+                burst.material = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             sound_playAt(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
@@ -499,8 +499,8 @@ void particle_spawnFlatMark(Obj150B9D8C *obj) {
         def.frameSpeed = 0;
         def.flags = 0x11;
         def.lifetime = 100;
-        def.unk10 = 0xFF;
-        def.unk11 = obj->unk90;
+        def.alpha = 0xFF;
+        def.colorLevel = obj->unk90;
         def.rgba[0] = 0;
         def.rgba[1] = 0;
         def.rgba[2] = 0;

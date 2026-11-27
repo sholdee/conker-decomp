@@ -33,7 +33,7 @@ typedef struct TargetTrailPoint {
 } TargetTrailPoint;
 
 /* Spawns a trail effect that follows target. */
-void trail_spawnFollowTrail(Actor *target, u8 arg1, s32 arg2) {
+void trail_spawnFollowTrail(Actor *target, u8 owner, s32 list) {
     EffectTemplate spawn;
     s32 pad_dummy; // matching: stack pad
     TargetTrailState state;
@@ -55,7 +55,7 @@ void trail_spawnFollowTrail(Actor *target, u8 arg1, s32 arg2) {
     state.distance = 0.0f;
     spawn.kind = 13;
 
-    obj = effect_newEffectObj(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    obj = effect_newEffectObj(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, owner, list);
     if (obj != NULL) {
         memcpy(obj->userData, &state, sizeof(state));
     }
@@ -412,15 +412,15 @@ void trail_onFollowTrailMessage(EffectObj *obj, void *msg, u8 msgType) {
 }
 
 /* Spawns a particle at target's position. */
-void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
+void trail_spawnParticleAtTarget(Actor *target, u8 owner, s32 list) {
     ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.fadeStart = 18;
@@ -465,7 +465,7 @@ void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, owner, list);
 }
 
 /* Particle a ribbon effect drags along (see trail_moveRibbon). */
@@ -495,7 +495,7 @@ static s32 (*gRibbonSourceProcs[])(EffectObj *, Vec3f *) = { trail_getRibbonActo
 
 /* Spawns a ribbon effect that follows the position given by gRibbonSourceProcs[selector], with a copy of args
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
-EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
+EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 owner, s32 list) {
     EffectObj *obj;
     EffectTemplate18 spawn;
     s32 pad; // matching: stack pad
@@ -511,8 +511,8 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
     spawn.life = 300;
     spawn.flags = 20;
     spawn.kind = 16;
-    spawn.unk14 = 2;
-    obj = effect_newEffectObj(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    spawn.shapeKind = 2;
+    obj = effect_newEffectObj(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, owner, list);
     if (obj != NULL) {
         state = obj->userData;
         memcpy(state, &init, sizeof(init));
@@ -529,8 +529,8 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         s32 flag40;
         particle.texture = unk1DChoices[math_random() & 3];
         particle.renderMode = 0x1303;
-        particle.unk0 = 0x200005;
-        particle.unk4 = 0;
+        particle.setGeometryMode = 0x200005;
+        particle.clearGeometryMode = 0;
         particle.timer = 300;
         particle.frame = 0;
         particle.frameRate = 0;
@@ -571,7 +571,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         particle.handlerSet = 0;
         particle.viewMask = 0;
         particle.views = 0xFF;
-        state->linked = particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg3, arg4);
+        state->linked = particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, owner, list);
         }
     }
     return obj;

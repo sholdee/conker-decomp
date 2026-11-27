@@ -45,7 +45,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         extra.angle = angle;
         params.owner = NULL;
         params.ownerId = 0;
-        params.unk41 = 0;
+        params.lightMode = 0;
         params.pos = *pos;
         extra.count = count;
         {
@@ -70,14 +70,14 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         params.postDrawFunc = -1;
         params.lifetime = 300;
         params.model = 0xA2;
-        params.unkC = 8;
-        params.render.unk0 = 0;
+        params.bank = 8;
+        params.render.otherModeH = 0;
         params.render.setGeometryMode = 0x620405;
         params.render.clearGeometryMode = 0x40200;
         params.render.renderMode = 20;
-        params.render.unk10 = 0x37;
-        params.render.unk14 = 0x80;
-        params.render.unk18 = 0x20;
+        params.render.combiner = 0x37;
+        params.render.colorDither = 0x80;
+        params.render.alphaDither = 0x20;
         params.render.primMode = 0;
         params.render.envMode = 8;
         params.color0.red = 0xFF;
@@ -110,25 +110,25 @@ struct S151BEB20 {
 };
 
 /* Rebuilds this frame's matrix: rotation by `rotY`, translation to `pos`, axes scaled by 0.923. */
-s32 func_151BEB20(struct S151BEB20 *arg0) {
+s32 effect_buildStatPickupMatrix(struct S151BEB20 *fx) {
     f32 scale;
 
-    math_mtxRotateRPYF(arg0->mtx[gDrawBufferIndex], 0.0f, arg0->rotY, 0.0f);
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, fx->rotY, 0.0f);
 
     scale = 0.9230000377f;
-    arg0->mtx[gDrawBufferIndex][3][0] = arg0->pos.x;
-    arg0->mtx[gDrawBufferIndex][3][1] = arg0->pos.y;
-    arg0->mtx[gDrawBufferIndex][3][2] = arg0->pos.z;
+    fx->mtx[gDrawBufferIndex][3][0] = fx->pos.x;
+    fx->mtx[gDrawBufferIndex][3][1] = fx->pos.y;
+    fx->mtx[gDrawBufferIndex][3][2] = fx->pos.z;
 
-    arg0->mtx[gDrawBufferIndex][0][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][0][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][0][2] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][1][2] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][0] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][1] *= scale;
-    arg0->mtx[gDrawBufferIndex][2][2] *= scale;
+    fx->mtx[gDrawBufferIndex][0][0] *= scale;
+    fx->mtx[gDrawBufferIndex][0][1] *= scale;
+    fx->mtx[gDrawBufferIndex][0][2] *= scale;
+    fx->mtx[gDrawBufferIndex][1][0] *= scale;
+    fx->mtx[gDrawBufferIndex][1][1] *= scale;
+    fx->mtx[gDrawBufferIndex][1][2] *= scale;
+    fx->mtx[gDrawBufferIndex][2][0] *= scale;
+    fx->mtx[gDrawBufferIndex][2][1] *= scale;
+    fx->mtx[gDrawBufferIndex][2][2] *= scale;
 
     return 1;
 }
@@ -140,22 +140,18 @@ Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *need
 }
 
 typedef struct {
-    /* 0x00 */ f32 unk0;
+    /* 0x00 */ f32 angle;   /* func_151BEEE0's angle */
     /* 0x04 */ Vec3f pos;
-    /* 0x10 */ u8 unk10;
+    /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
 } S151BECB8Params;
 
 struct S151BECB8 {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ u8 unk10;
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 flags;       /* EffectParams.flags */
     /* 0x011 */ u8 pad11[0x37];
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
-    /* 0x054 */ Vec3f unk54;
+    /* 0x054 */ Vec3f pos;       /* EffectParams.pos */
     /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
@@ -168,10 +164,10 @@ struct S151BECB8 {
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of
- * params.pos, plays sound 0x511 and runs effect_showStatCounter/func_151BF0C8/func_151BEEE0.
+ * params.pos, plays sound 0x511 and runs effect_showStatCounter/effect_spawnStatPickupBurst/func_151BEEE0.
  * Returns 0 if any object was in range, else 1.
  */
-s32 func_151BECB8(S151BECB8 *arg0) {
+s32 effect_updateStatPickup(S151BECB8 *fx) {
     s32 untouched = 1;
 
     {
@@ -185,10 +181,10 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 
         obj = movement_obj;
         do {
-            if (func_151BEE94(obj) != 0) {
+            if (effect_isPlayerActor(obj) != 0) {
                 f32 dist;
 
-                params = &arg0->params;
+                params = &fx->params;
                 sprite_getActorBounds(obj, &objPos, &radius, &height);
                 diff.x = objPos.x - params->pos.x;
                 diff.y = objPos.y - params->pos.y;
@@ -196,14 +192,14 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 dist = math_vec3Length(&diff);
                 if (dist - radius < range) {
                     s32 mode;
-                    s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
+                    s32 kind; // matching: switching on fx->unk48 directly changes the frame size
 
-                    player_setStat(obj->playernumber, 3, params->unk10);
+                    player_setStat(obj->playernumber, 3, params->count);
                     untouched = 0;
                     sound_play(0x511, 0x7D00, 0x40, 0, 0);
-                    effect_showStatCounter(arg0->unkC, arg0->unk1);
-                    func_151BF0C8(&params->pos);
-                    kind = arg0->unk48;
+                    effect_showStatCounter(fx->header.owner, fx->header.kind);
+                    effect_spawnStatPickupBurst(&params->pos);
+                    kind = fx->unk48;
                     switch (kind) {
                         case 1:
                             mode = 1;
@@ -217,8 +213,8 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                             mode = 0;
                             break;
                     }
-                    func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, mode, arg0->unk10 & 0x10,
-                                  arg0->zone, arg0->unkC, arg0->unk1);
+                    func_151BEEE0(params->angle, &fx->pos, fx->unkFC, fx->unk11B, mode, fx->flags & 0x10,
+                                  fx->zone, fx->header.owner, fx->header.kind);
                 }
             }
             obj++;
@@ -228,14 +224,14 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 }
 
 /* An object counts as active when it has a player slot, an interaction state and a valid id. */
-s32 func_151BEE94(Actor *arg0) {
-    if (arg0->playernumber == 0xFF) {
+s32 effect_isPlayerActor(Actor *obj) {
+    if (obj->playernumber == 0xFF) {
         return 0;
     }
-    if (arg0->type == 0) {
+    if (obj->type == 0) {
         return 0;
     }
-    if (arg0->character_type == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return 0;
     }
     return 1;
@@ -243,7 +239,7 @@ s32 func_151BEE94(Actor *arg0) {
 
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 owner, s32 list) {
     ModelParticle *particle;
     u8 variantIds[3] = { 4, 2, 3 };
 
@@ -276,7 +272,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.lifetime = 300;
         spawn.model = 0x26;
         spawn.variant = variantIds[variant];
-        spawn.unk5C = zone;
+        spawn.zone = zone;
         spawn.alpha = 0xFF;
         if (level == LEVEL_W1_DOG_FISH) {
             spawn.updateFn = 0x18;
@@ -290,12 +286,12 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 0;
+        spawn.lightMode = 0;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
-        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, arg7, arg8);
+        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, owner, list);
         if (particle != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&particle->mtx[i], particle);
@@ -306,7 +302,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
 }
 
 /* Spawns two particle bursts at pos: one through particle_spawnPieceSpray, one through particle_spawnSpriteBurst. */
-void func_151BF0C8(Vec3f *pos) {
+void effect_spawnStatPickupBurst(Vec3f *pos) {
     PieceSpray first;
     SpriteBurst second;
 
@@ -334,8 +330,8 @@ void func_151BF0C8(Vec3f *pos) {
     second.countRange = 8;
     second.texture = 0x6C;
     second.renderMode = 0x5103;
-    second.unk8 = 0x200005;
-    second.unkC = 0;
+    second.setGeometryMode = 0x200005;
+    second.clearGeometryMode = 0;
     second.timerBase = 40;
     second.timerRange = 40;
     second.frameRateBase = 0;
@@ -416,16 +412,16 @@ void effect_showStatCounter(u8 owner, s32 kind) {
             panelConfig.postDrawFunc = 0;
             panelConfig.lifetime = 300;
             panelConfig.model = 0xA3;
-            panelConfig.unkC = 8;
-            panelConfig.render.unk0 = 0x100000;
+            panelConfig.bank = 8;
+            panelConfig.render.otherModeH = 0x100000;
             panelConfig.render.setGeometryMode = 0x200004;
             panelConfig.render.clearGeometryMode = 0x60601;
             panelConfig.render.envMode = 8;
             panelConfig.render.renderMode = 1;
-            panelConfig.render.unk10 = 0x38;
+            panelConfig.render.combiner = 0x38;
             panelConfig.render.primMode = 0;
-            panelConfig.render.unk14 = 0x80;
-            panelConfig.render.unk18 = 0x20;
+            panelConfig.render.colorDither = 0x80;
+            panelConfig.render.alphaDither = 0x20;
             panelConfig.color0.red = 0xFF;
             panelConfig.color0.green = 0xFF;
             panelConfig.color0.blue = 0xFF;
@@ -436,7 +432,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
             panelConfig.color1.alpha = 0xFF;
             panelConfig.owner = 0;
             panelConfig.ownerId = 0;
-            panelConfig.unk41 = 1;
+            panelConfig.lightMode = 1;
             panelConfig.fadeStart = 1;
             panelConfig.fadeRate = 0xFF;
             panelConfig.pos.x = 300.0f;
@@ -446,9 +442,9 @@ void effect_showStatCounter(u8 owner, s32 kind) {
                 panelConfig.pos.y = 79.0f;
             }
             panelConfig.pos.z = 0.0f;
-            panelExtra.unk0 = gZeroVec3f;
-            panelExtra.unkC = 0.3010000288f;
-            panelExtra.unk10 = 0.3010000288f;
+            panelExtra.rot = gZeroVec3f;
+            panelExtra.scaleXZ = 0.3010000288f;
+            panelExtra.scaleY = 0.3010000288f;
             display->panel = effect_newModelEffect(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
             if (display->panel != NULL) {
                 memcpy(&display->panel->extra, &panelExtra, sizeof(panelExtra));
@@ -476,16 +472,16 @@ void effect_showStatCounter(u8 owner, s32 kind) {
                 digitArg.color2.green = 0xFF;
                 digitArg.color2.blue = 0xFF;
                 digitArg.color2.alpha = 0xFF;
-                digitArg.unk23 = 0xFF;
-                digitArg.otherModeH = 0;
-                digitArg.unk28 = 0x200004;
-                digitArg.unk2C = 0x9F0601;
-                digitArg.unk40 = 0;
-                digitArg.unk41 = 0;
-                digitArg.combineMode = 0x19;
-                digitArg.unk34 = 0x13;
-                digitArg.unk38 = 0x80;
-                digitArg.unk3C = 0x20;
+                digitArg.colorLevel = 0xFF;
+                digitArg.render.otherModeH = 0;
+                digitArg.render.setGeometryMode = 0x200004;
+                digitArg.render.clearGeometryMode = 0x9F0601;
+                digitArg.render.primMode = 0;
+                digitArg.render.envMode = 0;
+                digitArg.render.renderMode = 0x19;
+                digitArg.render.combiner = 0x13;
+                digitArg.render.colorDither = 0x80;
+                digitArg.render.alphaDither = 0x20;
                 digitArg.viewport = 0;
                 digitArg.offsetS = 0.0f;
                 digitArg.offsetT = 0.0f;

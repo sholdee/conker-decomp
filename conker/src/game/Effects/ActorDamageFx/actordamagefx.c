@@ -194,8 +194,8 @@ void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength) {
 }
 
 /* Spawn one particle_newOwnedSpriteParticle particle at (x, y, z), flying off at a random pitch along `yaw`. */
-s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw,
-                  s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw,
+                  s32 baseYaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 owner) {
     ParticleDesc desc;
     TimedEffect *particle;
     f32 extra;
@@ -204,8 +204,8 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = (math_random() & 0xF) + 20;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -247,7 +247,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.fadeRate = 12;
     desc.scaleStart = 27;
 
-    particle = particle_newOwnedSpriteParticle(&desc, 1, 4, argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, 4, owner, 1);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
     }

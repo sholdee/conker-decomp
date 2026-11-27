@@ -20,12 +20,12 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x08 */ f32 unk8;
+    /* 0x08 */ f32 burstAccum;    /* fractional count of weapon_spawnSmallImpactBurst bursts still to spawn */
     /* 0x0C */ SpriteParticle *particle;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 unk14;
+    /* 0x10 */ f32 steamAccum;    /* the same for particle_spawnSteamParticle */
+    /* 0x14 */ s16 attachSetId;   /* attach_find's setId, used with flags & 1 */
     /* 0x16 */ u8 flags;
-    /* 0x18 */ s32 unk18;
+    /* 0x18 */ s32 sound;         /* sound_playActorSound2 handle; 0 until the sound is started */
 } EffectData; /* size 0x1C */
 
 /* Effect object (TimedEffect is a shorter view of its head). */
@@ -36,7 +36,7 @@ struct PulseEffect {
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
-void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 fxOwner, s32 fxList) {
     EffectData data;
     PulseEffect *effect;
     EffectData *state;
@@ -45,18 +45,18 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    data.unk8 = 0.0f;
+    data.burstAccum = 0.0f;
     data.particle = NULL;
-    data.unk10 = 0.0f;
-    data.unk14 = -1;
+    data.steamAccum = 0.0f;
+    data.attachSetId = -1;
     data.flags = 0;
-    data.unk18 = 0;
+    data.sound = 0;
     if (owner->character_type == 0x34) {
-        data.unk14 = 0x54;
+        data.attachSetId = 0x54;
         data.flags = 1;
     }
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
-                                     0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
+                                     0x40, sizeof(EffectData), fxOwner, fxList);
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));
@@ -72,8 +72,8 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             pulse.amplitude[1] = (math_randomFloat() * 0.25f + 0.200000003f) * pulse.baseSize;
             spawn.texture = *(textures + (math_random() & 3)); // matching: textures[i] reserves an extra temp
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.r = 0;
@@ -105,7 +105,7 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.viewMask = NULL;
             spawn.views = 0xFF;
             spawn.minSize = 0;
-            state->particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
+            state->particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(ParticlePulse), fxOwner, fxList);
             if (state->particle != NULL) {
                 memcpy(&state->particle->data.pulse, &pulse, sizeof(ParticlePulse));
             }
@@ -162,11 +162,11 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         return;
     }
     collision_initHitFromObject(&ground, owner);
-    if (data->unk18 == 0) {
-        data->unk18 = sound_playActorSound2(150, owner, 0x36B0, 400, 0x4268);
+    if (data->sound == 0) {
+        data->sound = sound_playActorSound2(150, owner, 0x36B0, 400, 0x4268);
     }
     if (data->flags & 1) {
-        attachment = attach_find(owner, data->unk14, 0);
+        attachment = attach_find(owner, data->attachSetId, 0);
         if (attachment == NULL) {
             return;
         }
@@ -215,14 +215,14 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         emit = FALSE;
     }
     if (emit) {
-        data->unk8 += (0.1290000081f + math_randomFloat() * 0.1170000061f) * gFrameDelta;
-        while (data->unk8 > 1.0f) {
+        data->burstAccum += (0.1290000081f + math_randomFloat() * 0.1170000061f) * gFrameDelta;
+        while (data->burstAccum > 1.0f) {
             weapon_spawnSmallImpactBurst(&pos, effect->base.header.owner, effect->base.header.kind);
-            data->unk8 -= 1.0f;
+            data->burstAccum -= 1.0f;
         }
     }
-    data->unk10 += (0.1300000101f + math_randomFloat() * 0.2f) * gFrameDelta;
-    if (data->unk10 > 1.0f) {
+    data->steamAccum += (0.1300000101f + math_randomFloat() * 0.2f) * gFrameDelta;
+    if (data->steamAccum > 1.0f) {
         if (sprite_findActorMotion(owner, &wind) == 0) {
             wind = &gZeroVec3f;
         }
@@ -239,8 +239,8 @@ void effect_updatePulseEffect(PulseEffect *effect) {
             particle_spawnSteamParticle(&pos, &vel, 0xC, randF0 * 0.2580000162f + -0.6080000401f, (rand1 % 41U) + 60, (rand0 % 56U) + 200,
                           randF1 * 160.0f + 121.0f, math_randomFloat() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
                           effect->base.header.owner, effect->base.header.kind);
-            data->unk10 -= 1.0f;
-        } while (data->unk10 > 1.0f);
+            data->steamAccum -= 1.0f;
+        } while (data->steamAccum > 1.0f);
     }
 }
 
@@ -265,14 +265,14 @@ void effect_freePulseEffect(PulseEffect *effect) {
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to effect_handleTimedEffectOwnerEvent. */
-void effect_pulseEffectMessage(PulseEffect *effect, s32 arg1, u8 event) {
+void effect_pulseEffectMessage(PulseEffect *effect, s32 event, u8 eventType) {
     EffectData *data = &effect->data;
 
-    if (event == 0x55) {
+    if (eventType == 0x55) {
         data->flags &= ~2;
-    } else if (event == 0x56) {
+    } else if (eventType == 0x56) {
         data->flags |= 2;
     } else {
-        effect_handleTimedEffectOwnerEvent(arg1, event, &data->owner, &data->ownerId, effect);
+        effect_handleTimedEffectOwnerEvent(event, eventType, &data->owner, &data->ownerId, effect);
     }
 }

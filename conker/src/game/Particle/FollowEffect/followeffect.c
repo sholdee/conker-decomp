@@ -65,7 +65,7 @@ void particle_updateFollowEffect(FollowEffect *effect) {
             rightZ = -sinYaw;
             spawn.texture = 40;
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
+            spawn.setGeometryMode = 0x200005;
             spawn.r = 0xFF;
             spawn.g = 0xFF;
             spawn.b = 0xFF;
@@ -73,7 +73,7 @@ void particle_updateFollowEffect(FollowEffect *effect) {
             spawn.r2 = 0xFF;
             spawn.g2 = 0xFF;
             spawn.b2 = 0xFF;
-            spawn.unk4 = 0;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.brightness = 0xFF;
@@ -272,7 +272,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         piece.pos = pos;
         piece.flags = 0x21E8;
         piece.variant = 0;
-        piece.unk5C = 0;
+        piece.zone = 0;
         piece.alpha = 0xFF;
         piece.updateFn = 8;
         piece.update2Fn = 0;
@@ -282,7 +282,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         piece.destroyFn = 0;
         piece.squashFn = 0;
         piece.matrixFn = 2;
-        piece.unk6A = 1;
+        piece.lightMode = 1;
         piece.owner = obj;
         piece.ownerId = obj->unique_id;
         piece.sound = 0;
@@ -444,8 +444,8 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
     drift.drag = 0.8711180091f;
     spawn.texture = 0x6C;
     spawn.renderMode = 0x5103;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r2 = 0x14;
@@ -504,8 +504,8 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.alpha = grow.fadeStart;
         growSpawn.texture = 0x79;
         growSpawn.renderMode = 0x4403;
-        growSpawn.unk0 = 0x200005;
-        growSpawn.unk4 = 0;
+        growSpawn.setGeometryMode = 0x200005;
+        growSpawn.clearGeometryMode = 0;
         growSpawn.frame = 0;
         growSpawn.frameRate = 0;
         growSpawn.r2 = 0xFF;

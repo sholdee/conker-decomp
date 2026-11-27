@@ -99,7 +99,7 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
     packet.spawn.lifetime = duration;
     packet.spawn.model = id;
     packet.spawn.variant = 0;
-    packet.spawn.unk5C = 0;
+    packet.spawn.zone = 0;
     packet.spawn.alpha = 0xFF;
     packet.spawn.updateFn = 0x15;
     packet.spawn.update2Fn = 0;
@@ -109,7 +109,7 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
     packet.spawn.destroyFn = 0;
     packet.spawn.squashFn = 0;
     packet.spawn.matrixFn = 2;
-    packet.spawn.unk6A = 0;
+    packet.spawn.lightMode = 0;
     packet.spawn.owner = NULL;
     packet.spawn.ownerId = 0;
     packet.spawn.fadeStart = 1;
@@ -165,13 +165,13 @@ void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime
     def.scale.y = 1.0f;
     def.scale.z = 1.0f;
     def.flags = 0x45C0081;
-    def.unk44 = 0xFF;
-    def.unk45 = 0xFF;
-    def.unk46 = 0;
-    def.unk47 = 7;
-    def.unk48 = NULL;
+    def.alpha = 0xFF;
+    def.colorLevel = 0xFF;
+    def.primMode = 0;
+    def.envMode = 7;
+    def.zone = NULL;
     def.viewportMask = 0xFF;
-    def.unk50 = 0;
+    def.material = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
 

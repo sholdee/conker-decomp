@@ -379,7 +379,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.rotVel.z = 0.0f;
         state.lifetime = state.ray.dist * 0.004999999888f;
         state.impactType = impactType;
-        desc.unk5C = 0;
+        desc.zone = 0;
         desc.alpha = 255;
         desc.updateFn = 10;
         desc.update2Fn = 0;
@@ -389,7 +389,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.destroyFn = 0;
         desc.squashFn = 0;
         desc.matrixFn = 2;
-        desc.unk6A = 2;
+        desc.lightMode = 2;
         desc.owner = 0;
         desc.ownerId = 0;
         desc.fadeStart = 1;

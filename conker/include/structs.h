@@ -208,7 +208,7 @@ typedef struct EmitterPos {
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
     /* 0x06 */ s16 floorY; // -10000 = no floor
-    /* 0x08 */ u8 unk8;
+    /* 0x08 */ u8 markOnLanding;
 } EmitterPos;
 
 typedef struct ObjectEmitter {
@@ -2081,16 +2081,16 @@ typedef struct TriggerZone {
  */
 typedef struct {
     /* 0x00 */ TriggerZone *zone; /* the zone that set it up; message 0x3F (StageMsg.zone) names it */
-    /* 0x04 */ u8 set;            /* zone->data2: the column of D_800A1C00, the id of message 0x42 */
+    /* 0x04 */ u8 set;            /* zone->data2: the column of gStagePartObjectIds, the id of message 0x42 */
     /* 0x05 */ u8 mirror;         /* set >= 4; bit 0 mirrors the effect angles */
     /* 0x06 */ s16 stageTimer;
     /* 0x08 */ u8 stage;
     /* 0x09 */ u8 pad9[3];
     /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
+    /* 0x2C */ f32 kindSpriteAccum; /* fractional count of particle_spawnKindSprite sprites still to spawn */
+    /* 0x30 */ f32 flareAccum;      /* the same for the flare sprites */
+    /* 0x34 */ f32 debrisAccum;     /* for the debris pieces */
+    /* 0x38 */ f32 burstAccum;      /* for the weapon_spawnImpactBurst bursts */
     /* 0x3C */ s16 eventTimer;
     /* 0x3E */ u8 pad3E[2];
     /* 0x40 */ f32 centerX; /* from the type-3 zone 0x15 of the same set */
@@ -2759,7 +2759,7 @@ typedef struct EffectModelSlot {
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (texture_resolveDl's usedOut)
+    /* 0x10 */ s16 *usedTextures;         // texture ids used by the display list (texture_resolveDl's usedOut)
 } EffectModelSlot; // size 0x14
 
 /* A camera's message ring buffer, gCameraMsgQueues[camera index] (game/Camera/MessageQueue/messagequeue; allocated in game/Camera/CameraViews/cameraviews).
@@ -2877,8 +2877,8 @@ typedef struct BoneTrail {
         Actor *object;
         WorldObject *worldObj;
     } owner;
-    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
-} BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
+    /* 0x14 */ s32 hiddenParts; /* type 0 only: swapped into owner.object->hiddenParts while drawing */
+} BoneTrail; // size 0x18 (type 1 trails are allocated without hiddenParts)
 
 /* One 12-byte entry of the world-mesh triangle table gCurMapTris (built by func_15000F04 in game/Collision/MapBackground/mapbackground):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,

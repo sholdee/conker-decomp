@@ -41,13 +41,13 @@ BulletParticle *weapon_spawnBulletParticle(Bullet *bullet) {
     spawn.def.scale.y = bullet->head.vel.y * 0.25f;
     spawn.def.scale.z = bullet->head.vel.z * 0.25f;
     spawn.def.flags = 0x0CCC0000;
-    spawn.def.unk44 = 0xC8;
-    spawn.def.unk45 = 0xFF;
-    spawn.def.unk46 = 0;
-    spawn.def.unk47 = 6;
-    spawn.def.unk48 = NULL;
+    spawn.def.alpha = 0xC8;
+    spawn.def.colorLevel = 0xFF;
+    spawn.def.primMode = 0;
+    spawn.def.envMode = 6;
+    spawn.def.zone = NULL;
     spawn.def.viewportMask = 0xFF;
-    spawn.def.unk50 = 0;
+    spawn.def.material = 0;
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
@@ -93,7 +93,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     desc.lifetime = 300;
     desc.flags = 0;
     desc.emitter = 3;
-    desc.unk18 = 0;
+    desc.mode = 0;
     return blood_spawnTrail(&desc, 0, fxOwner, fxList);
 }
 
@@ -143,8 +143,8 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     choices = gBulletSpriteTextures;
     spawn.texture = choices.texture[math_random() & 3];
     spawn.renderMode = 0x1303;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0;
     spawn.timer = 300;
     spawn.frame = 0;
     spawn.frameRate = 0;

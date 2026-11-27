@@ -26,7 +26,7 @@
 
 
 /* Creates the spawner task for a stream source. */
-StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2) {
+StreamTask *trail_createStreamTask(TriggerZone *source, u8 owner, s32 list) {
     StreamTask *task;
     StreamSpawner spawner;
 
@@ -35,7 +35,7 @@ StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2) {
     spawner.emitter = NULL;
     spawner.textureIndex = source->data2;
 
-    task = effect_newTimedEffect(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
+    task = effect_newTimedEffect(0x12C, -1, -1, -1, 0, 0x1E, 0x10, owner, list);
     if (task != NULL) {
         memcpy(&task->spawner, &spawner, sizeof(spawner));
     }
@@ -91,12 +91,12 @@ void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event) {
 }
 
 /* Creates the emitter for a stream source. */
-LevelStream *trail_createStreamEmitter(source, textureIndex, id, arg3, arg4)
+LevelStream *trail_createStreamEmitter(source, textureIndex, id, owner, list)
     TriggerZone *source;
     u8 textureIndex;
     s32 id;
-    u8 arg3;
-    s32 arg4;
+    u8 owner;
+    s32 list;
 {
     LevelStream *emitter;
     EffectTemplate template;
@@ -127,13 +127,13 @@ LevelStream *trail_createStreamEmitter(source, textureIndex, id, arg3, arg4)
     data.widthRate = 0.05500000343f;
     data.spawnCount = 0.0f;
     data.id = id;
-    data.unk38 = -16384.0f;
+    data.spawnTc = -16384.0f;
     data.tc = -16384.0f;
     data.unk20 = 0.0f;
     data.textureIndex = textureIndex;
     template.material = 0;
-    template.unk14 = 7;
-    emitter = effect_newEffectObj(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
+    template.shapeKind = 7;
+    emitter = effect_newEffectObj(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, owner, list);
     if (emitter != NULL) {
         memcpy(emitter->data, &data, sizeof(data));
     }
@@ -230,7 +230,7 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
         dx = (emitter->head.tmpl.pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
         dz = (emitter->head.tmpl.pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
         dWidth = (data->baseWidth + sinf(data->widthPhase) * data->widthAmp) - data->width;
-        dTc = data->tc - data->unk38;
+        dTc = data->tc - data->spawnTc;
         width = data->width;
         tc = data->tc;
         gravity = -0.255000025f;
@@ -270,7 +270,7 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
         }
         data->spawnPos = pos;
         data->width = width;
-        data->unk38 = tc;
+        data->spawnTc = tc;
         data->unk20 = unk20;
     }
     return 1;
@@ -594,10 +594,10 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
             packet.scale.y = 0.0f;
             packet.scale.z = 1.0f;
             packet.flags = 0x01CC0061;
-            packet.unk45 = 0xFF;
-            packet.unk46 = 0;
-            packet.unk47 = 7;
-            packet.unk48 = effect->zone;
+            packet.colorLevel = 0xFF;
+            packet.primMode = 0;
+            packet.envMode = 7;
+            packet.zone = effect->zone;
             do {
                 // matching: `+ -1308.0f` (add.s); `- 1308.0f` emits sub.s
                 packet.rot.x = (math_randomFloat() * 409.0f + -1308.0f) * 0.001f;
@@ -607,7 +607,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
                 math_randomZoneFootprintPoint(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
                 if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
-                    packet.unk44 = math_random() % 101U + 155;
+                    packet.alpha = math_random() % 101U + 155;
                     particle_newQuadParticle(&packet, &gWhiteVtxColors, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
                 }
                 effect->accumulator -= 1.0f;
@@ -632,7 +632,7 @@ s32 trail_integrateScalarMotion(TrailScalarMotion *motion) {
 }
 
 /* Spawns a trail effect that follows owner (or anchor, when given). */
-WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg3, s32 arg4) {
+WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 smooth, u8 fxOwner, s32 fxList) {
     EffectTemplate spawn;
     WaveTrailData info;
     WaveTrail *trail;
@@ -643,7 +643,7 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2,
     spawn.life = 300;
     spawn.flags = 16;
     spawn.kind = 17;
-    spawn.unk14 = 3;
+    spawn.shapeKind = 3;
 
     info.owner = owner;
     if (owner != NULL) {
@@ -657,7 +657,7 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2,
     info.anchor = anchor;
     info.scaled.x = 0.0f;
     info.normal.x = 0.0f;
-    if (arg2) {
+    if (smooth) {
         flags = WAVE_TRAIL_SMOOTH;
     } else {
         flags = 0;
@@ -674,7 +674,7 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2,
         spawn.pos.z = 0.0f;
     }
 
-    trail = effect_newEffectObj(&spawn, 40, 40, 0, 15, 15, 0, 0, 0, arg3, arg4);
+    trail = effect_newEffectObj(&spawn, 40, 40, 0, 15, 15, 0, 0, 0, fxOwner, fxList);
     if (trail != NULL) {
         memcpy(trail->data, &info, sizeof(info));
     }
@@ -1025,12 +1025,12 @@ Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
 }
 
 /* Message handler of a following actor: lets effect_handleOwnerActorEvent update or end the link to its owner. */
-void trail_onFollowerMessage(TrackerTrail *actor, s32 arg1, u8 arg2) {
+void trail_onFollowerMessage(TrackerTrail *actor, s32 event, u8 eventType) {
     TrackerTrailData *data = actor->state;
 
     if (data->owner != NULL) {
         // the owner pointer and the byte after it are handled like an actor reference
-        effect_handleOwnerActorEvent(arg1, arg2, (Actor **)&data->owner, (u8 *)&data->texture, actor);
+        effect_handleOwnerActorEvent(event, eventType, (Actor **)&data->owner, (u8 *)&data->texture, actor);
     }
 }
 
@@ -1047,7 +1047,7 @@ typedef struct {
 
 /* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
-void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
+void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 bottom) {
     Camera *player;
     Vec3f spawnPos;
     Vec3f *camPos;
@@ -1069,7 +1069,7 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
             spawnPos.y = probeY;
             spawnPos.z = camPos->z - (cosf(angle) * distance);
 
-            if (collision_probeFloorSurfABSet0Cached(&spawnPos, 0, arg2, &D_800D9860) != 0) {
+            if (collision_probeFloorSurfABSet0Cached(&spawnPos, 0, bottom, &D_800D9860) != 0) {
                 spawnPos.y = D_800D9860.height;
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
@@ -1094,7 +1094,7 @@ static const Vec3f gBreakPiecePoints[7] = {
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
-void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
+void trail_breakApart(Actor *obj, u8 owner, s32 list) {
     Vec3f vecB;
     Vec3f pos;
     Vec3f vecA;
@@ -1121,14 +1121,14 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             piece.scale.z = 1.0f;
             piece.rotVel.y = 0.0f;
             piece.variant = 0;
-            piece.unk5C = 0;
+            piece.zone = 0;
             piece.alpha = 0xFF;
             piece.update2Fn = 0;
             piece.floorType3Fn = 0;
             piece.wallHitFn = 0;
             piece.destroyFn = 0;
             piece.squashFn = 0;
-            piece.unk6A = 1;
+            piece.lightMode = 1;
             piece.owner = obj;
             piece.ownerId = obj->unique_id;
             piece.fadeStart = 12;
@@ -1150,7 +1150,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = (math_randomFloat() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (math_randomFloat() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (math_random() % 101U) + 100;
-                particle_newModelParticle(&piece, 3, 0xFF, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 3, 0xFF, 0, owner, list);
             }
         }
         {
@@ -1185,20 +1185,20 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             cfg.blue = 0;
             cfg.alphaBase = 150;
             cfg.alphaRange = 105;
-            cfg.unk58 = 3;
-            cfg.unk5C = 0xFF;
-            cfg.render.unk0 = 0;
+            cfg.maxLights = 3;
+            cfg.lightMask = 0xFF;
+            cfg.render.otherModeH = 0;
             cfg.render.setGeometryMode = 0x220005;
             cfg.render.clearGeometryMode = 0x1D0600;
             cfg.render.renderMode = 3;
-            cfg.render.unk10 = 0x3B;
-            cfg.render.unk14 = 0x80;
-            cfg.render.unk18 = 0x20;
+            cfg.render.combiner = 0x3B;
+            cfg.render.colorDither = 0x80;
+            cfg.render.alphaDither = 0x20;
             cfg.render.primMode = 0;
             cfg.render.envMode = 7;
-            cfg.unk80 = 10;
-            cfg.unk82 = 25;
-            particle_spawnPuffSpray(&cfg, arg1, arg2);
+            cfg.fadeStart = 10;
+            cfg.fadeRate = 25;
+            particle_spawnPuffSpray(&cfg, owner, list);
         }
         {
             DecalSpray cfg2;
@@ -1213,10 +1213,10 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             cfg2.maxDistance = 375.0f;
             cfg2.sizeBase = 20.0f;
             cfg2.sizeRange = 40.0f;
-            cfg2.unk28 = 120;
-            cfg2.unk2A = 120;
+            cfg2.alphaBase = 120;
+            cfg2.alphaRange = 120;
             cfg2.kind = 2;
-            particle_spawnDecalSpray(&cfg2, arg1, arg2);
+            particle_spawnDecalSpray(&cfg2, owner, list);
         }
         {
             CollisionHit floor;
@@ -1225,7 +1225,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
 
             collision_initHitFromObject(&floor, obj);
             flag = 2;
-            beam_spawnAtGroundPoints(&pos, pos.y - 2000.0f, 200.0f, &floor, (math_random() & 3) + 7, 0, &flag, arg1, arg2);
+            beam_spawnAtGroundPoints(&pos, pos.y - 2000.0f, 200.0f, &floor, (math_random() & 3) + 7, 0, &flag, owner, list);
         }
     }
 }
@@ -1240,7 +1240,7 @@ void trail_notifyFollowersGone(Actor *obj) {
 }
 
 /* Spawns a strip effect of the given variant on the object. */
-void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
+void trail_spawnStripEffect(Actor *obj, u8 variant, u8 owner, s32 list) {
     StripEffect *effect;
     StripEffectData data;
 
@@ -1251,7 +1251,7 @@ void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     data.alpha = (math_random() % 56U) + 200;
     data.ownerUnk84 = obj->animseq.uh;
 
-    effect = effect_newTimedEffect(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(300, -1, 0x61, 4, 0, 0x31, sizeof(data), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1456,7 +1456,7 @@ static const Vec3f gLineBurstEnd = { 0.0f, 29.0f, 131.0f };
 
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a trail_spawnWaveTrail effect. */
-void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
+void trail_emitLineBursts(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
     Vec3f dir;
     CollisionHit floor;
@@ -1493,8 +1493,8 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             emitA.lifeRange = 30;
             emitA.gravityBase = -1.467000127f;
             emitA.gravityRange = 0.756000042f;
-            emitA.unk24 = 155;
-            emitA.unk25 = 100;
+            emitA.alphaBase = 155;
+            emitA.alphaRange = 100;
             emitA.sizeBase = 403.0f;
             emitA.sizeRange = 455.0f;
             emitA.unk30 = 1;
@@ -1503,7 +1503,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             emitA.wobbles = 1;
             emitA.bounceChance = 0.0f;
             shape.spread = 750.0f;
-            particle_spawnDropSpray(&shape, &emitA, &floor, arg1, arg2);
+            particle_spawnDropSpray(&shape, &emitA, &floor, owner, list);
         }
         {
             SplashSpray emitB;
@@ -1521,15 +1521,15 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             emitB.itemCountRange = 2;
             emitB.lifeBase = 30;
             emitB.lifeRange = 25;
-            emitB.unk30 = 155;
-            emitB.unk32 = 100;
-            emitB.unk38 = 0.0f;
-            emitB.unk3C = 16;
-            emitB.unk3E = 15;
-            emitB.unk40 = 0;
+            emitB.alphaBase = 155;
+            emitB.alphaRange = 100;
+            emitB.burstChance = 0.0f;
+            emitB.fadeStart = 16;
+            emitB.fadeRate = 15;
+            emitB.material = 0;
             emitB.kind = 2;
             shape.spread = 750.0f;
-            particle_spawnSplashSpray(&shape, &emitB, &floor, arg1, arg2);
+            particle_spawnSplashSpray(&shape, &emitB, &floor, owner, list);
         }
         if (particle_completeConeBasis(&shape) != 0) {
             s32 count;
@@ -1541,8 +1541,8 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             count = (math_random() % 6U) + 5;
             spawn.texture = 0x3E;
             spawn.renderMode = 0x2203;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0;
+            spawn.setGeometryMode = 0x200005;
+            spawn.clearGeometryMode = 0;
             spawn.frame = 0;
             spawn.frameRate = 0;
             spawn.r = 0;
@@ -1577,9 +1577,9 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             while (count != 0) {
                 particle_getRandomConeDir(&shape, (math_randomFloat() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
                 spawn.gravity = (math_randomFloat() * 1.340000033f) + -2.328999996f;
-                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg1, arg2);
+                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, owner, list);
                 if (particle != NULL) {
-                    particle->effect = trail_spawnWaveTrail(NULL, &particle->head, 0, arg1, arg2);
+                    particle->effect = trail_spawnWaveTrail(NULL, &particle->head, 0, owner, list);
                 }
                 count--;
             }
@@ -1611,7 +1611,7 @@ void trail_freeCarrierParticle(CarrierParticle *particle) {
 static s32 (*gTrackerPointProcs[])(Actor *obj, Vec3f *out) = { trail_getPointAboveFloor, trail_getModelPoint0, trail_getModelPoint1 };
 
 /* Spawns a tracker effect that follows the object's point gTrackerPointProcs[pointFn]. */
-void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
+void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 owner, s32 list) {
     TrackerEffect *effect;
     TrackerData data;
 
@@ -1628,7 +1628,7 @@ void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
-    effect = effect_newTimedEffect(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1707,8 +1707,8 @@ void trail_updateTrackerEffect(TrackerEffect *effect) {
 }
 
 /* Message handler of the tracker effect: lets effect_handleOwnerActorEvent update or end the link to its owner. */
-void trail_onTrackerMessage(TrackerEffect *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void trail_onTrackerMessage(TrackerEffect *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Tracker teardown: lets go of the trail. */
@@ -1779,7 +1779,7 @@ void trail_spawnTrackerTrail(TrackerEffect *effect) {
     req.spawn.life = 300;
     req.spawn.flags = 54;
     req.spawn.kind = 19;
-    req.spawn.unk14 = 6;
+    req.spawn.shapeKind = 6;
     req.spawn.material = 0;
     trail = effect_newEffectObj(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {

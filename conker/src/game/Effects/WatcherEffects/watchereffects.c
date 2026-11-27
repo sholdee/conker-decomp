@@ -134,7 +134,7 @@ WatcherEmitter *effect_attachRisingEmitter(Actor *character, Watcher *watcher) {
     desc.flags = 10;        /* on a bone (2), no previous position yet (8) */
     desc.emitter = 5;
     desc.callback = 2;
-    desc.unk2D = 3;
+    desc.handlerSet = 3;
     emitter = blood_spawnDrip(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(WatcherEmitterLink));
@@ -150,8 +150,8 @@ void effect_spawnRisingParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Wat
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.r = desc.g = desc.b = desc.a = desc.r2 = desc.g2 = desc.b2 = 0;
     desc.frame = desc.frameRate = 0;
     desc.brightness = 0xFF;
@@ -282,16 +282,16 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
             def.texture = 0x38;
             def.flags = 0x20300;
             def.lifetime = 300;
-            def.unk10 = 150;
+            def.alpha = 150;
             def.frame = 0;
-            def.unk11 = 0xFF;
+            def.colorLevel = 0xFF;
             def.rgba[0] = gKindColors[color].r;
             def.rgba[1] = gKindColors[color].g;
             def.rgba[2] = gKindColors[color].b;
             def.rgba[3] = 0xFF;
             def.renderModes = 0x440001;
-            def.unk16 = 0;
-            def.unk17 = 6;
+            def.primMode = 0;
+            def.envMode = 6;
             rand0 = math_random();
             rand1 = math_random();
             rand2 = math_random();

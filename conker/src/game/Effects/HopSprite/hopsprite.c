@@ -16,12 +16,12 @@ s32 gTile0ScrollT = 0;
 s32 gTile1ScrollS = 0;
 s32 gTile1ScrollT = 0;
 
-void func_150CF530(s32 arg0) {
+void effect_spawnGroundFxNearPlayer(TimedEffect *object) {
     trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Advances the texture scroll offsets by the frames elapsed. */
-void effect_scrollTileTextures(s32 arg0) {
+void effect_scrollTileTextures(s32 unused) {
     gTile0ScrollS += gFrameTicks * 26;
     gTile0ScrollT -= gFrameTicks * 28;
     gTile1ScrollS -= gFrameTicks * 28;
@@ -52,11 +52,7 @@ typedef struct {
 
 /* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game/Sprite/ScreenSprite/screensprite.c, 0x70 bytes) with its motion data. */
 struct HopSprite {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec2f pos;
     /* 0x18 */ u8 pad18[0x70 - 0x18];
     /* 0x70 */ union {
@@ -86,8 +82,8 @@ void effect_spawnHopSprite(s16 unk12, u8 unkC, s32 unk1) {
     spawn.color2.green = 0xFF;
     spawn.color2.blue = 0xFF;
     spawn.color2.alpha = 0xFF;
-    spawn.unk23 = 0xFF;
-    spawn.unk28 = 0x200004;
+    spawn.colorLevel = 0xFF;
+    spawn.render.setGeometryMode = 0x200004;
 
     hop.flags = 0;
     hop.phase = 0.0f;
@@ -96,14 +92,14 @@ void effect_spawnHopSprite(s16 unk12, u8 unkC, s32 unk1) {
     hop.distance = 0.0f;
     spawn.halfHeight = 7.5f;
     spawn.halfWidth = 7.5f;
-    spawn.otherModeH = 0;
-    spawn.unk2C = 0x9F0601;
-    spawn.unk40 = 0;
-    spawn.unk41 = 10;
-    spawn.combineMode = 0x17;
-    spawn.unk34 = 0x44;
-    spawn.unk38 = 0x80;
-    spawn.unk3C = 0x20;
+    spawn.render.otherModeH = 0;
+    spawn.render.clearGeometryMode = 0x9F0601;
+    spawn.render.primMode = 0;
+    spawn.render.envMode = 10;
+    spawn.render.renderMode = 0x17;
+    spawn.render.combiner = 0x44;
+    spawn.render.colorDither = 0x80;
+    spawn.render.alphaDither = 0x20;
     spawn.scaleY = 1.0f;
     spawn.scaleX = 1.0f;
     spawn.offsetT = 0.0f;
@@ -149,16 +145,16 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
             spawn.color2.green = 0xFF;
             spawn.color2.blue = 0xFF;
             spawn.color2.alpha = 0xFF;
-            spawn.unk23 = 0xFF;
-            spawn.otherModeH = 0;
-            spawn.unk28 = 0x200004;
-            spawn.unk2C = 0x9F0601;
-            spawn.unk40 = 0;
-            spawn.unk41 = 10;
-            spawn.combineMode = 0x17;
-            spawn.unk34 = 0x44;
-            spawn.unk38 = 0x80;
-            spawn.unk3C = 0x20;
+            spawn.colorLevel = 0xFF;
+            spawn.render.otherModeH = 0;
+            spawn.render.setGeometryMode = 0x200004;
+            spawn.render.clearGeometryMode = 0x9F0601;
+            spawn.render.primMode = 0;
+            spawn.render.envMode = 10;
+            spawn.render.renderMode = 0x17;
+            spawn.render.combiner = 0x44;
+            spawn.render.colorDither = 0x80;
+            spawn.render.alphaDither = 0x20;
             spawn.scaleX = 1.0f;
             spawn.scaleY = 1.0f;
             spawn.offsetT = 0.0f;
@@ -184,7 +180,7 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
                     rand = 0;
                 }
                 spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
-                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->header.owner, hopper->header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }

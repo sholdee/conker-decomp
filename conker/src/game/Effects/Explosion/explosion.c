@@ -86,7 +86,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
         spawn.rotVel.y = 0.0f;
         spawn.flags = 0x29E9;
         spawn.variant = 0;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 255;
         spawn.updateFn = 13;
         spawn.update2Fn = 0;
@@ -96,7 +96,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 35;

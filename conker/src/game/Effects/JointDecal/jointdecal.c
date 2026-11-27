@@ -14,8 +14,8 @@ struct Queue *gGroundDecalQueue = NULL; /* ground decals (effect_spawnJointStepE
  * Spawns the effects for one of obj's joints (side 0: joint 0x11, side 1: joint 0x1A): a sound,
  * two particle bursts and, when the ground below is found, a ground decal.
  */
-// matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
-void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
+// matching: each `*(u8 *)&owner` reloads owner from its stack slot; plain or K&R owner is kept in a register
+void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 owner) {
     Vec3f pos;
     s32 joint;
     s32 yaw;
@@ -48,9 +48,9 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
     math_getBoneTranslation((s32)obj->ob_matrix_ptr, joint, &pos);
     pos.y = obj->floorY;
     math_shakeIfPlayerInZone(5, 0x4022);
-    effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
+    effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&owner, 1);
     particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 50.0f + 40.0f, yaw + 60, yaw - 60,
-                  math_random() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
+                  math_random() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&owner);
     collision_initHitFromObject(&ground, obj);
     probe.x = pos.x;
     probe.y = pos.y + 100.0f;
@@ -58,35 +58,35 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
     if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = math_randomFloat() * 200.0f + 200.0f;
         desc.texture = 0x2A;
-        desc.unk7 = 0;
+        desc.handlerSet = 0;
         desc.flags = 0x7340;
         desc.lifetime = 300;
         desc.frame = 0;
         desc.frameSpeed = math_random() % 2001U + 2000;
-        desc.unk10 = 0xFF;
-        desc.unk11 = 0xFF;
+        desc.alpha = 0xFF;
+        desc.colorLevel = 0xFF;
         desc.rgba[0] = 0;
         desc.rgba[1] = 0;
         desc.rgba[2] = 0;
         desc.rgba[3] = 0xFF;
-        desc.unk16 = 0;
-        desc.unk17 = 0xD;
+        desc.primMode = 0;
+        desc.envMode = 0xD;
         desc.viewportMask = 0xFF;
-        desc.unk1C = 0;
+        desc.material = 0;
         desc.renderModes = 0x170002;
         decal = particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
-                              math_random() & 0xFF, (math_random() & 1) * 2 + (math_random() & 1), 4, *(u8 *)&arg2, 0);
+                              math_random() & 0xFF, (math_random() & 1) * 2 + (math_random() & 1), 4, *(u8 *)&owner, 0);
         if (decal != NULL && effect_pushQueue(gGroundDecalQueue, decal, 1) == 0) {
             effect_destroyObject(&decal->header);
         }
     }
     particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 40.0f + 60.0f, yaw + 60, yaw - 60,
-                  math_random() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
+                  math_random() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&owner);
 }
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
-s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
-                  s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 effect_spawnJointSpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
+                  s32 baseAngle, f32 radius, s32 argB, s32 argC, void *data, u8 owner) {
     f32 speed;
     SparkParticle *particle;
     ParticleDesc68 desc;
@@ -102,8 +102,8 @@ s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     sinYaw = math_cosBinAngleMasked(yaw);
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
-    desc.unk0 = 0x200005;
-    desc.unk4 = 0;
+    desc.setGeometryMode = 0x200005;
+    desc.clearGeometryMode = 0;
     desc.timer = math_random() % 36U + 70;
     desc.frame = 0;
     desc.frameRate = 0;
@@ -144,7 +144,7 @@ s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.scaleStart = 1;
     desc.scaleRate = 1.02f;
     damping = 0.95f;
-    particle = particle_newOwnedSpriteParticle(&desc, 0, sizeof(damping), argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 0, sizeof(damping), owner, 1);
     if (particle != NULL) {
         memcpy(&particle->damping, &damping, sizeof(damping));
     }
@@ -152,7 +152,7 @@ s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
 }
 
 /* Per-frame update of a effect_spawnJointSpark particle: damps its horizontal velocity once per elapsed frame. */
-s32 effect_dampJointSparkXZ(SparkParticle *particle, s32 arg1) {
+s32 effect_dampJointSparkXZ(SparkParticle *particle, Vec3f *prevPos) {
     s32 i;
     f32 *damping; // matching: reading particle->damping directly changes the loop code
 
@@ -178,16 +178,16 @@ s32 effect_updateFadeQuadSprite(FadeQuadSprite *sprite) {
 
     if (sprite->quad.def.lifetime < sprite->fadeStart) {
         alpha = sprite->quad.def.lifetime * sprite->fadeStep;
-        if (alpha < sprite->quad.def.unk10) {
-            sprite->quad.def.unk10 = alpha;
+        if (alpha < sprite->quad.def.alpha) {
+            sprite->quad.def.alpha = alpha;
         }
     }
     return 1;
 }
 
 /* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
-s32 effect_spawnJointPiece(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
-                  s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+s32 effect_spawnJointPiece(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
+                  s32 baseAngle, f32 radius, s32 arg11, s32 arg12, void *data, u8 owner) {
     s16 pitch;
     f32 cosYaw;
     f32 sinYaw;
@@ -232,7 +232,7 @@ s32 effect_spawnJointPiece(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     scale = math_randomFloat() * 18.80000114f + 5.6f;
     piece.model = 31;
     piece.variant = 0;
-    piece.unk5C = 0;
+    piece.zone = 0;
     piece.sizeXZ = scale;
     piece.alpha = 0xFF;
     piece.updateFn = 1;
@@ -243,13 +243,13 @@ s32 effect_spawnJointPiece(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     piece.destroyFn = 0;
     piece.squashFn = 0;
     piece.matrixFn = 0;
-    piece.unk6A = 0;
+    piece.lightMode = 0;
     piece.owner = 0;
     piece.ownerId = 0;
     piece.fadeStart = 1;
     piece.fadeRate = 0xFF;
     piece.sizeY = scale;
 
-    particle_newModelParticle(&piece, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&piece, 3, 0xFF, 0, owner, 0);
     return 1;
 }

@@ -15,7 +15,7 @@ void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *p
 
 
 /* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */
-void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
+void func_150E0870(Actor *obj, u8 owner, s32 list) {
     Vec3f origin;
     Vec3f impact;
     u8 hitGround;
@@ -45,17 +45,17 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
             impact.y = hit.height;
             impact.z = top.z;
             particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, math_random() % 101U + 155, &hit.tri, &impact,
-                          math_random() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+                          math_random() % 302U + 500, 0, 1, 0, 0, 0, owner, 0);
         }
     }
-    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
-    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-    particle_spawnBlastSpray(&origin, arg1, arg2);
-    particle_spawnLightFlash(&origin, arg1, arg2);
-    particle_startRandomEmitter(hitGround ? &impact : &origin, math_random() % 62U + 120, arg1, arg2);
-    particle_spawnGrowFade(&origin, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, arg1,
-                  arg2);
-    blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, arg1, arg2);
+    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 15, 20, owner, list);
+    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 5, owner, list);
+    particle_spawnBlastSpray(&origin, owner, list);
+    particle_spawnLightFlash(&origin, owner, list);
+    particle_startRandomEmitter(hitGround ? &impact : &origin, math_random() % 62U + 120, owner, list);
+    particle_spawnGrowFade(&origin, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, owner,
+                  list);
+    blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, owner, list);
     particle_runAttackPairAt(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
 }
 

@@ -100,7 +100,7 @@ void effect_spawnObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     spawn.colorLevelBase = 0xFF;
     spawn.colorLevelRange = 0;
     spawn.renderMode = 3;
-    spawn.unk21 = 36;
+    spawn.combiner = 36;
     spawn.setGeometryMode = 0x200005;
     spawn.clearGeometryMode = 0x60600;
     spawn.fadeStart = 8;
@@ -108,8 +108,8 @@ void effect_spawnObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     spawn.shrinkStart = 1;
     spawn.shrinkPaused = 0;
     spawn.shrinkFactor = 1.0f;
-    spawn.unk38 = -1;
-    spawn.unk39 = 0;
+    spawn.moveFn = -1;
+    spawn.shapeFn = 0;
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
@@ -162,7 +162,7 @@ void effect_spawnLargeObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     spawn.colorLevelBase = 0xFF;
     spawn.colorLevelRange = 0;
     spawn.renderMode = 3;
-    spawn.unk21 = 36;
+    spawn.combiner = 36;
     spawn.setGeometryMode = 0x200005;
     spawn.clearGeometryMode = 0x60600;
     spawn.fadeStart = 8;
@@ -170,8 +170,8 @@ void effect_spawnLargeObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     spawn.shrinkStart = 1;
     spawn.shrinkPaused = 0;
     spawn.shrinkFactor = 1.0f;
-    spawn.unk38 = -1;
-    spawn.unk39 = 0;
+    spawn.moveFn = -1;
+    spawn.shapeFn = 0;
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
@@ -188,8 +188,8 @@ void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
 
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4403;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x20000;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x20000;
     spawn.timer = math_random() % 7U + 4;
     spawn.frame = 0;
     spawn.frameRate = 0;

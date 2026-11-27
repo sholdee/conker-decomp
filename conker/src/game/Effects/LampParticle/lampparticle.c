@@ -35,7 +35,7 @@ typedef struct {
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (gLightEffectUpdates slot 7) that
  * follows it, and a beam shining from it. */
-void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
+void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list) {
     void *obj; // matching: one local holds the lamp, then the effect (two locals shift the stack)
     ParticleSpawn spawn;
     LampSwing swing;
@@ -68,8 +68,8 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     spawn.lifetime = 300;
     spawn.model = 0x22;
     collision_selectMap(0);
-    spawn.unk5C = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
-    spawn.flags = (spawn.unk5C ? 0x400 : 0) | 0x100 | 0x800;
+    spawn.zone = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
+    spawn.flags = (spawn.zone ? 0x400 : 0) | 0x100 | 0x800;
     spawn.variant = 0;
     spawn.alpha = 255;
     spawn.updateFn = 9;
@@ -80,12 +80,12 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 4;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = NULL;
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 255;
-    obj = particle_newModelParticle(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
+    obj = particle_newModelParticle(&spawn, 3, 255, sizeof(LampSwing), owner, list);
     if (obj != NULL) {
         LightEffectHeader header;
 
@@ -101,7 +101,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
             header.update = 7;
             header.lifetime = 300;
             header.lightType = 0x12;
-            obj = light_createEffect(&header, light, sizeof(data), arg2, arg3);
+            obj = light_createEffect(&header, light, sizeof(data), owner, list);
             if (obj != NULL) {
                 state = (SwingingLight *)&((LightEffect *)obj)->data;
                 memcpy(state, &data, sizeof(data));
@@ -157,13 +157,13 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
                     desc.scale.y = 1.0f;
                     desc.scale.z = 1.0f;
                     desc.flags = 0x1CD2006;
-                    desc.unk44 = 255;
-                    desc.unk45 = 255;
-                    desc.unk46 = 0;
-                    desc.unk47 = 6;
-                    desc.unk48 = spawn.unk5C;
+                    desc.alpha = 255;
+                    desc.colorLevel = 255;
+                    desc.primMode = 0;
+                    desc.envMode = 6;
+                    desc.zone = spawn.zone;
                     desc.viewportMask = 255;
-                    state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
+                    state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, owner, list);
                 }
             }
         }

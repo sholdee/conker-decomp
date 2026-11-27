@@ -97,7 +97,7 @@ WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emi
     desc.flags = 10;
     desc.emitter = 4;
     desc.callback = 1;
-    desc.unk2D = 2;
+    desc.handlerSet = 2;
     obj = blood_spawnDrip(&desc, 12, 0xFF, 0);
     if (obj != NULL) {
         memcpy(&obj->link, &link, sizeof(link));
@@ -113,8 +113,8 @@ void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, 
 
     burst.texture = 47;
     burst.renderMode = 0xC01;
-    burst.unk0 = 0x200005;
-    burst.unk4 = 0;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0;
     burst.b2 = 0;
     burst.g2 = 0;
     burst.r2 = 0;
@@ -252,16 +252,16 @@ FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
             desc.texture = 56;
             desc.flags = 0x20300;
             desc.lifetime = 300;
-            desc.unk10 = 150;
+            desc.alpha = 150;
             desc.frame = 0;
-            desc.unk11 = 0xFF;
+            desc.colorLevel = 0xFF;
             desc.rgba[0] = gKindColors[colorIndex].r;
             desc.rgba[1] = gKindColors[colorIndex].g;
             desc.rgba[2] = gKindColors[colorIndex].b;
             desc.rgba[3] = 0xFF;
             desc.renderModes = 0x440001;
-            desc.unk16 = 0;
-            desc.unk17 = 6;
+            desc.primMode = 0;
+            desc.envMode = 6;
             rand0 = math_random();
             rand1 = math_random();
             rand2 = math_random();

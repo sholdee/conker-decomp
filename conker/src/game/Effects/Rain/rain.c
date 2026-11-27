@@ -243,8 +243,8 @@ void effect_spawnRainDrop(s32 scatterY, s32 dropFlags) {
     packet.y = y;
     packet.x = x;
     packet.z = z;
-    packet.unk92 = 4;
-    packet.unk94 = rand + 35;
+    packet.halfWidth = 4;
+    packet.halfHeight = rand + 35;
     packet.flags = 0x8C00;
     packet.speed = rand + 10;
     packet.dropFlags = dropFlags;
@@ -282,7 +282,7 @@ void effect_updateRainDrop(QuadFx *drop) {
         alpha = 0;
     }
     heading = drop->data.heading;
-    drop->data.unkA4 = alpha;
+    drop->data.alpha = alpha;
     heading += (u32)(gWindStrength * 16 * ((math_randomU8() & 0xFF) + 128)) >> 9;
     heading = heading * 0.888890028f;
     if (heading > 0x3200) {
@@ -328,7 +328,7 @@ void effect_updateRainDrop(QuadFx *drop) {
         if (wrapped) {
             drop->data.dropFlags = dropFlags ^ 1;
         } else {
-            drop->data.unkA4 = 0;
+            drop->data.alpha = 0;
         }
     }
 }
@@ -383,8 +383,8 @@ void effect_spawnRainSplashes(s32 count) {
             packet.x = x;
             packet.y = groundY;
             packet.z = z;
-            packet.unk94 = 25;
-            packet.unk92 = 25;
+            packet.halfHeight = 25;
+            packet.halfWidth = 25;
             packet.floorY = 0;
             packet.callback = 0xE;
             packet.animIndex = 0x12;
@@ -405,5 +405,5 @@ void effect_updateRainSplash(QuadFx *splash) {
     dx = splash->data.z - camera_global_Cameras->eye.z;
     dz = splash->data.x - camera_global_Cameras->eye.x;
     dist = sqrtf((dx * dx) + (dz * dz));
-    splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
+    splash->data.alpha = 255.0f - (160.0f * dist) / 1000.0f;
 }

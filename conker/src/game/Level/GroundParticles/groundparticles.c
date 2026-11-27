@@ -41,7 +41,7 @@ void func_150121C0(LightEffect *effect) {
     stack.payload.variant = 0;
 
     collision_selectMap(0);
-    stack.payload.unk5C = collision_findZoneLeaf(D_80096550.x, D_80096550.z);
+    stack.payload.zone = collision_findZoneLeaf(D_80096550.x, D_80096550.z);
     stack.payload.alpha = 0xFF;
     stack.payload.updateFn = 0;
     stack.payload.update2Fn = 6;
@@ -51,7 +51,7 @@ void func_150121C0(LightEffect *effect) {
     stack.payload.destroyFn = 0;
     stack.payload.squashFn = 0;
     stack.payload.matrixFn = 3;
-    stack.payload.unk6A = 0;
+    stack.payload.lightMode = 0;
     stack.payload.owner = NULL;
     stack.payload.ownerId = 0;
     stack.payload.fadeStart = 1;
