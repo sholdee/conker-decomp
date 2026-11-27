@@ -154,11 +154,12 @@ enum LevelId {
     /* 65 */ LEVEL_W3_HORROR_INTRO,
     /* 66 */ LEVEL_W1_BRONTO_THROAT,
     /* 67 */ LEVEL_W1_RAPTOR_NEST,
-    /* 68 */ LEVEL_W1_RAPTOR_NEST_FLOODED
+    /* 68 */ LEVEL_W1_RAPTOR_NEST_FLOODED,
+    LEVEL_COUNT /* ours: the per-level tables (gPlayedCutscenes) have 69 entries */
 };
 
 extern s32 level; // the current map
-extern s32 gNextLevel; // current scene / game mode id
+extern s32 gNextLevel; // the level to load next (enum LevelId; game_requestLevelChange)
 extern s32 gPrevLevel; // the previous map
 extern s32 gNextMatchPlayerMask;
 extern s32 gNextMatchMode;

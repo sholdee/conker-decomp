@@ -1734,7 +1734,7 @@ void actor_refreshModelUnload(Actor *arg0) {
     u8 id = obj->character_type;
     u8 *counter;
 
-    if (gExpansionPak == 0 && level == 0x1D) {
+    if (gExpansionPak == 0 && level == LEVEL_FRONTEND) {
         gModelUnloadTimers[id] = 2;
         return;
     }

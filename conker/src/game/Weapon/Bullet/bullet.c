@@ -319,7 +319,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         dir.z *= 0.001000000047f;
     }
 
-    if (level == 36) {
+    if (level == LEVEL_WMP_TANK) {
         mode = 0;
     } else {
         mode = particle_raySphereObjectMask(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);

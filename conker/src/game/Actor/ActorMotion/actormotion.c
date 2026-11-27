@@ -829,7 +829,7 @@ void actor_updateChaseAi(Actor *actor) {
             f32 h;
 
             h = ty + 70.0f;
-            if (level == 0x26) {
+            if (level == LEVEL_W2_MACHINEGUNNEST) {
                 h -= 45.0f * actor->scale_y;
             }
             ang = actor_getDirectionAngle(sqrtf(distSqXZ), h, 0);
@@ -1291,13 +1291,13 @@ void actor_applyWaterCurrent(Actor *actor) {
     pathIdx = -1;
 
     switch (level) {
-        case 4:
+        case LEVEL_W2_OUTSIDE_MOLEHOLE:
             actor_easePushVelocity(actor, 0x4000, 50.0f, 0.05999999865889549f);
             break;
-        case 6:
+        case LEVEL_THE_WINDMILL:
             pathIdx = collision_findSpawnById(28);
             break;
-        case 41:
+        case LEVEL_W1_TRAINING:
             if (zone_isActorOutsideId(dc_glbl_CharNum, 0x4028) == 0) {
                 id = 12;
             } else if (zone_isActorOutsideId(dc_glbl_CharNum, 0x400E) == 0) {
@@ -1310,10 +1310,10 @@ void actor_applyWaterCurrent(Actor *actor) {
             pathIdx = collision_findSpawnById(id);
         split: // matching: label steers IDO register allocation for id
             break;
-        case 43:
+        case LEVEL_WMP_BEACH:
             pathIdx = collision_findSpawnById(18);
             break;
-        case 65:
+        case LEVEL_W3_HORROR_INTRO:
             if (zone_isActorOutsideId(dc_glbl_CharNum, 0x401F) == 0) {
                 id = 27;
             } else {
@@ -1865,7 +1865,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
             }
             actor->unk100 &= 0xFD;
             if (((actor->floorMaterial >> 12) & 0xF) == 1) {
-                if (level == 0x14) {
+                if (level == LEVEL_W1_DINO_ARENA) {
                     blood_spawnDeathEffects(actor, 0xFF, 1);
                     actor_kill(actor, 8);
                     return;
@@ -1874,7 +1874,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                 return;
             }
             hurtFall = 600.0f;
-            if (level == 0x43) {
+            if (level == LEVEL_W1_RAPTOR_NEST) {
                 deathFall = 1000.0f;
             } else {
                 deathFall = hurtFall * 3.0f;
@@ -1888,7 +1888,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                 flags = 0;
                 hurt = 0;
                 anim = 0x30;
-                if (level != 0x29) {
+                if (level != LEVEL_W1_TRAINING) {
                     floorType = actor->floorMaterial;
                     if (((((u32)floorType >> 12) & 0xF) == 2) || ((floorType == 0x13) & 0x1F)) {
                         anim = 0xC8;
@@ -3526,7 +3526,7 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
                 } else if (actor->inwater != 0) {
                     deathKind = 4;
                 } else if ((((actor->floorMaterial & 0x1F) == 0xE) || ((actor->floorMaterial & 0x1F) == 0x13)) &&
-                           (level != 0x34)) {
+                           (level != LEVEL_WMP_TUNNELS)) {
                     deathKind = 0xD;
                 } else {
                     switch (type) {
@@ -3795,7 +3795,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         if (actor->inwater == 1) {
             rate = 2.0f;
             anim = 0;
-            if ((gActorPressedButtons & 0x8000) && ((level != 0x29) || (actor->mv->pissed_up <= 0)) &&
+            if ((gActorPressedButtons & 0x8000) && ((level != LEVEL_W1_TRAINING) || (actor->mv->pissed_up <= 0)) &&
                 (((actor->waterHeight - 60.0f) - 30.0f) < actor->ypos)) {
                 actor_leaveWater(actor);
                 actor->mv->prop = 0;
@@ -3897,7 +3897,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
     anim = 0;
     if (idx != 0) {
         id = movement_obj[idx - 1].character_type;
-        if (((id == 0x28) && (level != 0x23)) || (id == 0x8A) || (id == 0x23)) {
+        if (((id == 0x28) && (level != LEVEL_W2_WARBOSS)) || (id == 0x8A) || (id == 0x23)) {
             jumpType = id + 1;
             flag = 1;
         }
@@ -4192,7 +4192,7 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
         state = actor->mv->unk7C;
     }
 
-    if ((level != 0x29) && (level != 0x2E) && (actor->mv->rt_context_b == 0) &&
+    if ((level != LEVEL_W1_TRAINING) && (level != LEVEL_W1_TRAINING_CAVE) && (actor->mv->rt_context_b == 0) &&
         (gCurrentPad->button & 0x20) && (text_isAvailable(state) != 0)) {
         state = 0x1A;
     }
@@ -4890,7 +4890,7 @@ void actor_updateTypeAnims(void) {
             s32 delta;
             s32 pad;
 
-            if (level != 0x30) {
+            if (level != LEVEL_WMP_BEACH_WAR) {
                 if (movement_obj[i].animseq.uh == 1) {
                     actor_scrollTypeTexture(id, 0x253, 0, 0x10, 0, 0);
                     actor_scrollTypeTexture(id, 0x255, 0, 8, 0, 0);

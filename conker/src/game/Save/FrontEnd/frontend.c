@@ -293,7 +293,7 @@ s32 save_invertBits(s32 value) {
 /* Requests a switch to map 0x1D (game_requestLevelChange mode 6) and resets this mode's state flags. */
 void save_quitToFrontEnd(void) {
     D_800D2E40 = 0;
-    game_requestLevelChange(6, 0x1D, 0, 0, 1);
+    game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
     gFrontEndState = 3;
     gMenuLoadStep = 0;
     gPauseRequested = 0;
@@ -336,10 +336,10 @@ void save_updatePauseMenu(void) {
     sfx = 0;
     blocked = 0;
     reducedMenu = D_8008FDB8;
-    if (level == 0x22) {
+    if (level == LEVEL_WFRONTEND_HELL) {
         reducedMenu = 1;
     }
-    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (gCutsceneIds[0] != 1)) {
+    if ((gCutsceneStates[0] != 1) || (level != LEVEL_W5_THRONE_ROOM) || (gCutsceneIds[0] != 1)) {
         if (screen_areViewsCovered() != 0) {
             blocked = 1;
         }
@@ -550,7 +550,7 @@ void save_updateStartupScene(void) {
         gFrontEndInputDelay = 2;
         gFrontEndState = 1;
         D_800D2E40 = 0;
-        game_requestLevelChange(6, 0x21, 0, 0, 1);
+        game_requestLevelChange(6, LEVEL_WFRONTEND_TABLE, 0, 0, 1);
         gFrontEndFade = 0xFF;
     }
 }
@@ -576,7 +576,7 @@ void func_151DE81C(void) {
 /* Enters state 3 (gFrontEndState) and puts the path state back on path 0, stop 5. */
 void func_151DE85C(void) {
     D_800D2E40 = 0;
-    game_requestLevelChange(6, 0x1D, 0, 0, 1);
+    game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
     gFrontEndState = 3;
     D_8008FD80 = 1;
     gFrontEndInputDelay = 2;
@@ -1312,7 +1312,7 @@ void save_updateSaveSlotPage(void) {
             if (gPauseCursor == 3) {
                 gPauseCursor = 0;
                 save_requestEraseSlot(slot);
-                gCheckpointLevel = 0x29;
+                gCheckpointLevel = LEVEL_W1_TRAINING;
                 gCheckpointSpawn = 0;
                 D_800BE3E4 = 0;
                 zone_resetTaskProgress();
@@ -3080,7 +3080,7 @@ void func_151E4E00(void) {
     gMenuLoadStep = 0;
     D_8008FD80 = 0;
     D_800D2E40 = 0;
-    game_requestLevelChange(6, 0x1D, 0, 0, 1);
+    game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
 }
 
 /* Waits for input (or 1200 frames) and then fades out into func_151E4E00. */
@@ -3169,7 +3169,7 @@ void save_initMenu(void) {
     zone_resetTaskProgress();
     gFrontEndState = 11;
     D_800D2E40 = 0;
-    game_requestLevelChange(6, 0x25, 0, 0, 1);
+    game_requestLevelChange(6, LEVEL_GENERIC_CUTSCENES, 0, 0, 1);
     gPrevFrontEndState = gFrontEndState;
 }
 
@@ -4374,7 +4374,7 @@ void save_updateCredits(void) {
             gFrontEndTimer = 0;
             D_8008FDCC = 0xFF;
             gCreditsLine = 0;
-            game_requestLevelChange(6, 0x1D, 0, 0, 1);
+            game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
             return;
         }
     }
@@ -4400,7 +4400,7 @@ void save_updateCredits(void) {
 void save_updateAfterCredits(void) {
     if (gCreditsLine == 0) {
         gCreditsLine = -1;
-        cutscene_start(0x1D, 6, 0, 0, 0);
+        cutscene_start(LEVEL_FRONTEND, 6, 0, 0, 0);
     }
     save_updateFadeIn();
     if (screen_areViewsCovered() == 0) {
@@ -4412,6 +4412,6 @@ void save_updateAfterCredits(void) {
         gFrontEndState = 1;
         gFrontEndTimer = 0;
         D_800D2E40 = 0;
-        game_requestLevelChange(6, 0x21, 0, 0, 1);
+        game_requestLevelChange(6, LEVEL_WFRONTEND_TABLE, 0, 0, 1);
     }
 }

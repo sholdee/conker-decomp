@@ -681,7 +681,7 @@ s32 actor_updateIdleAnim(void) {
 }
 
 s32 actor_getDuckWalkAnim(void) {
-    if (level == 27 || level == 30) {
+    if (level == LEVEL_W2_LIFTTUNNEL || level == LEVEL_W2_FLAMETUNNEL) {
         return 395;
     }
     return 27;
@@ -760,7 +760,7 @@ void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2) {
                     anim = 0x8B;
                     obj->unkAA = 0x4B;
                 } else if (vel > 14.0f) {
-                    anim = (level != 4) ? 2 : 0x1B2;
+                    anim = (level != LEVEL_W2_OUTSIDE_MOLEHOLE) ? 2 : 0x1B2;
                     speed = vel / 23.0f + 0.8000000119f;
                 } else if (vel > 6.0f || (arg2 < 1.0f && obj->speed > 1.0f)) {
                     anim = 1;
@@ -832,7 +832,7 @@ s32 actor_interleaveUpdate(Actor *obj) {
     if (ext == NULL) {
         return 1;
     }
-    if (obj->ob_matrix_ptr != NULL || level == 0x33 || obj->type == 0x25) {
+    if (obj->ob_matrix_ptr != NULL || level == LEVEL_WMP_VOLCANO_RACE || obj->type == 0x25) {
         ext->skippedTime = 0;
         return 1;
     }
@@ -1044,8 +1044,8 @@ void actor_updatePlayer(Actor *actor) {
             actor->mv->unk1B1 = 0;
             actor_fadeFogPulse(actor);
         }
-        if (((level == 0x2D) || (level == 0x30) || (level == 0x34) || (level == 0x1A) || (level == 0x3F)) && (gActorPressedButtons & 4) && !(gActorPressedButtons & 0xC000) && ((s32) actor->shad == 0) && (actor->yspd < 0.0f) && (actor->norun == 0) && (actor->lifting == 0) && (actor->mv->GrenadeThrowState == 0) && (actor->mv->rt_context_b == 0) && ((actor->mv->context_b & ~0x80) != 3) && (actor->mv->numGrenades != 0)) {
-            if ((actor->character_type == 0x3B) || (level == 0x1A) || (level == 0x3F)) {
+        if (((level == LEVEL_WMP_MAIN_WAR) || (level == LEVEL_WMP_BEACH_WAR) || (level == LEVEL_WMP_TUNNELS) || (level == LEVEL_WMP_HEIST) || (level == LEVEL_WMP_RAPTOR)) && (gActorPressedButtons & 4) && !(gActorPressedButtons & 0xC000) && ((s32) actor->shad == 0) && (actor->yspd < 0.0f) && (actor->norun == 0) && (actor->lifting == 0) && (actor->mv->GrenadeThrowState == 0) && (actor->mv->rt_context_b == 0) && ((actor->mv->context_b & ~0x80) != 3) && (actor->mv->numGrenades != 0)) {
+            if ((actor->character_type == 0x3B) || (level == LEVEL_WMP_HEIST) || (level == LEVEL_WMP_RAPTOR)) {
                 actor->mv->GrenadeThrowState = 5;
             } else {
                 actor->mv->GrenadeThrowState = 1;
@@ -1132,7 +1132,7 @@ void actor_updatePlayer(Actor *actor) {
                 centerAngle = 0x6000;
                 angleDelta = gCurrentPad->stick_x * gActorStepPercent;
                 actor->angle -= angleDelta / 8;
-                if (level == 6) {
+                if (level == LEVEL_THE_WINDMILL) {
                     moveSpeed = 42.0f;
                     centerAngle = actor_getDirectionAngle(2540.0f - actor->xpos, actor->zpos - -160.0f, 0);
                     maxOffset = 0xF000;
@@ -1405,7 +1405,7 @@ void actor_updatePlayer(Actor *actor) {
                     }
                 }
             } else {
-                if ((gActorPressedButtons & 0x4000) && (gIsMultiplayer == 0) && (level != 0x29)) {
+                if ((gActorPressedButtons & 0x4000) && (gIsMultiplayer == 0) && (level != LEVEL_W1_TRAINING)) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
                         actor->mv->unk22 = 0x76;
@@ -2094,7 +2094,7 @@ void actor_updatePlayer(Actor *actor) {
                             }
                         }
                         actor->floorMaterial &= ~0x1F;
-                        if (level == 0x23) {
+                        if (level == LEVEL_W2_WARBOSS) {
                             actor->floorMaterial |= 9;
                         } else {
                             actor->floorMaterial |= 3;
@@ -3061,7 +3061,7 @@ void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 
                 arg0->scale_y = 0.75f;
                 obj->ypos = arg0->ypos;
                 state = 1;
-                if (level == 6) {
+                if (level == LEVEL_THE_WINDMILL) {
                     state = 0x81;
                 }
             }

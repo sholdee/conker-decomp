@@ -687,7 +687,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
     s32 type;
 
     material = trail->trail.path.material & 0x1F;
-    if ((level == 0x2B) || (level == 0x30)) {
+    if ((level == LEVEL_WMP_BEACH) || (level == LEVEL_WMP_BEACH_WAR)) {
         switch (material) {
         case 1:
             type = 3;
@@ -698,13 +698,13 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
             type = 4;
             break;
         }
-    } else if ((material == 0xB) && (level == 4)) {
+    } else if ((material == 0xB) && (level == LEVEL_W2_OUTSIDE_MOLEHOLE)) {
         type = 1;
-    } else if ((material == 1 || material == 0xA) && (level == 0xE)) {
+    } else if ((material == 1 || material == 0xA) && (level == LEVEL_W2_TANK_FACTORY)) {
         type = 2;
-    } else if (level == 0x34) {
+    } else if (level == LEVEL_WMP_TUNNELS) {
         type = 3;
-    } else if (level == 0x27) {
+    } else if (level == LEVEL_W1_BEE_CAVERN) {
         type = 5;
     } else {
         type = 0;

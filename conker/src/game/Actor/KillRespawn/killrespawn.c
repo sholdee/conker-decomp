@@ -264,7 +264,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     } else if (mode == 3) {
         actor_finishDeath(slot);
     }
-    if (slot == 0 && level == 4) {
+    if (slot == 0 && level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
         r = math_random();
         f = math_randomFloat();
         particle_startScreenBurst(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
@@ -298,7 +298,7 @@ void actor_respawn(Actor *obj) {
     } else {
         player = -1;
     }
-    if (level == 0x2B) {
+    if (level == LEVEL_WMP_BEACH) {
         slot = obj - movement_obj;
         value = player_getStat(slot, 1);
         if (value >= 0x11 && value < 0x21) {
@@ -343,7 +343,7 @@ void actor_respawn(Actor *obj) {
     if (gIsMultiplayer != 0) {
         obj->imune = 150;
         obj->mv->unk1B1 = obj->imune;
-        if (level == 0x33) {
+        if (level == LEVEL_WMP_VOLCANO_RACE) {
             func_1507D158(slot, 120, 0, 0, 0);
             mp_placeAtStart(obj);
         }
@@ -375,7 +375,7 @@ void actor_finishDeath(s32 slot) {
 
         D_800D18A8 = 1;
         if (!(gTaskDoneBits[0x19] & 4) && gCurrentSaveSlot >= 0) {
-            game_requestLevelChange(1, 0x22, 0, 0, 0);
+            game_requestLevelChange(1, LEVEL_WFRONTEND_HELL, 0, 0, 0);
             return;
         }
         game_requestLevelChange(2, gCheckpointLevel, gCheckpointSpawn, 0, 0);
@@ -388,7 +388,7 @@ void actor_finishDeath(s32 slot) {
         D_800D18A8 = 1;
         player_setStat(slot, 5, gDefaultHealth);
         player_setStat(slot, 2, D_80087260);
-        game_requestLevelChange(1, 0x18, 0, 0, 0);
+        game_requestLevelChange(1, LEVEL_W5_THRONE_ROOM, 0, 0, 0);
     } else {
         gEliminatedPlayers |= 1 << slot;
     }
@@ -431,7 +431,7 @@ s32 actor_runDeathEffect(Actor *obj) {
         sight_explodeAtActor(obj, 0xFF, 1);
         break;
     case 0x25:
-        if (obj->taskint[2] != 0 || level == 6 || level == 0x3B) {
+        if (obj->taskint[2] != 0 || level == LEVEL_THE_WINDMILL || level == LEVEL_W1_WINDMILL_EXPLODED) {
             trail_breakApart(obj, 0xFF, 1);
         }
         return 0;
@@ -453,7 +453,7 @@ s32 actor_runDeathEffect(Actor *obj) {
         }
         break;
     case 0x90:
-        if (gIsMultiplayer != 0 && level == 0x33) {
+        if (gIsMultiplayer != 0 && level == LEVEL_WMP_VOLCANO_RACE) {
             actor_kill(obj, 8);
             return 2;
         }
@@ -467,7 +467,7 @@ s32 actor_runDeathEffect(Actor *obj) {
             actor_kill(obj, 6);
             spawned = gfx_findObjectById((obj->playernumber + 11));
         } else {
-            if (level == 0x23) {
+            if (level == LEVEL_W2_WARBOSS) {
                 spawned = gfx_findObjectById(1);
             }
             handle = event_getFirstLiveOwnedObject(obj);
@@ -646,9 +646,9 @@ void actor_applyPartHit(Actor *obj, s32 part) {
     }
 }
 
-/* Looks up resource's position and facing via player_getSpawnPoint and calls cutscene_start(0x25, ...) from there. */
+/* Looks up resource's position and facing via player_getSpawnPoint and calls cutscene_start(LEVEL_GENERIC_CUTSCENES, ...) from there. */
 void func_1507DFE4(s32 resource, s32 arg1) {
-    s32 savedMode;
+    s32 savedLevel;
     s16 pos[3];
     Vec3f vec;
     u8 unk4F;
@@ -670,12 +670,12 @@ void func_1507DFE4(s32 resource, s32 arg1) {
             return;
         }
         cutscene_setAnchor(pos[0], pos[1], pos[2], yaw);
-        savedMode = level;
-        level = 0x25;
+        savedLevel = level;
+        level = LEVEL_GENERIC_CUTSCENES;
         gSpawnCutsceneActive = 1;
-        cutscene_start(0x25, kind, 0, 0, 0);
+        cutscene_start(LEVEL_GENERIC_CUTSCENES, kind, 0, 0, 0);
         gCutsceneIgnorePlayed = 1;
-        level = savedMode;
+        level = savedLevel;
     }
 }
 
@@ -688,13 +688,13 @@ s32 func_1507E114(s32 *arg0) {
     u8 unk43;
     u8 unk42;
     s32 unk3C;
-    s32 mode;
+    s32 next;
 
     if (D_800D18A8 == 0) {
         return 0;
     }
-    mode = gNextLevel;
-    if (mode == 0x22 || mode == 0x18) {
+    next = gNextLevel;
+    if (next == LEVEL_WFRONTEND_HELL || next == LEVEL_W5_THRONE_ROOM) {
         return 0;
     }
     gNextLevel = gCheckpointLevel;

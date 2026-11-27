@@ -35,7 +35,7 @@ Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
     rand0 = math_randomFloat();
     rand1 = math_randomFloat();
     random = math_random();
-    kind = (level == 0x2B) ? 0x27 : 0x1A;
+    kind = (level == LEVEL_WMP_BEACH) ? 0x27 : 0x1A;
 
     return weapon_spawnProjectile(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
                          rand1 * 201.0f + 601.0f, 50.0f, (random % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1, 0, kind,
@@ -69,7 +69,7 @@ void weapon_runLauncherMuzzle(obj, arg1, arg2, muzzleOut, launchOut)
             muzzle.z = obj->zpos;
             launch = muzzle;
         }
-        particle_runAttackAtMidpoint(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
+        particle_runAttackAtMidpoint(obj, &muzzle, &launch, (level == LEVEL_WMP_BEACH) ? 0x28 : 0x1E);
         particle_spawnShortLightFlash(&muzzle, arg1, arg2);
         weapon_spawnLauncherFlash(obj, &muzzle, arg1, arg2);
         weapon_rumbleLauncher(obj);
