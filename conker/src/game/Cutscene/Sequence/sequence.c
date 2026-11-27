@@ -1873,11 +1873,11 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
 
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in gSeqActiveEvents (slot 2: another track's position, slot 1: this track's
-   unk24..unk2C or the player). Returns 1 when yaw, pitch and roll were written, else 0. */
+   unk24..unk2C or the camera's eye position). Returns 1 when yaw, pitch and roll were written, else 0. */
 s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
-    Camera *player;
+    Camera *camera;
     f32 none;
 
     if (gCutsceneStates[scene] != 1) {
@@ -1913,10 +1913,10 @@ s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 obj
                 *roll = gSeqTrackStates[scene][track].unk2C;
                 return 1;
             }
-            player = camera_global_Cameras;
-            target[0] = player->eye.x;
-            target[1] = player->eye.y + event->u.trackMode.yOffset;
-            target[2] = player->eye.z;
+            camera = camera_global_Cameras;
+            target[0] = camera->eye.x;
+            target[1] = camera->eye.y + event->u.trackMode.yOffset;
+            target[2] = camera->eye.z;
             return 0;
         }
         none = -99999.0f;
@@ -2199,8 +2199,8 @@ void cutscene_runActorHandler(Actor *obj) {
     }
 }
 
-/* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
-   bound itself, 2 when bound through its parent (obj->unk65). */
+/* Whether `obj` is bound to an object track of its scene (scene 1 when obj->drawtype is 4): 1 when
+   bound itself, 2 when bound through its parent (obj->attach_char). */
 s32 cutscene_isActorBound(Actor *obj) {
     s32 i;
     s32 scene;
