@@ -3231,8 +3231,8 @@ typedef struct QuadFxData {
     /* 0x8C */ s16 x;
     /* 0x8E */ s16 y;
     /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
+    /* 0x92 */ s16 halfWidth;   /* corner offsets +-halfWidth across the view (effect_drawQuadFx) */
+    /* 0x94 */ s16 halfHeight;  /* corners at -h/+h; flags 0x200 / 0x4000 anchor one edge (0..+-2h) */
     /* 0x96 */ s16 floorY;      /* floor height under the spawn point */
     /* 0x98 */ u16 flags;       /* 0x4: finish at either end, 0x40: ping-pong, 0x80/0x100: flip s/t */
     /* 0x9A */ u8 pad9A[2];
@@ -3242,7 +3242,7 @@ typedef struct QuadFxData {
     /* 0xA1 */ u8 speed;        /* rain: fall speed */
     /* 0xA2 */ s8 callback;     /* index into gParticleCallbacks, -1 = none */
     /* 0xA3 */ u8 unkA3;
-    /* 0xA4 */ u8 unkA4;        /* rain: alpha */
+    /* 0xA4 */ u8 alpha;        /* prim alpha with flags & 0x800 */
 } QuadFxData; /* size 0xA8 */
 
 /* Type 0xE object. */

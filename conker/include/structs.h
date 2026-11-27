@@ -208,7 +208,7 @@ typedef struct EmitterPos {
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
     /* 0x06 */ s16 floorY; // -10000 = no floor
-    /* 0x08 */ u8 unk8;
+    /* 0x08 */ u8 markOnLanding;
 } EmitterPos;
 
 typedef struct ObjectEmitter {

@@ -114,9 +114,9 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         obj.slot = gMaterialImpactScales[size][0];
         obj.unk86 = gMaterialImpactScales[size][1];
         obj.flags = 0x2A00;
-        obj.unk92 = 1;
-        obj.unk94 = 1;
-        obj.unkA4 = 0xFF;
+        obj.halfWidth = 1;
+        obj.halfHeight = 1;
+        obj.alpha = 0xFF;
         effect_initQuadFxTemplate(&obj, 0xB4, 0xB4, 0xB4, 0xFF);
         effect_spawnQuadFx(&obj, 0xFF, 0);
     }
@@ -209,36 +209,37 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
 }
 
 struct Struct150E4CBC {
-    /* 0x00 */ u8 pad0[0x90];
+    /* 0x00 */ EffectHeader link;
+    /* 0x10 */ Vtx vtx[8];
     /* 0x90 */ s32 timer;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ s16 unk98; // set to -1 when the effect is finished
+    /* 0x94 */ s16 widthScale;  // halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0])
+    /* 0x96 */ s16 heightScale; // halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1])
+    /* 0x98 */ s16 frame;       // QuadFxData.frame; set to -1 when the effect is finished
     /* 0x9A */ u8 pad9A[8];
-    /* 0xA2 */ s16 unkA2;
-    /* 0xA4 */ s16 unkA4;
+    /* 0xA2 */ s16 halfWidth;   // QuadFxData.halfWidth
+    /* 0xA4 */ s16 halfHeight;
     /* 0xA6 */ u8 padA6[0xE];
     /* 0xB4 */ u8 alpha;
 };
 
 /*
- * Per-frame update (from a handler table): unkA4 ramps up to 90/256 of unk96 over the first 9 ticks
+ * Per-frame update (gParticleCallbacks[13]): halfHeight ramps up to 90/256 of heightScale over the first 9 ticks
  * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
  */
 void func_150E4CBC(Struct150E4CBC *fx) {
     if (fx->timer < 9) {
-        fx->unkA4 = fx->timer * 90 / 9 * fx->unk96 / 256.0f;
+        fx->halfHeight = fx->timer * 90 / 9 * fx->heightScale / 256.0f;
     } else {
-        fx->unkA4 = (90 - (fx->timer * 90 - 810) / 600) * fx->unk96 / 256.0f;
+        fx->halfHeight = (90 - (fx->timer * 90 - 810) / 600) * fx->heightScale / 256.0f;
         if (fx->alpha > gFrameTicks * 17) {
             fx->alpha -= gFrameTicks * 17;
         } else {
-            fx->unk98 = -1;
+            fx->frame = -1;
         }
     }
-    fx->unkA2 = (s32)(fx->unk94 * 14.0f) >> 8;
+    fx->halfWidth = (s32)(fx->widthScale * 14.0f) >> 8;
     if (fx->timer > 608) {
-        fx->unk98 = -1;
+        fx->frame = -1;
     }
     fx->timer += gFrameTicks;
 }

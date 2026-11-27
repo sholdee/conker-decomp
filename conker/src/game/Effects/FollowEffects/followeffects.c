@@ -776,22 +776,6 @@ void effect_attachTankHeadlightBeam(Actor *obj) {
 
 
 
-/* Data block of the object returned by effect_newEffectObj. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-} Data15147A80;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x98];
-    /* 0x98 */ Data15147A80 *data;
-} Fx15147A80;
-
 /*
  * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and gPlayerCount < 5),
  * each with a reference back to its owner.
@@ -822,8 +806,8 @@ void func_151BC104(Actor *obj, u8 fxOwner, s32 fxList) {
     }
     {
         EffectTemplate desc;
-        Fx15147A80 *fx2;
-        Data15147A80 data;
+        RibbonTrail *fx2;
+        RibbonTrailData data;
 
         desc.itemCount = 40;
         desc.pos.x = obj->xpos;
@@ -832,13 +816,13 @@ void func_151BC104(Actor *obj, u8 fxOwner, s32 fxList) {
         desc.life = 300;
         desc.flags = 6;
         desc.kind = 12;
-        data.owner = obj;
-        data.ownerId = obj->unique_id;
-        data.pos = desc.pos;
-        data.unk14 = 0.0f;
+        data.owner.actor = obj;
+        data.owner.uniqueId = obj->unique_id;
+        data.lastPos = desc.pos;
+        data.pending = 0.0f;
         data.unk18 = 0.0f;
-        data.unk20 = -16384.0f;
-        data.unk1C = -16384.0f;
+        data.lastTexU = -16384.0f;
+        data.texU = -16384.0f;
         fx2 = effect_newEffectObj(&desc, 40, 20, 10, 10, 10, 0, 0, 0, fxOwner, fxList);
         if (fx2 != NULL) {
             memcpy(fx2->data, &data, sizeof(data));

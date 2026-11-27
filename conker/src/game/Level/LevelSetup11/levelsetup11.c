@@ -23,7 +23,7 @@ void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 arg4) {
         emitter->pos.y = y;
         emitter->pos.z = z;
         emitter->pos.floorY = floorY;
-        emitter->pos.unk8 = arg4;
+        emitter->pos.markOnLanding = arg4;
     }
 }
 

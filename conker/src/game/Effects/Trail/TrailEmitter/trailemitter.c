@@ -317,8 +317,8 @@ s32 trail_spawnHitPuff(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY) {
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = math_random() % 21U + 35;
-    fx.unk92 = fx.unk94;
+    fx.halfHeight = math_random() % 21U + 35;
+    fx.halfWidth = fx.halfHeight;
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
@@ -343,8 +343,8 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = math_random() % 21U + 35;
-    fx.unk92 = fx.unk94;
+    fx.halfHeight = math_random() % 21U + 35;
+    fx.halfWidth = fx.halfHeight;
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;

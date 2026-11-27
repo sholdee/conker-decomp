@@ -136,8 +136,8 @@ s32 func_150BBB5C(Actor *actor) {
         request.x = actor->xpos;
         request.y = actor->floorY + 60.0f;
         request.z = actor->zpos;
-        request.unk92 = width;
-        request.unk94 = height;
+        request.halfWidth = width;
+        request.halfHeight = height;
         request.floorY = actor->floorY;
         request.callback = -1;
         request.animIndex = 0x2E;
