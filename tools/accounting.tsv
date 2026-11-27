@@ -405,7 +405,7 @@ __alCSeqNextDelta	0x1001DBA0	224	init	c		build/src/libultra/audio/n_cseqnextdelt
 n_alSynAllocVoice	0x1001DC80	700	init	c		build/src/libultra/audio/n_synallocvoice.c.o
 _allocatePVoice	0x1001DF3C	564	init	c		build/src/libultra/audio/n_synallocvoice.c.o
 n_alSynStartVoiceParams	0x1001E170	304	init	c		build/src/libultra/audio/n_synstartvoiceparam.c.o
-n_alSynSetPan	0x1001E2A0	176	init	c		build/src/libultra/audio/init_1E2A0.c.o
+n_alSynSetPan	0x1001E2A0	176	init	c		build/src/libultra/audio/n_synsetpan.c.o
 func_1001E350	0x1001E350	176	init	c		build/src/libultra/audio/n_synfilter11.c.o
 n_alCSPSendMidi	0x1001E400	128	init	c		build/src/libultra/audio/n_cspsendmidi.c.o
 n_alSynDelete	0x1001E480	32	init	c		build/src/init/Audio/SynDelete/n_syndelete.c.o
