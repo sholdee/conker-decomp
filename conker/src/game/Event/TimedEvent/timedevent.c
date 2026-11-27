@@ -2896,7 +2896,7 @@ void func_15071B18(s32 cmd) {
 }
 
 void event_spawnImpactBurstNearBone(s32 cmd) {
-    beam_spawnImpactBurstNearBone(gCurrentActor, 0xFF, 1);
+    effect_spawnImpactBurstNearBone(gCurrentActor, 0xFF, 1);
 }
 
 /* Runs handler gAnimCommandProcs[gEventParam], passing it the command. */
