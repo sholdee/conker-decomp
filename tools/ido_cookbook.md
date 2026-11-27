@@ -166,6 +166,11 @@ unused `pad`) to get the scope. A dummy usually stands for a real local of that 
   allocation. A `u8`/`s16` temp can sit in an alignment gap (for example after another `u8`).
 - **Probe** with a throwaway `typedef int probe_t;` to learn whether a block can be a scope before you
   restructure it. Never land the probe.
+- **Compare code first, layout second.** A re-scoping that gives identical code with all `sp` offsets
+  masked is right in code and wrong only in layout; then the fix is in the declaration order.
+- **Function-level pads are budget:** sinking block locals back into their blocks is what removes them.
+- **A device block often stands for a neighbouring natural block:** the parent `if` body, a block that
+  ends right after a call, or a block that runs to the end of the function.
 - If no real local fits, keep the existing device with its `/* matching: */` comment. Do not replace one
   device with another.
 
