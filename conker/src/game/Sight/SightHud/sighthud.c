@@ -9,7 +9,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
     sight_resetPlayerEffects(player);
     idx = player->CharPtr->attach_char;
     if (idx != 0) {
-        if (D_800CBFA8[idx][0] == 0x23 || D_800CBFA8[idx][0] == 0x8A) {
+        if ((&movement_obj[idx] - 1)->character_type == 0x23 || (&movement_obj[idx] - 1)->character_type == 0x8A) {
             state = 0x1B;
         }
     }

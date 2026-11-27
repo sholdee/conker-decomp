@@ -613,7 +613,7 @@ s32 level_registerEmissionSourceZone(TriggerZone *obj) {
 }
 
 s32 func_1501407C(TriggerZone *obj) {
-    D_800D987C = 0;
+    D_800D9860.flags = 0;
     return 1;
 }
 

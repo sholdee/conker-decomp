@@ -21,6 +21,7 @@
  *   game/Weapon/ProjectileRay/projectileray.c
  *   game/Weapon/SegmentShot/segmentshot.c
  *   game/Weapon/JointShot/jointshot.c
+ *   game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil)
  */
 
 /* A particle spawned by weapon_spawnBulletParticle, which keeps its bullet at 0x110. */
@@ -269,5 +270,11 @@ void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
 void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151C7038(Func151C7038Arg *arg0);
+
+/* game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil) */
+extern u8 D_800DCA20;
+extern f32 D_800DCA24;
+extern u8 D_800DCA28;
+extern f32 D_800DCA2C;
 
 #endif

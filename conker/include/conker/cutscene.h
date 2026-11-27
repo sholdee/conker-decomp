@@ -9,6 +9,7 @@
  * Subsystem "cutscene": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game/Cutscene/Sequence/sequence.c
+ *   game_data_800CBE10.c (data only, owner unknown; linked after game/Collision/Probe/probe)
  *   game/Cutscene/StartCallback/startcallback.c
  *   game/Cutscene/SeqEvents/seqevents.c
  *   game/Cutscene/EventEffects/eventeffects.c
@@ -211,9 +212,11 @@ extern u8 gCutsceneChainBobScale;
 extern s16 gCutsceneCashOffset;
 extern SeqSubtitle gSubtitles[3];
 extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
-/* Defined outside the C files; sequence.c uses them: */
-extern u64 D_800CBE10[0x400 / sizeof(u64)]; /* RSP dram stack of the graphics tasks (bss_800CBE10, a .bss slice of conker.us.yaml) */
+/* Defined outside the C files; sequence.c uses it: */
 extern u8 ucode_ROM_START[];                 /* ROM start of the RSP microcodes (linker-defined, undefined_syms.us.txt) */
+
+/* game_data_800CBE10.c (data only, owner unknown; linked after game/Collision/Probe/probe) */
+extern u64 D_800CBE10[SP_DRAM_STACK_SIZE64]; /* RSP dram stack of the graphics tasks */
 
 /* game/Cutscene/StartCallback/startcallback.c */
 void cutscene_startCallback1(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
