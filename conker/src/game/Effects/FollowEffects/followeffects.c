@@ -185,30 +185,30 @@ void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType) {
 
 /* The launch paths of effect_spawnTankExplosion's particles, in the space of the object's model matrix: start and
  * end points (the end minus the start gives the direction), sizes and extra rotations. */
-static const Vec3f D_800AA590 = { 0.0f, 131.0f, 0.0f };
-static const Vec3f D_800AA59C = { 0.0f, 210.0f, 0.0f };
-static const Vec3f D_800AA5A8 = { 0.0f, 116.0f, 200.0f };
-static const Vec3f D_800AA5B4[2] = { { 90.0f, 189.0f, 201.0f }, { -75.0f, 192.0f, 183.0f } };
-static const Vec3f D_800AA5CC[4] = {
+static const Vec3f gTankDebris27Start = { 0.0f, 131.0f, 0.0f };
+static const Vec3f gTankDebris27End = { 0.0f, 210.0f, 0.0f };
+static const Vec3f gTankDebris28Start = { 0.0f, 116.0f, 200.0f };
+static const Vec3f gTankDebris28Ends[2] = { { 90.0f, 189.0f, 201.0f }, { -75.0f, 192.0f, 183.0f } };
+static const Vec3f gTankDebris29Starts[4] = {
     { 128.0f, -29.0f, -67.0f }, { -128.0f, -29.0f, -67.0f }, { -128.0f, -29.0f, 62.0f }, { 128.0f, -29.0f, 62.0f },
 };
-static const Vec3f D_800AA5FC[4] = {
+static const Vec3f gTankDebris29Ends[4] = {
     { 223.0f, 24.0f, -93.0f }, { -223.0f, 24.0f, -93.0f }, { -205.0f, 8.0f, 119.0f }, { 205.0f, 8.0f, 119.0f },
 };
-static const f32 D_800AA62C[4] = { 0.6000000238f, 0.6000000238f, 0.5f, 0.5f };
-static const Vec3f D_800AA63C = { 0.0f, 132.0f, 0.0f };
-static const Vec3f D_800AA648[2] = { { 95.0f, 125.0f, 32.0f }, { -95.0f, 125.0f, 32.0f } };
-static const Vec3f D_800AA660[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 180.0f, 0.0f } };
-static const Vec3f D_800AA678[4] = {
+static const f32 gTankDebris29Sizes[4] = { 0.6000000238f, 0.6000000238f, 0.5f, 0.5f };
+static const Vec3f gTankDebris2BStart = { 0.0f, 132.0f, 0.0f };
+static const Vec3f gTankDebris2BEnds[2] = { { 95.0f, 125.0f, 32.0f }, { -95.0f, 125.0f, 32.0f } };
+static const Vec3f gTankDebris2BRotations[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 180.0f, 0.0f } };
+static const Vec3f gTankDebris2CStarts[4] = {
     { 114.0f, -17.0f, 45.0f }, { -114.0f, -17.0f, 45.0f }, { 114.0f, -17.0f, -58.0f }, { -114.0f, -17.0f, -58.0f },
 };
-static const Vec3f D_800AA6A8[4] = {
+static const Vec3f gTankDebris2CEnds[4] = {
     { 198.0f, 20.0f, 104.0f }, { -198.0f, 20.0f, 104.0f }, { 189.0f, 50.0f, -108.0f }, { -189.0f, 50.0f, -108.0f },
 };
-static const Vec3f D_800AA6D8[4] = {
+static const Vec3f gTankDebris2CRotations[4] = {
     { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { -21.0f, 179.0f, 0.0f }, { -21.0f, 179.0f, 0.0f },
 };
-static const f32 D_800AA708[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 0.6200000048f };
+static const f32 gTankDebris2CSizes[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 0.6200000048f };
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
@@ -302,8 +302,8 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             part.sizeY = 0.75f;
             math_randomFloat();
             part.gravity = accel;
-            math_transformOffset(&D_800AA590, &part.pos, mtx);
-            math_transformOffset(&D_800AA59C, &part.vel, mtx);
+            math_transformOffset(&gTankDebris27Start, &part.pos, mtx);
+            math_transformOffset(&gTankDebris27End, &part.vel, mtx);
             part.vel.x = part.vel.x - part.pos.x;
             part.vel.y = part.vel.y - part.pos.y;
             part.vel.z = part.vel.z - part.pos.z;
@@ -327,8 +327,8 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             part.sizeY = 0.5f;
             math_randomFloat();
             part.gravity = accel;
-            math_transformOffset(&D_800AA5A8, &part.pos, mtx);
-            math_transformOffset(&D_800AA5B4[math_random() & 1], &part.vel, mtx);
+            math_transformOffset(&gTankDebris28Start, &part.pos, mtx);
+            math_transformOffset(&gTankDebris28Ends[math_random() & 1], &part.vel, mtx);
             part.vel.x = part.vel.x - part.pos.x;
             part.vel.y = part.vel.y - part.pos.y;
             part.vel.z = part.vel.z - part.pos.z;
@@ -346,11 +346,11 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             if (math_random() & 1) {
                 speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (math_random() % 36U) + 30;
-                part.sizeXZ = part.sizeY = D_800AA62C[i];
+                part.sizeXZ = part.sizeY = gTankDebris29Sizes[i];
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA5CC[i], &part.pos, mtx);
-                math_transformOffset(&D_800AA5FC[i], &part.vel, mtx);
+                math_transformOffset(&gTankDebris29Starts[i], &part.pos, mtx);
+                math_transformOffset(&gTankDebris29Ends[i], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -365,7 +365,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
         }
 
         part.model = 0x2B;
-        math_transformOffset(&D_800AA63C, &part.pos, mtx);
+        math_transformOffset(&gTankDebris2BStart, &part.pos, mtx);
         part.sizeXZ = part.sizeY = 0.551f;
         for (j = 0; j != 2; j++) {
             if (math_random() & 1) {
@@ -373,7 +373,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
                 part.lifetime = (math_random() % 36U) + 30;
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA648[j], &part.vel, mtx);
+                math_transformOffset(&gTankDebris2BEnds[j], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -381,9 +381,9 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
                 part.rot = objPos;
-                part.rot.x += D_800AA660[j].x;
-                part.rot.y += D_800AA660[j].y;
-                part.rot.z += D_800AA660[j].z;
+                part.rot.x += gTankDebris2BRotations[j].x;
+                part.rot.y += gTankDebris2BRotations[j].y;
+                part.rot.z += gTankDebris2BRotations[j].z;
                 part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);
@@ -395,11 +395,11 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             if (math_random() & 1) {
                 speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (math_random() % 36U) + 30;
-                part.sizeXZ = part.sizeY = D_800AA708[k];
+                part.sizeXZ = part.sizeY = gTankDebris2CSizes[k];
                 math_randomFloat();
                 part.gravity = accel;
-                math_transformOffset(&D_800AA678[k], &part.pos, mtx);
-                math_transformOffset(&D_800AA6A8[k], &part.vel, mtx);
+                math_transformOffset(&gTankDebris2CStarts[k], &part.pos, mtx);
+                math_transformOffset(&gTankDebris2CEnds[k], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -407,9 +407,9 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
                 part.rot = objPos;
-                part.rot.x += D_800AA6D8[k].x;
-                part.rot.y += D_800AA6D8[k].y;
-                part.rot.z += D_800AA6D8[k].z;
+                part.rot.x += gTankDebris2CRotations[k].x;
+                part.rot.y += gTankDebris2CRotations[k].y;
+                part.rot.z += gTankDebris2CRotations[k].z;
                 part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, owner, list);

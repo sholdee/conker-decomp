@@ -25,21 +25,21 @@ const f32 gBloodBurstScales[15] = {
 const s32 gConkerBloodModels[10] = { 2, 3, 0x3A, 0x3B, 0x3B, 0x3D, 0x3D, 0x3E, 0x3C, 0x3C };
 const s32 gWeaselBloodModels[8] = { 2, 3, 0x30, 0x92, 0x92, 0x91, 0x31, 0x31 };
 const s32 gTedizBloodModels[8] = { 2, 3, 0x44, 0x46, 0x46, 0x47, 0x45, 0x45 };
-const s32 D_800A3CD4[8] = { 2, 3, 0x49, 0x49, 0x4B, 0x4C, 0x4A, 0x4A };
+const s32 gSoldierBloodModels[8] = { 2, 3, 0x49, 0x49, 0x4B, 0x4C, 0x4A, 0x4A };
 const s32 gUgaBugaBloodModels[8] = { 2, 3, 0x81, 0x80, 0x7F, 0x7F, 0x7E, 0x7E };
-const s32 D_800A3D14[8] = { 2, 3, 0xB2, 0xA0, 0xA0, 0xA1, 0x9F, 0x9F };
-const s32 D_800A3D34[8] = { 2, 3, 0xB2, 0x9D, 0x9D, 0x9E, 0x9C, 0x9C };
+const s32 gVillagerHatBloodModels[8] = { 2, 3, 0xB2, 0xA0, 0xA0, 0xA1, 0x9F, 0x9F };
+const s32 gVillagerBonnetBloodModels[8] = { 2, 3, 0xB2, 0x9D, 0x9D, 0x9E, 0x9C, 0x9C };
 const s32 gBlackConkerBloodModels[10] = { 2, 3, 0x3A, 0x8E, 0x8E, 0x3D, 0x3D, 0x8F, 0x90, 0x90 };
 const s32 gZombieDressBloodModels[8] = { 2, 3, 0xBB, 0xAC, 0xAC, 0xAE, 0xAD, 0xAD };
 const s32 gZombieSuitBloodModels[8] = { 2, 3, 0xBC, 0xAF, 0xAF, 0xB1, 0xB0, 0xB0 };
 const s32 gRoboSpiderBloodModels[12] = { 0x95, 0x95, 0x96, 0x97, 0x95, 0x95, 0x2D, 0x2E, 0x2D, 0x2E, 0x95, 0x95 };
 const s32 gTntImpBloodModels[8] = { 2, 3, 0x98, 0x99, 0x99, 0x9B, 0x9A, 0x9A };
-const s32 D_800A3E0C[8] = { 2, 3, 0xC0, 0xC0, 0xC2, 0xC3, 0xC1, 0xC1 };
+const s32 gBlackWeaselBloodModels[8] = { 2, 3, 0xC0, 0xC0, 0xC2, 0xC3, 0xC1, 0xC1 };
 const s32 gRockBloodModels[7] = { 0xE7, 0xE7, 0xD8, 0xD8, 0xE7, 0xD7, 0xD7 };
-const s32 D_800A3E48[10] = { 2, 3, 0xDC, 0xDC, 0xDB, 0xDB, 0xDB, 0xDA, 0xD9, 0xD9 };
+const s32 gDecoratedSoldierBloodModels[10] = { 2, 3, 0xDC, 0xDC, 0xDB, 0xDB, 0xDB, 0xDA, 0xD9, 0xD9 };
 const s32 gBroadTedizBloodModels[8] = { 2, 3, 0xDE, 0xDE, 0xE8, 0x44, 0xDD, 0xDD };
-const s32 D_800A3E90[9] = { 0xE2, 0xE2, 0xE1, 0xE1, 0xDF, 0xE3, 0xE5, 0xE0, 0xE0 };
-const s32 D_800A3EB4[8] = { 0xE2, 0xE2, 0xD5, 0xD5, 0xD3, 0xD6, 0xD4, 0xD4 };
+const s32 gGreggBloodModels[9] = { 0xE2, 0xE2, 0xE1, 0xE1, 0xDF, 0xE3, 0xE5, 0xE0, 0xE0 };
+const s32 gHoodedGreggBloodModels[8] = { 0xE2, 0xE2, 0xD5, 0xD5, 0xD3, 0xD6, 0xD4, 0xD4 };
 const s32 D_800A3ED4[7] = { 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE };
 const s32 D_800A3EF0[9] = { 2, 3, 0x32, 0x17, 0x17, 0x33, 0x33, 0x1A, 0x1A };
 
@@ -55,9 +55,9 @@ const s32 gBloodBurstFloorHitFns[20] = {
 
 /* Blood model list of each profile (the counts are in gBloodModelCounts). */
 const s32 *gBloodModelLists[20] = {
-    gConkerBloodModels, gWeaselBloodModels, gTedizBloodModels, D_800A3CD4, gUgaBugaBloodModels, D_800A3D14, D_800A3D34,
-    gBlackConkerBloodModels, gZombieDressBloodModels, gZombieSuitBloodModels, gRoboSpiderBloodModels, gTntImpBloodModels, D_800A3E0C, gRockBloodModels,
-    D_800A3E48, gBroadTedizBloodModels, D_800A3E90, D_800A3EB4, D_800A3ED4, D_800A3EF0,
+    gConkerBloodModels, gWeaselBloodModels, gTedizBloodModels, gSoldierBloodModels, gUgaBugaBloodModels, gVillagerHatBloodModels, gVillagerBonnetBloodModels,
+    gBlackConkerBloodModels, gZombieDressBloodModels, gZombieSuitBloodModels, gRoboSpiderBloodModels, gTntImpBloodModels, gBlackWeaselBloodModels, gRockBloodModels,
+    gDecoratedSoldierBloodModels, gBroadTedizBloodModels, gGreggBloodModels, gHoodedGreggBloodModels, D_800A3ED4, D_800A3EF0,
 };
 
 
@@ -836,13 +836,13 @@ const BloodProfile gTedizBloodProfiles[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x44, 1, 0 }, /* [2] */
     { { 0.0f, 30.0f, 8.0f }, 0x4B, 0, 0 }, /* [3] */
 };
-const BloodProfile D_800A4018[1] = {
+const BloodProfile gUgaBugaBloodProfiles[1] = {
     { { 0.0f, 30.0f, 8.0f }, 0x81, 0, 0 }, /* [4] */
 };
-const BloodProfile D_800A4028[1] = {
+const BloodProfile gVillagerHatBloodProfiles[1] = {
     { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 }, /* [5] */
 };
-const BloodProfile D_800A4038[2] = {
+const BloodProfile gVillagerBonnetBloodProfiles[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 }, /* [6] */
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [7] */
 };
@@ -1899,7 +1899,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *hit, u8 ow
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
     particle_newModelParticleWithFloor(&spawn, 3, 0xFF, hit, 0, owner, list);
-    if (D_800A4018 == &gBloodProfiles[kind]) {
+    if (gUgaBugaBloodProfiles == &gBloodProfiles[kind]) {
         const s32 ids[3] = { 0x76, 0x77, 0x78 };
         u8 i;
         u8 found;
@@ -1919,7 +1919,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *hit, u8 ow
             spawn.model = ids2[i];
             particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, list);
         }
-    } else if (D_800A4028 == &gBloodProfiles[kind]) {
+    } else if (gVillagerHatBloodProfiles == &gBloodProfiles[kind]) {
         const s32 masks[4] = { 2, 8, 0x10, 0x20 };
         u8 i;
         const s32 ids[4] = { 0x87, 0x88, 0x89, 0x8A };
@@ -1930,7 +1930,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *hit, u8 ow
                 particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, list);
             }
         }
-    } else if (D_800A4038 == &gBloodProfiles[kind]) {
+    } else if (gVillagerBonnetBloodProfiles == &gBloodProfiles[kind]) {
         const s32 masks[2] = { 2, 8 };
         u8 i;
         const s32 ids[2] = { 0x8D, 0x8B };
