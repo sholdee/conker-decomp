@@ -440,7 +440,8 @@ void     n_alSndpSetSound(ALSndId id);
 
 
 /*
- * Conker: Rare's additions to the audio library, defined in src/libultra/audio, in address order.
+ * Conker: Rare's additions to the audio library, in address order. The ones in SDK files (src/libultra/audio)
+ * are first in each group; Rare's own files are in src/init/Audio. Rare's functions have the prefix audio_.
  */
 /* bnkf.c: the SDK's static functions (Rare's _bnkfPatchBank takes a fourth argument), and two of Rare's */
 void    _bnkfPatchBank(ALBank *bank, s32 offset, s32 table, s32 arg3);
@@ -454,7 +455,7 @@ f32     _depth2Cents(u8 arg0);
 s32     initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
 s32     updateOsc(struct OscState *arg0, f32 *arg1);
 void    stopOsc(struct OscState *arg0);
-void    audio_initOscStates(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
+void    audio_initOscStates(ALSeqpConfig *config, s32 arg1);
 /* init/Audio/SeqChannel/seqchannel.c: the channels of a compact sequence player */
 void    audio_setCspMsgQueue(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue);
 void    audio_setCspNoteMesg(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
@@ -464,18 +465,27 @@ void    audio_unmuteCspChannel(N_ALCSPlayer *seqp, s32 arg1);
 void    audio_fadeCspChannel(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
 void    func_10017CE0(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
 void    audio_setCspChannelFade(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
-void    audio_setCspFxMix(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
+/* init/Audio/SeqFxMix/seqfxmix.c */
+void    audio_setCspFxMix(N_ALCSPlayer *csp, f32 arg1, f32 arg2);
 void    audio_setCspChannelFxBus(N_ALCSPlayer *csp, u8 chan, u8 arg2);
-void    audio_setCspFxParam(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
-void    audio_findLoopMarkers(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base); /* n_csq.c */
-void    audio_pauseCsp(N_ALCSPlayer *seqp);                              /* init_18D50.c */
-void    audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init/Audio/SeqCtrl/seqctrl.c */
-void    audio_setVoiceLowPassCutoff(N_ALVoice *v, f32 fc);                            /* init/Audio/SynLowPassCutoff/synlowpasscutoff.c: filter type 19 */
-void    audio_setVoiceLowPassGain(N_ALVoice *v, u8 fgain);                          /* init/Audio/SynLowPassGain/synlowpassgain.c: filter type 18 */
-f32     audio_semitonesToRatio(s32 arg0);                                        /* n_drvrNew.c: the pitch ratio of a number of semitones */
-LowPass *audio_getBusLowPass(s16 bus);                                        /* n_syngetfxref.c: the bus's low-pass */
-void    audio_setBusLowPassParam(LowPass *lp, s16 paramID, s32 *value);            /* n_synsetfxparam.c */
-void    func_1001E350(N_ALVoice *v, u8 value);                          /* init/Audio/SynLowPassCount/synlowpasscount.c: filter type 17 */
+/* init/Audio/SeqFxParam/seqfxparam.c */
+void    audio_setCspFxParam(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+/* n_csq.c */
+void    audio_findLoopMarkers(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
+/* init/Audio/SeqPause/seqpause.c */
+void    audio_pauseCsp(N_ALCSPlayer *seqp);
+/* init/Audio/SeqCtrl/seqctrl.c */
+void    audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value);
+/* init/Audio/SynLowPassCutoff/synlowpasscutoff.c (filter type 19), init/Audio/SynLowPassGain/synlowpassgain.c (18) */
+void    audio_setVoiceLowPassCutoff(N_ALVoice *v, f32 fc);
+void    audio_setVoiceLowPassGain(N_ALVoice *v, u8 fgain);
+/* n_drvrNew.c */
+f32     audio_semitonesToRatio(s32 arg0);
+/* n_syngetfxref.c, n_synsetfxparam.c: the low-pass of an aux bus */
+LowPass *audio_getBusLowPass(s16 bus);
+void    audio_setBusLowPassParam(LowPass *lp, s16 paramID, s32 *value);
+/* init/Audio/SynLowPassCount/synlowpasscount.c (filter type 17) */
+void    func_1001E350(N_ALVoice *v, u8 value);
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by n_sndplayer.c; it agrees with os_libc.h. */
 void    osSyncPrintf(const char *fmt, ...);

@@ -686,6 +686,9 @@ src/libultra/audio/n_resample.c	audio	Rare's rework of n_alResamplePull
 src/libultra/audio/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
 src/init/Audio/SeqChannel/seqchannel.c	audio	channel functions of the compact sequence player (mute, fade, message queue)
 src/init/Audio/SeqCtrl/seqctrl.c	audio	MIDI controller handlers of the compact sequence player
+src/init/Audio/SeqFxMix/seqfxmix.c	audio	posts the sequence player's effect-mix event and the channel aux-bus controller
+src/init/Audio/SeqFxParam/seqfxparam.c	audio	posts the sequence player's effect-parameter event
+src/init/Audio/SeqPause/seqpause.c	audio	posts the sequence player's pause event
 src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
 src/libultra/audio/n_seqplayer.c	audio	the sequence player's voice and channel-state helpers (SDK seqplayer.c), with Conker's instrument loading
 src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path
