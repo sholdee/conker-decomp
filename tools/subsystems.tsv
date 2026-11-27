@@ -606,7 +606,7 @@ src/game/Script/TimerCmd/timercmd.c	script	slot records
 src/game/Script/ZoneCmd/zonecmd.c	script	record command/query handlers
 src/game/Shadow/BlobShadow/blobshadow.c	shadow	blob shadows under objects
 src/game/Shadow/RealTimeShadow/realtimeshadow.c	shadow	real-time shadows
-src/game/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
+src/game/Effects/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
 src/game/Effects/Sight/effects_sight.c	sight	split from game_1F4650.c; same subsystem
 src/game/Sprite/FadeSprite/fadesprite.c	sprite	fade-in/hold/fade-out sprite
 src/game/Sprite/LevelSprites/levelsprites.c	sprite	sprite animation callbacks
@@ -634,23 +634,23 @@ src/game/Texture/TextureRelease/texturerelease.c	texture	id list reference relea
 src/game/Texture/TextureTables/texturetables.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
 src/game/Texture/TextureUse/textureuse.c	texture	texture use counts and aging
 src/game/Texture/UvWobble/uvwobble.c	texture	UV wobble on display-list vertices
-src/game/Trail/Afterimage/afterimage.c	trail	bone-matrix afterimages
-src/game/Trail/AnchoredTrail/anchoredtrail.c	trail	bone trails with emitters
-src/game/Trail/BoneTrail/bonetrail.c	trail	bone trails
-src/game/Trail/CharacterTrail/charactertrail.c	trail	character trail with emitters and sounds
-src/game/Trail/FallingTrail/fallingtrail.c	trail	trails with bursts for level effects
-src/game/Trail/LevelStream/levelstream.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
-src/game/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
-src/game/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
-src/game/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
-src/game/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
-src/game/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
-src/game/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
-src/game/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor
-src/game/Trail/TrackerTrail/trackertrail.c	trail	tracker trails
-src/game/Trail/TrailEmitter/trailemitter.c	trail	trail emitters
-src/game/Trail/TrailRing/trailring.c	trail	particle kind 2: trail launched outward; ring of trails
-src/game/Trail/TrailSpray/trailspray.c	trail	motion trails sprayed from a ring around an object
+src/game/Effects/Trail/Afterimage/afterimage.c	trail	bone-matrix afterimages
+src/game/Effects/Trail/AnchoredTrail/anchoredtrail.c	trail	bone trails with emitters
+src/game/Effects/Trail/BoneTrail/bonetrail.c	trail	bone trails
+src/game/Effects/Trail/CharacterTrail/charactertrail.c	trail	character trail with emitters and sounds
+src/game/Effects/Trail/FallingTrail/fallingtrail.c	trail	trails with bursts for level effects
+src/game/Effects/Trail/LevelStream/levelstream.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
+src/game/Effects/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
+src/game/Effects/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
+src/game/Effects/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
+src/game/Effects/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
+src/game/Effects/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
+src/game/Effects/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
+src/game/Effects/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor
+src/game/Effects/Trail/TrackerTrail/trackertrail.c	trail	tracker trails
+src/game/Effects/Trail/TrailEmitter/trailemitter.c	trail	trail emitters
+src/game/Effects/Trail/TrailRing/trailring.c	trail	particle kind 2: trail launched outward; ring of trails
+src/game/Effects/Trail/TrailSpray/trailspray.c	trail	motion trails sprayed from a ring around an object
 src/game/View/Projection/projection.c	view	view frustum FOV and projection
 src/game/View/ViewLayout/viewlayout.c	view	player count and split-screen view layouts
 src/game/View/ViewOrtho/viewortho.c	view	per-view projection matrices from view sizes (level setup)

@@ -2874,7 +2874,7 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* A bone-matrix trail ("afterimage") drawn behind an object (game/Trail/Afterimage/afterimage); gBoneTrailLists[type] lists them. */
+/* A bone-matrix trail ("afterimage") drawn behind an object (game/Effects/Trail/Afterimage/afterimage); gBoneTrailLists[type] lists them. */
 typedef struct BoneTrail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
     /* 0x01 */ u8 numFrames; /* history length */

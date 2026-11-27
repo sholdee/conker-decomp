@@ -7,7 +7,7 @@
 #include "conker/trail.h"
 #include "conker/view.h"
 
-/* Trail types (see game/Trail/MotionTrail/motiontrail.c). */
+/* Trail types (see game/Effects/Trail/MotionTrail/motiontrail.c). */
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
 void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {

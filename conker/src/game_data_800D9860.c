@@ -3,4 +3,4 @@
 
 /* Owner unknown: the .bss between game/Script/ScriptInterp/scriptinterp and game/Sprite/SpriteRoutines/spriteroutines
  * (17 units lie between them, from game/Script/TaskExit/taskexit to game/Camera/LevelHook07/levelhook07; none uses it). */
-CollisionHit D_800D9860; /* the floor under the last spawn point of game/Trail/LevelStream/levelstream.c */
+CollisionHit D_800D9860; /* the floor under the last spawn point of game/Effects/Trail/LevelStream/levelstream.c */

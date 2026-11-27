@@ -8,7 +8,7 @@
 /*
  * Subsystem "sight": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/Sight/SightBeam/sightbeam.c
+ *   game/Effects/Sight/SightBeam/sightbeam.c
  *   game/Effects/Sight/effects_sight.c
  */
 
@@ -54,7 +54,7 @@ typedef struct {
     u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
 } SightLensObject;
 
-/* game/Sight/SightBeam/sightbeam.c */
+/* game/Effects/Sight/SightBeam/sightbeam.c */
 s32 sight_placeBeam(TriggerZone *beam);
 SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri,
                                TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue,

@@ -589,7 +589,7 @@ segments:
       - [0xDB730, hasm, game/Script/TaskExit/taskexit]
       - [0xDB750, c, game/Collision/WobbleQuad/wobblequad]
       - [0xDBA60, c, game/Effects/AttachedBurst/attachedburst]
-      - [0xDC360, c, game/Trail/TrailSpray/trailspray]
+      - [0xDC360, c, game/Effects/Trail/TrailSpray/trailspray]
       - [0xDC6B0, c, game/Particle/SmokeEmitter/smokeemitter]
       - [0xDDB60, c, game/Effects/ActorImpact/actorimpact]
       - [0xDDF10, c, game/Effects/PerimeterEmitter/perimeteremitter]
@@ -599,7 +599,7 @@ segments:
       - [0xDF930, c, game/Particle/YawStreak/yawstreak]
       - [0xDFBF0, c, game/Effects/PipeExplode/pipeexplode]
       - [0xE0F60, c, game/Effects/BoneStreak/bonestreak]
-      - [0xE1280, c, game/Trail/ScatterTrail/scattertrail]
+      - [0xE1280, c, game/Effects/Trail/ScatterTrail/scattertrail]
       - [0xE2880, c, game/Effects/OwnerSpark/ownerspark]
       - [0xE2DA0, c, game_E2DA0]
       - [0xE3C90, c, game/Camera/LevelHook07/levelhook07]
@@ -621,7 +621,7 @@ segments:
       - [0xEC420, c, game/Prop/Scenery/scenery]
       - [0xEDE60, c, game/Particle/PoolEmitter/poolemitter]
       - [0xEE710, c, game/Particle/FootDust/footdust]
-      - [0xEEB10, c, game/Trail/TrailRing/trailring]
+      - [0xEEB10, c, game/Effects/Trail/TrailRing/trailring]
       - [0xEEE70, c, game/Effects/BoneRing/bonering]
       - [0xEF410, c, game/Particle/PuffSprays/puffsprays]
       - [0xEFEA0, c, game/Particle/DiscEmitter/discemitter]
@@ -667,13 +667,13 @@ segments:
       - [0xFF5C0, c, game/Screen/Strobe/strobe]
       - [0xFF900, c, game/Effects/ColourWave/colourwave]
       - [0xFFBA0, c, game/Particle/SparkEmitter/sparkemitter]
-      - [0x100810, c, game/Trail/CharacterTrail/charactertrail]
+      - [0x100810, c, game/Effects/Trail/CharacterTrail/charactertrail]
       - [0x1028F0, c, game/Particle/FollowEffect/followeffect]
       - [0x1045D0, c, game/Effects/HitSpray/hitspray]
       - [0x1048D0, c, game/Effects/TintedObject/tintedobject]
       - [0x105760, c, game/Attach/TextureScroll/texturescroll]
       - [0x105D90, c, game/Attach/BonePoint/bonepoint]
-      - [0x105FC0, c, game/Trail/PissTrail/pisstrail]
+      - [0x105FC0, c, game/Effects/Trail/PissTrail/pisstrail]
       - [0x108320, c, game/Beam/BeamQuad/beamquad]
       - [0x108E90, c, game/Effects/PuffTimer/pufftimer]
       - [0x109220, c, game/Effects/FallingStream/fallingstream]
@@ -816,7 +816,7 @@ segments:
       - [0x16F770, c, game/Math/MathUtil/mathutil]
       - [0x173D40, c, game/Effects/ActorDamageFx/actordamagefx]
       - [0x174BF0, c, game/Effects/EffectObj/effectobj]
-      - [0x175250, c, game/Trail/MotionTrail/motiontrail]
+      - [0x175250, c, game/Effects/Trail/MotionTrail/motiontrail]
       - [0x1765E0, c, game/Effects/TimedEffect/timedeffect]
       - [0x176A00, c, game/Particle/ChannelParticle/channelparticle]
       - [0x177480, c, game/Particle/FlickerParticle/flickerparticle]
@@ -835,7 +835,7 @@ segments:
       - [0x186080, c, game/Effects/CharacterWatcher/characterwatcher]
       - [0x188440, c, game/Particle/SlidingSprite/slidingsprite]
       - [0x188F90, c, game/Sprite/TexQuad/texquad]
-      - [0x1897A0, c, game/Trail/FallingTrail/fallingtrail]
+      - [0x1897A0, c, game/Effects/Trail/FallingTrail/fallingtrail]
       - [0x18A8F0, c, game/Lighting/PointLight/pointlight]
       - [0x18C660, c, game/Lighting/AmbientZone/ambientzone]
       - [0x18D250, c, game/Effects/ColourFrameBuffer/colourframebuffer]
@@ -876,14 +876,14 @@ segments:
       - [0x1B1600, c, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x1B4A90, c, game/Effects/FadeBurst/fadeburst]
       - [0x1B5370, c, game/Effects/ColorAnim/coloranim]
-      - [0x1B5CC0, c, game/Trail/Afterimage/afterimage]
-      - [0x1B6DB0, c, game/Trail/SprayEmitter/sprayemitter]
+      - [0x1B5CC0, c, game/Effects/Trail/Afterimage/afterimage]
+      - [0x1B6DB0, c, game/Effects/Trail/SprayEmitter/sprayemitter]
       - [0x1B74A0, c, game/Particle/BoneGlow/boneglow]
       - [0x1B7870, c, game/Effects/TumblingPiece/tumblingpiece]
       - [0x1B7EC0, c, game/Effects/EffectQueue/effectqueue]
       - [0x1B81D0, c, game/Particle/Droplets/droplets]
       - [0x1B8B60, c, game/Particle/BillboardBurst/billboardburst]
-      - [0x1B8F40, c, game/Trail/TrailEmitter/trailemitter]
+      - [0x1B8F40, c, game/Effects/Trail/TrailEmitter/trailemitter]
       - [0x1B9DB0, c, game/Attach/AttachModel/attachmodel]
       - [0x1B9F30, c, game/Particle/GrowingBillboard/growingbillboard]
       - [0x1BA1D0, c, game/Particle/PlacementRing/placementring]
@@ -905,13 +905,13 @@ segments:
       - [0x1C0B10, c, game/Particle/SegmentBurst/segmentburst]
       - [0x1C1150, c, game/Effects/ContactEffects/contacteffects]
       - [0x1C2C60, c, game/Effects/CharacterFlameThrower/characterflamethrower]
-      - [0x1CA420, c, game/Trail/MatrixTrail/matrixtrail]
+      - [0x1CA420, c, game/Effects/Trail/MatrixTrail/matrixtrail]
       - [0x1CBE20, c, game/Cutscene/EventEffects/eventeffects]
       - [0x1CC420, c, game_1CC420]
-      - [0x1CC440, c, game/Trail/SurfaceTrail/surfacetrail]
+      - [0x1CC440, c, game/Effects/Trail/SurfaceTrail/surfacetrail]
       - [0x1CDEC0, c, game/Particle/FastSpark/fastspark]
       - [0x1CE2F0, c, game/Particle/SphereEmitter/sphereemitter]
-      - [0x1D0840, c, game/Trail/BoneTrail/bonetrail]
+      - [0x1D0840, c, game/Effects/Trail/BoneTrail/bonetrail]
       - [0x1D2480, c, game/Screen/Tint/tint]
       - [0x1D2B10, c, game/Particle/RegionEmitter/regionemitter]
       - [0x1D3AB0, c, game/Particle/ZoneEmitter/zoneemitter]
@@ -937,7 +937,7 @@ segments:
       - [0x1E3050, c, game/Effects/SpawnEmitterHook/spawnemitterhook]
       - [0x1E30A0, c, game/Particle/SoundPulse/soundpulse]
       - [0x1E34C0, c, game/Particle/Pulse/pulse]
-      - [0x1E37D0, c, game/Trail/RibbonTrail/ribbontrail]
+      - [0x1E37D0, c, game/Effects/Trail/RibbonTrail/ribbontrail]
       - [0x1E5820, c, game/Effects/RibbonChild/ribbonchild]
       - [0x1E58B0, c, game/Weapon/BulletParticle/bulletparticle]
       - [0x1E5FF0, c, game/Particle/Bob/bob]
@@ -952,17 +952,17 @@ segments:
       - [0x1F1F60, c, game/Weapon/ProjectileRay/projectileray]
       - [0x1F2730, c, game/Weapon/SegmentShot/segmentshot]
       - [0x1F3780, c, game/Weapon/JointShot/jointshot]
-      - [0x1F4650, c, game/Sight/SightBeam/sightbeam]
+      - [0x1F4650, c, game/Effects/Sight/SightBeam/sightbeam]
       - [0x1F7050, c, game/Effects/Sight/effects_sight]
-      - [0x1FA770, c, game/Trail/LevelStream/levelstream]
-      - [0x1FEA80, c, game/Trail/TrackerTrail/trackertrail]
+      - [0x1FA770, c, game/Effects/Trail/LevelStream/levelstream]
+      - [0x1FEA80, c, game/Effects/Trail/TrackerTrail/trackertrail]
       - [0x1FF760, c, game/Effects/ActorSoundBurst/actorsoundburst]
       - [0x1FFB70, c, game/Screen/Overlay/overlay]
       - [0x1FFF60, c, game/Effects/BoneFollower/bonefollower]
       - [0x200930, c, game/Particle/HitImpact/hitimpact]
       - [0x203340, c, game/Screen/FrameImage/frameimage]
       - [0x203E20, c, game/Text/AmountText/amounttext]
-      - [0x204660, c, game/Trail/AnchoredTrail/anchoredtrail]
+      - [0x204660, c, game/Effects/Trail/AnchoredTrail/anchoredtrail]
       - [0x205C90, c, game/Cont/Rumble/rumble]
       - [0x2062D0, c, game/Particle/Steam/steam]
       - [0x209B50, c, game/Particle/ColorEmitter/coloremitter]
@@ -1148,7 +1148,7 @@ segments:
       - {start: 0x22EB40, type: .data, name: game/Effects/ActorEffects/actoreffects, linker_section_order: .rodata}
       - {start: 0x22EC20, type: .data, name: game/Math/MathUtil/mathutil, linker_section_order: .rodata}
       - {start: 0x22EC90, type: .data, name: game/Effects/EffectObj/effectobj, linker_section_order: .rodata}
-      - {start: 0x22EEA0, type: .data, name: game/Trail/MotionTrail/motiontrail, linker_section_order: .rodata}
+      - {start: 0x22EEA0, type: .data, name: game/Effects/Trail/MotionTrail/motiontrail, linker_section_order: .rodata}
       - {start: 0x22EF30, type: .data, name: game/Effects/TimedEffect/timedeffect, linker_section_order: .rodata}
       - {start: 0x22F4C0, type: .data, name: game/Particle/SpawnShapes/spawnshapes, linker_section_order: .rodata}
       - {start: 0x22F530, type: .data, name: game/Effects/ActorAttachments/actorattachments, linker_section_order: .rodata}
@@ -1161,7 +1161,7 @@ segments:
       - {start: 0x22F890, type: .data, name: game/Effects/EffectActor/effectactor, linker_section_order: .rodata}
       - {start: 0x22F920, type: .data, name: game/Effects/CharacterWatcher/characterwatcher, linker_section_order: .rodata}
       - {start: 0x22FB10, type: .data, name: game/Sprite/TexQuad/texquad, linker_section_order: .rodata}
-      - {start: 0x22FB40, type: .data, name: game/Trail/FallingTrail/fallingtrail, linker_section_order: .rodata}
+      - {start: 0x22FB40, type: .data, name: game/Effects/Trail/FallingTrail/fallingtrail, linker_section_order: .rodata}
       - {start: 0x22FB50, type: .data, name: game/Lighting/AmbientZone/ambientzone, linker_section_order: .rodata}
       - {start: 0x22FB90, type: .data, name: game/Effects/ColourFrameBuffer/colourframebuffer, linker_section_order: .rodata}
       - {start: 0x22FBB0, type: .data, name: game/Effects/Light/light, linker_section_order: .rodata}
@@ -1183,7 +1183,7 @@ segments:
       - {start: 0x231EA0, type: .data, name: game/Shadow/RealTimeShadow/realtimeshadow, linker_section_order: .rodata}
       - {start: 0x231FB0, type: .data, name: game/Effects/FadeBurst/fadeburst, linker_section_order: .rodata}
       - [0x232038, .rodata, game/Effects/FadeBurst/fadeburst]
-      - {start: 0x232040, type: .data, name: game/Trail/Afterimage/afterimage, linker_section_order: .rodata}
+      - {start: 0x232040, type: .data, name: game/Effects/Trail/Afterimage/afterimage, linker_section_order: .rodata}
       - {start: 0x232060, type: .data, name: game/Particle/BoneGlow/boneglow, linker_section_order: .rodata}
       - {start: 0x232070, type: .data, name: game/Effects/TumblingPiece/tumblingpiece, linker_section_order: .rodata}
       - {start: 0x232080, type: .data, name: game/Effects/EffectQueue/effectqueue, linker_section_order: .rodata}
@@ -1203,15 +1203,15 @@ segments:
       - {start: 0x234590, type: .data, name: game/Particle/OwnerSideEmitter/ownersideemitter, linker_section_order: .rodata}
       - {start: 0x2345B0, type: .data, name: game/Effects/HoltenRope/holtenrope, linker_section_order: .rodata}
       - {start: 0x234640, type: .data, name: game/Beam/WavyBeam/wavybeam, linker_section_order: .rodata}
-      - {start: 0x234650, type: .data, name: game/Trail/RibbonTrail/ribbontrail, linker_section_order: .rodata}
+      - {start: 0x234650, type: .data, name: game/Effects/Trail/RibbonTrail/ribbontrail, linker_section_order: .rodata}
       - {start: 0x234660, type: .data, name: game/Effects/FollowEffects/followeffects, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game/Effects/StatCounter/statcounter, linker_section_order: .rodata}
       - {start: 0x234690, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
       - {start: 0x2346D0, type: .data, name: game/Effects/Sight/effects_sight, linker_section_order: .rodata}
-      - {start: 0x2346F0, type: .data, name: game/Trail/LevelStream/levelstream, linker_section_order: .rodata}
+      - {start: 0x2346F0, type: .data, name: game/Effects/Trail/LevelStream/levelstream, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game/Effects/BoneFollower/bonefollower, linker_section_order: .rodata}
       - {start: 0x234730, type: .data, name: game/Particle/HitImpact/hitimpact, linker_section_order: .rodata}
-      - {start: 0x234760, type: .data, name: game/Trail/AnchoredTrail/anchoredtrail, linker_section_order: .rodata}
+      - {start: 0x234760, type: .data, name: game/Effects/Trail/AnchoredTrail/anchoredtrail, linker_section_order: .rodata}
       - {start: 0x234780, type: .data, name: game/Cont/Rumble/rumble, linker_section_order: .rodata}
       - {start: 0x234790, type: .data, name: game/Particle/Steam/steam, linker_section_order: .rodata}
       - {start: 0x234830, type: .data, name: game/Save/FrontEnd/frontend, linker_section_order: .rodata}
@@ -1345,7 +1345,7 @@ segments:
       - [0x2443C0, .rodata, game/Particle/YawStreak/yawstreak]
       - [0x2443E0, .rodata, game/Effects/PipeExplode/pipeexplode]
       - [0x244680, .rodata, game/Effects/BoneStreak/bonestreak]
-      - [0x2446B0, .rodata, game/Trail/ScatterTrail/scattertrail]
+      - [0x2446B0, .rodata, game/Effects/Trail/ScatterTrail/scattertrail]
       - [0x2446E0, .rodata, game/Effects/OwnerSpark/ownerspark]
       - [0x2446F0, .rodata, game_E2DA0]
       - [0x2447B0, .rodata, game/Camera/LevelHook07/levelhook07]
@@ -1366,7 +1366,7 @@ segments:
       - [0x244BA0, .rodata, game/Prop/Scenery/scenery]
       - [0x244C80, .rodata, game/Particle/PoolEmitter/poolemitter]
       - [0x244C90, .rodata, game/Particle/FootDust/footdust]
-      - [0x244CB0, .rodata, game/Trail/TrailRing/trailring]
+      - [0x244CB0, .rodata, game/Effects/Trail/TrailRing/trailring]
       - [0x244CD0, .rodata, game/Effects/BoneRing/bonering]
       - [0x244CF0, .rodata, game/Particle/PuffSprays/puffsprays]
       - [0x244D60, .rodata, game/Particle/DiscEmitter/discemitter]
@@ -1401,13 +1401,13 @@ segments:
       - [0x2453A0, .rodata, game/Effects/AmbientPulse/ambientpulse]
       - [0x2453B0, .rodata, game/Effects/RaySpinner/rayspinner]
       - [0x245450, .rodata, game/Particle/SparkEmitter/sparkemitter]
-      - [0x245480, .rodata, game/Trail/CharacterTrail/charactertrail]
+      - [0x245480, .rodata, game/Effects/Trail/CharacterTrail/charactertrail]
       - [0x2454F0, .rodata, game/Particle/FollowEffect/followeffect]
       - [0x2455A0, .rodata, game/Effects/HitSpray/hitspray]
       - [0x2455B0, .rodata, game/Effects/TintedObject/tintedobject]
       - [0x2455D0, .rodata, game/Attach/TextureScroll/texturescroll]
       - [0x2455F0, .rodata, game/Attach/BonePoint/bonepoint]
-      - [0x245600, .rodata, game/Trail/PissTrail/pisstrail]
+      - [0x245600, .rodata, game/Effects/Trail/PissTrail/pisstrail]
       - [0x2456A0, .rodata, game/Beam/BeamQuad/beamquad]
       - [0x2456C0, .rodata, game/Effects/PuffTimer/pufftimer]
       - [0x245700, .rodata, game/Effects/FallingStream/fallingstream]
@@ -1528,7 +1528,7 @@ segments:
       - [0x24AB40, .rodata, game/Effects/CharacterWatcher/characterwatcher]
       - [0x24AEE0, .rodata, game/Particle/SlidingSprite/slidingsprite]
       - [0x24AF30, .rodata, game/Sprite/TexQuad/texquad]
-      - [0x24AF60, .rodata, game/Trail/FallingTrail/fallingtrail]
+      - [0x24AF60, .rodata, game/Effects/Trail/FallingTrail/fallingtrail]
       - [0x24AFE0, .rodata, game/Lighting/PointLight/pointlight]
       - [0x24AFF0, .rodata, game/Lighting/AmbientZone/ambientzone]
       - [0x24B000, .rodata, game/Effects/ColourFrameBuffer/colourframebuffer]
@@ -1557,11 +1557,11 @@ segments:
       - [0x24BD90, .rodata, game/Swarm/ModelSlots/modelslots]
       - [0x24BE10, .rodata, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x24BE50, .rodata, game/Effects/ColorAnim/coloranim]
-      - [0x24BE60, .rodata, game/Trail/SprayEmitter/sprayemitter]
+      - [0x24BE60, .rodata, game/Effects/Trail/SprayEmitter/sprayemitter]
       - [0x24BE80, .rodata, game/Particle/BoneGlow/boneglow]
       - [0x24BE90, .rodata, game/Particle/Droplets/droplets]
       - [0x24BEC0, .rodata, game/Particle/BillboardBurst/billboardburst]
-      - [0x24BED0, .rodata, game/Trail/TrailEmitter/trailemitter]
+      - [0x24BED0, .rodata, game/Effects/Trail/TrailEmitter/trailemitter]
       - [0x24BF10, .rodata, game/Particle/PlacementRing/placementring]
       - [0x24BF20, .rodata, game/Particle/ActorEmitter/actoremitter]
       - [0x24C620, .rodata, game/Particle/ActorEmitterHandlers/actoremitterhandlers]
@@ -1575,12 +1575,12 @@ segments:
       - [0x24CC80, .rodata, game/Particle/SegmentBurst/segmentburst]
       - [0x24CCD0, .rodata, game/Effects/ContactEffects/contacteffects]
       - [0x24D1D0, .rodata, game/Effects/CharacterFlameThrower/characterflamethrower]
-      - [0x24D640, .rodata, game/Trail/MatrixTrail/matrixtrail]
+      - [0x24D640, .rodata, game/Effects/Trail/MatrixTrail/matrixtrail]
       - [0x24D780, .rodata, game/Cutscene/EventEffects/eventeffects]
-      - [0x24D7A0, .rodata, game/Trail/SurfaceTrail/surfacetrail]
+      - [0x24D7A0, .rodata, game/Effects/Trail/SurfaceTrail/surfacetrail]
       - [0x24D7D0, .rodata, game/Particle/FastSpark/fastspark]
       - [0x24D7E0, .rodata, game/Particle/SphereEmitter/sphereemitter]
-      - [0x24D810, .rodata, game/Trail/BoneTrail/bonetrail]
+      - [0x24D810, .rodata, game/Effects/Trail/BoneTrail/bonetrail]
       - [0x24D830, .rodata, game/Screen/Tint/tint]
       - [0x24D840, .rodata, game/Particle/RegionEmitter/regionemitter]
       - [0x24D860, .rodata, game/Particle/ZoneEmitter/zoneemitter]
@@ -1604,7 +1604,7 @@ segments:
       - [0x24EEC0, .rodata, game/Beam/WavyBeam/wavybeam]
       - [0x24EEF0, .rodata, game/Particle/SoundPulse/soundpulse]
       - [0x24EF10, .rodata, game/Particle/Pulse/pulse]
-      - [0x24EF20, .rodata, game/Trail/RibbonTrail/ribbontrail]
+      - [0x24EF20, .rodata, game/Effects/Trail/RibbonTrail/ribbontrail]
       - [0x24EF50, .rodata, game/Weapon/BulletParticle/bulletparticle]
       - [0x24EFA0, .rodata, game/Effects/LampParticle/lampparticle]
       - [0x24F040, .rodata, game/Particle/FallingParticle/fallingparticle]
@@ -1614,15 +1614,15 @@ segments:
       - [0x24F490, .rodata, game/Weapon/Projectile/projectile]
       - [0x24F550, .rodata, game/Weapon/SegmentShot/segmentshot]
       - [0x24F5C0, .rodata, game/Weapon/JointShot/jointshot]
-      - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
+      - [0x24F6F0, .rodata, game/Effects/Sight/SightBeam/sightbeam]
       - [0x24F740, .rodata, game/Effects/Sight/effects_sight]
-      - [0x24F9A0, .rodata, game/Trail/LevelStream/levelstream]
-      - [0x24FB68, .rodata, game/Trail/TrackerTrail/trackertrail]
+      - [0x24F9A0, .rodata, game/Effects/Trail/LevelStream/levelstream]
+      - [0x24FB68, .rodata, game/Effects/Trail/TrackerTrail/trackertrail]
       - [0x24FB70, .rodata, game/Effects/ActorSoundBurst/actorsoundburst]
       - [0x24FC00, .rodata, game/Effects/BoneFollower/bonefollower]
       - [0x24FC30, .rodata, game/Particle/HitImpact/hitimpact]
       - [0x24FD10, .rodata, game/Text/AmountText/amounttext]
-      - [0x24FD40, .rodata, game/Trail/AnchoredTrail/anchoredtrail]
+      - [0x24FD40, .rodata, game/Effects/Trail/AnchoredTrail/anchoredtrail]
       - [0x24FDC0, .rodata, game/Cont/Rumble/rumble]
       - [0x24FDD0, .rodata, game/Particle/Steam/steam]
       - [0x24FFC0, .rodata, game/Particle/ColorEmitter/coloremitter]
@@ -1775,10 +1775,10 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DDE80, name: game/Swarm/ModelSlots/modelslots}
       - {start: 0x255880, type: .bss, vram: 0x800DDFB0, name: game/Shadow/RealTimeShadow/realtimeshadow}
       - {start: 0x255880, type: .bss, vram: 0x800DF700, name: game/Effects/ColorAnim/coloranim}
-      - {start: 0x255880, type: .bss, vram: 0x800DF7C0, name: game/Trail/Afterimage/afterimage}
+      - {start: 0x255880, type: .bss, vram: 0x800DF7C0, name: game/Effects/Trail/Afterimage/afterimage}
       - {start: 0x255880, type: .bss, vram: 0x800DF7D0, name: game/Attach/AttachModel/attachmodel}
       - {start: 0x255880, type: .bss, vram: 0x800E08E0, name: game/Effects/CharacterFlameThrower/characterflamethrower}
-      - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game/Trail/MatrixTrail/matrixtrail}
+      - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game/Effects/Trail/MatrixTrail/matrixtrail}
       - {start: 0x255880, type: .bss, vram: 0x800E0930, name: game/Weapon/Bullet/bullet}
       - {start: 0x255880, type: .bss, vram: 0x800E0940, name: game/Weapon/Projectile/projectile}
       - {start: 0x255880, type: .bss, vram: 0x800E0950, name: game/Effects/BoneFollower/bonefollower}

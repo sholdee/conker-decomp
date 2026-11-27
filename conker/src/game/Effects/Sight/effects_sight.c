@@ -2,7 +2,7 @@
  * Rare's ../Effects/Sight/effects_sight.c. The ECTS build (August 2000) passes this path (lines 3991
  * to 4004) to four debug tunables from its version of sight_spawnScopeFrame. In the US ROM the unit
  * ends with alignment padding, and its const tables follow the float literals of
- * game/Sight/SightBeam/sightbeam.c in .rodata, so that file is another unit.
+ * game/Effects/Sight/SightBeam/sightbeam.c in .rodata, so that file is another unit.
  * The ECTS tunables have Rare's names for the constants of sight_spawnScopeFrame: WIDTH, HEIGHT,
  * TOP_POSITION and BOTTOM_POSITION.
  */
