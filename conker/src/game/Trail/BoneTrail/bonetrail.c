@@ -137,7 +137,6 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
     Actor *owner;
     Vec3f delta;
     s32 started;
-    BoneTrailParams retry;
 
     owner = state->params.owner;
     if (owner->type == 0) {
@@ -157,13 +156,14 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
         }
     }
     if (!started && trail_getBoneAttachPoint(&state->params, &effect->head.tmpl.pos) == 0) {
+        BoneTrailParams retry;
+        TrailRetryTask *task;
+
         trail_detachBoneTrail(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
-        {
-            TrailRetryTask *task = effect_newTimedEffectNoDraw(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
-            if (task != NULL) {
-                memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
-            }
+        task = effect_newTimedEffectNoDraw(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
+        if (task != NULL) {
+            memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
         }
         return 1;
     }
@@ -227,20 +227,6 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
         state->lastPos = pos;
         state->age = age;
     }
-    /*
-     * matching: nine scopes holding a kept dead load each give as1 enough extra
-     * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
-     * (found by search).
-     */
-    { typedef s32 T0; state = *(BoneTrailState **)((u8 *)effect + 0x40); state = state; }
-    { typedef s32 T1; state = *(BoneTrailState **)((u8 *)effect + 0x44); state = state; }
-    { typedef s32 T2; state = *(BoneTrailState **)((u8 *)effect + 0x48); state = state; }
-    { typedef s32 T3; state = *(BoneTrailState **)((u8 *)effect + 0x4C); state = state; }
-    { typedef s32 T4; state = *(BoneTrailState **)((u8 *)effect + 0x50); state = state; }
-    { typedef s32 T5; state = *(BoneTrailState **)((u8 *)effect + 0x54); state = state; }
-    { typedef s32 T6; state = *(BoneTrailState **)((u8 *)effect + 0x58); state = state; }
-    { typedef s32 T7; state = *(BoneTrailState **)((u8 *)effect + 0x5C); state = state; }
-    { typedef s32 T8; state = *(BoneTrailState **)((u8 *)effect + 0x60); state = state; }
     return 1;
 }
 
