@@ -39,7 +39,7 @@ static const Vec3f gSideEffectEdgeBPointsType23[2] = { { 0.0f, 50.0f, 220.0f }, 
  * ob_matrix_ptr matrices; when the target found by event_getFirstLiveOwnedObject has unk197 set, the effect is aimed at the point
  * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
  * and trails, and a camera effect for the target's camera. */
-void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
+void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 owner, s32 list) {
     Actor *target;
     u8 useTarget;
     Vec3f origin;
@@ -152,7 +152,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         weapon_spawnProjectile(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
                       252.0f, 0.003968254197f, (math_randomFloat() * 20.0f) + 75.0f, (math_randomFloat() * 250.0f) + 502.0f, 50.0f,
                       (math_random() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
-                      cameraMask, 0, 0, arg4, arg5);
+                      cameraMask, 0, 0, owner, list);
     }
     if ((obj->cullMask & 0xF) != 0xF) {
         if (!(math_random() & 7)) {
@@ -166,7 +166,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             sparkPos.x = origin.x;
             sparkPos.y = origin.y;
             sparkPos.z = origin.z;
-            light_createWithEffect(&spark, &sparkPos, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            light_createWithEffect(&spark, &sparkPos, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, list);
         }
         if (!(math_random() & 1)) {
             ParticleSize trailParams;
@@ -182,7 +182,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             effect_spawnBoneBeamParticle(obj, (obj->character_type == 0x23) ? gSideEffectBonesType23[side] : gSideEffectBones[side], (obj->character_type == 0x23) ? &gSideEffectOriginsType23[side] : &gSideEffectOrigins[side],
                           (obj->character_type == 0x23) ? &gSideEffectDirPointsType23[side] : &gSideEffectDirPoints[side], &trailParams,
                           (math_random() % 3U) + 4, (math_random() % 101U) + 155, (math_randomFloat() * 1012.0f) + 1497.0f, &origin,
-                          trailCameraMask, 0, -1, arg4, arg5);
+                          trailCameraMask, 0, -1, owner, list);
         }
     }
     if (useTarget && target->CameraPtr != NULL) {
@@ -223,7 +223,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         effect.render.primMode = 0;
         effect.render.envMode = 7;
         effect.viewport = target->CameraPtr->CNumber;
-        sprite_newScreenSprite(&effect, 0, 0, 0, 0, 0, arg5);
+        sprite_newScreenSprite(&effect, 0, 0, 0, 0, 0, list);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
         func_1515572C((s32)&cameraArg, 0x37);
@@ -233,7 +233,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
 
 /* Calls weapon_spawnHitEffects for a projectile. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
-void func_150FC368(Game1EF500Trail *trail) {
+void particle_spawnHitEffectsHideOwnerSparks(Game1EF500Trail *trail) {
     u8 cameraMask;
     Actor *owner;
 
@@ -260,14 +260,14 @@ void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3)
     state.ownerUniqueId = owner->unique_id;
     state.spawnTimer = 0.0f;
     state.side = 0;
-    state.unkD = arg2;
+    state.skipTarget = arg2;
     state.wobble = NULL;
-    state.unk14 = 0;
-    state.unk1D = arg3;
+    state.rumbleTimer = 0;
+    state.ownerAnimSeq = arg3;
     if (other != NULL && other->CameraPtr != NULL) {
-        state.unk16 = other->CameraPtr->CNumber;
+        state.otherCamera = other->CameraPtr->CNumber;
     } else {
-        state.unk16 = -1;
+        state.otherCamera = -1;
     }
     state.other = other;
     if (other != NULL) {
@@ -317,14 +317,14 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
         obj->base.header.state = -1;
         return;
     }
-    if (owner->animseq.uh != state->unk1D) {
+    if (owner->animseq.uh != state->ownerAnimSeq) {
         obj->base.header.state = -1;
         return;
     }
 
     state->spawnTimer -= gFrameDelta;
     while (state->spawnTimer < 0.0f) {
-        particle_spawnSideEffect(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
+        particle_spawnSideEffect(owner, state->side, -state->spawnTimer, state->skipTarget, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->mv != NULL) {
@@ -334,20 +334,20 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
         state->spawnTimer += 4.0f + (math_randomFloat() * 4.0f);
     }
 
-    if (state->unk16 == -1) {
+    if (state->otherCamera == -1) {
         return;
     }
-    state->unk14 -= gFrameTicks;
-    if (state->unk14 < 0) {
+    state->rumbleTimer -= gFrameTicks;
+    if (state->rumbleTimer < 0) {
         spark.flags = 1;
         math_random();
         spark.duration = 30;
-        spark.playerMask = 1 << state->unk16;
+        spark.playerMask = 1 << state->otherCamera;
         spark.strength = (math_random() % 6U) + 3;
         spark.updateKind = -1;
         cont_spawnRumble(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         math_random();
-        state->unk14 = 250;
+        state->rumbleTimer = 250;
     }
 }
 

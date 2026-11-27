@@ -22,19 +22,19 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     angle = math_random() & 0xFF;
     cosine = math_cosBinAngleMasked(angle - 0x40);
     sine = math_cosBinAngleMasked(angle);
-    pos = &emitter->unk28;
+    pos = &emitter->data.disc;
     radius = math_randomFloat() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
     particle.color[0] = 0;
     particle.color[1] = 0;
     particle.color[2] = 0;
     particle.color[3] = 0xFF;
-    particle.unk2C = 0xFF;
-    particle.unk2D = 0xFF;
+    particle.alpha = 0xFF;
+    particle.colorLevel = 0xFF;
     particle.extraSize = 0;
     particle.flags = 1;
-    particle.unk2E = 0;
-    particle.unk2F = 1;
+    particle.updateFn1 = 0;
+    particle.expireFn = 1;
     particle.life = (math_random() % 201U) + 100;
     particle.effect = 0xF;
     particle.scale = 0.0f;
@@ -55,7 +55,10 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     emitter->base.header.state = (math_random() % 51U) + 25;
 }
 
-void func_150C2C00(Struct150C29F0 *emitter) {
+/* Timed effect update: while the camera is over 1581 from the world origin in xz, spawns channel particles on a
+ * ring of radius 3900-5178 around the origin, only at angles within 0.4 rad of the camera's bearing; each keeps its
+ * angle in particle->extra. */
+void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
     f32 *timer;
     f32 *pos;
     f32 distSq;
@@ -65,7 +68,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     f32 scaleB;
     ChannelParticle *created;
 
-    timer = &emitter->unk28.x;
+    timer = &emitter->data.accum;
     *timer += math_randomFloat() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2
@@ -80,9 +83,9 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                 particle.color[1] = 0;
                 particle.color[2] = 0;
                 particle.color[3] = 0xFF;
-                particle.unk2D = 0xFF;
-                particle.unk2E = 20;
-                particle.unk2F = 1;
+                particle.colorLevel = 0xFF;
+                particle.updateFn1 = 20;
+                particle.expireFn = 1;
                 particle.extraSize = 4;
                 particle.flags = 1;
                 particle.effect = 25;
@@ -102,7 +105,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                         particle.altB = 118.763f * scaleB;
                         particle.life = (math_random() % 151U) + 50;
                         particle.scale = (math_randomFloat() * 500.0f) * 0.001f;
-                        particle.unk2C = (math_random() % 156U) + 100;
+                        particle.alpha = (math_random() % 156U) + 100;
                         created = particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->extra, &angle, sizeof(angle));
@@ -128,7 +131,9 @@ s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle) {
     }
     return 1;
 }
-s32 func_150C308C(ChannelParticle *particle) {
+/* Update of particle_updateOriginRingEmitter's particles: cuts the lifetime to 5 once the camera is within 1581 of
+ * the origin or its bearing is more than 0.4 rad from the particle's angle. */
+s32 particle_expireRingParticleOffBearing(ChannelParticle *particle) {
     u8 triggered;
     f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)
     Vec3f *pos;

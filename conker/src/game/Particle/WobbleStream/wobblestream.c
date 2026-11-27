@@ -47,8 +47,8 @@ void particle_updateWobbleStream(Game1F1CD0Actor *actor) {
             math_dirFromAngles(x, y, 5.0f, &direction);
             randomX = math_randomFloat();
             randomY = math_randomFloat();
-            weapon_spawnProjectile(&emission->stream.position, &direction, 0, NULL, 0, 0, emission->speed, emission->unk3C,
-                          randomX * 40.0f + 55.0f, randomY * 300.0f + 250.0f, emission->unk40,
+            weapon_spawnProjectile(&emission->stream.position, &direction, 0, NULL, 0, 0, emission->speed, emission->distScale,
+                          randomX * 40.0f + 55.0f, randomY * 300.0f + 250.0f, emission->defaultRemaining,
                           math_random() % 56U + 200, NULL, 0, 0, 0, 0, 0, 0, -1, 0, time, 255, -1, 0,
                           actor->base.header.owner, actor->base.header.kind);
             phaseX += phaseStepX;

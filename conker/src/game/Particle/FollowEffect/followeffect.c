@@ -14,7 +14,7 @@
 #include "libc/string.h"
 
 /* Attaches a FollowEffect (particle_updateFollowEffect) to obj. */
-void particle_attachFollowEffect(Actor *obj, u8 arg1, s32 arg2) {
+void particle_attachFollowEffect(Actor *obj, u8 owner, s32 list) {
     FollowEffectData data;
     FollowEffect *effect;
 
@@ -22,7 +22,7 @@ void particle_attachFollowEffect(Actor *obj, u8 arg1, s32 arg2) {
     data.ownerId = obj->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = effect_newTimedEffect(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x38, -1, 0, 0x28, sizeof(data), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -161,7 +161,7 @@ void particle_freeFollowEffect(TimedEffect *effect) {
  * gBloodModelCounts[type] - 2 type-specific ones) flying off the surface obj's last move hit,
  * plus impact and dust effects.
  */
-void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnBreakup(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
     Vec3f vel;
     Vec3f hitPos;
@@ -192,8 +192,8 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     }
     sound_playActorUntracked((math_random() & 1) + 0x2B6, obj, 32000, 1000, 3000);
     sound_playActorUntracked((math_random() & 3) + 0x2B1, obj, 32000, 700, 2000);
-    weapon_wobbleNearbyCameras(&pos, arg1, arg2);
-    weapon_rumbleNearbyPlayers(&pos, arg1, arg2);
+    weapon_wobbleNearbyCameras(&pos, owner, list);
+    weapon_rumbleNearbyPlayers(&pos, owner, list);
     func_15145A50(obj);
     if (obj->ob_matrix_ptr == NULL) {
         return;
@@ -315,7 +315,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 piece.gravity = math_randomFloat() * 0.6480000019f + -1.397000074f;
                 piece.lifetime = math_random() % 21U + 30;
                 piece.model = firstModels[i];
-                particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 0, 0, 0, owner, list);
             }
             piece.fadeStart = 12;
             piece.fadeRate = 21;
@@ -334,36 +334,36 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 piece.gravity = math_randomFloat() * 0.6260000467f + -1.089000106f;
                 piece.lifetime = math_random() % 41U + 40;
                 piece.model = gBloodModelLists[type][j];
-                particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 0, 0, 0, owner, list);
             }
         }
         if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
-            particle_flashScreenWhite(obj->CameraPtr->CNumber, arg1, arg2);
+            particle_flashScreenWhite(obj->CameraPtr->CNumber, owner, list);
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
-                func_150D65F0((CollisionTri *)hitTri, &hitPos, arg1, arg2);
+                particle_spawnRandomSurfaceMark((CollisionTri *)hitTri, &hitPos, owner, list);
             } else {
-                weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
+                weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, owner, list);
             }
         }
-        particle_spawnRandomSwell(&pos, arg1, arg2);
-        particle_spawnRandomGrowFade(&pos, arg1, arg2);
+        particle_spawnRandomSwell(&pos, owner, list);
+        particle_spawnRandomGrowFade(&pos, owner, list);
     }
 }
 
 /* Spawns a particle_spawnGrowFade effect at pos with a random size and a 200-255 fourth argument. */
-void particle_spawnRandomGrowFade(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomGrowFade(Vec3f *pos, u8 owner, s32 list) {
     u32 randInt;
     f32 randFrac;
 
     randFrac = math_randomFloat();
     randInt = math_random();
-    particle_spawnGrowFade(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
+    particle_spawnGrowFade(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, owner, list);
 }
 
 /* Spawns a particle_spawnSwell effect at pos with randomized parameters. */
-void particle_spawnRandomSwell(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomSwell(Vec3f *pos, u8 owner, s32 list) {
     f32 rand3;
     f32 rand2;
     f32 rand1;
@@ -371,7 +371,7 @@ void particle_spawnRandomSwell(Vec3f *pos, u8 arg1, s32 arg2) {
     rand1 = math_randomFloat();
     rand2 = math_randomFloat();
     rand3 = math_randomFloat();
-    particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
+    particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, owner, list);
 }
 
 /* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or gPlayerCount >= 8, else 0. */
@@ -406,7 +406,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
 }
 
 /* Impact effect on a type-0xE surface hit at pos (particle_spawnSurfaceMark with randomized parameters). */
-void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
+void particle_spawnRandomSurfaceMark(CollisionTri *surface, Vec3f *pos, u8 owner, s32 list) {
     u32 rand3;
     u32 rand2;
     f32 rand1;
@@ -414,21 +414,21 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     rand1 = math_randomFloat();
     rand2 = math_random();
     rand3 = math_random();
-    particle_spawnSurfaceMark(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
+    particle_spawnSurfaceMark(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, owner, list);
 }
 
-/* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
-void particle_flashScreenWhite(u8 arg0, u8 arg1, s32 arg2) {
+/* Calls screen_spawnFlash for view `view` with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
+void particle_flashScreenWhite(u8 view, u8 owner, s32 list) {
     u32 rand2;
     u32 rand1;
 
     rand1 = math_random();
     rand2 = math_random();
-    screen_spawnFlash(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, view, owner, list);
 }
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
-void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnFollowDrift(Actor *obj, u8 owner, s32 list) {
     s32 count;
     ParticleDesc spawn;
     FollowDriftData drift;
@@ -484,7 +484,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         r1 = (math_random() & 1) ? 0x80 : 0;
         r2 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
-        particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0xC, arg1, arg2);
+        particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0xC, owner, list);
         if (particle != NULL) {
             memcpy(&particle->data.drift, &drift, sizeof(drift));
         }
@@ -538,7 +538,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.height = 0.0f;
         growSpawn.width = 0.0f;
         growSpawn.gravity = 0.0f;
-        particle = particle_newSpriteParticleWithFloor(&growSpawn, 1, 0, 0x1C, arg1, arg2);
+        particle = particle_newSpriteParticleWithFloor(&growSpawn, 1, 0, 0x1C, owner, list);
         if (particle != NULL) {
             memcpy(&particle->data.grow, &grow, sizeof(grow));
         }
@@ -553,7 +553,7 @@ void particle_getPointAboveObj(Actor *obj, Vec3f *out) {
 }
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
-s32 particle_updateFollowDrift(FollowParticle *particle, s32 arg1) {
+s32 particle_updateFollowDrift(FollowParticle *particle, Vec3f *prevPos) {
     FollowDriftData *data;
     Actor *owner;
 
@@ -610,7 +610,7 @@ void particle_onFollowDriftMsg(FollowParticle *particle, ActorMsg *msg, u8 type)
 }
 
 /* Grow particle update: follows the owner, grows and fades; returns 0 once its lifetime is over. */
-s32 particle_updateFollowGrow(FollowParticle *particle, s32 arg1) {
+s32 particle_updateFollowGrow(FollowParticle *particle, Vec3f *prevPos) {
     GrowParticleData *data;
     Actor *owner;
     f32 size;

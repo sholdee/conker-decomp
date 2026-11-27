@@ -25,7 +25,7 @@ void particle_levelHook29(Camera *camera) {
 }
 
 /* Spawns an emitter effect (particle_updatePointEmitter) at `pos` with a random duration of 69-201. */
-void particle_spawnPointEmitter(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
+void particle_spawnPointEmitter(EffectHeader *spawner, Vec3f *pos, f32 top, u8 noGround) {
     PointEmitterData data;
     TimedEffect *effect;
 

@@ -19,7 +19,7 @@
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
 static void (*D_8008FBD0[])() = {
-    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
+    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, func_150EC45C, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
 typedef struct {
@@ -962,8 +962,8 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         data.stream.position.y = emitter->position[1];
         data.stream.position.z = emitter->position[2];
         data.speed = emitter->speed;
-        data.unk3C = emitter->unk30;
-        data.unk40 = emitter->unk34;
+        data.distScale = emitter->distScale;
+        data.defaultRemaining = emitter->defaultRemaining;
 
         effect = effect_newTimedEffect((math_random() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);

@@ -17,14 +17,15 @@
  * (IDO keeps vtx in a register where the ROM loads it again).
  */
 /* The effect names that particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke pass on. */
-const char D_800A7460[] = "effects_characterfire_conker_all_over_fire_to_smoke_death";
-const char D_800A749C[] = "effects_characterfire_conker_tail_fire_to_smoke_death";
+const char gAllOverFireToSmokeName[] = "effects_characterfire_conker_all_over_fire_to_smoke_death";
+const char gTailFireToSmokeName[] = "effects_characterfire_conker_tail_fire_to_smoke_death";
 /* The template of particle_broadcastToActorEmitters's local. */
-const IdList1 D_800A74D4 = { { 0x21 } };
+const IdList1 gActorEmitterTypes = { { 0x21 } };
 /*
  * The anchor emitter templates, one array per kind (gAnchorEmitterTemplates): { rate, rateRange, burstBase,
- * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, unk20, unk21Range, lifeMin, lifeRange, pad, maxCount,
- * velocityScale, unk30, unk34Range, unk38, unk3C, unk3E, unk40, unk42Range, anchorSet, flags, pad, unk4C }.
+ * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, alpha, alphaRange, lifeMin, lifeRange, pad, maxCount,
+ * velocityScale, gravity, gravityRange, drag, fadeStart, fadeRate, launchLifeMin, launchLifeRange, anchorSet, flags,
+ * pad, easeFactor }.
  */
 const AnchorEmitterTemplate D_800A74D8[] = {
     { 0.504f, 0.517f, 20.0f, 10.0f, 0.46100003f, 0.574f, 0.404f, 0.41200003f, 80, 100, 20, 60, { 0 }, 30,
@@ -128,7 +129,7 @@ const u8 D_800A7B10[4] = { 0 };
  */
 static EmitterTable *gActorEmitterTables[] = {
     &D_8008F780, &gAllOverFireEmitterTable, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &gTailFireEmitterTable,
-    &gAllOverSmokeEmitterTable, &gTailSmokeEmitterTable, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
+    &gAllOverSmokeEmitterTable, &gTailSmokeEmitterTable, &gLavaBoulderImpactEmitterTable, &D_8008F804, &gFireImpImpactEmitterTable, &D_8008F81C, &D_8008F828, &D_8008F834,
 };
 /* Particle spawn callbacks, by ParticleTemplate.spawnCb (game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
 static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { particle_pickBlackTexture, particle_pickPaletteTexture };
@@ -136,8 +137,8 @@ static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16
 static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { particle_chainAllOverFireToSmoke, particle_chainTailFireToSmoke };
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
-                       const char *arg6) {
+ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 fxOwner, u8 fxList,
+                       const char *callerName) {
     ActorEmitterParams params;
     s32 i;
 
@@ -168,109 +169,109 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 11:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 0;
         params.table = 1;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 12:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 1:
         params.lifetime = 500;
         params.flags = 1;
         params.expireCb = 0;
         params.table = 1;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 2:
         params.lifetime = 3000;
         params.flags = 1;
         params.expireCb = 1;
         params.table = 7;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 3:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 8;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 4:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 9;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 5:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 2;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 6:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 3;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 7:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 4;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 8:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 5;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 9:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 6;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 13:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 10;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 14:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 11;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 15:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 12;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 16:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 13;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 17:
         params.lifetime = 300;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 14;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     case 18:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 15;
-        return particle_newActorEmitter(&params, arg4);
+        return particle_newActorEmitter(&params, fxOwner);
     }
     return NULL;
 }
@@ -401,8 +402,8 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                             data->vel.z = -10.0f;
                         }
                         data->vel.y = 0.0f;
-                        particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
-                                      data->tmpl->unk3E);
+                        particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->releaseUpdateFn1, data->tmpl->releaseUpdateFn2, data->tmpl->releaseExpireFn,
+                                      data->tmpl->releaseVertexFn);
                         slot->particle->head.def.lifetime =
                             math_random() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->head.def.flags |= 1;
@@ -434,26 +435,26 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                     ok = 1;
                     prevFree->next = freeSlot;
                     spawn.frame = 0;
-                    data.unk20 = tmpl->unk14;
-                    data.unk24 = tmpl->unk18;
-                    data.unk2C = 0;
-                    spawn.frameSpeed = (tmpl->unk14 + tmpl->unk18) * 0.5f;
-                    data.unk3C = tmpl->unk1C;
-                    data.unk40 = tmpl->unk20;
-                    data.unk44 = tmpl->unk24;
-                    data.unk4C = tmpl->unk2C;
-                    data.stretch = tmpl->unk30;
-                    data.unk48 = tmpl->unk28;
-                    data.unk4A = tmpl->unk2A;
-                    data.unk0 = tmpl->unk0 * self->scale;
-                    data.unk4 = tmpl->unk4 * self->scale;
-                    data.unk1C = 0;
-                    data.unk8 = spawn.width = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
-                    data.unkC = tmpl->unk8 * self->scale;
-                    data.unk10 = tmpl->unkC * self->scale;
-                    data.unk14 = tmpl->unk10 * self->scale;
-                    data.unk1E = 0;
-                    data.unk18 = spawn.height = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
+                    data.wobble.hi2 = tmpl->frameSpeedHi;
+                    data.wobble.lo2 = tmpl->frameSpeedLo;
+                    data.wobble.timer2 = 0;
+                    spawn.frameSpeed = (tmpl->frameSpeedHi + tmpl->frameSpeedLo) * 0.5f;
+                    data.gravity = tmpl->gravity;
+                    data.drag = tmpl->drag;
+                    data.shrinkRate = tmpl->shrinkRate;
+                    data.blend = tmpl->blend;
+                    data.stretch = tmpl->stretch;
+                    data.fadeStart = tmpl->fadeStart;
+                    data.fadeRate = tmpl->fadeRate;
+                    data.wobble.hi0 = tmpl->widthHi * self->scale;
+                    data.wobble.lo0 = tmpl->widthLo * self->scale;
+                    data.wobble.timer0 = 0;
+                    data.wobble.target0 = spawn.width = reset ? (data.wobble.hi0 + data.wobble.lo0) * 0.5f : 0.0f;
+                    data.wobble.hi1 = tmpl->heightHi * self->scale;
+                    data.wobble.lo1 = tmpl->heightLo * self->scale;
+                    data.wobble.peak1 = tmpl->heightPeak * self->scale;
+                    data.wobble.timer1 = 0;
+                    data.wobble.target1 = spawn.height = reset ? (data.wobble.hi1 + data.wobble.lo1) * 0.5f : 0.0f;
                     data.tmpl = tmpl;
                     spawn.scale.x = 1.0f;
                     spawn.scale.y = 0.0f;
@@ -471,7 +472,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         }
                         gActorEmitterSpawnFuncs[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
                                                   &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
-                        freeSlot->particle = particle_newQuadParticleWhite(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
+                        freeSlot->particle = particle_newQuadParticleWhite(&spawn, tmpl->updateFn1, tmpl->updateFn2, 0, tmpl->vertexFn,
                                                            spawnFlag, sizeof(ActorEmitterParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
                             memcpy(&freeSlot->particle->data, &data, sizeof(ActorEmitterParticleData));
@@ -588,13 +589,13 @@ void particle_setActorEmitterTable(ActorEmitterProcess *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 arg1) {
+ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 owner) {
     ActorEmitterProcess *emitter;
 
     if (params->owner->character_type == 150) {
         return NULL;
     }
-    emitter = effect_newObject(0x21, 1, 0x9EC, 1, arg1, 1);
+    emitter = effect_newObject(0x21, 1, 0x9EC, 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
     }

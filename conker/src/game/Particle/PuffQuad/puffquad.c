@@ -29,7 +29,7 @@ Gfx gPuffQuadSetupDl[] = {
 };
 
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
-void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
+void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 owner, s32 list) {
     PuffQuadEffect *obj;
     s32 angle;
     s32 i;
@@ -37,7 +37,7 @@ void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     f32 fy;
     f32 fz;
 
-    obj = effect_newObject(0xD, arg5, sizeof(PuffQuadEffect), 1, arg4, 1);
+    obj = effect_newObject(0xD, list, sizeof(PuffQuadEffect), 1, owner, 1);
     if (obj != NULL) {
         obj->timer = 10;
         obj->x = x;
@@ -111,7 +111,7 @@ void particle_updatePuffQuad(void *self) {
 }
 
 /* Draws the three quads; their texture scrolls in S as the timer runs down. */
-Gfx *particle_drawPuffQuad(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
+Gfx *particle_drawPuffQuad(Gfx *gfx, PuffQuadEffect *obj, s32 view) {
     s32 texS;
     s32 i;
 
@@ -134,15 +134,15 @@ Gfx *particle_drawPuffQuad(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
 }
 
 
-/* Loads texture D_8009054C, using the frame and mode already in gDrawHookTextureFrame/gDrawHookTextureCm. */
-Gfx *particle_beginPuffQuadDraw(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    gDrawHookTexture = &D_8009054C;
+/* Loads texture gPuffQuadTexture, using the frame and mode already in gDrawHookTextureFrame/gDrawHookTextureCm. */
+Gfx *particle_beginPuffQuadDraw(Gfx *gfx, s32 type, s32 list, s32 view) {
+    gDrawHookTexture = &gPuffQuadTexture;
     return sprite_loadDescFrame(gfx, gDrawHookTexture, gDrawHookTextureFrame, &gDrawHookSprite, 0, 0, 0, gDrawHookTextureCm, 3);
 }
 
 
 /* Loads gIdentityMtx as the modelview matrix. */
-Gfx *particle_endPuffQuadDraw(Gfx *gfx, s32 arg1, s32 arg2) {
+Gfx *particle_endPuffQuadDraw(Gfx *gfx, s32 type, s32 view) {
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     return gfx;
 }

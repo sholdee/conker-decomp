@@ -11,8 +11,8 @@
 #include "conker/weapon.h"
 
 /* matching: no header declares particle_spawnKindSprite (steam.c): blood.c was compiled with another view */
-SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
-                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
+SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 scaleRate, f32 drag, f32 gravity, s16 lifetime,
+                             u8 alpha, s16 fadeFrames, s16 fadeStep, u8 spin, u8 owner, s32 list);
 
 /* Read by game/Level/LevelSetup26/levelsetup26.c. */
 const u8 gStagePartObjectIds[8][8] = {

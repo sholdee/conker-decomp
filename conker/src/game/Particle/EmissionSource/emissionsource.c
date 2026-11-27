@@ -51,7 +51,7 @@ static const Game113D60Source gEmissionSources[] = {
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
-void particle_startSourceEmission(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
+void particle_startSourceEmission(Actor *actor, s32 playerIndex, TriggerZone *zone, u8 sourceIndex) {
     const Game113D60Source *source;
     Vec3f end;
     Vec3f start;
@@ -203,7 +203,7 @@ void particle_randomPointInSourceZones(Vec3f *out) {
     math_randomPointInZone(gEmissionSourceZones[math_random() & 1], out);
 }
 
-static const Game113D60Segment D_800A1200[6] = {
+static const Game113D60Segment gEmissionPathSegments[6] = {
     { { -5626.0f, 194.0f, 4084.0f }, { -6566.0f, 207.0f, 5929.0f } },
     { { -6566.0f, 207.0f, 5929.0f }, { -6830.0f, -231.0f, 8012.0f } },
     { { -6830.0f, -231.0f, 8012.0f }, { -6615.0f, -781.0f, 9425.0f } },
@@ -211,8 +211,8 @@ static const Game113D60Segment D_800A1200[6] = {
     { { 3843.0f, 240.0f, 6531.0f }, { 3730.0f, -266.0f, 8330.0f } },
     { { 3730.0f, -266.0f, 8330.0f }, { 3603.0f, -866.0f, 9595.0f } },
 };
-static const Game113D60Segment *D_80088A44[] = {
-    &D_800A1200[0], &D_800A1200[1], &D_800A1200[2], &D_800A1200[3], &D_800A1200[4], &D_800A1200[5],
+static const Game113D60Segment *gEmissionPathSegmentPtrs[] = {
+    &gEmissionPathSegments[0], &gEmissionPathSegments[1], &gEmissionPathSegments[2], &gEmissionPathSegments[3], &gEmissionPathSegments[4], &gEmissionPathSegments[5],
 };
 
 /* Start callback: a random point on one of six segments. */
@@ -220,7 +220,7 @@ void particle_randomPointOnSixSegments(Vec3f *out) {
     const Game113D60Segment *segment;
     f32 t;
 
-    segment = D_80088A44[math_random() % 6];
+    segment = gEmissionPathSegmentPtrs[math_random() % 6];
     t = math_randomFloat();
     out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
     out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
@@ -297,10 +297,10 @@ void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D
 }
 
 /* Occasionally spawns one of the two sprite_newScreenSprite effects, plus a sound and an event. */
-void func_150E7290(arg0, owner, kind)
-    u8 arg0;
+void func_150E7290(playerIndex, owner, list)
+    u8 playerIndex;
     u8 owner;
-    s32 kind;
+    s32 list;
 {
     if (math_randomFloat() < 0.00419999985f) {
         s32 ids[2] = { 4, 5 };
@@ -321,15 +321,15 @@ void func_150E7290(arg0, owner, kind)
             flip4 = (math_random() & 1) ? 4 : 0;
             particle_spawnScreenSprite(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
                           (u8)(flip4 | flip2) | 9, (math_random() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner,
-                          kind);
+                          list);
         } else {
             randomSize = math_randomFloat();
             flip4 = math_random(); // matching: a separate variable here does not match
             particle_spawnScreenEdgeSprite(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
-                          (math_random() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, kind);
+                          (math_random() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, list);
         }
         sound_play(0x360, 0x7FFF, 0, 0, 0);
-        camera_startWobblePreset(1, arg0, NULL, owner, kind);
+        camera_startWobblePreset(1, playerIndex, NULL, owner, list);
         event.flags = 1;
         event.duration = (math_random() % 26) + 25;
         event.playerMask = 1;
@@ -340,77 +340,77 @@ void func_150E7290(arg0, owner, kind)
 }
 
 /* Spawns a sprite_newScreenSprite effect of the given size at `position`. */
-void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
-                   s32 idCount, u8 owner, s32 kind) {
+void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 timer, u8 flags, u8 alpha, u8 colorLevel, s16 fadeStart, s16 fadeRate, s32 *ids,
+                   s32 idCount, u8 owner, s32 list) {
     s32 pad; // matching: unused stack slot
-    ScreenSpriteInfo arg;
+    ScreenSpriteInfo info;
     u8 id[1] = { 0x44 };
 
     // matching: x and y are copied as one Vec2f
-    *(Vec2f *)&arg.x = *position;
-    arg.halfWidth = size;
-    arg.halfHeight = size;
-    arg.texture = id[0];
-    arg.timer = unk12;
-    arg.flags = flags | 0x40;
-    arg.fadeStart = unk16;
-    arg.fadeRate = unk18;
-    arg.kind = 4;
-    arg.color1.red = 0xFF;
-    arg.color1.green = 0xE6;
-    arg.color1.blue = 0xBE;
-    arg.color1.alpha = unk1E;
-    arg.color2.red = 0xFF;
-    arg.color2.green = 0xFF;
-    arg.color2.blue = 0xFF;
-    arg.color2.alpha = 0xFF;
-    arg.colorLevel = unk23;
-    arg.render.otherModeH = 1;
-    arg.render.setGeometryMode = 0;
-    arg.render.clearGeometryMode = 0;
-    arg.render.primMode = 0;
-    arg.render.envMode = 10;
-    arg.render.renderMode = 7;
-    arg.render.combiner = 60;
-    arg.render.colorDither = 0x80;
-    arg.render.alphaDither = 0x20;
-    sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
+    *(Vec2f *)&info.x = *position;
+    info.halfWidth = size;
+    info.halfHeight = size;
+    info.texture = id[0];
+    info.timer = timer;
+    info.flags = flags | 0x40;
+    info.fadeStart = fadeStart;
+    info.fadeRate = fadeRate;
+    info.kind = 4;
+    info.color1.red = 0xFF;
+    info.color1.green = 0xE6;
+    info.color1.blue = 0xBE;
+    info.color1.alpha = alpha;
+    info.color2.red = 0xFF;
+    info.color2.green = 0xFF;
+    info.color2.blue = 0xFF;
+    info.color2.alpha = 0xFF;
+    info.colorLevel = colorLevel;
+    info.render.otherModeH = 1;
+    info.render.setGeometryMode = 0;
+    info.render.clearGeometryMode = 0;
+    info.render.primMode = 0;
+    info.render.envMode = 10;
+    info.render.renderMode = 7;
+    info.render.combiner = 60;
+    info.render.colorDither = 0x80;
+    info.render.alphaDither = 0x20;
+    sprite_newScreenSprite(&info, 0, ids, idCount, 0, owner, list);
 }
 
 /* Like particle_spawnScreenSprite, but placed at a random screen edge. */
-void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
-                   u8 owner, s32 kind) {
+void particle_spawnScreenEdgeSprite(f32 size, s16 timer, u8 flags, u8 alpha, u8 colorLevel, s16 fadeStart, s16 fadeRate, s32 *ids, s32 idCount,
+                   u8 owner, s32 list) {
     s32 pad; // matching: unused stack slot
-    ScreenSpriteInfo arg;
+    ScreenSpriteInfo info;
     u8 edge;
 
     edge = math_random() & 3;
 
-    arg.timer = unk12;
-    arg.flags = flags & 0xFFF9;
-    arg.fadeStart = unk16;
-    arg.fadeRate = unk18;
-    arg.kind = 5;
-    arg.color1.red = 0xFF;
-    arg.color1.green = 0xE6;
-    arg.color1.blue = 0xBE;
-    arg.color1.alpha = unk1E;
-    arg.color2.red = 0xFF;
-    arg.color2.green = 0xFF;
-    arg.color2.blue = 0xFF;
-    arg.color2.alpha = 0xFF;
-    arg.colorLevel = unk23;
-    arg.render.otherModeH = 1;
-    arg.render.setGeometryMode = 0;
-    arg.render.clearGeometryMode = 0;
-    arg.render.primMode = 0;
-    arg.render.envMode = 10;
-    arg.render.renderMode = 7;
-    arg.render.combiner = 60;
-    arg.render.colorDither = 0x80;
-    arg.render.alphaDither = 0x20;
-    arg.halfHeight = size;
-    arg.halfWidth = size;
+    info.timer = timer;
+    info.flags = flags & 0xFFF9;
+    info.fadeStart = fadeStart;
+    info.fadeRate = fadeRate;
+    info.kind = 5;
+    info.color1.red = 0xFF;
+    info.color1.green = 0xE6;
+    info.color1.blue = 0xBE;
+    info.color1.alpha = alpha;
+    info.color2.red = 0xFF;
+    info.color2.green = 0xFF;
+    info.color2.blue = 0xFF;
+    info.color2.alpha = 0xFF;
+    info.colorLevel = colorLevel;
+    info.render.otherModeH = 1;
+    info.render.setGeometryMode = 0;
+    info.render.clearGeometryMode = 0;
+    info.render.primMode = 0;
+    info.render.envMode = 10;
+    info.render.renderMode = 7;
+    info.render.combiner = 60;
+    info.render.colorDither = 0x80;
+    info.render.alphaDither = 0x20;
+    info.halfHeight = size;
+    info.halfWidth = size;
 
     switch (edge) {
     case 0:
@@ -418,15 +418,15 @@ void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
         {
             s32 sideIds[3] = { 0x48, 0x49, 0x4A };
 
-            arg.texture = sideIds[math_random() % 3];
-            arg.y = (math_randomFloat() * 160.0f) + -80.0f;
+            info.texture = sideIds[math_random() % 3];
+            info.y = (math_randomFloat() * 160.0f) + -80.0f;
             switch (edge) {
             case 0:
-                arg.flags |= 2;
-                arg.x = 145.0f - size;
+                info.flags |= 2;
+                info.x = 145.0f - size;
                 break;
             case 1:
-                arg.x = size - 145.0f;
+                info.x = size - 145.0f;
                 break;
             }
         }
@@ -436,27 +436,27 @@ void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
         {
             s32 topIds[3] = { 0x45, 0x46, 0x47 };
 
-            arg.texture = topIds[math_random() % 3];
-            arg.x = (math_randomFloat() * 260.0f) + -130.0f;
+            info.texture = topIds[math_random() % 3];
+            info.x = (math_randomFloat() * 260.0f) + -130.0f;
             switch (edge) {
             case 2:
-                arg.flags |= 4;
-                arg.y = 110.0f - size;
+                info.flags |= 4;
+                info.y = 110.0f - size;
                 break;
             case 3:
-                arg.y = size - 110.0f;
+                info.y = size - 110.0f;
                 break;
             }
         }
         break;
     }
 
-    sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
+    sprite_newScreenSprite(&info, 0, ids, idCount, 0, owner, list);
 }
 
 /* Creates a burst effect (updated by particle_updateScreenBurst) whose `count` points lie on a random
  * curve across the screen. */
-TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) {
+TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list) {
     TimedEffect *obj;
     Game113D60BurstHead head;
     RumbleParams event;
@@ -484,7 +484,7 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) 
     head.count = count;
     head.next = 0;
 
-    obj = effect_newTimedEffectNoDraw(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, kind);
+    obj = effect_newTimedEffectNoDraw(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, list);
     if (obj != NULL) {
         memcpy(&((Game113D60BurstEffect *)obj)->burst.head, &head, sizeof(head));
 
@@ -543,43 +543,43 @@ void particle_updateScreenBurst(Game113D60BurstEffect *effect) {
 
 /* Spawns a particle_spawnSurfaceQuadSprite effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
-void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
-                   u8 arg9, u8 owner, s32 kind) {
+void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *position, s16 duration, u8 lit, u8 arg6, u8 r, u8 g,
+                   u8 b, u8 owner, s32 list) {
     s32 pad; // matching: unused stack slot
-    SpriteDef arg;
-    s32 argB;
-    s32 argC;
+    SpriteDef def;
+    s32 maxLights;
+    s32 lightMask;
 
-    arg.fadeStart = 20;
-    arg.fadeRate = 12;
-    arg.texture = 0x4F;
-    arg.handlerSet = 0;
-    arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
-    arg.lifetime = (duration == -1) ? 300 : duration + 20;
-    arg.frame = 0;
-    arg.frameSpeed = 0;
-    arg.alpha = arg1;
-    arg.colorLevel = 0xFF;
-    arg.rgba[0] = arg7;
-    arg.rgba[1] = arg8;
-    arg.rgba[2] = arg9;
-    arg.rgba[3] = 0xFF;
-    arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
-    arg.primMode = 0;
-    arg.envMode = 6;
-    if (arg5 != 0) {
-        argB = 3;
-        argC = 0xFF;
+    def.fadeStart = 20;
+    def.fadeRate = 12;
+    def.texture = 0x4F;
+    def.handlerSet = 0;
+    def.flags = ((duration == -1) ? 0 : 1) | (lit ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
+    def.lifetime = (duration == -1) ? 300 : duration + 20;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.alpha = alpha;
+    def.colorLevel = 0xFF;
+    def.rgba[0] = r;
+    def.rgba[1] = g;
+    def.rgba[2] = b;
+    def.rgba[3] = 0xFF;
+    def.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    def.primMode = 0;
+    def.envMode = 6;
+    if (lit != 0) {
+        maxLights = 3;
+        lightMask = 0xFF;
     } else {
-        argB = 0;
-        argC = 0;
+        maxLights = 0;
+        lightMask = 0;
     }
-    particle_spawnSurfaceQuadSprite(&arg, 0, 0, surface, position->x, position->y, position->z, size, size, math_random() & 0xFF,
-                  (math_random() & 1) + ((math_random() & 1) * 2), argB, argC, 0, owner, kind);
+    particle_spawnSurfaceQuadSprite(&def, 0, 0, surface, position->x, position->y, position->z, size, size, math_random() & 0xFF,
+                  (math_random() & 1) + ((math_random() & 1) * 2), maxLights, lightMask, 0, owner, list);
 }
 
-/* Effect points; func_150E81A8 uses 4-7. */
-static const Vec3f D_800A1290[8] = {
+/* Effect points; particle_spawnFlashAndJetSprayAtPoint uses 4-7. */
+static const Vec3f gEmissionFlashPoints[8] = {
     { -780.8950195f, -32.0f, 2153.626953f },
     { -172.0f, -32.0f, 942.0f },
     { -852.0f, -32.0f, -638.0f },
@@ -590,50 +590,50 @@ static const Vec3f D_800A1290[8] = {
     { 610.0f, -452.0f, 5605.0f },
 };
 
-/* For points 4-7 of the D_800A1290 table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
- * 200 units above the point, plus an event. */
-void func_150E81A8(index, owner, kind)
+/* For points 4-7 of the gEmissionFlashPoints table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
+ * 200 units above the point, plus a rumble. Other indices do nothing. */
+void particle_spawnFlashAndJetSprayAtPoint(index, owner, list)
     u8 index;
     u8 owner;
-    s32 kind;
+    s32 list;
 {
     Vec3f position;
-    JetSpraySpec arg;
+    JetSpraySpec spec;
     RumbleParams event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
-        position = D_800A1290[index];
+        position = gEmissionFlashPoints[index];
         position.y += 200.0f;
-        particle_spawnLightFlash(&position, owner, kind);
+        particle_spawnLightFlash(&position, owner, list);
 
-        arg.angles.yawBase = 0;
-        arg.angles.yawRange = 0xFF;
-        arg.angles.pitchBase = -0x40;
-        arg.angles.pitchRange = 0x4D;
-        arg.spray.countBase = 10;
-        arg.spray.countRange = 5;
-        arg.spray.pos = position;
-        arg.spray.speedBase = 252.0f;
-        arg.spray.speedRange = 117.0f;
-        arg.spray.sizeBase = 308.0f;
-        arg.spray.sizeRange = 256.0f;
-        arg.spray.sizeSlopeBase = 699.0f;
-        arg.spray.sizeSlopeRange = 511.0f;
-        arg.spray.particleCountBase = 4;
-        arg.spray.particleCountRange = 7;
-        arg.spray.spread = 27.0f;
-        arg.spray.drag = 0.7820000648f;
-        arg.spray.gravityBase = -0.9300000668f;
-        arg.spray.gravityRange = 0.7300000191f;
-        arg.spray.delayBase = 25;
-        arg.spray.delayRange = 15;
-        arg.spray.alphaBase = 100;
-        arg.spray.alphaRange = 100;
-        arg.spray.fadeStart = 12;
-        arg.spray.fadeOutStart = 20;
-        arg.spray.eventFunc = 0;
+        spec.angles.yawBase = 0;
+        spec.angles.yawRange = 0xFF;
+        spec.angles.pitchBase = -0x40;
+        spec.angles.pitchRange = 0x4D;
+        spec.spray.countBase = 10;
+        spec.spray.countRange = 5;
+        spec.spray.pos = position;
+        spec.spray.speedBase = 252.0f;
+        spec.spray.speedRange = 117.0f;
+        spec.spray.sizeBase = 308.0f;
+        spec.spray.sizeRange = 256.0f;
+        spec.spray.sizeSlopeBase = 699.0f;
+        spec.spray.sizeSlopeRange = 511.0f;
+        spec.spray.particleCountBase = 4;
+        spec.spray.particleCountRange = 7;
+        spec.spray.spread = 27.0f;
+        spec.spray.drag = 0.7820000648f;
+        spec.spray.gravityBase = -0.9300000668f;
+        spec.spray.gravityRange = 0.7300000191f;
+        spec.spray.delayBase = 25;
+        spec.spray.delayRange = 15;
+        spec.spray.alphaBase = 100;
+        spec.spray.alphaRange = 100;
+        spec.spray.fadeStart = 12;
+        spec.spray.fadeOutStart = 20;
+        spec.spray.eventFunc = 0;
 
-        particle_spawnJetSprayBursts(&arg, owner, kind);
+        particle_spawnJetSprayBursts(&spec, owner, list);
 
         event.flags = 1;
         event.duration = (math_random() % 11) + 30;
@@ -650,7 +650,7 @@ typedef struct {
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
-void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
+void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 list) {
     Game113D60PointData data;
     TimedEffect *effect;
 
@@ -658,7 +658,7 @@ void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, 
     data.accum = 0.0f;
 
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
-                           owner, kind);
+                           owner, list);
     if (effect != NULL) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
@@ -730,7 +730,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
 }
 
 /* Update callback of the particles particle_updateRandomEmitter spawns. */
-s32 particle_wobbleRandomEmitterParticle(Game113D60Particle *particle, s32 arg1) {
+s32 particle_wobbleRandomEmitterParticle(Game113D60Particle *particle, Vec3f *prevPos) {
     particle_wobbleSpriteOffset(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }

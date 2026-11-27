@@ -4,7 +4,7 @@
 #include "conker/effect.h"
 #include "conker/particle.h"
 
-s32 particle_selectObjGroundBurst(s32 arg0, s32 arg1) {
+s32 particle_selectObjGroundBurst(s32 kind, Actor *actor) {
     return 10;
 }
 
@@ -25,9 +25,9 @@ void particle_spawnObjGroundBurst(Actor *obj, s32 arg1, s32 arg2) {
  * Spawns one streak particle at (x, y, z) heading along `yaw` (binary angle) with a random pitch,
  * random speeds, random colours and lifetime. math_cosBinAngleMasked is cos, so cos(a - 64) is sin(a).
  */
-s32 particle_spawnYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 owner) {
+s32 particle_spawnYawStreak(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s32 yaw, s32 baseAngle, f32 radius, s32 arg11,
+                  s32 arg12, void *data, u8 owner) {
     f32 horizontal;
     StreakParticleDesc desc;
     s16 pitch;

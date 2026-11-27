@@ -8,8 +8,8 @@
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). */
 PulseParticle *particle_spawnPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
-                        s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
-                        s32 arg13) {
+                        s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 bounces, u8 owner,
+                        s32 list) {
     PulseParticle *particle;
     ParticleSpawn spawn;
     Pulse pulse;
@@ -51,7 +51,7 @@ PulseParticle *particle_spawnPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot,
         spawn.rotVel.y = 0.0f;
         spawn.rotVel.z = 0.0f;
     }
-    if (arg11) {
+    if (bounces) {
         spawn.flags |= 1;
     }
     spawn.model = 3;
@@ -71,7 +71,7 @@ PulseParticle *particle_spawnPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot,
     spawn.ownerId = 0;
     spawn.fadeStart = fadeTime;
     spawn.fadeRate = 255 / fadeTime;
-    particle = particle_newModelParticle(&spawn, 3, 255, sizeof(Pulse), arg12, arg13);
+    particle = particle_newModelParticle(&spawn, 3, 255, sizeof(Pulse), owner, list);
     if (particle != NULL) {
         memcpy(&particle->pulse, &pulse, sizeof(Pulse));
     }

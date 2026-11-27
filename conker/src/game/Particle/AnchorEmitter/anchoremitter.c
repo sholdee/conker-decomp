@@ -9,9 +9,9 @@
 #include "libc/string.h"
 
 /* matching: no header declares particle_spawnJitterParticle (groundcluster.c): areaemitter.c was compiled with another view */
-void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
-                    f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
-                    s32 arg11);
+void *particle_spawnJitterParticle(Vec3f *pos, ParticleSize *scale, s16 life, u8 alpha, const Vec3f *velocity, f32 gravity, f32 drag,
+                    f32 easeFactor, u8 updateFn1, u8 updateFn2, u8 expireFn, s32 texture, u8 flags, s16 fadeStart, s16 fadeRate, s32 extraSize, u8 owner,
+                    s32 list);
 
 /* What effect_newFollowerGroup (game/Effects/BoneFollower/bonefollower.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
@@ -40,9 +40,9 @@ typedef struct {
     /* 0x08 */ Vec3f offset;
     /* 0x14 */ u8 bone;
     /* 0x16 */ s16 duration;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 updateFn;
+    /* 0x1A */ u8 expireFn;
     /* 0x1C */ void *sprite;
     /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
@@ -63,7 +63,7 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
     D_800A7708, D_800A7758, D_800A77A8, D_800A77F8, D_800A7848, D_800A7898, D_800A78E8,
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
 };
-/* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
+/* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, expireFunc); the callbacks take the emitter as
    their own view (effect_updateBurnDamage and effect_clearOnFire, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
 static s32 (*gAnchorEmitterUpdateFuncs[])() = { effect_updateBurnDamage };
 static void (*gAnchorEmitterExpireFuncs[])() = { effect_clearOnFire };
@@ -114,16 +114,16 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     return 1;
 }
 
-void particle_broadcastToActorEmitters(s32 arg0, u8 arg1) {
-    IdList1 desc = D_800A74D4;
+void particle_broadcastToActorEmitters(s32 event, u8 eventType) {
+    IdList1 desc = gActorEmitterTypes;
 
-    effect_sendEventToTypes(desc.ids, 1, arg0, arg1);
+    effect_sendEventToTypes(desc.ids, 1, event, eventType);
 }
 
 /* Message handler of the actor emitter process (type 0x21): message 0x49 names an actor; the emitter dies with it. */
-void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
-    effect_handleOwnerActorEvent((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
-    if (arg2 == 0x49) {
+void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 eventType) {
+    effect_handleOwnerActorEvent((s32)other, eventType, &self->params.owner, &self->params.ownerId, self);
+    if (eventType == 0x49) {
         Actor *selfActor = self->params.owner;
         Actor *otherActor = other->actor;
         u8 selfTag = self->params.ownerId;
@@ -134,9 +134,9 @@ void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 a
     }
 }
 
-/* Creates emitter `index` of the kind matching `owner`'s object id, with arg7 bytes of the caller's data after it. */
-void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 arg7,
-                    u8 arg8, s32 arg9) {
+/* Creates emitter `index` of the kind matching `owner`'s object id, with extraSize bytes of the caller's data after it. */
+void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 expireFunc, s8 childKind, u8 messageFunc, s32 extraSize,
+                    u8 fxOwner, s32 fxList) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
 
@@ -146,13 +146,13 @@ void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updat
     if (particle_getEmitterKindForObj(owner, &kind, index) == 0) {
         return NULL;
     }
-    return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, unk59Func,
-                         childKind, unk5A, arg7, arg8, arg9);
+    return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, expireFunc,
+                         childKind, messageFunc, extraSize, fxOwner, fxList);
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                       s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
+AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 expireFunc,
+                       s8 childKind, u8 messageFunc, s32 extraSize, u8 fxOwner, s32 fxList) {
     FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
     AnchorEmitterParams params;
@@ -164,8 +164,8 @@ AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTempla
     params.tmpl = *tmpl;
     params.updateFunc = updateFunc;
     desc.owner = owner;
-    params.unk59Func = unk59Func;
-    params.unk5A = unk5A;
+    params.expireFunc = expireFunc;
+    params.messageFunc = messageFunc;
     desc.ownerId = owner->unique_id;
     if (duration == -1) {
         desc.duration = 300;
@@ -180,12 +180,12 @@ AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTempla
     desc.expireFn = 0;
     desc.kind = 1;
 
-    emitter = effect_newFollowerGroup(&desc, arg7 + 0x60, arg8, arg9);
+    emitter = effect_newFollowerGroup(&desc, extraSize + 0x60, fxOwner, fxList);
     if (emitter != NULL) {
         dest = &emitter->params;
         memcpy(dest, &params, sizeof(AnchorEmitterParams));
         if (childKind != -1) {
-            dest->child = particle_spawnAnchorEmitterSprite(emitter, owner, childKind, duration, arg8, arg9);
+            dest->child = particle_spawnAnchorEmitterSprite(emitter, owner, childKind, duration, fxOwner, fxList);
         } else {
             dest->child = NULL;
         }
@@ -212,8 +212,8 @@ s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
 void particle_runAnchorEmitterExpire(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
-    if (emitter->params.unk59Func != -1) {
-        gAnchorEmitterExpireFuncs[params->unk59Func](emitter);
+    if (emitter->params.expireFunc != -1) {
+        gAnchorEmitterExpireFuncs[params->expireFunc](emitter);
     }
 }
 
@@ -230,7 +230,7 @@ void particle_emitAnchorBurst(AnchorEmitter *emitter) {
 void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
     Actor *owner;
-    Struct1514B8E4Size size;
+    ParticleSize size;
     Vec3f pos;
     BoneAnchor *anchor;
     s32 set;
@@ -247,8 +247,8 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
                     anchor = &gAnchorSets[set][math_random() % gAnchorCounts[set]];
-                    size.unk0 = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
-                    size.unk4 = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
+                    size.width = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
+                    size.height = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     math_transformOffset(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
                     frameRand = math_random();
                     if (math_random() & 1) {
@@ -257,8 +257,8 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         kind = 0x14;
                     }
                     sprite = particle_spawnJitterParticle(&pos, &size, -1,
-                                           frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                           &gZeroVec3f, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           frameRand % (params->tmpl.alphaRange + 1) + params->tmpl.alpha,
+                                           &gZeroVec3f, 0.0f, 1.0f, params->tmpl.easeFactor, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->group.header.owner, emitter->group.header.kind);
                     if (sprite != NULL) {
                         desc.owner = owner;
@@ -266,13 +266,13 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         desc.offset = anchor->offset;
                         desc.bone = anchor->bone;
                         desc.duration = math_random() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
-                        desc.unk18 = 1;
+                        desc.flags = 1;
                         if (params->tmpl.flags & 1) {
-                            desc.unk19 = 1;
+                            desc.updateFn = 1;
                         } else {
-                            desc.unk19 = 0;
+                            desc.updateFn = 0;
                         }
-                        desc.unk1A = 0;
+                        desc.expireFn = 0;
                         desc.parent = emitter;
                         desc.sprite = sprite;
                         effect_spawnBoneFollower(&desc, &pos, 0, emitter->group.header.owner, emitter->group.header.kind);
@@ -324,11 +324,11 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest) {
     sprite->jitter.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->jitter;
-    motion->gravity = math_randomFloat() * params->tmpl.unk34Range + params->tmpl.unk30;
-    motion->drag = params->tmpl.unk38;
-    sprite->head.def.fadeStart = params->tmpl.unk3C;
-    sprite->head.def.fadeRate = params->tmpl.unk3E;
-    sprite->head.def.lifetime = math_random() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    motion->gravity = math_randomFloat() * params->tmpl.gravityRange + params->tmpl.gravity;
+    motion->drag = params->tmpl.drag;
+    sprite->head.def.fadeStart = params->tmpl.fadeStart;
+    sprite->head.def.fadeRate = params->tmpl.fadeRate;
+    sprite->head.def.lifetime = math_random() % (params->tmpl.launchLifeRange + 1) + params->tmpl.launchLifeMin;
     if (params->tmpl.flags & 1) {
         sprite->head.updateFn1 = 0x21;
     } else {
@@ -576,7 +576,7 @@ const u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the gLightJitterMids/6760/6820 tables. */
-LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 fxOwner, s32 fxList) {
     ChildDesc desc;
     Vec3i pos;
     LightEffect *child;
@@ -611,7 +611,7 @@ LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *ow
     pos.y = owner->ypos;
     pos.z = owner->zpos;
 
-    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
+    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, fxOwner, fxList);
     if (child != NULL) {
         memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
         memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));

@@ -27,22 +27,22 @@ typedef struct {
     /* 0x04 */ f32 rate;
     /* 0x08 */ f32 scale;
     /* 0x0C */ f32 pending; // particles owed; one is spawned per whole unit
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 maxHeight;
     /* 0x14 */ f32 xScaleBase;
     /* 0x18 */ f32 xScaleRange;
     /* 0x1C */ f32 yScaleBase;
     /* 0x20 */ f32 yScaleRange;
-    /* 0x24 */ s16 unk24Base;
-    /* 0x26 */ s16 unk24Range;
-    /* 0x28 */ f32 unk38Base;
-    /* 0x2C */ f32 unk38Range;
-    /* 0x30 */ f32 unk40Base;
-    /* 0x34 */ f32 unk40Range;
-    /* 0x38 */ f32 unk44Base;
-    /* 0x3C */ f32 unk44Range;
+    /* 0x24 */ s16 lifeBase;
+    /* 0x26 */ s16 lifeRange;
+    /* 0x28 */ f32 scaleBase;
+    /* 0x2C */ f32 scaleRange;
+    /* 0x30 */ f32 shrinkRateBase;
+    /* 0x34 */ f32 shrinkRateRange;
+    /* 0x38 */ f32 growRateBase;
+    /* 0x3C */ f32 growRateRange;
     /* 0x40 */ u8 useGround;
-    /* 0x41 */ u8 unk2CBase;
-    /* 0x42 */ u8 unk2CRange;
+    /* 0x41 */ u8 alphaBase;
+    /* 0x42 */ u8 alphaRange;
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
     /* 0x6C */ ZoneNode *zone;
@@ -81,12 +81,12 @@ void particle_updateRegionEmitter(u8 *effect) {
         particle.color[2] = 0;
         particle.color[3] = 0xFF;
         particle.flags = 1;
-        particle.unk2D = 0xFF;
+        particle.colorLevel = 0xFF;
         particle.extraSize = 0;
-        particle.unk2E = 0;
-        particle.unk2F = 0;
+        particle.updateFn1 = 0;
+        particle.expireFn = 0;
         particle.effect = 0x10;
-        particle.maxHeight = emitter->unk10;
+        particle.maxHeight = emitter->maxHeight;
         do {
             switch (emitter->region->flags & 3) {
             case 2: {
@@ -164,11 +164,11 @@ void particle_updateRegionEmitter(u8 *effect) {
             particle.maxB = 57.969f * yScale;
             particle.minB = 42.714f * yScale;
             particle.altB = 118.763f * yScale;
-            particle.life = math_random() % (emitter->unk24Range + 1) + emitter->unk24Base;
-            particle.scale = math_randomFloat() * emitter->unk38Range + emitter->unk38Base;
-            particle.shrinkRate = math_randomFloat() * emitter->unk40Range + emitter->unk40Base;
-            particle.growRate = math_randomFloat() * emitter->unk44Range + emitter->unk44Base;
-            particle.unk2C = math_random() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
+            particle.life = math_random() % (emitter->lifeRange + 1) + emitter->lifeBase;
+            particle.scale = math_randomFloat() * emitter->scaleRange + emitter->scaleBase;
+            particle.shrinkRate = math_randomFloat() * emitter->shrinkRateRange + emitter->shrinkRateBase;
+            particle.growRate = math_randomFloat() * emitter->growRateRange + emitter->growRateBase;
+            particle.alpha = math_random() % (emitter->alphaRange + 1) + emitter->alphaBase;
             particle_spawnChannelParticle(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);
@@ -182,25 +182,25 @@ typedef struct {
 } EffectSoundState;
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultDestroyTimedEffect. */
-void particle_destroyRegionEmitter(TimedEffect *arg0) {
-    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+void particle_destroyRegionEmitter(TimedEffect *effect) {
+    EffectSoundState *state = (EffectSoundState *)((u8 *)effect + 0x58);
 
-    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
-    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+    // matching: the test reads through effect and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)effect + 0x6C) != 0) {
         particle_stopEffectSound(state->soundHandle);
     }
-    effect_defaultDestroyTimedEffect(arg0);
+    effect_defaultDestroyTimedEffect(effect);
 }
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultFreeTimedEffect. */
-void particle_freeRegionEmitter(TimedEffect *arg0) {
-    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+void particle_freeRegionEmitter(TimedEffect *effect) {
+    EffectSoundState *state = (EffectSoundState *)((u8 *)effect + 0x58);
 
-    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
-    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+    // matching: the test reads through effect and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)effect + 0x6C) != 0) {
         particle_stopEffectSound(state->soundHandle);
     }
-    effect_defaultFreeTimedEffect(arg0);
+    effect_defaultFreeTimedEffect(effect);
 }
 
 /* Releases a sound handle. */
@@ -212,8 +212,8 @@ void particle_stopEffectSound(u16 soundHandle) {
  * Spawns an effect via particle_spawnSurfaceQuadSprite at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
-                          u8 arg7, s32 arg8) {
+QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, s16 duration, u8 lit, u8 arg6,
+                          u8 owner, s32 list) {
     SpriteDef2C params;
 
     if (duration <= 0) {
@@ -223,7 +223,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.fadeRate = 12;
     params.texture = 0x38;
     params.handlerSet = 0;
-    params.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
+    params.flags = ((duration == -1) ? 0 : 1) | (lit ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
     if (duration == -1) {
         params.lifetime = 300;
     } else {
@@ -235,7 +235,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     } else {
         params.frameSpeed = 0x140000 / (duration + 20);
     }
-    params.alpha = arg1;
+    params.alpha = alpha;
     params.colorLevel = 0xFF;
     params.rgba[0] = 0xFF;
     params.rgba[1] = 0x83;
@@ -247,19 +247,8 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.viewportMask = 0xFF;
     return particle_spawnSurfaceQuadSprite(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
                          math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
-                         arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
+                         lit ? 3 : 0, lit ? 0xFF : 0, 0, owner, list);
 }
-
-/* An object that can trigger a one-shot effect at its position. */
-struct Game1D3420Emitter {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ u8 padA[0xA];
-    /* 0x14 */ u8 ready; /* 1 while the effect can still be triggered */
-};
 
 /* Message 0x35: the list of trigger ids that fired. */
 typedef struct Game1D3420Message {
@@ -269,21 +258,17 @@ typedef struct Game1D3420Message {
 } Game1D3420Message;
 
 typedef struct Game1D3420Target {
-    /* 0x00 */ Game1D3420Emitter *emitter;
+    /* 0x00 */ TriggerZone *emitter; /* inactive is 1 while the effect can still be triggered */
     /* 0x04 */ u8 id;
     /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ ZoneNode *zone; /* the effect's spawn zone (ParticleDef.unk48) */
-    /* 0x0C */ u8 flags; /* bit 0: play sounds, bit 1: copied into the effect's unk17 */
+    /* 0x08 */ ZoneNode *zone; /* the effect's spawn zone (ParticleDef.zone) */
+    /* 0x0C */ u8 flags; /* bit 0: play sounds, bit 1: copied into the effect's hasZone */
     /* 0x0D */ u8 pad0D[3];
     /* 0x10 */ s32 value;
 } Game1D3420Target;
 
 struct Game1D3420Listener {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1D3420Target target;
 };
 
@@ -308,53 +293,34 @@ void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *dat
             i++;
         }
     }
-    if (found && target->emitter->ready == 1) {
+    if (found && target->emitter->inactive == 1) {
         particle_fireRegionEmitter(target->emitter, target->zone, target->flags & 1, target->flags & 2,
-                      listener->unkC, listener->unk1);
-        target->emitter->ready = 0;
+                      listener->base.header.owner, listener->base.header.kind);
+        target->emitter->inactive = 0;
         target->value = msg->value;
     }
 }
 
-/* Per-effect state, copied to offset 0x110 of the spawned object. */
-typedef struct Game1D3420EffectState {
-    /* 0x00 */ Game1D3420Emitter *emitter;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ LightEffect *light; /* returned by light_createJitterAt */
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ f32 unk18;
-} Game1D3420EffectState; /* size 0x1C */
-
-typedef struct Game1D3420Effect {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Game1D3420EffectState state;
-} Game1D3420Effect;
-
 /* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
-void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
+void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list) {
     ParticleDef spawn;
-    Game1D3420EffectState init;
-    Game1D3420Effect *effect;
-    Game1D3420EffectState *state;
+    ZoneEmitterState init;
+    ZoneEmitter *effect;
+    ZoneEmitterState *state;
     LightEffectHeader header;
     Vec3i pos;
 
-    init.emitter = emitter;
-    init.unk4 = 0.0f;
-    init.unk8 = (math_randomFloat() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
-    init.unkC = (math_randomFloat() * 1300.0f) + 2700.0f;
+    init.region = emitter;
+    init.texScroll = 0.0f;
+    init.texScrollSpeed = (math_randomFloat() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
+    init.texSpan = (math_randomFloat() * 1300.0f) + 2700.0f;
     init.light = NULL;
-    init.unk14 = math_random();
-    init.unk15 = ((u8)math_random() & 3) + 4; // matching: the u8 narrowing changes the andi codegen
-    init.unk16 = 0xFF;
-    init.unk18 = 0.0f;
-    init.unk17 = arg3;
+    init.phase = math_random();
+    init.phaseSpeed = ((u8)math_random() & 3) + 4; // matching: the u8 narrowing changes the andi codegen
+    init.alpha = 0xFF;
+    init.pending = 0.0f;
+    init.hasZone = arg3;
     spawn.texture = 0x6B;
     spawn.type = 10;
     spawn.renderModes = 0x4C03;
@@ -365,8 +331,8 @@ void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 p
     spawn.rgba[1] = 0xFF;
     spawn.rgba[2] = 0xFF;
     spawn.rgba[3] = 0xFF;
-    spawn.width = emitter->unk6;
-    spawn.height = emitter->height;
+    spawn.width = emitter->xSize;
+    spawn.height = emitter->ySize;
     spawn.pos.x = emitter->x;
     spawn.pos.y = emitter->y;
     spawn.pos.z = emitter->z;
@@ -383,19 +349,19 @@ void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 p
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    effect = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
+    effect = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), owner, list);
     if (effect != NULL) {
         state = &effect->state;
         memcpy(state, &init, sizeof(init));
         if (playSound) {
             pos.x = emitter->x;
-            pos.y = emitter->y + (emitter->height >> 1);
+            pos.y = emitter->y + (emitter->ySize >> 1);
             pos.z = emitter->z;
             header.flags = 2;
             header.update = 2;
             header.lifetime = 300;
             header.lightType = 6;
-            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
+            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, owner, list);
         }
     }
     if (playSound) {
@@ -419,9 +385,9 @@ struct Game1D2B10QuadOwner {
     u8 unknown40[0x80];
     Game1D2B10QuadVertex vertexTemplate[4];
     u8 *buffers[5]; /* each holds two copies of vertexTemplate */
-    f32 unk114; /* texture s of the quad's first edge */
-    f32 unk118;
-    f32 unk11C; /* texture s span */
+    f32 texScroll; /* texture s of the quad's first edge */
+    f32 texScrollSpeed;
+    f32 texSpan; /* texture s span */
     u8 unknown120[6];
     u8 alpha;
 };
@@ -451,8 +417,8 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
     }
     {
         s16 tMax = 0x7C0;
-        sStart = owner->unk114;
-        sEnd = owner->unk114 + owner->unk11C;
+        sStart = owner->texScroll;
+        sEnd = owner->texScroll + owner->texSpan;
         dz = gCameraAngleSines[index] * owner->width;
         dx = gCameraAngleCosines[index] * owner->width;
         vertices->x = owner->x + dx;

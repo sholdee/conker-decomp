@@ -140,7 +140,7 @@ void particle_updateDropToSplash(DropParticle *drop) {
     SpriteFxTemplate splash;
     s32 dim;
 
-    bottom = drop->y + drop->unk2A;
+    bottom = drop->y + drop->floorOffset;
     floorY = drop->floorY;
     if (floorY >= bottom) {
         collision_selectMap(0);
@@ -155,14 +155,14 @@ void particle_updateDropToSplash(DropParticle *drop) {
             splash.x = drop->x;
             splash.y = drop->floorY + 10;
             splash.z = drop->z;
-            intensity = drop->unk3B;
+            intensity = drop->size;
             splash.fadeStep = 0;
             dim = (intensity << 12) / 5100 + 204;
             splash.scaleX = dim;
             splash.scaleY = dim;
             splash.unk15 = intensity;
             splash.callback = 3; /* gObjectCallbacks[3] = particle_updateSplashFx */
-            effect_spawnSpriteFx(&splash, drop->owner, drop->list);
+            effect_spawnSpriteFx(&splash, drop->header.owner, drop->header.kind);
         }
     } else {
         drop->velX *= 0.9800000191f;
@@ -178,10 +178,10 @@ void particle_updateSplashFx(SplashFx *fx) {
 
     if (fx->frame >= 0x300) {
         texture = math_random() % 3;
-        intensity = fx->unk25;
+        intensity = fx->size;
         angle = math_random() % 360;
         particle_spawnFloorSprite(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
-                      (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
+                      (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->header.owner, fx->header.kind);
     }
 }
 

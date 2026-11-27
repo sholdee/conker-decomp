@@ -452,7 +452,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                     pos.z = cmd->a[2].w;
                     effect_spawnExplosion(&pos, 0xFF, 1);
                 } else {
-                    func_150E81A8(cmd->arg.w & 0xFF, 0xFF, 1);
+                    particle_spawnFlashAndJetSprayAtPoint(cmd->arg.w & 0xFF, 0xFF, 1);
                 }
             }
             break;

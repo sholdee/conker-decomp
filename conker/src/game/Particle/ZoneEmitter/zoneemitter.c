@@ -15,8 +15,8 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     if (state->hasZone) {
         mp_addZone(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
     }
-    state->angle += state->angleSpeed * gFrameDelta;
-    state->angle = math_wrapFloat(state->angle, 2048.0f, 0.0f);
+    state->texScroll += state->texScrollSpeed * gFrameDelta;
+    state->texScroll = math_wrapFloat(state->texScroll, 2048.0f, 0.0f);
     state->phase += state->phaseSpeed * gFrameTicks;
     state->alpha = math_cosBinAngleMasked(state->phase - 0x40) * 63.0f + 192.0f;
     if (math_isZoneHiddenFromViews(obj->head.def.zone) == 0) {
@@ -72,11 +72,11 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     return 1;
 }
 
-/* Shuts the emitter down: marks its region off, calls sound_stopByCallback with sound_stopWhenSilentCallback on it, and frees unk10. */
+/* Shuts the emitter down: marks its region off, calls sound_stopByCallback with sound_stopWhenSilentCallback on it, and frees its light. */
 void particle_shutZoneEmitter(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
     sound_stopByCallback(sound_stopWhenSilentCallback, obj->state.region, 0);
-    if (obj->state.unk10 != NULL) {
-        effect_destroyObject(obj->state.unk10);
+    if (obj->state.light != NULL) {
+        effect_destroyObject(obj->state.light);
     }
 }

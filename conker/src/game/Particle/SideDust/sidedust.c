@@ -51,18 +51,9 @@ s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 s
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
-s32 particle_selectSideDust(s32 arg0, s32 arg1) {
+s32 particle_selectSideDust(s32 kind, Actor *actor) {
     return 0xB;
 }
-
-/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
-typedef struct {
-    s16 r;
-    s16 g;
-    s16 b;
-    s16 a;
-    s16 unk8;
-} DustColor;
 
 /* Spawns a dust puff (tinted by particle_getDepthTint) on the ground below the actor's bone on `side`. */
 void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
@@ -92,7 +83,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     g = fg;
     b = fb;
     {
-        DustColor colors[4];
+        VtxColor colors[4];
         s16 roll;
         s16 roll2;
         Rgb8 rgb;
@@ -101,22 +92,22 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         colors[0].g = g;
         colors[0].b = b;
         colors[0].a = 0xFF;
-        colors[0].unk8 = 0;
+        colors[0].flag = 0;
         colors[1].r = r;
         colors[1].g = g;
         colors[1].b = b;
         colors[1].a = 0xFF;
-        colors[1].unk8 = 0;
+        colors[1].flag = 0;
         colors[2].r = r;
         colors[2].g = g;
         colors[2].b = b;
         colors[2].a = 0xFF;
-        colors[2].unk8 = 0;
+        colors[2].flag = 0;
         colors[3].r = r;
         colors[3].g = g;
         colors[3].b = b;
         colors[3].a = 0xFF;
-        colors[3].unk8 = 0;
+        colors[3].flag = 0;
         if (side == 1) {
             desc.texture = 0x4C;
         } else {
@@ -182,8 +173,8 @@ s32 particle_fadeSideDustSprite(QuadSprite *sprite) {
 }
 
 /* Spawns one particle_newModelParticle particle at (x, y, z), its velocity built by math_dirFromBinAngles from `angle`. */
-s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
-                  s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+s32 particle_spawnYawModelParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 angle,
+                  s32 baseAngle, f32 radius, s32 arg11, s32 arg12, void *data, u8 owner) {
     s32 pad; // matching: unused stack slot
     ParticleSpawn desc;
     f32 fraction;
@@ -229,7 +220,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.ownerId = 0;
     desc.fadeStart = 32;
     desc.fadeRate = 7;
-    particle_newModelParticle(&desc, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&desc, 3, 0xFF, 0, owner, 0);
     return 1;
 }
 
@@ -259,8 +250,8 @@ s32 particle_updateDustPuff(DustPuff *dust) {
  * Spawns one particle_newOwnedSpriteParticle particle at (x, y, z), its velocity built by math_dirFromBinAngles from
  * `angle`. It stores the damping factor that particle_dampSparkXZ applies each frame step.
  */
-s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
-                  s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 particle_spawnYawSpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 angle,
+                  s32 baseAngle, f32 radius, s32 argB, s32 argC, void *data, u8 owner) {
     SparkParticle *particle;
     ParticleDesc desc;
     f32 size;
@@ -315,7 +306,7 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.scaleRate = 1.02f;
     damping = 0.962000072f;
 
-    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(damping), argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(damping), owner, 1);
     if (particle != NULL) {
         memcpy(&particle->damping, &damping, sizeof(damping));
     }
@@ -323,7 +314,7 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
 }
 
 /* Multiplies desc.vel.x and desc.vel.z by the particle's damping once per frame step. */
-s32 particle_dampSparkXZ(SparkParticle *particle, s32 arg1) {
+s32 particle_dampSparkXZ(SparkParticle *particle, Vec3f *prevPos) {
     s32 i;
     f32 *damping;
 
@@ -336,14 +327,14 @@ s32 particle_dampSparkXZ(SparkParticle *particle, s32 arg1) {
 }
 
 /* Advances the particle one frame step under constant vertical acceleration. */
-s32 particle_moveBallisticConstAccel(BallisticParticle *particle) {
-    particle->pos[0] += particle->vel[0] * gFrameDelta;
-    particle->pos[1] += (particle->vel[1] * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
-    particle->pos[2] += particle->vel[2] * gFrameDelta;
-    particle->vel[1] += particle->gravity * gFrameDelta;
-    particle->unk20[0] += particle->unk50[0] * gFrameDelta;
-    particle->unk20[1] += particle->unk50[1] * gFrameDelta;
-    particle->unk20[2] += particle->unk50[2] * gFrameDelta;
+s32 particle_moveBallisticConstAccel(ModelParticle *particle) {
+    particle->pos.x += particle->vel.x * gFrameDelta;
+    particle->pos.y += (particle->vel.y * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
+    particle->pos.z += particle->vel.z * gFrameDelta;
+    particle->vel.y += particle->gravity * gFrameDelta;
+    particle->rot.x += particle->rotVel.x * gFrameDelta;
+    particle->rot.y += particle->rotVel.y * gFrameDelta;
+    particle->rot.z += particle->rotVel.z * gFrameDelta;
     return 1;
 }
 

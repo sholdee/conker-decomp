@@ -5,7 +5,7 @@
 #include "conker/game.h"
 
 /*
- * This file's .data: the message handlers by AnchorEmitterParams.unk5A, (obj, msg, event); optional. Handler 1 is
+ * This file's .data: the message handlers by AnchorEmitterParams.messageFunc, (obj, msg, event); optional. Handler 1 is
  * effect_periodicTriggerMessage (game/Effects/TriggerSwap/triggerswap.c), which takes the object and the message as its own views, so the table has no
  * prototype; the call keeps the prototype, as the ROM passes the event as a u8.
  */
@@ -18,7 +18,7 @@ void effect_anchorEmitterMessage(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
     if (event == 0x2A) {
         effect_handleFollowerGroupActorGone(&obj->group, msg);
     }
-    handler = gAnchorEmitterMessageFuncs[obj->params.unk5A];
+    handler = gAnchorEmitterMessageFuncs[obj->params.messageFunc];
     if (handler != NULL) {
         handler(obj, msg, event);
     }

@@ -9,7 +9,7 @@
 
 /* Spawns a burst at pos scaled by scale: one particle_newOwnedSpriteParticle particle moving along vel,
  * 5-12 particle_newModelParticle pieces flung in random directions, and a light_createWithEffect flash. */
-void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
+void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 owner, s32 list) {
     s32 count;
     ParticleDesc6C spawn;
     s32 yaw;
@@ -54,7 +54,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     spawn.pos = *pos;
     spawn.vel = *vel;
     spawn.gravity = 0.0f;
-    particle_newOwnedSpriteParticle(&spawn, 0, 0, arg3, arg4);
+    particle_newOwnedSpriteParticle(&spawn, 0, 0, owner, list);
 
     count = (math_random() & 7) + 5;
     piece.flags = 0x21E8;
@@ -95,7 +95,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
         piece.gravity = ((math_randomFloat() * 99.0f) + -206.0f) * 0.01f;
         piece.rotVel.x = (math_randomFloat() * 101.0f) + -49.0f;
         piece.rotVel.z = (math_randomFloat() * 101.0f) + -49.0f;
-        particle_newModelParticle(&piece, 3, 0xFF, 0, arg3, arg4);
+        particle_newModelParticle(&piece, 3, 0xFF, 0, owner, list);
         count--;
     }
 
@@ -106,7 +106,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     origin.x = pos->x;
     origin.y = pos->y;
     origin.z = pos->z;
-    light_createWithEffect(&flash, &origin, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_createWithEffect(&flash, &origin, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, list);
 }
 
 

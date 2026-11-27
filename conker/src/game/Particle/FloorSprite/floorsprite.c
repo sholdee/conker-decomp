@@ -23,9 +23,9 @@ Gfx gFloorSpriteEndDl[] = {
 };
 
 /* Allocates a particle and initialises its animation state. */
-Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
-                              s32 arg7) {
-    Particle19F150 *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, arg7, sizeof(Particle19F150), 1, arg6, 1);
+Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 owner,
+                              s32 list) {
+    Particle19F150 *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, list, sizeof(Particle19F150), 1, owner, 1);
 
     if (particle == NULL) {
         return NULL;
@@ -48,10 +48,10 @@ Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s
  * `angle`; with flags & 2 it is a flat horizontal square of half-size `size`.
  */
 void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size,
-                   s32 flags, s32 animSpeed, s32 arg11, u8 arg12, s32 arg13) {
+                   s32 flags, s32 animSpeed, s32 arg11, u8 owner, s32 list) {
     Particle19F150 *particle;
 
-    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg11, arg12, arg13);
+    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg11, owner, list);
     if (particle != NULL) {
         if (!(flags & 2)) {
             if (particle_layQuadOnFloor(particle->vtx, x, y, z, angle, dist, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
@@ -73,10 +73,10 @@ void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
 void particle_spawnTriSprite(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
-                   s32 animSpeed, s32 arg10, u8 arg11, s32 arg12) {
+                   s32 animSpeed, s32 arg10, u8 owner, s32 list) {
     Particle19F150 *particle;
 
-    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
+    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg10, owner, list);
     if (particle != NULL) {
         if (particle_layQuadOnTri(particle->vtx, tri, x, y, z, 0.0f, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
             effect_destroyObject(&particle->header);
@@ -133,7 +133,7 @@ void particle_updateFloorSprite(Particle19F150 *particle) {
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
  * primitive colour only when they differ from the cached state in gCachedTexture..gCachedPrimA.
  */
-Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
+Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 view) {
     s32 r;
     s32 g;
     s32 b;
@@ -396,7 +396,7 @@ s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, 
     struct FloorHit {
         void *tri;
         f32 floorY;
-        u32 unk8;
+        u32 flags;
         s32 unkC;
     };
     f32 sinT;
@@ -407,7 +407,7 @@ s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, 
     sinT = sinf((angle - 90.0f) * 0.01745329238f);
     x += dist * sinT;
     z += dist * cosT;
-    collision_findFloor(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
+    collision_findFloor(&floor.tri, 0, &floor.floorY, 0, &floor.flags, 0, x, y, z, y, 0, 0);
     if (floor.tri == NULL) {
         return 0;
     }

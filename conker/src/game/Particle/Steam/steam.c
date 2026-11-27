@@ -13,8 +13,8 @@ u8 gLevelEffectKind; /* the effect kind of the current context (particle_getCont
 
 // particle_spawnKindSprite (game/Particle/Steam/steam.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
 // different view of it.
-SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
-                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
+SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 scaleRate, f32 drag, f32 gravity, s16 lifetime,
+                             u8 alpha, s16 fadeFrames, s16 fadeStep, u8 spin, u8 owner, s32 list);
 
 /* Per effect kind (0..12): sprite texture id, used by game/Particle/Drips/drips and game/Effects/LandingBurst/landingburst emitters. */
 const u8 gKindSpriteTextures[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
@@ -118,15 +118,15 @@ u8 particle_pickKind12Texture(void) {
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                        f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE,
-                        s32 argF) {
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 alpha, f32 size, s32 hitsFloor,
+                        f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces, u8 owner,
+                        s32 list) {
     SteamParticle *particle;
     ParticleDesc desc;
     SteamWobble wobble;
 
     desc.texture = gKindParticleTexturePickers[kind]();
-    desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
+    desc.renderMode = ((lit ? 0x44 : 0x22) << 8) + 3;
     desc.setGeometryMode = 0x200005;
     desc.clearGeometryMode = 0;
     desc.frame = 0;
@@ -138,7 +138,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.r2 = 0;
     desc.g2 = 0;
     desc.b2 = 0;
-    desc.alpha = arg5;
+    desc.alpha = alpha;
     desc.brightness = 0xFF;
     desc.pos = *pos;
     desc.offset = gZeroVec3f;
@@ -147,7 +147,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.gravity = gravity;
     desc.scaleRate = 1.0f;
     desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((math_random() & 1) ? 0x40 : 0) |
-                 ((math_random() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
+                 ((math_random() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (lit ? 0x10000 : 0) |
                  (D_800AB330[kind] ? 0x800000 : 0);
     if (lifetime == -99) {
         desc.timer = 300;
@@ -161,7 +161,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.primColorMode = 6;
     desc.envColorMode = 8;
     desc.drawFunc = -1;
-    desc.updateFunc = (u8)arg7 ? 0x21 : 0x22;
+    desc.updateFunc = (u8)hitsFloor ? 0x21 : 0x22;
     desc.deathFunc = -1;
     desc.handlerSet = 0;
     desc.viewMask = 0;
@@ -183,7 +183,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     wobble.kind = kind;
     wobble.altBurstScale = altBurstScale;
     wobble.flags = ((u8)wobbles ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)bounces ? WOBBLE_FLAG_BOUNCE : 0);
-    particle = particle_newSpriteParticleWithFloor(&desc, 1, ground, sizeof(wobble), argE, argF);
+    particle = particle_newSpriteParticleWithFloor(&desc, 1, ground, sizeof(wobble), owner, list);
     if (particle != NULL) {
         memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
     }
@@ -191,11 +191,11 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 }
 
 /* Per-frame update of a particle_spawnSteamParticle particle; returns 0 once it should be removed. */
-s32 particle_updateSteamParticle(SteamParticle *particle, Vec3f *arg1) {
+s32 particle_updateSteamParticle(SteamParticle *particle, Vec3f *prevPos) {
     s32 alive;
 
-    if (particle_wobbleSteamSize(particle, arg1) != 0) {
-        if (particle_steamFloorHit(particle, arg1) != 0) {
+    if (particle_wobbleSteamSize(particle, prevPos) != 0) {
+        if (particle_steamFloorHit(particle, prevPos) != 0) {
             alive = 1;
         } else {
             alive = 0;
@@ -207,7 +207,7 @@ s32 particle_updateSteamParticle(SteamParticle *particle, Vec3f *arg1) {
 }
 
 /* Wobbles the particle's two scale axes around its base size. */
-s32 particle_wobbleSteamSize(SteamParticle *particle, Vec3f *arg1) {
+s32 particle_wobbleSteamSize(SteamParticle *particle, Vec3f *prevPos) {
     SteamWobble *wobble;
 
     wobble = &particle->data.wobble;
@@ -222,19 +222,19 @@ s32 particle_wobbleSteamSize(SteamParticle *particle, Vec3f *arg1) {
 }
 
 /*
- * Floor collision: once the particle falls below arg1's height, finds the floor under it and either
- * bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
+ * Floor collision: once the particle falls below prevPos (its position before this frame's move), finds the floor under it
+ * and either bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
  */
-u8 particle_steamFloorHit(SteamParticle *particle, Vec3f *arg1) {
+u8 particle_steamFloorHit(SteamParticle *particle, Vec3f *prevPos) {
     volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
     Vec3f point;
     SteamWobble *wobble;
     f32 avgScale;
 
     alive = 1;
-    if (particle->head.desc.pos.y < arg1->y) {
+    if (particle->head.desc.pos.y < prevPos->y) {
         point.x = particle->head.desc.pos.x;
-        point.y = arg1->y;
+        point.y = prevPos->y;
         point.z = particle->head.desc.pos.z;
         if (math_isInWorldBounds(&point) == 0) {
             return 0;
@@ -350,11 +350,11 @@ u8 func_151D9B34(void) {
 static const Vec3f gDownUnitVec = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
- * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
+ * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With withDrip set and an
  * upward-facing surface under tri, also starts a DripEffect there.
  */
-void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
-                   u8 arg9, s32 argA) {
+void particle_spawnKindEmitter(u8 kind, f32 size, u8 alpha, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 lit, u8 withDrip,
+                   u8 owner, s32 list) {
     SpriteDef desc;
     TimedEffect *effect;
     Vec3f outA;
@@ -374,13 +374,13 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     }
     desc.frame = 0;
     desc.frameSpeed = 0;
-    desc.alpha = arg2;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.rgba[2] = 0;
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
-    desc.renderModes = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
+    desc.renderModes = (arg6 ? 2 : 3) + ((lit ? 0x3B : 0x22) << 16);
     desc.handlerSet = 0;
     desc.primMode = 0;
     desc.envMode = 7;
@@ -388,8 +388,8 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     desc.material = 0;
     if (particle_spawnSurfaceQuadSprite(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
                       math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
-                      arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
-        arg8 && math_getTriEdges(tri, &outA, &outB, &normal)) {
+                      lit ? 3 : 0, lit ? 0xFF : 0, 0, owner, list) != NULL &&
+        withDrip && math_getTriEdges(tri, &outA, &outB, &normal)) {
         down = gDownUnitVec;
         math_vec3Normalize(&normal, &normal, NULL, NULL);
         if (math_vec3Dot(&normal, &down) < -0.5f) {
@@ -399,11 +399,11 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
             drip.timer = 0;
             drip.size = size * 4.5f;
             drip.pos = *pos;
-            drip.unk14 = arg2;
-            drip.unk15 = arg7;
+            drip.alpha = alpha;
+            drip.lit = lit;
             drip.kind = kind;
             effect = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
-                                   sizeof(drip), arg9, argA);
+                                   sizeof(drip), owner, list);
             if (effect != NULL) {
                 memcpy(&((DripEffect *)effect)->drip, &drip, sizeof(drip));
             }
@@ -423,22 +423,22 @@ void particle_updateDripEffect(DripEffect *effect) {
         rand = math_randomFloat();
         lifeRand = math_random();
         particle_spawnSteamParticle(&drip->pos, &gZeroVec3f, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
-                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
+                      drip->alpha, drip->size, 0, 1.0f, 1.0f, drip->lit, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
         drip->timer = (math_random() % 111U) + 30;
     }
 }
 
 /* Splash for effect kind `kind`: an emitter plus, except for kinds 2 and 5, a particle_startSteamEffect effect. */
-void particle_spawnKindSplash(u8 kind, f32 size, u8 arg2, CollisionTri *surface, Vec3f *pos, u8 arg5, s32 arg6) {
-    particle_spawnKindMark(kind, size * 0.5f, arg2, surface, pos, arg5, arg6);
+void particle_spawnKindSplash(u8 kind, f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, u8 owner, s32 list) {
+    particle_spawnKindMark(kind, size * 0.5f, alpha, surface, pos, owner, list);
     if ((kind != 5) && (kind != 2)) {
-        particle_startSteamEffect(kind, size * 0.0003f, 1.01f, arg2, 100, surface, pos, arg5, arg6);
+        particle_startSteamEffect(kind, size * 0.0003f, 1.01f, alpha, 100, surface, pos, owner, list);
     }
 }
 
 /* Starts a steam effect of kind `kind` at `pos` (lifetime -1: untimed, shrinking by `shrink` otherwise). */
-SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos,
-                          s32 arg7, s32 arg8) {
+SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 alpha, s16 lifetime, CollisionTri *surface, Vec3f *pos,
+                          s32 owner, s32 list) {
     SteamEffect *effect;
     ParticleDef desc;
     SteamData steam;
@@ -493,7 +493,7 @@ SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s
             desc.fadeRate = 0xFF / lifetime;
         }
     }
-    desc.alpha = arg3;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.type = 0;
     desc.primMode = 4;
@@ -588,22 +588,22 @@ s32 particle_shrinkSteamEffect(SteamEffect *effect) {
 }
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
-Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
-                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
-                      s32 material, u8 arg10, s32 arg11) {
+Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 alpha, f32 scale, s32 itemCount, u8 hitsFloor,
+                      f32 burstScale, f32 altBurstScale, u8 lit, u8 kind, CollisionHit *ground, s16 fadeStart, s16 fadeRate,
+                      s32 material, u8 owner, s32 list) {
     Splash *splash;
     EffectTemplate spawn;
     TrailMotion motion;
     SplashBurst burst;
-    s32 a;
-    s32 b;
-    s32 c;
-    s32 d;
+    s32 hitFn;
+    s32 hitKind3Fn;
+    s32 maxLights;
+    s32 lightMask;
     TrailRender style;
     s32 flag80;
     s32 flag20;
 
-    spawn.itemCount = arg6;
+    spawn.itemCount = itemCount;
     spawn.pos = *pos;
     spawn.life = lifetime + 16;
     spawn.flags = 0x35;
@@ -619,16 +619,16 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     motion.flags = flag80 | 8 | flag20 | 0x40;
     motion.texture = gKindSplashTextures[kind];
     motion.shade = 0xFF;
-    motion.alpha = arg4;
-    motion.fadeStart = argD;
-    motion.fadeRate = argE;
-    if (arg7 != 0) {
+    motion.alpha = alpha;
+    motion.fadeStart = fadeStart;
+    motion.fadeRate = fadeRate;
+    if (hitsFloor != 0) {
         motion.flags |= 3;
-        a = 7;
-        b = 4;
+        hitFn = 7;
+        hitKind3Fn = 4;
     } else {
-        a = 0;
-        b = 0;
+        hitFn = 0;
+        hitKind3Fn = 0;
     }
     burst.kind = kind;
     burst.burstScale = burstScale;
@@ -645,14 +645,14 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
         style.alphaDither = 0x20;
         style.primMode = 0;
         style.envMode = 0xC;
-        if (argA != 0) {
-            c = 2;
-            d = 0xFF;
+        if (lit != 0) {
+            maxLights = 2;
+            lightMask = 0xFF;
         } else {
-            c = 0;
-            d = 0;
+            maxLights = 0;
+            lightMask = 0;
         }
-        splash = trail_createMotionTrail(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
+        splash = trail_createMotionTrail(&spawn, &motion, 16, 1, 0, 0, hitFn, hitKind3Fn, 0, maxLights, lightMask, &style, ground, owner, list);
     }
     if (splash != NULL) {
         memcpy(&splash->state->burst, &burst, sizeof(burst));
@@ -664,7 +664,7 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
 /* Splash impact handler: bursts into a particle_spawnKindEmitter emitter or a particle_spawnSquash effect at floor height. */
 s32 particle_splashBurst(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
-    SplashNode *nodes = splash->nodes;
+    MotionTrailPoint *nodes = splash->nodes;
     Vec3f point;
     SplashBurst *burst = &state->burst;
 
@@ -672,44 +672,44 @@ s32 particle_splashBurst(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, Collis
     point.y = floorY + 2.0f;
     point.z = nodes[splash->head.start].pos.z;
     if (math_random() & 1) {
-        particle_spawnKindEmitter(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, surface,
+        particle_spawnKindEmitter(burst->kind, (state->params.motion.halfWidth * 3.0f) * burst->burstScale, state->params.motion.alpha, surface,
                       &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
-        particle_spawnSquash(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
+        particle_spawnSquash(burst->kind, (state->params.motion.halfWidth * 1.1f) * burst->burstScale, state->params.motion.alpha, &point, 1,
                       splash->head.header.owner, splash->head.header.kind);
     }
-    state->unk20 = 4;
+    state->params.state = 4;
     return 1;
 }
 
 /* Splash impact handler: a particle_spawnKindSplash burst at floor height. */
 s32 particle_splashSpray(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
-    SplashNode *nodes = splash->nodes;
+    MotionTrailPoint *nodes = splash->nodes;
     Vec3f point;
 
     point.x = nodes[splash->head.start].pos.x;
     point.y = floorY;
     point.z = nodes[splash->head.start].pos.z;
-    particle_spawnKindSplash(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
+    particle_spawnKindSplash(state->burst.kind, state->params.motion.halfWidth * 11.0f * state->burst.altBurstScale, state->params.motion.alpha,
                   surface, &point, splash->head.header.owner, splash->head.header.kind);
-    state->unk20 = 4;
+    state->params.state = 4;
     return 1;
 }
 
 
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
-// matching: volatile arg4 (and the non-volatile byte read of it below) make IDO reload it from its stack slot
-void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
+// matching: volatile lit (and the non-volatile byte read of it below) make IDO reload it from its stack slot
+void particle_spawnSquash(u8 kind, f32 size, u8 alpha, Vec3f *pos, volatile u8 lit, u8 owner, s32 list) {
     void *effect;
     ParticleDef desc;
     SquashData squash;
     s32 value;
     s32 coinFlip;
-    s32 arg7;
+    s32 maxLights;
 
     desc.texture = gKindParticleTexturePickers[kind]();
-    desc.renderModes = ((arg4 ? 0x3B : 0x22) << 8) + 3;
+    desc.renderModes = ((lit ? 0x3B : 0x22) << 8) + 3;
 
 
     desc.lifetime = 100;
@@ -717,7 +717,7 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.rgba[1] = 0;
     desc.rgba[0] = 0;
     desc.rgba[3] = 0xFF;
-    desc.alpha = arg2;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.pos = *pos;
     desc.flags = (D_800AB330[kind] ? 0x40000000 : 0) | 0x0CDC0009;
@@ -745,12 +745,12 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.fadeStart = 32;
     desc.fadeRate = 7;
     coinFlip = (math_random() & 1) ? 1 : 0;
-    value = *(u8 *)&arg4;
-    arg7 = value ? 3 : 0;
+    value = *(u8 *)&lit;
+    maxLights = value ? 3 : 0;
     value = value ? 0xFF : 0;
     effect = particle_newQuadParticle(
-&desc, &gWhiteVtxColors, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
-                           arg6);
+&desc, &gWhiteVtxColors, 0, 20, 0, 14, coinFlip | 2, maxLights, value, sizeof(squash), owner,
+                           list);
     if (effect != NULL) {
         memcpy(&((SquashEffect *)effect)->squash, &squash, sizeof(squash));
     }
@@ -930,8 +930,8 @@ void particle_setKind12Colors(ParticleDesc *desc) {
  * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
  * its desc.unk3C oscillates (particle_updateKindSprite); a `drag` other than 1.0f scales its velocity each frame.
  */
-SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
-                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD) {
+SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 scaleRate, f32 drag, f32 gravity, s16 lifetime, u8 alpha,
+                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 owner, s32 list) {
     ParticleDesc desc;
     SteamParticle *particle;
     ParticleSpin data;
@@ -964,7 +964,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     desc.frameRate = 0;
     desc.a = 0xFF;
     desc.width = desc.height = size;
-    desc.alpha = arg8;
+    desc.alpha = alpha;
     desc.brightness = 0xFF;
     desc.pos = *(Vec3f *)pos;
     desc.offset = gZeroVec3f;
@@ -973,7 +973,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     desc.fadeStart = fadeFrames;
     desc.fadeRate = fadeStep;
     desc.scaleStart = (lifetime == -1) ? 1 : lifetime;
-    desc.scaleRate = arg4;
+    desc.scaleRate = scaleRate;
     desc.flags = ((lifetime == -1) ? 0 : 1) | 2 | 4 | ((math_random() & 1) ? 0x40 : 0) |
                  ((math_random() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (spin ? 0x1000 : 0) | 0x4000 |
                  0x8000 | 0x40000 | 0x800000;
@@ -987,7 +987,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     desc.views = 0xFF;
     desc.minSize = 1000;
     desc.maxSize = 1000.0f;
-    particle = particle_newSpriteParticleWithFloor(&desc, 1, 0, sizeof(data), argC, argD);
+    particle = particle_newSpriteParticleWithFloor(&desc, 1, 0, sizeof(data), owner, list);
     if (particle != NULL) {
         memcpy(&particle->data.spin, &data, sizeof(data));
     }
@@ -995,7 +995,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
 }
 
 /* particle_spawnKindSprite particle update: applies drag and oscillates desc.unk3C on three axes. */
-s32 particle_updateKindSprite(SteamParticle *particle, s32 arg1) {
+s32 particle_updateKindSprite(SteamParticle *particle, Vec3f *prevPos) {
     ParticleSpin *spin;
     s32 pad; // matching: unused stack slot
     f32 waveY;
@@ -1026,7 +1026,7 @@ s32 particle_updateKindSprite(SteamParticle *particle, s32 arg1) {
 }
 
 /* Throws `count` splashes of effect kind `kind` from `pos`. */
-void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
+void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 owner, s32 list) {
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
@@ -1060,12 +1060,12 @@ void particle_throwSplashes(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
 
     splash.spray.kind = kind;
 
-    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, 0, arg3, arg4);
+    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, 0, owner, list);
 
 }
 
 /* Spawns a particle_spawnKindEmitter emitter of effect kind *kind just above `pos`, with random size and lifetime. */
-void particle_spawnKindEmitterAbove(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 arg3, s32 arg4) {
+void particle_spawnKindEmitterAbove(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 owner, s32 list) {
     Vec3f point;
     u8 emitterKind;
     s32 pad; // matching: unused stack slot
@@ -1081,13 +1081,13 @@ void particle_spawnKindEmitterAbove(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 
     rand = math_random();
 
     particle_spawnKindEmitter(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, &hit->tri, &point,
-                  (math_random() % 151U) + 150, 0, 1, 0, arg3, arg4);
+                  (math_random() % 151U) + 150, 0, 1, 0, owner, list);
 }
 
 
 /* Spawns an emitter of effect kind `kind` (coloured from gKindColors) at `pos`, via particle_spawnSurfaceQuadSpriteNoModel on surface when it
  * is set. */
-void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, void *pos, u8 arg5, s32 arg6) {
+void particle_spawnKindMark(u8 kind, f32 size, s16 alpha, CollisionTri *surface, void *pos, u8 owner, s32 list) {
     SpriteDef desc;
 
     desc.texture = 0x38;
@@ -1095,7 +1095,7 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
     desc.flags = 0x67B02;
     desc.lifetime = 300;
     desc.frame = 0;
-    desc.alpha = arg2;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.rgba[0] = gKindColors[kind].r;
     desc.rgba[1] = gKindColors[kind].g;
@@ -1112,16 +1112,16 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
     if (surface != NULL) {
         particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, surface, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
                       ((Vec3f *)pos)->z, size, size, math_random() & 0xFF,
-                      (math_random() & 1) + (math_random() & 1) * 2, 0, arg5, arg6);
+                      (math_random() & 1) + (math_random() & 1) * 2, 0, owner, list);
     } else {
         particle_spawnFlatQuadSpriteNoModel(&desc, 0, 0, 0, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y, ((Vec3f *)pos)->z,
-                      size, size, 0, 0, 0, arg5, arg6);
+                      size, size, 0, 0, 0, owner, list);
     }
 }
 
 /* Starts an effect of kind `kind` (coloured from gKindColors) at `pos`. */
-void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
-                   u8 arg8, s32 arg9) {
+void particle_startKindEffect(u8 kind, f32 size, f32 scaleX, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 alpha, u8 arg7,
+                   u8 owner, s32 list) {
     ParticleDef desc;
 
     desc.texture = 0x38;
@@ -1138,9 +1138,9 @@ void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *
 
     desc.pos = *pos;
 
-    desc.scale.x = arg2;
+    desc.scale.x = scaleX;
     desc.flags = 0x466C0001;
-    desc.alpha = arg6;
+    desc.alpha = alpha;
     desc.colorLevel = 0xFF;
     desc.type = 0;
     desc.primMode = 0;
@@ -1157,11 +1157,11 @@ void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *
     desc.rot.z = 0.0f;
 
     particle_spawnAxisQuadParticleNoModel(&desc, 0, 11, 17, 0, (math_random() & 1) + (math_random() & 1),
-                  math_random() & 0xFF, size, size, NULL, tri, 0, 0, arg8, arg9);
+                  math_random() & 0xFF, size, size, NULL, tri, 0, 0, owner, list);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from gKindPlainTextures) at `pos`. */
-void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6) {
+void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 alpha, s16 lifetime, u8 kind, u8 owner, s32 list) {
     ParticleDesc desc;
     s32 flag800000;
     s32 flag40;
@@ -1181,7 +1181,7 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
     desc.r2 = 0xFF;
     desc.g2 = 0xFF;
     desc.b2 = 0xFF;
-    desc.alpha = arg2;
+    desc.alpha = alpha;
     desc.brightness = 0xFF;
     desc.height = size;
     desc.width = size;
@@ -1208,16 +1208,16 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
     desc.views = 0xFF;
     desc.minSize = 1000;
     desc.maxSize = 1000.0f;
-    particle_newSpriteParticleWithFloor(&desc, 1, 0, 0, arg5, arg6);
+    particle_newSpriteParticleWithFloor(&desc, 1, 0, 0, owner, list);
 }
 
 /* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
-void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
+void particle_spawnSplashAndDrops(pos, ground, kind, owner, list)
     Vec3f *pos;
     CollisionHit *ground;
     u8 kind;
-    u8 arg3;
-    s32 arg4;
+    u8 owner;
+    s32 list;
 {
     SplashSpraySpec splash;
 
@@ -1245,7 +1245,7 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.speedRange = 11.0f;
     splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
-    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
+    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, owner, list);
 
     {
         DropSpraySpec drops;
@@ -1270,19 +1270,19 @@ void particle_spawnSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.spray.sizeBase = 123.0f;
         drops.spray.sizeRange = 134.0f;
         drops.spray.wobbles = 1;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, arg3, arg4);
+        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, owner, list);
     }
 }
 
 /* Smaller variant of particle_spawnSplashAndDrops: splash burst plus wobbling drops of effect kind `kind`. */
-void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
+void particle_spawnSmallSplashAndDrops(pos, ground, kind, owner, list)
     Vec3f *pos;
     CollisionHit *ground;
     u8 kind;
-    u8 arg3;
-    s32 arg4;
+    u8 owner;
+    s32 list;
 {
     SplashSpraySpec splash;
 
@@ -1310,7 +1310,7 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
     splash.spray.speedRange = 5.0f;
     splash.spray.burstChance = 1.0f;
     splash.spray.kind = kind;
-    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, arg3, arg4);
+    particle_spawnSplashSprayAtAngles(&splash.angles, &splash.spray, ground, owner, list);
 
     {
         DropSpraySpec drops;
@@ -1335,8 +1335,8 @@ void particle_spawnSmallSplashAndDrops(pos, ground, kind, arg3, arg4)
         drops.spray.gravityRange = 0.47500002f;
         drops.spray.kind = kind;
         drops.spray.wobbles = 1;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, arg3, arg4);
+        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, ground, owner, list);
     }
 }

@@ -28,8 +28,8 @@ static const VtxColor gActorBeamColors[4] = {
 };
 
 /* matching: no header declares particle_spawnImpactMark (emissionsource.c): followeffects.c and sightbeam.c were compiled with other views */
-void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
-                   u8 arg9, u8 owner, s32 kind);
+void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *position, s16 duration, u8 lit, u8 arg6, u8 r, u8 g,
+                   u8 b, u8 owner, s32 list);
 
 /* Spawns the effect at each of the three gSprayAreas spots, starts three positioned sounds,
  * then calls camera_startWobblePreset for each of the gScreenLayout + 1 entries and cont_spawnRumble once. */

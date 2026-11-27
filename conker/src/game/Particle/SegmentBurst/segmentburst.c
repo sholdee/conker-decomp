@@ -7,7 +7,7 @@
 #include "libc/math.h"
 
 /* Spawns a particle burst at bone 10 of `actor`. */
-void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
+void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list) {
     ModelBurst burst;
     MtxF *bones;
 
@@ -31,10 +31,10 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
         burst.lifetimeBase = 40;
         burst.lifetimeRange = 35;
         burst.model = 0xA0;
-        burst.unk38 = 0x13;
-        burst.unk3C = 0;
-        burst.unk40 = 0.0f;
-        burst.unk44 = 1.960000038f;
+        burst.bank = 0x13;
+        burst.anim = 0;
+        burst.animSpeedBase = 0.0f;
+        burst.animSpeedRange = 1.960000038f;
         burst.scaleBase = 0.3070000112f;
         burst.scaleRange = 0.0f;
         burst.rotVelBase.x = burst.rotVelBase.z = -12.85999966f;
@@ -53,12 +53,12 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
         burst.motionFlags = 0xF;
         burst.fadeStart = 25;
         burst.fadeRate = 10;
-        particle_spawnModelBurst(&burst, arg1, arg2);
+        particle_spawnModelBurst(&burst, owner, list);
     }
 }
 
 /* Creates a blood_spawnStrip object attached to `owner`. */
-void particle_attachBloodStrip(Actor *owner, s32 arg1, s32 arg2) {
+void particle_attachBloodStrip(Actor *owner, s32 fxOwner, s32 fxList) {
     BloodStripDesc desc;
 
     if ((owner != NULL) && (owner->type != 0)) {
@@ -86,16 +86,16 @@ void particle_attachBloodStrip(Actor *owner, s32 arg1, s32 arg2) {
 }
 
 /* Sets the emitter's velocity scale. */
-s32 func_151938E4(SegmentEmitter *emitter) {
-    emitter->scale = 0.40200001f;
+s32 particle_sampleSegmentPower(BloodStrip *emitter) {
+    emitter->power = 0.40200001f;
     return TRUE;
 }
 
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
- * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
+ * (to - from) * emitter->power. Skipped while the owner is in water or moving slower than 8.1.
  */
-void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *emitter) {
     EffectParams params;
     EffectMotion motion;
     const Vec3f *ownerMotion;
@@ -148,9 +148,9 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.ownerId = emitter->owner->unique_id;
     params.lightMode = 1;
     params.pos = *from;
-    motion.vel.x = (to->x - from->x) * emitter->scale;
-    motion.vel.y = (to->y - from->y) * emitter->scale;
-    motion.vel.z = (to->z - from->z) * emitter->scale;
+    motion.vel.x = (to->x - from->x) * emitter->power;
+    motion.vel.y = (to->y - from->y) * emitter->power;
+    motion.vel.z = (to->z - from->z) * emitter->power;
     params.pos.x += motion.vel.x * t;
     params.pos.y += motion.vel.y * t;
     params.pos.z += motion.vel.z * t;
@@ -166,5 +166,5 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.fadeStart = 25;
     params.fadeRate = 10;
     motion.flags = 0xF;
-    effect_newMovingModelEffect(&params, &motion, 0, (math_randomFloat() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
+    effect_newMovingModelEffect(&params, &motion, 0, (math_randomFloat() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->header.owner, emitter->header.kind);
 }

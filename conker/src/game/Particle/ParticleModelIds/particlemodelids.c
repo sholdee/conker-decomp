@@ -8,9 +8,9 @@
  * before blood's .rodata.
  *
  * The model ids of the particle models (bank 9), by particle model: particle_loadModel
- * (game/Particle/ModelParticle/modelparticle.c) loads D_800A3880[model].
+ * (game/Particle/ModelParticle/modelparticle.c) loads gParticleModelIds[model].
  */
-const s32 D_800A3880[233] = {
+const s32 gParticleModelIds[233] = {
     /*   0 */ 0x0BE, 0x0BF, 0x0C0, 0x0C1, 0x0C2, 0x0C3, 0x0C4, 0x0C6, 0x0C5, 0x1A1,
     /*  10 */ 0x1A2, 0x1A3, 0x15C, 0x0D5, 0x0E4, 0x0BC, 0x0BD, 0x1A4, 0x1A5, 0x1A6,
     /*  20 */ 0x1A7, 0x1A8, 0x1A9, 0x0FC, 0x0C9, 0x0CA, 0x0FF, 0x0E5, 0x0CC, 0x0CD,

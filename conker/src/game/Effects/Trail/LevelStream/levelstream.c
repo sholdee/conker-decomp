@@ -1499,7 +1499,7 @@ void trail_emitLineBursts(Actor *obj, u8 owner, s32 list) {
             emitA.sizeRange = 455.0f;
             emitA.unk30 = 1;
             emitA.kind = 2;
-            emitA.unk34 = 0.0f;
+            emitA.floorHitChance = 0.0f;
             emitA.wobbles = 1;
             emitA.bounceChance = 0.0f;
             shape.spread = 750.0f;

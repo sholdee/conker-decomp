@@ -12,38 +12,14 @@
 #include "conker/sound.h"
 #include "libc/string.h"
 
-/* Data of the child subParticle (after its 0x110-byte particle). */
+/* The data of the beam's startFx, at BeamStartFx.wobble (0xA8 in the sprite). */
 typedef struct {
-    u8 unk0;
-    u8 pad1[0x13];
-    EffectParticle *parent;
-} SubParticleData;
-
-/* Data of the child particleA (at 0xA8 in the particle). */
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 angle[2];               /* random, 0 to 2pi */
-    f32 unk20;
-    f32 unk24;
-    EffectParticle *parent;
-    u8 unk2C;
-    u8 pad2D[3];
-} ParticleAData;
-
-/* Data of the child glow (at 0x170, GlowParams.anim) and particleB (at 0xA8). */
-typedef struct {
-    EffectParticle *parent;
-    u8 unk4;
-    u8 pad5[3];
-} ChildData;
+    /* 0x00 */ Wobble151025F4 wobble;
+    /* 0x28 */ RayBeamLink link;
+} BeamStartFxData;
 
 /* This unit's .rodata front-end data: the effect tables of particle_startObjRayBeam. Per effect kind: the two points
- * (vec1, vec2) given to particle_spawnRayBeam, and its arg3. */
+ * (vec1, vec2) given to particle_spawnRayBeam, and its bone. */
 static const Vec3f gObjRayBeamStarts[7] = {
     { 0.0f, 36.0f, 76.0f },  { -6.0f, -25.0f, 119.0f }, { 0.0f, 66.0f, 74.0f },  { -6.0f, -25.0f, 119.0f },
     { 0.0f, -79.0f, 49.0f }, { 7.0f, -54.0f, 57.0f },   { 9.0f, -51.0f, 65.0f },
@@ -52,20 +28,20 @@ static const Vec3f gObjRayBeamTargets[7] = {
     { 0.0f, 36.0f, 130.0f },  { -6.0f, -25.0f, 208.0f }, { 0.0f, 66.0f, 274.0f }, { -6.0f, -25.0f, 208.0f },
     { 0.0f, -114.0f, 49.0f }, { 7.0f, -113.0f, 57.0f },  { 9.0f, -64.0f, 72.0f },
 };
-static const u8 D_800A2248[7] = { 12, 0, 12, 9, 9, 9, 9 };
+static const u8 gObjRayBeamBones[7] = { 12, 0, 12, 9, 9, 9, 9 };
 
 /*
- * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
- * a flash, a glow and two particle_newOwnedSpriteParticle particles) that keep a pointer back to it. lifetime -1 means
- * endless. Returns the main particle, or NULL.
+ * Spawns a beam on owner: a main particle carrying a RayBeamData plus five children (the hitFx quad, the endPoint
+ * light, the line glow, and the startFx and endFx particle_newOwnedSpriteParticle sprites) that keep a pointer back to
+ * it. lifetime -1 means endless. Returns the beam, or NULL.
  */
-EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
-                              u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
-    EffectParticle *particle;
+RayBeam *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 bone, s16 lifetime, u8 r,
+                              u8 g, u8 b, f32 arg8, f32 scrollBase, f32 scrollRange, f32 argB, u8 aimed, u8 fxOwner, s32 fxList) {
+    RayBeam *particle;
     ParticleDef def;
-    EffectParticleState data;
+    RayBeamData data;
     u8 hasLifetime;
-    EffectParticleState *state;
+    RayBeamData *state;
 
     if (lifetime == -1) {
         hasLifetime = FALSE;
@@ -75,37 +51,37 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
     }
     data.ownerSlot = owner - movement_obj;
     if (owner->CameraPtr != NULL) {
-        data.unk22 = owner->CameraPtr->CNumber;
+        data.ownerCamera = owner->CameraPtr->CNumber;
     } else {
-        data.unk22 = 0xFF;
+        data.ownerCamera = 0xFF;
     }
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    data.unk20 = arg3;
-    data.unk23 = (s32)(argC ? 2 : 0); // matching: the (s32) cast changes IDO's register choice
-    data.unk8 = *vec1;
-    data.unk14 = *vec2;
-    data.unk3C = arg8;
-    data.unk40 = 0.1019999981f;
-    data.unk48 = arg9;
-    data.unk4C = argA;
-    data.unk54 = argB;
-    data.unk58 = -32768.0f;
-    data.unk64 = 250.0f;
-    data.unk6C = 25.0f;
-    data.unk38 = 0.0f;
-    data.unk50 = 0.0f;
-    data.unk5C = 0.0f;
-    data.unk60 = 0.0f;
-    data.unk68 = 0.0f;
-    data.unk78 = 0.0f;
-    data.unk84 = 0.0f;
-    data.unk70 = 0.4499999881f;
-    data.unk74 = 255.0f;
-    data.unk7C = 128.0f;
-    data.unk80 = 127.0f;
-    data.unk88 = 20.0f;
-    data.unk8C = 0.400000006f;
+    data.bone = bone;
+    data.flags = (s32)(aimed ? 2 : 0); // matching: the (s32) cast changes IDO's register choice
+    data.localStart = *vec1;
+    data.localTarget = *vec2;
+    data.widthTarget = arg8;
+    data.widthBlend = 0.1019999981f;
+    data.scrollBase = scrollBase;
+    data.scrollRange = scrollRange;
+    data.scrollPhaseRate = argB;
+    data.texOffset = -32768.0f;
+    data.texVelocityRange = 250.0f;
+    data.texVelocityTimerRange = 25.0f;
+    data.width = 0.0f;
+    data.scrollPhase = 0.0f;
+    data.texVelocity = 0.0f;
+    data.texVelocityTarget = 0.0f;
+    data.texVelocityTimer = 0.0f;
+    data.alphaTarget = 0.0f;
+    data.alphaTimer = 0.0f;
+    data.texVelocityBlend = 0.4499999881f;
+    data.alpha = 255.0f;
+    data.alphaBase = 128.0f;
+    data.alphaRange = 127.0f;
+    data.alphaTimerRange = 20.0f;
+    data.alphaBlend = 0.400000006f;
     if (owner->CameraPtr != NULL) {
         data.sound = sound_play(0x4D0, 2000, 0x40, 0, 0);
     } else {
@@ -137,23 +113,23 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
     def.colorLevel = 0xFF;
     def.primMode = 0;
     def.envMode = 6;
-    particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
+    particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(RayBeamData), fxOwner, fxList);
     if (particle != NULL) {
-        state = &particle->state;
-        memcpy(state, &data, sizeof(EffectParticleState));
+        state = &particle->data;
+        memcpy(state, &data, sizeof(RayBeamData));
         {
             ParticleDef subDef;
-            SubParticleData subData;
+            BeamHitFxData subData;
 
-            subData.parent = particle;
+            subData.beam = particle;
             {
                 LightEffectHeader flashHeader;
                 Vec3i flashPos;
-                EffectParticle *flashData;
+                RayBeam *flashData;
                 ParticleDesc descA;
-                ParticleAData particleAData;
+                BeamStartFxData particleAData;
 
-                subData.unk0 = 0;
+                subData.flags = 0;
                 subDef.texture = 3;
                 subDef.type = 2;
                 subDef.renderModes = 0x3201;
@@ -180,9 +156,9 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 subDef.colorLevel = 0xFF;
                 subDef.primMode = 0;
                 subDef.envMode = 6;
-                if ((state->subParticle = particle_newQuadParticleNoModel(&subDef, &gWhiteVtxColors, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
-                                                   argD, argE)) != NULL) {
-                    memcpy(state->subParticle + 0x110, &subData, sizeof(SubParticleData));
+                if ((state->hitFx = particle_newQuadParticleNoModel(&subDef, &gWhiteVtxColors, 0, 0, 0, 0x13, 0, sizeof(BeamHitFxData),
+                                                   fxOwner, fxList)) != NULL) {
+                    memcpy(&state->hitFx->data, &subData, sizeof(BeamHitFxData));
                 }
                 flashPos.x = 0;
                 flashPos.y = 0;
@@ -192,23 +168,23 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 flashHeader.update = -1;
                 flashHeader.lifetime = lifetime;
                 flashHeader.lightType = 7;
-                if ((state->flash = light_createWithEffect(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
-                                                  argD, argE)) != NULL) {
-                    memcpy(&state->flash->data.object, &flashData, sizeof(flashData));
+                if ((state->endPoint = light_createWithEffect(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
+                                                  fxOwner, fxList)) != NULL) {
+                    memcpy(&state->endPoint->data.object, &flashData, sizeof(flashData));
                 }
-                particleAData.unk2C = 0;
-                particleAData.unk0 = 0.0f;
-                particleAData.unk4 = 0.0f;
-                particleAData.unkC = 10.25000095f;
-                particleAData.unk8 = 10.25000095f;
-                particleAData.unk14 = 2.750000238f;
-                particleAData.unk10 = 2.750000238f;
-                particleAData.parent = particle;
-                particleAData.angle[0] = math_randomFloat() * 6.283185482f;
-                particleAData.angle[1] = math_randomFloat() * 6.283185482f;
+                particleAData.link.flags = 0;
+                particleAData.wobble.offset[0] = 0.0f;
+                particleAData.wobble.offset[1] = 0.0f;
+                particleAData.wobble.base[1] = 10.25000095f;
+                particleAData.wobble.base[0] = 10.25000095f;
+                particleAData.wobble.amplitude[1] = 2.750000238f;
+                particleAData.wobble.amplitude[0] = 2.750000238f;
+                particleAData.link.beam = particle;
+                particleAData.wobble.phase[0] = math_randomFloat() * 6.283185482f; /* random, 0 to 2pi */
+                particleAData.wobble.phase[1] = math_randomFloat() * 6.283185482f;
                 // matching: '+ -0.3f' (add.s), not '- 0.3f' (sub.s)
-                particleAData.unk20 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
-                particleAData.unk24 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
+                particleAData.wobble.speed[0] = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
+                particleAData.wobble.speed[1] = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
                 descA.texture = 0x2B;
                 descA.renderMode = 0x3303;
                 descA.setGeometryMode = 0x200005;
@@ -250,16 +226,16 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 descA.deathFunc = -1;
                 descA.drawFunc = 0;
                 descA.handlerSet = 1;
-                if ((state->particleA = particle_newOwnedSpriteParticle(&descA, 1, sizeof(ParticleAData), argD, argE)) != NULL) {
-                    memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
+                if ((state->startFx = particle_newOwnedSpriteParticle(&descA, 1, sizeof(BeamStartFxData), fxOwner, fxList)) != NULL) {
+                    memcpy(&state->startFx->wobble, &particleAData, sizeof(BeamStartFxData));
                 }
                 {
                     GlowShape glowParams;
                     ParticleDef glowDef;
-                    ChildData glowData;
+                    RayBeamLink glowData;
 
-                    glowData.parent = particle;
-                    glowData.unk4 = 0;
+                    glowData.beam = particle;
+                    glowData.flags = 0;
                     glowDef.texture = 3;
                     glowDef.type = 3;
                     glowDef.renderModes = 0x3403;
@@ -302,15 +278,15 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                     glowParams.offset0 = 0.5f;
                     glowParams.alpha1 = 0.3000000119f;
                     glowParams.fadeRate = 9.999999975e-07f;
-                    if ((state->glow = flare_spawnGlow(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, argD, argE)) != NULL) {
-                        memcpy(state->glow + 0x170, &glowData, sizeof(ChildData));
+                    if ((state->line = flare_spawnGlow(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, fxOwner, fxList)) != NULL) {
+                        memcpy(&state->line->link, &glowData, sizeof(RayBeamLink));
                     }
                     {
                         ParticleDesc descB;
-                        ChildData particleBData;
+                        RayBeamLink particleBData;
 
-                        particleBData.unk4 = 0;
-                        particleBData.parent = particle;
+                        particleBData.flags = 0;
+                        particleBData.beam = particle;
                         descB.texture = 0x15;
                         descB.renderMode = 0x3203;
                         descB.setGeometryMode = 0x200005;
@@ -353,8 +329,8 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                         descB.deathFunc = -1;
                         descB.drawFunc = 1;
                         descB.handlerSet = 5;
-                        if ((state->particleB = particle_newOwnedSpriteParticle(&descB, 1, sizeof(ChildData), argD, argE)) != NULL) {
-                            memcpy(state->particleB + 0xA8, &particleBData, sizeof(ChildData));
+                        if ((state->endFx = particle_newOwnedSpriteParticle(&descB, 1, sizeof(RayBeamLink), fxOwner, fxList)) != NULL) {
+                            memcpy(&state->endFx->link, &particleBData, sizeof(RayBeamLink));
                         }
                     }
                 }
@@ -369,8 +345,8 @@ void particle_destroyRayBeam(RayBeam *beam) {
     RayBeamData *data = &beam->data;
 
     // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
-    if (*(u16 *)&data->unk90) {
-        sound_stop(data->unk90);
+    if (*(u16 *)&data->sound) {
+        sound_stop(data->sound);
     }
     if (data->hitFx != NULL) {
         effect_destroyObject(&data->hitFx->head.header);
@@ -491,8 +467,8 @@ void particle_freeBeamEndFx(BeamEndFx *fx) {
  */
 s8 particle_updateRayBeam(RayBeam *beam) {
     s8 result;
-    BeamOwnerAim *aim;
-    BeamOwner *owner;
+    ActorCtl *aim;
+    Actor *owner;
     u8 hit;
     CollisionTri hitInfo;
     Vec3f dir;
@@ -512,17 +488,17 @@ s8 particle_updateRayBeam(RayBeam *beam) {
         result = 0;
     } else {
         endIsHit = 1;
-        bones = owner->boneMtx;
-        if (bones != NULL && (gCutsceneStates[0] != 1 || (owner->unk74 & 0xF) != 0xF)) {
+        bones = owner->ob_matrix_ptr;
+        if (bones != NULL && (gCutsceneStates[0] != 1 || (owner->cullMask & 0xF) != 0xF)) {
             boneMtx = bones[data->bone];
             math_transformOffset(&data->localStart, &beam->head.def.pos, boneMtx);
             if (data->flags & 2) {
-                aim = owner->aim;
-                hitType = aim->targetType;
+                aim = owner->mv;
+                hitType = aim->rayHit.hitType;
                 if (hitType != 0) {
-                    beam->head.def.rot = owner->aim->targetPos;
-                    data->length = owner->aim->targetDist;
-                    hitInfo = owner->aim->targetHit;
+                    beam->head.def.rot = owner->mv->rayHit.pos;
+                    data->length = owner->mv->rayHit.dist;
+                    hitInfo = owner->mv->rayHit.tri;
                     dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
                     dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
                     dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
@@ -530,9 +506,9 @@ s8 particle_updateRayBeam(RayBeam *beam) {
                     endIsHit = 0;
                     hitType = 2;
                     data->length = 2000.0f;
-                    dir.x = owner->aim->targetDir.x * 2000.0f;
-                    dir.y = owner->aim->targetDir.y * 2000.0f;
-                    dir.z = owner->aim->targetDir.z * 2000.0f;
+                    dir.x = owner->mv->rayHit.dir.x * 2000.0f;
+                    dir.y = owner->mv->rayHit.dir.y * 2000.0f;
+                    dir.z = owner->mv->rayHit.dir.z * 2000.0f;
                     beam->head.def.rot.x = beam->head.def.pos.x + dir.x;
                     beam->head.def.rot.y = beam->head.def.pos.y + dir.y;
                     beam->head.def.rot.z = beam->head.def.pos.z + dir.z;
@@ -613,8 +589,8 @@ s8 particle_updateRayBeam(RayBeam *beam) {
             if (data->startFx != NULL) {
                 startFx = data->startFx;
                 startFx->head.desc.pos = beam->head.def.pos;
-                startFx->head.desc.width = startFx->baseSizeX * data->width;
-                startFx->head.desc.height = startFx->baseSizeY * data->width;
+                startFx->head.desc.width = startFx->wobble.offset[0] * data->width;
+                startFx->head.desc.height = startFx->wobble.offset[1] * data->width;
                 startFx->link.flags |= 1;
             }
             if (data->line != NULL) {
@@ -684,7 +660,7 @@ Vtx *particle_buildRayBeamQuad(RayBeam *beam, s16 viewport) {
     s32 texStart, texEnd, texSpan;
     f32 maxLen;
 
-    if (viewport == data->unk22 && (data->owner == NULL || data->owner->aim->unk197 != 0)) {
+    if (viewport == data->ownerCamera && (data->owner == NULL || data->owner->mv->SniperState != 0)) {
         return NULL;
     }
     if (data->flags & 1) {
@@ -856,127 +832,58 @@ Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport) {
     return ret;
 }
 
-typedef struct {
-    u8 pad0[0x14];
-    u8 *unk14;
-} Sub151022AC_2C;
+/* Per-frame update (gQuadParticleUpdate2Funcs): advances the scroll phase and the texture offset, and eases the width,
+ * the texture velocity and the alpha toward random targets, then passes them on to the child objects. */
+s32 particle_flickerRayBeam(RayBeam *beam) {
+    RayBeamData *state;
+    BeamHitFx *quad;
+    LightEffect *particles;
+    BeamEndFx *child;
 
-typedef struct {
-    TimedEffect base;
-    u8 rgba[4];
-} Sub151022AC_24;
-
-typedef struct {
-    u8 pad0[0x2C];
-    f32 width;
-    f32 height;
-    u8 pad34[0x28];
-    u8 alpha;
-} Sub151022AC_28;
-
-typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-} Sub151022AC_34;
-
-/* Randomly wandering spin, scale and alpha, pushed out to the linked objects each frame. */
-typedef struct {
-    u8 pad0[0x24];
-    Sub151022AC_24 *linked24;
-    Sub151022AC_28 *linked28;
-    Sub151022AC_2C *linked2C;
-    u8 pad30[4];
-    Sub151022AC_34 *linked34;
-    f32 scale;
-    f32 targetScale;
-    f32 scaleBlend;
-    u8 pad44[0xC];
-    f32 angle;
-    f32 rate;
-    f32 rotation;
-    f32 velocity;
-    f32 targetVelocity;
-    f32 velocityRange;
-    f32 timer;
-    f32 timerRange;
-    f32 velocityBlend;
-    f32 alpha;
-    f32 targetAlpha;
-    f32 alphaBase;
-    f32 alphaRange;
-    f32 alphaTimer;
-    f32 alphaTimerRange;
-    f32 alphaBlend;
-} Flicker151022AC;
-
-struct Owner151022AC {
-    u8 pad0[0x5C];
-    u8 alpha;
-    u8 pad5D[0xB3];
-    Flicker151022AC flicker;
-};
-
-/* Per-frame update: advances the angle and spin, and eases scale and alpha toward random targets. */
-s32 particle_flickerRayBeam(Owner151022AC *obj) {
-    Flicker151022AC *state;
-    Sub151022AC_28 *quad;
-    Sub151022AC_2C *particles;
-    Sub151022AC_34 *child;
-
-    state = &obj->flicker;
-    state->angle += state->rate * gFrameDelta;
-    state->angle = math_wrapRadians(state->angle);
-    state->rotation += state->velocity * gFrameDelta;
-    while (state->rotation > 32767.0f) {
-        state->rotation -= 65536.0f;
+    state = &beam->data;
+    state->scrollPhase += state->scrollPhaseRate * gFrameDelta;
+    state->scrollPhase = math_wrapRadians(state->scrollPhase);
+    state->texOffset += state->texVelocity * gFrameDelta;
+    while (state->texOffset > 32767.0f) {
+        state->texOffset -= 65536.0f;
     }
-    while (state->rotation < -32768.0f) {
-        state->rotation += 65536.0f;
+    while (state->texOffset < -32768.0f) {
+        state->texOffset += 65536.0f;
     }
-    state->timer -= gFrameDelta;
-    if (state->timer < 0.0f) {
-        state->timer = math_randomFloat() * state->timerRange;
-        state->targetVelocity = math_randomFloat() * (state->velocityRange + state->velocityRange) - state->velocityRange;
+    state->texVelocityTimer -= gFrameDelta;
+    if (state->texVelocityTimer < 0.0f) {
+        state->texVelocityTimer = math_randomFloat() * state->texVelocityTimerRange;
+        state->texVelocityTarget = math_randomFloat() * (state->texVelocityRange + state->texVelocityRange) - state->texVelocityRange;
     }
-    state->velocity += (state->targetVelocity - state->velocity) * state->velocityBlend;
-    state->scale += (state->targetScale - state->scale) * state->scaleBlend;
-    if (state->linked28 != NULL) {
-        quad = state->linked28;
-        quad->width = quad->height = (math_randomFloat() * 0.2f + 0.4f) * state->scale;
+    state->texVelocity += (state->texVelocityTarget - state->texVelocity) * state->texVelocityBlend;
+    state->width += (state->widthTarget - state->width) * state->widthBlend;
+    if (state->hitFx != NULL) {
+        quad = state->hitFx;
+        quad->head.def.width = quad->head.def.height = (math_randomFloat() * 0.2f + 0.4f) * state->width;
     }
     state->alphaTimer -= gFrameDelta;
     if (state->alphaTimer < 0.0f) {
         state->alphaTimer = math_randomFloat() * state->alphaTimerRange;
-        state->targetAlpha = math_randomFloat() * state->alphaRange + state->alphaBase;
+        state->alphaTarget = math_randomFloat() * state->alphaRange + state->alphaBase;
     }
-    state->alpha += (state->targetAlpha - state->alpha) * state->alphaBlend;
-    obj->alpha = state->alpha;
-    if (state->linked28 != NULL) {
-        state->linked28->alpha = obj->alpha;
+    state->alpha += (state->alphaTarget - state->alpha) * state->alphaBlend;
+    beam->head.def.alpha = state->alpha;
+    if (state->hitFx != NULL) {
+        state->hitFx->head.def.alpha = beam->head.def.alpha;
     }
-    if (state->linked24 != NULL) {
-        state->linked24->rgba[3] = obj->alpha;
+    if (state->startFx != NULL) {
+        state->startFx->head.desc.alpha = beam->head.def.alpha;
     }
-    if (state->linked2C != NULL) {
-        particles = state->linked2C;
-        particles->unk14[0x2F] = (math_random() & 3) + 2;
+    if (state->endPoint != NULL) {
+        particles = state->endPoint;
+        particles->light->radius = (math_random() & 3) + 2;
     }
-    if (state->linked34 != NULL) {
-        child = state->linked34;
-        child->unk38 = child->unk3C = math_randomFloat() * 10.0f + 120.0f;
+    if (state->endFx != NULL) {
+        child = state->endFx;
+        child->head.desc.width = child->head.desc.height = math_randomFloat() * 10.0f + 120.0f;
     }
     return 1;
 }
-
-/* A 2D sine wobble: offset = base + amplitude * sin(phase), with phase advancing at speed. */
-typedef struct {
-    f32 offset[2];
-    f32 base[2];
-    f32 amplitude[2];
-    f32 phase[2];
-    f32 speed[2];
-} Wobble151025F4;
 
 struct Owner151025F4 {
     DescParticleHead head;
@@ -984,7 +891,7 @@ struct Owner151025F4 {
 };
 
 /* Per-frame update of the owner's wobble offset. */
-s32 particle_updateWobbleOffset(Owner151025F4 *obj, s32 arg1) {
+s32 particle_updateWobbleOffset(Owner151025F4 *obj, Vec3f *prevPos) {
     Wobble151025F4 *wobble = &obj->wobble;
     s32 pad; // matching: unused stack slot in the original frame
     f32 sinX;
@@ -1002,9 +909,9 @@ s32 particle_updateWobbleOffset(Owner151025F4 *obj, s32 arg1) {
 }
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
-    s32 unk5;
-    s32 unk6;
+RayBeam *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 aimed, u8 owner, s32 list) {
+    s32 r;
+    s32 g;
 
     if (obj == NULL) {
         return NULL;
@@ -1013,30 +920,30 @@ EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3,
         case 0x58:
         case 0x5B:
         case 0x80:
-            unk5 = 0x32;
-            unk6 = 0xFF;
+            r = 0x32;
+            g = 0xFF;
             break;
         case 0x5A:
         case 0x5F:
         case 0x74:
         case 0x75:
         case 0x7A:
-            unk5 = 0xFF;
-            unk6 = 0;
+            r = 0xFF;
+            g = 0;
             break;
         default:
             if (obj->mv->rt_context_b == 0x3B) {
-                unk5 = 0xFF;
-                unk6 = 0;
+                r = 0xFF;
+                g = 0;
             } else {
-                unk5 = 0x32;
-                unk6 = 0xFF;
+                r = 0x32;
+                g = 0xFF;
             }
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
-                         20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
+    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], gObjRayBeamBones[kind], lifetime, r, g, 0,
+                         20.0f, 20, 4.0f, 0.08f, aimed, owner, list);
 }
 
 /* Sends message 0x1A for `actor` (stops the effect started by particle_startObjRayBeam). */
@@ -1049,69 +956,44 @@ void particle_stopObjEffect(Actor *actor) {
 }
 
 
-/* State block at +0x110 of the objects referenced by Owner1510281C. */
-typedef struct {
-    Actor *linked;
-    u8 pad4[0x1E];
-    u8 unk22;
-} Block1510281C;
-
-typedef struct {
-    u8 pad0[0x110];
-    Block1510281C block;
-} Obj1510281C;
-
-struct Owner1510281C {
-    u8 pad0[0xD0];
-    Obj1510281C *unkD0;
-    u8 unkD4;
-    u8 padD5[0x9B];
-    Obj1510281C *unk170;
-    u8 unk174;
-};
-
-/* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
-s32 func_1510281C(Owner1510281C *owner, s16 key) {
-    Block1510281C *block = &owner->unkD0->block;
+/* Draw test of the beam's startFx: 0 in the owner's camera view (ownerCamera) when the owner is NULL or aims in first
+ * person (SniperState), else bit 0 of link.flags. */
+s32 func_1510281C(BeamStartFx *sprite, s16 view) {
+    RayBeamData *block = &sprite->link.beam->data;
     Actor *linked;
 
-    if (key == block->unk22) {
-        linked = block->linked;
+    if (view == block->ownerCamera) {
+        linked = block->owner;
         if (linked == NULL || linked->mv->SniperState != 0) {
             return 0;
         }
     }
-    if (!(owner->unkD4 & 1)) {
+    if (!(sprite->link.flags & 1)) {
         return 0;
     }
     return 1;
 }
 
-struct Obj15102884 {
-    u8 pad0[0xAC];
-    u8 unkAC;
-};
-
-/* Returns bit 0 of obj->unkAC. */
-s32 func_15102884(Obj15102884 *obj, s32 arg1) {
-    if (!(obj->unkAC & 1)) {
+/* Returns bit 0 of fx->link.flags. */
+s32 func_15102884(BeamEndFx *fx, s32 view) {
+    if (!(fx->link.flags & 1)) {
         return 0;
     }
     return 1;
 }
 
-/* Same test as func_1510281C, on unk170 and unk174. */
-s32 func_151028AC(Owner1510281C *owner, s16 key) {
-    Block1510281C *block = &owner->unk170->block;
+/* Same test as func_1510281C, for the beam's line (gGlowVisibilityTests). */
+s32 func_151028AC(BeamLine *line, s16 view) {
+    RayBeamData *block = &line->link.beam->data;
     Actor *linked;
 
-    if (key == block->unk22) {
-        linked = block->linked;
+    if (view == block->ownerCamera) {
+        linked = block->owner;
         if (linked == NULL || linked->mv->SniperState != 0) {
             return 0;
         }
     }
-    if (!(owner->unk174 & 1)) {
+    if (!(line->link.flags & 1)) {
         return 0;
     }
     return 1;

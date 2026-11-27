@@ -20,7 +20,7 @@ Vec3f gKickableLookAtPos = { 0.0f, 0.0f, 0.0f };   /* its position, 50 above */
 Actor *gKickablePusher = NULL;                  /* object 1, pushing particle_fallAndGrow's particles */
 static s32 gShatterSounds[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
 static s32 gShatterWallSound = 0xA1;              /* wall-hit sound */
-static s32 D_80088740 = 0x69;              /* landing sound of the falling/growing particles */
+static s32 gShatterLandSound = 0x69;              /* landing sound of the falling/growing particles */
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */
@@ -241,8 +241,8 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
-                    burst.unk74 = particle->link.maxLights;
-                    burst.unk78 = particle->link.lightMask;
+                    burst.maxLights = particle->link.maxLights;
+                    burst.lightMask = particle->link.lightMask;
                     burst.render.otherModeH = 0;
                     burst.render.setGeometryMode = 0x220005;
                     burst.render.clearGeometryMode = 0x1D0600;
@@ -252,9 +252,9 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.render.alphaDither = 0x20;
                     burst.render.primMode = 0;
                     burst.render.envMode = 7;
-                    burst.unk9C = 10;
-                    burst.unk9E = 25;
-                    burst.unkA0 = particle->floor.material;
+                    burst.fadeStart = 10;
+                    burst.fadeRate = 25;
+                    burst.material = particle->floor.material;
                     particle_spawnSurfacePuffSpray(&burst, particle->header.owner, particle->header.kind);
                 }
             }
@@ -459,7 +459,7 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.material = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
-            sound_playAt(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
+            sound_playAt(gShatterLandSound, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
             return 0;
         }
     }

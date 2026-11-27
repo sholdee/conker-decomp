@@ -36,12 +36,6 @@ typedef struct {
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
-/* Passed through particle_emitOnRandomCircle to the spawn callbacks (e.g. effect_spawnImpactSprayParticle). */
-struct FxSpawnPayload {
-    /* 0x00 */ CollisionHit *hit;
-    /* 0x04 */ s32 list;     /* the object list of the spawned effects */
-    /* 0x08 */ u8 kind;
-};
 
 /* The impact types' effect selections (effect_spawnImpact, effect_spawnImpactSprayParticle, particle_spawnYawSteam). */
 const FxImpactSet gImpactSets[] = {

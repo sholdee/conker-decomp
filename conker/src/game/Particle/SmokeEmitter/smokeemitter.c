@@ -36,9 +36,9 @@ void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {
     }
 }
 
-/* Calls trail_spawnNearCamera(arg0, unk2 + unk8, unk2). */
-void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
-    trail_spawnNearCamera(arg0, range->unk2 + range->unk8, range->unk2);
+/* TriggerZone handler: trail_spawnNearCamera for obj, probing from the zone's top (y + ySize) down to its base (y). */
+void particle_spawnZoneGroundFxNearCamera(void *obj, TriggerZone *range) {
+    trail_spawnNearCamera(obj, range->y + range->ySize, range->y);
 }
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
@@ -109,7 +109,7 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
 }
 
 /* Update for particle_updateSmokeEmitter's particles: wobbles the offset and applies drag to the velocity. */
-s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
+s32 particle_wobbleSmoke(SpriteParticle *particle, Vec3f *prevPos) {
     WobbleData *wobble;
 
     wobble = &particle->data.wobble;
@@ -119,7 +119,7 @@ s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
 }
 
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
-void particle_startGreyscaleScreen(s16 lifetime, u8 arg1, s32 arg2) {
+void particle_startGreyscaleScreen(s16 lifetime, u8 owner, s32 list) {
     EffectDesc desc;
 
     desc.flags = 1;
@@ -127,42 +127,30 @@ void particle_startGreyscaleScreen(s16 lifetime, u8 arg1, s32 arg2) {
     desc.drawIndex = 2;
     desc.lifetime = lifetime;
     desc.messageIndex = 0;
-    colourfb_createScreenEffect(&desc, 0, arg1, arg2);
+    colourfb_createScreenEffect(&desc, 0, owner, list);
 }
 
-void particle_drawGreyscaleScreen(void *arg0, u8 *arg1) {
-    colourfb_toGreyscale(arg1, arg1 + 0x1ECC0);
+void particle_drawGreyscaleScreen(void *effect, u8 *framebuffer) {
+    colourfb_toGreyscale(framebuffer, framebuffer + 0x1ECC0);
 }
-
-typedef struct GameDC6B0SmokeMotion {
-    f32 x, y;
-    f32 phase; /* random in [0, 2pi) */
-    f32 unkC;
-} GameDC6B0SmokeMotion;
-
-/* A sprite created by sprite_newScreenSprite; the puffs carry their motion at 0x70. */
-typedef struct {
-    u8 pad0[0x70];
-    GameDC6B0SmokeMotion motion;
-} GameDC6B0SmokeSprite;
 
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
 void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
-    GameDC6B0SmokeSprite *sprite;
+    Obj150AFBF4 *sprite;
     ScreenSpriteInfo puff;
-    GameDC6B0SmokeMotion motion;
+    TimeOscillator motion;
     GameDC6B0SmokeTimers *timers;
     ScreenSpriteInfo spark;
 
     timers = &source->timers;
     timers->puff -= gFrameTicks;
     if (timers->puff < 0) {
-        motion.x = math_randomFloat() * 280.0f + -140.0f;
-        motion.y = math_randomFloat() * 50.0f;
-        motion.phase = 2.0f * (math_randomFloat() * 3.141592741f);
-        motion.unkC = math_randomFloat() * 0.2680000067f;
+        motion.base = math_randomFloat() * 280.0f + -140.0f;
+        motion.amplitude = math_randomFloat() * 50.0f;
+        motion.phase = 2.0f * (math_randomFloat() * 3.141592741f); /* random in [0, 2pi) */
+        motion.rate = math_randomFloat() * 0.2680000067f;
         puff.x = 0.0f;
         puff.y = 0.0f;
         math_randomFloat(); /* a random value the original draws and discards */
@@ -198,7 +186,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         puff.viewport = 0;
         sprite = sprite_newScreenSprite(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
-            memcpy(&sprite->motion, &motion, sizeof(motion));
+            memcpy(&sprite->osc, &motion, sizeof(motion));
         }
         timers->puff = math_random() % 41U + 45;
     }
@@ -240,34 +228,34 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     }
 }
 
-/* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to unk10. */
+/* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to the sprite's x. */
 s32 particle_updateSineOscillator(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * gFrameDelta;
     osc->phase = math_wrapRadians(osc->phase);
-    obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
+    obj->sprite.info.x = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
 }
 
 /* Spawns a particle_newSpriteEmitter particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
-void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
+void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 owner, s32 list) {
     particle_newSpriteEmitter(1, 0, 0, 0xD,                 /* x, y, z, texture */
         0, 0, 0, 0, 0, 0, 0, 0,                 /* frame, rgba, env rgb */
         4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,        /* kind, velocity x/z high/low, unk32..34 */
         0xFF, 0, 1, 0, 0, 0, 0, 0xAA,           /* unk35..37, velocity randoms, scaleX */
         0xAA, 0xAA, 0xAA, timer, radiusXZ, 0,   /* scaleY, scale randoms, timer, radii */
         object, 0xF0, 0x50, 0x50, 1, 4, 0, 1,   /* object, lifetime, velocityY (+random), flags, interval, chance, burst */
-        0, 0, 0, bone, 0, arg4, arg5);          /* speed, startOffset, isAlt, bone, particleLink */
+        0, 0, 0, bone, 0, owner, list);          /* speed, startOffset, isAlt, bone, particleLink */
 }
 
 typedef struct Node150AFDB0 {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x2F];
-    /* 0x3F */ u8 unk3F;
+    /* 0x3F */ u8 object;
 } Node150AFDB0;
 
-/* Releases (effect_destroyObject) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
+/* Releases (effect_destroyObject) every node of object list 0 of type 17 whose object is dc_glbl_CharNum. Each
  * node's successor is saved on the gObjectWalkNext iteration stack first, so releasing it is safe. */
 void particle_freeCharSpriteEmitters(void) {
     Node150AFDB0 *node;
@@ -275,7 +263,7 @@ void particle_freeCharSpriteEmitters(void) {
     gObjectWalkDepth++;
     for (node = (Node150AFDB0 *)gObjectLists[0][17]; node != NULL; node = gObjectWalkNext[gObjectWalkDepth]) {
         gObjectWalkNext[gObjectWalkDepth] = node->header.next;
-        if (node->unk3F == dc_glbl_CharNum) {
+        if (node->object == dc_glbl_CharNum) {
             effect_destroyObject(&node->header);
         }
     }
@@ -320,7 +308,7 @@ void particle_fireActorBoneTracer(s32 altBone) {
 }
 
 /* Runs particle_hitPlayerOnObjectContact on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
-void func_150B003C(s32 arg0) {
+void func_150B003C(s32 unused) {
     if (level == LEVEL_THE_WINDMILL) {
         effect_updateRain(0);
         particle_hitPlayerOnObjectContact(0xE2, 0xE1);
@@ -337,7 +325,7 @@ typedef struct GameDC6B0TrailArgs {
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
-void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
+void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list) {
     ParticleSpawn packet;
     Vec3f dir;
     f32 length;
@@ -382,12 +370,12 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         packet.fadeRate = 0xFF;
         packet.sound = 0;
         packet.gravity = 0.0f;
-        projectile = particle_newModelParticleWithFloor(&packet, 3, 0xFF, 0, 4, arg2, arg3);
+        projectile = particle_newModelParticleWithFloor(&packet, 3, 0xFF, 0, 4, owner, list);
         if (projectile != NULL) {
             trail = &projectile->trail;
             memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
             trailArgs.source = projectile;
-            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
+            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), owner, list);
         }
     }
 }
@@ -418,7 +406,7 @@ static const s32 gObjDebrisVariants[] = { 6, 6, 6, 82, 82 };
 static const f32 gObjDebrisScales[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
-void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnObjDebrisBurst(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -469,7 +457,7 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         burst.envColorMode = 6;
         burst.unk64 = 1;
         burst.extra = 0.938608f;
-        particle_spawnSpriteBurst(&burst, 0xFF, arg1, arg2);
+        particle_spawnSpriteBurst(&burst, 0xFF, owner, list);
     }
     {
         DebrisBurst debris;
@@ -490,24 +478,24 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
-        particle_spawnDebrisBurst(&debris, gObjDebrisVariants, gObjDebrisScales, 5, 65.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&debris, gObjDebrisVariants, gObjDebrisScales, 5, 65.0f, 0, owner, list);
     }
 }
 
-/* Looks up object `id` into out; on success also sets out's two constants and copies the
- * object's position. Returns 0 if there is no such object. */
-s32 func_150B060C(id, out)
+/* Fills out a LightSwing on object `id`: the object, offset -150, scale 4.5 and the object's position as the pivot.
+ * Returns 0 if there is no such object. */
+s32 particle_initLightSwingOnObject(id, out)
     u8 id;
-    struct Obj150B060C *out;
+    LightSwing *out;
 {
     out->object = gfx_findObjectById(id);
     if (out->object == NULL) {
         return 0;
     }
-    out->unk0 = -150.0f;
-    out->unk4 = 4.5f;
-    out->x = out->object->x;
-    out->y = out->object->y;
-    out->z = out->object->z;
+    out->offset = -150.0f;
+    out->scale = 4.5f;
+    out->pivot.x = out->object->x;
+    out->pivot.y = out->object->y;
+    out->pivot.z = out->object->z;
     return 1;
 }

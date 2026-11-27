@@ -134,20 +134,6 @@ void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
     }
 }
 
-/* Extra data copied to offset 0xA8 of the object particle_newSpriteParticleWithFloor returns. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ s8 unk04;
-    /* 0x05 */ s8 unk05;
-    /* 0x06 */ s8 unk06;
-    /* 0x07 */ s8 unk07;
-    /* 0x08 */ f32 unk08; /* random fraction of size */
-    /* 0x0C */ f32 unk0C; /* random fraction of size */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 pad18[4];
-} Particle15130280Extra; /* 0x1C bytes are copied */
-
 /* Spawns math_getZoneVolume(region) * density * 2e-6 particle_newSpriteParticleWithFloor particles of random size. */
 void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
     f32 count;
@@ -158,7 +144,7 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
         f32 fracRange;
         f32 inv65535;
         ParticleDesc68 part;
-        Particle15130280Extra extra;
+        SteamWobble extra;
         DescParticleHead *obj;
         f32 top;
         f32 bottom;
@@ -197,10 +183,10 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
         part.deathFunc = -1;
         part.drawFunc = -1;
         part.handlerSet = 0;
-        extra.unk04 = 0;
-        extra.unk05 = 0;
-        extra.unk10 = 1.0f;
-        extra.unk14 = 1.0f;
+        extra.phaseX = 0;
+        extra.phaseY = 0;
+        extra.burstScale = 1.0f;
+        extra.altBurstScale = 1.0f;
         inv65535 = 1.525902189e-05f;
         do {
             s32 pad4; // matching: stack slot
@@ -218,10 +204,10 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
                 extra.size = y;
             }
             part.alpha = RANDOM() % 101 + 50;
-            extra.unk06 = (RANDOM() & 3) + 2;
-            extra.unk07 = (RANDOM() & 3) + 2;
-            extra.unk08 = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
-            extra.unk0C = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
+            extra.stepX = (RANDOM() & 3) + 2;
+            extra.stepY = (RANDOM() & 3) + 2;
+            extra.amplitudeX = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
+            extra.amplitudeY = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
             // matching: a separate statement makes IDO call math_random for 0x40 first
             flag40 = (math_random() & 1) ? 0x40 : 0;
             part.flags = flag40 | ((math_random() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
@@ -251,17 +237,6 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
     }
 }
 
-/* Extra data copied to offset 0x110 of the object particle_newQuadParticle returns. */
-typedef struct {
-    /* 0x00 */ f32 centerY;
-    /* 0x04 */ f32 amplitude; /* max distance from centerY that stays inside the region */
-    /* 0x08 */ f32 phase; /* radians */
-    /* 0x0C */ f32 phaseSpeed;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-} Particle1513D2F0Extra; /* size 0x1C */
-
 /* Spawns math_getZoneVolume(region) * density * 2e-7 particle_newQuadParticle particles using gWhiteVtxColors. */
 void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
     f32 count;
@@ -273,7 +248,7 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
         f32 range; // matching: reused for the distance to the nearer bound
         f32 y;
         ParticleDef4C part;
-        Particle1513D2F0Extra extra;
+        QuadBob extra;
         f32 top;
         f32 bottom;
         f32 temp;
@@ -295,7 +270,7 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
         part.colorLevel = 0xFF;
         part.primMode = 0;
         part.envMode = 6;
-        extra.unk14 = 0.0f;
+        extra.rotVel.y = 0.0f;
         part.rgba[0] = 0xFF;
         part.rgba[1] = 0xFF;
         part.rgba[2] = 0xFF;
@@ -307,7 +282,7 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
             zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
-            extra.centerY = y;
+            extra.center = y;
             {
                 f32 above;
 
@@ -318,9 +293,9 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
                 extra.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
             }
             extra.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
-            extra.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
-            extra.unk10 = RANDOM_U16() * inv65535;
-            extra.unk18 = RANDOM_U16() * inv65535;
+            extra.speed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
+            extra.rotVel.x = RANDOM_U16() * inv65535;
+            extra.rotVel.z = RANDOM_U16() * inv65535;
             part.rot.x = RANDOM_U16() * inv65535 * 360.0f;
             part.rot.y = RANDOM_U16() * inv65535 * 360.0f;
             part.rot.z = RANDOM_U16() * inv65535 * 360.0f;
@@ -482,7 +457,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
 }
 
 /* Like particle_spawnAreaSprites with larger particle_newSpriteParticleWithFloor particles and random colour bytes. */
-void func_1500DE88(TriggerZone *region, f32 density) {
+void particle_spawnAreaLargeSprites(TriggerZone *region, f32 density) {
     f32 count;
 
     count = math_getZoneVolume(region) * density * 1.999999995e-06f;
@@ -491,7 +466,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
         f32 fracRange;
         f32 inv65535;
         ParticleDesc68 part;
-        Particle15130280Extra extra;
+        SteamWobble extra;
         DescParticleHead *obj;
         f32 top;
         f32 bottom;
@@ -526,10 +501,10 @@ void func_1500DE88(TriggerZone *region, f32 density) {
         part.deathFunc = -1;
         part.drawFunc = -1;
         part.handlerSet = 0;
-        extra.unk04 = 0;
-        extra.unk05 = 0;
-        extra.unk10 = 1.0f;
-        extra.unk14 = 1.0f;
+        extra.phaseX = 0;
+        extra.phaseY = 0;
+        extra.burstScale = 1.0f;
+        extra.altBurstScale = 1.0f;
         part.texture = 108;
         inv65535 = 1.525902189e-05f;
         do {
@@ -538,10 +513,10 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             part.width = temp;
             extra.size = temp;
             part.alpha = RANDOM() % 71 + 50;
-            extra.unk06 = RANDOM() % 3;
-            extra.unk07 = RANDOM() % 3;
-            extra.unk08 = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
-            extra.unk0C = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
+            extra.stepX = RANDOM() % 3;
+            extra.stepY = RANDOM() % 3;
+            extra.amplitudeX = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
+            extra.amplitudeY = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
             part.flags = ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0) | 0x4000 |
                          0x8000 | 0x20000 | 0x800000;
             part.r2 = RANDOM() % 56 + 80;

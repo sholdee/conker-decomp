@@ -83,7 +83,7 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
 /* Update of particle_updateAreaEmitter's particles: picks the animation frame from the time since birth and
  * until death, randomly starts an 11-unit flash (drawn with draw function 3), and kills the
  * particle when its life runs out. Returns 0 to kill it. */
-s32 particle_updateAreaFlash(AreaFlashParticle *particle, s32 arg1) {
+s32 particle_updateAreaFlash(AreaFlashParticle *particle, Vec3f *prevPos) {
     FlashParticleData *data = &particle->data;
     f32 elapsed = data->lifetime - data->life;
 
@@ -120,13 +120,13 @@ s32 particle_updateAreaFlash(AreaFlashParticle *particle, s32 arg1) {
     return 1;
 }
 
-/* Event handler of the particle_updateAreaEmitter emitter: event 0x2B enables spawning, 0x2C disables it. */
-void particle_onAreaEmitterEvent(AreaEmitter *emitter, s32 arg1, u8 event) {
+/* Event handler of the particle_updateAreaEmitter emitter: event type 0x2B enables spawning, 0x2C disables it. */
+void particle_onAreaEmitterEvent(AreaEmitter *emitter, s32 event, u8 eventType) {
     AreaEmitterData *data = &emitter->data;
 
-    if (event == 0x2B) {
+    if (eventType == 0x2B) {
         data->flags |= EMITTER_ENABLED;
-    } else if (event == 0x2C) {
+    } else if (eventType == 0x2C) {
         data->flags &= ~EMITTER_ENABLED;
     }
 }

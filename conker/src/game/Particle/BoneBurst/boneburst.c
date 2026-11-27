@@ -22,7 +22,7 @@ ZoneNode *D_800D9A40;
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four gSetup33TexScrolls entries
  * by object 0xE's taskint[0]. */
-void func_150F2A60(s32 arg0) {
+void func_150F2A60(s32 unused) {
     s32 i;
     s32 scroll;
     Actor *obj;
@@ -72,7 +72,7 @@ void particle_spawnBoneBurstEmitter(Actor *target) {
 
     state.target = target;
     state.targetId = target->unique_id;
-    state.prevUnk222 = 0;
+    state.prevTargetIndex = 0;
     state.timer = 0.0f;
     state.count = 0;
 
@@ -100,11 +100,11 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
         emitter->base.header.state = -1;
         return;
     }
-    if (state->prevUnk222 != target->targetIndex && target->targetIndex != 0) {
+    if (state->prevTargetIndex != target->targetIndex && target->targetIndex != 0) {
         state->count = 3;
         state->timer = 0.0f;
     }
-    state->prevUnk222 = target->targetIndex;
+    state->prevTargetIndex = target->targetIndex;
     if (target->targetIndex != 0) {
         actor_flashFog(&movement_obj[target->targetIndex], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
@@ -174,13 +174,13 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
 }
 
 /* Hands the emitter's target pointer and id to effect_handleOwnerActorEvent. */
-void particle_onBoneBurstEmitterEvent(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
+void particle_onBoneBurstEmitterEvent(BoneBurstEmitter *emitter, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
 /* Hands the particle's target pointer and id to effect_handleOwnerActorEvent. */
-void particle_onBoneBurstParticleEvent(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
+void particle_onBoneBurstParticleEvent(BoneBurstParticle *particle, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
@@ -216,8 +216,9 @@ void particle_buildBoneBurstQuad(BoneBurstParticle *particle, s16 viewport) {
     particle_buildQuadFromAxes(&particle->head, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-/* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */
-void func_150F33B0(WorldObject *obj) {
+/* Clears bit 0 of obj->object_status (the object is not drawn) while camera_global_Cameras->eye.z is below -2000,
+ * sets it otherwise. */
+void particle_cullObjectByCameraZ(WorldObject *obj) {
     if (camera_global_Cameras->eye.z < -2000.0f) {
         obj->object_status &= ~1;
         return;

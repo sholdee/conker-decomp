@@ -477,7 +477,7 @@ s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index) {
 
 /* Area effects of level_spawnAreaParticlesZone, chosen by TriggerZone.data1, with the density data2 / 1000. */
 static void (*gZoneAreaParticleHandlers[6])(TriggerZone *, f32) = {
-    particle_spawnAreaParticles, particle_spawnAreaSprites, particle_spawnAreaQuads, func_1500D3AC, func_1500D8C8, func_1500DE88,
+    particle_spawnAreaParticles, particle_spawnAreaSprites, particle_spawnAreaQuads, func_1500D3AC, func_1500D8C8, particle_spawnAreaLargeSprites,
 };
 
 /** Runs the object's handler from gZoneAreaParticleHandlers (chosen by data1) with data2 / 1000 as argument. */
@@ -544,10 +544,10 @@ s32 level_spawnChannelParticlesZone(TriggerZone *obj) {
     params.color[2] = 0;
     params.color[3] = 0xFF;
     params.flags = 0;
-    params.unk2D = 0xFF;
+    params.colorLevel = 0xFF;
     params.extraSize = 0;
-    params.unk2E = 0;
-    params.unk2F = 0;
+    params.updateFn1 = 0;
+    params.expireFn = 0;
     params.effect = 0;
     params.maxHeight = 99999.89844f;
 
@@ -560,7 +560,7 @@ s32 level_spawnChannelParticlesZone(TriggerZone *obj) {
     params.shrinkRate = 0.04500000179f;
     params.growRate = 0.6999999881f;
 
-    params.unk2C = (math_random() % 56U) + 200;
+    params.alpha = (math_random() % 56U) + 200;
 
     params.maxA = 22.60000038f * scaleX;
     params.minA = 13.78600025f * scaleX;
@@ -791,8 +791,8 @@ s32 level_spawnBulletZone(TriggerZone *obj) {
     emitter.rateBase = (obj->data2 & 0xFF) * 0.015625f;
     emitter.rateRange = ((obj->data2 >> 8) & 0xFF) * 0.015625f;
     emitter.speed = (obj->data2 >> 24) & 0xFF;
-    emitter.unk30 = 1.0f / emitter.speed;
-    emitter.unk34 = obj->ySize * emitter.unk30;
+    emitter.distScale = 1.0f / emitter.speed;
+    emitter.defaultRemaining = obj->ySize * emitter.distScale;
     emitter.spread = math_atan2(obj->xSize, obj->ySize);
     emitter.wobbleSpeed = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
     value = (u32)effect_newTimedEffect(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);

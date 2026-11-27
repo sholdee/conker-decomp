@@ -14,7 +14,7 @@
 /* Live particle returned by particle_newOwnedSpriteParticle; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 unkA8;
+    /* 0xA8 */ f32 drag;
 } Particle1368C0;
 
 /* This file's .rodata. Emission segments of effect 0x1A: particles start on segment i (gSegmentEmitterPoints[i] to
@@ -65,7 +65,7 @@ static u32 D_80088C70[2][4] = {
  * particles at `spawnRate` through gSegmentEmitFuncs[emitFunc]. `extraSize` more data bytes are reserved.
  */
 TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
-                         u8 owner, s32 kind) {
+                         u8 owner, s32 list) {
     Effect1368C0 *effect;
     ObjectEmitterData data;
     s16 lifetime;
@@ -91,7 +91,7 @@ TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFu
     data.objectId = object->unique_id;
 
     effect = effect_newTimedEffect(lifetime, -1, 0x1A, -1, timed, 0x1A,
-                                           (extraSize + sizeof(data)), owner, kind);
+                                           (extraSize + sizeof(data)), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -323,17 +323,17 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
 }
 
 /*
- * Creates effect 0x1B for `arg0`, lasting `duration` frames (negative: 300), emitting particles at
+ * Creates effect 0x1B for `object`, lasting `duration` frames (negative: 300), emitting particles at
  * `spawnRate` through gSegmentEmitFuncs[emitFunc]. `extraSize` more data bytes are reserved.
  */
-TimedEffect *particle_startMatrixSegmentEmitter(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
-                         u8 owner, s32 kind) {
+TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+                         u8 owner, s32 list) {
     Effect1368C0 *effect;
     MatrixEmitterData data;
     s16 lifetime;
     u8 timed;
 
-    if (arg0 == NULL) {
+    if (object == NULL) {
         return NULL;
     }
 
@@ -349,10 +349,10 @@ TimedEffect *particle_startMatrixSegmentEmitter(void *arg0, s16 duration, s8 tic
     data.spawnRate = spawnRate;
     data.tickFunc = tickFunc;
     data.emitFunc = emitFunc;
-    data.unk0 = arg0;
+    data.object = object;
 
     effect = effect_newTimedEffect(lifetime, -1, 0x1B, -1, timed, 0x1B,
-                                           (extraSize + sizeof(data)), owner, kind);
+                                           (extraSize + sizeof(data)), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -361,7 +361,7 @@ TimedEffect *particle_startMatrixSegmentEmitter(void *arg0, s16 duration, s8 tic
 
 /*
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
- * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.unk0.
+ * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.object.
  */
 void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
     MatrixEmitterData *data;
@@ -384,7 +384,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
             f32 y;
             f32 z;
 
-            gfx_getObjectModelMtx(mtx, data->unk0);
+            gfx_getObjectModelMtx(mtx, data->object);
             r = math_randomFloat() * gSegmentEmitterWeights[6];
             for (i = 0; gSegmentEmitterWeights[i] < r; i++) {
                 r -= gSegmentEmitterWeights[i];
@@ -417,7 +417,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owner, s32 kind) {
+TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owner, s32 list) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
@@ -431,7 +431,7 @@ TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owne
     data.spawnRate = 0.2040000111f;
     data.spawnRateRandom = 0.8220000267f;
 
-    effect = effect_newTimedEffect(duration, -1, 0x1C, -1, TRUE, 0x1C, sizeof(data), owner, kind);
+    effect = effect_newTimedEffect(duration, -1, 0x1C, -1, TRUE, 0x1C, sizeof(data), owner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -525,7 +525,7 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
             spawn.vel.z = dirs[side].z * speed;
             particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->unkA8, &extra, sizeof(extra));
+                memcpy(&particle->drag, &extra, sizeof(extra));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);

@@ -9,9 +9,9 @@
 #include "conker/weapon.h"
 
 /* matching: no header declares particle_spawnSteamParticle (steam.c): modelbeam.c and blood.c were compiled with other views */
-SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
-                             u8 argE, s32 argF);
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 alpha, f32 size, s32 hitsFloor,
+                             f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 owner, s32 list);
 
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
@@ -75,7 +75,7 @@ void particle_getRandomConeDir(ConeBasis *cone, f32 speed, Vec3f *out) {
 
 /* Spawns a random number of particles from config->position, each moving in a random direction inside
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
-void particle_spawnJetSpray(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
+void particle_spawnJetSpray(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 owner, s32 list) {
     s32 count;
     f32 velocity[3];
     f32 second;
@@ -99,21 +99,21 @@ void particle_spawnJetSpray(JetSpray *config, Vec3f *direction, Vec3f *axis0, Ve
                       (math_random() % (config->particleCountRange + 1)) + config->particleCountBase,
                       config->spread, config->drag, config->gravityBase, config->gravityRange,
                       config->delayBase, config->delayRange, config->alphaBase, config->alphaRange,
-                      config->fadeStart, config->fadeOutStart, config->eventFunc, arg5, arg6);
+                      config->fadeStart, config->fadeOutStart, config->eventFunc, owner, list);
         count--;
     }
 }
 
-void particle_spawnDirectedJetSpray(DirectedJetSpray *emitter, u8 arg1, s32 arg2) {
+void particle_spawnDirectedJetSpray(DirectedJetSpray *emitter, u8 owner, s32 list) {
     Vec3f axis0;
     Vec3f axis1;
 
     if (math_buildPerpendicularBasis(&emitter->direction, &axis0, &axis1) != 0) {
-        particle_spawnJetSpray(&emitter->spray, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
+        particle_spawnJetSpray(&emitter->spray, &emitter->direction, &axis0, &axis1, emitter->spread, owner, list);
     }
 }
 
-void particle_spawnSurfaceJetSpray(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
+void particle_spawnSurfaceJetSpray(SurfaceJetSpray *emitter, u8 owner, s32 list) {
     Vec3f axis0;
     f32 length0;
     f32 inverse0;
@@ -133,11 +133,11 @@ void particle_spawnSurfaceJetSpray(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) 
             normal.y = -normal.y;
             normal.z = -normal.z;
         }
-        particle_spawnJetSpray(&emitter->spray, &normal, &axis0, &axis1, emitter->source.spread, arg1, arg2);
+        particle_spawnJetSpray(&emitter->spray, &normal, &axis0, &axis1, emitter->source.spread, owner, list);
     }
 }
 
-void particle_spawnJetSprayBursts(JetSpraySpec *config, u8 arg1, s32 arg2) {
+void particle_spawnJetSprayBursts(JetSpraySpec *config, u8 owner, s32 list) {
     s32 count;
 
     count = (math_random() % (config->spray.countRange + 1)) + config->spray.countBase;
@@ -152,20 +152,20 @@ void particle_spawnJetSprayBursts(JetSpraySpec *config, u8 arg1, s32 arg2) {
                       config->spray.spread, config->spray.drag, config->spray.gravityBase, config->spray.gravityRange,
                       config->spray.delayBase, config->spray.delayRange, config->spray.alphaBase,
                       config->spray.alphaRange, config->spray.fadeStart, config->spray.fadeOutStart,
-                      config->spray.eventFunc, arg1, arg2);
+                      config->spray.eventFunc, owner, list);
         count--;
     }
 }
 
-void particle_spawnDropSprayOnTri(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnDropSprayOnTri(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     ConeBasis cone;
 
     particle_initConeFromTri(source, &cone);
-    particle_spawnDropSpray(&cone, config, ground, arg3, arg4);
+    particle_spawnDropSpray(&cone, config, ground, owner, list);
 }
 
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
-void particle_spawnDropSpray(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnDropSpray(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     s32 count;
     Vec3f velocity;
 
@@ -178,15 +178,15 @@ void particle_spawnDropSpray(ConeBasis *cone, DropSpray *config, CollisionHit *g
                           (math_random() % (config->lifeRange + 1)) + config->lifeBase,
                           (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                           (math_randomFloat() * config->sizeRange) + config->sizeBase,
-                          math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
-                          math_randomFloat() < config->bounceChance, arg3, arg4);
+                          math_randomFloat() < config->floorHitChance, 1.4f, 1.4f, 1, ground, config->wobbles,
+                          math_randomFloat() < config->bounceChance, owner, list);
             count--;
         }
     }
 }
 
 /* Like particle_spawnDropSpray, but each direction is a random yaw/pitch from `angles`. */
-void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     s32 count;
     Vec3f velocity;
 
@@ -201,15 +201,15 @@ void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, Coll
                       (math_random() % (config->lifeRange + 1)) + config->lifeBase,
                       (math_random() % (config->alphaRange + 1)) + config->alphaBase,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,
-                      math_randomFloat() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
-                      math_randomFloat() < config->bounceChance, arg3, arg4);
+                      math_randomFloat() < config->floorHitChance, 1.4f, 1.4f, 1, ground, config->wobbles,
+                      math_randomFloat() < config->bounceChance, owner, list);
         count--;
     }
 }
 
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
-void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3) {
+void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 owner, s32 list) {
     s32 count;
     ParticleSpawn spawn;
     s16 yaw;
@@ -268,7 +268,7 @@ void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 a
         spawn.sizeY = (config->scaleBase + (math_randomFloat() * config->scaleRange)) * config->variantScales[variant];
         spawn.sizeXZ = spawn.sizeY;
         spawn.radius = config->radiusScale * spawn.sizeXZ;
-        piece = particle_newModelParticleWithFloor(&spawn, (config->flags & 1) ? 3 : 0, 0xFF, config->floor, config->extraSize, arg2, arg3);
+        piece = particle_newModelParticleWithFloor(&spawn, (config->flags & 1) ? 3 : 0, 0xFF, config->floor, config->extraSize, owner, list);
         if (config->extraSize > 0 && piece != NULL) {
             memcpy((u8 *)piece + 0x170, config->extraData, config->extraSize);
         }
@@ -278,7 +278,7 @@ void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 a
 }
 
 /* Like particle_spawnDebrisScatter, but the variant tables are passed in and each variant is used at most once. */
-void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, CollisionHit *floor, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
+void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 variant, u8 hasLifetime, s8 drawFn, CollisionHit *floor, f32 radius, u8 argB, u8 argC, u8 owner, s32 list) {
     u8 *used;
     ParticleSpawn spawn;
     s32 remaining;
@@ -303,12 +303,12 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
         spawn.scale.z = 1.0f;
         spawn.elasticity = 0.5610000491f;
         spawn.rotVel.y = 0.0f;
-        spawn.flags = 0x8 | 0x20 | 0x40 | (arg7 ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
+        spawn.flags = 0x8 | 0x20 | 0x40 | (hasLifetime ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
         count = (math_random() % (config->countRange + 1)) + config->countBase;
         if (variantCount < count) {
             count = variantCount;
         }
-        spawn.variant = arg6;
+        spawn.variant = variant;
         spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.update2Fn = 0;
@@ -322,7 +322,7 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
         spawn.ownerId = 0;
         spawn.fadeStart = 12;
         spawn.fadeRate = 21;
-        spawn.drawFn = arg8;
+        spawn.drawFn = drawFn;
         while (count != 0) {
             yaw = (math_random() % (config->angles.yawRange + 1)) + config->angles.yawBase;
             pitch = (math_random() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
@@ -375,7 +375,7 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
                 spawn.floorHitFn = 0;
                 spawn.updateFn = 8;
             }
-            piece = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, floor, extraSize, argD, argE);
+            piece = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, floor, extraSize, owner, list);
             if (extraData != NULL && piece != NULL) {
                 memcpy((u8 *)piece + 0x170, extraData, extraSize);
             }
@@ -388,7 +388,7 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
 
 /* Casts a random number of rays from config->origin and spawns a decal (particle_spawnKindEmitter) on each
  * suitable surface hit closer than config->maxDistance. */
-void particle_spawnDecalSpray(DecalSpray *config, u8 arg1, s32 arg2) {
+void particle_spawnDecalSpray(DecalSpray *config, u8 owner, s32 list) {
     CollisionTri *hitTriangle;
     Vec3f direction;
     CollisionTri triangle;
@@ -410,14 +410,14 @@ void particle_spawnDecalSpray(DecalSpray *config, u8 arg1, s32 arg2) {
             particle_spawnKindEmitter(config->kind, (math_randomFloat() * config->sizeRange) + config->sizeBase,
                           (math_random() % 156U) + 100, hitTriangle, &hit,
                           (math_random() % (config->alphaRange + 1)) + config->alphaBase,
-                          1, 1, 1, arg1, arg2);
+                          1, 1, 1, owner, list);
         }
         count--;
     }
 }
 
 /* Spawns a random number of randomly rotated pieces (effect_spawnTumblingPiece) flying out of config->pos. */
-void particle_spawnPieceSpray(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
+void particle_spawnPieceSpray(PieceSpray *config, u8 altDisplayList, u8 owner, s32 list) {
     Vec3f jitter;
     f32 width;
     s32 count;
@@ -443,7 +443,7 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
                       math_randomFloat() * config->sizeRange + config->sizeBase,
                       config->scale, config->kind,
                       (math_random() % (config->lifeRange + 1)) + config->lifeBase,
-                      arg1, 0, arg2, arg3);
+                      altDisplayList, 0, owner, list);
         count--;
     }
 }
@@ -451,14 +451,14 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
 /* Copied into the spawned object at +0x110. */
 typedef struct {
     Vec3f velocity;
-    f32 unkC;
-    f32 unk10;
+    f32 gravity;
+    f32 drag;
     Vec3f spin;
 } Local151511FCExtra;
 
 /* Spawns a random number of objects off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal. */
-void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
+void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
     s32 count;
     Vec3f axis0;
     f32 length0;
@@ -493,9 +493,9 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
     desc.scale.z = 1.0f;
     desc.flags = config->flags | 0x08000000;
     desc.colorLevel = 0xFF;
-    desc.primMode = config->unk46;
-    desc.envMode = config->unk47;
-    extra.unk10 = config->unk6C;
+    desc.primMode = config->primMode;
+    desc.envMode = config->envMode;
+    extra.drag = config->drag;
     if (math_getTriEdges(&config->triangle, &axis0, &axis1, &normal) != 0) {
         math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
         math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
@@ -518,16 +518,16 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
             desc.rot.x = math_randomFloat() * 360.0f;
             desc.rot.y = math_randomFloat() * 360.0f;
             desc.rot.z = math_randomFloat() * 360.0f;
-            desc.alpha = (math_random() % (config->unk44Range + 1)) + config->unk44Base;
+            desc.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
             extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
-            extra.unkC = (math_randomFloat() * config->unk50) + config->unk4C;
+            extra.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
             extra.spin.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             extra.spin.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             // matching: the comma expression makes IDO load &gWhiteVtxColors inside the loop's register plan
             object = particle_newQuadParticle(&desc, (0, &gWhiteVtxColors), 25, 0, 0, 23, ((math_random() & 1) * 2) + (math_random() & 1),
-                                   config->unk60, config->unk64, 32, arg1, arg2);
+                                   config->maxLights, config->lightMask, 32, owner, list);
             if (object != NULL) {
                 memcpy((u8 *)object + 0x110, &extra, sizeof(extra));
             }
@@ -538,10 +538,10 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
 
 /* Spawns a random number of particles off a surface triangle, each moving in a random direction
  * inside the cone around the triangle's normal. */
-void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
+void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 owner, s32 list) {
     EffectTemplate spawn;
     TrailMotion motion;
-    u8 kind;
+    u8 ownerCopy;
     Vec3f axis0;
     f32 length0, inverse0;
     Vec3f axis1;
@@ -554,7 +554,7 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
     s32 count;
     u32 rand;
 
-    kind = arg1; // matching: IDO keeps arg1 in a saved register only through a copy
+    ownerCopy = owner; // matching: IDO keeps owner in a saved register only through a copy
     if (math_getTriEdges(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
         math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
         math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
@@ -572,10 +572,10 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
         motion.texture = config->green;
         motion.shade = config->blue;
         motion.flags = config->red;
-        motion.fadeStart = config->unk9C;
-        motion.fadeRate = config->unk9E;
+        motion.fadeStart = config->fadeStart;
+        motion.fadeRate = config->fadeRate;
         spawn.pos = config->pos;
-        spawn.material = config->unkA0;
+        spawn.material = config->material;
         count = math_random() % (config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = math_random();
@@ -591,8 +591,8 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
             motion.velocity.z = (axis0.z * first + axis1.z * second + normal.z) * speed;
             trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1],
                           config->handlers[2], config->handlers[3], config->handlers[4],
-                          config->handlers[5], config->unk74, config->unk78,
-                          &config->render, 0, kind, arg2);
+                          config->handlers[5], config->maxLights, config->lightMask,
+                          &config->render, 0, ownerCopy, list);
             count--;
         }
     }
@@ -600,7 +600,7 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
 
 /* Spawns a random number of particles at config->position, each moving at a random yaw (around y)
  * and pitch; math_cosBinAngleMasked is the cosine of a 256-step angle. */
-void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
+void particle_spawnPuffSpray(PuffSpray *config, u8 owner, s32 list) {
     EffectTemplate spawn;
     TrailMotion motion;
     s32 count;
@@ -641,14 +641,14 @@ void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = horizontal * cosYaw;
         trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
-                      config->handlers[4], config->handlers[5], config->maxLights, config->lightMask, &config->render, 0, arg1, arg2);
+                      config->handlers[4], config->handlers[5], config->maxLights, config->lightMask, &config->render, 0, owner, list);
         count--;
     }
 }
 
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
-void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
+void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, u8 owner, s32 list) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
@@ -723,7 +723,7 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
             spawn.rotVel.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             spawn.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
             spawn.lifetime = (math_random() % (config->lifeRange + 1)) + config->lifeBase;
-            particle_newModelParticle(&spawn, 3, 0xFF, 0, arg4, arg5);
+            particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, list);
             count--;
         }
     }
@@ -731,7 +731,7 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
 
 /* Spawns a random number of pieces in random directions around config->origin, each using a random
  * entry of the variant tables. */
-void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
+void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 owner, s32 list) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
@@ -785,14 +785,14 @@ void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const
         spawn.sizeXZ = spawn.sizeY;
         {
             void *piece; // matching: storing the unused result changes as1's ordering of the argument stores
-            piece = particle_newModelParticle(&spawn, 3, 0xFF, 0, arg6, arg7);
+            piece = particle_newModelParticle(&spawn, 3, 0xFF, 0, owner, list);
 
         }
         count--;
     }
 }
 
-void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
+void particle_spawnModelBurst(ModelBurst *config, u8 owner, s32 list) {
     s32 pad; // matching: unused stack slot
     EffectParams params;
     EffectMotion motion;
@@ -805,7 +805,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
     params.preDrawFunc = -1;
     params.postDrawFunc = -1;
     params.model = config->model;
-    params.bank = config->unk38;
+    params.bank = config->bank;
     params.render.colorDither = 0x80;
     params.render.alphaDither = 0x20;
     params.render.otherModeH = 0;
@@ -840,7 +840,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
         motion.rotVel.y = (math_randomFloat() * config->rotVelRange.y) + config->rotVelBase.y;
         motion.rotVel.z = (math_randomFloat() * config->rotVelRange.z) + config->rotVelBase.z;
         motion.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
-        effect_newMovingModelEffect(&params, &motion, config->unk3C, (math_randomFloat() * config->unk44) + config->unk40, 0, 0, 0, arg1, arg2);
+        effect_newMovingModelEffect(&params, &motion, config->anim, (math_randomFloat() * config->animSpeedRange) + config->animSpeedBase, 0, 0, 0, owner, list);
         count--;
     }
 }
@@ -848,7 +848,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
 /* The color functions of DriftBurst.colorFunc. */
 static void (*gBurstColorFuncs[])(Color8 *) = { particle_getRandomPaletteColor };
 
-void particle_spawnDriftBurst(DriftBurst *config, u8 arg1, s32 arg2) {
+void particle_spawnDriftBurst(DriftBurst *config, u8 owner, s32 list) {
     DriftSpawn spawn;
     s32 count;
 
@@ -873,7 +873,7 @@ void particle_spawnDriftBurst(DriftBurst *config, u8 arg1, s32 arg2) {
             spawn.color.blue = 0xFF;
             spawn.color.alpha = 0xFF;
         }
-        particle_spawnDriftQuad(&spawn, arg1, arg2);
+        particle_spawnDriftQuad(&spawn, owner, list);
         count--;
     }
 }
@@ -895,10 +895,10 @@ void particle_getRandomPaletteColor(Color8 *out) {
     out->blue = rgb[2];
 }
 
-void particle_spawnTrailBurst(config, arg1, arg2)
+void particle_spawnTrailBurst(config, owner, list)
     TrailBurst *config;
-    u8 arg1;
-    s32 arg2;
+    u8 owner;
+    s32 list;
 {
     EffectTemplate param;
     TrailBurstParams spawn;
@@ -940,13 +940,13 @@ void particle_spawnTrailBurst(config, arg1, arg2)
         spawn.color2.blue = (math_random() % (config->color2Range.blue + 1)) + config->color2Base.blue;
         spawn.color2.alpha = (math_random() % (config->color2Range.alpha + 1)) + config->color2Base.alpha;
         spawn.colorLevel = (math_random() % (config->colorLevelRange + 1)) + config->colorLevelBase;
-        trail_spawnFallingTrail(&param, 0, &spawn, 0, arg1, arg2);
+        trail_spawnFallingTrail(&param, 0, &spawn, 0, owner, list);
         count--;
     }
 }
 
 /* Like particle_spawnPuffSpray, with a fixed color and fixed trail_createMotionTrail parameters. */
-void particle_spawnSimplePuffSpray(SimplePuffSpray *config, u8 arg1) {
+void particle_spawnSimplePuffSpray(SimplePuffSpray *config, u8 owner) {
     EffectTemplate spawn;
     s32 count;
     TrailMotion1C motion;
@@ -992,7 +992,7 @@ void particle_spawnSimplePuffSpray(SimplePuffSpray *config, u8 arg1) {
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = (speed * cosPitch) * cosYaw;
         trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
-                      config->handlers[4], config->handlers[5], 0, 0, &params, 0, arg1, 1);
+                      config->handlers[4], config->handlers[5], 0, 0, &params, 0, owner, 1);
         count--;
     }
 }
@@ -1000,7 +1000,7 @@ void particle_spawnSimplePuffSpray(SimplePuffSpray *config, u8 arg1) {
 
 /* Spawns a random number of particles (effect_spawnBillboard) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */
-void particle_spawnBillboardBurst(BillboardBurst *config, u8 arg1, s32 arg2) {
+void particle_spawnBillboardBurst(BillboardBurst *config, u8 owner, s32 list) {
     BillboardTemplate packet;
     f32 speed;
     f32 sinPitch;
@@ -1048,14 +1048,14 @@ void particle_spawnBillboardBurst(BillboardBurst *config, u8 arg1, s32 arg2) {
         packet.fadeStep = math_random() % (config->fadeRange + 1) + config->fadeBase;
         packet.width = math_random() % (config->widthRange + 1) + config->widthBase;
         packet.height = math_random() % (config->heightRange + 1) + config->heightBase;
-        effect_spawnBillboard(&packet, 0, 0, -1, arg1, arg2);
+        effect_spawnBillboard(&packet, 0, 0, -1, owner, list);
         count--;
     }
 }
 
 /* Spawns a random number of particles (particle_newSpriteParticleWithFloor) at config->position, each moving at a random
  * yaw and pitch, and copies config->extra into each. */
-void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
+void particle_spawnSpriteBurst(SpriteBurst *config, u8 views, u8 owner, s32 list) {
     ParticleDesc spawn;
     f32 extra;
     s32 count;
@@ -1094,7 +1094,7 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) 
     spawn.envColorMode = config->envColorMode;
     spawn.scaleStart = config->scaleStart;
     spawn.scaleRate = config->scaleRate;
-    spawn.views = arg1;
+    spawn.views = views;
     while (count != 0) {
         yaw = (math_random() % (config->yawRange + 1)) + config->yawBase;
         pitch = (math_random() % (config->pitchRange + 1)) + config->pitchBase;
@@ -1112,7 +1112,7 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) 
         spawn.vel.z = horizontal * cosYaw;
         spawn.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
         spawn.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
-        object = particle_newSpriteParticleWithFloor(&spawn, config->unk64, 0, 4, arg2, arg3);
+        object = particle_newSpriteParticleWithFloor(&spawn, config->unk64, 0, 4, owner, list);
         if (object != NULL) {
             memcpy((u8 *)object + 0xA8, &extra, sizeof(extra));
         }
@@ -1122,7 +1122,7 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) 
 
 /* Spawns a random number of particles (particle_newOwnedStreakParticle) at config->position, each pointing at a random
  * yaw and pitch (a direction of length 10). */
-void particle_spawnStreakBurst(StreakBurst *config, u8 arg1) {
+void particle_spawnStreakBurst(StreakBurst *config, u8 owner) {
     StreakParticleDesc spawn;
     s32 count;
     s16 yaw;
@@ -1163,21 +1163,21 @@ void particle_spawnStreakBurst(StreakBurst *config, u8 arg1) {
         spawn.lifetime = (math_random() % (config->lifetimeRange + 1)) + config->lifetimeBase;
         spawn.width = (math_randomFloat() * config->widthRange) + config->widthBase;
         spawn.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
-        particle_newOwnedStreakParticle(&spawn, config->kind, 0, arg1, 0);
+        particle_newOwnedStreakParticle(&spawn, config->kind, 0, owner, 0);
         count--;
     }
 }
 
-void particle_spawnSplashSprayOnTri(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnSplashSprayOnTri(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     ConeBasis cone;
 
     particle_initConeFromTri(source, &cone);
-    particle_spawnSplashSpray(&cone, config, ground, arg3, arg4);
+    particle_spawnSplashSpray(&cone, config, ground, owner, list);
 }
 
 /* Spawns a random number of particles (particle_spawnSplash), each moving in a random direction inside the
  * cone. */
-void particle_spawnSplashSpray(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnSplashSpray(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     s32 count;
     Vec3f velocity;
 
@@ -1192,14 +1192,14 @@ void particle_spawnSplashSpray(ConeBasis *cone, SplashSpray *config, CollisionHi
                           (math_randomFloat() * config->scaleRange) + config->scaleBase,
                           (math_random() % (config->itemCountRange + 1)) + config->itemCountBase,
                           math_randomFloat() < config->burstChance, 1.7f, 1.7f, 1, config->kind, ground,
-                          config->fadeStart, config->fadeRate, config->material, arg3, arg4);
+                          config->fadeStart, config->fadeRate, config->material, owner, list);
             count--;
         }
     }
 }
 
 /* Like particle_spawnSplashSpray, but each direction is a random yaw/pitch from `angles`. */
-void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
+void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 owner, s32 list) {
     s32 count;
     Vec3f velocity;
 
@@ -1216,14 +1216,14 @@ void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, 
                       (math_randomFloat() * config->scaleRange) + config->scaleBase,
                       (math_random() % (config->itemCountRange + 1)) + config->itemCountBase,
                       math_randomFloat() < config->burstChance, 1.7f, 1.7f, 1, config->kind, ground,
-                      config->fadeStart, config->fadeRate, config->material, arg3, arg4);
+                      config->fadeStart, config->fadeRate, config->material, owner, list);
         count--;
     }
 }
 
-/* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
+/* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero sizeY
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
-void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
+void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 sizeY, u8 owner, s32 list) {
     void *object;
     s32 oneAxis;
     ParticleSpawn78 spawn;
@@ -1239,7 +1239,7 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     extra.growth = growth;
     extra.alpha = alpha;
     extra.fade = alpha / (duration * duration);
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         oneAxis = TRUE;
     } else {
         oneAxis = FALSE;
@@ -1247,16 +1247,16 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     extra.growOneAxis = oneAxis;
 
     spawn.sizeXZ = 0.0f;
-    spawn.sizeY = arg4;
+    spawn.sizeY = sizeY;
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         spawn.rot.x = 0.0f;
     } else {
         spawn.rot.x = math_randomFloat() * 360.0f;
     }
     spawn.rot.y = math_randomFloat() * 360.0f;
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         spawn.rot.z = 0.0f;
     } else {
         spawn.rot.z = math_randomFloat() * 360.0f;
@@ -1268,17 +1268,17 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         spawn.rotVel.x = 0.0f;
     } else {
         spawn.rotVel.x = (math_randomFloat() * 8.512000084f) + -4.256000042f;
     }
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         spawn.rotVel.y = (math_randomFloat() * 8.512000084f) + -4.256000042f;
     } else {
         spawn.rotVel.y = 0.0f;
     }
-    if (arg4 != 0) {
+    if (sizeY != 0) {
         spawn.rotVel.z = 0.0f;
     } else {
         spawn.rotVel.z = (math_randomFloat() * 8.512000084f) + -4.256000042f;
@@ -1304,41 +1304,41 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     spawn.fadeRate = 0xFF;
     spawn.lifetime = 300;
 
-    object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), arg5, arg6);
+    object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
         memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
     }
     return object;
 }
 
-/* Per-frame update for particle_spawnGrowFade's objects: grow, fade, move; returns 0 once expired. */
+/* Per-frame update for particle_spawnGrowFade's objects: grow, fade, spin; returns 0 once expired. */
 s32 particle_updateGrowFade(Object15132A4C *object) {
     f32 size;
     Extra1515452C *extra;
 
     extra = &object->extra.grow;
     size = extra->growth * sqrtf(extra->elapsed);
-    object->unk18 = size;
+    object->head.sizeXZ = size;
     if (!(extra->growOneAxis & 1)) {
-        object->unk1C = size;
+        object->head.sizeY = size;
     }
     {
         f32 elapsed = extra->elapsed;
-        object->alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
+        object->head.alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
         extra->elapsed += gFrameDelta;
         if (extra->duration < extra->elapsed) {
             return 0;
         }
-        object->position.x += object->velocity.x * gFrameDelta;
-        object->position.y += object->velocity.y * gFrameDelta;
-        object->position.z += object->velocity.z * gFrameDelta;
+        object->head.rot.x += object->head.rotVel.x * gFrameDelta;
+        object->head.rot.y += object->head.rotVel.y * gFrameDelta;
+        object->head.rot.z += object->head.rotVel.z * gFrameDelta;
         return 1;
     }
 }
 
 /* Spawns a random number of particles (func_151C5F44), each moving at a random yaw and a pitch from
  * config's range. */
-void particle_spawnParticleBurst(ParticleBurst *config, u8 arg1, s32 arg2) {
+void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
     f32 pad; // matching: unused stack slot above velocity
     Vec3f velocity;
     s32 count;
@@ -1356,14 +1356,14 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 arg1, s32 arg2) {
                       (math_random() % (config->timerRange + 1)) + config->timerBase,
                       (math_randomFloat() * config->sizeRange) + config->sizeBase,
                       math_randomFloat() < config->altChance,
-                      config->ground, arg1, arg2);
+                      config->ground, owner, list);
         count--;
     }
 }
 
 /* Spawns a single object at `position` whose size and alpha swell and shrink along half a sine wave
  * over `duration`. */
-void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5) {
+void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 owner, s32 list) {
     void *object;
     ParticleSpawn spawn;
     Extra15154A88 extra;
@@ -1415,14 +1415,14 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
     spawn.fadeRate = 0xFF;
     spawn.lifetime = 300;
 
-    object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), arg4, arg5);
+    object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
         memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
     }
     return object;
 }
 
-/* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, move; returns 0 once expired. */
+/* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, spin; returns 0 once expired. */
 s32 particle_updateSwell(Object15132A4C *object) {
     Extra15154A88 *extra;
     f32 wave;
@@ -1431,17 +1431,17 @@ s32 particle_updateSwell(Object15132A4C *object) {
     extra = &object->extra.pulse;
     wave = sinf(extra->phase);
     size = extra->size * wave;
-    object->unk1C = size;
-    object->unk18 = size;
-    object->alpha = (f32)(u8)(u32)extra->alpha * wave;
+    object->head.sizeY = size;
+    object->head.sizeXZ = size;
+    object->head.alpha = (f32)(u8)(u32)extra->alpha * wave;
     extra->remaining -= gFrameDelta;
     if (extra->remaining <= 0.0f) {
         return 0;
     }
 
     extra->phase += extra->phaseRate * gFrameDelta;
-    object->position.x += object->velocity.x * gFrameDelta;
-    object->position.y += object->velocity.y * gFrameDelta;
-    object->position.z += object->velocity.z * gFrameDelta;
+    object->head.rot.x += object->head.rotVel.x * gFrameDelta;
+    object->head.rot.y += object->head.rotVel.y * gFrameDelta;
+    object->head.rot.z += object->head.rotVel.z * gFrameDelta;
     return 1;
 }

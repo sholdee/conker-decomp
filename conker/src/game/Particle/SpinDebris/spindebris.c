@@ -142,7 +142,7 @@ void particle_updateSpinDebris(SpinDebrisParticle *particle) {
 }
 
 /* Identity hook used by particle_beginSpinDebrisDraw for object types 0xC and 0x59. */
-Gfx *func_1517A394(Gfx *gfx) {
+Gfx *particle_emptySpinDebrisDrawHook(Gfx *gfx) {
     return gfx;
 }
 
@@ -266,10 +266,10 @@ void particle_updateGroundChunk(SpinDebrisParticle *particle) {
 }
 
 /* Begin-draw hook: forgets the cached primitive alpha so the first particle drawn sets it again. */
-Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
+Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 list, s32 view) {
     gDebrisPrimAlpha = -1;
     if ((type == 0xC) || (type == 0x59)) {
-        gfx = func_1517A394(gfx);
+        gfx = particle_emptySpinDebrisDrawHook(gfx);
     }
     return gfx;
 }
@@ -281,7 +281,7 @@ Gfx *particle_loadDebrisTexture(Gfx *gfx, s32 texture) {
 
     if (texture != gCachedTextureId) {
         // matching: the unsigned shift changes IDO's code
-        gfx = sprite_loadDescFrame(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &gDebrisTexture, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
         gCachedTextureId = texture;
     }
     return gfx;
@@ -310,6 +310,6 @@ void particle_spawnGroundChunks(f32 size, s32 x, s32 y, s32 z, s32 count) {
 }
 
 /* Draw callback for another object type in the same table; forwards to view_emitRspSetup. */
-Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 arg1, s16 player) {
+Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 type, s16 player) {
     return view_emitRspSetup(gfx, player);
 }

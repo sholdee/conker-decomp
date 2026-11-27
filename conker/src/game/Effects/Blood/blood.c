@@ -447,7 +447,7 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 owner, s32 list) 
 
 /* Drop emitters of a trail (BloodTrail.emitter), as gBloodDripEmitters (with a prototype for the same reason). */
 static void (*gBloodTrailEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    blood_emitNoTrailDrop, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, func_150C2898,
+    blood_emitNoTrailDrop, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, particle_emitSteamTrailSpray,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
 static s32 (*gBloodTrailCallbacks[])() = { effect_isBloodTrailOwnerActive };
@@ -571,7 +571,7 @@ void *blood_spawnStrip(BloodStripDesc *desc, s32 extraSize) {
 /* Callbacks of a strip: sample (0 kills it), emit, rate and update (0 kills it). The emit table has a prototype
  * for its f32 argument. */
 static s32 (*gBloodStripSampleCallbacks[])() = {
-    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, level_sampleBloodStripPower,
+    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, particle_sampleSegmentPower, effect_resetBloodStripAge, blood_sampleRandomPower, level_sampleBloodStripPower,
 };
 static void (*gBloodStripEmitCallbacks[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
     effect_emitStripRiseParticle, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,

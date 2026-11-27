@@ -201,7 +201,7 @@ void particle_freeWatcherLink(WatcherEmitter *obj) {
     blood_freeDripDefault(&obj->header);
 }
 
-static Vec3f D_800887D0 = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */
+static Vec3f gFlickerSpriteOrigin = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
@@ -214,7 +214,7 @@ FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
     if (actor->ob_matrix_ptr) {
         Vec3f origin;
 
-        origin = D_800887D0;
+        origin = gFlickerSpriteOrigin;
         math_transformOffset(&origin, &pos, actor->ob_matrix_ptr);
     } else {
         pos.x = actor->xpos;

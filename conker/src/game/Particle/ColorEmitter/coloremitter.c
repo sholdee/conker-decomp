@@ -7,9 +7,9 @@
 
 /* Spawns a flash particle, a burst of 12-18 drops, the particle_spawnShortLightFlash effect and a white screen
  * flash at `pos`. */
-void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
+void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 list) {
     effect_spawnFlashParticle(math_random() % 5U + 12, math_random() % 56U + 200, math_randomFloat() * 600.0f + 1700.0f,
-                  pos, 0xFF, owner, kind);
+                  pos, 0xFF, owner, list);
     {
         DropSpraySpec drops;
 
@@ -33,36 +33,36 @@ void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
         drops.spray.gravityRange = 0.37f;
         drops.spray.sizeBase = 280.0f;
         drops.spray.sizeRange = 390.0f;
-        drops.spray.unk34 = 0.6f;
+        drops.spray.floorHitChance = 0.6f;
         drops.spray.bounceChance = 1.0f;
-        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, 0, owner, kind);
+        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, 0, owner, list);
     }
-    particle_spawnShortLightFlash(pos, owner, kind);
-    screen_spawnFlash(0xFF, 0xFF, 0xFF, math_random() % 51U + 150, math_random() % 5U + 8, 0, owner, kind);
+    particle_spawnShortLightFlash(pos, owner, list);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, math_random() % 51U + 150, math_random() % 5U + 8, 0, owner, list);
 }
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by particle_updateColorEmitter
  * (gTimedEffectTickFuncs[0x5B]), preceded by a particle_spawnFlashBurst burst when `burst` is set. */
-void particle_startColorEmitter(pos, duration, burst, randomColors, owner, kind)
+void particle_startColorEmitter(pos, duration, burst, randomColors, owner, list)
     Vec3f *pos;
     s32 duration;
     u8 burst;
     u8 randomColors;
     u8 owner;
-    s32 kind;
+    s32 list;
 {
     ColorEmitterData data;
     ColorEmitter *emitter;
 
     if (burst) {
-        particle_spawnFlashBurst(pos, owner, kind);
+        particle_spawnFlashBurst(pos, owner, list);
     }
 
     data.pos = *pos;
     data.accum = 0.0f;
     data.randomColors = randomColors;
 
-    emitter = effect_newTimedEffect(duration, -1, 0x5B, -1, 1, 0, sizeof(data), owner, kind);
+    emitter = effect_newTimedEffect(duration, -1, 0x5B, -1, 1, 0, sizeof(data), owner, list);
     if (emitter != NULL) {
         memcpy(&emitter->data, &data, sizeof(data));
     }

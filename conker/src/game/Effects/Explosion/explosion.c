@@ -225,10 +225,10 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
     emitter.color[2] = 0;
     emitter.color[3] = 255;
     emitter.flags = 1;
-    emitter.unk2C = math_random() % 156U + 100;
-    emitter.unk2D = 255;
-    emitter.unk2E = 0;
-    emitter.unk2F = 1;
+    emitter.alpha = math_random() % 156U + 100;
+    emitter.colorLevel = 255;
+    emitter.updateFn1 = 0;
+    emitter.expireFn = 1;
     emitter.extraSize = 0;
     emitter.effect = 15;
     emitter.scale = 0.0f;
@@ -248,8 +248,8 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
         emitter.minB = 42.714f * scaleB;
         emitter.altB = 118.763f * scaleB;
         emitter.life = math_random() % 151U + 150;
-        emitter.unk2C = math_random() % 156U + 100;
-        emitter.unk2F = 0;
+        emitter.alpha = math_random() % 156U + 100;
+        emitter.expireFn = 0;
         particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
     }
 }

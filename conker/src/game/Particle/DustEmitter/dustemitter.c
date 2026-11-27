@@ -11,7 +11,7 @@
 DustEmitter *particle_spawnDustEmitter(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
                           s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
                           s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
-                          f32 unk60, u8 kind, u8 arg16, s32 arg17) {
+                          f32 unk60, u8 kind, u8 fxOwner, s32 fxList) {
     DustEmitter *effect;
     DustEmitterData data;
 
@@ -40,8 +40,8 @@ DustEmitter *particle_spawnDustEmitter(Actor *owner, const Vec3f *offset, u8 bon
     data.kind = kind;
 
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x1D, -1,
-                                          (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
-                                          arg17);
+                                          (duration == -1) ? 0 : 1, 0x1D, sizeof(data), fxOwner,
+                                          fxList);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -108,7 +108,7 @@ void particle_updateDustEmitter(DustEmitter *effect) {
  * (update func 0xF, particle_updateDustParticle). */
 DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
-                            u8 arg11, s32 arg12) {
+                            u8 owner, s32 list) {
     DustParticle *particle;
     ParticleDesc desc;
     DustData dust;
@@ -171,7 +171,7 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     dust.floorY = floorY;
     dust.floor = *floor;
     dust.kind = kind;
-    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(DustData), arg11, arg12);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(DustData), owner, list);
     if (particle != NULL) {
         memcpy(&particle->dust, &dust, sizeof(DustData));
     }
@@ -254,7 +254,7 @@ static const u8 gDustPresetKinds[] = { 4, 4, 4, 2 };
 
 /* Spawns the dust emitter preset that suits obj's id (particle_spawnDustEmitter) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
-DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
+DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 owner, s32 list) {
     s32 kind;
     DustEmitter *effect;
 
@@ -285,12 +285,12 @@ DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 arg2, s32
         effect = particle_spawnDustEmitter(obj, &gDustPresetOffsets[kind], gDustPresetBones[kind], gDustPresetRateBases[kind], gDustPresetRateRandoms[kind],
                                duration, gDustPresetGravityBases[kind], gDustPresetGravityRandoms[kind], gDustPresetLifetimeBases[kind],
                                gDustPresetLifetimeRandoms[kind], 100, 155, gDustPresetSizeBases[kind], gDustPresetSizeRandoms[kind],
-                               D_800A80D4[kind], gDustPresetKinds[kind], arg2, arg3);
+                               D_800A80D4[kind], gDustPresetKinds[kind], owner, list);
     }
     return effect;
 }
 
 /* Effect callback for the dust emitter: hands effect_handleOwnerActorEvent the owner reference. */
-void particle_onDustEmitterEvent(DustEmitter *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void particle_onDustEmitterEvent(DustEmitter *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }

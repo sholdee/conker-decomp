@@ -8,7 +8,7 @@
 #include "libc/string.h"
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
-void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 arg3) {
+void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 list) {
     TimedEffect *effect;
     PointSparkEmitter emitter;
 
@@ -30,7 +30,7 @@ void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 arg3) 
                 emitter.variant = 0;
                 break;
             }
-            effect = effect_newTimedEffectNoDraw(duration, -1, 1, 1, 0, sizeof(PointSparkEmitter), owner, arg3);
+            effect = effect_newTimedEffectNoDraw(duration, -1, 1, 1, 0, sizeof(PointSparkEmitter), owner, list);
             if (effect != NULL) {
                 memcpy(&((SparkEmitterEffect *)effect)->emitter, &emitter, sizeof(PointSparkEmitter));
             }
@@ -55,11 +55,11 @@ void particle_updateSparkEmitterEffect(SparkEmitterEffect *effect) {
 static u8 gSparkGreyLevels[] = { 128, 128 };
 
 /*
- * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random
+ * Particle kind 4 spawn callback (gParticleKindCallbacks): a fast spark thrown out in a random
  * direction around `angle`, grey level and sprite chosen by `variant`.
  */
 s32 particle_spawnFastSpark(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
-                  s32 angle, s32 baseAngle, f32 radius, s32 variant, f32 arg12, s32 arg13, u8 owner) {
+                  s32 angle, s32 baseAngle, f32 radius, s32 variant, f32 arg12, void *data, u8 owner) {
     BillboardTemplate spark;
     s16 tilt;
     f32 sinTilt;

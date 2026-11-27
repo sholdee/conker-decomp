@@ -1541,20 +1541,26 @@ typedef struct EmitterConfig {
     /* 0x06 */ u16 pitchRange;
     /* 0x08 */ f32 speed;
     /* 0x0C */ f32 speedRange;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ u16 unk10Range;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk14Range;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk18Range;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ f32 unk28Chance;
+    /* 0x10 */ s16 lifetime;
+    /* 0x12 */ u16 lifetimeRange;
+    /* 0x14 */ u8 alpha;
+    /* 0x15 */ u8 alphaRange;
+    /* 0x18 */ f32 size;
+    /* 0x1C */ f32 sizeRange;
+    /* 0x20 */ f32 gravity;
+    /* 0x24 */ f32 gravityRange;
+    /* 0x28 */ f32 floorHitChance;
 } EmitterConfig; // size 0x2C
 
 extern const FxImpactSet gImpactSets[];
 extern const EmitterConfig gImpactEmitterConfigs[];
-typedef struct FxSpawnPayload FxSpawnPayload;
+/* Passed through particle_emitOnRandomCircle to the spawn callbacks (e.g. effect_spawnImpactSprayParticle,
+ * particle_spawnYawSteam). */
+struct FxSpawnPayload {
+    /* 0x00 */ CollisionHit *hit;
+    /* 0x04 */ s32 list;     /* the object list of the spawned effects */
+    /* 0x08 */ u8 kind;
+};
 typedef struct FxEmitter FxEmitter;
 void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 owner, s32 list);
 s32 effect_spawnImpactSprayParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw, s32 baseAngle, f32 radius,

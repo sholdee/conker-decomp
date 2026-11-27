@@ -7,7 +7,7 @@
 #include "libc/string.h"
 
 /* Spawns 25-35 particles on a ring around (111, -90, 0) in placement space, flying outward from its center. */
-void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
+void particle_spawnPlacementRing(WorldObject *placement, u8 owner, s32 list) {
     s16 count;
     ParticleDesc spawn;
     s16 remaining;
@@ -78,7 +78,7 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
             spawn.vel.z = (points[i].z - points[count].z) * speed;
             spawn.gravity = (math_randomFloat() * 880.0f + 13.0f) * 0.001000000047f;
             spawn.alpha = math_random() % 176U + 80;
-            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(particle->data.drag), arg1, arg2);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(particle->data.drag), owner, list);
             if (particle != NULL) {
                 memcpy(&particle->data.drag, &drag, sizeof(drag));
             }

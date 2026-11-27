@@ -48,18 +48,9 @@ s32 particle_getSpraySidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
-s32 particle_selectSideSpray(s32 arg0, s32 arg1) {
+s32 particle_selectSideSpray(s32 kind, Actor *actor) {
     return 12;
 }
-
-/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
-typedef struct {
-    s16 r;
-    s16 g;
-    s16 b;
-    s16 a;
-    s16 unk8;
-} SprayColor;
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
@@ -75,7 +66,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     SprayGrowth growth;
     ParticleDef desc;
     s32 lifeRoll; // matching: IDO schedules the first roll differently when it is inlined
-    SprayColor colors[4];
+    VtxColor colors[4];
     s16 roll;
     u8 r;
     u8 g;
@@ -102,22 +93,22 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     colors[0].g = g;
     colors[0].b = b;
     colors[0].a = 180;
-    colors[0].unk8 = 0;
+    colors[0].flag = 0;
     colors[1].r = r;
     colors[1].g = g;
     colors[1].b = b;
     colors[1].a = 180;
-    colors[1].unk8 = 0;
+    colors[1].flag = 0;
     colors[2].r = r;
     colors[2].g = g;
     colors[2].b = b;
     colors[2].a = 180;
-    colors[2].unk8 = 0;
+    colors[2].flag = 0;
     colors[3].r = r;
     colors[3].g = g;
     colors[3].b = b;
     colors[3].a = 180;
-    colors[3].unk8 = 0;
+    colors[3].flag = 0;
     desc.texture = 0x50;
     desc.renderModes = 0x2502;
     lifeRoll = math_random();
@@ -200,9 +191,9 @@ s32 particle_updateSpray(SprayParticle *spray) {
 }
 
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */
-s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
-                  s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
+s32 particle_spawnYawSpraySpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+                  f32 originY, f32 originZ, s16 yaw, s32 baseAngle, f32 radius, s32 arg11,
+                  s32 arg12, void *data, u8 owner) {
     SparkParticle *spark;
     ParticleDesc desc;
     s32 pad1; // matching: unused stack slot
@@ -255,7 +246,7 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
     desc.fadeRate = 17;
     desc.scaleStart = 25;
 
-    spark = particle_newOwnedSpriteParticle(&desc, 1, 4, arg14, 1);
+    spark = particle_newOwnedSpriteParticle(&desc, 1, 4, owner, 1);
     if (spark != NULL) {
         memcpy(&spark->damping, &damping, sizeof(damping));
     }
@@ -263,7 +254,7 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
 }
 
 /* Damps the spark's desc.vel.x and desc.vel.z by its damping factor once per elapsed frame. */
-s32 particle_dampSprayXZ(SparkParticle *spark, s32 arg1) {
+s32 particle_dampSprayXZ(SparkParticle *spark, Vec3f *prevPos) {
     f32 *damping;
     s32 frames;
 

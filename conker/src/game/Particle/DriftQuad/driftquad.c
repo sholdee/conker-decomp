@@ -17,7 +17,7 @@ DriftBurstEmitter *gDriftBurstEmitter = NULL; /* the burst emitter whose rate pa
 static BurstYaws gDriftBurstYaws = { { 0.19999999f, 1.3f, 2.3f, 3.3999999f, 5.4f } };
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
-DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
+DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 owner, u8 list) {
     DriftQuad *effect;
     ParticleDef packet;
     QuadDriftMotion drift;
@@ -59,7 +59,7 @@ DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     drift.phaseSpeed = math_randomFloat() * 1210.0f * 0.0001f;
     drift.phaseScale = (math_randomFloat() * 12960.0f + 15241.0f) * 0.0001f;
 
-    effect = particle_newQuadParticleWhite(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
+    effect = particle_newQuadParticleWhite(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, owner, list);
     if (effect != NULL) {
         memcpy(&effect->drift, &drift, sizeof(drift));
     }
