@@ -79,7 +79,7 @@ Gfx D_800832C0[24][2] = {
     RENDER_MODE(0x19EC3F, 0x07C24000), RENDER_MODE(0x19EC3F, 0x07C24000),
 };
 
-Gfx D_80083440[24][2] = {
+Gfx gModelXluNoZRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x04D041C8), RENDER_MODE(0x182C3F, 0x04D041C8),
     RENDER_MODE(0x182C3F, 0x04D041C8), RENDER_MODE(0x182C3F, 0x04D041C8),
     RENDER_MODE(0x18AC3F, 0x04D041C8), RENDER_MODE(0x18AC3F, 0x04D041C8),
@@ -94,7 +94,7 @@ Gfx D_80083440[24][2] = {
     RENDER_MODE(0x19EC3F, 0x04D041C8), RENDER_MODE(0x19EC3F, 0x04D041C8),
 };
 
-Gfx D_800835C0[24][2] = {
+Gfx gModelOpaNoZRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x04D12048), RENDER_MODE(0x182C3F, 0x04D13048),
     RENDER_MODE(0x182C3F, 0x04D12048), RENDER_MODE(0x182C3F, 0x04D12248),
     RENDER_MODE(0x18AC3F, 0x04D12048), RENDER_MODE(0x18AC3F, 0x04D13048),
@@ -139,7 +139,7 @@ Gfx gEffectOpaRenderModes[24][2] = {
     RENDER_MODE(0x19ECAF, 0x0C192D58), RENDER_MODE(0x19ECAF, 0x0C192278),
 };
 
-Gfx D_80083A40[24][2] = {
+Gfx gEffectXluNoZRenderModes[24][2] = {
     RENDER_MODE(0x182CAF, 0x0C1841C8), RENDER_MODE(0x182CAF, 0x0C1841C8),
     RENDER_MODE(0x182CAF, 0x0C184DD8), RENDER_MODE(0x182CAF, 0x0C1841C8),
     RENDER_MODE(0x18ACAF, 0x0C1841C8), RENDER_MODE(0x18ACAF, 0x0C1841C8),
@@ -154,7 +154,7 @@ Gfx D_80083A40[24][2] = {
     RENDER_MODE(0x19ECAF, 0x0C184DD8), RENDER_MODE(0x19ECAF, 0x0C1841C8),
 };
 
-Gfx D_80083BC0[24][2] = {
+Gfx gEffectOpaNoZRenderModes[24][2] = {
     RENDER_MODE(0x182CAF, 0x0C192048), RENDER_MODE(0x182CAF, 0x0C193048),
     RENDER_MODE(0x182CAF, 0x0C192D58), RENDER_MODE(0x182CAF, 0x0C192248),
     RENDER_MODE(0x18ACAF, 0x0C192048), RENDER_MODE(0x18ACAF, 0x0C193048),
@@ -250,7 +250,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
     view_initDefaultProjection(arg1);
 }
 
-/* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
+/* Writes the start of each framebuffer's display list (segment 0, the setup list gFrameSetupDL, the depth image
  * and view 0's viewport for that framebuffer) and stores where each one ends in gDisplayListPrologueEnds. */
 void view_initFrameDisplayLists(void) {
     s32 i;
@@ -260,7 +260,7 @@ void view_initFrameDisplayLists(void) {
         gfx = gDisplayListBuffers[i];
         gSPSegment(gfx++, 0, 0);
         gSPSegment(gfx++, 0, 0);
-        gSPDisplayList(gfx++, D_8002C930);
+        gSPDisplayList(gfx++, gFrameSetupDL);
         gDPSetDepthImage(gfx++, gZBuffer);
         gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
         gDisplayListPrologueEnds[i] = gfx;

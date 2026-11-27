@@ -1958,7 +1958,7 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
             gMpGame->sightBits[player] = gMpGame->sightBits[source];
             savedRot = obj->mv->shotsfired;
             actor_swapSlots(&movement_obj[source], obj);
-            if (level == 0x3F) {
+            if (level == LEVEL_WMP_RAPTOR) {
                 if (obj->lifting >= 100) {
                     slot = obj->lifting - 100;
                     res = script_getTaskBss(gCurrentTaskId);

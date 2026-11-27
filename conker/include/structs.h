@@ -229,24 +229,24 @@ typedef struct LevelMusic {
     /* 0xD */ u8  unkD;
 } LevelMusic; // size 0xE
 
-/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
+/* The current level's settings resource, gLevelHeader (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
-    /* 0x00 */ u16 unk0;            // fog (gFogPresets.farPlane), gDefaultFar
-    /* 0x02 */ u16 unk2;            // fog (gFogPresets.nearPlane), gDefaultNear, RenderView.unk67C
+    /* 0x00 */ u16 farPlane;        // fog (gFogPresets.farPlane), gDefaultFar
+    /* 0x02 */ u16 nearPlane;       // fog (gFogPresets.nearPlane), gDefaultNear, Camera.NearPlane
     /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  unk5;            // background colour (gBackgroundColour)
-    /* 0x06 */ u8  unk6;
-    /* 0x07 */ u8  unk7;
-    /* 0x08 */ u8  unk8;            // sky mode (gSkyDrawFuncs); 4 = textured sky
-    /* 0x09 */ u8  unk9;            // sky texture set (gSkyTextureSets)
-    /* 0x0A */ u8  unkA;            // callback, gLevelSetupFuncs
+    /* 0x05 */ u8  backgroundRed;   // background colour (gBackgroundColour)
+    /* 0x06 */ u8  backgroundGreen;
+    /* 0x07 */ u8  backgroundBlue;
+    /* 0x08 */ u8  skyMode;         // sky mode (gSkyDrawFuncs); 4 = textured sky
+    /* 0x09 */ u8  skyTextureSet;   // sky texture set (gSkyTextureSets)
+    /* 0x0A */ u8  setupCallback;   // gLevelSetupFuncs
     /* 0x0B */ u8  updateCallback;  // gLevelUpdateHooks
     /* 0x0C */ u8  drawCallback1;   // gLevelDrawHooks1
     /* 0x0D */ u8  drawCallback2;   // gLevelDrawHooks2
-    /* 0x0E */ u8  unkE;            // callback, gLevelCameraSetups
-    /* 0x0F */ u8  unkF;            // callback, gLevelHooks
-    /* 0x10 */ u8  unk10;           // sun position, index into gSunPositions
+    /* 0x0E */ u8  cameraSetupCallback; // gLevelCameraSetups
+    /* 0x0F */ u8  hookCallback;    // gLevelHooks
+    /* 0x10 */ u8  sunPosition;     // index into gSunPositions
     /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
     /* 0x12 */ u8  unk12;
     /* 0x13 */ u8  unk13;           // landing step (game/Actor/ActorMotion/actormotion)
@@ -254,13 +254,13 @@ typedef struct LevelHeader {
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
-    /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
+    /* 0x1A */ u16 bonePoolSize;    // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
     /* 0x20 */ u8  pad20;
     /* 0x21 */ u8  vtxColorFlags;   // game/Env/VtxColourFade/vtxcolourfade
     /* 0x22 */ u8  pad22[7];
-    /* 0x29 */ u8  unk29;
+    /* 0x29 */ u8  tintPreset;      // index into gTintPresets (level_initTintWaves)
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game/Cutscene/Sequence/sequence
     /* 0x2C */ LevelMusic music;
@@ -271,8 +271,8 @@ typedef struct LevelHeader {
     /* 0x42 */ u8  fogColour[4];
     /* 0x46 */ s8  fogPreset;       // fog preset (env_blendFog), -1 = none
     /* 0x47 */ u8  pad47[2];
-    /* 0x49 */ u8  unk49;           // callback, gLevelPreUpdateFuncs
-    /* 0x4A */ u8  unk4A;           // callback, gLevelPostUpdateFuncs
+    /* 0x49 */ u8  preUpdateCallback;  // gLevelPreUpdateFuncs
+    /* 0x4A */ u8  postUpdateCallback; // gLevelPostUpdateFuncs
     /* 0x4B */ u8  assetList;       // index into gLevelAssetLists, 0 = none
 } LevelHeader; // size 0x4C
 
@@ -1305,7 +1305,7 @@ struct Actor {
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
     /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
-    /* 0x314 */ Ambient *unk314; // one per frame buffer (func_1515D440)
+    /* 0x314 */ Ambient *unk314; // one per frame buffer (light_allocAmbients)
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;
@@ -1619,7 +1619,7 @@ struct Camera {
     /* 0x276 */ u8 pad276[0x2];
     /* 0x278 */ f32 FTgetRadius;
     /* 0x27C */ Vec3f unk27C;
-    /* 0x288 */ Vec3f unk288;
+    /* 0x288 */ Vec3f posePos;                         /* gCameraPoses[FCameraIndex], the fixed pose point (game/Camera/CameraCommands/cameracommands.c) */
     /* 0x294 */ f32 FixedVel;                         /* not accessed by US code */
     /* 0x298 */ s16 CharMoved;
     /* 0x29A */ u8 pad29A[0x2];
@@ -1751,7 +1751,9 @@ struct Camera {
     /* 0x73C */ s16 DoingAim;
     /* 0x73E */ u8 pad73E[0x2];
     /* 0x740 */ CamAim aim;
-    /* 0x7A8 */ u8 pad7A8[0x8];
+    /* 0x7A8 */ f32 BackOffAngle;                     /* not accessed by US code */
+    /* 0x7AC */ s8 DeBounceAimButton;                 /* not accessed by US code */
+    /* 0x7AD */ u8 pad7AD[0x3];
     /* 0x7B0 */ f32 WaterDx;
     /* 0x7B4 */ f32 SpringTime;                       /* frame time scale */
     /* 0x7B8 */ s32 ZoomCounter;
@@ -1773,7 +1775,7 @@ struct Camera {
     /* 0x7F0 */ f32 CameraRadiusAngleVel;             /* not accessed by US code */
     /* 0x7F4 */ CamTransition transition;
     /* 0x844 */ f32 LadderAngleVel;
-    /* 0x848 */ u8 unk848;
+    /* 0x848 */ u8 ropeActive;                        /* the rope camera (SpecialFlags 0x40) ran; cleared once it has been undone */
     /* 0x849 */ u8 pad849[0x1];
     /* 0x84A */ s16 AimTimeOuts;                      /* frames left before the aim swing gives up */
     /* 0x84C */ u8 AimTargetOn;                       /* sight_startPlayerEffects ran; sight_resetPlayerEffects undoes it */
@@ -1834,12 +1836,12 @@ struct Camera {
     /* 0x948 */ u8 avoidActive;
     /* 0x949 */ u8 unk949;
     /* 0x94A */ u8 pad94A[0x2];
-    /* 0x94C */ f32 unk94C;
-    /* 0x950 */ f32 unk950;
-    /* 0x954 */ f32 unk954;
-    /* 0x958 */ f32 unk958;
-    /* 0x95C */ f32 unk95C;
-    /* 0x960 */ f32 unk960;
+    /* 0x94C */ f32 wallProbeWidthTarget;             /* size of the camera's wall probe (type 0x2D, camera_collide) */
+    /* 0x950 */ f32 wallProbeHeightTarget;
+    /* 0x954 */ f32 wallProbeWidthVel;
+    /* 0x958 */ f32 wallProbeHeightVel;
+    /* 0x95C */ f32 wallProbeWidth;                   /* eased toward the target; objectsize.c reads it for type 0x2D */
+    /* 0x960 */ f32 wallProbeHeight;
     /* 0x964 */ f32 accelA;
     /* 0x968 */ f32 accelB;
     /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game/Camera/YawBehind/yawbehind.c) */

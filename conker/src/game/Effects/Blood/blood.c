@@ -2571,7 +2571,7 @@ void blood_spawnProfileBurst(Vec3f *position, const s32 *table, const f32 *arg2,
     config.spin = 16.10200119f;
     switch (kind) {
     case 19:
-        if (level == 60) {
+        if (level == LEVEL_W3_HAUNTED_HOUSE) {
             config.floorHitChance = 0.0f;
         }
         break;

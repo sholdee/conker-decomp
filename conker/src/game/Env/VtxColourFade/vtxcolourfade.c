@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// Byte 0x21 of *D_800B0DF0: bit 0 enables fades on the level mesh, bit 1 on props, and bit 2 enables
+// Byte 0x21 of *gLevelHeader: bit 0 enables fades on the level mesh, bit 1 on props, and bit 2 enables
 // both and takes the base colors from gVtxGroupBaseColours instead of gVtxBaseColours.
-#define sVtxColorFlags (D_800B0DF0->vtxColorFlags)
+#define sVtxColorFlags (gLevelHeader->vtxColorFlags)
 
 /* Fades the vertices of color set colorSet (group group, or every group when group is 0xFF) from their
  * base colors towards the groups' target colors by blend/256. isProp selects the vertices of prop

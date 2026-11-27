@@ -1446,7 +1446,7 @@ s32 particle_layQuadSpriteOnSurface(QuadSprite *sprite, Vec3s **triPtrs, Collisi
                   f32 height, u8 angle);
 s32 particle_updateDriftMotion(DefParticleHead *particle);
 Vtx *particle_buildRotatedQuad(DefParticleHead *particle, s16 viewport);
-Vtx *particle_buildUprightQuad(DefParticleHead *particle, s32 reversed, s32 viewport);
+Vtx *particle_buildUprightQuad(); /* (DefParticleHead *particle, u8 reversed, s16 viewport); K&R definition, declared without a prototype */
 Vtx *particle_buildUprightQuadFwd(void *particle, s16 viewport);
 Vtx *particle_buildUprightQuadRev(void *particle, s16 viewport);
 Vtx *particle_buildRotatedRectQuadUnrolled(DefParticleHead *particle, s16 viewport);
@@ -1766,7 +1766,7 @@ StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kin
 void particle_newStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize);
 void particle_updateStreakParticle(StreakParticle *arg0);
 Gfx *particle_drawStreakParticle(Gfx *gfx, StreakParticle *particle, s16 viewIndex);
-void particle_spawnStreakBurstEffect(StreakBurstEffectDesc *desc, u8 owner);
+void particle_spawnStreakBurstEffect(); /* (StreakBurstEffectDesc *desc, u8 owner); K&R definition, declared without a prototype */
 void particle_updateRandomBurstEffect(RandomBurstEffect *effect);
 void particle_spawnPipeBurst(f32 *pos, u8 owner);
 void particle_freeStreakVtxBuffers(StreakParticle *particle);
@@ -3073,7 +3073,7 @@ void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target,
 void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4);
 void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
 void particle_detachObjEmitters(Actor *obj);
-void particle_attachPointEmitter(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
+void particle_attachPointEmitter(); /* (Actor *obj, u8 posFunc, s16 arg2, u8 arg3, s32 arg4); K&R definition, declared without a prototype */
 void particle_updatePointSmoke(ObjEmitterEffect *effect);
 void particle_onPointEmitterMsg(ObjEmitterEffect *effect, ActorRef *handle, u8 msg);
 s32 particle_updatePointPuff(SpriteParticle *puff, s32 arg1);

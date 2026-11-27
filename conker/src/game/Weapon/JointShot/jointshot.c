@@ -135,7 +135,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
             particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
         }
         mask = 1;
-        for (i = D_800DCA20; i > 0; i--) {
+        for (i = gLayoutDetailShift; i > 0; i--) {
             mask |= 1 << i;
         }
         if (arg2 || !(math_random() & mask)) {

@@ -543,7 +543,7 @@ void sprite_freeTypeTextures(void) {
     for (i = 0; i < 15; i++) {
         if (gSpriteTypeTexFiles[i].buf != 0) {
             if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0) {
-                boot_decompress(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
+                boot_decompress(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], gDecompressWork);
                 heap_free(gSpriteTypeTexFiles[i].buf);
             }
             gSpriteTypeTexFiles[i].buf = 0;

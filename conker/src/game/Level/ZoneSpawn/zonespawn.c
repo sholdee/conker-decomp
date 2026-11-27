@@ -471,7 +471,7 @@ s32 level_spawnAreaParticlesZone(TriggerZone *obj) {
     obj->flags |= 4;
     index = obj->data1;
 
-    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == LEVEL_W2_HARBOUR)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -565,10 +565,10 @@ static s32 (*gHandlerZoneSpawns[12])(TriggerZone *) = {
     NULL,
     func_1501407C,
     level_spawnZoneEffect,
-    func_15015300,
+    level_spawnBoltZone,
     NULL,
     NULL,
-    func_15015300,
+    level_spawnBoltZone,
     level_spawnStageZone,
     NULL,
     NULL,
@@ -719,7 +719,7 @@ s32 level_spawnFlackZone(TriggerZone *obj) {
         return 1;
     }
 
-    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == LEVEL_W2_HARBOUR)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -900,9 +900,9 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         header.update = -1;
         header.lifetime = 300;
         header.lightType = 0;
-        r = (level == 0x40) ? 0xFF : gRaySpinnerChildColors[i][0];
-        g = (level == 0x40) ? 0 : gRaySpinnerChildColors[i][1];
-        count = (level == 0x40) ? 0 : gRaySpinnerChildColors[i][2]; // matching: blue reuses count's register
+        r = (level == LEVEL_W5_END_ARENA) ? 0xFF : gRaySpinnerChildColors[i][0];
+        g = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][1];
+        count = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][2]; // matching: blue reuses count's register
         packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = effect_newTimedEffect(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
@@ -1038,14 +1038,14 @@ s32 level_spawnBoltRainZone(TriggerZone *obj) {
     return 1;
 }
 
-/* Handlers of func_15015300, chosen by TriggerZone.data2. */
-static void (*D_80082F70[2])(TriggerZone *) = {
+/* Handlers of level_spawnBoltZone, chosen by TriggerZone.data2. */
+static void (*gBoltZoneSpawns[2])(TriggerZone *) = {
     level_spawnBoltArcZone,
     level_spawnBoltRingZone,
 };
 
-/** Runs the object's handler from D_80082F70, chosen by data2 (0 or 1). */
-s32 func_15015300(TriggerZone *obj) {
+/** Runs the object's handler from gBoltZoneSpawns, chosen by data2 (0 or 1). */
+s32 level_spawnBoltZone(TriggerZone *obj) {
     void (*handler)(TriggerZone *);
     s32 index = obj->data2;
 
@@ -1053,7 +1053,7 @@ s32 func_15015300(TriggerZone *obj) {
         return 1;
     }
 
-    handler = D_80082F70[index];
+    handler = gBoltZoneSpawns[index];
     if (handler != NULL) {
         handler(obj);
     }
@@ -1159,15 +1159,15 @@ s32 level_spawnRopeZone(TriggerZone *obj) {
     MtxF mtx;
     RopeSpawn payload;
 
-    if (level == 0xB) {
+    if (level == LEVEL_W1_COG_LAND) {
         if (obj->data1 < 6U) {
             return 1;
         }
-    } else if (level == 0x2C) {
+    } else if (level == LEVEL_W1_POO_CABIN) {
         if (obj->data1 < 7U) {
             return 1;
         }
-    } else if (level == 0x26) {
+    } else if (level == LEVEL_W2_MACHINEGUNNEST) {
         if (obj->data1 < 2U) {
             return 1;
         }

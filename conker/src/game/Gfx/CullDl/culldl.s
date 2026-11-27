@@ -60,7 +60,7 @@ glabel gShadowFaceFlags
     /* 800D3668 */ .space 0x4
 glabel gShadowFaceFlagsEnd
     /* 800D366C */ .space 0x4
-glabel D_800D3670
+glabel gCullFarZ
     /* 800D3670 */ .space 0x4
 glabel D_800D3674
     /* 800D3674 */ .space 0xC

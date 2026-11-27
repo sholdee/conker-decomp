@@ -53,17 +53,17 @@ extern f32 gTwoPlayerWidthScale; // the width scale of the two-player layout
 extern Gfx gModelXluRenderModes[24][2]; // render mode tables for segment 8
 extern Gfx gModelOpaRenderModes[24][2];
 extern Gfx D_800832C0[24][2];
-extern Gfx D_80083440[24][2];
-extern Gfx D_800835C0[24][2];
+extern Gfx gModelXluNoZRenderModes[24][2];
+extern Gfx gModelOpaNoZRenderModes[24][2];
 extern Gfx gEffectXluRenderModes[24][2];
 extern Gfx gEffectOpaRenderModes[24][2];
-extern Gfx D_80083A40[24][2];
-extern Gfx D_80083BC0[24][2];
+extern Gfx gEffectXluNoZRenderModes[24][2];
+extern Gfx gEffectOpaNoZRenderModes[24][2];
 extern Gfx gWorldObjectXluRenderModes[24][2];
 extern Gfx gWorldObjectOpaRenderModes[24][2];
 
 /* init/View/SetupDl/setupdl.c (a data-only unit in the init segment) */
-extern const Gfx D_8002C930[]; // the setup display list of each frame (view_initFrameDisplayLists)
+extern const Gfx gFrameSetupDL[]; // the setup display list of each frame (view_initFrameDisplayLists)
 
 /* game/View/Projection/projection.c */
 extern Vec3f gFovChanges[4];

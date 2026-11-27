@@ -22,7 +22,7 @@ void level_spawnObjBurst(Actor *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-/* Zone handler D_80082F70[1]: spawns timed effect 0x46 for the zone. */
+/* Zone handler gBoltZoneSpawns[1]: spawns timed effect 0x46 for the zone. */
 void level_spawnBoltRingZone(TriggerZone *zone) {
     BoltRingData tmp;
     TimedEffect *effect;

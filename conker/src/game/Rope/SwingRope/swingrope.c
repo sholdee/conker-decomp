@@ -86,7 +86,7 @@ Rope *rope_create(void *spawn, s32 extraSize) {
     s32 texS2;
     s32 texS3;
 
-    rope = effect_newObject((level == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
+    rope = effect_newObject((level == LEVEL_W1_POO_CABIN) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (rope == NULL) {
         return NULL;
     }
@@ -111,7 +111,7 @@ Rope *rope_create(void *spawn, s32 extraSize) {
     }
     rope->segmentLength = (f32)(topY - bottomY) / segments;
     rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0);
-    if (level == 0xB) {
+    if (level == LEVEL_W1_COG_LAND) {
         rope->textureId = 0x37;
         shift = 4;
     } else {
@@ -120,7 +120,7 @@ Rope *rope_create(void *spawn, s32 extraSize) {
     }
     r = 0xFF;
     g = 0xFF;
-    if (level == 0x39) {
+    if (level == LEVEL_W5_BANK_ENTRANCE) {
         r = 0x58;
         g = 0x4B;
         b = 0x2C;
@@ -285,7 +285,7 @@ void rope_update(Rope *rope) {
                 vel[j] += mid[j] * 1.24;
             }
             pos[j] += vel[j];
-            if (level == 0x39 && pos[0] > 1150.0f) {
+            if (level == LEVEL_W5_BANK_ENTRANCE && pos[0] > 1150.0f) {
                 pos[0] = 1150.0f;
             }
         }

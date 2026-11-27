@@ -100,13 +100,13 @@ void effect_spawnModelBurst(WorldObject *actor, s32 modelId, s32 kind, s32 mode,
     actor->inactive = 1;
 }
 
-/* Plays the scene-specific burst (scenes 2 and 16) at the actor. */
+/* Plays the map-specific burst (LEVEL_W1_BRONTO_CAVERN and LEVEL_W1_BARN_ARENA) at the actor. */
 void effect_spawnLevelModelBurst(WorldObject *actor, u8 owner, s32 list) {
     switch (level) {
-    case 2:
+    case LEVEL_W1_BRONTO_CAVERN:
         effect_spawnModelBurst(actor, 1, 1, 1, owner, list);
         break;
-    case 16:
+    case LEVEL_W1_BARN_ARENA:
         effect_spawnModelBurst(actor, 0xA9, 8, 0, owner, list);
         break;
     }

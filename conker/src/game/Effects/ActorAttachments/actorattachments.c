@@ -8,7 +8,7 @@ static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           func_1514E00C, func_1514E194, func_1514E31C, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     func_1514D64C,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, func_1514D564, func_1514DA38,
-    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInLevel20, func_1514DE88, func_1514DB98,
+    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
@@ -164,7 +164,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
     }
 
     switch (level) {
-    case 43:
+    case LEVEL_WMP_BEACH:
         *globalSlot = 21;
         found |= 2;
         if (obj->character_type == 156 || obj->character_type == 157) {
@@ -172,7 +172,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 29:
+    case LEVEL_FRONTEND:
         *globalSlot = 20;
         found |= 2;
         if (obj->unique_id == 9) {
@@ -180,7 +180,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 0:
+    case LEVEL_W1_BULL_PADDOCK:
         *globalSlot = 16;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -188,7 +188,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 44:
+    case LEVEL_W1_POO_CABIN:
         *globalSlot = 17;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -196,7 +196,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 35:
+    case LEVEL_W2_WARBOSS:
         *globalSlot = 15;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -204,7 +204,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 47:
+    case LEVEL_W2_LAB:
         *globalSlot = 18;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -212,7 +212,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 53:
+    case LEVEL_W1_POO_BOSS:
         *globalSlot = 19;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -220,7 +220,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 40:
+    case LEVEL_W2_TANKTUNNEL:
         *globalSlot = 14;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -228,7 +228,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 27:
+    case LEVEL_W2_LIFTTUNNEL:
         *globalSlot = 10;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -236,7 +236,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 30:
+    case LEVEL_W2_FLAMETUNNEL:
         *globalSlot = 11;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -244,7 +244,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 38:
+    case LEVEL_W2_MACHINEGUNNEST:
         *globalSlot = 12;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -252,7 +252,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 28:
+    case LEVEL_W2_CANYON:
         *globalSlot = 13;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -260,7 +260,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 14:
+    case LEVEL_W2_TANK_FACTORY:
         *globalSlot = 7;
         found |= 2;
         switch (obj->unique_id) {
@@ -274,7 +274,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             break;
         }
         break;
-    case 4:
+    case LEVEL_W2_OUTSIDE_MOLEHOLE:
         *globalSlot = 6;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -282,7 +282,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 7:
+    case LEVEL_W1_DOG_FISH:
         *globalSlot = 5;
         found |= 2;
         if (obj->unique_id == 16) {
@@ -290,11 +290,11 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 12:
+    case LEVEL_W1_BARN_OUTSIDE:
         *globalSlot = 3;
         found |= 2;
         break;
-    case 2:
+    case LEVEL_W1_BRONTO_CAVERN:
         *globalSlot = 0;
         found |= 2;
         switch (obj->unique_id) {
@@ -319,7 +319,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             break;
         }
         break;
-    case 10:
+    case LEVEL_W2_BOILERROOM:
         *globalSlot = 1;
         found |= 2;
         switch (obj->unique_id) {
@@ -361,11 +361,11 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             break;
         }
         break;
-    case 6:
+    case LEVEL_THE_WINDMILL:
         *globalSlot = 2;
         found |= 2;
         break;
-    case 16:
+    case LEVEL_W1_BARN_ARENA:
         *globalSlot = 4;
         found |= 2;
         if (obj->unique_id == 6) {
@@ -373,7 +373,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 20:
+    case LEVEL_W1_DINO_ARENA:
         *globalSlot = 8;
         found |= 2;
         if (obj->unique_id == 16) {
@@ -381,7 +381,7 @@ s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s3
             found |= 1;
         }
         break;
-    case 23:
+    case LEVEL_W1_DOG_FISH_NURSERY_PART1:
         *globalSlot = 9;
         found |= 2;
         if (obj->unique_id == 1) {
@@ -741,8 +741,8 @@ void effect_attachCharacterWatcher(Actor *obj) {
 void func_1514DB58(Actor *obj) {
 }
 
-void effect_spawnRopeTieInLevel20(Actor *obj) {
-    if (level == 20) {
+void effect_spawnRopeTieInDinoArena(Actor *obj) {
+    if (level == LEVEL_W1_DINO_ARENA) {
         rope_spawnTie(obj);
     }
 }

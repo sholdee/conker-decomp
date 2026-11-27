@@ -79,8 +79,87 @@ extern s32 gFrameTicks; // frames elapsed this update
 extern s32 gLastPlayerIndex; // number of players minus one
 extern u8 D_800BE9EC;
 extern u8 gClearToWhite;
+
+/* Level ids: the values of `level` (and of IdRecord.LoadSection, the level a task was loaded in). Original names
+ * from the October 2000 debugger's level table (its soak test); Rare's identifiers with the prefix LEVEL_, so
+ * the ones Rare wrote with a leading underscore (cut or test levels) get a double underscore. The US code
+ * compares the same values: paired prerelease functions use the same constants up to 66, and
+ * script_canAutoSave lists the multiplayer, frontend, cutscene and cut levels. */
+enum LevelId {
+    /*  0 */ LEVEL_W1_BULL_PADDOCK,
+    /*  1 */ LEVEL_W1_BARN_INSIDE,
+    /*  2 */ LEVEL_W1_BRONTO_CAVERN,
+    /*  3 */ LEVEL__W2_MOLEHOLE,
+    /*  4 */ LEVEL_W2_OUTSIDE_MOLEHOLE,
+    /*  5 */ LEVEL_INTRO_CUTSCENE,
+    /*  6 */ LEVEL_THE_WINDMILL,
+    /*  7 */ LEVEL_W1_DOG_FISH,
+    /*  8 */ LEVEL_ANIMTEST,
+    /*  9 */ LEVEL__HITS_TEST,
+    /* 10 */ LEVEL_W2_BOILERROOM,
+    /* 11 */ LEVEL_W1_COG_LAND,
+    /* 12 */ LEVEL_W1_BARN_OUTSIDE,
+    /* 13 */ LEVEL__W2_WARZONE,
+    /* 14 */ LEVEL_W2_TANK_FACTORY,
+    /* 15 */ LEVEL__W2_MISSILE_SILO,
+    /* 16 */ LEVEL_W1_BARN_ARENA,
+    /* 17 */ LEVEL__W1_DOG_FISH_NURSERY,
+    /* 18 */ LEVEL_W1_INSIDE_SAFE,
+    /* 19 */ LEVEL_W2_HARBOUR,
+    /* 20 */ LEVEL_W1_DINO_ARENA,
+    /* 21 */ LEVEL__W3_ED_TEST,
+    /* 22 */ LEVEL__MARK_TEST,
+    /* 23 */ LEVEL_W1_DOG_FISH_NURSERY_PART1,
+    /* 24 */ LEVEL_W5_THRONE_ROOM,
+    /* 25 */ LEVEL_W1_VOLCANO_INSIDE,
+    /* 26 */ LEVEL_WMP_HEIST,
+    /* 27 */ LEVEL_W2_LIFTTUNNEL,
+    /* 28 */ LEVEL_W2_CANYON,
+    /* 29 */ LEVEL_FRONTEND,
+    /* 30 */ LEVEL_W2_FLAMETUNNEL,
+    /* 31 */ LEVEL__PRESENT_CUTSCENE,
+    /* 32 */ LEVEL_FRONTEND_CUTSCENE,
+    /* 33 */ LEVEL_WFRONTEND_TABLE,
+    /* 34 */ LEVEL_WFRONTEND_HELL,
+    /* 35 */ LEVEL_W2_WARBOSS,
+    /* 36 */ LEVEL_WMP_TANK,
+    /* 37 */ LEVEL_GENERIC_CUTSCENES,
+    /* 38 */ LEVEL_W2_MACHINEGUNNEST,
+    /* 39 */ LEVEL_W1_BEE_CAVERN,
+    /* 40 */ LEVEL_W2_TANKTUNNEL,
+    /* 41 */ LEVEL_W1_TRAINING,
+    /* 42 */ LEVEL_WMP_ARENA,
+    /* 43 */ LEVEL_WMP_BEACH,
+    /* 44 */ LEVEL_W1_POO_CABIN,
+    /* 45 */ LEVEL_WMP_MAIN_WAR,
+    /* 46 */ LEVEL_W1_TRAINING_CAVE,
+    /* 47 */ LEVEL_W2_LAB,
+    /* 48 */ LEVEL_WMP_BEACH_WAR,
+    /* 49 */ LEVEL_W1_ROCK_SOLID,
+    /* 50 */ LEVEL_W1_VOLCANO_RACE,
+    /* 51 */ LEVEL_WMP_VOLCANO_RACE,
+    /* 52 */ LEVEL_WMP_TUNNELS,
+    /* 53 */ LEVEL_W1_POO_BOSS,
+    /* 54 */ LEVEL_W5_BANK,
+    /* 55 */ LEVEL_W1_U_BEND,
+    /* 56 */ LEVEL_W5_BLADE_BOARDROOM,
+    /* 57 */ LEVEL_W5_BANK_ENTRANCE,
+    /* 58 */ LEVEL_W5_BANK_END,
+    /* 59 */ LEVEL_W1_WINDMILL_EXPLODED,
+    /* 60 */ LEVEL_W3_HAUNTED_HOUSE,
+    /* 61 */ LEVEL_W3_HAUNTED_OUTHOUSE,
+    /* 62 */ LEVEL__WMP_HAUNTED_HOUSE,
+    /* 63 */ LEVEL_WMP_RAPTOR,
+    /* 64 */ LEVEL_W5_END_ARENA,
+    /* 65 */ LEVEL_W3_HORROR_INTRO,
+    /* 66 */ LEVEL_W1_BRONTO_THROAT,
+    /* 67 */ LEVEL_W1_RAPTOR_NEST,
+    /* 68 */ LEVEL_W1_RAPTOR_NEST_FLOODED,
+    LEVEL_COUNT /* ours: the per-level tables (gPlayedCutscenes) have 69 entries */
+};
+
 extern s32 level; // the current map
-extern s32 gNextLevel; // current scene / game mode id
+extern s32 gNextLevel; // the level to load next (enum LevelId; game_requestLevelChange)
 extern s32 gPrevLevel; // the previous map
 extern s32 gNextMatchPlayerMask;
 extern s32 gNextMatchMode;

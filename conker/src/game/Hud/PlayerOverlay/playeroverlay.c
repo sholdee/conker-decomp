@@ -344,7 +344,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale gHudScaleX */
 
     start = gfx;
-    if (level == 0x1D) {
+    if (level == LEVEL_FRONTEND) {
         return gfx;
     }
     gSPPerspNormalize(gfx++, gHudPerspNorm);
@@ -788,9 +788,9 @@ Gfx *hud_drawWaterSurface(Gfx *gfx) {
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
     if (gHudWaterStage.alpha < 255) {
-        gSPSegment(gfx++, 8, D_80083440);
+        gSPSegment(gfx++, 8, gModelXluNoZRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_800835C0);
+        gSPSegment(gfx++, 8, gModelOpaNoZRenderModes);
     }
     y = -11.0f + gHudWaterStage.unkA8;
     x = -1.0f - gHudWaterStage.unkA0;
@@ -1057,7 +1057,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                         cellShift = -3;
                         break;
                     default:
-                        if (level == 0x1A) {
+                        if (level == LEVEL_WMP_HEIST) {
                             icon = 4;
                             cellShift = 4;
                         } else {
@@ -1238,7 +1238,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 rowY = (s32)gViews[i].top + 5;
                 rowY *= 4;
                 // matching: constant-first operands; the swapped form changes the code
-                if (0x1A == level || 0x3F == level) {
+                if (LEVEL_WMP_HEIST == level || LEVEL_WMP_RAPTOR == level) {
                     cellW = 11;
                     cellH = 14;
                     texS = 0x200;

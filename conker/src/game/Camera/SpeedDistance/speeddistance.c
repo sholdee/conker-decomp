@@ -11,7 +11,7 @@ static const struct {
 
 /* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
  * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from script_query queries;
- * otherwise zeroes unk190/unk1A4/unk1A8 when camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds. On level 0x32, also mirrors
+ * otherwise zeroes unk190/unk1A4/unk1A8 when camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds. On LEVEL_W1_VOLCANO_RACE, also mirrors
  * a script_query query into unk84 bit 0x1000. */
 void camera_scaleBySpeed(Camera *camera) {
     if (camera->Mode == 0x40) {
@@ -34,7 +34,7 @@ void camera_scaleBySpeed(Camera *camera) {
         }
         camera->IdealTripodMagnitude = -194.0f * speedFrac + 280.0f;
         camera->unk34C = camera->height = 34.0f * speedFrac + 75.0f;
-        if (level == 0x32) {
+        if (level == LEVEL_W1_VOLCANO_RACE) {
             found = script_query(4, camera->CNumber | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037);
         } else {
             found = script_query(5, camera->CNumber | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
@@ -59,7 +59,7 @@ void camera_scaleBySpeed(Camera *camera) {
         camera->YOffsetTget = camera->TgetFOVX = camera->TgetFOVY = 0.0f;
     }
 
-    if (level == 0x32) {
+    if (level == LEVEL_W1_VOLCANO_RACE) {
         if (script_query(1, 0x4039, 6, 0x9000) != 0) {
             camera->AvailableModes |= 0x1000;
         } else {

@@ -129,19 +129,19 @@ void func_150829D8(Actor *obj) {
     obj->noshove |= 4;
     if ((obj->mv != NULL) && (obj->mv->unk56 == 0)) {
         switch (level) {
-        case 0:
-        case 10:
-        case 14:
-        case 18:
-        case 19:
-        case 25:
-        case 27:
-        case 44:
-        case 60:
-        case 61:
-        case 66:
-        case 67:
-        case 68:
+        case LEVEL_W1_BULL_PADDOCK:
+        case LEVEL_W2_BOILERROOM:
+        case LEVEL_W2_TANK_FACTORY:
+        case LEVEL_W1_INSIDE_SAFE:
+        case LEVEL_W2_HARBOUR:
+        case LEVEL_W1_VOLCANO_INSIDE:
+        case LEVEL_W2_LIFTTUNNEL:
+        case LEVEL_W1_POO_CABIN:
+        case LEVEL_W3_HAUNTED_HOUSE:
+        case LEVEL_W3_HAUNTED_OUTHOUSE:
+        case LEVEL_W1_BRONTO_THROAT:
+        case LEVEL_W1_RAPTOR_NEST:
+        case LEVEL_W1_RAPTOR_NEST_FLOODED:
             break;
         default:
             obj->noshove |= 2;
@@ -315,7 +315,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
             obj->unk68[0] = t + 0x10;
         }
     }
-    if ((gExpansionPak == 0) && (level != 29) && (spawn->keepTime == 0xFF)) {
+    if ((gExpansionPak == 0) && (level != LEVEL_FRONTEND) && (spawn->keepTime == 0xFF)) {
         found = obj->modelCount;
         if (found == 0) {
             found = 1;
@@ -324,7 +324,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
             gModelUnloadTimers[obj->modelIds[i]] = 0xFF;
         }
     }
-    if (level == 29) {
+    if (level == LEVEL_FRONTEND) {
         obj->unk66 &= ~0x20;
     }
     effect_spawnAttachments(obj);
@@ -374,7 +374,7 @@ void collision_allocActorLights(Actor *obj) {
         if (obj->unk304[i - 1] != 0) {
             obj->unk301 = count;
         }
-        obj->unk314 = func_1515D440();
+        obj->unk314 = light_allocAmbients();
     }
 }
 
@@ -567,7 +567,7 @@ void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
                     obj->cullDistance = override;
                 }
             }
-            if (level == 29) {
+            if (level == LEVEL_FRONTEND) {
                 obj->cullDistance = 1000;
             }
         } else {
@@ -652,7 +652,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
     if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;
     }
-    obj->unk314 = func_1515D440();
+    obj->unk314 = light_allocAmbients();
     if (gCutsceneStates[0] == 1) {
         blocked = 1;
     } else {

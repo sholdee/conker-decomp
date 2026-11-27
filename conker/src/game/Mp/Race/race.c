@@ -43,11 +43,11 @@ f32 mp_nodeDistance(s32 a, s32 b) {
 void func_15086C68(void) {
 }
 
-/* Calls zone_findAt(3, 11, ...) at path node `index`. */
+/* Calls zone_findAt(ZONE_TYPE_NEUTRAL, 11, ...) at path node `index`. */
 TriggerZone *mp_findNodeZone(s32 index) {
     s16 z = gPathNodes[index].z;
 
-    return zone_findAt(3, 11, gPathNodes[index].x, gPathNodes[index].y, z);
+    return zone_findAt(ZONE_TYPE_NEUTRAL, 11, gPathNodes[index].x, gPathNodes[index].y, z);
 }
 
 /* Writes the position of path node `index` to *x, *y, *z; returns 0 if out of range. */

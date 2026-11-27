@@ -161,7 +161,7 @@ s32 level_spawnZoneSpray(TriggerZone *zone);
 /* game/Level/LevelSetupReset/levelsetupreset.c */
 void level_resetSetupState(void);
 void func_1500E70C(s32 id);
-void func_1500E738(void);
+void level_setEffectDetail(void);
 void level_setup21(void);
 void level_setup01(void);
 void level_setup36(void);
@@ -329,7 +329,7 @@ s32 level_spawnLaserTubeZone(TriggerZone *obj);
 s32 level_addDustRegionZone(void);
 s32 level_spawnZoneEffect(TriggerZone *obj);
 s32 level_spawnBoltRainZone(TriggerZone *obj);
-s32 func_15015300(TriggerZone *obj);
+s32 level_spawnBoltZone(TriggerZone *obj);
 void level_spawnBoltArcZone(TriggerZone *obj);
 s32 func_15015644(TriggerZone *obj);
 s32 level_spawnRopeZone(TriggerZone *obj);

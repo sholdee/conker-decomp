@@ -47,7 +47,7 @@ s32 player_getBaseCharacterType(Actor *obj) {
 }
 
 /* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
- * parameters. In multiplayer (gIsMultiplayer) with D_800D18A8 set, it instead picks the team's spawn
+ * parameters. In multiplayer (gIsMultiplayer) with gRespawnPending set, it instead picks the team's spawn
  * point farthest from the other team's players, plus a random term. When `useLink` is set, the
  * point's link is followed. Remembers the chosen index in the player's state; returns 1 when
  * there is no spawn table, else 0. */
@@ -68,9 +68,9 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
     s32 j; // spawn loop counter, then the chosen spawn index
 
     remember = TRUE;
-    if (level == 0x2B) {
+    if (level == LEVEL_WMP_BEACH) {
         remember = FALSE;
-        D_800D18A8 = 0;
+        gRespawnPending = 0;
     }
     if (gIsMultiplayer && gMenuState->selection == 0 && gSettings[3] != 0) {
         remember = FALSE;
@@ -88,7 +88,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
         spawnIndex = 0;
     }
     if (gSpawnPoints != NULL) {
-        if (gIsMultiplayer && D_800D18A8) {
+        if (gIsMultiplayer && gRespawnPending) {
             u8 candidates[32];
 
             team = movement_obj[playerIndex].team;
@@ -165,7 +165,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
         *outFacing = gSpawnPoints[j].facing;
         *outUnk14 = gSpawnPoints[j].unk14;
         *outDoorWalkTime = gSpawnPoints[j].doorWalkTime;
-        if (gIsMultiplayer && D_800D18A8 == 0) {
+        if (gIsMultiplayer && gRespawnPending == 0) {
             f32 angle = *outFacing * 3.1415927410f * (1.0f / 128);
             f32 offset = math_randomFloat() * 80.0f - 40.0f;
             outPos[0] += sinf(angle) * offset;
@@ -202,7 +202,7 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     s32 savedIndex;
     ActorRef event;
 
-    player_getSpawnPoint(obj->playernumber, spawnIndex, D_800D18A8, pos, &cameraEye, &tilt, &facing, &unk14, &doorWalkTime, unused, NULL);
+    player_getSpawnPoint(obj->playernumber, spawnIndex, gRespawnPending, pos, &cameraEye, &tilt, &facing, &unk14, &doorWalkTime, unused, NULL);
     savedObject = gCurrentActor;
     savedIndex = dc_glbl_CharNum;
     gCurrentActor = obj;
@@ -236,7 +236,7 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->ob_overslopey = 0.0f;
     if (obj->playernumber != 0xFF) {
         obj->mv->door_walkf_time = doorWalkTime;
-        if (gIsMultiplayer && D_800D18A8) {
+        if (gIsMultiplayer && gRespawnPending) {
             actor_resolveCollisions(obj, obj - movement_obj);
         }
         if (obj->mv->rt_context_b == 0 && obj->mv->GrenadeThrowState != 4 && obj->mv->GrenadeThrowState != 7) {

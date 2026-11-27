@@ -343,7 +343,7 @@ void zone_updateActor(Actor *actor) {
                         /* yaw * 65536/360 is a binary angle */
                         if (actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
                             actor->norun == 0 &&
-                            (actor->mv->weapon_status == 0 || level == 6) && actor->stickspeed > 8.0f) {
+                            (actor->mv->weapon_status == 0 || level == LEVEL_THE_WINDMILL) && actor->stickspeed > 8.0f) {
                             height = zones[i].y + zones[i].ySize;
                             flag = 0;
                             angle = (u32)(zones[i].yaw * 182.0444489f);

@@ -593,7 +593,7 @@ void collision_updateCameraZone(s32 index) {
         *cameraZone = zone;
         func_150A6760(index);
     }
-    if (level == 60) {
+    if (level == LEVEL_W3_HAUNTED_HOUSE) {
         func_150F33F8(index);
     }
 }

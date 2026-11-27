@@ -7,11 +7,11 @@
 u8 level_getEffectKind(void) {
     switch(level)
     {
-        case 0:
-        case 44:
-        case 55:
+        case LEVEL_W1_BULL_PADDOCK:
+        case LEVEL_W1_POO_CABIN:
+        case LEVEL_W1_U_BEND:
             return 2;
-        case 40:
+        case LEVEL_W2_TANKTUNNEL:
             return 6;
         default:
             return 5;

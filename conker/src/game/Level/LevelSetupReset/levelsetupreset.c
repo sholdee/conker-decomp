@@ -49,21 +49,21 @@ void func_1500E70C(s32 id) {
     }
 }
 
-/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from gScreenLayout, D_800DCA28/2C from gPlayerCount. */
-void func_1500E738(void) {
+/* Sets two (shift, scale = 1 / 2^shift) pairs: gLayoutDetailShift/24 from gScreenLayout, D_800DCA28/2C from gPlayerCount. */
+void level_setEffectDetail(void) {
     switch (gScreenLayout) {
     case 0:
-        D_800DCA20 = 0;
-        D_800DCA24 = 1.0f;
+        gLayoutDetailShift = 0;
+        gLayoutDetailScale = 1.0f;
         break;
     case 1:
-        D_800DCA20 = 1;
-        D_800DCA24 = 0.5f;
+        gLayoutDetailShift = 1;
+        gLayoutDetailScale = 0.5f;
         break;
     case 2:
     case 3:
-        D_800DCA20 = 2;
-        D_800DCA24 = 0.25f;
+        gLayoutDetailShift = 2;
+        gLayoutDetailScale = 0.25f;
         break;
     }
     switch (gPlayerCount) {
@@ -141,7 +141,7 @@ void level_setup01(void) {
         descriptor.extent.z = 900.0f - descriptor.origin.z;
         trail_createSprayEmitter(&descriptor, 1);
     }
-    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, sound_stopWhenSilentCallback, 0, 0, 72, 0);
+    sound_addDynamicSound(1567, (level == LEVEL_THE_WINDMILL) ? 52 : 7, 0, 0, 12000, 1000, 400, sound_stopWhenSilentCallback, 0, 0, 72, 0);
 }
 
 void level_setup36(void) {

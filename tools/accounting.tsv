@@ -697,7 +697,7 @@ light_cbLampParticle1	0x15009844	44	game	c		build/src/game/Lighting/LevelLights/
 light_cbSwingingLamps	0x15009870	36	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbFlickerSound0	0x15009894	60	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 func_150098D0	0x150098D0	40	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
-func_150098F8	0x150098F8	76	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
+light_cbColourCycle1	0x150098F8	76	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbJitter1	0x15009944	76	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbObjectCycle	0x15009990	168	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 func_15009A38	0x15009A38	104	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
@@ -713,7 +713,7 @@ light_cbJitter4	0x15009DB0	76	game	c		build/src/game/Lighting/LevelLights/levell
 light_cbJitter5	0x15009DFC	76	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbFlickerSound1	0x15009E48	60	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbPulse3	0x15009E84	68	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
-func_15009EC8	0x15009EC8	44	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
+light_cbEmptyEffect	0x15009EC8	44	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbFlickerSound3	0x15009EF4	60	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 light_cbPulse4	0x15009F30	68	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
 func_15009F74	0x15009F74	180	game	c		build/src/game/Lighting/LevelLights/levellights.c.o
@@ -773,7 +773,7 @@ func_1500DE88	0x1500DE88	1512	game	c		build/src/game/Particle/AreaParticles/area
 game_initLevelSubsystems	0x1500E470	336	game	c		build/src/game/Game/LevelInit/levelinit.c.o
 level_resetSetupState	0x1500E5C0	332	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 func_1500E70C	0x1500E70C	44	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
-func_1500E738	0x1500E738	344	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
+level_setEffectDetail	0x1500E738	344	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_setup21	0x1500E890	48	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_setup01	0x1500E8C0	480	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_setup36	0x1500EAA0	128	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
@@ -869,7 +869,7 @@ level_spawnLaserTubeZone	0x15014F6C	312	game	c		build/src/game/Level/ZoneSpawn/z
 level_addDustRegionZone	0x150150A4	96	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnZoneEffect	0x15015104	208	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnBoltRainZone	0x150151D4	300	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
-func_15015300	0x15015300	84	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
+level_spawnBoltZone	0x15015300	84	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnBoltArcZone	0x15015354	752	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 func_15015644	0x15015644	176	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
 level_spawnRopeZone	0x150156F4	540	game	c		build/src/game/Level/ZoneSpawn/zonespawn.c.o
@@ -1407,8 +1407,8 @@ actor_resolveAttachId	0x1504AEF4	28	game	c		build/src/game/Actor/Movement/moveme
 actor_updateAttachedObject	0x1504AF10	492	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateSwim	0x1504B0FC	2364	game	c		build/src/game/Actor/Movement/movement.c.o
 func_1504BA38	0x1504BA38	184	game	c		build/src/game/Actor/Movement/movement.c.o
-func_1504BAF0	0x1504BAF0	152	game	c		build/src/game/Actor/Movement/movement.c.o
-func_1504BB88	0x1504BB88	176	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_dropLiftedObject	0x1504BAF0	152	game	c		build/src/game/Actor/Movement/movement.c.o
+actor_applyTaskAttrib	0x1504BB88	176	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_tickTimers	0x1504BC38	500	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updatePissed	0x1504BE2C	588	game	c		build/src/game/Actor/Movement/movement.c.o
 actor_updateIdleAnim	0x1504C078	64	game	c		build/src/game/Actor/Movement/movement.c.o
@@ -2143,8 +2143,8 @@ func_1507DB64	0x1507DB64	8	game	c		build/src/game/Actor/KillRespawn/killrespawn.
 func_1507DB6C	0x1507DB6C	736	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 actor_applyHeadShot	0x1507DE4C	196	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 actor_applyPartHit	0x1507DF10	212	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
-func_1507DFE4	0x1507DFE4	304	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
-func_1507E114	0x1507E114	188	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
+actor_startSpawnCutscene	0x1507DFE4	304	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
+actor_resumeAtCheckpoint	0x1507E114	188	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 actor_getTrackPoint	0x1507E1D0	224	game	c		build/src/game/Actor/KillRespawn/killrespawn.c.o
 face_updateBlink	0x1507E2B0	272	game	c		build/src/game/Face/Expression/expression.c.o
 face_showEyeParts	0x1507E3C0	320	game	c		build/src/game/Face/Expression/expression.c.o
@@ -2198,7 +2198,7 @@ collision_rayHitSpheres	0x1508114C	1064	game	c		build/src/game/Collision/HitSphe
 collision_findHitSphereTarget	0x15081574	284	game	c		build/src/game/Collision/HitSphere/hitsphere.c.o
 collision_castRay	0x15081690	1424	game	c		build/src/game/Collision/RayCast/raycast.c.o
 collision_rayCylinder	0x15081C20	492	game	c		build/src/game/Collision/RayCast/raycast.c.o
-func_15081E0C	0x15081E0C	108	game	c		build/src/game/Collision/RayCast/raycast.c.o
+collision_applyShotPartHit	0x15081E0C	108	game	c		build/src/game/Collision/RayCast/raycast.c.o
 collision_applyRayHit	0x15081E78	1864	game	c		build/src/game/Collision/RayCast/raycast.c.o
 collision_trySpawnRecord	0x150825C0	924	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_trySpawnRecords	0x1508295C	124	game	c		build/src/game/Collision/Spawn/spawn.c.o
@@ -3686,7 +3686,7 @@ gfx_removeObject	0x15114B94	304	game	c		build/src/game/Gfx/WorldObject/worldobje
 gfx_objectSoundCallback	0x15114CC4	96	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
 gfx_playObjectSound	0x15114D24	480	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
 gfx_startObjectSound	0x15114F04	64	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
-func_15114F44	0x15114F44	364	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
+gfx_checkMapTriTables	0x15114F44	364	game	c		build/src/game/Gfx/WorldObject/worldobject.c.o
 prop_emptyBehavior22	0x151150B0	12	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_spinZ	0x151150BC	160	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
 prop_spinY	0x1511515C	160	game	c		build/src/game/Prop/ShakeSink/shakesink.c.o
@@ -3837,7 +3837,7 @@ camera_placeAtObject	0x15128774	108	game	c		build/src/game/Camera/Camera/camera.
 camera_updateAngleOffsets	0x151287E0	1232	game	c		build/src/game/Camera/TiltPresets/tiltpresets.c.o
 camera_processMessages	0x15128CB0	3088	game	c		build/src/game/Camera/CameraMessages/cameramessages.c.o
 func_151298C0	0x151298C0	116	game	c		build/src/game/Camera/CameraPoses/cameraposes.c.o
-func_15129934	0x15129934	764	game	c		build/src/game/Camera/CameraPoses/cameraposes.c.o
+camera_updatePoseEye	0x15129934	764	game	c		build/src/game/Camera/CameraPoses/cameraposes.c.o
 camera_updateFreeFly	0x15129C30	1840	game	c		build/src/game/Camera/FreeFlyCamera/freeflycamera.c.o
 camera_updateFrontEndPath	0x1512A360	48	game	c		build/src/game/Camera/FreeFlyCamera/freeflycamera.c.o
 camera_updateFloorHeights	0x1512A390	2152	game	c		build/src/game/Camera/CameraOcclusion/cameraocclusion.c.o
@@ -4279,7 +4279,7 @@ func_1514DA38	0x1514DA38	108	game	c		build/src/game/Effects/ActorAttachments/act
 func_1514DAA4	0x1514DAA4	116	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachCharacterWatcher	0x1514DB18	64	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DB58	0x1514DB58	12	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
-effect_spawnRopeTieInLevel20	0x1514DB64	52	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
+effect_spawnRopeTieInDinoArena	0x1514DB64	52	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DB98	0x1514DB98	32	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 effect_attachBone2Light	0x1514DBB8	128	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
 func_1514DC38	0x1514DC38	36	game	c		build/src/game/Effects/ActorAttachments/actorattachments.c.o
@@ -4488,7 +4488,7 @@ trail_growFallingTrail	0x1515CF9C	148	game	c		build/src/game/Trail/FallingTrail/
 trail_shrinkFallingTrail	0x1515D030	88	game	c		build/src/game/Trail/FallingTrail/fallingtrail.c.o
 trail_spawnLevelEffect	0x1515D088	168	game	c		build/src/game/Trail/FallingTrail/fallingtrail.c.o
 trail_updateBurstEmitter	0x1515D130	784	game	c		build/src/game/Trail/FallingTrail/fallingtrail.c.o
-func_1515D440	0x1515D440	64	game	c		build/src/game/Lighting/PointLight/pointlight.c.o
+light_allocAmbients	0x1515D440	64	game	c		build/src/game/Lighting/PointLight/pointlight.c.o
 light_allocGfxLights	0x1515D480	84	game	c		build/src/game/Lighting/PointLight/pointlight.c.o
 light_setAmbient	0x1515D4D4	76	game	c		build/src/game/Lighting/PointLight/pointlight.c.o
 light_allocPointLight	0x1515D520	140	game	c		build/src/game/Lighting/PointLight/pointlight.c.o
@@ -5732,7 +5732,7 @@ screen_blurImage	0x151D61B0	616	game	c		build/src/game/Screen/FrameImage/frameim
 screen_drawImageAlpha	0x151D6418	728	game	c		build/src/game/Screen/FrameImage/frameimage.c.o
 screen_setFrameEcho	0x151D66F0	136	game	c		build/src/game/Screen/FrameImage/frameimage.c.o
 screen_drawFrameEcho	0x151D6778	504	game	c		build/src/game/Screen/FrameImage/frameimage.c.o
-func_151D6970	0x151D6970	68	game	c		build/src/game/Text/AmountText/amounttext.c.o
+text_spawnVolcanoRaceTouchDrift	0x151D6970	68	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_spawnHealthPickupBurst	0x151D69B4	584	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_spawnAmount	0x151D6BFC	612	game	c		build/src/game/Text/AmountText/amounttext.c.o
 text_updateCashModel	0x151D6E60	416	game	c		build/src/game/Text/AmountText/amounttext.c.o

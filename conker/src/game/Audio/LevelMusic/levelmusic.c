@@ -34,8 +34,8 @@ void music_startLevelMusic(void) {
     cnt = 0;
     a2 = 0;
     gMusicPaused = 0;
-    if (D_800B0DF0) {
-        q = D_800B0DF0->music;
+    if (gLevelHeader) {
+        q = gLevelHeader->music;
     } else {
         q.mode = 1;
         q.volume = 0;
@@ -191,9 +191,9 @@ void music_initLevelViewState() {
     s32 i;
     s32 j;
 
-    gDefaultNear = D_800B0DF0->unk2;
-    gDefaultFar = D_800B0DF0->unk0;
-    D_800D3670 = 100.0f - gDefaultFar;
+    gDefaultNear = gLevelHeader->nearPlane;
+    gDefaultFar = gLevelHeader->farPlane;
+    gCullFarZ = 100.0f - gDefaultFar;
 
     level_initTintWaves();
 
@@ -240,9 +240,9 @@ void music_initLevelViewState() {
 //     s32 i;
 //     s32 j;
 //
-//     gDefaultNear = D_800B0DF0->unk2;
-//     gDefaultFar = D_800B0DF0->unk0;
-//     D_800D3670 = 100.0f - gDefaultFar;
+//     gDefaultNear = gLevelHeader->nearPlane;
+//     gDefaultFar = gLevelHeader->farPlane;
+//     gCullFarZ = 100.0f - gDefaultFar;
 //
 //     level_initTintWaves();
 //

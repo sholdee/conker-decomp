@@ -10,7 +10,7 @@ void level_initTintWaves(arg0)
     s32 j;
     s32 idx;
 
-    idx = D_800B0DF0->unk29;
+    idx = gLevelHeader->tintPreset;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             gTintWavePhases[i][j] = 0;

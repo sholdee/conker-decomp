@@ -90,7 +90,7 @@ typedef struct ActorTracker {
 /* game/Sprite/PointGroup/pointgroup.c */
 extern f32 (*gPointGroupMtx)[4]; // the current float matrix
 extern s32 gSegmentBases[16];   // segment base addresses
-extern u8 D_800D2C68;
+extern u8 gAddingObjectTris;
 void sprite_transformPointGroup(PointGroup *group, f32 (*out)[3]);
 void sprite_spreadGroupSlots(PointGroup *group, GroupPoint **slots);
 void sprite_rotateTexcoords(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height);

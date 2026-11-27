@@ -32,11 +32,11 @@ s32 effect_getAltFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
-/* Effect id for an actor's effect kind: kind 1 in world 4 (level) is 6 when func_151420F8
+/* Effect id for an actor's effect kind: kind 1 in LEVEL_W2_OUTSIDE_MOLEHOLE is 6 when func_151420F8
    accepts the actor and 3 otherwise; everything else is unmapped (-1). */
 s32 effect_selectAltFootEffect(s32 kind, Actor *actor) {
     if (kind == 1) {
-        if (level == 4) {
+        if (level == LEVEL_W2_OUTSIDE_MOLEHOLE) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }

@@ -9,8 +9,8 @@ void level_setup31(void) {
     prop_startWaveChain(2);
     prop_startWaveChain(3);
     if ((gTaskDoneBits[0x14] & 1) != 0) {
-        D_800B0DF0->unk5 = 0x30;
-        D_800B0DF0->unk6 = 0x38;
-        D_800B0DF0->unk7 = 0x5F;
+        gLevelHeader->backgroundRed = 0x30;
+        gLevelHeader->backgroundGreen = 0x38;
+        gLevelHeader->backgroundBlue = 0x5F;
     }
 }

@@ -41,7 +41,7 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
                 cutscene_setAnchor(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
             }
             savedValue = level;
-            level = 0x25;
+            level = LEVEL_GENERIC_CUTSCENES;
             // matching: passing 0x25 directly reschedules the switch
             cutscene_start(level, id, 0, 0, 0);
             level = savedValue;

@@ -181,16 +181,16 @@ s32 effect_getActorEffectSelector(Actor *actor) {
 }
 /* Picks an effect variant from the current world (level) and the given type. */
 s32 effect_getSurfaceEffectVariant(u32 type) {
-    if (level == 0x2F) {
+    if (level == LEVEL_W2_LAB) {
         return 6;
     }
-    if (level == 0x42) {
+    if (level == LEVEL_W1_BRONTO_THROAT) {
         return 7;
     }
-    if (level == 0x27) {
+    if (level == LEVEL_W1_BEE_CAVERN) {
         return 8;
     }
-    if (level == 0x19) {
+    if (level == LEVEL_W1_VOLCANO_INSIDE) {
         return 5;
     }
     switch (type) {
@@ -205,12 +205,12 @@ s32 effect_getSurfaceEffectVariant(u32 type) {
     case 2:
     case 8:
     case 12:
-        if (level == 2) {
+        if (level == LEVEL_W1_BRONTO_CAVERN) {
             return 7;
         }
         return 4;
     case 5:
-        if (level == 0x14) {
+        if (level == LEVEL_W1_DINO_ARENA) {
             return 5;
         }
         return 9;

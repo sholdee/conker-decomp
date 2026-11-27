@@ -35,12 +35,12 @@ typedef struct {
 
 #define WORK(obj) ((TexAnimWork *)&(obj)->touch)
 
-/* One texture animation: a sequence of texture assets, optionally restricted to one world. */
+/* One texture animation: a sequence of texture assets, optionally restricted to one level (levelId, -1 for every level). */
 typedef struct {
     s32 *frames;
     u8 frameCount;
     u8 kind;
-    s8 world;
+    s8 levelId;
     u8 ticksPerFrame;
     u8 pingPong;
     u8 pad9[3];
@@ -50,34 +50,34 @@ typedef struct {
 
 /* The texture animations of the world objects (.data, after game/Prop/PropMover/propmover.c's). */
 static TexAnim gTexAnims[24] = {
-    { D_8009177C, 15, 11, 41, 1, 1 },
-    { D_8009177C, 15, 10, 41, 1, 1 },
-    { D_8009177C, 15, 12, 41, 1, 1 },
-    { D_8009177C, 15, 7, 6, 1, 1 },
-    { D_8009177C, 15, 9, 6, 1, 1 },
-    { D_8009177C, 15, 12, 6, 1, 1 },
-    { D_8009177C, 15, 13, 6, 1, 1 },
-    { D_8009177C, 15, 7, 59, 1, 1 },
-    { D_8009177C, 15, 9, 59, 1, 1 },
-    { D_8009177C, 15, 11, 59, 1, 1 },
-    { D_8009177C, 15, 7, 7, 1, 1 },
-    { D_8009177C, 15, 4, 7, 1, 1 },
-    { D_8009177C, 15, 5, 7, 1, 1 },
-    { D_8009177C, 15, 6, 7, 1, 1 },
-    { D_8009177C, 15, 9, 7, 2, 1 },
-    { D_8009177C, 15, 10, 7, 1, 1 },
-    { D_800917D8, 3, 9, 23, 6, 0 },
-    { D_800917D8, 3, 9, 18, 6, 0 },
-    { D_8009177C, 15, 9, 65, 1, 1 },
-    { D_8009177C, 15, 10, 65, 1, 1 },
-    { D_8009177C, 15, 11, 65, 1, 1 },
-    { D_8009177C, 15, 12, 65, 1, 1 },
-    { D_8009177C, 15, 13, 65, 1, 1 },
-    { D_80090338, 3, 255, 23, 3, 0 },
+    { D_8009177C, 15, 11, LEVEL_W1_TRAINING, 1, 1 },
+    { D_8009177C, 15, 10, LEVEL_W1_TRAINING, 1, 1 },
+    { D_8009177C, 15, 12, LEVEL_W1_TRAINING, 1, 1 },
+    { D_8009177C, 15, 7, LEVEL_THE_WINDMILL, 1, 1 },
+    { D_8009177C, 15, 9, LEVEL_THE_WINDMILL, 1, 1 },
+    { D_8009177C, 15, 12, LEVEL_THE_WINDMILL, 1, 1 },
+    { D_8009177C, 15, 13, LEVEL_THE_WINDMILL, 1, 1 },
+    { D_8009177C, 15, 7, LEVEL_W1_WINDMILL_EXPLODED, 1, 1 },
+    { D_8009177C, 15, 9, LEVEL_W1_WINDMILL_EXPLODED, 1, 1 },
+    { D_8009177C, 15, 11, LEVEL_W1_WINDMILL_EXPLODED, 1, 1 },
+    { D_8009177C, 15, 7, LEVEL_W1_DOG_FISH, 1, 1 },
+    { D_8009177C, 15, 4, LEVEL_W1_DOG_FISH, 1, 1 },
+    { D_8009177C, 15, 5, LEVEL_W1_DOG_FISH, 1, 1 },
+    { D_8009177C, 15, 6, LEVEL_W1_DOG_FISH, 1, 1 },
+    { D_8009177C, 15, 9, LEVEL_W1_DOG_FISH, 2, 1 },
+    { D_8009177C, 15, 10, LEVEL_W1_DOG_FISH, 1, 1 },
+    { D_800917D8, 3, 9, LEVEL_W1_DOG_FISH_NURSERY_PART1, 6, 0 },
+    { D_800917D8, 3, 9, LEVEL_W1_INSIDE_SAFE, 6, 0 },
+    { D_8009177C, 15, 9, LEVEL_W3_HORROR_INTRO, 1, 1 },
+    { D_8009177C, 15, 10, LEVEL_W3_HORROR_INTRO, 1, 1 },
+    { D_8009177C, 15, 11, LEVEL_W3_HORROR_INTRO, 1, 1 },
+    { D_8009177C, 15, 12, LEVEL_W3_HORROR_INTRO, 1, 1 },
+    { D_8009177C, 15, 13, LEVEL_W3_HORROR_INTRO, 1, 1 },
+    { D_80090338, 3, 255, LEVEL_W1_DOG_FISH_NURSERY_PART1, 3, 0 },
 };
 
 /**
- * Advances the texture animation that matches obj's kind in the current world and loads the
+ * Advances the texture animation that matches obj's kind in the current level and loads the
  * current frame's texture into obj's display list.
  * texIndices caches the G_SETTIMG indices found by prop_findSetTimg (second << 16 | first);
  * animState packs the play direction and tick counter (direction << 16 | tick).
@@ -99,8 +99,8 @@ void prop_animateTexture(WorldObject *obj, s32 *texIndices, s32 *animState) {
     anim = NULL;
     for (i = 0; i < 24; i++) {
         kind = gTexAnims[i].kind;
-        if (gTexAnims[i].world != -1) {
-            if (level != gTexAnims[i].world) {
+        if (gTexAnims[i].levelId != -1) {
+            if (level != gTexAnims[i].levelId) {
                 continue;
             }
             if (kind != 0xFF) {
@@ -139,7 +139,7 @@ void prop_animateTexture(WorldObject *obj, s32 *texIndices, s32 *animState) {
         }
         value = anim->frames[tick / anim->ticksPerFrame];
         paletteAddr = 0;
-        if (level == 6 || level == 0x3B) {
+        if (level == LEVEL_THE_WINDMILL || level == LEVEL_W1_WINDMILL_EXPLODED) {
             flags = 3;
         } else {
             flags = 0x3E;

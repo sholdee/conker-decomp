@@ -48,7 +48,7 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     bzero(view, sizeof(Camera));
     view->Snap = 1;
     view->CNumber = index;
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < CAMERA_MODE_COUNT; i++) {
         camera_popMode(view, i);
         view->savedDistIndex[i] = 999;
     }
@@ -74,7 +74,7 @@ void camera_resetView(Camera *view, s32 index, s16 resource, s32 mode) {
     view->FCameraIndex = -1;
     view->UDHitsCounter = 1;
     view->TonyHitsClear = 1;
-    view->NearPlane = (u32)D_800B0DF0->unk2;
+    view->NearPlane = (u32)gLevelHeader->nearPlane;
     view->lastPlayerPos.x = view->focus.x;
     view->lastPlayerPos.y = view->focus.y;
     view->lastPlayerPos.z = view->focus.z;
@@ -159,7 +159,7 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye) {
     camera_updatePlayerAngle(view);
 
     view->SpecialFlags |= 4;
-    if (level != 0x21 && gCutsceneStates[0] != 1) {
+    if (level != LEVEL_WFRONTEND_TABLE && gCutsceneStates[0] != 1) {
         camera_queueMessage(view, 5, NULL);
         gCamShot.yaw = view->CameraAngle;
         camera_queueMessage(view, 8, &gCamShot);

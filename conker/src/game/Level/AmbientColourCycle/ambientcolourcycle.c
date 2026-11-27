@@ -28,7 +28,7 @@ void level_startAmbientColourCycle(s32 arg0) {
 void level_attachDripEmitter(Actor *arg0) {
     ActorLink tmp;
 
-    if (level != 24) {
+    if (level != LEVEL_W5_THRONE_ROOM) {
         tmp.actor = arg0;
         tmp.actorId = arg0->unique_id;
         tmp.timer = 300;

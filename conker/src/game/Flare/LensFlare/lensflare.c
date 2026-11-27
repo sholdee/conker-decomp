@@ -12,10 +12,10 @@ LensFlare *gLensFlares; /* head of the lens flare list */
 #include "functions.h"
 #include "variables.h"
 
-/* The sun position of the levels whose LevelHeader.unk10 is 1. */
+/* The sun position of the levels whose LevelHeader.sunPosition is 1. */
 static f32 gSunPosition[3] = { -73.0f, 80.0f, -95.0f };
 
-/* Per LevelHeader.unk10: the sun position of the FLARE_SUN flares (NULL: no sun). */
+/* Per LevelHeader.sunPosition: the sun position of the FLARE_SUN flares (NULL: no sun). */
 f32 *gSunPositions[2] = { NULL, gSunPosition };
 
 /* Sprite sizes, one row per flare type. */
@@ -30,7 +30,7 @@ static const u8 gFlareSpriteSizes[2][7] = {
  * the line from its screen position through the screen centre.
  */
 
-#define FLARE_SUN       1 /* position comes from gSunPositions[D_800B0DF0->unk10] */
+#define FLARE_SUN       1 /* position comes from gSunPositions[gLevelHeader->sunPosition] */
 #define FLARE_FLASH     2 /* also drives the screen flash level gScreenFlash */
 #define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
@@ -128,7 +128,7 @@ Gfx *flare_drawAll(Gfx *gfx, s32 arg1) {
                 if (gDaylight == 0) {
                     hidden = TRUE;
                 } else {
-                    sunPos = gSunPositions[D_800B0DF0->unk10];
+                    sunPos = gSunPositions[gLevelHeader->sunPosition];
                     if (flare_projectToScreen(sunPos[0], sunPos[1], sunPos[2], &flare->screenX, &flare->screenY) != 1) {
                         hidden = TRUE;
                     }

@@ -191,7 +191,7 @@ s32 rom_loadInto(u8 *romAddr, void *dst, u32 info, u32 maxSize) {
         rom_read((s32)romAddr, packed, (size + 0xF) & ~0xF, 1);
         /* The first word of compressed data is its unpacked size. */
         unpackedSize = *(s32 *)packed & 0x7FFFFFFF;
-        if ((size = boot_decompress(packed, dst, D_8003809C)) != unpackedSize) {
+        if ((size = boot_decompress(packed, dst, gDecompressWork)) != unpackedSize) {
             gDebugStatusCode = 0x0C000036;
             debug_fatalTrap();
         }
@@ -225,7 +225,7 @@ void *rom_loadAlloc(u8 *romAddr, s32 info, u32 *size) {
             if (*size < 1000000) {
                 data = allocate_memory(*size, 1, 2, 2);
                 if (data != NULL) {
-                    loadSize = boot_decompress(packed, data, D_8003809C);
+                    loadSize = boot_decompress(packed, data, gDecompressWork);
                 } else {
                     loadSize = 0;
                 }

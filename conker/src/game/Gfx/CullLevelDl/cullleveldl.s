@@ -201,8 +201,8 @@ glabel gfx_copyLevelDlCulled
     /* D28C0 150A5410 C43B35E4 */  lwc1       $f27, %lo(gFrustumSlopeX + 0x4)($at)
     /* D28C4 150A5414 4600E707 */  neg.s      $f28, $f28
     /* D28C8 150A5418 4600DEC7 */  neg.s      $f27, $f27
-    /* D28CC 150A541C 3C01800D */  lui        $at, %hi(D_800D3670)
-    /* D28D0 150A5420 C43D3670 */  lwc1       $f29, %lo(D_800D3670)($at)
+    /* D28CC 150A541C 3C01800D */  lui        $at, %hi(gCullFarZ)
+    /* D28D0 150A5420 C43D3670 */  lwc1       $f29, %lo(gCullFarZ)($at)
     /* D28D4 150A5424 C4D40000 */  lwc1       $f20, 0x0($a2)
     /* D28D8 150A5428 C4C10004 */  lwc1       $f1, 0x4($a2)
     /* D28DC 150A542C C4C20008 */  lwc1       $f2, 0x8($a2)

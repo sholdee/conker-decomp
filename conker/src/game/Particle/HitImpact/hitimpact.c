@@ -84,11 +84,11 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         }
         sound_startVoiceAt(0, sfx, 0x6590, (math_random() % 500U) - 250, 0, 0, pos->x, pos->y, pos->z, 500, 800);
     }
-    if (math_randomFloat() < D_800DCA24) {
+    if (math_randomFloat() < gLayoutDetailScale) {
         TrailBurst sparks;
 
-        sparks.countBase = 5 >> D_800DCA20;
-        sparks.countRange = 4 >> D_800DCA20;
+        sparks.countBase = 5 >> gLayoutDetailShift;
+        sparks.countRange = 4 >> gLayoutDetailShift;
         sparks.pos = *pos;
         sparks.sizeBase = 8.25f;
         sparks.sizeRange = 5.859999657f;
@@ -905,7 +905,7 @@ s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, v
         obj = &movement_obj[i];
         if (obj->type == 0) continue;
         if (obj->drawtype == 3) continue;
-        if (level != 0x23 && obj->character_type == 0xFF) continue;
+        if (level != LEVEL_W2_WARBOSS && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
         if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) continue;

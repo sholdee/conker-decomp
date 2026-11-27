@@ -32,7 +32,7 @@ PointLight *gPickedLights[14];    // point lights light_pickLights picked this f
 void view_initDefaultProjection(s32 arg0) {
     gDefaultNear = gFogNear;
     gDefaultFar = gFogFar;
-    D_800D3670 = 100.0f - gDefaultFar;
+    gCullFarZ = 100.0f - gDefaultFar;
     func_151EF954(&gView0Projection, -gViews->halfWidth, gViews->halfWidth, -gViews->halfHeight,
                   gViews->halfHeight, 1.0f, 10000.0f, 1.0f);
 }
@@ -209,19 +209,19 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     if (!skipWorld) {
         switch (level) {
-        case 0x14:
+        case LEVEL_W1_DINO_ARENA:
             gfx = effect_bindBounceRecordFrames(gfx);
             break;
-        case 0x1A:
+        case LEVEL_WMP_HEIST:
             gfx = effect_bindFlagLightTextures(gfx);
             break;
-        case 0x13:
+        case LEVEL_W2_HARBOUR:
             gfx = effect_bindMaterialTextures(gfx);
             break;
-        case 0x35:
+        case LEVEL_W1_POO_BOSS:
             gfx = effect_setScrolledTileSizes(gfx);
             break;
-        case 0x33:
+        case LEVEL_WMP_VOLCANO_RACE:
             gfx = effect_bindAnimatedTextures(gfx);
             break;
         }
@@ -234,11 +234,11 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                         gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][gDrawBufferIndex], &gViewGfxLightCount, 1, 0, 0x25,
                         gPickedLights);
     if (!skipWorld) {
-        if (level != 5) {
+        if (level != LEVEL_INTRO_CUTSCENE) {
             if (gCullLevelDisplayList) {
                 gDPPipeSync(gfx++);
                 if (gMeshBuilt) {
-                    if (level != 0x14 && level != 0x33 && level != 0x32) {
+                    if (level != LEVEL_W1_DINO_ARENA && level != LEVEL_WMP_VOLCANO_RACE && level != LEVEL_W1_VOLCANO_RACE) {
                         gfx = gfx_copyLevelDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
                     } else {
                         gSPDisplayList(gfx++, gLevelDisplayLists[0]);
@@ -247,7 +247,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                         gDPPipeSync(gfx++);
                         gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
-                        if (level == 0x35) {
+                        if (level == LEVEL_W1_POO_BOSS) {
                             gfx = effect_setScrolledTileSizes(gfx);
                         }
                         gSPDisplayList(gfx++, gLevelDisplayLists[1]);

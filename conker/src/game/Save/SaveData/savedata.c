@@ -57,9 +57,9 @@ void save_resetGameState(void) {
     s32 i;
 
     zone_resetTaskProgress();
-    for (i = 0; i < 69; i++) { gPlayedCutscenes[i] = 0; }
+    for (i = 0; i < LEVEL_COUNT; i++) { gPlayedCutscenes[i] = 0; }
 
-    gCheckpointLevel = 24;
+    gCheckpointLevel = LEVEL_W5_THRONE_ROOM;
     gPlayTime = 0;
     D_800D2E45 = 1;
 }
@@ -136,7 +136,7 @@ void save_readFile(s32 eepromSlot) {
         gPlayTime = value;
         byte = *p++;
         bit = 0x80;
-        for (i = 0; i < 69; i++) {
+        for (i = 0; i < LEVEL_COUNT; i++) {
             gPlayedCutscenes[i] = 0;
             mask = (u64)1 << (gSaveEntryBits[i] - 1);
             for (j = 0; j < gSaveEntryBits[i]; j++) {
@@ -253,7 +253,7 @@ void save_writeSlot(s32 saveSlot) {
     for (i = 0; i < 69; i++) { p[i] = 0; }
     byte = 0;
     bit = 0x80;
-    for (i = 0; i < 69; i++) {
+    for (i = 0; i < LEVEL_COUNT; i++) {
         mask = (u64)1 << (gSaveEntryBits[i] - 1);
         for (j = 0; j < gSaveEntryBits[i]; j++) {
             if (gPlayedCutscenes[i] & mask) {

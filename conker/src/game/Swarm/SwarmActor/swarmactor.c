@@ -321,7 +321,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && gCutsceneStates[0] != 0 && gCutsceneIds[0] == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == LEVEL_THE_WINDMILL && gCutsceneStates[0] != 0 && gCutsceneIds[0] == 0xF) {
         actor->flags &= ~8;
         if (gCutsceneStates[0] == 0 || gCutsceneIds[0] != 0xF) {
             effect_destroyObject(&actor->header);

@@ -72,7 +72,7 @@ ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32
         for (i = 0; i <= gScreenLayout; i++) {
             fx->attach.handles[i] = light_allocGfxLights(attachArg);
         }
-        fx->attach.sharedHandle = func_1515D440();
+        fx->attach.sharedHandle = light_allocAmbients();
     }
     return fx;
 }
@@ -203,9 +203,9 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     gSPSegment(gfx++, 3, fx->model->partMtx[gDrawBufferIndex]);
     gSPSegment(gfx++, 1, fx->segment1);
     if (fx->params.color0.alpha < 0xFF || fx->params.color1.alpha < 0xFF) {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : gEffectXluRenderModes);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? gEffectXluNoZRenderModes : gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : gEffectOpaRenderModes);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? gEffectOpaNoZRenderModes : gEffectOpaRenderModes);
     }
     for (i = 0; i < fx->displayListCount; i++) {
         gSPDisplayList(gfx++, fx->displayLists[i]);

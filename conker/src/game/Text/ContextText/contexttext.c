@@ -220,7 +220,7 @@ void text_closeContextText(void) {
 void text_updateContextText(void) {
     if (gContextTextOpen && gContextTextBox->state == 0) {
         text_closeContextText();
-        if (level != 0x29 && level != 0x2E) {
+        if (level != LEVEL_W1_TRAINING && level != LEVEL_W1_TRAINING_CAVE) {
             gSeenTextBits[8] |= 0x10;
         }
         if (gContextTextZone != NULL) {

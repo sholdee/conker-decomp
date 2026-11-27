@@ -21,7 +21,7 @@ void game_startMatch(s16 arg0, s16 arg1, s16 arg2) {
     mp_clearGame();
     func_15000090();
     gRumbleRedetect = 1;
-    D_800D18A8 = 0;
+    gRespawnPending = 0;
     gClearToWhite = 0;
 }
 
@@ -42,48 +42,48 @@ void game_loadLevel(void) {
     heap_freeTaggedBlocks();
     collision_loadMapSettings(gNextLevel);
     switch (gNextLevel) {
-    case 0x1A:
-    case 0x24:
-    case 0x2B:
-    case 0x2D:
-    case 0x30:
-    case 0x33:
-    case 0x34:
-    case 0x3F:
+    case LEVEL_WMP_HEIST:
+    case LEVEL_WMP_TANK:
+    case LEVEL_WMP_BEACH:
+    case LEVEL_WMP_MAIN_WAR:
+    case LEVEL_WMP_BEACH_WAR:
+    case LEVEL_WMP_VOLCANO_RACE:
+    case LEVEL_WMP_TUNNELS:
+    case LEVEL_WMP_RAPTOR:
         value = 0x103;
-        if (gNextLevel == 0x24) {
+        if (gNextLevel == LEVEL_WMP_TANK) {
             value = 0xF3;
         }
-        if (gNextLevel == 0x33) {
+        if (gNextLevel == LEVEL_WMP_VOLCANO_RACE) {
             value -= 8;
         }
-        if (gNextLevel == 0x3F) {
+        if (gNextLevel == LEVEL_WMP_RAPTOR) {
             value -= 8;
         }
-        if (gNextLevel == 0x34) {
+        if (gNextLevel == LEVEL_WMP_TUNNELS) {
             value += 8;
         }
         break;
-    case 0x13:
+    case LEVEL_W2_HARBOUR:
         value = 0xEB;
         if (!(gTaskDoneBits[0x11] & 4)) {
-            value = D_800B0DF0->unk11 + 0xEB;
+            value = gLevelHeader->unk11 + 0xEB;
         }
         break;
     default:
-        value = D_800B0DF0->unk11 + 0xEB;
+        value = gLevelHeader->unk11 + 0xEB;
         break;
     }
     libc_reinitPaging(value);
     gRumbleSuppressed = 0;
-    func_1500E738();
+    level_setEffectDetail();
     particle_resetModelList();
     gGlowCount = 0;
     gPendingTrailPairTask = NULL;
     effect_clearHomingEffects();
     gReleaseRawBanksPending = 1;
     resource = gPlayerSpawnPoints[0];
-    slot = func_1507E114(&resource);
+    slot = actor_resumeAtCheckpoint(&resource);
     if (gFrontEndState == 2) {
         resource = D_800E0BD1;
     }
@@ -155,7 +155,7 @@ void game_loadLevel(void) {
     collision_loadCylinderSets(level);
     light_applyZones();
     collision_initMapBackground(level);
-    if (level == 0x1D) {
+    if (level == LEVEL_FRONTEND) {
         save_clearMenuCharacters();
     }
     game_initLevelSubsystems(level);
@@ -183,7 +183,7 @@ void game_loadLevel(void) {
     script_runTasks(1);
     level_spawnZones();
     if (slot != 0) {
-        func_1507DFE4(resource, slot - 1);
+        actor_startSpawnCutscene(resource, slot - 1);
     }
     func_151E562C();
     if ((D_800E0B99 != 0) || (D_800DDE38 == 2)) {
@@ -207,8 +207,8 @@ void game_loadLevel(void) {
             zone_updateActor(&movement_obj[i]);
         }
     }
-    if ((D_800D18A8 != 0) && (level != 0x22)) {
-        D_800D18A8 = 0;
+    if ((gRespawnPending != 0) && (level != LEVEL_WFRONTEND_HELL)) {
+        gRespawnPending = 0;
         effect_showStatCounter(0xFF, 1);
     }
     script_autoSave();

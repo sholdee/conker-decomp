@@ -793,7 +793,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.y = &obj->ypos;
         desc.z = &obj->zpos;
         desc.lifetime = 300;
-        desc.rate = 0.3033999801f * D_800DCA24;
+        desc.rate = 0.3033999801f * gLayoutDetailScale;
         desc.flags = 4;
         desc.emitter = 4;
         desc.unk18 = 1;
@@ -1649,21 +1649,20 @@ void effect_updateBoneBurst(BurstEffect *effect) {
 }
 
 /* Message handler of the burst: message 0x3B (effect_sendBurstOwnerGone) for its owner frees it; the rest go to effect_handleOwnerActorEvent. */
-void effect_boneBurstMessage(s32 effect, s32 msg, u8 msgId) {
+void effect_boneBurstMessage(void *effect, s32 msg, u8 msgId) {
     // matching: the original reads its parameters through this pointer; typed parameters
     // with the same body let IDO merge the two loads of msg
-    s32 *args = &effect;
-    s32 owner;
+    void **args = &effect;
+    BurstData *data;
 
     if (msgId == 0x3B) {
-        owner = args[0] + 0x28; /* &((BurstEffect *)effect)->data.owner */
-        if (((ActorRef *)msg)->actor == ((ActorRef *)owner)->actor ||
-            ((ActorRef *)owner)->uniqueId == ((ActorRef *)args[1])->uniqueId) {
-            effect_destroyObject((EffectHeader *)args[0]);
+        data = &((BurstEffect *)args[0])->data;
+        if (((ActorRef *)msg)->actor == data->owner || data->ownerId == ((ActorRef *)args[1])->uniqueId) {
+            effect_destroyObject(args[0]);
         }
     } else {
-        owner = args[0] + 0x28;
-        effect_handleOwnerActorEvent(msg, msgId, owner, owner + 4, args[0]);
+        data = &((BurstEffect *)args[0])->data;
+        effect_handleOwnerActorEvent(msg, msgId, &data->owner, &data->ownerId, args[0]);
     }
 }
 

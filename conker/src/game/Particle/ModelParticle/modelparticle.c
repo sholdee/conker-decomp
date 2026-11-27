@@ -239,8 +239,8 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
             node->prev = NULL;
             node->model = spawn->model;
             if (spawn->flags & 0x100000) {
-                if (level == 0x3B || level == 6 || level == 0x13 || gIsMultiplayer != 0 ||
-                    level == 2) {
+                if (level == LEVEL_W1_WINDMILL_EXPLODED || level == LEVEL_THE_WINDMILL || level == LEVEL_W2_HARBOUR ||
+                    gIsMultiplayer != 0 || level == LEVEL_W1_BRONTO_CAVERN) {
                     node->keepLoaded = FALSE;
                 } else {
                     node->keepLoaded = TRUE;
@@ -304,7 +304,7 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
         for (i = 0; i <= gScreenLayout; i++) {
             particle->link.handles[i] = light_allocGfxLights(arg1);
         }
-        particle->link.sharedHandle = func_1515D440();
+        particle->link.sharedHandle = light_allocAmbients();
     }
     particle->flags &= ~0x200000;
     return particle;

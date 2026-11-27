@@ -708,8 +708,8 @@ void level_loadModels(s32 levelId) {
     s32 size;
     s32 id;
 
-    if (levelId >= 69) {
-        levelId = 0;
+    if (levelId >= LEVEL_COUNT) {
+        levelId = LEVEL_W1_BULL_PADDOCK;
     }
     models = rom_loadPathTable(&loaded, 0, &count, 2, 4, levelId);
     gLevelModels = models;
@@ -754,9 +754,9 @@ void level_loadModels(s32 levelId) {
             }
         }
     }
-    if (D_800B0DF0->assetList != 0) {
+    if (gLevelHeader->assetList != 0) {
         j = 0;
-        while ((id = gLevelAssetLists[D_800B0DF0->assetList][j++]) != 0) {
+        while ((id = gLevelAssetLists[gLevelHeader->assetList][j++]) != 0) {
             texture_getAddress(id, &size, 62, 0);
         }
     }
@@ -774,7 +774,7 @@ s32 level_resetTextureTable(void) {
     gTexAgeFirst = 0xFFFF;
     gTexAgeLast = -1;
 
-    if (level != 1 && level != 50) {
+    if (level != LEVEL_W1_BARN_INSIDE && level != LEVEL_W1_VOLCANO_RACE) {
         gTexAgeThrottle = 0;
     } else {
         gTexAgeThrottle = 1;
@@ -821,7 +821,7 @@ void level_buildCollisionTris(s32 unused) {
 
     gMeshBuilt = 0;
     collision_initTriArena();
-    D_800D2C68 = 0;
+    gAddingObjectTris = 0;
 
     collision_beginMapTris(0);
     collision_addDlTriCount(gLevelDisplayLists[0]);
@@ -843,7 +843,7 @@ void level_buildCollisionTris(s32 unused) {
     }
     collision_allocMapTriTables();
 
-    D_800D2C68 = 1;
+    gAddingObjectTris = 1;
     gSegmentBases[1] = 0;
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].object_status & 0x60) != 0x20) {
@@ -859,13 +859,13 @@ void level_buildCollisionTris(s32 unused) {
     }
     collision_endMapTris(2);
 
-    D_800D2C68 = 0;
+    gAddingObjectTris = 0;
     gGroundCandidates[0].height = 0;
     gGroundCandidates[0].tri = (s32 *)((s32)gCurMapTris << 8);
     collision_selectMap(0);
 
     size = (collision_getMaxMapTriCount() + 7) & ~7;
-    gShadowFaceFlags = (u8 *)D_8003809C;
+    gShadowFaceFlags = (u8 *)gDecompressWork;
     gShadowFaceFlagsEnd = gShadowFaceFlags + size;
     collision_selectMap(2);
 }

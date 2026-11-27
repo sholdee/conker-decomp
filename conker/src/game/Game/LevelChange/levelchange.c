@@ -82,7 +82,7 @@ void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
         break;
     case 5:
-        gNextLevel = 5;
+        gNextLevel = LEVEL_INTRO_CUTSCENE;
         gLevelChangeRequest = 1;
         break;
     }

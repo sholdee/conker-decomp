@@ -17,7 +17,7 @@ f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch) {
 }
 
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
- * Z fires (only when level is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
+ * Z fires (only when level is LEVEL_W3_HAUNTED_HOUSE and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
 void player_updateFlying(Actor *actor) {
     u16 angle;
@@ -260,7 +260,7 @@ void player_updateFlying(Actor *actor) {
             }
         } else if ((gActorPressedButtons & Z_TRIG) && (actor->unk103 == 0)) {
             count = 0;
-            if (level == 0x3C) {
+            if (level == LEVEL_W3_HAUNTED_HOUSE) {
                 for (idx = 1; idx < 25; idx++) {
                     if ((movement_obj[idx].type != 0) && (movement_obj[idx].character_type == 0x25)) {
                         count++;

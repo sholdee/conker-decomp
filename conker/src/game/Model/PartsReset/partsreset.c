@@ -17,7 +17,7 @@ void model_resetParts(void) {
 }
 
 void model_allocBonePools(void) {
-    gBonePoolSize = D_800B0DF0->unk1A;
+    gBonePoolSize = gLevelHeader->bonePoolSize;
     gBonePools[0] = allocate_memory(gBonePoolSize << 6, 1, 3, 0);
     gBonePools[1] = allocate_memory(gBonePoolSize << 6, 1, 3, 0);
 }

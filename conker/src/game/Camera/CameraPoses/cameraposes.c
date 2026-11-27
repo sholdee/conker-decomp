@@ -33,10 +33,10 @@ void func_151298C0(cam, arg1)
 
 
 /*
- * Eases the camera point unk2F8 toward the point unk278 short of unk2BC on the line from
- * unk288 (snapping when unk23C is set), then re-queries collision_findFloorInRange for it when needed.
+ * Eases the eye toward the point FTgetRadius short of target on the line from posePos
+ * (snapping when Snap is set), then re-queries collision_findFloorInRange for it when needed.
  */
-void func_15129934(Camera *cam) {
+void camera_updatePoseEye(Camera *cam) {
     f32 x;
     Vec3f dir;
     f32 z;
@@ -48,9 +48,9 @@ void func_15129934(Camera *cam) {
     f32 dz;
 
     if (gNumCameraPoses != 0 && cam->DoingAim == 0) {
-        cam->unk27C.x = cam->unk288.x;
-        cam->unk27C.y = cam->unk288.y;
-        cam->unk27C.z = cam->unk288.z;
+        cam->unk27C.x = cam->posePos.x;
+        cam->unk27C.y = cam->posePos.y;
+        cam->unk27C.z = cam->posePos.z;
         math_vec3Diff(&cam->unk27C, &cam->target, &dir);
         math_vec3Unit(&dir, &dir);
         dx = cam->target.x - cam->unk27C.x;

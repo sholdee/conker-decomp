@@ -368,16 +368,16 @@ void anim_pickIdleSequence(void) {
             category = 10;
         } else if (attach_find(gCurrentActor, 0x17, 0) != NULL) {
             category = 6;
-        } else if (level == 0x31) {
+        } else if (level == LEVEL_W1_ROCK_SOLID) {
             if (gIdleRequestFlags & 4) {
                 category = 8;
             } else {
                 category = 7;
             }
-        } else if (gCurrentActor->character_type == 0x96 || level == 0x10 || level == 0x1B ||
-                   level == 0x1E || level == 0x26 || level == 0x2F ||
-                   level == 0xE || level == 0x28 || level == 0x23 ||
-                   level == 0x1C || level == 0x36 || level == 0x3A) {
+        } else if (gCurrentActor->character_type == 0x96 || level == LEVEL_W1_BARN_ARENA || level == LEVEL_W2_LIFTTUNNEL ||
+                   level == LEVEL_W2_FLAMETUNNEL || level == LEVEL_W2_MACHINEGUNNEST || level == LEVEL_W2_LAB ||
+                   level == LEVEL_W2_TANK_FACTORY || level == LEVEL_W2_TANKTUNNEL || level == LEVEL_W2_WARBOSS ||
+                   level == LEVEL_W2_CANYON || level == LEVEL_W5_BANK || level == LEVEL_W5_BANK_END) {
             category = 2;
         } else if (gIdleRequestFlags != 0) {
             if (gIdleRequestFlags & 1) {
@@ -449,7 +449,7 @@ s32 anim_randomIdleDelay(s32 phase) {
     if (phase == 0) {
         base = 180;
         range = 60;
-    } else if (level == 0x31) {
+    } else if (level == LEVEL_W1_ROCK_SOLID) {
         return 0;
     } else if (phase == 1) {
         base = 60;
@@ -869,9 +869,9 @@ s32 anim_isIdleWatched(Actor *actor) {
     f32 pad[3]; // matching: unused stack space (frame size)
     s32 type;
 
-    inZone = zone_findAt(4, 5, actor->xpos, actor->ypos, actor->zpos);
+    inZone = zone_findAt(ZONE_TYPE_MINI_SHAPE, 5, actor->xpos, actor->ypos, actor->zpos);
     if (!inZone) {
-        inZone = zone_findAt(4, 11, actor->xpos, actor->ypos, actor->zpos);
+        inZone = zone_findAt(ZONE_TYPE_MINI_SHAPE, 11, actor->xpos, actor->ypos, actor->zpos);
     }
     if (inZone) {
         types = gIdleWatcherTypes;

@@ -461,7 +461,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         collision_getLodModelId(obj, &lod);
     }
     func_1502D54C(index, colour);
-    if (D_800B0DF0->unk3E != 0) {
+    if (gLevelHeader->unk3E != 0) {
         actor_getFogAlpha(obj, colour, player);
     } else {
         colour[3] = 0xFF;
@@ -578,7 +578,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
         gSPSetGeometryMode(gdl++, G_CULL_BACK);
     }
     lit = TRUE;
-    levelFog = D_800B0DF0->unk3E;
+    levelFog = gLevelHeader->unk3E;
     if ((obj->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);
@@ -1734,7 +1734,7 @@ void actor_refreshModelUnload(Actor *arg0) {
     u8 id = obj->character_type;
     u8 *counter;
 
-    if (gExpansionPak == 0 && level == 0x1D) {
+    if (gExpansionPak == 0 && level == LEVEL_FRONTEND) {
         gModelUnloadTimers[id] = 2;
         return;
     }

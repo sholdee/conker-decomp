@@ -111,8 +111,8 @@ s32 actor_resolveAttachId(s32 arg0, s32 *arg1);
 void actor_updateAttachedObject(Actor *obj, s32 force, s32 release);
 f32 actor_updateSwim(Actor *obj, f32 arg1);
 void func_1504BA38(Actor *obj);
-void func_1504BAF0(Actor *obj);
-void func_1504BB88(Actor *obj);
+void actor_dropLiftedObject(Actor *obj);
+void actor_applyTaskAttrib(Actor *obj);
 void actor_tickTimers(Actor *obj);
 void actor_updatePissed(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3);
 s32 actor_updateIdleAnim(void);
@@ -365,13 +365,13 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 extern u8 D_D0F; // texture id 0xD0F as a symbol (undefined_syms.us.txt): func_1507DB6C passes its address
 void actor_applyHeadShot(Actor *obj);
 void actor_applyPartHit(Actor *obj, s32 part);
-void func_1507DFE4(s32 resource, s32 arg1);
-s32 func_1507E114(s32 *arg0);
+void actor_startSpawnCutscene(s32 resource, s32 arg1);
+s32 actor_resumeAtCheckpoint(s32 *arg0);
 void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z);
 extern u16 gEliminatedPlayers;
 extern u16 D_800D18A2;
 extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
-extern u8 D_800D18A8;
+extern u8 gRespawnPending;
 extern u8 gLastDeathKind;
 
 /* game_DE5A0.c */

@@ -75,7 +75,7 @@ OSContPad **cont_readPads(void) {
             gConnectedPads |= 1 << i;
         }
     }
-    if (level != 0x1D) {
+    if (level != LEVEL_FRONTEND) {
         numPlayers = gHumanCount;
     } else {
         numPlayers = 4;

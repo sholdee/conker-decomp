@@ -183,7 +183,7 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
     return 1;
 }
 
-void func_15081E0C(Actor *obj, u16 part, u8 skip) {
+void collision_applyShotPartHit(Actor *obj, u16 part, u8 skip) {
     if (gIsMultiplayer == 0) {
         if (obj->energy != 0) {
             obj->energy = 7;
@@ -244,7 +244,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             effect_spawnRaySurfaceImpact(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
-            if (level == 14) {
+            if (level == LEVEL_W2_TANK_FACTORY) {
                 f32 vc;
                 f32 front[3];
                 f32 back[3];
@@ -290,7 +290,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
     longShot = 0;
     sound = gProjectileHitValues[kind];
     if (kind == 7) {
-        if (level == 43) {
+        if (level == LEVEL_WMP_BEACH) {
             sound = 0x27;
         }
     }
@@ -334,7 +334,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 obj->energy = 1;
             }
         } else if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
-            func_15081E0C(obj, hit->part, longShot);
+            collision_applyShotPartHit(obj, hit->part, longShot);
         }
         switch (kind) {
         case 2:

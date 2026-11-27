@@ -2,4 +2,5 @@
 # 616 = 590 + 26: the particle spawn callback table in spawnshapes.c (2026-11-27, the owner's decision).
 # Its entries are handler functions with their own parameter types, so each gives warning 709, like
 # the other handler tables (see the ObjType comment in include/structs.h).
-616
+# 582: 9 x 712 and the 763 fixed, and 24 x 642 gone with unprototyped declarations of K&R definitions (2026-11-26).
+582

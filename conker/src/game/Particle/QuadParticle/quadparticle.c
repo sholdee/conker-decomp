@@ -240,7 +240,7 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
         for (i = 0; i <= gScreenLayout; i++) {
             sprite->link.handles[i] = light_allocGfxLights(model);
         }
-        sprite->link.sharedHandle = func_1515D440();
+        sprite->link.sharedHandle = light_allocAmbients();
     }
     if (pos) {
         sprite->pos = *pos;
@@ -675,7 +675,7 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
         for (i = 0; i <= gScreenLayout; i++) {
             particle->link.handles[i] = light_allocGfxLights(model);
         }
-        particle->link.sharedHandle = func_1515D440();
+        particle->link.sharedHandle = light_allocAmbients();
     }
     return particle;
 }

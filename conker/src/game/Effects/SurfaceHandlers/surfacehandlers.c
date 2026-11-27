@@ -5,8 +5,8 @@
 typedef void (*ObjectHandler)(Actor *obj);
 
 /*
- * This file's .data: the handlers by id group (effect_getSurfaceHandlerGroup), then surface slot. Slot 2 (surface type 5 in level
- * 20) runs particle_attachSideEmitter (game/Particle/SideEmitter/sideemitter.c) for group 0 and particle_startOwnerSideTask (game/Particle/OwnerSideEmitter/ownersideemitter.c) for group 1.
+ * This file's .data: the handlers by id group (effect_getSurfaceHandlerGroup), then surface slot. Slot 2 (surface type 5 in
+ * LEVEL_W1_DINO_ARENA) runs particle_attachSideEmitter (game/Particle/SideEmitter/sideemitter.c) for group 0 and particle_startOwnerSideTask (game/Particle/OwnerSideEmitter/ownersideemitter.c) for group 1.
  */
 static ObjectHandler gSurfaceHandlersGroup0[] = { NULL, NULL, particle_attachSideEmitter, NULL };
 static ObjectHandler gSurfaceHandlersGroup1[] = { NULL, NULL, particle_startOwnerSideTask, NULL };
@@ -22,7 +22,7 @@ void effect_runSurfaceHandler(Actor *obj, s32 arg1) {
     if (obj != NULL && effect_getSurfaceHandlerGroup(obj, groupPtr)) {
         switch (collision_getSurfaceType(obj->floorMaterial)) {
         case 5:
-            if (level == 20) {
+            if (level == LEVEL_W1_DINO_ARENA) {
                 slot = 2;
             } else {
                 slot = 1;

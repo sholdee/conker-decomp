@@ -834,10 +834,10 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
         D_800900B8 = 0;
         return gfx;
     }
-    if (D_800B0DF0->unk8 == 4 && D_800900B8 == 0) {
-        if (level == 0x13) {
+    if (gLevelHeader->skyMode == 4 && D_800900B8 == 0) {
+        if (level == LEVEL_W2_HARBOUR) {
             s32 id;
-            id = gSkyTextureSets[D_800B0DF0->unk9][2];
+            id = gSkyTextureSets[gLevelHeader->skyTextureSet][2];
             for (i = 0; i < 0x48; i++, id++) {
                 if (id != (s32)&D_1647 && id != (s32)&D_1648 && id != (s32)(&D_1648 + 1) &&
                     id != (s32)&D_1653 && id != (s32)&D_1654 && id != (s32)(&D_1654 + 1)) {
@@ -849,7 +849,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
             start = 0;
         }
         for (i = start; i < 0x168; i++) {
-            texture_releaseId(gSkyTextureSets[D_800B0DF0->unk9][2] + i);
+            texture_releaseId(gSkyTextureSets[gLevelHeader->skyTextureSet][2] + i);
         }
     }
     if (D_800900B8 < 5) {
@@ -1163,7 +1163,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     s32 alpha;
     s32 temp;
 
-    if (level == 0x21) {
+    if (level == LEVEL_WFRONTEND_TABLE) {
         return gfx;
     }
 

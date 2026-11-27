@@ -120,11 +120,11 @@ void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *a
 }
 
 
-/* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
+/* Calls collision_applyShotPartHit(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
     if (other->character_type == 0x9F || other->character_type == 0xA0) {
         if (!(other->unk94 & 0x80)) {
-            func_15081E0C(other, 4, 0);
+            collision_applyShotPartHit(other, 4, 0);
         }
     }
 }

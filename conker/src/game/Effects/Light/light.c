@@ -1678,50 +1678,50 @@ void light_placeSwing(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX,
     effect->light->z = z;
 }
 
-/* Turns the special lighting for the current level setting on or off, setting the colours in gAmbientColour and D_800B0DF0. */
+/* Turns the special lighting for the current level setting on or off, setting the colours in gAmbientColour and gLevelHeader. */
 void light_setDaylight(u8 enable) {
     gDaylight = enable;
     if (enable) {
         switch (level) {
-        case 11:
+        case LEVEL_W1_COG_LAND:
             env_setSky(4);
             break;
-        case 6:
+        case LEVEL_THE_WINDMILL:
             light_setGroupDisabled(10, 1);
             env_setSky(4);
             // fallthrough
-        case 57:
-            gAmbientColour[0] = D_800886F0[0];
-            gAmbientColour[1] = D_800886F0[1];
-            gAmbientColour[2] = D_800886F0[2];
-            D_800B0DF0->unk5 = D_800886F4[0];
-            D_800B0DF0->unk6 = D_800886F4[1];
-            D_800B0DF0->unk7 = D_800886F4[2];
+        case LEVEL_W5_BANK_ENTRANCE:
+            gAmbientColour[0] = gDaylightOnAmbient[0];
+            gAmbientColour[1] = gDaylightOnAmbient[1];
+            gAmbientColour[2] = gDaylightOnAmbient[2];
+            gLevelHeader->backgroundRed = gDaylightOnBackground[0];
+            gLevelHeader->backgroundGreen = gDaylightOnBackground[1];
+            gLevelHeader->backgroundBlue = gDaylightOnBackground[2];
             break;
-        case 7:
-        case 12:
+        case LEVEL_W1_DOG_FISH:
+        case LEVEL_W1_BARN_OUTSIDE:
             break;
         }
     } else {
         switch (level) {
-        case 6:
+        case LEVEL_THE_WINDMILL:
             light_setGroupDisabled(10, 0);
             // fallthrough
-        case 7:
-        case 12:
-        case 57:
+        case LEVEL_W1_DOG_FISH:
+        case LEVEL_W1_BARN_OUTSIDE:
+        case LEVEL_W5_BANK_ENTRANCE:
             env_setSky(6);
-            gAmbientColour[0] = D_800886F8[0];
-            gAmbientColour[1] = D_800886F8[1];
-            gAmbientColour[2] = D_800886F8[2];
-            D_800B0DF0->unk5 = 0xFF;
-            D_800B0DF0->unk6 = 0xFF;
-            D_800B0DF0->unk7 = 0xFF;
+            gAmbientColour[0] = gDaylightOffAmbient[0];
+            gAmbientColour[1] = gDaylightOffAmbient[1];
+            gAmbientColour[2] = gDaylightOffAmbient[2];
+            gLevelHeader->backgroundRed = 0xFF;
+            gLevelHeader->backgroundGreen = 0xFF;
+            gLevelHeader->backgroundBlue = 0xFF;
             break;
-        case 11:
+        case LEVEL_W1_COG_LAND:
             env_setSky(6);
             break;
-        case 41:
+        case LEVEL_W1_TRAINING:
             env_setSky(1);
             break;
         }

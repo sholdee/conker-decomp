@@ -104,7 +104,7 @@ TextBox *text_createBox(u32 msgIndex, s32 objIndex, s32 arg2,
 void text_updateBox(TextBox *box);
 Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2);
 u8 *text_getPage(TextBoxConfig *config, s32 index, s16 source);
-Gfx *text_drawBoxText(Gfx *gfx, TextBox *box, u8 r, u8 g, u8 b, u8 a);
+Gfx *text_drawBoxText(); /* (Gfx *gfx, TextBox *box, u8 r, u8 g, u8 b, u8 a); K&R definition, declared without a prototype */
 void text_placeBox(TextBox *box);
 void text_clampBoxToView(TextBox *box, f32 *x, f32 *y, f32 *angle);
 void func_1516D2D8(void);
@@ -114,7 +114,7 @@ TextBox *text_closeBoxAfterPage(TextBox *box);
 TextBox *text_closeBoxNow(TextBox *box);
 
 /* game/Text/AmountText/amounttext.c */
-void func_151D6970(Actor *character, void *obj);
+void text_spawnVolcanoRaceTouchDrift(Actor *character, void *obj);
 void text_spawnHealthPickupBurst(WorldObject *pickup, Actor *player);
 void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2);
 s32 text_updateCashModel(ModelEffect *fx);
