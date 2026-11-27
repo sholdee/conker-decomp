@@ -292,7 +292,6 @@ void audio_setSeqVolume(u8 player, s32 vol) {
 }
 
 void audio_endSeqTrack(u8 player) {
-    // AL_TRACK_END
     n_alCSPStop(gSeqPlayers[player]);
 }
 

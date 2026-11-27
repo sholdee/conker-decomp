@@ -57,14 +57,14 @@ void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2) {
     if (minTrack != -1) {
         __n_alCSeqGetTrackEvent(seq, minTrack, evt, arg2);
     } else {
-        evt->type = AL_CSP_LOOPSTART;
+        evt->type = AL_TRACK_END;
     }
 
     evt->msg.midi.ticks = minDelta;
     seq->lastTicks += minDelta;
     seq->lastDeltaTicks = minDelta;
 
-    if (evt->type != AL_CSP_LOOPSTART) {
+    if (evt->type != AL_TRACK_END) {
         seq->evtDeltaTicks[minTrack] += __readVarLen(seq, minTrack);
     }
     seq->deltaFlag = 1;
@@ -94,7 +94,7 @@ u8 __n_alCSeqGetTrackEvent(ALCSeq *seq, s32 track, N_ALEvent *event, s32 arg3) {
             flag = 1 << track;
             seq->validTracks ^= flag;
             if (seq->validTracks != 0) {
-                event->type = AL_CSP_LOOPSTART;
+                event->type = AL_TRACK_END;
             } else {
                 event->type = AL_SEQ_END_EVT;
             }
@@ -104,7 +104,7 @@ u8 __n_alCSeqGetTrackEvent(ALCSeq *seq, s32 track, N_ALEvent *event, s32 arg3) {
             status = __getTrackByte(seq, track);
             event->msg.midi.duration += status;
             seq->lastStatus[track] = 0;
-            event->type = AL_CSP_LOOPEND;
+            event->type = AL_CSP_LOOPSTART;
         } else if (c == AL_CMIDI_LOOPEND_CODE) {
             ptr = seq->curLoc[track];
             firstByte = *ptr++;
@@ -124,7 +124,7 @@ u8 __n_alCSeqGetTrackEvent(ALCSeq *seq, s32 track, N_ALEvent *event, s32 arg3) {
                 seq->curLoc[track] = ptr - backup;
             }
             seq->lastStatus[track] = 0;
-            event->type = AL_CSP_NOTEOFF_EVT;
+            event->type = AL_CSP_LOOPEND;
         }
     } else {
         event->type = AL_SEQ_MIDI_EVT;
@@ -189,7 +189,7 @@ void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base) {
             lclMarker.evtDeltaTicks[j] = tmp.evtDeltaTicks[j];
         }
         n_alCSeqNextEvent(&tmp, &event, 0);
-        if (event.type == AL_CSP_LOOPEND) {
+        if (event.type == AL_CSP_LOOPSTART) {
             if ((s32)event.msg.midi.duration >> 8 >= base &&
                 (s32)event.msg.midi.duration >> 8 < base + count) {
                 if (markers[((s32)event.msg.midi.duration >> 8) - base].lastTicks == 0) {

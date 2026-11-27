@@ -434,6 +434,7 @@ enum ALMsg {
     AL_SEQP_SEQ_EVT,
     AL_SEQP_BANK_EVT,
     AL_SEQP_PLAY_EVT,
+    AL_SEQP_PAUSE_EVT, /* Conker: Rare's added event (the player keeps its place: state 3); the SDK's values after it are one higher */
     AL_SEQP_STOP_EVT,
     AL_SEQP_STOPPING_EVT,
     AL_TRACK_END,
