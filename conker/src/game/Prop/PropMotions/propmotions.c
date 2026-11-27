@@ -265,7 +265,7 @@ void prop_partFourPieces(WorldObject *prop) {
 }
 
 /* Starts the prop's behaviour: moves it from state 0 to state 1. */
-void prop_start(WorldObject *prop, s32 arg1) {
+void prop_start(WorldObject *prop, Actor *actor) {
     if (WORK(prop)->words[1] == 0) {
         WORK(prop)->words[1] = 1;
     }

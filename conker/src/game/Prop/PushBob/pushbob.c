@@ -47,9 +47,10 @@ void prop_bobAndSway(WorldObject *obj) {
 }
 /*
  * Updates the object's push value (high half of param) from the pull of movement_obj[0], letting it decay
- * back to zero, then keeps a looping sound whose volume follows the object's speed (spinY).
+ * back to zero, then keeps a looping sound whose volume follows the object's speed (spinY). With flags bit 0,
+ * a negative pull counts as none.
  */
-void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
+void prop_updatePush(WorldObject *obj, s32 flags, s32 soundId, f32 pitchScale) {
     s32 push;
     s32 value;
     s32 timer;
@@ -64,7 +65,7 @@ void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     } else {
         push = prop_getApproachSpeed(obj->x, obj->z, &WORK(obj)->push.unk7C, movement_obj) >> 3;
     }
-    if ((arg1 & 1) && push < 0) {
+    if ((flags & 1) && push < 0) {
         push = 0;
     }
     value = obj->moveData.half.hi;
@@ -171,5 +172,5 @@ s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other) {
 }
 
 /* Does nothing. */
-void prop_emptyBehavior71(s32 arg0) {
+void prop_emptyBehavior71(WorldObject *obj) {
 }

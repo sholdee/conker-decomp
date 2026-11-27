@@ -51,7 +51,7 @@ extern SaveSlotInfo gSaveSlots[3]; // the three save slots
 
 /* game/Save/EepromTimedWrite/eepromtimedwrite.c */
 s32 save_writeEeprom(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */
-s32 save_pollEepromWrite(s32 arg0);
+s32 save_pollEepromWrite(s32 flag);
 
 /* game/Save/FrontEnd/frontend.c */
 void save_resetSettings(void);

@@ -74,7 +74,7 @@ extern Gfx *gHudBlockDl;         /* display list built by game/Hud/PlayerOverlay
 
 /* game/Hud/CounterFree/counterfree.c */
 void hud_freeCounter(CounterEffect *effect);
-void hud_counterMessage(EffectHeader *obj, s32 arg1, u8 msg);
+void hud_counterMessage(EffectHeader *obj, s32 unused, u8 msg);
 
 /* game/Hud/HudOverlay/hudoverlay.c */
 Gfx *hud_drawMain(Gfx *gfx);

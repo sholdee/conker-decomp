@@ -6,10 +6,10 @@
 
 
 /* Allocates a sprite effect and initialises it from `params`. */
-Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1) {
+Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 owner) {
     Sprite2D *sprite;
 
-    sprite = effect_newObject(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
+    sprite = effect_newObject(0x5E, 0, sizeof(Sprite2D), 0, owner, 1);
     if (sprite != NULL) {
         bcopy(params, &sprite->params, sizeof(sprite->params));
     }
@@ -54,7 +54,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
 }
 
 /* Draws the sprite as a scaled textured rectangle. */
-Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
+Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 view) {
     s32 pad; // matching: unused stack slots keep the original frame size
     s32 drawFlags;
     u8 update;

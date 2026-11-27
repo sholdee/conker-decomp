@@ -94,13 +94,13 @@ void env_initVtxColours(void) {
     }
 }
 
-void env_recordVtxColours(Vtx *arg0, u32 arg1) {
+void env_recordVtxColours(Vtx *vertices, u32 count) {
     u32 i;
 
-    for (i = 0; i < arg1; i++) {
-        gVtxBaseColours[0][gVtxColourCount][0] = arg0[i].v.cn[0];
-        gVtxBaseColours[0][gVtxColourCount][1] = arg0[i].v.cn[1];
-        gVtxBaseColours[0][gVtxColourCount][2] = arg0[i].v.cn[2];
+    for (i = 0; i < count; i++) {
+        gVtxBaseColours[0][gVtxColourCount][0] = vertices[i].v.cn[0];
+        gVtxBaseColours[0][gVtxColourCount][1] = vertices[i].v.cn[1];
+        gVtxBaseColours[0][gVtxColourCount][2] = vertices[i].v.cn[2];
         gVtxColourCount++;
     }
 }

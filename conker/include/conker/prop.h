@@ -157,18 +157,18 @@ typedef struct Game1483E0WaveMesh {
 
 /* game/Prop/WaveChainStart/wavechainstart.c */
 void prop_clearWaveChains(void);
-void prop_startWaveChain(s32 arg0);
+void prop_startWaveChain(s32 presetId);
 
 /* game/Prop/Scenery/scenery.c */
-void prop_emptyLevelUpdateHook2(s32 arg0);
-void prop_startMirroredEmitters(s32 arg0);
+void prop_emptyLevelUpdateHook2(s32 unused);
+void prop_startMirroredEmitters(s32 duration);
 s32 prop_updateStyleFadeGrow(Struct150BF0F4 *entry);
 void prop_moveToHeightAndBob(WorldObject *obj);
 void func_150BF760(WorldObject *obj);
 void prop_updateSinkingPlatform(WorldObject *platform);
 void prop_spawnDeathBurst(Actor *obj);
-s32 prop_burstPieceOnFloor(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y);
-void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5);
+s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight);
+void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list);
 s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
 /* game/Prop/Pendulum/pendulum.c */
@@ -193,7 +193,7 @@ void func_150C7C90(WorldObject *obj);
 void func_150C7D7C(WorldObject *obj);
 
 /* game/Prop/LinkedToggle/linkedtoggle.c */
-void func_150CF0A0(WorldObject *arg0);
+void func_150CF0A0(WorldObject *obj);
 
 /* game/Prop/MoverSwing/moverswing.c */
 s32 prop_shotHitsCylinders(Vec3f *start, Vec3f *delta, Vec3f *hit);
@@ -203,7 +203,7 @@ void prop_spawnFixedExplosion(void);
 void prop_spawnCylinderBurst(TriggerZone *gate, u8 owner, s32 kind);
 
 /* game/Prop/Clock/clock.c */
-void prop_levelUpdateRainOnly(s32 arg0);
+void prop_levelUpdateRainOnly(s32 unused);
 void prop_updateClock(WorldObject *minuteHand);
 void prop_swingClockPendulum(WorldObject *obj);
 s32 prop_isOutsideFrustum(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY, f32 *marginX,
@@ -224,7 +224,7 @@ void prop_emptyBehavior22(WorldObject *obj);
 void prop_spinZ(WorldObject *obj);
 void prop_spinY(WorldObject *obj);
 void prop_spinX(WorldObject *obj);
-void prop_emptyBehavior55(s32 arg0);
+void prop_emptyBehavior55(WorldObject *obj);
 void prop_sinkWhileTriggered(WorldObject *obj);
 void prop_shakeAndSink(WorldObject *obj);
 
@@ -243,9 +243,9 @@ void prop_bob(WorldObject *obj);
 
 /* game/Prop/PushBob/pushbob.c */
 void prop_bobAndSway(WorldObject *obj);
-void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale);
+void prop_updatePush(WorldObject *obj, s32 flags, s32 soundId, f32 pitchScale);
 s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other);
-void prop_emptyBehavior71(s32 arg0);
+void prop_emptyBehavior71(WorldObject *obj);
 
 /* game/Prop/PropMover/propmover.c */
 void prop_triggerMover(WorldObject *obj, Actor *actor);
@@ -275,7 +275,7 @@ void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out);
 void prop_grabAndSwingCharacter(WorldObject *prop);
 void prop_swingDoorLink0(WorldObject *prop);
 void prop_swingDoorLink3(WorldObject *prop);
-void prop_swingDoor(WorldObject *prop, s32 arg1);
+void prop_swingDoor(WorldObject *prop, s32 mode);
 void prop_swingFlap(WorldObject *prop);
 void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj);
 void prop_followHeight(WorldObject *prop);
@@ -326,7 +326,7 @@ void prop_carryCharacterInArc(WorldObject *prop);
 void prop_pinToLinkedObject(WorldObject *prop);
 void prop_fadeOutAfterDelay(WorldObject *prop);
 void prop_partFourPieces(WorldObject *prop);
-void prop_start(WorldObject *prop, s32 arg1);
+void prop_start(WorldObject *prop, Actor *actor);
 void prop_bobThenSink(WorldObject *prop);
 void prop_copyLinkedPos(WorldObject *prop);
 
@@ -335,7 +335,7 @@ void prop_clearLinks(void);
 void prop_registerLink(WorldObject *prop, s32 mode);
 
 /* game/Prop/DrawHooks/drawhooks.c */
-void prop_emptyFrameHook(s32 arg0);
+void prop_emptyFrameHook(s32 bufferIndex);
 Gfx *prop_emptyDrawEffectAngled(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
 Gfx *prop_emptyDrawEffect(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 

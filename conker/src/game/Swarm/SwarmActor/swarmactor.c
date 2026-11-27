@@ -95,7 +95,7 @@ void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 pl
 
 /* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
  * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */
-void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne,
+void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 player, s32 airborne,
                    f32 minScale, f32 scaleRange) {
     f32 height;
     s32 spawnX;

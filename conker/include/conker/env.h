@@ -22,7 +22,7 @@ typedef struct SkyTile {
 
 /* game/Env/VtxColourSetup/vtxcoloursetup.c */
 void env_initVtxColours(void);
-void env_recordVtxColours(Vtx *arg0, u32 arg1);
+void env_recordVtxColours(Vtx *vertices, u32 count);
 void env_recordEnvColours(Gfx *dl);
 void env_clearAttachModelRefs(void);
 extern u8 (*gVtxBaseColours[4])[3]; // [0]: base RGB of every level vertex, then the props'; [i]: level model i's first vertex
@@ -40,7 +40,7 @@ extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *gSkyMatrices;
 extern s32 *gSkyTextureSets[];
-Gfx *env_drawSky(Gfx *gfx, s32 arg1);
+Gfx *env_drawSky(Gfx *gfx, s32 levelId);
 /* Texture asset ids of the sky's replacement tiles: a link-time symbol whose address is the first id (undefined_syms_auto.txt). */
 extern u8 D_1673[];
 void env_buildCameraRotation(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
@@ -50,7 +50,7 @@ Gfx *env_fillRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b
 Gfx *env_drawMapBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 Gfx *env_clearDepth(Gfx *gfx);
 s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw);
-Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height, u32 tileW,
+Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 unused, u32 width, u32 height, u32 tileW,
                    u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit, s32 *vtxCountPtr, s32 *vtxIdxPtr,
                    SkyTile *queue, s32 *lastFormatPtr, u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts,
                    u8 *tiles, s32 texSet);
@@ -68,11 +68,11 @@ extern u16 D_800DD2EE;
 extern s16 gFogBlend;    /* blend of the last env_blendFog call */
 extern s16 gFogNear;    /* near plane */
 extern s16 gFogFar;    /* far plane */
-void env_initFog(s32 arg0);
+void env_initFog(s32 levelId);
 Gfx *func_151733D8(Gfx *gfx, s32 arg1);
-void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
-void env_reapplyFog(s32 arg0);
-s8 env_getLevelFogPreset(s32 arg0);
+void env_blendFog(s32 from, s32 to, s32 levelId, s32 blend, s32 dest);
+void env_reapplyFog(s32 levelId);
+s8 env_getLevelFogPreset(s32 levelId);
 
 /* game/Env/VtxColourFade/vtxcolourfade.c */
 void env_fadeVtxColours(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex);

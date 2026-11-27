@@ -90,7 +90,7 @@ typedef struct ActorTracker {
 } ActorTracker;
 
 /* game/Sprite/LevelSpriteSetup/levelspritesetup.c */
-void sprite_initParticleSlots(s32 arg0);
+void sprite_initParticleSlots(s32 levelId);
 void sprite_loadParticleTextures(void);
 void sprite_setupParticleSlot(s32 slot, s32 id, s32 flags);
 s32 sprite_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
@@ -153,7 +153,7 @@ void sprite_updateTexScroll(Sprite2D *sprite);
 void sprite_updateFrameScroll(Sprite2D *sprite);
 void sprite_updateSlideBlink(Sprite2D *sprite);
 void sprite_updateGrowIn(Sprite2D *sprite);
-void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3);
+void sprite_spawnConverging(s32 targetX, s32 targetY, s32 duration, s32 owner);
 void sprite_updateLinearMove(Sprite2D *sprite);
 void func_150B7484(void);
 void func_150B7560(void);
@@ -173,10 +173,10 @@ extern Gfx gScreenSpriteSetupDl[]; /* render setup (object type table gObjectTyp
 extern Gfx gScreenSpriteTeardownDl[]; /* render teardown (object type table gObjectTypes) */
 void sprite_updateScreenSprite(ScreenSprite *sprite);
 Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport);
-void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6);
-void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 arg1, u8 arg2);
+void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 extraSize, u8 owner, s32 list);
+void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 event, u8 eventType);
 s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
-void sprite_sendEventToScreenSprites(s32 arg0, u8 arg1);
+void sprite_sendEventToScreenSprites(s32 event, u8 eventType);
 
 /* game/Sprite/TexQuad/texquad.c */
 extern Gfx gTexQuadSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -191,14 +191,14 @@ void sprite_updateActorTracker(ActorTracker *tracker);
 void sprite_actorTrackerMessage(ActorTracker *tracker, s32 event, u8 eventType);
 s32 sprite_findActorMotion(Actor *actor, const Vec3f **motion);
 void sprite_resetActorTrackers(void);
-void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
-void sprite_getActorBodyBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
+void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *height);
+void sprite_getActorBodyBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *height);
 
 /* game/Sprite/Sprite2D/sprite2d.c */
-Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1);
+Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 owner);
 Sprite2D *sprite_newSprite2DDefault(Sprite2DParams *params);
 void sprite_updateSprite2D(Sprite2D *sprite);
-Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2);
+Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 view);
 
 /* game/Sprite/LevelSprites/levelsprites.c */
 /*

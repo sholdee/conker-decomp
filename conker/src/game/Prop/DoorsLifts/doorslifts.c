@@ -574,7 +574,7 @@ void prop_swingDoorLink3(WorldObject *prop) {
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
  * at the ends. Bits 24-31 of params pick a light (or similar) faded with the opening.
  */
-void prop_swingDoor(WorldObject *prop, s32 arg1) {
+void prop_swingDoor(WorldObject *prop, s32 mode) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -591,7 +591,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
 
     sound = 0;
     slow = FALSE;
-    prop_registerLink(prop, arg1);
+    prop_registerLink(prop, mode);
     row = (prop->moveData.word & 0xFC00) >> 10;
     openAngle = (prop->moveData.word << 22) >> 22;
     motion = prop->task_flag & TASK_FLAG_STATE;

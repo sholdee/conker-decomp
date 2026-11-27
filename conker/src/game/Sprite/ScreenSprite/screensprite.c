@@ -199,7 +199,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
  * Creates a sprite from info, flagged with flags. With kinds given, it is not created (NULL) when its
  * rectangle overlaps a live sprite of one of those kinds. Callers keep their own view of the sprite.
  */
-void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
+void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 extraSize, u8 owner, s32 list) {
     ScreenSprite *sprite;
     f32 halfSize[2];
 
@@ -210,7 +210,7 @@ void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 k
             return NULL;
         }
     }
-    sprite = effect_newObject((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
+    sprite = effect_newObject((info->flags & 0x20) ? 0x57 : 0x5D, list, extraSize + 0x70, 1, owner, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -221,9 +221,9 @@ void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 k
 }
 
 /* Calls the handler for the sprite's kind, if it has one. */
-void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 arg1, u8 arg2) {
+void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 event, u8 eventType) {
     if (gScreenSpriteMsgHandlers[sprite->info.kind] != NULL) {
-        gScreenSpriteMsgHandlers[sprite->info.kind](sprite, arg1, arg2);
+        gScreenSpriteMsgHandlers[sprite->info.kind](sprite, event, eventType);
     }
 }
 
@@ -278,9 +278,9 @@ lbl: // matching: unused label; it splits the block before i++
     // matching: no `return 0`; i lives in v0, which is 0 once both tables are searched
 }
 
-void sprite_sendEventToScreenSprites(s32 arg0, u8 arg1) {
+void sprite_sendEventToScreenSprites(s32 event, u8 eventType) {
     IdList2 pair;
 
     pair = D_800A6038;
-    effect_sendEventToTypes(pair.ids, 2, arg0, arg1);
+    effect_sendEventToTypes(pair.ids, 2, event, eventType);
 }

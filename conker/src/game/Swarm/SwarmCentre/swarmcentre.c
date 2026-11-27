@@ -82,8 +82,8 @@ struct SwarmMember {
 };
 
 /* Spawns a swarm at (x, y, z) following targetPos (or the fixed point x, y, z), plus memberCount members. */
-void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8,
-                   s32 playSfx, s32 argA) {
+void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 unused, s32 life, u8 owner,
+                   s32 playSfx, s32 size) {
     SwarmMemberState template;
     Swarm *swarm;
     SwarmMember *member;
@@ -97,14 +97,14 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     s32 py;
     s32 pad; // matching: unused stack slot keeps the frame size
 
-    swarm = effect_newObject(0x3A, 0, sizeof(Swarm), 0, arg8, 1);
+    swarm = effect_newObject(0x3A, 0, sizeof(Swarm), 0, owner, 1);
     if (swarm == NULL) {
         return;
     }
-    if (argA == 0) {
-        argA = 280;
+    if (size == 0) {
+        size = 280;
     } else {
-        argA = 140;
+        size = 140;
     }
     if (targetPos != NULL) {
         swarm->target.pos = targetPos;
@@ -131,9 +131,9 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     template.unk1F = 6;
     template.unk20 = 0;
     template.unk22 = 0;
-    template.unk24 = argA;
-    template.unk26 = argA;
-    template.unk28 = arg7;
+    template.unk24 = size;
+    template.unk26 = size;
+    template.unk28 = life;
     template.unk2A = 0;
     template.unk2C = 0xFF;
     template.unk2D = 0xFF;
@@ -154,7 +154,7 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
         template.x = px;
         template.y = py;
         template.z = pz;
-        member = effect_newObject(0x3B, 0, sizeof(SwarmMember), 0, arg8, 1);
+        member = effect_newObject(0x3B, 0, sizeof(SwarmMember), 0, owner, 1);
         if (member == NULL) {
             break;
         }

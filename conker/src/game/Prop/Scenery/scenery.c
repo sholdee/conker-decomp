@@ -23,16 +23,16 @@ const s16 D_800A00E0[4][4] = {
     { -479, 1035, 0, 200 },
 };
 
-void prop_emptyLevelUpdateHook2(s32 arg0) {
+void prop_emptyLevelUpdateHook2(s32 unused) {
 }
 
-/* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
-void prop_startMirroredEmitters(s32 arg0) {
+/* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of duration. */
+void prop_startMirroredEmitters(s32 duration) {
     s32 i;
     s32 z;
     s32 timer;
 
-    timer = arg0 & 0xFFFF;
+    timer = duration & 0xFFFF;
     z = 0x17C;
     for (i = 0; i < 2; i++) {
         particle_newSpriteEmitter(0x1FDB, 0x25, z, 0xD,
@@ -481,13 +481,13 @@ void prop_spawnDeathBurst(Actor *obj) {
     particle_spawnSpriteBurst(&spawn, 0xFF, 0xFF, 1);
 }
 
-/* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
-s32 prop_burstPieceOnFloor(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
+/* Piece floor handler: two particle bursts 20 units above the floor height at the piece's position. */
+s32 prop_burstPieceOnFloor(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight) {
     Vec3f pos;
     DebrisBurst burst;
 
     pos.x = piece->position.x;
-    pos.y = y + 20.0f;
+    pos.y = floorHeight + 20.0f;
     pos.z = piece->position.z;
     {
     const s32 ids[1] = { 5 };
@@ -562,7 +562,7 @@ s32 prop_burstPieceOnFloor(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 }
 
 /* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
-void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
+void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list) {
     DebrisScatter config;
     AngleRange angles;
     s32 ids[1];
@@ -583,7 +583,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     config.scaleRange = 0.4500000179f;
     config.lifetimeBase = 0x50;
     config.lifetimeRange = 0x3C;
-    config.floor = arg1;
+    config.floor = floor;
     config.variantIds = ids;
     config.variantScales = scales;
     config.variantCount = 1;
@@ -593,7 +593,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     config.elasticityRange = 0.1640000045f;
     config.radiusScale = 10.0f;
     config.radius = 78.0f;
-    if (arg3 != 0) {
+    if (lit != 0) {
         flags = 1;
     } else {
         flags = 0;
@@ -606,7 +606,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     angles.yawRange = 0xFF;
     angles.pitchBase = -0x32;
     angles.pitchRange = 0x23;
-    particle_spawnDebrisScatter(&config, &angles, arg4, arg5);
+    particle_spawnDebrisScatter(&config, &angles, owner, list);
 }
 
 /* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above

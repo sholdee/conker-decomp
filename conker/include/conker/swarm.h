@@ -105,7 +105,7 @@ void swarm_resetModelSlots(void);
 
 /* game/Swarm/SwarmActor/swarmactor.c */
 void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player, f32 minScale, f32 scaleRange, s32 flags);
-void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne, f32 minScale,
+void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 player, s32 airborne, f32 minScale,
                    f32 scaleRange);
 void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius, s32 player, s32 heightRange, s32 minRadius,
                    s32 flags, s32 baseType, u32 typeCount, s32 baseModel, s32 modelMask, s32 state, f32 minScale,
@@ -118,8 +118,8 @@ Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera);
 void swarm_flapWings(u8 index);
 
 /* game/Swarm/SwarmCentre/swarmcentre.c */
-void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8, s32 playSfx,
-                   s32 argA);
+void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 unused, s32 life, u8 owner, s32 playSfx,
+                   s32 size);
 void swarm_updateMember(SwarmMember *member);
 Gfx *swarm_drawMember(Gfx *gfx, SwarmMember *member, s16 view);
 void swarm_doNothing(void);
@@ -144,7 +144,7 @@ void swarm_loadModelWithAltVerts(s32 slot);
 void swarm_loadModelPair(s32 slot);
 void swarm_loadModelWithExtra(s32 slot, s32 extraSlot);
 void swarm_loadModel(s32 slot);
-Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3);
+Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 type, s32 list, s32 view);
 void swarm_freeModel(s32 slot);
 void swarm_updateModelSlots(void);
 s32 func_15184118(Actor *obj);

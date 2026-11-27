@@ -23,7 +23,7 @@ typedef struct {
 #define SWING_WORK(obj) ((SwingWork *)&(obj)->touch)
 #define CLOCK_WORK(obj) ((ClockWork *)&(obj)->touch)
 
-void prop_levelUpdateRainOnly(s32 arg0) {
+void prop_levelUpdateRainOnly(s32 unused) {
     effect_updateRain(0);
 }
 

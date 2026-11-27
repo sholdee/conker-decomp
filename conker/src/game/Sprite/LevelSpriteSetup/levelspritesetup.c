@@ -41,9 +41,9 @@ static const u8 gParticleSlotCounterInits[15] = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 static const f32 *gParticlePatterns[] = { gParticlePattern3, gParticlePattern5, gParticlePattern7 };
 
 /** Clears the particle slot tables and picks this level's resources. */
-void sprite_initParticleSlots(s32 arg0) {
+void sprite_initParticleSlots(s32 levelId) {
     bzero(gParticleSlotResources, sizeof(gParticleSlotResources));
-    rom_loadPathInto(gParticleSlotResources, sizeof(gParticleSlotResources), 3, 12, arg0, 10);
+    rom_loadPathInto(gParticleSlotResources, sizeof(gParticleSlotResources), 3, 12, levelId, 10);
     bzero(gSpriteTypeTexFiles, sizeof(gSpriteTypeTexFiles));
     bzero(gSpriteTypeFrames, sizeof(gSpriteTypeFrames));
 }

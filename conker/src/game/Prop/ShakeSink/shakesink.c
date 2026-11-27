@@ -65,7 +65,7 @@ void prop_spinX(WorldObject *obj) {
     }
 }
 
-void prop_emptyBehavior55(s32 arg0) {
+void prop_emptyBehavior55(WorldObject *obj) {
 }
 
 /*

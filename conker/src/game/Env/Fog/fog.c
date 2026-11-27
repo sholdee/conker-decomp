@@ -40,7 +40,7 @@ static FogPreset gFogPresets[9] = {
 };
 
 /* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
-void env_initFog(s32 arg0) {
+void env_initFog(s32 levelId) {
     if (gLevelHeader->unk3C == gLevelHeader->unk40 && gLevelHeader->unk3C == 0) {
         gLevelHeader->unk40 = 100;
     }
@@ -56,10 +56,10 @@ void env_initFog(s32 arg0) {
     gFogPresets[0].farPlane = gLevelHeader->farPlane;
     if (gLevelHeader->fogPreset != -1) {
         gHasLevelFogPreset = 1;
-        env_blendFog(gLevelHeader->fogPreset, gLevelHeader->fogPreset, arg0, 0, -1);
+        env_blendFog(gLevelHeader->fogPreset, gLevelHeader->fogPreset, levelId, 0, -1);
     } else {
         gHasLevelFogPreset = 0;
-        env_blendFog(0, 0, arg0, 0, -1);
+        env_blendFog(0, 0, levelId, 0, -1);
     }
 }
 
@@ -76,7 +76,7 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
  * Blends fog presets `from` and `to` by `blend`/4096 into preset `dest`, or into the active fog
  * globals (gFogColour...) when `dest` is -1. Indices 0x7C-0x7F are aliases resolved first.
  */
-void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
+void env_blendFog(s32 from, s32 to, s32 levelId, s32 blend, s32 dest) {
     s32 i;
     s32 *index;
     s32 fromByte;
@@ -125,7 +125,7 @@ void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
             *index = 2;
             break;
         case 0x7E:
-            *index = env_getLevelFogPreset(arg2);
+            *index = env_getLevelFogPreset(levelId);
             break;
         case 0x7F:
             *index = 2;
@@ -150,15 +150,15 @@ void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
 }
 
 /* With no level fog preset, re-applies preset 6 (if camera_global_Cameras->SpecialFlags bit 0 is set) or preset 0. */
-void env_reapplyFog(s32 arg0) {
+void env_reapplyFog(s32 levelId) {
     if (gLevelHeader->fogPreset == -1) {
         if (camera_global_Cameras->SpecialFlags & 1) {
-            env_blendFog(6, 6, arg0, 0, -1);
+            env_blendFog(6, 6, levelId, 0, -1);
             gBackgroundColour[0] = gFogColour[0];
             gBackgroundColour[1] = gFogColour[1];
             gBackgroundColour[2] = gFogColour[2];
         } else {
-            env_blendFog(0, 0, arg0, 0, -1);
+            env_blendFog(0, 0, levelId, 0, -1);
             gBackgroundColour[0] = gLevelHeader->backgroundRed;
             gBackgroundColour[1] = gLevelHeader->backgroundGreen;
             gBackgroundColour[2] = gLevelHeader->backgroundBlue;
@@ -167,6 +167,6 @@ void env_reapplyFog(s32 arg0) {
 }
 
 /* Returns the level's fog preset index (-1 for none). */
-s8 env_getLevelFogPreset(s32 arg0) {
+s8 env_getLevelFogPreset(s32 levelId) {
     return gLevelHeader->fogPreset;
 }

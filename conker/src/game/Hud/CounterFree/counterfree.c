@@ -9,7 +9,7 @@ void hud_freeCounter(CounterEffect *effect) {
 }
 
 /* Message handler: frees the object on message 0x57. */
-void hud_counterMessage(EffectHeader *obj, s32 arg1, u8 msg) {
+void hud_counterMessage(EffectHeader *obj, s32 unused, u8 msg) {
     if (msg == 0x57) {
         effect_destroyObject(obj);
     }
