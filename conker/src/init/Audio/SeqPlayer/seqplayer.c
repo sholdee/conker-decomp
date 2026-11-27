@@ -291,10 +291,10 @@ void audio_setSeqVolume(u8 player, s32 vol) {
     n_alCSPSetVol(gSeqPlayers[player], vol);
 }
 
-void audio_endSeqTrack(u8 player) {
+void audio_stopSeq(u8 player) {
     n_alCSPStop(gSeqPlayers[player]);
 }
 
-void audio_stopSeq(u8 player) {
+void audio_pauseSeq(u8 player) {
     func_10018D50(gSeqPlayers[player]);
 }

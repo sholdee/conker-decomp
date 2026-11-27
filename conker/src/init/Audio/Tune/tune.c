@@ -619,7 +619,7 @@ u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     }
 
     if (level != LEVEL_FRONTEND) {
-        audio_endSeqTrack(channel);
+        audio_stopSeq(channel);
         return state;
     }
 
@@ -725,7 +725,7 @@ s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         return state;
     }
     if (level != LEVEL_FRONTEND) {
-        audio_endSeqTrack(channel);
+        audio_stopSeq(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
         case 1:
@@ -1086,7 +1086,7 @@ void music_readMarkers(s32 channel) {
         if (gChannelTunes[channel]->currentVolume == 0) {
             gMarkerBits[channel] |= 0x80;
             if (gChannelTunes[channel]->internallyPaused == 0) {
-                audio_stopSeq(channel);
+                audio_pauseSeq(channel);
                 gChannelTunes[channel]->internallyPaused = 1;
             }
         } else if (gChannelTunes[channel]->internallyPaused == 1) {
@@ -1199,7 +1199,7 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                 }
             } else if (music_isSyncReached(next->startSync, next->syncTune)) {
                 (*slot)->internallyPaused = 0;
-                audio_endSeqTrack(channel);
+                audio_stopSeq(channel);
             }
             track = *slot;
         } else if (track->seq_number == 0) {
@@ -1565,7 +1565,7 @@ void music_pauseTune(s32 id, s32 pause) {
         }
         if (2 != track->internallyPaused && pause != 0) {
             if (track->internallyPaused != 1) {
-                audio_stopSeq(track->player);
+                audio_pauseSeq(track->player);
             }
             track->internallyPaused = 2;
         }
@@ -1655,7 +1655,7 @@ void music_pauseAll(s32 pause) {
             if (gMusicInfo[gChannelTunes[i]->seq_number].flags & 0x10) {
                 continue;
             }
-            audio_stopSeq(i);
+            audio_pauseSeq(i);
         } else {
             if (!(gMusicInfo[track->seq_number].flags & 0x10)) {
                 audio_playSeqIfStopped(i);
@@ -1871,7 +1871,7 @@ void music_reset(void) {
             gMusicEventLevels[i][j] = 0x8000;
             gMusicEventDecay[i][j] = 0x100;
         }
-        audio_endSeqTrack(i);
+        audio_stopSeq(i);
         gChannelTunes[i] = NULL;
         gMarkerInterval[i] = 0;
         gLastMarkerPos[i] = 0;

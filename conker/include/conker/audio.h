@@ -80,8 +80,8 @@ void audio_findSeqLoopMarkers(u8 player, u8 count, s32 base);
 void audio_jumpToSeqMarker(u8 player, u8 marker);
 s32 audio_playSequence(u8 player, s32 sequence);
 void audio_setSeqVolume(u8 player, s32 vol);
-void audio_endSeqTrack(u8 player);
 void audio_stopSeq(u8 player);
+void audio_pauseSeq(u8 player);
 extern ALBank *gSoundBank; // sound bank
 extern ALHeap gAudioHeap;  // audio heap
 extern u8 D_80044B20[];    // the audio heap's memory, 0x3E000 bytes from 0x80044B20 (linker-defined, past the init .bss)

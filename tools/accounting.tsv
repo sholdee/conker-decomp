@@ -130,8 +130,8 @@ audio_findSeqLoopMarkers	0x10008C04	104	init	c		build/src/init/Audio/SeqPlayer/s
 audio_jumpToSeqMarker	0x10008C6C	124	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_playSequence	0x10008CE8	504	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_setSeqVolume	0x10008EE0	68	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-audio_endSeqTrack	0x10008F24	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
-audio_stopSeq	0x10008F58	56	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_stopSeq	0x10008F24	52	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
+audio_pauseSeq	0x10008F58	56	init	c		build/src/init/Audio/SeqPlayer/seqplayer.c.o
 audio_createAudioMgr	0x10008F90	1084	init	c		build/src/init/Audio/AudioMgr/audiomgr.c.o
 audio_stopThread	0x100093CC	52	init	c		build/src/init/Audio/AudioMgr/audiomgr.c.o
 audio_threadMain	0x10009400	416	init	c		build/src/init/Audio/AudioMgr/audiomgr.c.o
