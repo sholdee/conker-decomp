@@ -1062,8 +1062,7 @@ segments:
       - {start: 0x22BE50, type: .data, name: game/Hud/PlayerOverlay/playeroverlay, linker_section_order: .rodata}
       - {start: 0x22BE90, type: .data, name: game/Sprite/SpriteDraw/spritedraw, linker_section_order: .rodata}
       - {start: 0x22BED0, type: .data, name: game/Script/TaskSet/taskset, linker_section_order: .rodata}
-      - [0x22BEF0, rodata]   # resource manifest (names are game content: extracted, not in C)
-      - {start: 0x22CEE0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
+      - {start: 0x22BEF0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
       - {start: 0x22CFD0, type: .data, name: game/Script/TimerCmd/timercmd, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
       - {start: 0x22D000, type: .data, name: game/Anim/BoneMtxState/bonemtxstate, linker_section_order: .rodata}

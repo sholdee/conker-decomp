@@ -338,8 +338,8 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params);
 s32 script_cutsceneQuery(s32 id, s32 event, s32 unused);
 void script_setAnchorAtObject(s32 ref, s32 alt);
 
-/* The resource manifest D_80087430 (.data 0x22BEF0) and its dependency lists and names (.rodata
- * 0x242F30) stay data extracted from the ROM: the names are game content, which stays out of the
+/* The resource manifest D_80087430 (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
+ * (.rodata 0x242F30) stay data extracted from the ROM: the names are game text, which stays out of the
  * repository. */
 /* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
 typedef struct ResourceDescriptor {
