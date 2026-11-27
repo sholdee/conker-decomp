@@ -17,10 +17,11 @@ typedef struct LoadedResource {
     /* 0xC */ u32 dependencyCount;   // stored doubled in the file
 } LoadedResource;
 
-/* The loaded resource table: slot 0's unk4 holds the slot count, slots 1.. point at resource blocks. */
+/* The loaded resource table: a relocated RomTableEntry table (rom_loadPathTable) whose offsets are now pointers;
+ * slot 0's info holds the slot count, slots 1.. point at resource blocks. */
 typedef struct ResourceSlot {
     /* 0x0 */ LoadedResource *data;
-    /* 0x4 */ s32 unk4;
+    /* 0x4 */ s32 info;
 } ResourceSlot;
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
@@ -191,7 +192,7 @@ s32 script_loadResourceTable(s32 category, s32 *countOut) {
         return 0;
     }
     table = gResourceTable;
-    table[0].unk4 = count - 1;
+    table[0].info = count - 1;
     *countOut = count - 1;
     for (i = 1; i < count; i++) {
         done = 0;
@@ -538,15 +539,6 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
     }
 }
 
-typedef struct Msg1509D8FC {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u8 unk6;
-    /* 0x7 */ u8 unk7;
-} Msg1509D8FC;
-
-
 /* Advances script command `cmdId` to `phase`. */
 s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
     switch (cmdId) {
@@ -591,12 +583,12 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             break;
         case 29:
             if (phase == 5) {
-                Msg1509D8FC msg;
-                msg.unk0 = cmd->a[1].w;
-                msg.unk4 = cmd->a[0].w;
-                msg.unk5 = cmd->a[2].w;
-                msg.unk6 = cmd->a[3].w;
-                msg.unk7 = cmd->a[4].w;
+                LightFlashEvent msg;
+                msg.level = cmd->a[1].w;
+                msg.id = cmd->a[0].w;
+                msg.r = cmd->a[2].w;
+                msg.g = cmd->a[3].w;
+                msg.b = cmd->a[4].w;
                 effect_sendEventToType(53, (s32)&msg, 51);
             }
             break;
@@ -645,13 +637,6 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
     }
 }
 
-typedef struct Node1509DBBC {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct Node1509DBBC *next;
-    /* 0x0C */ u8 padC[0x3C];
-    /* 0x48 */ u8 type;
-} Node1509DBBC;
-
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
 s32 script_effectQuery(s32 cmdId, s32 phase, s32 cmd) {
     s32 x;
@@ -667,17 +652,17 @@ s32 script_effectQuery(s32 cmdId, s32 phase, s32 cmd) {
             if (phase == 4) {
                 u8 i;
                 s8 j;
-                Node1509DBBC *node;
+                ModelEffect *node;
 
-                /* Done once no node of type 2 is left in the watched lists. */
+                /* Done once no model effect with params.unk38 == 2 is left in the watched lists. */
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 3; j++) {
-                        node = (Node1509DBBC *)gObjectLists[i][gModelEffectTypes[j]];
+                        node = (ModelEffect *)gObjectLists[i][gModelEffectTypes[j]];
                         while (node != NULL) {
-                            Node1509DBBC *next;
+                            ModelEffect *next;
 
-                            next = node->next;
-                            if (node->type == 2) {
+                            next = (ModelEffect *)node->header.next;
+                            if (node->params.unk38 == 2) {
                                 return 0;
                             }
                             node = next;
