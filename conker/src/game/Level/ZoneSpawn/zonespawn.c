@@ -280,21 +280,10 @@ s32 level_spawnTrailZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game40490BeamPacket {
-    f32 position[3];
-    f32 direction[3];
-    f32 height;
-    f32 width;
-    f32 rotation[2];
-    f32 zero;
-    f32 field2C;
-    f32 field30;
-} Game40490BeamPacket;
-
 /** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
 s32 level_spawnZoneBeam(TriggerZone *obj) {
     TimedEffect *effect;
-    Game40490BeamPacket packet;
+    DiskEmitter packet;
     MtxF matrix;
 
     if (obj->ySize != 0) {
@@ -303,21 +292,21 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
 
         packet.height = 2.0f * obj->ySize;
         inverse = 1.0f / packet.height;
-        packet.width = obj->xSize;
-        packet.rotation[0] = obj->pitch;
-        packet.rotation[1] = obj->yaw;
-        packet.zero = 0.0f;
-        packet.field2C = 0.2001999915f;
-        packet.field30 = 0.04999999702f;
-        packet.position[0] = obj->x;
-        packet.position[1] = obj->y;
-        packet.position[2] = obj->z;
+        packet.radius = obj->xSize;
+        packet.angleX = obj->pitch;
+        packet.angleY = obj->yaw;
+        packet.pending = 0.0f;
+        packet.rate = 0.2001999915f;
+        packet.rateRandom = 0.04999999702f;
+        packet.position.x = obj->x;
+        packet.position.y = obj->y;
+        packet.position.z = obj->z;
         math_mtxRotateRPYF(matrix, obj->pitch, obj->yaw, 0.0f);
         math_transformPoint(matrix, 0.0f, packet.height, 0.0f,
-                      &packet.direction[0], &packet.direction[1], &packet.direction[2]);
-        packet.direction[0] *= inverse;
-        packet.direction[1] *= inverse;
-        packet.direction[2] *= inverse;
+                      &packet.velocity.x, &packet.velocity.y, &packet.velocity.z);
+        packet.velocity.x *= inverse;
+        packet.velocity.y *= inverse;
+        packet.velocity.z *= inverse;
         effect = effect_newTimedEffect(300, -1, 0x19, -1, 0, 0x17, sizeof(packet), 0xFF, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
@@ -749,30 +738,11 @@ s32 level_spawnBulletZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game40490PlanePoint {
-    f32 x;
-    f32 z;
-} Game40490PlanePoint;
-
-typedef struct Game40490PlanePacket {
-    Game40490PlanePoint start;
-    Game40490PlanePoint end;
-    f32 edge[4];
-    f32 top;
-    f32 bottom;
-    f32 scaleX;
-    f32 scaleZ;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    s8 bytes[4];
-} Game40490PlanePacket;
-
 /** Spawns an effect over the object's rotated rectangle (sizeX by sizeZ, sizeY high). */
 s32 level_spawnMissileZone(TriggerZone *obj) {
-    Game40490PlanePacket packet;
+    FlashSpawner packet;
     TimedEffect *effect;
-    Game40490PlanePoint corners[4];
+    Vec2fXZ corners[4];
     f32 s;
     f32 c;
     f32 z;
@@ -792,23 +762,23 @@ s32 level_spawnMissileZone(TriggerZone *obj) {
     corners[2].z = -obj->zSize * c + z - -obj->xSize * s;
     corners[3].x = -obj->xSize * c + x + obj->zSize * s;
     corners[3].z = obj->zSize * c + z - -obj->xSize * s;
-    packet.start = corners[1];
-    packet.end = corners[2];
-    packet.edge[0] = corners[0].x - corners[1].x;
-    packet.edge[1] = corners[0].z - corners[1].z;
-    packet.edge[2] = corners[3].x - corners[2].x;
-    packet.edge[3] = corners[3].z - corners[2].z;
-    packet.top = obj->y + obj->ySize;
-    packet.bottom = obj->y;
-    packet.scaleX = (obj->data2 & 0xFF) * 0.00390625f * 0.5f;
-    packet.scaleZ = ((obj->data2 >> 8) & 0xFF) * 0.00390625f * 0.5f;
-    packet.unk30 = 0.0f;
-    packet.unk34 = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 250.0f;
-    packet.unk38 = ((obj->data2 >> 24) & 0xFF) * 0.00390625f * 250.0f;
-    packet.bytes[0] = obj->data1 & 0xFF;
-    packet.bytes[1] = (obj->data1 >> 8) & 0xFF;
-    packet.bytes[2] = (obj->data1 >> 16) & 0xFF;
-    packet.bytes[3] = (obj->data1 >> 24) & 0xFF;
+    packet.startOrigin = corners[1];
+    packet.endOrigin = corners[2];
+    packet.startExtent.x = corners[0].x - corners[1].x;
+    packet.startExtent.z = corners[0].z - corners[1].z;
+    packet.endExtent.x = corners[3].x - corners[2].x;
+    packet.endExtent.z = corners[3].z - corners[2].z;
+    packet.height = obj->y + obj->ySize;
+    packet.probeHeight = obj->y;
+    packet.rate = (obj->data2 & 0xFF) * 0.00390625f * 0.5f;
+    packet.rateRange = ((obj->data2 >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    packet.accumulator = 0.0f;
+    packet.speed = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    packet.speedRange = ((obj->data2 >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    packet.colour[0] = obj->data1 & 0xFF;
+    packet.colour[1] = (obj->data1 >> 8) & 0xFF;
+    packet.colour[2] = (obj->data1 >> 16) & 0xFF;
+    packet.colour[3] = (obj->data1 >> 24) & 0xFF;
     effect = effect_newTimedEffect(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
@@ -816,22 +786,10 @@ s32 level_spawnMissileZone(TriggerZone *obj) {
     return 1;
 }
 
-typedef struct Game4049014B60Packet {
-    f32 pos[3];
-    f32 rot[3];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    LightEffect *effects[6];
-    f32 unk3C;
-    void *owner;
-    u8 active;
-} Game4049014B60Packet;
-
 /** Creates six light_createWithEffect objects at the object's position, coloured from gRaySpinnerChildColors, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 level_spawnDiscoBallZone(TriggerZone *obj) {
-    Game4049014B60Packet packet;
+    FF0E0State packet;
     s32 i;
     TimedEffect *effect;
     Vec3i pos;
@@ -839,21 +797,21 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
     u32 count;
 
     obj->flags |= 4;
-    packet.active = 1;
-    packet.owner = obj;
-    packet.pos[0] = obj->x;
-    packet.pos[1] = obj->y;
-    packet.pos[2] = obj->z;
+    packet.flags = 1;
+    packet.zone = obj;
+    packet.position.x = obj->x;
+    packet.position.y = obj->y;
+    packet.position.z = obj->z;
     count = osGetCount();
-    packet.rot[0] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rotation.x = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[1] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rotation.y = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[2] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
-    packet.unk18 = (obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk1C = ((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk20 = (obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk3C = ((obj->data2 >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
+    packet.rotation.z = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.angularVelocity.x = (obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.angularVelocity.y = ((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.angularVelocity.z = (obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.intensity = ((obj->data2 >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
     pos.x = obj->x;
     pos.y = obj->y;
     pos.z = obj->z;
@@ -868,7 +826,7 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         r = (level == LEVEL_W5_END_ARENA) ? 0xFF : gRaySpinnerChildColors[i][0];
         g = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][1];
         count = (level == LEVEL_W5_END_ARENA) ? 0 : gRaySpinnerChildColors[i][2]; // matching: blue reuses count's register
-        packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
+        packet.children[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = effect_newTimedEffect(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
@@ -876,8 +834,8 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         return 1;
     }
     for (i = 0; i < 6; i++) {
-        if (packet.effects[i] != NULL) {
-            effect_destroyObject(packet.effects[i]);
+        if (packet.children[i] != NULL) {
+            effect_destroyObject(packet.children[i]);
         }
     }
     return 1;

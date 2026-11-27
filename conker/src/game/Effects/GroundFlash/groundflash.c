@@ -5,22 +5,6 @@
 #include "conker/light.h"
 #include "libc/math.h"
 
-/* Spawner state: flashes run between a random point on the start line and one on the end line. */
-typedef struct {
-    /* 0x00 */ Vec2fXZ startOrigin;
-    /* 0x08 */ Vec2fXZ endOrigin;
-    /* 0x10 */ Vec2fXZ startExtent;
-    /* 0x18 */ Vec2fXZ endExtent;
-    /* 0x20 */ f32 height;
-    /* 0x24 */ f32 probeHeight;
-    /* 0x28 */ f32 rate;        /* flashes per frame */
-    /* 0x2C */ f32 rateRange;
-    /* 0x30 */ f32 accumulator;
-    /* 0x34 */ f32 speed;
-    /* 0x38 */ f32 speedRange;
-    /* 0x3C */ u8  colour[4];
-} FlashSpawner;
-
 struct struct_EAB10 {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8  pad10[0x18];
