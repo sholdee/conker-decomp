@@ -216,7 +216,8 @@ void particle_buildBoneBurstQuad(BoneBurstParticle *particle, s16 viewport) {
     particle_buildQuadFromAxes(&particle->head, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-/* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */
+/* Clears bit 0 of obj->object_status (the object is not drawn) while camera_global_Cameras->eye.z is below -2000,
+ * sets it otherwise. */
 void particle_cullObjectByCameraZ(WorldObject *obj) {
     if (camera_global_Cameras->eye.z < -2000.0f) {
         obj->object_status &= ~1;

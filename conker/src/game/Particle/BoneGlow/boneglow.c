@@ -69,7 +69,8 @@ s32 particle_followBoneGlow(BoneGlow *emitter) {
     return 1;
 }
 
-/* Handler: sets params unk18/unk1C and the color from the target's byte 0x68; 15 clears flag 2 and stops. */
+/* Handler: by the target's swapTexture[0], hides the glow (15: clears flag 2 and stops) or sets params alpha0/alpha1
+ * and the red colour (16: 0.3 and 0x80; 17 and every other value: 0.6 and 0xFF). */
 s32 particle_setBoneGlowBySwapTexture(BoneGlow *emitter, u8 *follow) {
     GlowShape *params;
     f32 value;

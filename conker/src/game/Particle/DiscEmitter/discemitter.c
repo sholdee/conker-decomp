@@ -55,6 +55,9 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     emitter->base.header.state = (math_random() % 51U) + 25;
 }
 
+/* Timed effect update: while the camera is over 1581 from the world origin in xz, spawns channel particles on a
+ * ring of radius 3900-5178 around the origin, only at angles within 0.4 rad of the camera's bearing; each keeps its
+ * angle in particle->extra. */
 void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
     f32 *timer;
     f32 *pos;
@@ -128,6 +131,8 @@ s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle) {
     }
     return 1;
 }
+/* Update of particle_updateOriginRingEmitter's particles: cuts the lifetime to 5 once the camera is within 1581 of
+ * the origin or its bearing is more than 0.4 rad from the particle's angle. */
 s32 particle_expireRingParticleOffBearing(ChannelParticle *particle) {
     u8 triggered;
     f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)

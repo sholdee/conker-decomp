@@ -591,7 +591,7 @@ static const Vec3f D_800A1290[8] = {
 };
 
 /* For points 4-7 of the D_800A1290 table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
- * 200 units above the point, plus an event. */
+ * 200 units above the point, plus a rumble. Other indices do nothing. */
 void particle_spawnFlashAndJetSprayAtPoint(index, owner, kind)
     u8 index;
     u8 owner;
