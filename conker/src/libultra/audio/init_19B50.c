@@ -5,7 +5,7 @@ extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
 
-void func_10019B50(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
+void audio_ctrlVolume(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
     N_ALVoiceState *vs;
     s16 tmp;
     seqp->chanState[chan].vol = vol;
@@ -17,7 +17,7 @@ void func_10019B50(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
     }
 }
 
-void func_10019C28(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
+void audio_ctrlPan(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     N_ALVoiceState *vs;
     u8 tmp;
     seqp->chanState[chan].pan = pan;
@@ -29,21 +29,21 @@ void func_10019C28(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     }
 }
 
-void func_10019CD0(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 priority) {
+void audio_ctrlPriority(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 priority) {
     seqp->chanState[chan].priority = priority;
 }
 
-void func_10019CFC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlSendMesg(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if (seqp->msgQueue != 0) {
         osSendMesg(seqp->msgQueue, (arg3 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & -0x100), 0);
     }
 }
 
-void func_10019D6C(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlBank(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk8 = arg3;
 }
 
-void func_10019D98(N_ALCSPlayer *seqp, u8 chan) {
+void audio_applyChannelLowPass(N_ALCSPlayer *seqp, u8 chan) {
     N_ALVoiceState *vs;
     s16 pan;
     s8 keyoff;
@@ -64,14 +64,14 @@ void func_10019D98(N_ALCSPlayer *seqp, u8 chan) {
     }
 }
 
-void func_10019ED8(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlLowPassGain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk14 = arg3;
-    func_10019D98(seqp, chan);
+    audio_applyChannelLowPass(seqp, chan);
 }
 
-void func_10019F38(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlLowPassKey(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk15 = arg3;
-    func_10019D98(seqp, chan);
+    audio_applyChannelLowPass(seqp, chan);
 }
 
 void func_10019F98(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
@@ -84,7 +84,7 @@ void func_10019F98(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A030(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlSustain(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALVoiceState *vs;
 
     seqp->chanState[chan].sustain = arg3;
@@ -126,28 +126,28 @@ void func_1001A224(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A2F8(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFxMix(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     arg3 = arg3 & 0x7F;
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x80) | arg3;
     func_1001A224(seqp, event, chan, seqp->chanState[chan].fxmix >> 7);
 }
 
-void func_1001A39C(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFxBus(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if ((u32)arg3 < n_syn->maxAuxBusses) {
         seqp->chanState[chan].unkB = arg3;
     }
 }
 
-void func_1001A3E0(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlMp3Bank(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->mpegBank = arg3;
 }
 
 /* Plays sound mpegBank * 100 + arg3. */
-void func_1001A3FC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlMp3Start(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     mp3_startTrack(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
 }
 
-void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
+void audio_applyChannelVolume(N_ALCSPlayer *seqp, u8 chan) {
     N_ALVoiceState *vs;
     s16 tmp;
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
@@ -157,7 +157,7 @@ void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
         }
     }
 }
-void func_1001A508(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFadeTo(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     f32 delta;
 
     if (seqp->chanState[chan].unkF == 0) {
@@ -178,10 +178,10 @@ void func_1001A508(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     return;
 call_block:
     event->msg.midi.byte1 = 0xFE;
-    func_1001A704(seqp, event, chan, arg3);
+    audio_ctrlFadeStep(seqp, event, chan, arg3);
 }
 
-void func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     u8 sp2F;
     u8 sp2E;
     s32 sp28;
@@ -230,14 +230,14 @@ void func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     } else {
         seqp->chanMask &= ~(1 << chan);
     }
-    func_1001A45C(seqp, chan);
+    audio_applyChannelVolume(seqp, chan);
 }
 
-void func_1001A9DC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFadeTime(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkF = arg3;
 }
 
-void func_1001AA08(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+void audio_ctrlFadeSet(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkD = arg3;
     seqp->chanState[chan].unkE = arg3;
     if (arg3 == 0) {
@@ -245,42 +245,42 @@ void func_1001AA08(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     } else {
         seqp->chanMask |= 1 << chan;
     }
-    func_1001A45C(seqp, chan);
+    audio_applyChannelVolume(seqp, chan);
 }
 
 /* The controller-change handlers (see n_seqp.h). */
-CSPCtrlHandler D_8002BA50[0x5D + 4] = {
+CSPCtrlHandler gCspCtrlHandlers[0x5D + 4] = {
     /* 0x00 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    /* 0x07 */ func_10019B50, /* volume */
+    /* 0x07 */ audio_ctrlVolume, /* volume */
     /* 0x08 */ NULL, NULL,
-    /* 0x0A */ func_10019C28, /* pan */
+    /* 0x0A */ audio_ctrlPan, /* pan */
     /* 0x0B */ NULL, NULL, NULL, NULL, NULL,
-    /* 0x10 */ func_10019CD0, /* priority */
+    /* 0x10 */ audio_ctrlPriority, /* priority */
     /* 0x11 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x19 */ NULL,
-    /* 0x1A */ func_1001A3FC,
-    /* 0x1B */ func_1001A3E0,
+    /* 0x1A */ audio_ctrlMp3Start,
+    /* 0x1B */ audio_ctrlMp3Bank,
     /* 0x1C */ NULL, NULL,
-    /* 0x1E */ func_10019CFC,
+    /* 0x1E */ audio_ctrlSendMesg,
     /* 0x1F */ NULL,
-    /* 0x20 */ func_10019D6C,
-    /* 0x21 */ func_10019ED8,
-    /* 0x22 */ func_10019F38,
+    /* 0x20 */ audio_ctrlBank,
+    /* 0x21 */ audio_ctrlLowPassGain,
+    /* 0x22 */ audio_ctrlLowPassKey,
     /* 0x23 */ func_10019F98,
     /* 0x24 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x2C */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x34 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x3C */ NULL, NULL, NULL, NULL,
-    /* 0x40 */ func_1001A030, /* sustain */
+    /* 0x40 */ audio_ctrlSustain, /* sustain */
     /* 0x41 */ func_1001A224,
     /* 0x42 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x4A */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x52 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     /* 0x5A */ NULL,
-    /* 0x5B */ func_1001A2F8, /* fx mix */
-    /* 0x5C */ func_1001A39C,
-    /* 0x5D */ func_1001A508, /* controller 0xFF */
-    /* 0x5E */ func_1001A704, /* controller 0xFE */
-    /* 0x5F */ func_1001A9DC, /* controller 0xFD */
-    /* 0x60 */ func_1001AA08  /* controller 0xFC */
+    /* 0x5B */ audio_ctrlFxMix, /* fx mix */
+    /* 0x5C */ audio_ctrlFxBus,
+    /* 0x5D */ audio_ctrlFadeTo, /* controller 0xFF */
+    /* 0x5E */ audio_ctrlFadeStep, /* controller 0xFE */
+    /* 0x5F */ audio_ctrlFadeTime, /* controller 0xFD */
+    /* 0x60 */ audio_ctrlFadeSet  /* controller 0xFC */
 };

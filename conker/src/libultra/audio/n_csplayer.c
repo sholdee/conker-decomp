@@ -641,9 +641,9 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 CSPCtrlHandler handler;
 
                 if (byte1 < 0x5D) {
-                    handler = D_8002BA50[byte1];
+                    handler = gCspCtrlHandlers[byte1];
                 } else if (byte1 >= 0xFC) {
-                    handler = D_8002BA50[0x5D + (0xFF - byte1)];
+                    handler = gCspCtrlHandlers[0x5D + (0xFF - byte1)];
                 } else {
                     handler = NULL;
                 }

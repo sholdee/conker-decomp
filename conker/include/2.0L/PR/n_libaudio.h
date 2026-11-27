@@ -306,7 +306,7 @@ typedef struct {
     /* 0x32 */  s16                 vol;            /* overall sequence volume          */
     /* 0x34 */  u8                  maxChannels;    /* number of MIDI channels          */
     /* 0x35 */  u8                  debugFlags;     /* control which error get reported */
-    /* 0x36 */  u8                  mpegBank;       /* Rare: the Oct 2000 debugger's name; set by func_1001A3E0 */
+    /* 0x36 */  u8                  mpegBank;       /* Rare: the Oct 2000 debugger's name; set by audio_ctrlMp3Bank */
     /* 0x37 */  u8                  pad37;
     /* 0x38 */  N_ALEvent           nextEvent;
     /* 0x48 */  ALEventQueue        evtq;
@@ -469,7 +469,7 @@ void    func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
 void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
 void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base); /* n_csq.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
-void    func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
+void    audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
 void    func_1001CA90(N_ALVoice *v, f32 fc);                            /* n_synfilter13.c: filter type 19, the cutoff of the voice's low-pass */
 void    func_1001CB40(N_ALVoice *v, u8 fgain);                          /* n_synfilter12.c: filter type 18, the gain of the voice's low-pass */
 f32     func_1001CEA4(s32 arg0);                                        /* n_drvrNew.c: the pitch ratio of a number of semitones */
