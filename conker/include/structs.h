@@ -78,7 +78,7 @@ typedef struct ActorEffectDef {
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
 
-/* A sound player voice record: the SndState of src/libultra/audio/init_15550.c (the audio library's sound state), as seen by game code
+/* A sound player voice record: the SndState of src/libultra/audio/n_sndplayer.c (the audio library's sound state), as seen by game code
  * that cannot include n_libaudio.h; the sound slots of init/Audio/DynamicSound/dynamicsound.c (gVoiceSlots) point at one. */
 struct SndState {
     /* 0x00 */ struct SndState *next;
@@ -628,7 +628,7 @@ typedef struct {
     /* 0x195 */ s8  being_sniped;
     /* 0x196 */ s8  being_s_char;
     /* 0x197 */ u8  SniperState;      // nonzero while aiming in first person (our earlier name: aimState)
-    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game/Camera/Camera/camera.c)
+    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game/Camera/camera_camera.c)
     /* 0x199 */ u8  shotCount;
     /* 0x19A */ u8  numGrenades;
     /* 0x19B */ u8  GrenadeThrowState;
@@ -1287,7 +1287,7 @@ struct Actor {
     /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
-    /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/EmitterSpawner/emitterspawner saves [0]/[1] as commands 0xE/0x68;
+    /* 0x2E4 */ s32 taskint[3]; // per-type state; game_EB6C0.c (func_150BE438) saves [0]/[1] as commands 0xE/0x68;
                                 // [2] is nonzero while the unk2D8 fade runs
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
@@ -2262,7 +2262,7 @@ typedef struct RopeSpawn {
 } RopeSpawn; /* size 0x24 */
 
 /* The streaming music player's voice (D_800E0D80; set up by game/Audio/Mp3Voice/mp3voice, run by
- * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
+ * game/Audio/Mp3Player/mp3player). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
  * the two rate pairs, the two targets), and from 0x30 a low-pass filter laid out as LowPass is up
  * to its first state pointer (fc, fgain, the coefficient vector, first, fstate[0]). The fields
@@ -2288,7 +2288,7 @@ typedef struct StreamVoice {
     /* 0x26 */ u8   pad26[0x2];
     /* 0x28 */ s32  em_delta;
     /* 0x2C */ s32  em_segEnd;
-    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to func_1001CF38 as a LowPass): fc
+    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to audio_updateLowPassCoefs as a LowPass): fc
     /* 0x32 */ s16  unk32;          // fgain; the filter runs while it is > 0
     /* 0x34 */ u8   pad34[0x4];
     /* 0x38 */ s16  unk38[16];      // the coefficient vector (its physical address goes in an acmd)
@@ -2863,7 +2863,7 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* A bone-matrix trail ("afterimage") drawn behind an object (game/Trail/Afterimage/afterimage); gBoneTrailLists[type] lists them. */
+/* A bone-matrix trail ("afterimage") drawn behind an object (game/Effects/Trail/Afterimage/afterimage); gBoneTrailLists[type] lists them. */
 typedef struct BoneTrail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
     /* 0x01 */ u8 numFrames; /* history length */

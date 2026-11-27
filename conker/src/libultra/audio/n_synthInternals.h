@@ -24,7 +24,7 @@
 #include <synthInternals.h>
 #include <n_abi.h>
 
-/* An audio command (Acmd) seen as its two words; init/Audio/AuxBus/n_auxbus.c, init/Audio/VoiceLowPass/voicelowpass.c and
+/* An audio command (Acmd) seen as its two words; libultra/audio/n_auxbus.c, init/Audio/VoiceLowPass/voicelowpass.c and
  * n_synthesizer.c build their command lists through it. */
 typedef struct { u32 w0; u32 w1; } Cmd;
 
@@ -165,26 +165,26 @@ Acmd    *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 byteCount, Acmd *p); /* Conke
 s32     audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param);   /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
 s32     n_alLoadParam(N_PVoice *filter, s32 paramID, void *param);
 
-Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: init/Audio/Resample/n_resample.c */
+Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: libultra/audio/n_resample.c */
 s32     n_alResampleParam(N_PVoice *f, s32 paramID, void *param);
 
-Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: init/Audio/Env/n_env.c */
-/* Conker: init/Audio/Env/n_env.c. Static in the SDK; libultra/audio/game_21FC90.c uses them too. */
+Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: libultra/audio/n_env.c */
+/* Conker: libultra/audio/n_env.c. Static in the SDK; game/Audio/Mp3Player/mp3player.c uses them too. */
 s16     _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
 s16     _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 
 s32 n_alAuxBusParam( s32 paramID, void *param);
-/* Conker: init/Audio/AuxBus/n_auxbus.c. Rare's synthesizer has several aux buses: this pull takes the bus and
+/* Conker: libultra/audio/n_auxbus.c. Rare's synthesizer has several aux buses: this pull takes the bus and
  * counts its voice pulls in *cmdCount (the SDK's takes sampleOffset and p only). */
 Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
 
-/* Conker: init/Audio/Reverb/n_reverb.c. Rare's effect pull takes the aux bus whose effect it runs. */
+/* Conker: libultra/audio/n_reverb.c. Rare's effect pull takes the aux bus whose effect it runs. */
 Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 bus);
-s32 n_alFxParamHdl(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
+s32 n_alFxParamHdl(void *filter, s32 paramID, void *param); /* Conker: libultra/audio/n_reverb.c */
 void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
 
-Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *p); /* Conker: init/Audio/MainBus/n_mainbus.c */
+Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *p); /* Conker: libultra/audio/n_mainbus.c */
 s32 n_alMainBusParam( s32 paramID, void *param);
 
 Acmd *n_alSavePull(s32 sampleOffset, Acmd *p);
@@ -197,7 +197,7 @@ void init_lpfilter(LowPass *lp);
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
 
-/* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/conker/math.h). */
+/* Conker: defined in game/Math/Atan2/atan2.c, used by n_drvrNew.c (the game's declaration is in include/conker/math.h). */
 f32     math_atan2(f32 arg0, f32 arg1);
 
 #endif /*  __N_SYNTHINTERNALS__ */

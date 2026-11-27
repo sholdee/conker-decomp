@@ -34,15 +34,34 @@ Other sources of facts:
   code.
 
 ## File names and layout (the owner's decision)
-- Files follow Rare's layout, as the five proven paths show: `src/game/<Area>/<Name>/<name>.c`. The
+- Files follow Rare's layout, as the proven paths show: `src/game/<Area>/<Name>/<name>.c`. The
   file name is lowercase. `<Area>` and `<Name>` are CamelCase words, for example
   `game/Effects/PipeExplode/pipeexplode`.
-- The five proven files are already in place under `src/game/Effects/`. Use the same pattern for the
+- Nine files have a proven path, from path strings in the US ROM and in the prerelease builds. Each is
+  at Rare's path under `src/game/`:
+  - US ROM: `Effects/PipeExplode/pipeexplode.c`, `Effects/Blood/blood.c`,
+    `Effects/ColourFrameBuffer/colourframebuffer.c`, `Effects/Light/light.c`,
+    `Effects/CharacterFlameThrower/characterflamethrower.c`.
+  - ECTS build (August 2000): `Effects/HoltenRope/holtenrope.c`,
+    `Effects/Sfx/effects_sfx_w1_bee_cavern.c`, `Effects/Sight/effects_sight.c`.
+  - Debug build (October 2000): `Camera/camera_camera.c`.
+
+  Some of Rare's file names start with the directory names (`camera_camera.c`, `effects_sight.c`),
+  and `camera_camera.c` is directly in its area directory. A file with a proven path keeps exactly
+  that path. Rare had `Sight/` and `Trail/` under `Effects/` (`Effects/Sight/effects_sight.c`,
+  `Effects/Trail/trail.c`), so the sight and trail files are in `game/Effects/Sight/` and
+  `game/Effects/Trail/`. Use the `<Area>/<Name>/<name>.c` pattern for the
   other files. Choose `<Area>` from the subsystem (for example `Effects`, `Camera`, `Collision`,
   `Audio`). Choose `<Name>` from what the file does.
 - The root is the file's ROM segment: `game/` for the game code, `init/` for the init segment
   (`init/<Area>/<Name>/<name>.c`), and `debugger/` for the debugger segment.
 - Each file name must be unique in `src/`. Leave the libultra files where they are.
+- **The audio library.** A file that is Rare's version of an SDK audio file has the SDK's file name and
+  is in `src/libultra/audio/` (for example `n_seqplayer.c`, `n_event.c`, `bnkf.c`). Rare's own audio
+  files are in `init/Audio/<Name>/<name>.c` (or `game/Audio/`) with descriptive names. Rare's own
+  functions in the audio library have the `audio_` prefix (`mp3_` for the streaming player), never
+  `n_al*`: that form is only for the SDK's names. Do not use the placeholder names of other
+  decompilations for files or functions.
 - Rare's copies of SDK functions keep a separate step: their SDK names need matching prototypes in the
   SDK headers. Put such proposals in `symbols.tsv` as usual. The coordinator applies them after the
   prototypes are fixed.

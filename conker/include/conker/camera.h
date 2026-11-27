@@ -62,7 +62,7 @@
  *   game/Camera/HeadingToPoint/headingtopoint.c
  *   game/Camera/OrbitEye/orbiteye.c
  *   game/Camera/YawFollow/yawfollow.c
- *   game/Camera/Camera/camera.c
+ *   game/Camera/camera_camera.c
  *   game/Camera/TiltPresets/tiltpresets.c
  *   game/Camera/CameraMessages/cameramessages.c
  *   game/Camera/CameraPoses/cameraposes.c
@@ -343,7 +343,7 @@ void camera_placeOrbitEye(Camera *camera);
 /* game/Camera/YawFollow/yawfollow.c */
 void camera_followYaw(Camera *camera);
 
-/* game/Camera/Camera/camera.c */
+/* game/Camera/camera_camera.c */
 void camera_updateAll(void);
 void camera_update(Camera *camera);
 void camera_updatePlayerAngle(Camera *camera);

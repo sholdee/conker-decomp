@@ -216,14 +216,14 @@ s32 game_processMessage(void) {
                         if (gPaused != 0) {
                             music_pauseAll(1);
                             sound_setMuted(1);
-                            if (func_151F2CDC() != 0) {
-                                func_151F2BE8();
+                            if (mp3_getPlayState() != 0) {
+                                mp3_pause();
                             }
                         } else {
                             music_pauseAll(0);
                             sound_setMuted(0);
-                            if (func_151F2CDC() != 0) {
-                                func_151F2C4C();
+                            if (mp3_getPlayState() != 0) {
+                                mp3_resume();
                             }
                         }
                     }

@@ -4,7 +4,7 @@
 #include "conker/script.h"
 
 /* Script command handler (gScriptCommandHandlers[5]): opcode 0 starts `id` via mp3_startTrack at volume a[0]
- * (0x7FFF when omitted), 1 passes a[0] (and a[1] when given) to func_151F2D6C, 2 calls func_151F2BA8.
+ * (0x7FFF when omitted), 1 passes a[0] (and a[1] when given) to mp3_setVolume, 2 calls mp3_stop.
  * Returns 1 when the opcode is handled. */
 s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
@@ -19,22 +19,22 @@ s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd) {
     }
     case 1:
         if (gScriptCmdWordCount == 4) {
-            func_151F2D6C(cmd->a[0].w, cmd->a[1].w);
+            mp3_setVolume(cmd->a[0].w, cmd->a[1].w);
         } else {
-            func_151F2D6C(cmd->a[0].w, 0);
+            mp3_setVolume(cmd->a[0].w, 0);
         }
         return 1;
     case 2:
-        func_151F2BA8();
+        mp3_stop();
         return 1;
     }
     return 0;
 }
 
-/* Script query handler (gScriptQueryHandlers[5]): opcode 3 returns whether func_151F2CDC() == 1, else 0. */
+/* Script query handler (gScriptQueryHandlers[5]): opcode 3 returns whether mp3_getPlayState() == 1, else 0. */
 s32 script_streamQuery(s32 id, s32 opcode, ScriptCmd *cmd) {
     if (opcode == 3) {
-        return func_151F2CDC() == 1;
+        return mp3_getPlayState() == 1;
     }
     return 0;
 }

@@ -139,7 +139,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     return math_gfxSetOtherMode(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
-/* Message handlers by ScreenTint.unk19 (none for 0); sight_handleTintMessage (game/Sight/SightHud/sighthud) takes the effect as
+/* Message handlers by ScreenTint.unk19 (none for 0); sight_handleTintMessage (game/Effects/Sight/effects_sight) takes the effect as
    the longer SightOwnedEffect, which has the owning player in the extra data. */
 static void (*gTintMessageFuncs[])(struct ScreenTint *, void *, u8) = { NULL, sight_handleTintMessage };
 

@@ -13,7 +13,7 @@ src/init/Boot/Inflate/inflatetables.s	boot	hand-written asm (subsystem from its 
 src/init/Boot/Exception/exceptasm.s	boot	hand-written asm (subsystem from nearest preceding file)
 src/init/Boot/DebugTrap/debugtrap.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/FaultDebugger/faultdebugger.s	boot	hand-written asm (subsystem from its header group)
-src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
+src/init/Audio/OutputMode/outputmode.c	audio	Rare audio output-mode setup
 src/game/Model/ActorQuadAlloc/actorquadalloc.c	model	per-view vertex buffer copies for actor quads
 src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup03/levelcamsetup03.c	camera	per-level camera hook (empty)
@@ -92,7 +92,7 @@ src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-wr
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game/Camera/LevelHook07/levelhook07.c	camera	per-level camera setup from game-flag queries
 src/game/Camera/LevelHook05/levelhook05.c	camera	per-level camera flag hook
-src/game_EB600.c	effect	split from game_EB340.c; same subsystem
+src/game_EB6C0.c	effect	prop push, path mover and a debris burst (the file after effects_sfx_w1_bee_cavern.c)
 src/game/Camera/LevelHook18/levelhook18.c	camera	per-level camera hook
 src/game/Camera/LevelHook03/levelhook03.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook10/levelhook10.c	camera	per-level camera flag hook
@@ -123,7 +123,7 @@ src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
 src/game_193420.c	effect	effect stub (empty)
 src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game_1CC420.c	effect	effect stub (empty)
-src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
+src/game/Audio/Mp3Player/mp3player.c	mp3	streaming music player (StreamVoice), set up by game/Audio/Mp3Voice/mp3voice.c
 src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctlong.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctshort.s	mp3	hand-written asm (subsystem from its header group)
@@ -181,7 +181,7 @@ src/game/Bone/BoneRemap/boneremap.c	bone	data-only unit: bone remap byte lists a
 src/game/Boot/GameMain/gamemain.c	boot	game entrypoint: subsystem init and main loop
 src/game/Camera/AimAtObject/aimatobject.c	camera	aim at object
 src/game/Camera/AimCamera/aimcamera.c	camera	aim camera mode and aim ray
-src/game/Camera/Camera/camera.c	camera	player camera per-frame update (camera.c)
+src/game/Camera/camera_camera.c	camera	player camera per-frame update (camera.c)
 src/game/Camera/CameraCommands/cameracommands.c	camera	camera commands and path following
 src/game/Camera/CameraData/cameradata.c	camera	data-only unit: identity matrix, camera frame count, camera table, hold timers
 src/game/Camera/CameraMessages/cameramessages.c	camera	camera message pump and point easing
@@ -279,7 +279,7 @@ src/game/Effects/EffectActor/effectactor.c	effect	effect actors and motions
 src/game/Effects/EffectObj/effectobj.c	effect	effect object core: life and update handlers
 src/game/Effects/EffectQueue/effectqueue.c	effect	fixed-capacity FIFO with release callbacks
 src/game/Effects/EffectQueueInit/effectqueueinit.c	effect	allocates the effect FIFO queue
-src/game/Effects/EmitterSpawner/emitterspawner.c	effect	level effect spawners (bee cavern sfx effects)
+src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c	effect	screen-sprite spawner of the bee cavern (original path, from the ECTS build)
 src/game/Effects/Explosion/explosion.c	effect	explosion and dropped point effects
 src/game/Effects/FadeBurst/fadeburst.c	effect	burst effect pieces
 src/game/Effects/FallingObject/fallingobject.c	effect	falling object spawns
@@ -606,8 +606,8 @@ src/game/Script/TimerCmd/timercmd.c	script	slot records
 src/game/Script/ZoneCmd/zonecmd.c	script	record command/query handlers
 src/game/Shadow/BlobShadow/blobshadow.c	shadow	blob shadows under objects
 src/game/Shadow/RealTimeShadow/realtimeshadow.c	shadow	real-time shadows
-src/game/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
-src/game/Sight/SightHud/sighthud.c	sight	split from game_1F4650.c; same subsystem
+src/game/Effects/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
+src/game/Effects/Sight/effects_sight.c	sight	split from game_1F4650.c; same subsystem
 src/game/Sprite/FadeSprite/fadesprite.c	sprite	fade-in/hold/fade-out sprite
 src/game/Sprite/LevelSprites/levelsprites.c	sprite	sprite animation callbacks
 src/game/Sprite/PointGroup/pointgroup.c	sprite	rotated texcoords and point groups
@@ -634,23 +634,23 @@ src/game/Texture/TextureRelease/texturerelease.c	texture	id list reference relea
 src/game/Texture/TextureTables/texturetables.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
 src/game/Texture/TextureUse/textureuse.c	texture	texture use counts and aging
 src/game/Texture/UvWobble/uvwobble.c	texture	UV wobble on display-list vertices
-src/game/Trail/Afterimage/afterimage.c	trail	bone-matrix afterimages
-src/game/Trail/AnchoredTrail/anchoredtrail.c	trail	bone trails with emitters
-src/game/Trail/BoneTrail/bonetrail.c	trail	bone trails
-src/game/Trail/CharacterTrail/charactertrail.c	trail	character trail with emitters and sounds
-src/game/Trail/FallingTrail/fallingtrail.c	trail	trails with bursts for level effects
-src/game/Trail/LevelStream/levelstream.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
-src/game/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
-src/game/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
-src/game/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
-src/game/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
-src/game/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
-src/game/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
-src/game/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor
-src/game/Trail/TrackerTrail/trackertrail.c	trail	tracker trails
-src/game/Trail/TrailEmitter/trailemitter.c	trail	trail emitters
-src/game/Trail/TrailRing/trailring.c	trail	particle kind 2: trail launched outward; ring of trails
-src/game/Trail/TrailSpray/trailspray.c	trail	motion trails sprayed from a ring around an object
+src/game/Effects/Trail/Afterimage/afterimage.c	trail	bone-matrix afterimages
+src/game/Effects/Trail/AnchoredTrail/anchoredtrail.c	trail	bone trails with emitters
+src/game/Effects/Trail/BoneTrail/bonetrail.c	trail	bone trails
+src/game/Effects/Trail/CharacterTrail/charactertrail.c	trail	character trail with emitters and sounds
+src/game/Effects/Trail/FallingTrail/fallingtrail.c	trail	trails with bursts for level effects
+src/game/Effects/Trail/LevelStream/levelstream.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
+src/game/Effects/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
+src/game/Effects/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
+src/game/Effects/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
+src/game/Effects/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
+src/game/Effects/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
+src/game/Effects/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
+src/game/Effects/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor
+src/game/Effects/Trail/TrackerTrail/trackertrail.c	trail	tracker trails
+src/game/Effects/Trail/TrailEmitter/trailemitter.c	trail	trail emitters
+src/game/Effects/Trail/TrailRing/trailring.c	trail	particle kind 2: trail launched outward; ring of trails
+src/game/Effects/Trail/TrailSpray/trailspray.c	trail	motion trails sprayed from a ring around an object
 src/game/View/Projection/projection.c	view	view frustum FOV and projection
 src/game/View/ViewLayout/viewlayout.c	view	player count and split-screen view layouts
 src/game/View/ViewOrtho/viewortho.c	view	per-view projection matrices from view sizes (level setup)
@@ -675,21 +675,29 @@ src/game/Zone/ZoneState/zonestate.c	zone	zone state: sound zones, music-channel 
 src/game/Zone/ZoneTree/zonetree.c	zone	zone tree walk and zone-object cursor
 src/init/Audio/AdpcmLoad/adpcmload.c	audio	ADPCM decoder stage (Rare rework of _decodeChunk)
 src/init/Audio/AudioMgr/audiomgr.c	audio	audio manager: synthesis driver setup, audio thread, sample DMA cache, sound banks
-src/init/Audio/AuxBus/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
+src/libultra/audio/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
 src/init/Audio/DynamicSound/dynamicsound.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
-src/init/Audio/Env/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
-src/init/Audio/EvtQueue/n_evtqueue.c	audio	libaudio node linking helpers (alLink-style)
-src/init/Audio/MainBus/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
+src/libultra/audio/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
+src/libultra/audio/n_event.c	audio	the event queue (SDK event.c; n_alEvtqPostEvent has a fourth argument of Rare's)
+src/libultra/audio/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
 src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (override/fallback/one-shot)
 src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers
-src/init/Audio/Resample/n_resample.c	audio	Rare's rework of n_alResamplePull
-src/init/Audio/Reverb/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
+src/libultra/audio/n_resample.c	audio	Rare's rework of n_alResamplePull
+src/libultra/audio/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
+src/init/Audio/SeqChannel/seqchannel.c	audio	channel functions of the compact sequence player (mute, fade, message queue)
+src/init/Audio/SeqCtrl/seqctrl.c	audio	MIDI controller handlers of the compact sequence player
+src/init/Audio/SeqFxMix/seqfxmix.c	audio	posts the sequence player's effect-mix event and the channel aux-bus controller
+src/init/Audio/SeqFxParam/seqfxparam.c	audio	posts the sequence player's effect-parameter event
+src/init/Audio/SeqPause/seqpause.c	audio	posts the sequence player's pause event
 src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
-src/init/Audio/SeqVoice/seqvoice.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
+src/libultra/audio/n_seqplayer.c	audio	the sequence player's voice and channel-state helpers (SDK seqplayer.c), with Conker's instrument loading
 src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path
-src/init/Audio/SynAllocFx/n_synallocfx.c	audio	synth FX allocation wrapper (n_alFxNew)
-src/init/Audio/SynDelete/n_syndelete.c	audio	n_alSynDelete
+src/libultra/audio/n_synallocfx.c	audio	synth FX allocation wrapper (n_alFxNew)
+src/libultra/audio/n_syndelete.c	audio	n_alSynDelete
 src/init/Audio/Tune/tune.c	music	music sequence manager: tracks, volume ramps, per-frame sequence hooks
+src/init/Audio/SynLowPassCount/synlowpasscount.c	audio	posts filter type 17 (the count of the voice low-pass stage)
+src/init/Audio/SynLowPassCutoff/synlowpasscutoff.c	audio	posts filter type 19 (the cutoff of the voice low-pass)
+src/init/Audio/SynLowPassGain/synlowpassgain.c	audio	posts filter type 18 (the gain of the voice low-pass)
 src/init/Audio/VoiceLowPass/voicelowpass.c	audio	per-voice low-pass filter stage
 src/init/Boot/ArgStub/argstub.c	boot	empty early-boot stub
 src/init/Boot/BootMain/bootmain.c	boot	main and idle threads: heap/framebuffer/VI setup, boot data load and decompression

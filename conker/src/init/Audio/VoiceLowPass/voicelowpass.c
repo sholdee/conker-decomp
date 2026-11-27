@@ -45,7 +45,7 @@ Acmd *audio_pullLowPass(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {
     }
     if (voice->fgain > 0) {
         if (voice->flags != 0) {
-            func_1001CF38((LowPass *)&voice->fc, 22050.0f);
+            audio_updateLowPassCoefs((LowPass *)&voice->fc, 22050.0f);
         }
         /* aLoadADPCM(32, fcvec): DMA the 16 filter coefficients into DMEM */
         loadCmd = ptr++;

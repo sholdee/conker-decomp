@@ -8,8 +8,8 @@
 /*
  * Subsystem "sight": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/Sight/SightBeam/sightbeam.c
- *   game/Sight/SightHud/sighthud.c
+ *   game/Effects/Sight/SightBeam/sightbeam.c
+ *   game/Effects/Sight/effects_sight.c
  */
 
 typedef struct {
@@ -54,7 +54,7 @@ typedef struct {
     u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
 } SightLensObject;
 
-/* game/Sight/SightBeam/sightbeam.c */
+/* game/Effects/Sight/SightBeam/sightbeam.c */
 s32 sight_placeBeam(TriggerZone *beam);
 SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri,
                                TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue,
@@ -82,7 +82,7 @@ s32 sight_updateStatusLight(LightEffect *obj);
 s32 func_151C9B64(SightStatusObject *obj, u8 *visible);
 extern const s32 gSightBeamBreakHits[];
 
-/* game/Sight/SightHud/sighthud.c */
+/* game/Effects/Sight/effects_sight.c */
 void sight_startPlayerEffects(Camera *player, s32 state);
 void sight_spawnScopeSight(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void sight_resetPlayerEffects(Camera *player);

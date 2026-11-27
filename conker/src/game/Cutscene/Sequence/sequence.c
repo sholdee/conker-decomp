@@ -681,7 +681,7 @@ void cutscene_skip(s32 scene) {
     s32 i;
 
     if (mp3_isPlaying() != 0) {
-        func_151F2BA8();
+        mp3_stop();
     }
     obj = event_getOwnedObject(movement_obj, 0);
     if (obj != NULL) {
@@ -775,8 +775,8 @@ void cutscene_updateSkip(s32 scene) {
         gCutsceneSkipFadeTimer = 30;
         screen_startViewFade(0, 0, 0, 0x1E, 1, 0);
         func_1000E17C();
-        if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
-            func_151F2D6C(0, 0x2B02);
+        if ((mp3_getPlayState() == 1) || (mp3_getPlayState() == 2)) {
+            mp3_setVolume(0, 0x2B02);
         }
     } else if (gCutsceneSkipState == 1) {
         if (gRawFrameTicks < gCutsceneSkipFadeTimer) {
@@ -826,7 +826,7 @@ void cutscene_advanceTime(s32 scene) {
             (gCutsceneStartTime != gCutsceneTimes[scene])) {
             gCutscenePrevTimes[scene] = -1;
         }
-        if (func_151F2CDC() == 1) {
+        if (mp3_getPlayState() == 1) {
             face_processMessages();
         }
         if (gCutsceneTimes[scene] >= gCutsceneEndTimes[scene]) {

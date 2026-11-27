@@ -21,7 +21,7 @@
 #define TEXTBOX_DARK            0x4     /* translucent black body, no drop shadow */
 #define TEXTBOX_ALT_TAIL        0x8     /* tail drawn with gTextBoxAltTailTexture */
 #define TEXTBOX_INPUT           0x10    /* A/B buttons advance or close the box */
-#define TEXTBOX_INPUT_CHECK     0x20    /* ... but only while func_151F2CDC() returns 0 */
+#define TEXTBOX_INPUT_CHECK     0x20    /* ... but only while mp3_getPlayState() returns 0 */
 #define TEXTBOX_NO_B_SKIP       0x40    /* B does not skip to the end */
 #define TEXTBOX_B_RESTARTS      0x80    /* B on the last page restarts from the first */
 #define TEXTBOX_CLOSE           0x100   /* request: close after the current page */
@@ -205,7 +205,7 @@ void text_updateBox(TextBox *box) {
         box->timer -= gFrameSteps;
         box->timer = (box->timer < 0) ? 0 : box->timer;
         if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->noInput == 0) {
-            if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
+            if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || mp3_getPlayState() == 0) {
                 if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
                     if (gButtonsPressed[0] & B_BUTTON) {
                         box->page = -1;

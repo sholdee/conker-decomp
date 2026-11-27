@@ -1598,7 +1598,7 @@ void event_spawnSmallQuadEdgeParticles(void) {
 }
 /*
  * Resolves a sound command in place: bit 21 skips it while sound_isActorSound2Playing / sound_isActorSound1Playing /
- * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's gSpawnModelData table,
+ * mp3_getPlayState (by `mode`) reports busy, ids >= 2000 come from the object's gSpawnModelData table,
  * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
  * Returns 0 if nothing should play.
  */
@@ -1625,7 +1625,7 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
             }
             break;
         case 2:
-            if (func_151F2CDC() == 1) {
+            if (mp3_getPlayState() == 1) {
                 return 0;
             }
             break;

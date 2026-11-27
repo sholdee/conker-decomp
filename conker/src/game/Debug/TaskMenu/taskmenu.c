@@ -9,7 +9,7 @@
 #include "conker/zone.h"
 #include "libc/string.h"
 
-s16 D_80084480 = 0; // the first word of this file's .data; read by game/Camera/Camera/camera.c and game/Game/MainLoop/mainloop.c
+s16 D_80084480 = 0; // the first word of this file's .data; read by game/Camera/camera_camera.c and game/Game/MainLoop/mainloop.c
 
 /* Not referenced: the 0x50 bytes of .bss before gTaskMenuScrollOffset. The .bss of game/Zone/ZoneTree/zonetree ends with
  * unit padding at 0x800C6800, and no unit lies between that one and this one. The debug prototype has the same

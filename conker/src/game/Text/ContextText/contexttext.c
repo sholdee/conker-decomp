@@ -219,7 +219,7 @@ void text_closeContextText(void) {
         heap_free(gContextSounds);
         gContextHeaderText = NULL;
     }
-    func_151F2D6C(0, 0x5622);
+    mp3_setVolume(0, 0x5622);
 }
 
 /* Per frame: once the open text box has closed, frees it and disables the zone that showed it. */

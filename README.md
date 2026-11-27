@@ -43,8 +43,9 @@ badges from the committed files after each change to `master` (`tools/progress.p
   original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
   descriptive names.
 - **Source layout.** The files follow the pattern of the source paths in the game's own strings, for
-  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
-  other directory and file names are descriptive.
+  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only nine paths are known: five from the US
+  ROM and four from the prerelease builds (`tools/RENAMING.md` lists them). Those files are at Rare's
+  paths. The other directory and file names are descriptive.
 - **Clean C.** Each function and global is declared in the subsystem header of the file that defines
   it. Each C file includes the headers that it uses: there are no umbrella headers. About 70 local
   declarations remain in C files. Each is there because IDO needs it to reproduce the original code,
@@ -164,6 +165,12 @@ Fur Day* is the property of its owners, and this project is not affiliated with 
   decompilation of the game. Its translation-unit boundaries and many struct, field and function names
   were adopted here by address, and its data-layout notes informed the data work. It is also the place
   to go for assets.
+- The decompilations of Rare's other N64 games, which share the modified audio library:
+  [Perfect Dark](https://github.com/n64decomp/perfect_dark) by Ryan Dwyer,
+  [Donkey Kong 64](https://gitlab.com/dk64_decomp/dk64),
+  [Diddy Kong Racing](https://github.com/DavidSM64/Diddy-Kong-Racing) and
+  [Banjo-Kazooie](https://github.com/n64decomp/banjo-kazooie). Byte matches with their code gave the
+  SDK names of many audio functions and the file layout of `src/libultra/audio/`.
 - [ultralib](https://github.com/decompals/ultralib) (decompiled libultra),
   [splat](https://github.com/ethteck/splat) and [spimdisasm](https://github.com/Decompollaborate/spimdisasm),
   [asm-processor](https://github.com/simonlindholm/asm-processor),
