@@ -31,7 +31,7 @@ f32 gScriptSpeedups[2];
 /*
  * Object script interpreter commands.
  *
- * Each object runs a byte-code script (Actor.unk218 points at its next command). A command
+ * Each object runs a byte-code script (Actor.scriptCmd points at its next command). A command
  * is five bytes: an opcode (< 247, an index into gObjScriptHandlers) and four argument bytes, which the
  * interpreter copies to gScriptArg0..gScriptArg3 before calling the handler. Bytes >= 247 are
  * one-byte jump labels.
