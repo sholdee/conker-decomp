@@ -175,7 +175,7 @@ void script_markTasksDone(const u16 *list, void (*callback)(s32)) {
 
 
 /* Loads the resource table, relocates every block in it and returns its resource count in *countOut. */
-s32 script_loadResourceTable(s32 arg0, s32 *countOut) {
+s32 script_loadResourceTable(s32 category, s32 *countOut) {
     ResourceSlot *table;
     u32 i;
     s32 done;
@@ -185,7 +185,7 @@ s32 script_loadResourceTable(s32 arg0, s32 *countOut) {
     s32 pad[2]; // matching: frame size
 
     count = 0;
-    gResourceTable = rom_loadPathTable(0, 0, &count, 3, 8, 0, arg0);
+    gResourceTable = rom_loadPathTable(0, 0, &count, 3, 8, 0, category);
     if (gResourceTable == NULL) {
         *countOut = 0;
         return 0;
@@ -228,7 +228,7 @@ void script_freeResourceTable(void) {
  * Returns 1 if every dependency of loaded resource `index` is loaded. Also reports its first
  * dependency (0xBF if missing) and the first halfword of its unk0 list (0 if missing).
  */
-s32 script_areResourceDepsLoaded(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
+s32 script_areResourceDepsLoaded(s32 category, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     ResourceSlot *table;
     ResourceSlot *slot;
     LoadedResource *resource;
@@ -653,15 +653,15 @@ typedef struct Node1509DBBC {
 } Node1509DBBC;
 
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
-s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2) {
-    s32 hi;
+s32 script_effectQuery(s32 cmdId, s32 phase, s32 cmd) {
+    s32 x;
     s32 result;
-    s32 lo;
+    s32 z;
     s32 handle;
 
-    hi = 0;
+    x = 0;
     result = 0;
-    lo = 0;
+    z = 0;
     switch (cmdId) {
         case 25:
             if (phase == 4) {
@@ -693,9 +693,9 @@ s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2) {
             if (phase == 0 || phase == 1) {
                 handle = cmdId >> 6;
                 if (handle != 0) {
-                    effect_getHomingEffectPos(handle, &hi, &result, &lo);
+                    effect_getHomingEffectPos(handle, &x, &result, &z);
                     if (phase == 0) {
-                        result = (hi << 16) | (lo & 0xFFFF);
+                        result = (x << 16) | (z & 0xFFFF);
                     }
                     return result;
                 }

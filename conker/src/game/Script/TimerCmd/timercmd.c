@@ -59,37 +59,37 @@ void script_updateTimers(void) {
 }
 
 
-s32 script_startTimer(s32 arg0, Src150A0264 *arg1) {
-    Rec150A0264 *r = &gScriptTimers[arg0];
+s32 script_startTimer(s32 timer, Src150A0264 *cmd) {
+    Rec150A0264 *r = &gScriptTimers[timer];
 
     if (r->active != 0) {
         return 0;
     }
     r->active = 1;
     r->running = 0;
-    r->unit = arg1->unit;
+    r->unit = cmd->unit;
     r->count = 0;
     return 1;
 }
 
-s32 script_timerCommand(s32 arg0, s32 arg1, Src150A0264 *arg2) {
-    switch (arg1) {
+s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd) {
+    switch (opcode) {
     case 0:
-        gScriptTimers[arg0].running = 1;
+        gScriptTimers[timer].running = 1;
         return 1;
     case 1:
-        gScriptTimers[arg0].running = 0;
+        gScriptTimers[timer].running = 0;
         return 1;
     case 2:
-        gScriptTimers[arg0].count = arg2->value;
+        gScriptTimers[timer].count = cmd->value;
         return 1;
     }
     return 0;
 }
 
-s32 script_timerQuery(s32 arg0, s32 arg1, s32 arg2) {
-    if (arg1 == 3) {
-        return gScriptTimers[arg0].count;
+s32 script_timerQuery(s32 timer, s32 opcode, s32 cmd) {
+    if (opcode == 3) {
+        return gScriptTimers[timer].count;
     }
     return 0;
 }

@@ -13,41 +13,41 @@ struct Msg_CD860 {
     /* 0x08 */ s32 params[5];
 };
 
-/* Applies command `command` with the parameters in `msg` to record `slot`.
+/* Applies command `opcode` with the parameters in `cmd` to zone `zone` (an index into zones).
  * Returns 1 for commands 0-2 and 0 otherwise. */
-s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg) {
+s32 script_zoneCommand(s32 zone, u32 opcode, Msg_CD860 *cmd) {
     s32 mode;
 
-    switch (command) {
+    switch (opcode) {
     case 0:
-        zone_setDisabled(slot, 0);
+        zone_setDisabled(zone, 0);
         return 1;
     case 1:
-        zone_setDisabled(slot, 1);
+        zone_setDisabled(zone, 1);
         return 1;
     case 2:
-        zone_setData1(slot, msg->params[0], msg->params[1]);
+        zone_setData1(zone, cmd->params[0], cmd->params[1]);
         return 1;
     case 3:
-        zone_setPosition(slot, msg->params[0], msg->params[1], msg->params[2]);
+        zone_setPosition(zone, cmd->params[0], cmd->params[1], cmd->params[2]);
         break;
     case 4:
-        zone_setParams(slot, msg->params[0], msg->params[1], msg->params[2], msg->params[3], msg->params[4]);
+        zone_setParams(zone, cmd->params[0], cmd->params[1], cmd->params[2], cmd->params[3], cmd->params[4]);
         break;
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
-        mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        sight_sendBeamCommand(mode, &zones[slot]);
+        mode = (cmd->params[0] == 999) ? 2 : (cmd->params[0] != 0) ? 0 : 1;
+        sight_sendBeamCommand(mode, &zones[zone]);
         break;
     }
     return 0;
 }
 
-/* Answers query `query` about record `slot`; `msg` carries the query's parameters.
+/* Answers query `opcode` about zone `zone`; `cmd` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
  * movement_obj (looked up by actor_findOnPath), 0x9000 a zones record. */
-s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
-    switch (query) {
+s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
+    switch (opcode) {
     case 6:
         {
             s32 pad; // matching: unused stack slot keeps `result` at the original sp offset
@@ -56,31 +56,31 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             Actor *obj;
             s32 ret = 0;
 
-            id = msg->params[0] & 0xFFFF0FFF;
-            switch (msg->params[0] & 0xF000) {
+            id = cmd->params[0] & 0xFFFF0FFF;
+            switch (cmd->params[0] & 0xF000) {
             case 0x2000:
                 obj = actor_findOnPath(id);
                 if (obj == NULL) {
                     return 0;
                 }
-                result = zone_isActorOutsideId(obj - movement_obj, slot);
+                result = zone_isActorOutsideId(obj - movement_obj, zone);
             lbl1: // matching: block boundary stops IDO moving the store into the branch delay slot
                 break;
             case 0x9000:
-                result = zone_isCameraOutsideId(id, slot);
+                result = zone_isCameraOutsideId(id, zone);
                 break;
             }
             return (result == 0) ? 1 : ret;
         }
     case 8:
         {
-            s32 a;
-            s32 b;
-            s32 c;
-            s32 d;
+            s32 subTypeData;
+            s32 data1;
+            s32 data2;
+            s32 data3;
 
-            zone_getParams(slot, &a, &b, &c, &d);
-            if (c == 0) {
+            zone_getParams(zone, &subTypeData, &data1, &data2, &data3);
+            if (data2 == 0) {
                 break;
             }
             if (gCutsceneStates[0] == 0) {
@@ -90,13 +90,13 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
         }
     case 9:
         {
-            s32 a;
-            s32 b;
-            s32 c;
-            s32 d;
+            s32 subTypeData;
+            s32 data1;
+            s32 data2;
+            s32 data3;
 
-            zone_getParams(slot, &a, &b, &c, &d);
-            if (c == 0) {
+            zone_getParams(zone, &subTypeData, &data1, &data2, &data3);
+            if (data2 == 0) {
                 break;
             }
             if (gCutsceneStates[0] == 1) {
@@ -107,14 +107,14 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
     case 10:
         {
             TriggerZone *rec;
-            s32 hi;
-            s32 lo;
+            s32 x;
+            s32 z;
 
             // matching: the no-op cast changes IDO's register numbering
-            rec = (TriggerZone *)zones + slot; // matching: the (no-op) cast orders the addu
-            hi = rec->x;
-            lo = rec->z;
-            return (hi << 16) | (lo & 0xFFFF);
+            rec = (TriggerZone *)zones + zone; // matching: the (no-op) cast orders the addu
+            x = rec->x;
+            z = rec->z;
+            return (x << 16) | (z & 0xFFFF);
         }
     case 11:
     case 12:
@@ -122,8 +122,8 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (movement_obj[i].type == msg->params[0] && zone_isActorOutsideId(i, slot) == 0) {
-                    if (query == 11) {
+                if (movement_obj[i].type == cmd->params[0] && zone_isActorOutsideId(i, zone) == 0) {
+                    if (opcode == 11) {
                         return movement_obj[i].listpos | 0x2000;
                     }
                     return movement_obj[i].unique_id;
@@ -132,7 +132,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             return 0;
         }
     case 7:
-        return zones[slot].inactive;
+        return zones[zone].inactive;
     case 13:
         {
             s32 pad; // matching: unused stack slot; removing it shifts the frame layout
@@ -140,36 +140,36 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 result;
             Actor *obj;
 
-            id = msg->params[0] & 0xFFFF0FFF;
-            switch (msg->params[0] & 0xF000) {
+            id = cmd->params[0] & 0xFFFF0FFF;
+            switch (cmd->params[0] & 0xF000) {
             case 0x2000:
                 obj = actor_findOnPath(id);
-                result = zone_isActorBehindGate(obj - movement_obj, slot);
+                result = zone_isActorBehindGate(obj - movement_obj, zone);
                 break;
             case 0x9000:
-                result = zone_isCameraBehindGate(id, slot);
+                result = zone_isCameraBehindGate(id, zone);
                 break;
             }
             return result;
         }
     case 14:
-        return zones[slot].y;
+        return zones[zone].y;
     case 15:
-        if (zone_findActorInZone(slot) == -1) {
+        if (zone_findActorInZone(zone) == -1) {
             return 0;
         }
         return 1;
     case 16:
-        if (zone_findActorInZone(slot) == -1) {
+        if (zone_findActorInZone(zone) == -1) {
             s32 i;
 
             for (i = 0; i < gHumanCount; i++) {
-                if (zone_isCameraOutsideId(i, slot) == 0) {
+                if (zone_isCameraOutsideId(i, zone) == 0) {
                     if (gScriptCmdWordCount == 2) {
                         return 1;
                     }
-                    if (msg->params[1] != 0) {
-                        if (movement_obj[i].mv->rt_context_b != 3 && zone_isCameraOutsideId(i, msg->params[0] & 0xFFFF0FFF) == 0) {
+                    if (cmd->params[1] != 0) {
+                        if (movement_obj[i].mv->rt_context_b != 3 && zone_isCameraOutsideId(i, cmd->params[0] & 0xFFFF0FFF) == 0) {
                             return 1;
                         }
                     } else {
@@ -184,20 +184,20 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
         {
             s32 which;
 
-            which = msg->params[0];
+            which = cmd->params[0];
             if (which == 0) {
-                return zones[slot].subTypeData;
+                return zones[zone].subTypeData;
             } else if (which == 1) {
-                return zones[slot].data1;
+                return zones[zone].data1;
             } else if (which == 2) {
-                return zones[slot].data2;
+                return zones[zone].data2;
             } else if (which == 3) {
-                return zones[slot].data3;
+                return zones[zone].data3;
             }
             break;
         }
     case 18:
-        return zones[slot].yaw;
+        return zones[zone].yaw;
     }
     return 0;
 }

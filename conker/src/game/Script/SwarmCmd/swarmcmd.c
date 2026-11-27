@@ -35,9 +35,9 @@ s32 script_destroySwarm(s32 tag, ScriptCmd *cmd) {
     return 0;
 }
 
-/* Script handler: makes the swarm with the given tag follow an object (op 0) or head for a fixed point (op 1). */
-s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd) {
-    switch (op) {
+/* Script handler: makes the swarm with the given tag follow an object (opcode 0) or head for a fixed point (opcode 1). */
+s32 script_swarmCommand(s32 tag, s32 opcode, SwarmTargetCmd *cmd) {
+    switch (opcode) {
     case 0: {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
         swarm_setTarget(tag & 0xFF, &movement_obj[collision_findSlotBySpawnIndex(cmd->target & mask)].xpos, cmd->argC.follow.yOffset);
@@ -50,9 +50,9 @@ s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd) {
     return 0;
 }
 
-/* Script query: returns the distance from the swarm with the given tag to the command's object (op 0). */
-s32 script_swarmQuery(s32 tag, s32 op, SwarmTargetCmd *cmd) {
-    if (op == 0) {
+/* Script query: returns the distance from the swarm with the given tag to the command's object (opcode 0). */
+s32 script_swarmQuery(s32 tag, s32 opcode, SwarmTargetCmd *cmd) {
+    if (opcode == 0) {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
         return swarm_getDistanceToActor(tag & 0xFF, collision_findSlotBySpawnIndex(cmd->target & mask));
     }

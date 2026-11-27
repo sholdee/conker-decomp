@@ -196,7 +196,7 @@ void script_setDefaultExpression(void);
 void script_playRandomSoundOnSelf(void);
 void script_setFallReaction(void);
 void script_setSpawnDelay(void);
-u16 script_getAngleToPathStart(s32 arg0);
+u16 script_getAngleToPathStart(s32 index);
 void script_changeObjectProperty(void);
 void script_setSpeedup(void);
 void script_setHitReaction(void);
@@ -216,7 +216,7 @@ void script_showParts(void);
 void script_hideParts(void);
 void script_changeWaypointDirection(void);
 void script_jumpIfAngleInRange(void);
-s32 script_getPadButtons(s32 arg0);
+s32 script_getPadButtons(s32 player);
 void script_jumpIfButtonsHeld(void);
 void script_jumpIfLevel(void);
 void script_setNorun(void);
@@ -281,13 +281,13 @@ void script_clearPoseCommands(void);
 s32 script_isPoseCommandActive(s32 count);
 s32 script_updatePoseCommand(s32 slot);
 void script_updatePoseCommands(void);
-s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args);
-s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args);
-void script_dollyPoseCamera(s32 actorIndex);
+s32 script_cameraCommand(s32 camIndex, s32 opcode, s32 *cmd);
+s32 script_cameraQuery(s32 camIndex, s32 opcode, s32 *cmd);
+void script_dollyPoseCamera(s32 camIndex);
 
 /* game/Script/ActorCmd/actorcmd.c */
-s32 script_spawnActor(s32 scriptId, s32 unused);
-s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1);
+s32 script_spawnActor(s32 scriptId, s32 cmd);
+s32 script_removeActor(s32 objId, C4DC0_arg1 *cmd);
 s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd);
 s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd);
 
@@ -334,8 +334,8 @@ s32 func_1509C414(s32 index);
 extern s32 gScriptCmdBuffer[16];
 
 /* game/Script/CutsceneCmd/cutscenecmd.c */
-s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params);
-s32 script_cutsceneQuery(s32 id, s32 event, s32 unused);
+s32 script_cutsceneCommand(s32 cutscene, s32 opcode, ScriptCmd *cmd);
+s32 script_cutsceneQuery(s32 cutscene, s32 opcode, s32 cmd);
 void script_setAnchorAtObject(s32 ref, s32 alt);
 
 /* The resource manifest D_80087430 (game/Script/CmdTables/cmdtables.c). Its dependency lists and names
@@ -376,13 +376,13 @@ void script_markTaskDepsDone(s32 index);
 s32 script_markRelatedTasksDone(s32 index);
 void script_propagateTasksDone(s32 index);
 void script_markTasksDone(const u16 *list, void (*callback)(s32));
-s32 script_loadResourceTable(s32 arg0, s32 *countOut);
+s32 script_loadResourceTable(s32 category, s32 *countOut);
 void script_freeResourceTable(void);
-s32 script_areResourceDepsLoaded(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out);
+s32 script_areResourceDepsLoaded(s32 category, s32 index, s32 *firstDepOut, s32 *unk0Out);
 s32 script_startEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_endEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd);
-s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2);
+s32 script_effectQuery(s32 cmdId, s32 phase, s32 cmd);
 
 /* game/Script/SwarmCmd/swarmcmd.c */
 s32 script_alwaysTrue0(s32 arg0);
@@ -391,28 +391,28 @@ s32 script_alwaysTrue2(s32 arg0);
 s32 script_alwaysTrue13(s32 arg0);
 s32 script_spawnSwarm(s32 arg0, SwarmSpawnCmd *cmd);
 s32 script_destroySwarm(s32 tag, ScriptCmd *cmd);
-s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd);
-s32 script_swarmQuery(s32 tag, s32 op, SwarmTargetCmd *cmd);
+s32 script_swarmCommand(s32 tag, s32 opcode, SwarmTargetCmd *cmd);
+s32 script_swarmQuery(s32 tag, s32 opcode, SwarmTargetCmd *cmd);
 
 /* game/Script/MiscCmd/misccmd.c */
-s32 script_initSpringValue(s32 arg0, ScriptCmd *record);
-s32 script_emptyMiscEnd(s32 arg0, ScriptCmd *record);
-s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args);
-s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args);
+s32 script_initSpringValue(s32 cmdId, ScriptCmd *cmd);
+s32 script_emptyMiscEnd(s32 cmdId, ScriptCmd *cmd);
+s32 script_miscCommand(s32 cmdId, s32 opcode, ScriptCmd *cmd);
+s32 script_miscQuery(s32 cmdId, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/MusicCmd/musiccmd.c */
-s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd);
-s32 script_streamQuery(s32 id, s32 opcode, ScriptCmd *cmd);
-s32 script_musicCommand(s32 id, u32 opcode, ScriptCmd *cmd);
-s32 script_musicQuery(s32 id, s32 opcode, ScriptCmd *cmd);
+s32 script_streamCommand(s32 track, s32 opcode, ScriptCmd *cmd);
+s32 script_streamQuery(s32 track, s32 opcode, ScriptCmd *cmd);
+s32 script_musicCommand(s32 tune, u32 opcode, ScriptCmd *cmd);
+s32 script_musicQuery(s32 tune, s32 opcode, ScriptCmd *cmd);
 
 /* game/Script/ObjectCmd/objectcmd.c */
-s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd);
-s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd);
+s32 script_worldObjectCommand(s32 objId, s32 opcode, s32 *cmd);
+s32 script_worldObjectQuery(s32 objId, s32 opcode, s32 *cmd);
 s32 script_playSound(s32 sound, u32 *cmd);
-s32 script_stopSound(s32 arg0, u32 *cmd);
-s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd);
-s32 script_soundQuery(s32 arg0, s32 arg1, s32 arg2);
+s32 script_stopSound(s32 cmdId, u32 *cmd);
+s32 script_actorSoundCommand(s32 cmdId, s32 opcode, u32 *cmd);
+s32 script_soundQuery(s32 cmdId, s32 opcode, s32 cmd);
 s32 script_playRandomActorSound(); /* (s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
 void script_playRandomObjectSound(); /* (s32 first, s32 last, s32 volume, s32 objId, s16 nearDistance, s32 farDistance); K&R definition, declared without a prototype */
 s32 script_playRandomZoneSound(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance);
@@ -422,23 +422,23 @@ void script_stopActorSound(s32 path, s32 secondVoice);
 s32 script_playPlainSound(s32 sound, s32 volume, s32 cents, s32 pan);
 s32 script_playSoundAtActor(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);
 void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance);
-s32 script_emptyQuery12(s32 arg0, s32 arg1, s32 arg2);
-s32 script_trapCommand12(s32 arg0, s32 arg1, s32 arg2);
+s32 script_emptyQuery12(s32 cmdId, s32 opcode, s32 cmd);
+s32 script_trapCommand12(s32 cmdId, s32 opcode, s32 cmd);
 
 /* game/Script/TaskCmd/taskcmd.c */
-s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args);
-s32 script_taskQuery(s32 id, s32 query, QueryArgs *args);
+s32 script_taskCommand(s32 id, s32 opcode, CommandArgs *cmd);
+s32 script_taskQuery(s32 id, s32 opcode, QueryArgs *cmd);
 
 /* game/Script/TimerCmd/timercmd.c */
 void script_resetTimers(void);
 void script_updateTimers(void);
-s32 script_startTimer(s32 arg0, Src150A0264 *arg1);
-s32 script_timerCommand(s32 arg0, s32 arg1, Src150A0264 *arg2);
-s32 script_timerQuery(s32 arg0, s32 arg1, s32 arg2);
+s32 script_startTimer(s32 timer, Src150A0264 *cmd);
+s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd);
+s32 script_timerQuery(s32 timer, s32 opcode, s32 cmd);
 
 /* game/Script/ZoneCmd/zonecmd.c */
-s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg);
-s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg);
+s32 script_zoneCommand(s32 zone, u32 opcode, Msg_CD860 *cmd);
+s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd);
 
 /* game/Script/ScriptInterp/scriptinterp.s */
 extern s32 gScriptCmdWordCount;

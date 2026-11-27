@@ -725,29 +725,29 @@ void script_setDeathReaction(void) {
 }
 
 void script_playUntrackedSound(void) {
-    s32 id = (gScriptArg0 << 8) | gScriptArg1;
+    s32 sound = (gScriptArg0 << 8) | gScriptArg1;
 
-    if (id != 0) {
-        s32 param = gScriptArg2 << 7;
+    if (sound != 0) {
+        s32 volume = gScriptArg2 << 7;
 
-        sound_playActorUntracked(id, gCurrentActor, param, 500, 2500);
+        sound_playActorUntracked(sound, gCurrentActor, volume, 500, 2500);
     }
 }
 
 void script_runFadeCommand(void) {
-    u8 mode;
-    u8 param0;
-    u8 param1;
+    u8 fadeCmd;
+    u8 value;
+    u8 step;
 
     if (gScriptArg3 == 0) {
-        param0 = gScriptArg0;
-        param1 = gScriptArg1;
+        value = gScriptArg0;
+        step = gScriptArg1;
         if (gScriptArg2 != 0) {
-            mode = 1;
+            fadeCmd = 1;
         } else {
-            mode = 2;
+            fadeCmd = 2;
         }
-        actor_fadeCommand(gCurrentActor, mode, param0, param1, 0);
+        actor_fadeCommand(gCurrentActor, fadeCmd, value, step, 0);
     } else if (gScriptArg2 == 0) {
         actor_startFogFadeOut(gCurrentActor, gScriptArg0);
     } else {
@@ -834,7 +834,7 @@ void script_stepPathGraph(void) {
     f32 y;
     f32 z;
     s8 hasGoal;
-    s8 hasGoal2;
+    s8 hasAvoid;
     s32 i;
     s32 best;
     u8 *q;
@@ -858,24 +858,24 @@ void script_stepPathGraph(void) {
     }
     gCurrentActor->task_attrib &= ~0x800;
     if (gSpawnPathCounts[gCurrentActor->listpos] - 1 > 0) {
-        hasGoal2 = 0;
+        hasAvoid = 0;
         hasGoal = 0;
         if (gCurrentActor->pathGoal != 0xFF) {
             hasGoal = 1;
         }
         if (gCurrentActor->pathAvoid != 0xFF) {
-            hasGoal2 = 1;
+            hasAvoid = 1;
         }
         current = gCurrentActor->pathNode;
         if (current == 0xFF) {
             if (gScriptArg0 == 1) {
-                hasGoal2 = 0;
+                hasAvoid = 0;
                 hasGoal = 0;
                 next = gCurrentActor->prevPathNode;
             }
             if (next == 0xFF) {
                 next = path_getNextNode(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
-                                     hasGoal, hasGoal2, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
+                                     hasGoal, hasAvoid, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
             }
         } else if (current != 0xFF) {
             if (gScriptArg0 == 1) {
@@ -902,7 +902,7 @@ void script_stepPathGraph(void) {
                     next = gCurrentActor->prevPathNode;
                 }
             } else {
-                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
+                next = path_search(current, hasGoal, hasAvoid, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
             }
         }
         if (next != 0xFF) {
@@ -1492,11 +1492,11 @@ void script_restartFoundObject(void) {
 }
 
 void script_sendAttachmentMessage(void) {
-    u16 param0 = gScriptArg0;
-    s32 param1 = gScriptArg1;
-    s32 param2 = gScriptArg2;
+    u16 type = gScriptArg0;
+    s32 msg = gScriptArg1;
+    s32 arg = gScriptArg2;
 
-    effect_sendAttachmentMessage(gCurrentActor, param0, param1, param2);
+    effect_sendAttachmentMessage(gCurrentActor, type, msg, arg);
 }
 
 /* Places waypoint arg0 at a random point up to 550 units from object 0, clamped to +-1200. */
@@ -1644,13 +1644,13 @@ void script_setSpawnDelay(void) {
     gSpawnDelays[gCurrentActor->listpos] = (gScriptArg0 << 8) + gScriptArg1;
 }
 
-/* Returns the direction from object `arg0` to the centre of the current object's path. */
-u16 script_getAngleToPathStart(s32 arg0) {
+/* Returns the direction from object `index` to the centre of the current object's path. */
+u16 script_getAngleToPathStart(s32 index) {
     PathPoint *path;
     Actor *obj;
 
     path = gSpawnPaths[gCurrentActor->listpos];
-    obj = &movement_obj[arg0];
+    obj = &movement_obj[index];
     return actor_getDirectionAngle(path[0].x - obj->xpos, obj->zpos - path[0].z, 0);
 }
 
@@ -1956,8 +1956,8 @@ void script_jumpIfAngleInRange(void) {
     }
 }
 
-s32 script_getPadButtons(s32 arg0) {
-    return gPads[arg0].button;
+s32 script_getPadButtons(s32 player) {
+    return gPads[player].button;
 }
 
 /* Jumps to arg3 when entry arg0 of gPads has all the bits of (arg1:arg2) set. */
