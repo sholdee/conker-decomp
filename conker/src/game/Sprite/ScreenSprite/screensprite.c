@@ -51,7 +51,7 @@ void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
 /* The two sprite lists sprite_overlapsScreenSprite searches. */
 static const SpriteListIds gScreenSpriteLists = { 93, 87 };
 
-/* The same two lists, for func_1515572C. */
+/* The same two lists, for sprite_sendEventToScreenSprites. */
 static const IdList2 D_800A6038 = { 93, 87 };
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
@@ -278,7 +278,7 @@ lbl: // matching: unused label; it splits the block before i++
     // matching: no `return 0`; i lives in v0, which is 0 once both tables are searched
 }
 
-void func_1515572C(s32 arg0, u8 arg1) {
+void sprite_sendEventToScreenSprites(s32 arg0, u8 arg1) {
     IdList2 pair;
 
     pair = D_800A6038;

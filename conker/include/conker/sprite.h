@@ -147,7 +147,7 @@ Gfx *sprite_endDraw(Gfx *gfx);
 /* game/Sprite/SpriteRoutines/spriteroutines.c */
 void sprite_runQueuedCommand(s32 unused);
 void sprite_resetSlots(void);
-void func_150B6D34(void);
+void sprite_settleFrameScrolls(void);
 void sprite_freeAll(void);
 void sprite_updateTexScroll(Sprite2D *sprite);
 void sprite_updateFrameScroll(Sprite2D *sprite);
@@ -176,7 +176,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport);
 void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6);
 void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 arg1, u8 arg2);
 s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
-void func_1515572C(s32 arg0, u8 arg1);
+void sprite_sendEventToScreenSprites(s32 arg0, u8 arg1);
 
 /* game/Sprite/TexQuad/texquad.c */
 extern Gfx gTexQuadSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -266,7 +266,7 @@ extern Vtx *gSpriteVtxBuffers[2]; /* this frame's sprite vertex buffer, one per 
 extern Game1A89B0Position *gLevelSprites; /* the level's sprites */
 extern u8 gBillboardAnimCounter; /* billboard animation counter */
 extern s32 gLevelSpriteCount; /* number of sprites in gLevelSprites */
-s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 sprite_animJitterHeight(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 s32 sprite_animFadeOffset(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 s32 sprite_animHop(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);

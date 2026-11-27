@@ -439,7 +439,7 @@ s32 actor_runDeathEffect(Actor *actor) {
     case 0x10:
     case 0x38:
     case 0x91:
-        func_150BFFE0(actor);
+        prop_spawnDeathBurst(actor);
         break;
     case 0x3A:
     case 0x3D:

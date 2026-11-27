@@ -815,7 +815,7 @@ void mp_releaseSpareRacer(Actor *obj) {
 }
 
 /* Returns whether racer 0's camNodes[2] is 0xFF (no node). */
-s32 func_150887F8(void) {
+s32 mp_isFlyThroughEnding(void) {
     Racer *racers = gRacers;
     if (racers == NULL) {
         return 0;

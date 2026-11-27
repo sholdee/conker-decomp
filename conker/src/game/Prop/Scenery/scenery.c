@@ -47,7 +47,7 @@ void prop_startMirroredEmitters(s32 arg0) {
 }
 
 /* Steps the entry by gFrameTicks frames; returns 1 once it has faded out or shrunk to nothing. */
-s32 func_150BF0F4(Struct150BF0F4 *entry) {
+s32 prop_updateStyleFadeGrow(Struct150BF0F4 *entry) {
     s32 intensity;
     s32 limit;
     s32 delta;
@@ -99,7 +99,7 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
 }
 
 /*
- * Behaviour scratch state (WorldObject.touch) of func_150BF21C: an object whose mesh is translated toward a
+ * Behaviour scratch state (WorldObject.touch) of prop_moveToHeightAndBob: an object whose mesh is translated toward a
  * target height (param) and bobs (rotX-rotZ) while it is at rest.
  */
 typedef struct {
@@ -112,7 +112,7 @@ typedef struct {
 
 /* Moves the object toward its target height (param) (accelerating, with sounds), bobs it while at rest, then
  * writes its transformed mesh into the current vertex buffer. */
-void func_150BF21C(WorldObject *obj) {
+void prop_moveToHeightAndBob(WorldObject *obj) {
     Vtx *dst;
     Vtx *src;
     f32 diff;
@@ -426,7 +426,7 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
 }
 
 /* blood_spawnHitEffects on the object, then a burst of particles at its x/z, unk180 + 105 high. */
-void func_150BFFE0(Actor *obj) {
+void prop_spawnDeathBurst(Actor *obj) {
     Vec3f pos;
     SpriteBurst spawn;
 
@@ -482,7 +482,7 @@ void func_150BFFE0(Actor *obj) {
 }
 
 /* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
-s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
+s32 prop_burstPieceOnFloor(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     Vec3f pos;
     DebrisBurst burst;
 

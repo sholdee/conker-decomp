@@ -93,7 +93,7 @@ void sight_resetPlayerEffects(Camera *player) {
 
     msg = player;
     colourfb_broadcastMessage((s32)&msg, 0x21, (s32)player);
-    func_1515572C((s32)&msg, 0x21);
+    sprite_sendEventToScreenSprites((s32)&msg, 0x21);
     screen_sendTintMessage((s32)&msg, 0x21);
     effect_sendEventToTimedEffects((s32)&msg, 0x21);
     D_8008CD00 = 0;
@@ -826,7 +826,7 @@ void sight_flashSprites(Camera *player) {
     Camera *msg;
 
     msg = player;
-    func_1515572C((s32)&msg, 0x46);
+    sprite_sendEventToScreenSprites((s32)&msg, 0x46);
 }
 
 /* Message 0x46 handler: starts the 35-frame colour flash. */

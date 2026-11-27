@@ -485,7 +485,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
 
     switch (cmdId) {
         case 41:
-            func_150EB8C4();
+            prop_spawnFixedExplosion();
             break;
         case 39:
             effect_jumpStagesToEnd(cmd->arg.b.lo);

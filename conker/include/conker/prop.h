@@ -162,12 +162,12 @@ void prop_startWaveChain(s32 arg0);
 /* game/Prop/Scenery/scenery.c */
 void prop_emptyLevelUpdateHook2(s32 arg0);
 void prop_startMirroredEmitters(s32 arg0);
-s32 func_150BF0F4(Struct150BF0F4 *entry);
-void func_150BF21C(WorldObject *obj);
+s32 prop_updateStyleFadeGrow(Struct150BF0F4 *entry);
+void prop_moveToHeightAndBob(WorldObject *obj);
 void func_150BF760(WorldObject *obj);
 void prop_updateSinkingPlatform(WorldObject *platform);
-void func_150BFFE0(Actor *obj);
-s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y);
+void prop_spawnDeathBurst(Actor *obj);
+s32 prop_burstPieceOnFloor(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y);
 void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5);
 s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
@@ -188,7 +188,7 @@ void func_150C7870(WorldObject *obj);
 void prop_spinOppositeObject3(WorldObject *obj);
 void prop_spinWithObject3(WorldObject *obj);
 void prop_scrollTextureByObject3(WorldObject *obj);
-void func_150C79BC(s32 view);
+void prop_levelUpdateMusicAndDebris(s32 view);
 void func_150C7C90(WorldObject *obj);
 void func_150C7D7C(WorldObject *obj);
 
@@ -199,7 +199,7 @@ void func_150CF0A0(WorldObject *arg0);
 s32 prop_shotHitsCylinders(Vec3f *start, Vec3f *delta, Vec3f *hit);
 s32 prop_segmentHitsCylinders(Vec3f *start, Vec3f *end, Vec3f *hit);
 void prop_springTiltByPlayerDistance(WorldObject *obj);
-void func_150EB8C4(void);
+void prop_spawnFixedExplosion(void);
 void prop_spawnCylinderBurst(TriggerZone *gate, u8 owner, s32 kind);
 
 /* game/Prop/Clock/clock.c */
@@ -308,7 +308,7 @@ void prop_faceCamera(WorldObject *obj);
 void prop_grabAndLowerCharacter(WorldObject *obj);
 void prop_updateNone(void);
 void prop_sway(WorldObject *obj);
-void func_1511C638(WorldObject *obj);
+void prop_replaceNextWhenTriggered(WorldObject *obj);
 void prop_getWaveOriginZ(WorldObject *obj, f32 *originZ);
 void prop_animateWaveMesh(WorldObject *obj);
 void prop_scrollWithOwnerWave(WorldObject *obj);
@@ -323,7 +323,7 @@ void prop_slideZUntilTriggered(WorldObject *prop);
 
 /* game/Prop/PropMotions/propmotions.c */
 void prop_carryCharacterInArc(WorldObject *prop);
-void func_1511F31C(WorldObject *prop);
+void prop_pinToLinkedObject(WorldObject *prop);
 void prop_fadeOutAfterDelay(WorldObject *prop);
 void prop_partFourPieces(WorldObject *prop);
 void prop_start(WorldObject *prop, s32 arg1);

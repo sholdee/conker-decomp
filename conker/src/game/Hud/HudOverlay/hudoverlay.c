@@ -49,7 +49,7 @@ Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {
 
 /* Per-mode (gFrontEndState) HUD drawers, called by hud_drawMain. */
 Gfx *(*gHudModeDrawers[13])(Gfx *) = {
-    NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
+    NULL, func_151EC178, hud_drawDemoScreen, NULL, func_151ED09C, NULL, NULL,
     NULL, hud_drawFadingMessage, NULL, NULL, NULL, NULL,
 };
 
@@ -1183,7 +1183,7 @@ Gfx *func_151EC178(Gfx *gfx) {
 }
 
 /* Draws a fading image and two overlaid sprites (the second tinted by gMenuPulse); updates the fade level gFrontEndFade. */
-Gfx *func_151EC1F0(Gfx *gfx) {
+Gfx *hud_drawDemoScreen(Gfx *gfx) {
     s32 alpha;
     s32 temp;
 
@@ -1235,7 +1235,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by gMenuState->displayedStop (or the func_151EC648 / hud_updateCodeEntry screens). */
+/* Draws the fading image picked by gMenuState->displayedStop (or the hud_drawModeMenuOverlay / hud_updateCodeEntry screens). */
 Gfx *hud_drawMenuOverlay(Gfx *gfx) {
     static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
     static u8 D_800900D4 = 0;
@@ -1252,7 +1252,7 @@ Gfx *hud_drawMenuOverlay(Gfx *gfx) {
     D_800900D4 = alpha;
     gSPDisplayList(gfx++, gHudSpriteDl);
     if (gMenuState->menu == 1) {
-        return func_151EC648(gfx);
+        return hud_drawModeMenuOverlay(gfx);
     }
     if (gMenuState->menu == 0) {
         if (gMenuState->displayedStop == 1 && D_8008FEF8 != 0) {
@@ -1291,7 +1291,7 @@ Gfx *hud_drawMenuOverlay(Gfx *gfx) {
 }
 
 /* Draws the multi-page screen selected by gMenuState: page images, a rotating list, or per-slot panels. */
-Gfx *func_151EC648(Gfx *gfx) {
+Gfx *hud_drawModeMenuOverlay(Gfx *gfx) {
     static u8 *D_800900D8[8] = {
         (u8 *)0x831, (u8 *)0x884, (u8 *)0x8A4, (u8 *)0x80B, (u8 *)0x7BC, (u8 *)0x7B9, (u8 *)0x822, (u8 *)0x808,
     };

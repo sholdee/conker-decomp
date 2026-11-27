@@ -145,7 +145,7 @@ s32 mp_findRacer(Actor *obj);
 void mp_copyRacer(s32 src, s32 dst);
 s32 mp_claimSpareRacer(Actor *obj);
 void mp_releaseSpareRacer(Actor *obj);
-s32 func_150887F8(void);
+s32 mp_isFlyThroughEnding(void);
 void mp_resetRacer(Racer *racer);
 u8 mp_pickNextNode(u8 prev, u8 cur, s8 route);
 s32 mp_advanceRacer(Racer *racer, f32 step);

@@ -130,7 +130,7 @@ void prop_carryCharacterInArc(WorldObject *prop) {
 }
 
 /* On LEVEL_W1_POO_BOSS, places a kind-0x8005 prop at a fixed point in the frame of the prop it is linked to. */
-void func_1511F31C(WorldObject *prop) {
+void prop_pinToLinkedObject(WorldObject *prop) {
     s32 pad[2]; // matching: unused stack slots of the original frame
     MtxF mtx;
     f32 x;

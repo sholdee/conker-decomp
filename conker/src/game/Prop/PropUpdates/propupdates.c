@@ -702,7 +702,7 @@ void prop_sway(WorldObject *obj) {
  * Fades the object (and the one or two objects after it) in when triggered, playing the
  * effect chosen by the next object's param; turns them off again when reset.
  */
-void func_1511C638(WorldObject *obj) {
+void prop_replaceNextWhenTriggered(WorldObject *obj) {
     s32 mode;
     WorldObject *next;
     WorldObject *third;

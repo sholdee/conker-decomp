@@ -798,7 +798,7 @@ void save_updateMenuPages(void) {
                 }
                 switch (gMenuState->displayedStop) {
                     case 1:
-                        func_151DF1BC();
+                        save_updateSettingsAndCodesPage();
                         break;
                     case 2:
                         save_updateListPage();
@@ -822,7 +822,7 @@ void save_updateMenuPages(void) {
                         save_updateOptionsPage();
                         break;
                     case 3:
-                        func_151E2284();
+                        save_updateResultsPage();
                         break;
                     case 4:
                         save_updateJoinPage();
@@ -860,7 +860,7 @@ void save_updateMenuPages(void) {
 
 
 /* Menu page for displayedStop == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
-void func_151DF1BC(void) {
+void save_updateSettingsAndCodesPage(void) {
     u16 unused; // matching: unused stack slot sets IDO's frame layout
     s32 alpha;
     s32 anim;
@@ -2059,7 +2059,7 @@ void save_updateTeamPage(void) {
 }
 
 /* Menu page 3: runs save_updateFadeIn and save_updateResultsScreen with D_8008FD80 = 3. */
-void func_151E2284(void) {
+void save_updateResultsPage(void) {
     D_8008FD80 = 3;
     save_updateFadeIn();
     save_updateResultsScreen();
@@ -3019,7 +3019,7 @@ void save_updateResultsScreen(void) {
                     if (D_8008FD80 == 3) {
                         gFrontEndState = 3;
                     } else {
-                        gPendingTransition = func_151E4E00;
+                        gPendingTransition = save_returnToFrontEnd;
                     }
                 }
                 gFrontEndFadeStep = 8;
@@ -3098,7 +3098,7 @@ void func_151E4DD8(void) {
 }
 
 /* Returns to state 3 and plays cue 0x1D. */
-void func_151E4E00(void) {
+void save_returnToFrontEnd(void) {
     D_8008FDCC = 0;
     save_resetControllerMap();
     gFrontEndState = 3;
@@ -3108,7 +3108,7 @@ void func_151E4E00(void) {
     game_requestLevelChange(6, LEVEL_FRONTEND, 0, 0, 1);
 }
 
-/* Waits for input (or 1200 frames) and then fades out into func_151E4E00. */
+/* Waits for input (or 1200 frames) and then fades out into save_returnToFrontEnd. */
 void func_151E4E64(void) {
     save_updateFadeIn();
     save_updatePulse();
@@ -3117,7 +3117,7 @@ void func_151E4E64(void) {
     }
     if (gFrontEndButtons != 0) {
         gFrontEndState = 7;
-        gPendingTransition = func_151E4E00;
+        gPendingTransition = save_returnToFrontEnd;
         gFrontEndFadeStep = 8;
     }
 }

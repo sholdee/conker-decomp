@@ -120,7 +120,7 @@ void particle_newStyleParticle(x, y, z, texture, frame, r, g, b, alpha, envR, en
  * take other particle types. */
 static s32 (*gStyleUpdateFuncs[])() = {
     particle_updateStyleColorRamp, particle_updateStylePulse, particle_updateStyleDrift, particle_updateStyleDamped, particle_updateStyleTint,
-    particle_updateStyleAccelY, particle_updateStyleSlide, particle_updateStyleBounce, func_150BF0F4,
+    particle_updateStyleAccelY, particle_updateStyleSlide, particle_updateStyleBounce, prop_updateStyleFadeGrow,
 };
 
 void particle_updateStyleParticle(StyleParticle *particle) {

@@ -209,7 +209,7 @@ void effect_hopSpriteMessage(HopSprite *hopper, f32 *targetX, u8 type) {
 void effect_sendHopMessage(f32 targetX) {
     f32 payload = targetX;
 
-    func_1515572C((s32)&payload, 0x52);
+    sprite_sendEventToScreenSprites((s32)&payload, 0x52);
 }
 
 /* Bouncing particle update: integrates the motion and bounces off the floor, damped. */

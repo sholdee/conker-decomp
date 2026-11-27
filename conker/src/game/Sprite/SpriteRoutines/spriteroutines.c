@@ -24,7 +24,7 @@ void sprite_runQueuedCommand(s32 unused) {
         sprite_resetSlots();
         return;
     case 2:
-        func_150B6D34();
+        sprite_settleFrameScrolls();
         return;
     case 4:
         sprite_freeAll();
@@ -66,7 +66,7 @@ void sprite_resetSlots(void) {
 }
 
 /* Lets the three scrolling sprites in slots 5-7 stop once they reach their target frame and y. */
-void func_150B6D34(void) {
+void sprite_settleFrameScrolls(void) {
     s32 i;
     Sprite2D *sprite;
 

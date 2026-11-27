@@ -246,7 +246,7 @@ void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
 
     if (prop->modelId == 0x8006 && level == LEVEL_W1_POO_BOSS) {
         prop = gfx_findObjectById(0xFD);
-        func_1511F31C(prop);
+        prop_pinToLinkedObject(prop);
         y = -555.0f;
         x = 0.0f;
         z = 0.0f;

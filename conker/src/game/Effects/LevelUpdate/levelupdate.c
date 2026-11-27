@@ -31,7 +31,7 @@ static void (*gLevelUpdateHooks[])(s32) = {
     sprite_runQueuedCommand,
     effect_levelUpdateRotatingZone,
     effect_levelUpdateMaterialScroll,
-    func_150C79BC,
+    prop_levelUpdateMusicAndDebris,
     effect_levelUpdateBounceRecords,
     effect_levelUpdateFlagLights,
     func_150DE320,

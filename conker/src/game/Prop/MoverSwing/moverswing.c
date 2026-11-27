@@ -161,7 +161,7 @@ static const u8 D_800A14D8[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
  * 120-181 frames, the particle_spawnBlastSpray/particle_spawnLightFlash/particle_spawnGrowFade trio at D_800A1490, and four
  * particle_newModelParticleWithFloor debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
  */
-void func_150EB8C4(void) {
+void prop_spawnFixedExplosion(void) {
     ParticleSpawn spawn;
 
     camera_startWobblePreset(2, gLastPlayerIndex, NULL, 0xFF, 1);
