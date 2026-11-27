@@ -48,29 +48,31 @@ typedef struct SwarmMemberState {
     /* 0x00 */ TextureDesc *anim; /* an entry of gEffectAnimTextures */
     /* 0x04 */ Swarm *swarm;
     /* 0x08 */ s32 steer; /* (heading << 4) | timer */
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
+    /* 0x0C */ s16 frame;
+    /* 0x0E */ s16 frameStep;
     /* 0x10 */ s16 x;
     /* 0x12 */ s16 y;
     /* 0x14 */ s16 z;
     /* 0x16 */ s16 velX;
     /* 0x18 */ s16 velZ;
     /* 0x1A */ s16 angle;
-    /* 0x1C */ u8 pad1C[0x3];
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
+    /* 0x1C */ u8 subX; /* fractional (1/256) parts of x, z, y */
+    /* 0x1D */ u8 subZ;
+    /* 0x1E */ u8 subY;
+    /* 0x1F */ s8 callback; /* index into gParticleCallbacks: 6, swarm_updateMember */
+    /* 0x20 */ s16 velY;
+    /* 0x22 */ s16 accelY;
+    /* 0x24 */ s16 width;
+    /* 0x26 */ s16 height;
+    /* 0x28 */ s16 life;
+    /* 0x2A */ s8 fadeStep;
     /* 0x2B */ u8 turnRate;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
+    /* 0x2C */ u8 primR;
+    /* 0x2D */ u8 primG;
+    /* 0x2E */ u8 primB;
+    /* 0x2F */ u8 primA;
     /* 0x30 */ u8 pad30[0x4];
-    /* 0x34 */ s16 unk34;
+    /* 0x34 */ u16 flags; /* BILLBOARD_* */
     /* 0x36 */ u8 pad36[0x2];
 } SwarmMemberState; /* size 0x38 */
 
@@ -78,12 +80,12 @@ typedef struct SwarmMemberState {
 struct SwarmMember {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ SwarmMemberState s;
-    /* 0x48 */ s8 unk48;
+    /* 0x48 */ s8 onDeath; /* index into gObjectCallbacks, -1 = none */
 };
 
 /* Spawns a swarm at (x, y, z) following targetPos (or the fixed point x, y, z), plus memberCount members. */
-void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8,
-                   s32 playSfx, s32 argA) {
+void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 unused, s32 life, u8 owner,
+                   s32 playSfx, s32 size) {
     SwarmMemberState template;
     Swarm *swarm;
     SwarmMember *member;
@@ -97,14 +99,14 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     s32 py;
     s32 pad; // matching: unused stack slot keeps the frame size
 
-    swarm = effect_newObject(0x3A, 0, sizeof(Swarm), 0, arg8, 1);
+    swarm = effect_newObject(0x3A, 0, sizeof(Swarm), 0, owner, 1);
     if (swarm == NULL) {
         return;
     }
-    if (argA == 0) {
-        argA = 280;
+    if (size == 0) {
+        size = 280;
     } else {
-        argA = 140;
+        size = 140;
     }
     if (targetPos != NULL) {
         swarm->target.pos = targetPos;
@@ -128,18 +130,18 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     template.velX = 0;
     template.velZ = 0;
     template.angle = 0;
-    template.unk1F = 6;
-    template.unk20 = 0;
-    template.unk22 = 0;
-    template.unk24 = argA;
-    template.unk26 = argA;
-    template.unk28 = arg7;
-    template.unk2A = 0;
-    template.unk2C = 0xFF;
-    template.unk2D = 0xFF;
-    template.unk2E = 0xFF;
-    template.unk2F = 0xFF;
-    template.unk34 = 0;
+    template.callback = 6;
+    template.velY = 0;
+    template.accelY = 0;
+    template.width = size;
+    template.height = size;
+    template.life = life;
+    template.fadeStep = 0;
+    template.primR = 0xFF;
+    template.primG = 0xFF;
+    template.primB = 0xFF;
+    template.primA = 0xFF;
+    template.flags = 0;
     for (i = 0; i < memberCount; i++) {
         angle = math_random() & 0xFF;
         c = math_sinBinAngle(angle);
@@ -149,17 +151,17 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
         pz = z + r * s;
         py = (math_random() & 0xFF) + y - 78;
         template.turnRate = (math_random() & 7) + 7;
-        template.unkC = 0;
-        template.unkE = 0;
+        template.frame = 0;
+        template.frameStep = 0;
         template.x = px;
         template.y = py;
         template.z = pz;
-        member = effect_newObject(0x3B, 0, sizeof(SwarmMember), 0, arg8, 1);
+        member = effect_newObject(0x3B, 0, sizeof(SwarmMember), 0, owner, 1);
         if (member == NULL) {
             break;
         }
         bcopy(&template, &member->s, sizeof(template));
-        member->unk48 = -1;
+        member->onDeath = -1;
     }
 }
 
@@ -262,14 +264,14 @@ void swarm_updateMember(SwarmMember *member) {
     member->s.angle = angle;
     rnd = (math_random() & 0x7F) + 100;
     if ((math_random() & 0x3F) + (y + 50.0f) < member->s.y) {
-        member->s.unk22 = -rnd;
+        member->s.accelY = -rnd;
     } else {
-        member->s.unk22 = rnd;
+        member->s.accelY = rnd;
     }
-    if (member->s.unk20 > 0x400) {
-        member->s.unk20 = 0x400;
-    } else if (member->s.unk20 < -0x400) {
-        member->s.unk20 = -0x400;
+    if (member->s.velY > 0x400) {
+        member->s.velY = 0x400;
+    } else if (member->s.velY < -0x400) {
+        member->s.velY = -0x400;
     }
     gp = camera_global_Cameras;
     yaw = gp->TrueCameraAngle * (256.0f / 360.0f);
@@ -277,9 +279,9 @@ void swarm_updateMember(SwarmMember *member) {
     c = math_cosBinAngle(yaw);
     v = member->s.velX * c - member->s.velZ * s;
     if (v >= 0) {
-        member->s.unk34 = 0;
+        member->s.flags = 0;
     } else {
-        member->s.unk34 = 4;
+        member->s.flags = BILLBOARD_FLIP_S;
         v = -v;
     }
     if (v > 0x200) {
@@ -295,7 +297,7 @@ void swarm_updateMember(SwarmMember *member) {
         }
     }
     member->s.anim = gEffectAnimTextures[v];
-    member->s.unkC ^= 0x100;
+    member->s.frame ^= 0x100;
 }
 
 /* Member hook: defers to effect_drawBillboard only when the swarm's viewMask has bit `view` set. */

@@ -168,7 +168,7 @@ void actor_kill(Actor *actor, s32 cause) {
     actor->mv->unk121 = cause;
     if (gIsMultiplayer != 0 && !again) {
         if (slot < 16) {
-            D_800E0AD0[slot]++;
+            gPlayerDeaths[slot]++;
         }
         if ((gMatchFlags & 0x20) && actor->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
             player_setStat(1, 10, 1);
@@ -439,7 +439,7 @@ s32 actor_runDeathEffect(Actor *actor) {
     case 0x10:
     case 0x38:
     case 0x91:
-        func_150BFFE0(actor);
+        prop_spawnDeathBurst(actor);
         break;
     case 0x3A:
     case 0x3D:

@@ -25,7 +25,7 @@ u8 gSpriteTypeTexInfoIds[15];
 u8 gSpriteTypeFrameCounts[15];
 u8 gSpriteTypeDisturbFrames[15];
 u8 gSpriteTypePasses[15];
-s32 D_800DDC00;
+s32 gSpriteParityPhaseTypes;
 s32 gSpritePingPongTypes;
 s32 gSpriteRandomFlipTypes;
 u8 gSpritePingPongDirs[15];
@@ -62,7 +62,7 @@ s32 gLevelSpriteSortAxis = 0;
 
 SpriteKind gSpriteKinds[6] = {
     { sprite_scatterParticles, NULL, 0 },
-    { sprite_placeCentreParticle, func_1517B500, 0 },
+    { sprite_placeCentreParticle, sprite_animJitterHeight, 0 },
     { sprite_scatterParticles87, sprite_animFadeOffset, 0 },
     { sprite_scatterParticles8, func_1517B7A8, 0 },
     { sprite_placeParticlePattern, NULL, 0 },
@@ -96,7 +96,7 @@ static Gfx gLevelSpriteRenderDl[] = {
  */
 
 /* Advances the phase by half again, wrapping at the frame count, and drifts the height toward 41 with jitter. */
-s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animJitterHeight(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 diff;
     s32 limit;
     s32 rnd;

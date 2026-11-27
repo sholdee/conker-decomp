@@ -1138,7 +1138,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB6: {
         u8 *p;
         s32 attacker;
-        p = &D_800E0BB8[OBJ_INDEX(obj)];
+        p = &gLastAttackers[OBJ_INDEX(obj)];
         attacker = *p;
         *p &= 0x7F;
         return attacker;

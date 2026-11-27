@@ -180,7 +180,7 @@ void particle_removePlayerSlidingSprites(s16 player) {
     s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
 
     payload[0] = player;
-    func_1515572C((s32)payload, MSG_REMOVE_PLAYER_SPRITES);
+    sprite_sendEventToScreenSprites((s32)payload, MSG_REMOVE_PLAYER_SPRITES);
 }
 
 /* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */

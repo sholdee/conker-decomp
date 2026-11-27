@@ -43,7 +43,7 @@ extern s16 gScanBestFlagCount;
 extern u8 D_800BE3DE;
 extern s8 gCheckpointLevel;
 extern u8 gCheckpointSpawn;
-extern u32 D_800BE3E4; // saved clock (seconds)
+extern u32 D_800BE3E4; // the player's score as saved (stat 6; 2 bytes in the save file)
 extern s32 gPlayTime; // play time (seconds)
 extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
 extern u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
@@ -51,7 +51,7 @@ extern SaveSlotInfo gSaveSlots[3]; // the three save slots
 
 /* game/Save/EepromTimedWrite/eepromtimedwrite.c */
 s32 save_writeEeprom(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */
-s32 save_pollEepromWrite(s32 arg0);
+s32 save_pollEepromWrite(s32 flag);
 
 /* game/Save/FrontEnd/frontend.c */
 void save_resetSettings(void);
@@ -66,7 +66,7 @@ void func_151DE81C(void);
 void func_151DE85C(void);
 void func_151DE8E8(void);
 void save_updateMenuPages(void);
-void func_151DF1BC(void);
+void save_updateSettingsAndCodesPage(void);
 void save_updateListPage(void);
 void save_updateSaveSlotPage(void);
 void save_updateModeSelectPage(void);
@@ -74,7 +74,7 @@ void save_updateOptionsPage(void);
 void save_updateJoinPage(void);
 void save_updateCpuPlayersPage(void);
 void save_updateTeamPage(void);
-void func_151E2284(void);
+void save_updateResultsPage(void);
 void save_applyModeSettings(void);
 void save_storeModeSettings(void);
 s32 save_addPartnerPlayers(s32 *out);
@@ -88,7 +88,7 @@ void save_updateResultsScreen(void);
 void save_endRound(void);
 void func_151E4DC4(void);
 void func_151E4DD8(void);
-void func_151E4E00(void);
+void save_returnToFrontEnd(void);
 void func_151E4E64(void);
 void save_updateFadeTransition(void);
 void save_resetMenuState(void);
@@ -139,12 +139,12 @@ extern u16 gMatchFlags;
 extern u16 gMatchHudFlags;
 extern s8 D_8008FDC4;
 extern s8 gFreeForAll;
-extern s16 D_8008FDCC; /* save_updatePauseMenu reads its low byte */
+extern s16 gMenuFadeInAlpha; /* save_updatePauseMenu reads its low byte */
 extern f32 D_8008FDD0;
 extern MenuState *gMenuState;
 extern s32 gTextBank2;
 extern s8 D_8008FDDC;
-extern s8 D_8008FDE0;
+extern s8 gModeSettingsChanged;
 extern s8 D_8008FDE4;
 extern f32 D_8008FDE8;
 extern void (*gFrontEndStateHandlers[12])(void);
@@ -167,8 +167,8 @@ extern u32 D_8008FEA4[8];
 extern s8 D_8008FEC4[32];
 extern s8 D_8008FEE4[8]; /* per team preset: row of gPlayerCountLimits */
 extern const u8 gTeamColorsRGB[10][3]; /* team colours (RGB) */
-extern s8 D_8008FEEC;
-extern s8 D_8008FEF0;
+extern s8 gPauseInputDelay;
+extern s8 gUnpauseDelay;
 extern s8 D_8008FEF8;
 extern s8 gMenuListCategory;
 extern u8 gMenuListSelection;
@@ -187,9 +187,9 @@ extern s16 gCreditsLine;
 extern s32 gFrontEndTimer;
 extern u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 extern u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
-extern s16 D_800E0AA0[4];
+extern s16 gTeamScores[4];
 extern s8 gPlayerRanks[16];
-extern s16 D_800E0AD0[16];
+extern s16 gPlayerDeaths[16];
 extern s8 gPlayerCharacters[4];
 extern u8 gFrontEndState;
 extern u8 gPrevFrontEndState;
@@ -197,23 +197,23 @@ extern u8 gFrontEndFade;
 extern u8 gMenuPulse;
 extern u8 D_800E0B99;
 extern Actor *gMenuCharacters[4]; /* characters spawned by save_spawnMenuCharacter */
-extern s8 D_800E0BB0;
-extern s8 D_800E0BB1;
-extern u8 D_800E0BB8[16];
-extern s8 D_800E0BC8[4];
+extern s8 gTeamCount;
+extern s8 gTeamSize;
+extern u8 gLastAttackers[16];
+extern s8 gTeamColorIds[4];
 extern u16 D_800E0BCC;
 extern s8 gPartnerSlots[2];
 extern s8 gBotDifficulty;
 extern u8 D_800E0BD1;
 extern s8 D_800E0BD2;
-extern s8 D_800E0BD3;
+extern s8 gTextBankId;
 extern s32 gTextBank;
 extern u8 **gTextStrings; // text strings of the current language ([8 + n]: player names)
 extern u8 D_800E0BDC;
 extern s8 gSettings[0x1C];
 extern s8 gRosterTeams[16]; /* team of each gRoster entry */
-extern s16 D_800E0C10[4];
-extern s32 D_800E0C18[2];
+extern s16 gBestLapTimes[4];
+extern s32 gRaceTotalTimes[2];
 extern s8 gMatchResult;
 
 #endif

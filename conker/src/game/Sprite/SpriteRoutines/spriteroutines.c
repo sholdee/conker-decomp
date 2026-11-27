@@ -24,7 +24,7 @@ void sprite_runQueuedCommand(s32 unused) {
         sprite_resetSlots();
         return;
     case 2:
-        func_150B6D34();
+        sprite_settleFrameScrolls();
         return;
     case 4:
         sprite_freeAll();
@@ -66,7 +66,7 @@ void sprite_resetSlots(void) {
 }
 
 /* Lets the three scrolling sprites in slots 5-7 stop once they reach their target frame and y. */
-void func_150B6D34(void) {
+void sprite_settleFrameScrolls(void) {
     s32 i;
     Sprite2D *sprite;
 
@@ -204,17 +204,17 @@ void sprite_updateGrowIn(Sprite2D *sprite) {
 }
 
 
-/* Spawns four D_80091924 sprites (update routine 7) that converge on (arg0, arg1) from above, below,
+/* Spawns four D_80091924 sprites (update routine 7) that converge on (targetX, targetY) from above, below,
  * left and right over `duration` frames. */
-void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
+void sprite_spawnConverging(s32 targetX, s32 targetY, s32 duration, s32 owner) {
     Sprite2DParams desc;
     s32 r;
     s32 x;
     s32 y;
 
     // matching: copies of the args give the 0x80 frame and IDO's register choice
-    x = arg0;
-    y = arg1;
+    x = targetX;
+    y = targetY;
     desc.texture = &D_80091924;
     desc.data.words[0] = (x << 16) | (y & 0xFFFF);
     desc.scaleX = 0x1000;
@@ -248,24 +248,24 @@ void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     desc.frame = 0;
     desc.x = x;
     desc.y = y - r;
-    sprite_newSprite2D(&desc, arg3);
+    sprite_newSprite2D(&desc, owner);
 
     desc.data.words[2] = (x << 16) | ((y + r) & 0xFFFF);
     desc.flags = 8;
     desc.y = y + r;
-    sprite_newSprite2D(&desc, arg3);
+    sprite_newSprite2D(&desc, owner);
 
     desc.x = x - r;
     desc.data.words[2] = ((x - r) << 16) | (y & 0xFFFF);
     desc.flags = 4;
     desc.frame = 0x100;
     desc.y = y;
-    sprite_newSprite2D(&desc, arg3);
+    sprite_newSprite2D(&desc, owner);
 
     desc.data.words[2] = ((x + r) << 16) | (y & 0xFFFF);
     desc.flags = 0;
     desc.x = x + r;
-    sprite_newSprite2D(&desc, arg3);
+    sprite_newSprite2D(&desc, owner);
 }
 
 /* Update routine 7: moves the sprite in a straight line from its start point to its end point as its

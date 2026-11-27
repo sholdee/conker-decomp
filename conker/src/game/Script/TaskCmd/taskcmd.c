@@ -241,7 +241,7 @@ s32 script_taskQuery(s32 id, s32 opcode, ScriptCmd *cmd) {
     case 35:
         return gHumanCount;
     case 36:
-        return D_800E0BB1;
+        return gTeamSize;
     case 37:
         return gMatchFlags & 0x10;
     case 38:

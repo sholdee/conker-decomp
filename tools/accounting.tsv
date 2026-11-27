@@ -2267,7 +2267,7 @@ mp_findRacer	0x1508855C	144	game	c		build/src/game/Mp/Race/race.c.o
 mp_copyRacer	0x150885EC	160	game	c		build/src/game/Mp/Race/race.c.o
 mp_claimSpareRacer	0x1508868C	244	game	c		build/src/game/Mp/Race/race.c.o
 mp_releaseSpareRacer	0x15088780	120	game	c		build/src/game/Mp/Race/race.c.o
-func_150887F8	0x150887F8	44	game	c		build/src/game/Mp/Race/race.c.o
+mp_isFlyThroughEnding	0x150887F8	44	game	c		build/src/game/Mp/Race/race.c.o
 mp_resetRacer	0x15088824	132	game	c		build/src/game/Mp/Race/race.c.o
 mp_pickNextNode	0x150888A8	352	game	c		build/src/game/Mp/Race/race.c.o
 mp_advanceRacer	0x15088A08	848	game	c		build/src/game/Mp/Race/race.c.o
@@ -2762,7 +2762,7 @@ effect_flashViewLightBlue	0x150B6754	140	game	c		build/src/game/Effects/ObjBurst
 camera_levelHook07	0x150B67E0	992	game	c		build/src/game/Camera/LevelHook07/levelhook07.c.o
 sprite_runQueuedCommand	0x150B6BC0	208	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
 sprite_resetSlots	0x150B6C90	164	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
-func_150B6D34	0x150B6D34	68	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
+sprite_settleFrameScrolls	0x150B6D34	68	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
 sprite_freeAll	0x150B6D78	132	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
 sprite_updateTexScroll	0x150B6DFC	64	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
 sprite_updateFrameScroll	0x150B6E3C	608	game	c		build/src/game/Sprite/SpriteRoutines/spriteroutines.c.o
@@ -2834,12 +2834,12 @@ effect_spawnQuadrupedFootprintAlt	0x150BED4C	356	game	c		build/src/game/Effects/
 effect_levelHook27	0x150BEEB0	192	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 prop_emptyLevelUpdateHook2	0x150BEF70	12	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_startMirroredEmitters	0x150BEF7C	376	game	c		build/src/game/Prop/Scenery/scenery.c.o
-func_150BF0F4	0x150BF0F4	296	game	c		build/src/game/Prop/Scenery/scenery.c.o
-func_150BF21C	0x150BF21C	1348	game	c		build/src/game/Prop/Scenery/scenery.c.o
+prop_updateStyleFadeGrow	0x150BF0F4	296	game	c		build/src/game/Prop/Scenery/scenery.c.o
+prop_moveToHeightAndBob	0x150BF21C	1348	game	c		build/src/game/Prop/Scenery/scenery.c.o
 func_150BF760	0x150BF760	796	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_updateSinkingPlatform	0x150BFA7C	1380	game	c		build/src/game/Prop/Scenery/scenery.c.o
-func_150BFFE0	0x150BFFE0	508	game	c		build/src/game/Prop/Scenery/scenery.c.o
-func_150C01DC	0x150C01DC	740	game	c		build/src/game/Prop/Scenery/scenery.c.o
+prop_spawnDeathBurst	0x150BFFE0	508	game	c		build/src/game/Prop/Scenery/scenery.c.o
+prop_burstPieceOnFloor	0x150C01DC	740	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_scatterPieces	0x150C04C0	392	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_onPieceFloorHit	0x150C0648	872	game	c		build/src/game/Prop/Scenery/scenery.c.o
 particle_onPoolEmitterEvent	0x150C09B0	64	game	c		build/src/game/Particle/PoolEmitter/poolemitter.c.o
@@ -2934,7 +2934,7 @@ func_150C7870	0x150C7870	112	game	c		build/src/game/Prop/LinkedSpinners/linkedsp
 prop_spinOppositeObject3	0x150C78E0	80	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 prop_spinWithObject3	0x150C7930	56	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 prop_scrollTextureByObject3	0x150C7968	84	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
-func_150C79BC	0x150C79BC	724	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
+prop_levelUpdateMusicAndDebris	0x150C79BC	724	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 func_150C7C90	0x150C7C90	236	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 func_150C7D7C	0x150C7D7C	132	game	c		build/src/game/Prop/LinkedSpinners/linkedspinners.c.o
 camera_levelHook06	0x150C7E00	1360	game	c		build/src/game/Camera/LevelHook06/levelhook06.c.o
@@ -3253,7 +3253,7 @@ camera_levelHook04	0x150EB1C0	624	game	c		build/src/game/Camera/LevelHook04/leve
 prop_shotHitsCylinders	0x150EB430	84	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 prop_segmentHitsCylinders	0x150EB484	400	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 prop_springTiltByPlayerDistance	0x150EB614	688	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
-func_150EB8C4	0x150EB8C4	956	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
+prop_spawnFixedExplosion	0x150EB8C4	956	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 prop_spawnCylinderBurst	0x150EBC80	576	game	c		build/src/game/Prop/MoverSwing/moverswing.c.o
 weapon_fireTwinMuzzleShot	0x150EBEC0	1300	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
 func_150EC3D4	0x150EC3D4	136	game	c		build/src/game/Weapon/TwinMuzzle/twinmuzzle.c.o
@@ -3752,7 +3752,7 @@ prop_faceCamera	0x1511BE5C	96	game	c		build/src/game/Prop/PropUpdates/propupdate
 prop_grabAndLowerCharacter	0x1511BEBC	1668	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_updateNone	0x1511C540	8	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_sway	0x1511C548	240	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
-func_1511C638	0x1511C638	1268	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
+prop_replaceNextWhenTriggered	0x1511C638	1268	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_getWaveOriginZ	0x1511CB2C	24	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_animateWaveMesh	0x1511CB44	2128	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_scrollWithOwnerWave	0x1511D394	1064	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
@@ -3765,7 +3765,7 @@ prop_swingHinge	0x1511E780	1232	game	c		build/src/game/Prop/PropUpdates/propupda
 prop_raiseWhileTriggered	0x1511EC50	308	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_slideZUntilTriggered	0x1511ED84	444	game	c		build/src/game/Prop/PropUpdates/propupdates.c.o
 prop_carryCharacterInArc	0x1511EF40	988	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
-func_1511F31C	0x1511F31C	204	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
+prop_pinToLinkedObject	0x1511F31C	204	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_fadeOutAfterDelay	0x1511F3E8	232	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_partFourPieces	0x1511F4D0	664	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
 prop_start	0x1511F768	32	game	c		build/src/game/Prop/PropMotions/propmotions.c.o
@@ -4383,7 +4383,7 @@ sprite_drawScreenSprite	0x15154D80	1804	game	c		build/src/game/Sprite/ScreenSpri
 sprite_newScreenSprite	0x1515548C	216	game	c		build/src/game/Sprite/ScreenSprite/screensprite.c.o
 sprite_screenSpriteMessage	0x15155564	72	game	c		build/src/game/Sprite/ScreenSprite/screensprite.c.o
 sprite_overlapsScreenSprite	0x151555AC	384	game	c		build/src/game/Sprite/ScreenSprite/screensprite.c.o
-func_1515572C	0x1515572C	84	game	c		build/src/game/Sprite/ScreenSprite/screensprite.c.o
+sprite_sendEventToScreenSprites	0x1515572C	84	game	c		build/src/game/Sprite/ScreenSprite/screensprite.c.o
 effect_newPlayerMarker	0x15155780	124	game	c		build/src/game/Effects/PlayerMarker/playermarker.c.o
 effect_showPlayerMarker	0x151557FC	160	game	c		build/src/game/Effects/PlayerMarker/playermarker.c.o
 effect_updatePlayerMarker	0x1515589C	1120	game	c		build/src/game/Effects/PlayerMarker/playermarker.c.o
@@ -4805,7 +4805,7 @@ particle_spawnGroundChunks	0x1517AA20	348	game	c		build/src/game/Particle/SpinDe
 particle_endSpinDebrisDraw	0x1517AB7C	52	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 anim_ageMorphCache	0x1517ABB0	336	game	c		build/src/game/Anim/VertexMorph/vertexmorph.c.o
 anim_morphVertices	0x1517AD00	2048	game	c		build/src/game/Anim/VertexMorph/vertexmorph.c.o
-func_1517B500	0x1517B500	488	game	c		build/src/game/Sprite/LevelSprites/levelsprites.c.o
+sprite_animJitterHeight	0x1517B500	488	game	c		build/src/game/Sprite/LevelSprites/levelsprites.c.o
 sprite_animFadeOffset	0x1517B6E8	192	game	c		build/src/game/Sprite/LevelSprites/levelsprites.c.o
 func_1517B7A8	0x1517B7A8	80	game	c		build/src/game/Sprite/LevelSprites/levelsprites.c.o
 sprite_animHop	0x1517B7F8	164	game	c		build/src/game/Sprite/LevelSprites/levelsprites.c.o
@@ -5861,7 +5861,7 @@ func_151DE81C	0x151DE81C	64	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE85C	0x151DE85C	140	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151DE8E8	0x151DE8E8	8	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateMenuPages	0x151DE8F0	2252	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151DF1BC	0x151DF1BC	952	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateSettingsAndCodesPage	0x151DF1BC	952	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateListPage	0x151DF574	2500	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateSaveSlotPage	0x151DFF38	1260	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateModeSelectPage	0x151E0424	1464	game	c		build/src/game/Save/FrontEnd/frontend.c.o
@@ -5869,7 +5869,7 @@ save_updateOptionsPage	0x151E09DC	404	game	c		build/src/game/Save/FrontEnd/front
 save_updateJoinPage	0x151E0B70	1700	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateCpuPlayersPage	0x151E1214	1328	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateTeamPage	0x151E1744	2880	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E2284	0x151E2284	56	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_updateResultsPage	0x151E2284	56	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_applyModeSettings	0x151E22BC	328	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_storeModeSettings	0x151E2404	236	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_addPartnerPlayers	0x151E24F0	836	game	c		build/src/game/Save/FrontEnd/frontend.c.o
@@ -5883,7 +5883,7 @@ save_updateResultsScreen	0x151E43DC	2044	game	c		build/src/game/Save/FrontEnd/fr
 save_endRound	0x151E4BD8	492	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151E4DC4	0x151E4DC4	20	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151E4DD8	0x151E4DD8	40	game	c		build/src/game/Save/FrontEnd/frontend.c.o
-func_151E4E00	0x151E4E00	100	game	c		build/src/game/Save/FrontEnd/frontend.c.o
+save_returnToFrontEnd	0x151E4E00	100	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 func_151E4E64	0x151E4E64	132	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_updateFadeTransition	0x151E4EE8	332	game	c		build/src/game/Save/FrontEnd/frontend.c.o
 save_resetMenuState	0x151E5034	148	game	c		build/src/game/Save/FrontEnd/frontend.c.o
@@ -5923,9 +5923,9 @@ hud_drawResults	0x151EB930	60	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c
 hud_drawFadingMessage	0x151EB96C	484	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151EBB50	0x151EBB50	1576	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151EC178	0x151EC178	120	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-func_151EC1F0	0x151EC1F0	504	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
+hud_drawDemoScreen	0x151EC1F0	504	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_drawMenuOverlay	0x151EC3E8	608	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-func_151EC648	0x151EC648	2644	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
+hud_drawModeMenuOverlay	0x151EC648	2644	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 func_151ED09C	0x151ED09C	324	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_darkenScreen	0x151ED1E0	188	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_setupSpriteTiles	0x151ED29C	404	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o

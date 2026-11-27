@@ -62,7 +62,7 @@ static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     NULL, particle_floorShatter, effect_bounceOnGround, effect_bounceOffTriangle,
     blood_onDebrisFloorHit, pipeexplode_onChunkFloorHit, particle_floorBounce, particle_floorStop,
     blood_onChunkLand, blood_onGorePartLand, particle_floorBounceSettle, func_15133D20,
-    func_15133C58, func_150C01DC, prop_onPieceFloorHit,
+    func_15133C58, prop_burstPieceOnFloor, prop_onPieceFloorHit,
 };
 static ParticleFloorType3Fn gModelParticleFloorType3Funcs[] = { NULL };
 static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatter };

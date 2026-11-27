@@ -176,7 +176,7 @@ s32 script_miscQuery(s32 cmdId, s32 opcode, ScriptCmd *cmd) {
     case 13:
         return mp_findRacerByRank(cmd->a[0].w, cmd->a[1].w);
     case 14:
-        return func_150887F8();
+        return mp_isFlyThroughEnding();
     case 15:
         return gMatchFlags & 0x40;
     case 16:

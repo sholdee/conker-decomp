@@ -27,7 +27,7 @@ typedef struct MpZone {
  */
 typedef struct MpGame {
     /* 0x0000 */ s32 unk0;
-    /* 0x0004 */ s32 unk4;
+    /* 0x0004 */ s32 currentPlayer;
     /* 0x0008 */ s32 unk8;
     /* 0x000C */ s32 unkC;
     /* 0x0010 */ s32 numPlayers;
@@ -46,9 +46,9 @@ typedef struct MpGame {
     /* 0x029C */ s32 attackTimer[16];         /* fires when it turns non-negative */
     /* 0x02DC */ s32 unk2DC[16];
     /* 0x031C */ s32 unk31C[16];
-    /* 0x035C */ s32 unk35C[16];
-    /* 0x039C */ s32 unk39C[16];
-    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from D_800E0BB8 */
+    /* 0x035C */ s32 deathHandled[16];
+    /* 0x039C */ s32 health[16];
+    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from gLastAttackers */
     /* 0x041C */ s32 unk41C[16];
     /* 0x045C */ s32 opponentDist[16];
     /* 0x049C */ s32 opponent[16];            /* chosen by mp_pickOpponentByPath */
@@ -145,7 +145,7 @@ s32 mp_findRacer(Actor *obj);
 void mp_copyRacer(s32 src, s32 dst);
 s32 mp_claimSpareRacer(Actor *obj);
 void mp_releaseSpareRacer(Actor *obj);
-s32 func_150887F8(void);
+s32 mp_isFlyThroughEnding(void);
 void mp_resetRacer(Racer *racer);
 u8 mp_pickNextNode(u8 prev, u8 cur, s8 route);
 s32 mp_advanceRacer(Racer *racer, f32 step);

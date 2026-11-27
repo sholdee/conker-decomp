@@ -446,7 +446,7 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gDPSetOtherMode(gfx++, 0x08AC0F, 0x5041CC);
         gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
-        gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
+        gDPSetEnvColor(gfx++, 255, 255, 255, gMenuFadeInAlpha);
     }
     count = gHudBlockCount;
     dl = gHudBlockDl;
@@ -508,12 +508,12 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
  * sprite_drawScreen reads it back (see ParticleDesc64 in effects.h). */
 typedef struct TexSprite {
     s32 unk0;
-    s16 unk4;
+    s16 z;
     s16 w;
     s16 h;
     u8 alpha;
-    u8 unkB;
-    u8 unkC;
+    u8 animSpeed;
+    u8 animTimer;
     u8 flags; /* SPRITE_FLIP_* */
     u8 padE[2];
 } TexSprite;
@@ -625,39 +625,39 @@ void hud_updateWaterSurface(void) {
     if (intensity > 90) {
         if (gHudWaterStage.alpha == 0) {
             gHudWaterStage.alpha = 255;
-            gHudWaterStage.unk94 = 0.0f;
-            gHudWaterStage.unk98 = 0.02f;
-            gHudWaterStage.unkA0 = 0;
-            gHudWaterStage.unkA4 = 3.2f;
-            gHudWaterStage.unkA8 = 0;
-            gHudWaterStage.unkAC = 0;
+            gHudWaterStage.blend = 0.0f;
+            gHudWaterStage.blendSpeed = 0.02f;
+            gHudWaterStage.rotXOffset = 0;
+            gHudWaterStage.rotXSpeed = 3.2f;
+            gHudWaterStage.rotYOffset = 0;
+            gHudWaterStage.rotYSpeed = 0;
             gHudWaterStage.timer = (math_random() & 63) + 60;
         }
     } else {
         gHudWaterStage.alpha = 0;
         return;
     }
-    gHudWaterStage.unk9C = (u32)movement_obj->underwaterTime / 720.0f;
-    if (gHudWaterStage.unk9C > 1.0f) {
-        gHudWaterStage.unk9C = 1.0f;
+    gHudWaterStage.blendCentre = (u32)movement_obj->underwaterTime / 720.0f;
+    if (gHudWaterStage.blendCentre > 1.0f) {
+        gHudWaterStage.blendCentre = 1.0f;
     }
     if (intensity < 1441) {
-        gHudWaterStage.unk94 += gHudWaterStage.unk98 * gFrameTicks;
-        lo = gHudWaterStage.unk9C - 0.2f;
+        gHudWaterStage.blend += gHudWaterStage.blendSpeed * gFrameTicks;
+        lo = gHudWaterStage.blendCentre - 0.2f;
         if (lo < 0.0f) {
             lo = 0.0f;
         }
-        if (gHudWaterStage.unk94 <= lo) {
-            gHudWaterStage.unk94 = (lo + lo) - gHudWaterStage.unk94;
-            gHudWaterStage.unk98 = -gHudWaterStage.unk98;
+        if (gHudWaterStage.blend <= lo) {
+            gHudWaterStage.blend = (lo + lo) - gHudWaterStage.blend;
+            gHudWaterStage.blendSpeed = -gHudWaterStage.blendSpeed;
         } else {
-            hi = gHudWaterStage.unk9C + 0.2f;
+            hi = gHudWaterStage.blendCentre + 0.2f;
             if (hi > 1.0f) {
                 hi = 1.0f;
             }
-            if (hi <= gHudWaterStage.unk94) {
-                gHudWaterStage.unk94 = (hi + hi) - gHudWaterStage.unk94;
-                gHudWaterStage.unk98 = -gHudWaterStage.unk98;
+            if (hi <= gHudWaterStage.blend) {
+                gHudWaterStage.blend = (hi + hi) - gHudWaterStage.blend;
+                gHudWaterStage.blendSpeed = -gHudWaterStage.blendSpeed;
             }
         }
     }
@@ -687,7 +687,7 @@ void hud_updateWaterSurface(void) {
     base = gHudWaterStage.shapes[0];
     dst = gHudWaterStage.vtx[gDrawBufferIndex];
     target = gHudWaterStage.shapes[1];
-    blend = gHudWaterStage.unk94;
+    blend = gHudWaterStage.blend;
     for (i = 0; i < gHudWaterStage.count; i++) {
         dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
         dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
@@ -761,35 +761,35 @@ void hud_updateWaterSurface(void) {
     }
     dt = gFrameTicks;
     if (fadeRaw > 0x2CE2E) {
-        gHudWaterStage.unkAC = 0.0f;
+        gHudWaterStage.rotYSpeed = 0.0f;
     } else if (fadeRaw > 0x1DF1E) {
-        if (fabsf(gHudWaterStage.unkAC) < 0.6f) {
-            gHudWaterStage.unkAC = 0.6f;
+        if (fabsf(gHudWaterStage.rotYSpeed) < 0.6f) {
+            gHudWaterStage.rotYSpeed = 0.6f;
         }
     } else if (gHudWaterStage.timer != 0) {
         tmp = gHudWaterStage.timer - gFrameTicks;
         if (tmp <= 0) {
             tmp = 0;
-            gHudWaterStage.unkAC = 0.2f;
-            gHudWaterStage.unkA8 = dt * gHudWaterStage.unkAC;
+            gHudWaterStage.rotYSpeed = 0.2f;
+            gHudWaterStage.rotYOffset = dt * gHudWaterStage.rotYSpeed;
         }
         gHudWaterStage.timer = tmp;
     }
-    gHudWaterStage.unkA8 += gHudWaterStage.unkAC * dt;
-    if (gHudWaterStage.unkA8 > 2.0f) {
-        gHudWaterStage.unkA8 = 4.0f - gHudWaterStage.unkA8;
-        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
-    } else if (gHudWaterStage.unkA8 < -2.0f) {
-        gHudWaterStage.unkA8 = -4.0f - gHudWaterStage.unkA8;
-        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
-    } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.unkA8 >= 0 && gHudWaterStage.unkA8 < gHudWaterStage.unkAC * dt) {
+    gHudWaterStage.rotYOffset += gHudWaterStage.rotYSpeed * dt;
+    if (gHudWaterStage.rotYOffset > 2.0f) {
+        gHudWaterStage.rotYOffset = 4.0f - gHudWaterStage.rotYOffset;
+        gHudWaterStage.rotYSpeed = -gHudWaterStage.rotYSpeed;
+    } else if (gHudWaterStage.rotYOffset < -2.0f) {
+        gHudWaterStage.rotYOffset = -4.0f - gHudWaterStage.rotYOffset;
+        gHudWaterStage.rotYSpeed = -gHudWaterStage.rotYSpeed;
+    } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.rotYOffset >= 0 && gHudWaterStage.rotYOffset < gHudWaterStage.rotYSpeed * dt) {
         gHudWaterStage.timer = (math_random() & 63) + 60;
-        gHudWaterStage.unkA8 = 0.0f;
-        gHudWaterStage.unkAC = 0.0f;
+        gHudWaterStage.rotYOffset = 0.0f;
+        gHudWaterStage.rotYSpeed = 0.0f;
     }
-    if (fadeRaw >= 720 * 255 && gHudWaterStage.unkA0 > -22.0f) {
-        gHudWaterStage.unkA4 -= 0.25f * gFrameTicks;
-        gHudWaterStage.unkA0 += gHudWaterStage.unkA4;
+    if (fadeRaw >= 720 * 255 && gHudWaterStage.rotXOffset > -22.0f) {
+        gHudWaterStage.rotXSpeed -= 0.25f * gFrameTicks;
+        gHudWaterStage.rotXOffset += gHudWaterStage.rotXSpeed;
     }
 }
 
@@ -812,8 +812,8 @@ Gfx *hud_drawWaterSurface(Gfx *gfx) {
     } else {
         gSPSegment(gfx++, 8, gModelOpaNoZRenderModes);
     }
-    y = -11.0f + gHudWaterStage.unkA8;
-    x = -1.0f - gHudWaterStage.unkA0;
+    y = -11.0f + gHudWaterStage.rotYOffset;
+    x = -1.0f - gHudWaterStage.rotXOffset;
     math_mtxRotScaleTrans(&gHudWaterStage.mtx[gDrawBufferIndex], x, y, 0.0f,
                   4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
     gSPMatrix(gfx++, &gHudWaterStage.mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);

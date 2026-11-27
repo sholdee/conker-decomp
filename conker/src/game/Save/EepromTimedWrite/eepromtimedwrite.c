@@ -20,7 +20,7 @@ s32 save_writeEeprom(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) {
     return osSetTimer(&__osEepromTimer, 12000ULL * osClockRate / 1000000ULL, 0, &__osEepromTimerQ, &__osEepromTimerMsg);
 }
 
-s32 save_pollEepromWrite(s32 arg0) {
+s32 save_pollEepromWrite(s32 flag) {
     OSMesgQueue *queue;
     u8 block;
     u8 *data;
@@ -28,7 +28,7 @@ s32 save_pollEepromWrite(s32 arg0) {
     if (gEepromWriteQueue == NULL) {
         return 0;
     }
-    if (osRecvMesg(&__osEepromTimerQ, NULL, arg0) != -1) {
+    if (osRecvMesg(&__osEepromTimerQ, NULL, flag) != -1) {
         if (gEepromWriteLeft <= 0) {
             gEepromWriteQueue = NULL;
             gEepromWriteLeft = 0;

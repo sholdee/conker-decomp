@@ -246,7 +246,7 @@ void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
 
     if (prop->modelId == 0x8006 && level == LEVEL_W1_POO_BOSS) {
         prop = gfx_findObjectById(0xFD);
-        func_1511F31C(prop);
+        prop_pinToLinkedObject(prop);
         y = -555.0f;
         x = 0.0f;
         z = 0.0f;
@@ -413,7 +413,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             if (control->jump_on_char) {
                 continue;
             }
-            if (control->unk6B >= 4) {
+            if (control->grabState >= 4) {
                 continue;
             }
             if (obj->ypos + 40.0f < anchor[1]) {
@@ -432,7 +432,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
     if (target == NULL && motion == TASK_FLAG_GOING_ON) {
         for (i = 0; i < gPlayerCount; i++) {
             obj = &movement_obj[i];
-            if (obj->mv->unk6B != 0) {
+            if (obj->mv->grabState != 0) {
                 target = obj;
                 break;
             }
@@ -451,9 +451,9 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
             if (target != NULL) {
                 if (timer != 0) {
-                    target->mv->unk6B = 1;
+                    target->mv->grabState = 1;
                 } else {
-                    target->mv->unk6B = 2;
+                    target->mv->grabState = 2;
                 }
             }
             if (timer != 0) {
@@ -482,7 +482,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
                     started = 0;
                     gfx_playObjectSound(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
-                        target->mv->unk6B = 0;
+                        target->mv->grabState = 0;
                     }
                 }
             }
@@ -494,14 +494,14 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
         } else {
             if (target != NULL && (control = target->mv) != NULL) {
-                if (started == 0 && control->unk6B == 0) {
+                if (started == 0 && control->grabState == 0) {
                     timer = 50;
                     started++;
                 }
                 if (timer != 0) {
-                    control->unk6B = 3;
-                } else if (control->unk6B == 3) {
-                    control->unk6B = 4;
+                    control->grabState = 3;
+                } else if (control->grabState == 3) {
+                    control->grabState = 4;
                     started = 0;
                 }
                 if (timer != 0) {
@@ -543,7 +543,7 @@ void prop_grabAndSwingCharacter(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            target->mv->unk6B = 0;
+            target->mv->grabState = 0;
         }
     }
     PROP_SET_MOTION(prop, motion);
@@ -574,7 +574,7 @@ void prop_swingDoorLink3(WorldObject *prop) {
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
  * at the ends. Bits 24-31 of params pick a light (or similar) faded with the opening.
  */
-void prop_swingDoor(WorldObject *prop, s32 arg1) {
+void prop_swingDoor(WorldObject *prop, s32 mode) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -591,7 +591,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
 
     sound = 0;
     slow = FALSE;
-    prop_registerLink(prop, arg1);
+    prop_registerLink(prop, mode);
     row = (prop->moveData.word & 0xFC00) >> 10;
     openAngle = (prop->moveData.word << 22) >> 22;
     motion = prop->task_flag & TASK_FLAG_STATE;

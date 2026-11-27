@@ -264,9 +264,9 @@ typedef struct LevelHeader {
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game/Cutscene/Sequence/sequence
     /* 0x2C */ LevelMusic music;
-    /* 0x3A */ s16 unk3A;           // fog (gFogPresets.unk4..unkA)
+    /* 0x3A */ s16 fogStart;        // copied to gFogPresets[0].fogStart
     /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;           // nonzero: level fog on objects
+    /* 0x3E */ s16 fogEnd;          // copied to gFogPresets[0].fogEnd; nonzero: level fog on objects
     /* 0x40 */ s16 unk40;
     /* 0x42 */ u8  fogColour[4];
     /* 0x46 */ s8  fogPreset;       // fog preset (env_blendFog), -1 = none
@@ -552,7 +552,7 @@ typedef struct {
     /* 0x058 */ IdleState idle;
     /* 0x068 */ u16 unk68;
     /* 0x06A */ u8  pad6A;
-    /* 0x06B */ u8  unk6B;      // grab state
+    /* 0x06B */ u8  grabState;      // stage of being held by a grabbing prop (prop_grabAndSwingCharacter, prop_grabAndLowerCharacter); 0 = not held
     /* 0x06C */ s16 holdX;      // held position (s16 world units)
     /* 0x06E */ s16 holdY;
     /* 0x070 */ s16 holdZ;
@@ -593,7 +593,7 @@ typedef struct {
     /* 0x0AC */ u8  ropeSwingAngle;
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
-    /* 0x0AF */ u8  unkAF;
+    /* 0x0AF */ u8  aimTargetTimer; // 0x78 while aiming at a character (multiplayer), counted down by gFrameTicks
     /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (collision_castRay)
     /* 0x114 */ s16 height;      // cached size from actor_computeSize
     /* 0x116 */ s16 width;
@@ -1904,7 +1904,7 @@ typedef struct {
 /* Summary of one of the three save files the player can pick. */
 typedef struct SaveSlotInfo {
     /* 0x00 */ s32 playTime;   /* gPlayTime, in seconds */
-    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
+    /* 0x04 */ u32 score;      /* D_800BE3E4, the player's score as saved */
     /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
     /* 0x0C */ u8 checkpointLevel; /* gCheckpointLevel */
     /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at gTaskDoneBits */
@@ -2228,13 +2228,13 @@ typedef struct WaterStage {
     /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
     /* 0x8C */ WaterBase *shapes[2]; /* [0] the rest shape, [1] the shape it blends to */
-    /* 0x94 */ f32 unk94;
-    /* 0x98 */ f32 unk98;
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
-    /* 0xA4 */ f32 unkA4;
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ f32 unkAC;
+    /* 0x94 */ f32 blend;       /* 0..1 from shapes[0] to shapes[1] */
+    /* 0x98 */ f32 blendSpeed;  /* per tick, reversed at blendCentre -/+ 0.2 */
+    /* 0x9C */ f32 blendCentre;
+    /* 0xA0 */ f32 rotXOffset;  /* degrees, subtracted from the surface's x rotation */
+    /* 0xA4 */ f32 rotXSpeed;   /* added to rotXOffset each frame */
+    /* 0xA8 */ f32 rotYOffset;  /* degrees, added to the surface's y rotation (rocks between -2 and 2) */
+    /* 0xAC */ f32 rotYSpeed;   /* per tick */
     /* 0xB0 */ u16 tex[4];
     /* 0xB8 */ s16 timer;
     /* 0xBA */ u8  alpha;
@@ -2816,7 +2816,7 @@ typedef struct {
     /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
     /* 0x12 */ s8 speed;
     /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
-    /* 0x14 */ u8 unk14[6];   // only used by mode 1
+    /* 0x14 */ u8 colorWave[6];   // only used by mode 1: r, rAmp, g, gAmp, b, bAmp (vertex colour base and amplitude)
     /* 0x1A */ u8 pad1A[2];
 } WaveParams;
 
@@ -2919,8 +2919,8 @@ typedef struct RenderView {
     /* 0x010 */ f32 halfHeight; // also the screen centre y
     /* 0x014 */ f32 scaleX;     // sprite x scale (unscaled sprites)
     /* 0x018 */ f32 scaleY;
-    /* 0x01C */ f32 unk1C;      // sprite x scale (perspective sprites)
-    /* 0x020 */ f32 unk20;
+    /* 0x01C */ f32 projScaleX;      // sprite x scale (perspective sprites)
+    /* 0x020 */ f32 projScaleY;
     /* 0x024 */ f32 top;
     /* 0x028 */ f32 bottom;
     /* 0x02C */ f32 left;
@@ -3047,15 +3047,15 @@ typedef struct ObjectBehavior {
 /* Saved settings of one multiplayer mode (gModeSettings[mode]); save_applyModeSettings copies them into gSettings[]. */
 typedef struct ModeSettings {
     /* 0x0 */ s8 unk0;
-    /* 0x1 */ s8 unk1; /* -> gSettings[2], at least 1 */
-    /* 0x2 */ s8 unk2; /* -> gSettings[3] */
-    /* 0x3 */ u8 unk3; /* -> gSettings[16], 0..4 */
+    /* 0x1 */ s8 lives; /* -> gSettings[2], at least 1 */
+    /* 0x2 */ s8 timeLimit; /* -> gSettings[3], in minutes; below 3: no limit */
+    /* 0x3 */ u8 botDifficulty; /* -> gSettings[16], 0..4 */
     /* 0x4 */ u8 unk4; /* -> gSettings[17] */
     /* 0x5 */ u8 unk5; /* mode-specific setting (gSettings[4] / [13] / [18] / [7]) */
     /* 0x6 */ u8 unk6; /* mode-specific setting (gSettings[14] / [19]) */
     /* 0x7 */ u8 unk7;
     /* 0x8 */ u8 unk8; /* -> gSettings[22] */
-    /* 0x9 */ u8 unk9; /* -> gSettings[6] */
+    /* 0x9 */ u8 scoreLimit; /* -> gSettings[6] */
 } ModeSettings; /* size 0xA */
 
 /* A HUD image drawn by hud_drawSprite: a texture id (split into 4KB chunks of consecutive ids) and its format.
@@ -3100,16 +3100,19 @@ typedef struct {
     /* 0x04 */ f32 stepSpeed;     /* its speed */
     /* 0x08 */ f32 pathProgress;  /* progress along the current stop's path */
     /* 0x0C */ f32 pathSpeed;     /* its speed */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
+    /* 0x10 */ f32 focusShiftWeight; /* 1 when a menu-1 jump starts, then x0.85 per frame (a ramp while lookBack == 3) */
+    /* 0x14 */ f32 focusShiftX;   /* added to the focus, times focusShiftWeight: the old stop's direction minus */
+    /* 0x18 */ f32 focusShiftY;   /* the new stop's, from the home node */
+    /* 0x1C */ f32 focusShiftZ;
     /* 0x20 */ u16 input;        /* MENU_* bits pressed this frame on controller 1 */
     /* 0x22 */ u16 padInput[4];  /* MENU_* bits pressed this frame, per controller */
-    /* 0x2A */ s8 unk2A;
+    /* 0x2A */ s8 lookBack;       /* nonzero: the focus is mirrored through the eye; 1: entered menu 1 from the end of
+                                     path 0, 2: a B jump from stops 2..6, 3: the last quarter of that entry (set from 1
+                                     once pathProgress < 0.25; focusShiftWeight ramps; cleared at progress 0 with
+                                     currentStop 4) */
     /* 0x2B */ s8 currentStop;    /* current path stop */
     /* 0x2C */ s8 displayedStop;  /* displayed stop */
-    /* 0x2D */ s8 unk2D;
+    /* 0x2D */ s8 unmappedStop;   /* displayedStop before menu 1 remaps it through D_800AB570 */
     /* 0x2E */ s8 stickX[4];     /* last stick position, per controller */
     /* 0x32 */ s8 stickY[4];
     /* 0x36 */ s8 repeatX[4];    /* stick auto-repeat timers */
@@ -3119,7 +3122,8 @@ typedef struct {
     /* 0x40 */ s8 prevPage;
     /* 0x41 */ s8 cursor;
     /* 0x42 */ s8 selection;     /* e.g. row of the mode table gModeEntries */
-    /* 0x43 */ s8 unk43;
+    /* 0x43 */ s8 stepRequest;    /* nonzero: step to the next stop on the next idle frame (set only while unk44 != 0,
+                                     and nothing sets unk44 nonzero) */
     /* 0x44 */ s8 unk44;
     /* 0x45 */ char pad45;
     /* 0x46 */ s16 score[16];    /* per-player score (checked against the limit gSettings[6], capped at 9999) */
@@ -3134,27 +3138,9 @@ typedef struct {
     /* 0x5 */ s8 teamSetup; /* gTeamSetups index; negative: -(preset + 1), every player on a team of their own */
     /* 0x6 */ s8 introCue;   /* cue of gModeIntroCues played before the match; -1: none */
     /* 0x7 */ s8 resultCue;  /* cue of gModeResultCues played with the results; -1, -2: special endings (save_endMatch) */
-    /* 0x8 */ s8 unk8;
+    /* 0x8 */ s8 defaultCharacter;
     /* 0x9 */ s8 unk9;
 } ModeEntry; /* size 0xA */
-
-/* Camera request passed to camera_queueMessage (mode 7). */
-typedef struct CamParams {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 eyeX;
-    /* 0x18 */ f32 eyeY;
-    /* 0x1C */ f32 eyeZ;
-    /* 0x20 */ f32 atX;
-    /* 0x24 */ f32 atY;
-    /* 0x28 */ f32 atZ;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} CamParams;
 
 /* Per-racer state of the race mode (gRacers[]), 0x84 bytes. */
 typedef struct Racer {
@@ -3188,7 +3174,7 @@ typedef struct Racer {
     /* 0x49 */ s8 camState;
     /* 0x4A */ u8 camNode;
     /* 0x4B */ u8 camNextNode;
-    /* 0x4C */ CamParams cam;
+    /* 0x4C */ CamShot cam;
 } Racer; /* size 0x84 */
 
 /* A node of the level's path graph (loaded by path_load), 0x10 bytes. */

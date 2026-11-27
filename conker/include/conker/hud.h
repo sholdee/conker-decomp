@@ -74,7 +74,7 @@ extern Gfx *gHudBlockDl;         /* display list built by game/Hud/PlayerOverlay
 
 /* game/Hud/CounterFree/counterfree.c */
 void hud_freeCounter(CounterEffect *effect);
-void hud_counterMessage(EffectHeader *obj, s32 arg1, u8 msg);
+void hud_counterMessage(EffectHeader *obj, s32 unused, u8 msg);
 
 /* game/Hud/HudOverlay/hudoverlay.c */
 Gfx *hud_drawMain(Gfx *gfx);
@@ -90,9 +90,9 @@ Gfx *hud_drawResults(Gfx *gfx);
 Gfx *hud_drawFadingMessage(Gfx *gfx);
 Gfx *func_151EBB50(Gfx *gfx);
 Gfx *func_151EC178(Gfx *gfx);
-Gfx *func_151EC1F0(Gfx *gfx);
+Gfx *hud_drawDemoScreen(Gfx *gfx);
 Gfx *hud_drawMenuOverlay(Gfx *gfx);
-Gfx *func_151EC648(Gfx *gfx);
+Gfx *hud_drawModeMenuOverlay(Gfx *gfx);
 Gfx *func_151ED09C(Gfx *gfx);
 Gfx *hud_darkenScreen(Gfx *gfx);
 Gfx *hud_setupSpriteTiles(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut);
@@ -107,7 +107,7 @@ void hud_clearCodeFlags(void);
 extern Gfx *(*gHudModeOverlayDrawers[13])(Gfx *);
 extern Gfx *(*gHudModeDrawers[13])(Gfx *);
 extern Gfx gHudSpriteDl[];
-extern HudModel *D_80090058;
+extern HudModel *gHudCashModel;
 extern HudModel *D_8009005C;
 extern HudSprite gHudSprite;
 extern u8 gScoreDigitCols[4];

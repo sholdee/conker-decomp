@@ -49,7 +49,7 @@ Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {
 
 /* Per-mode (gFrontEndState) HUD drawers, called by hud_drawMain. */
 Gfx *(*gHudModeDrawers[13])(Gfx *) = {
-    NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
+    NULL, func_151EC178, hud_drawDemoScreen, NULL, func_151ED09C, NULL, NULL,
     NULL, hud_drawFadingMessage, NULL, NULL, NULL, NULL,
 };
 
@@ -63,7 +63,7 @@ Gfx gHudSpriteDl[] = {
     gsSPEndDisplayList(),
 };
 
-HudModel *D_80090058 = NULL;
+HudModel *gHudCashModel = NULL;
 HudModel *D_8009005C = NULL;
 HudSprite gHudSprite = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
 /* texture_getAddress returns this instead of a texture address when it fails. */
@@ -83,17 +83,17 @@ Gfx *hud_drawMain(Gfx *gfx) {
     if (D_80000300 != 0) {
         if (gIsMultiplayer != 0 && gHumanCount >= 2) {
             if ((gConnectedPads & 0xF) == 0) {
-                if (D_800E0BD3 == 1) {
+                if (gTextBankId == 1) {
                     message = 0x33;
-                } else if (D_800E0BD3 == 2) {
+                } else if (gTextBankId == 2) {
                     message = 0x16;
                 }
             }
         } else {
             if ((gConnectedPads & 1) == 0) {
-                if (D_800E0BD3 == 1) {
+                if (gTextBankId == 1) {
                     message = 0x32;
-                } else if (D_800E0BD3 == 2) {
+                } else if (gTextBankId == 2) {
                     message = 0x15;
                 }
             }
@@ -123,7 +123,7 @@ Gfx *hud_drawModeOverlay(Gfx *gfx) {
         gfx = gHudModeOverlayDrawers[mode](gfx);
     }
     if (gFrontEndState != 0) {
-        D_80090058 = NULL;
+        gHudCashModel = NULL;
         D_800E0C78 = 0;
     }
     gDebugStatusCode = 0;
@@ -202,7 +202,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
         y = 0x198;
     }
     spacing = 0x124;
-    if (D_800E0BB0 > 0) { spacing = 0x124 / D_800E0BB0; } // matching: one line (-g3 line numbers steer scheduling)
+    if (gTeamCount > 0) { spacing = 0x124 / gTeamCount; } // matching: one line (-g3 line numbers steer scheduling)
     zero = 0;
     D_800E0BCC = 0;
     nearTarget = 0;
@@ -265,7 +265,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
     }
     if ((gMatchHudFlags & 8) && (image != 0)) {
         x = spacing >> 1;
-        for (i = 0; i < D_800E0BB0; i++) {
+        for (i = 0; i < gTeamCount; i++) {
             score = player_getStat(i, 6);
             started = 0;
             done = 0;
@@ -408,8 +408,8 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
         gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
     }
     spacing = 0x124;
-    if (D_800E0BB0 > 0) {
-        spacing = 0x124 / D_800E0BB0;
+    if (gTeamCount > 0) {
+        spacing = 0x124 / gTeamCount;
     }
     if (refresh) {
         inactiveTeams = 0xF;
@@ -420,12 +420,12 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
         }
     }
     x = spacing >> 1;
-    for (i = 0; i < D_800E0BB0; i++) {
+    for (i = 0; i < gTeamCount; i++) {
         if (refresh) {
             filled = player_getStat(i, 6);
-            D_800E0AA0[i] = filled;
+            gTeamScores[i] = filled;
         } else {
-            filled = D_800E0AA0[i];
+            filled = gTeamScores[i];
         }
         if (!(inactiveTeams & (1 << i))) {
             if (i == extraPipTeam) {
@@ -466,7 +466,7 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
         gDPLoadTLUTCmd(gfx++, 6, 15);
         gDPSetOtherMode(gfx++, 0x00AC3F, 0x504244);
         x = spacing >> 1;
-        for (i = 0; i < D_800E0BB0; i++) {
+        for (i = 0; i < gTeamCount; i++) {
             if (inactiveTeams & (1 << i)) {
                 gDPPipeSync(gfx++);
                 {
@@ -558,11 +558,11 @@ Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
                 }
             }
         }
-        D_800E0AA0[0] = team0Total;
-        D_800E0AA0[1] = team1Total;
+        gTeamScores[0] = team0Total;
+        gTeamScores[1] = team1Total;
     } else {
-        team0Total = D_800E0AA0[0];
-        team1Total = D_800E0AA0[1];
+        team0Total = gTeamScores[0];
+        team1Total = gTeamScores[1];
     }
 
     gfx = hud_texRectScaled(gfx, 0x108, y, 0x148, y + 0x40, 0, leftIconS, iconT, 0x400, 0x400);
@@ -635,7 +635,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         }
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
-    if (D_800E0BD3 == 2) {
+    if (gTextBankId == 2) {
         nameBase = 9;
         refreshScores = 1;
     } else {
@@ -749,7 +749,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             }
             text_printAt(x + 0x3C, y, 0x81, "%s", gTextStrings[nameIndex + nameBase]);
             if (gMatchHudFlags & 1) {
-                text_printAt(xbase + 0x54, y, 0x81, "%d", D_800E0AA0[team]);
+                text_printAt(xbase + 0x54, y, 0x81, "%d", gTeamScores[team]);
                 x = xbase + 0x1E;
             }
             x += 0x58;
@@ -765,7 +765,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 }
                 x += 0x1E;
             }
-            text_printAt(x, y, 0x81, "%d", D_800E0AD0[i]);
+            text_printAt(x, y, 0x81, "%d", gPlayerDeaths[i]);
             y += 0xF;
         }
     }
@@ -838,7 +838,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
     s32 hasValue;
     s32 i;
     s32 start;
-    static s8 D_800900B8 = 0;
+    static s8 gPauseHudDelay = 0;
 
     show = (gTaskDoneBits[0x19] & 4) || (gCurrentSaveSlot < 0);
     if (gIsMultiplayer && !gPaused && !gPauseRequested) {
@@ -848,17 +848,17 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
     } else {
         D_800E0C78 = 0;
     }
-    if (!gPaused || D_8008FEF0) {
-        if (D_80090058 != NULL) {
-            hud_freeModel(D_80090058);
+    if (!gPaused || gUnpauseDelay) {
+        if (gHudCashModel != NULL) {
+            hud_freeModel(gHudCashModel);
             hud_freeModel(D_8009005C);
-            D_80090058 = NULL;
+            gHudCashModel = NULL;
         }
-        D_8008FDCC = 0;
-        D_800900B8 = 0;
+        gMenuFadeInAlpha = 0;
+        gPauseHudDelay = 0;
         return gfx;
     }
-    if (gLevelHeader->skyMode == 4 && D_800900B8 == 0) {
+    if (gLevelHeader->skyMode == 4 && gPauseHudDelay == 0) {
         if (level == LEVEL_W2_HARBOUR) {
             s32 id;
             id = gSkyTextureSets[gLevelHeader->skyTextureSet][2];
@@ -876,16 +876,16 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
             texture_releaseId(gSkyTextureSets[gLevelHeader->skyTextureSet][2] + i);
         }
     }
-    if (D_800900B8 < 5) {
-        D_800900B8++;
+    if (gPauseHudDelay < 5) {
+        gPauseHudDelay++;
         return gfx;
     }
-    D_8008FDCC += 0x20;
-    if (D_8008FDCC >= 0x100) {
-        D_8008FDCC = 0xFF;
+    gMenuFadeInAlpha += 0x20;
+    if (gMenuFadeInAlpha >= 0x100) {
+        gMenuFadeInAlpha = 0xFF;
     }
     gSPDisplayList(gfx++, gHudSpriteDl);
-    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuFadeInAlpha);
     gHudSprite.texId = &D_891;
     {
         s32 remaining;
@@ -933,8 +933,8 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
                 hasValue = 0;
             }
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x3C, 3, 1, 1.0f, 0);
-            if (D_80090058 == NULL) {
-                D_80090058 = hud_loadModel(0xA4, 0x17, 0, 1.0f);
+            if (gHudCashModel == NULL) {
+                gHudCashModel = hud_loadModel(0xA4, 0x17, 0, 1.0f);
                 D_8009005C = hud_loadModel(0xA2, 8, 0, 1.0f);
             }
             gSPSetGeometryMode(gfx++, 0x220404);
@@ -942,8 +942,8 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
             gfx = hud_drawBlocks(gfx, 1);
             halfWidth = gViews[0].width * 0.5f;
             func_151EF954(&gHudOrthoMtx, -halfWidth, halfWidth, -(gViews[0].height * 0.5f), gViews[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
-            gSinglePlayerHudAlpha = D_8008FDCC;
-            if (D_80090058 != NULL) {
+            gSinglePlayerHudAlpha = gMenuFadeInAlpha;
+            if (gHudCashModel != NULL) {
                 i = 10;
                 if (hasValue) {
                     x = -0x10;
@@ -951,7 +951,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
                         x -= 0x10;
                         i *= 10;
                     }
-                    gfx = hud_drawModel(gfx, D_80090058, x + -10.0f, -83.0f, 0.2699999809f);
+                    gfx = hud_drawModel(gfx, gHudCashModel, x + -10.0f, -83.0f, 0.2699999809f);
                 }
             }
             if (D_8009005C != NULL && show) {
@@ -968,18 +968,18 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
                 if (count >= 100) {
                     count = 99;
                 }
-                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuFadeInAlpha);
                 gfx = hud_drawNumber(gfx, 0xEC, 0x1E, count);
             }
             if (hasValue) {
                 s32 pad4; // matching: stack slot
                 gDPPipeSync(gfx++);
-                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuFadeInAlpha);
                 gHudSprite.texId = &D_7F6;
                 gfx = hud_drawNumber(hud_drawSprite(gfx, &gHudSprite, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
             }
         } else {
-            gfx = hud_drawResultsTable(hud_drawSprite(gfx, &gHudSprite, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
+            gfx = hud_drawResultsTable(hud_drawSprite(gfx, &gHudSprite, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, gMenuFadeInAlpha, 1);
         }
     }
     return gfx;
@@ -988,8 +988,8 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
 
 /* Draws the results table while it is faded in. */
 Gfx *hud_drawResults(Gfx *gfx) {
-    if (D_8008FDCC != 0) {
-        gfx = hud_drawResultsTable(gfx, 0x6A, D_8008FDCC, 0);
+    if (gMenuFadeInAlpha != 0) {
+        gfx = hud_drawResultsTable(gfx, 0x6A, gMenuFadeInAlpha, 0);
     }
     return gfx;
 }
@@ -1183,7 +1183,7 @@ Gfx *func_151EC178(Gfx *gfx) {
 }
 
 /* Draws a fading image and two overlaid sprites (the second tinted by gMenuPulse); updates the fade level gFrontEndFade. */
-Gfx *func_151EC1F0(Gfx *gfx) {
+Gfx *hud_drawDemoScreen(Gfx *gfx) {
     s32 alpha;
     s32 temp;
 
@@ -1235,24 +1235,24 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by gMenuState->displayedStop (or the func_151EC648 / hud_updateCodeEntry screens). */
+/* Draws the fading image picked by gMenuState->displayedStop (or the hud_drawModeMenuOverlay / hud_updateCodeEntry screens). */
 Gfx *hud_drawMenuOverlay(Gfx *gfx) {
-    static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
-    static u8 D_800900D4 = 0;
+    static void *gMenuStopImages[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
+    static u8 gMenuOverlayFadeIn = 0;
     s32 alpha;
 
     if (gCutsceneStates[0] == 1) {
-        D_800900D4 = 0;
+        gMenuOverlayFadeIn = 0;
         return gfx;
     }
-    alpha = D_800900D4 + (gFrameTicks * 4);
+    alpha = gMenuOverlayFadeIn + (gFrameTicks * 4);
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    D_800900D4 = alpha;
+    gMenuOverlayFadeIn = alpha;
     gSPDisplayList(gfx++, gHudSpriteDl);
     if (gMenuState->menu == 1) {
-        return func_151EC648(gfx);
+        return hud_drawModeMenuOverlay(gfx);
     }
     if (gMenuState->menu == 0) {
         if (gMenuState->displayedStop == 1 && D_8008FEF8 != 0) {
@@ -1265,8 +1265,8 @@ Gfx *hud_drawMenuOverlay(Gfx *gfx) {
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
-            if (D_800900D4 < alpha) {
-                alpha = D_800900D4;
+            if (gMenuOverlayFadeIn < alpha) {
+                alpha = gMenuOverlayFadeIn;
             }
             if (gMenuState->displayedStop == 1) {
                 alpha = (gMenuPageFade * alpha) >> 8;
@@ -1276,7 +1276,7 @@ Gfx *hud_drawMenuOverlay(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            gHudSprite.texId = D_800900BC[gMenuState->displayedStop];
+            gHudSprite.texId = gMenuStopImages[gMenuState->displayedStop];
             gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
         if (gMenuState->pathProgress >= 0.5f) {
@@ -1291,7 +1291,7 @@ Gfx *hud_drawMenuOverlay(Gfx *gfx) {
 }
 
 /* Draws the multi-page screen selected by gMenuState: page images, a rotating list, or per-slot panels. */
-Gfx *func_151EC648(Gfx *gfx) {
+Gfx *hud_drawModeMenuOverlay(Gfx *gfx) {
     static u8 *D_800900D8[8] = {
         (u8 *)0x831, (u8 *)0x884, (u8 *)0x8A4, (u8 *)0x80B, (u8 *)0x7BC, (u8 *)0x7B9, (u8 *)0x822, (u8 *)0x808,
     };
@@ -1747,7 +1747,7 @@ Gfx gHudModelTexOffDl[] = {
 };
 
 
-/* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
+/* Draws a HUD model at (x, y) with the given scale; the gHudCashModel model also blinks. */
 Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     s32 tex;
     Gfx *start;
@@ -1782,7 +1782,7 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     gSPSegment(gfx++, 3, model->anim->partMtx[gDrawBufferIndex]);
     gSPSegment(gfx++, 1, model->segment1Base);
 
-    if (model == D_80090058) {
+    if (model == gHudCashModel) {
         model->blinkTimer--;
         if (model->blinkTimer == 0) {
             model->blinkTimer = (math_random() & 0x7F) + 0xF;

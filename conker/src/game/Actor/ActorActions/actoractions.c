@@ -158,8 +158,8 @@ void actor_runPending(void) {
                 case 0x24:
                     if (collision_applyRayHit(actor, &ctl->rayHit, 7) != 2) {
                         ctl = actor->mv;
-                        if (ctl->unkAF != 0) {
-                            ctl->unkAF = 0;
+                        if (ctl->aimTargetTimer != 0) {
+                            ctl->aimTargetTimer = 0;
                             if (sound_isActorSound1Playing(actor) == 0) {
                                 sound_playActorSound1Delayed(math_random() % 3 + 0x53B, actor, 0x7D00, 800, 3000, 30);
                             }

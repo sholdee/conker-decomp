@@ -53,11 +53,11 @@ static SkyDrawFunc gSkyDrawFuncs[] = {
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
 struct Game13D350U8x2 { u8 v[2]; };
 struct Game13D350S16x2 { s16 v[2]; };
-static struct Game13D350U8x2 D_800891EC = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
-static struct Game13D350U8x2 D_800891F0 = { { 1, 2 } };          // load shifts
-static struct Game13D350S16x2 D_800891F4 = { { 0x800, 0x400 } }; // palette offsets
-static struct Game13D350U8x2 D_800891F8 = { { 255, 15 } };       // TLUT counts - 1
-static struct Game13D350U8x2 D_800891FC = { { 0, 1 } };          // render tiles
+static struct Game13D350U8x2 gSkyFormatSizes = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
+static struct Game13D350U8x2 gSkyFormatShifts = { { 1, 2 } };          // load shifts
+static struct Game13D350S16x2 gSkyFormatPalOffsets = { { 0x800, 0x400 } }; // palette offsets
+static struct Game13D350U8x2 gSkyFormatTlutCounts = { { 255, 15 } };       // TLUT counts - 1
+static struct Game13D350U8x2 gSkyFormatTiles = { { 0, 1 } };          // render tiles
 
 /* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
 typedef struct SkyFace {
@@ -82,7 +82,7 @@ static const SkyFace gSkyFaces[6] = {
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
  * camera angles into range and calls the current sky's draw routine if env_getSkyExtent says the sky shows. */
-Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
+Gfx *env_drawSky(Gfx *gfx, s32 levelId) {
     RenderView *view;
     f32 pitch;
     f32 yaw;
@@ -350,7 +350,7 @@ s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
  * (view_getQuadViewDepth) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued
  * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
  * pointer arguments. quad is scratch (callers pass NULL). */
-Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
+Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 unused, u32 width, u32 height,
                    u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastFormatPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts, u8 *tiles, s32 texSet) {
@@ -478,7 +478,7 @@ Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg
                 if (!D_800DBEAB || rowIdx < limit) {
                     maxT = (u16)(s32)((tileH + 0.5f) * 32.0f);
                     maxS = (u16)(s32)((tileW + 0.5f) * 32.0f);
-                    // matching: the quad pointer lives in the unused parameter, built with byte arithmetic
+                    // matching: the quad pointer lives in the parameter quad (unused on entry), built with byte arithmetic
                     quad = (Vtx *)((u8 *)vtxBuf + vtxIdx * 16 + vtxCount * 16);
                     if (axis == 'y' && (col == 0 || col == width - tileW)) {
                         x0 -= 3;
@@ -589,8 +589,8 @@ typedef struct Star {
     u16 x;
     u16 y;
     u16 z;
-    u8 unk6; // 0..4
-    u8 unk7; // 64..254
+    u8 colourIndex; // 0..4, index into the star field's colours
+    u8 brightness; // 64..254, the alpha
 } Star;
 
 #define NUM_STARS 8000
@@ -627,8 +627,8 @@ void env_initStars(void) {
         stars[i].x = *(u16 *)&bits;
         bits = (s32)(math_cos(longitude) * ringRadius);
         stars[i].z = *(u16 *)&bits;
-        stars[i].unk7 = (math_random() % 191U) + 64;
-        stars[i].unk6 = math_random() % 5U;
+        stars[i].brightness = (math_random() % 191U) + 64;
+        stars[i].colourIndex = math_random() % 5U;
     }
 }
 
@@ -661,11 +661,11 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     struct Game13D350U8x2 tlutCounts;
     struct Game13D350U8x2 tiles;
 
-    sizes = D_800891EC;
-    shifts = D_800891F0;
-    palOffsets = D_800891F4;
-    tlutCounts = D_800891F8;
-    tiles = D_800891FC;
+    sizes = gSkyFormatSizes;
+    shifts = gSkyFormatShifts;
+    palOffsets = gSkyFormatPalOffsets;
+    tlutCounts = gSkyFormatTlutCounts;
+    tiles = gSkyFormatTiles;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gfx = view_setColorImage(view_setScissor(gfx, gCurrentView, 0, 0, 0, 0));
     fov = (gScreenLayout != 1) ? 80.0f : 95.0f;

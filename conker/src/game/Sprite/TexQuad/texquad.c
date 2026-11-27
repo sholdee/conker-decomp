@@ -207,19 +207,19 @@ void sprite_resetActorTrackers(void) {
 }
 
 /*
- * Gets an actor's collision bounds: for actor ids below 0xBB, radius hitRadius, *arg3 hitHeight and a centre
+ * Gets an actor's collision bounds: for actor ids below 0xBB, radius hitRadius, *height hitHeight and a centre
  * raised by hitOffsetY; for other ids, 1.0 and 1.0 at the actor's position.
  */
-void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *height) {
     if ((actor->character_type < 0xBB) && (actor->character_type != 0xFF)) {
         *radius = actor->hitRadius;
-        *arg3 = actor->hitHeight;
+        *height = actor->hitHeight;
         center->x = actor->xpos;
         center->y = actor->ypos + actor->hitOffsetY;
         center->z = actor->zpos;
     } else {
         *radius = 1.0f;
-        *arg3 = 1.0f;
+        *height = 1.0f;
         center->x = actor->xpos;
         center->y = actor->ypos;
         center->z = actor->zpos;
@@ -227,16 +227,16 @@ void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) 
 }
 
 /* Like sprite_getActorBounds, using the body cylinder (bodyRadius/bodyHeight/bodyOffsetY). */
-void sprite_getActorBodyBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+void sprite_getActorBodyBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *height) {
     if ((actor->character_type < 0xBB) && (actor->character_type != 0xFF)) {
         *radius = actor->bodyRadius;
-        *arg3 = actor->bodyHeight;
+        *height = actor->bodyHeight;
         center->x = actor->xpos;
         center->y = actor->ypos + actor->bodyOffsetY;
         center->z = actor->zpos;
     } else {
         *radius = 1.0f;
-        *arg3 = 1.0f;
+        *height = 1.0f;
         center->x = actor->xpos;
         center->y = actor->ypos;
         center->z = actor->zpos;

@@ -263,8 +263,8 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
 
         // matching: byte-offset form; &gViews[viewIdx] schedules differently
         view = &gViews[viewIdx];
-        sizeX = p->head.desc.width * scale * view->unk1C * 16.94900131f;
-        sizeY = p->head.desc.height * scale * view->unk20 * 16.94900131f;
+        sizeX = p->head.desc.width * scale * view->projScaleX * 16.94900131f;
+        sizeY = p->head.desc.height * scale * view->projScaleY * 16.94900131f;
         if (p->head.desc.flags & PARTICLE_MAX_SIZE) {
             if (p->head.desc.maxSize < sizeX) {
                 sizeX = p->head.desc.maxSize;

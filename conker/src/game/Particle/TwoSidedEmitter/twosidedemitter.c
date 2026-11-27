@@ -15,7 +15,7 @@
 
 
 
-/* First argument of func_1515572C. */
+/* First argument of sprite_sendEventToScreenSprites. */
 typedef struct {
     /* 0x00 */ u8 side;
     /* 0x01 */ u8 pad1[3];
@@ -226,7 +226,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         sprite_newScreenSprite(&effect, 0, 0, 0, 0, 0, list);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
-        func_1515572C((s32)&cameraArg, 0x37);
+        sprite_sendEventToScreenSprites((s32)&cameraArg, 0x37);
     }
 }
 

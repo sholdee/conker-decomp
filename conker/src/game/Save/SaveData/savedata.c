@@ -10,7 +10,7 @@ s16 gScanBestFlagCount;
 u8 D_800BE3DE;
 s8 gCheckpointLevel;
 u8 gCheckpointSpawn;
-u32 D_800BE3E4; // saved clock (seconds)
+u32 D_800BE3E4; // the player's score as saved (stat 6; 2 bytes in the save file)
 s32 gPlayTime; // play time (seconds)
 s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
 u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
@@ -176,7 +176,7 @@ void save_readFile(s32 eepromSlot) {
                 gSaveSlots[saveSlot].playTime = gPlayTime;
                 gSaveSlots[saveSlot].flagCount = flagCount;
                 gSaveSlots[saveSlot].checkpointLevel = gCheckpointLevel;
-                gSaveSlots[saveSlot].unk4 = D_800BE3E4;
+                gSaveSlots[saveSlot].score = D_800BE3E4;
                 gSaveSlots[saveSlot].sequence = sequence;
                 gSaveSlots[saveSlot].eepromSlot = eepromSlot;
                 if ((u8)flagCount >= gScanBestFlagCount) {
@@ -314,10 +314,10 @@ void save_resetModeSettings(void) {
     }
 
     for (i = 0; i < 10; i++) {
-        gModeSettings[i].unk1 = 3;
-        gModeSettings[i].unk3 = 2;
+        gModeSettings[i].lives = 3;
+        gModeSettings[i].botDifficulty = 2;
         gModeSettings[i].unk4 = 1;
-        gModeSettings[i].unk2 = 10;
+        gModeSettings[i].timeLimit = 10;
         switch (i) {
             case 0:
                 gModeSettings[i].unk5 = 3;
@@ -331,14 +331,14 @@ void save_resetModeSettings(void) {
                 break;
             case 5:
                 gModeSettings[i].unk5 = 20;
-                gModeSettings[i].unk2 = 0;
+                gModeSettings[i].timeLimit = 0;
                 break;
             case 8:
             case 9:
                 gModeSettings[i].unk5 = 3;
                 break;
         }
-        gModeSettings[i].unk9 = 0;
+        gModeSettings[i].scoreLimit = 0;
     }
 }
 /* Reads the gModeSettingsRecord record from EEPROM; resets it (save_resetModeSettings) if its checksum fails. */

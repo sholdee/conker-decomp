@@ -3,7 +3,7 @@
 #include "conker/prop.h"
 
 
-void prop_emptyFrameHook(s32 arg0) {
+void prop_emptyFrameHook(s32 bufferIndex) {
 }
 
 /* Draw hooks left empty in this build: they return the display list unchanged. */

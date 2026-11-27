@@ -732,7 +732,7 @@ void actor_updateWalkAnim(Actor *obj, s32 pushAnim, f32 moveSpeed) {
         ext->pssd_waist_tilt += (s16)diff;
     }
     ext = obj->mv;
-    if (ext->unk6B != 0) {
+    if (ext->grabState != 0) {
         return;
     }
     anim = 999;
@@ -1195,7 +1195,7 @@ void actor_updatePlayer(Actor *actor) {
                 lean = scratch;
                 if ((gIsMultiplayer != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (gCurrentPad->button & 0x2000) && ((actor->mv->rayHit.hitType == 3) || (actor->mv->rayHit.hitType == 2))) {
                     chance = 0;
-                    if (actor->mv->unkAF < 0x3C) {
+                    if (actor->mv->aimTargetTimer < 0x3C) {
                         chance = 0x30;
                     }
                     if (sound_isActorSound1Playing(actor) == 0) {
@@ -1218,17 +1218,17 @@ void actor_updatePlayer(Actor *actor) {
                             }
                         }
                     }
-                    actor->mv->unkAF = 0x78;
+                    actor->mv->aimTargetTimer = 0x78;
                 }
-                if (actor->mv->unkAF != 0) {
-                    if (gFrameTicks < actor->mv->unkAF) {
-                        actor->mv->unkAF -= gFrameTicks;
+                if (actor->mv->aimTargetTimer != 0) {
+                    if (gFrameTicks < actor->mv->aimTargetTimer) {
+                        actor->mv->aimTargetTimer -= gFrameTicks;
                     } else {
-                        actor->mv->unkAF = 0;
+                        actor->mv->aimTargetTimer = 0;
                     }
                 }
             } else {
-                actor->mv->unkAF = 0;
+                actor->mv->aimTargetTimer = 0;
             }
             if (actor->mv->lockout > 0) {
                 actor->mv->lockout -= gActorStepPercent;
@@ -1354,7 +1354,7 @@ void actor_updatePlayer(Actor *actor) {
         actor->mv->door_walkf_time -= gFrameSteps;
         D_800cc2bc |= 0x40;
     }
-    if (actor->mv->unk6B != 0) {
+    if (actor->mv->grabState != 0) {
         func_15052260(actor);
     }
     surfaceDelta = actor->waterHeight - actor->prevWaterHeight;
@@ -1841,7 +1841,7 @@ void actor_updatePlayer(Actor *actor) {
             actor->mv->side = 8;
         }
     }
-    if (actor->mv->unk6B == 0) {
+    if (actor->mv->grabState == 0) {
         actor_moveHorizontal(actor);
         if (actor->mv->gpoint > 0) {
             actor->mv->gpoint -= gFrameSteps;
@@ -1965,7 +1965,7 @@ void actor_updatePlayer(Actor *actor) {
         } else {
             snapRange = 15.0f;
         }
-        if ((actor->noshove & 4) && (actor->mv->side <= 0) && (actor->mv->unk6B == 0) && (actor->unk137 == 0) && (actor->attach_char == 0) && ((actor->mv->bot == 0) || (actor->xpos != actor->old_xpos) || (actor->ypos != actor->old_ypos) || (actor->zpos != actor->old_zpos))) {
+        if ((actor->noshove & 4) && (actor->mv->side <= 0) && (actor->mv->grabState == 0) && (actor->unk137 == 0) && (actor->attach_char == 0) && ((actor->mv->bot == 0) || (actor->xpos != actor->old_xpos) || (actor->ypos != actor->old_ypos) || (actor->zpos != actor->old_zpos))) {
             if (actor->noshove & 0x08000000) {
                 D_800CBDD3 = 1;
             }
@@ -2709,7 +2709,7 @@ f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 li
 }
 
 /*
- * While mv->unk6B < 4, moves the actor toward the s16 target position in its mv block
+ * While mv->grabState < 4, moves the actor toward the s16 target position in its mv block
  * (all the way, or 40% per call in modes 1 and 3); otherwise clears the mode once unk28 runs out.
  * Ends the mode and sets inwater when the actor drops below waterHeight.
  */
@@ -2717,14 +2717,14 @@ void func_15052260(Actor *actor) {
     ActorCtl *ctrl = actor->mv;
     f32 blend;
 
-    if (ctrl->unk6B == 1 || ctrl->unk6B == 3) {
+    if (ctrl->grabState == 1 || ctrl->grabState == 3) {
         blend = 0.400000006f;
     } else {
         blend = 1.0f;
     }
     actor->fallStartY = actor->ypos;
 
-    if (ctrl->unk6B < 4) {
+    if (ctrl->grabState < 4) {
         actor->xpos += (ctrl->holdX - actor->xpos) * blend;
         actor->ypos += ((ctrl->holdY - 80) - actor->ypos) * blend;
         actor->zpos += (ctrl->holdZ - actor->zpos) * blend;
@@ -2732,7 +2732,7 @@ void func_15052260(Actor *actor) {
         actor->yspd = -10.0f;
     } else {
         if ((s32)actor->shad == 0) {
-            ctrl->unk6B = 0;
+            ctrl->grabState = 0;
         } else {
             actor_playAnim(actor, 56, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         }
@@ -2742,7 +2742,7 @@ void func_15052260(Actor *actor) {
     if (actor->ypos < actor->waterHeight) {
         actor->ygrav = 0.0f;
         actor->yspd = 0.0f;
-        actor->mv->unk6B = 0;
+        actor->mv->grabState = 0;
         actor->count5 = 0;
         actor->inwater = 1;
     }
@@ -3135,7 +3135,7 @@ void actor_startRiderJump(Actor *mount, f32 yVelocity, f32 gravity, s32 mountWal
 
     rider = &movement_obj[mount->owner];
     if ((rider->norun == 0) && (rider->stunned == 0)) {
-        if ((rider->mv != NULL) && (rider->mv->unk6B != 0)) {
+        if ((rider->mv != NULL) && (rider->mv->grabState != 0)) {
             return;
         }
         rider->imune = 0xFF;
@@ -3513,7 +3513,7 @@ void func_150538CC(Actor *obj) {
             done = 1;
             if ((hit == 1) && (obj->owner > 0)) {
                 owner = &movement_obj[obj->owner - 1];
-                if ((owner->mv != NULL) && (owner->mv->unkAF != 0)) {
+                if ((owner->mv != NULL) && (owner->mv->aimTargetTimer != 0)) {
                     if (sound_isActorSound1Playing(owner) == 0) {
                         actor_playSound((math_random() % 3U) + 0x53B, owner);
                     }

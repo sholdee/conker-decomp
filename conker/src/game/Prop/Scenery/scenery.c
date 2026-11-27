@@ -23,16 +23,16 @@ const s16 D_800A00E0[4][4] = {
     { -479, 1035, 0, 200 },
 };
 
-void prop_emptyLevelUpdateHook2(s32 arg0) {
+void prop_emptyLevelUpdateHook2(s32 unused) {
 }
 
-/* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
-void prop_startMirroredEmitters(s32 arg0) {
+/* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of duration. */
+void prop_startMirroredEmitters(s32 duration) {
     s32 i;
     s32 z;
     s32 timer;
 
-    timer = arg0 & 0xFFFF;
+    timer = duration & 0xFFFF;
     z = 0x17C;
     for (i = 0; i < 2; i++) {
         particle_newSpriteEmitter(0x1FDB, 0x25, z, 0xD,
@@ -46,60 +46,61 @@ void prop_startMirroredEmitters(s32 arg0) {
     }
 }
 
-/* Steps the entry by gFrameTicks frames; returns 1 once it has faded out or shrunk to nothing. */
-s32 func_150BF0F4(Struct150BF0F4 *entry) {
+/* Style particle kind 8: fades alpha in to u.fade.maxAlpha while lifetime is nonzero and out to 0 after it, grows
+ * scaleX / scaleY and counts its age, by gFrameTicks; returns 1 once it has faded out or shrunk to nothing. */
+s32 prop_updateStyleFadeGrow(StyleParticle *entry) {
     s32 intensity;
     s32 limit;
     s32 delta;
     s32 size;
     s32 age;
 
-    intensity = entry->level;
-    limit = entry->maxLevel;
-    if (entry->rising) {
+    intensity = entry->alpha;
+    limit = entry->u.fade.maxAlpha;
+    if (entry->lifetime) {
         if (intensity != limit) {
-            intensity += gFrameTicks * entry->riseRate;
+            intensity += gFrameTicks * entry->u.fade.fadeInRate;
             if (intensity > limit) {
                 intensity = limit;
             }
-            entry->level = intensity;
+            entry->alpha = intensity;
         }
     } else if (intensity != 0) {
-        intensity -= gFrameTicks * entry->fallRate;
+        intensity -= gFrameTicks * entry->u.fade.fadeOutRate;
         if (intensity < 0) {
             intensity = 0;
         }
-        entry->level = intensity;
+        entry->alpha = intensity;
     }
 
-    if (!entry->rising && intensity == 0) {
+    if (!entry->lifetime && intensity == 0) {
         return 1;
     }
 
-    delta = entry->unk14Rate;
+    delta = entry->u.fade.growX;
     delta *= gFrameTicks;
-    entry->unk14 += delta;
-    size = entry->unk14;
-    delta = entry->unk16Rate;
+    entry->scaleX += delta;
+    size = entry->scaleX;
+    delta = entry->u.fade.growY;
     delta *= gFrameTicks;
-    entry->unk16 += delta;
-    if (size <= 0 || size <= 0) { /* sic: unk16 is never tested */
-        entry->unk16 = 0;
-        entry->unk14 = entry->unk16;
+    entry->scaleY += delta;
+    if (size <= 0 || size <= 0) { /* sic: scaleY is never tested */
+        entry->scaleY = 0;
+        entry->scaleX = entry->scaleY;
         return 1;
     }
 
-    age = entry->age;
+    age = entry->u.fade.age;
     age += gFrameTicks;
     if (age >= 0x80) {
         age = 0x7F;
     }
-    entry->age = age;
+    entry->u.fade.age = age;
     return 0;
 }
 
 /*
- * Behaviour scratch state (WorldObject.touch) of func_150BF21C: an object whose mesh is translated toward a
+ * Behaviour scratch state (WorldObject.touch) of prop_moveToHeightAndBob: an object whose mesh is translated toward a
  * target height (param) and bobs (rotX-rotZ) while it is at rest.
  */
 typedef struct {
@@ -112,7 +113,7 @@ typedef struct {
 
 /* Moves the object toward its target height (param) (accelerating, with sounds), bobs it while at rest, then
  * writes its transformed mesh into the current vertex buffer. */
-void func_150BF21C(WorldObject *obj) {
+void prop_moveToHeightAndBob(WorldObject *obj) {
     Vtx *dst;
     Vtx *src;
     f32 diff;
@@ -297,7 +298,7 @@ void func_150BF760(WorldObject *obj) {
 typedef struct {
     /* 0x7C */ s32 home;  /* low half: rest height; bit 31: initialised */
     /* 0x80 */ s32 unk80; /* sinking timer; on the partner, its offset from the lowered height */
-    /* 0x84 */ s32 unk84;
+    /* 0x84 */ s32 ringSpawned;
 } PlatformWork;
 
 #define WORK(obj) ((PlatformWork *)&(obj)->touch)
@@ -378,16 +379,16 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
             if (platform->y < lowered) {
                 if (kind == 0) {
                     step = ((platform->y - bottom + 0x10) * step) / travel;
-                    if (WORK(platform)->unk84 == 0) {
+                    if (WORK(platform)->ringSpawned == 0) {
                         particle_spawnPlacementRing(platform, 0xFF, 0);
-                        WORK(platform)->unk84 = 1;
+                        WORK(platform)->ringSpawned = 1;
                     }
                 }
                 platform->y -= step;
                 WORK(&platform[1])->unk80 = platform->y - lowered;
             } else {
                 platform->y -= step;
-                WORK(platform)->unk84 = 0;
+                WORK(platform)->ringSpawned = 0;
             }
             if (platform->y <= bottom || step == 0) {
                 platform->y = bottom;
@@ -426,7 +427,7 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
 }
 
 /* blood_spawnHitEffects on the object, then a burst of particles at its x/z, unk180 + 105 high. */
-void func_150BFFE0(Actor *obj) {
+void prop_spawnDeathBurst(Actor *obj) {
     Vec3f pos;
     SpriteBurst spawn;
 
@@ -481,14 +482,22 @@ void func_150BFFE0(Actor *obj) {
     particle_spawnSpriteBurst(&spawn, 0xFF, 0xFF, 1);
 }
 
-/* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
-s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
+/* A model particle spawned by prop_scatterPieces (particle_spawnDebrisScatter), with prop_onPieceFloorHit as its floor
+ * handler. */
+typedef struct Piece {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ f32 burstChance; /* prop_scatterPieces's extraData (MODEL_PARTICLE_DATA) */
+} Piece;
+
+/* Model particle floor handler 13 (used by blood_spawnProfileBurst): two particle bursts 20 units above the floor height
+ * at the particle's position. */
+s32 prop_burstPieceOnFloor(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
     Vec3f pos;
     DebrisBurst burst;
 
-    pos.x = piece->position.x;
-    pos.y = y + 20.0f;
-    pos.z = piece->position.z;
+    pos.x = particle->pos.x;
+    pos.y = floorHeight + 20.0f;
+    pos.z = particle->pos.z;
     {
     const s32 ids[1] = { 5 };
     const f32 scales[1] = { 1.0f };
@@ -509,7 +518,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     burst.scaleBase = 0.8000000119f;
     burst.scaleRange = 1.200000048f;
     burst.spin = 15.29900074f;
-    particle_spawnDebrisBurst(&burst, ids, scales, 1, 0.0f, 1, piece->unkC, piece->unk1);
+    particle_spawnDebrisBurst(&burst, ids, scales, 1, 0.0f, 1, particle->header.owner, particle->header.kind);
     }
     {
     SpriteBurst spawn;
@@ -556,13 +565,13 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     spawn.envColorMode = 6;
     spawn.kind = 1;
     spawn.extra = 0.8977670074f;
-    particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
+    particle_spawnSpriteBurst(&spawn, 0xFF, particle->header.owner, particle->header.kind);
     }
     return 0;
 }
 
 /* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
-void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
+void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s32 list) {
     DebrisScatter config;
     AngleRange angles;
     s32 ids[1];
@@ -583,7 +592,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     config.scaleRange = 0.4500000179f;
     config.lifetimeBase = 0x50;
     config.lifetimeRange = 0x3C;
-    config.floor = arg1;
+    config.floor = floor;
     config.variantIds = ids;
     config.variantScales = scales;
     config.variantCount = 1;
@@ -593,7 +602,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     config.elasticityRange = 0.1640000045f;
     config.radiusScale = 10.0f;
     config.radius = 78.0f;
-    if (arg3 != 0) {
+    if (lit != 0) {
         flags = 1;
     } else {
         flags = 0;
@@ -606,7 +615,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
     angles.yawRange = 0xFF;
     angles.pitchBase = -0x32;
     angles.pitchRange = 0x23;
-    particle_spawnDebrisScatter(&config, &angles, arg4, arg5);
+    particle_spawnDebrisScatter(&config, &angles, owner, list);
 }
 
 /* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
@@ -621,22 +630,22 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             s32 ids[1];
             const f32 scales[1] = { 1.0f };
 
-            ids[0] = piece->unk66;
+            ids[0] = piece->head.model;
             config.countBase = 2;
             config.countRange = 0;
-            config.origin.x = piece->position.x;
+            config.origin.x = piece->head.pos.x;
             config.origin.y = floorHeight + 20.0f;
-            config.origin.z = piece->position.z;
+            config.origin.z = piece->head.pos.z;
             config.speedBase = 5.0f;
             config.speedRange = 4.0f;
             config.gravityBase = -1.210000038f;
             config.gravityRange = 0.4720000327f;
             config.lifetimeBase = 0x28;
             config.lifetimeRange = 0x1E;
-            config.scaleBase = piece->unk18 * 0.3600000143f;
-            config.scaleRange = piece->unk18 * 0.4130000174f;
+            config.scaleBase = piece->head.sizeXZ * 0.3600000143f;
+            config.scaleRange = piece->head.sizeXZ * 0.4130000174f;
             config.spin = 31.52700233f;
-            config.floor = piece->unk110;
+            config.floor = &piece->head.floor;
             config.floorHitChance = 1.0f;
             config.elasticityBase = 0; // matching: integer zeros here; 0.0f changes the code
             config.elasticityRange = 0;
@@ -645,7 +654,7 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             config.variantScales = scales;
             config.variantCount = 1;
             config.radius = 0;
-            if (piece->unk60 & 0x800) {
+            if (piece->head.flags & 0x800) {
                 flags = 1;
             } else {
                 flags = 0;
@@ -658,7 +667,7 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             angles.yawRange = 0xFF;
             angles.pitchBase = -0x2A;
             angles.pitchRange = 0x19;
-            particle_spawnDebrisScatter(&config, &angles, piece->unkC, piece->unk1);
+            particle_spawnDebrisScatter(&config, &angles, piece->head.header.owner, piece->head.header.kind);
             {
             SpriteBurst spawn;
             f32 spawnY;
@@ -690,9 +699,9 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             spawn.scaleRate = 1.024461985f;
             spawn.sizeBase = 178.0f;
             spawn.sizeRange = 91.0f;
-            spawn.pos.x = piece->position.x;
+            spawn.pos.x = piece->head.pos.x;
             spawn.pos.y = spawnY;
-            spawn.pos.z = piece->position.z;
+            spawn.pos.z = piece->head.pos.z;
             spawn.yawBase = 0;
             spawn.pitchBase = -0x12;
             spawn.yawRange = 0xFF;
@@ -708,10 +717,10 @@ s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, Col
             spawn.envColorMode = 6;
             spawn.kind = 1;
             spawn.extra = 0.9535999894f;
-            particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
+            particle_spawnSpriteBurst(&spawn, 0xFF, piece->head.header.owner, piece->head.header.kind);
             }
         }
         return 0;
     }
-    return particle_floorBounceSettle((ModelParticle *)piece, x, y, z, floorHeight, surface);
+    return particle_floorBounceSettle(&piece->head, x, y, z, floorHeight, surface);
 }

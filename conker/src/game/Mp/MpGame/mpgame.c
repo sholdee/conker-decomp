@@ -203,7 +203,7 @@ s32 mp_updateTargetList(void) {
     mask = gMpGame->activeMask;
     count = gMpGame->numPlayers;
     kinds = gMpGame->unk15C;
-    active = gMpGame->unk39C;
+    active = gMpGame->health;
     layers = gMpGame->layer;
     ids = gMpGame->targets[0];
     dists = gMpGame->targetDists[0];
@@ -307,9 +307,9 @@ s32 mp_update(void) {
     s32 count;
     s32 *arr1C;
     s32 *teams;
-    s32 *arr35C;
+    s32 *deathHandled;
     s32 *arr31C;
-    s32 *arr39C;
+    s32 *health;
     s32 *arr19C;
     s32 *aimTimes;
     s32 *attackTimers;
@@ -332,7 +332,7 @@ s32 mp_update(void) {
     seenMask = gMpGame->seenMask;
     count = gMpGame->numPlayers;
     teams = gMpGame->team;
-    arr35C = gMpGame->unk35C;
+    deathHandled = gMpGame->deathHandled;
     arr31C = gMpGame->unk31C;
     arr19C = gMpGame->unk19C;
     aimTimes = gMpGame->aimTime;
@@ -343,7 +343,7 @@ s32 mp_update(void) {
     teamScores = gMpGame->teamScore;
     countdowns = gMpGame->countdown;
     arr1C = gMpGame->unk1C;
-    arr39C = gMpGame->unk39C;
+    health = gMpGame->health;
     layers = gMpGame->layer;
     for (i = 0; i < count; i++) {
         bit = 1 << i;
@@ -379,15 +379,15 @@ s32 mp_update(void) {
             if (arr19C[i] == 3 && (arr25C[i] & 0x1F) >= 0x1D) {
                 mp_sendPlayerCommand61(i, 0x8000);
             }
-            attackers[i] = D_800E0BB8[i];
-            D_800E0BB8[i] &= 0x7F;
+            attackers[i] = gLastAttackers[i];
+            gLastAttackers[i] &= 0x7F;
             if (gMpGame->grenades != NULL) {
                 gMpGame->grenades[i] = obj->mv->numGrenades;
             }
-            arr39C[i] = player_getStat(i, 4);
+            health[i] = player_getStat(i, 4);
             layers[i] = path_getLayerAt(obj->ypos);
-            if (arr39C[i] == 0 || isNew || obj->snapTimer != 0) {
-                if (arr35C[i] == 0) {
+            if (health[i] == 0 || isNew || obj->snapTimer != 0) {
+                if (deathHandled[i] == 0) {
                     if (obj->pathNode != 0xFF) {
                         gMpGame->unk59C[i] = obj->pathNode;
                     } else {
@@ -395,7 +395,7 @@ s32 mp_update(void) {
                         if (!attackers) { // matching: an extra use of attackers steers IDO's register allocation
                         }
                     }
-                    arr35C[i] = 1;
+                    deathHandled[i] = 1;
                     arr25C[i] = 0;
                     arr19C[i] = 0;
                     gMpGame->unk5C[i] = 1;
@@ -414,7 +414,7 @@ s32 mp_update(void) {
                     result |= bit;
                 }
             } else {
-                arr35C[i] = 0;
+                deathHandled[i] = 0;
             }
             flag = 1;
             if (arr31C[i] != 0 && gMpGame->gameType != 0xB8) {
@@ -488,7 +488,7 @@ s32 mp_update(void) {
                 arr25C[i] = 20;
             }
         } else {
-            arr39C[i] = 0;
+            health[i] = 0;
             layers[i] = -1;
         }
     }
@@ -669,8 +669,8 @@ void mp_assignZoneNodes(void) {
 }
 
 /*
- * Picks the best opponent for player unk4: the active player with the lowest path cost to it,
- * scaled by weights[unk4][] / 255 (and 0.8 for its current target). Stores it in opponent and
+ * Picks the best opponent for player currentPlayer: the active player with the lowest path cost to it,
+ * scaled by weights[currentPlayer][] / 255 (and 0.8 for its current target). Stores it in opponent and
  * the distance in opponentDist. Returns 0.
  */
 s32 mp_pickOpponentByPath(void) {
@@ -693,8 +693,8 @@ s32 mp_pickOpponentByPath(void) {
 
     mode = 1;
     count = gMpGame->numPlayers;
-    current = gMpGame->unk4;
-    active = gMpGame->unk39C;
+    current = gMpGame->currentPlayer;
+    active = gMpGame->health;
     neighbors = gMpGame->targets[0];
     costs = gMpGame->targetDists[0];
     targets = gMpGame->target;
@@ -817,7 +817,7 @@ void mp_randomizeWeights(void) {
 }
 
 /*
- * For every player on unk4's team, picks the reachable opponent with the lowest target
+ * For every player on currentPlayer's team, picks the reachable opponent with the lowest target
  * distance, doubling the cost per teammate already on it (kinds 2/3 choose first).
  */
 s32 mp_pickTeamOpponents(void) {
@@ -841,10 +841,10 @@ s32 mp_pickTeamOpponents(void) {
     s32 bestSlot;
     s32 n;
 
-    myIdx = gMpGame->unk4;
+    myIdx = gMpGame->currentPlayer;
     numPlayers = gMpGame->numPlayers;
     kinds = gMpGame->unk15C;
-    active = gMpGame->unk39C;
+    active = gMpGame->health;
     teams = gMpGame->team;
     bestCosts = gMpGame->opponentDist;
     bestSlots = gMpGame->opponent;
@@ -1961,8 +1961,8 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
             if (gMpGame->layer) {
                 gMpGame->layer[player] = gMpGame->layer[source];
             }
-            if (gMpGame->unk39C) {
-                gMpGame->unk39C[player] = gMpGame->unk39C[source];
+            if (gMpGame->health) {
+                gMpGame->health[player] = gMpGame->health[source];
             }
             if (gMpGame->attacker) {
                 gMpGame->attacker[player] = gMpGame->attacker[source];

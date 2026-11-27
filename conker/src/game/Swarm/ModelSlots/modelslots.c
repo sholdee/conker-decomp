@@ -33,12 +33,12 @@ typedef struct ModelResource {
     /* 0x04 */ s32 unk4;
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ Gfx *unk10;
+    /* 0x10 */ Gfx *secondDisplayList;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ Gfx *unk18;
+    /* 0x18 */ Gfx *displayList;
 } ModelResource;
 
-/* The model id of each slot (swarm_callModelSecondDl looks a model up here). */
+/* The object type of each slot (swarm_callModelSecondDl looks its drawBegin type up here). */
 static const u8 gEffectModelSlotIds[11] = { 10, 10, 21, 22, 23, 24, 20, 19, 68, 69, 19 };
 /* The wing vertex indices that effect_swingVertices moves, per slot: left half, then right half. */
 static const u8 D_800A72DC[2] = { 13, 16 };
@@ -203,7 +203,7 @@ void swarm_loadModelWithExtra(s32 slot, s32 extraSlot) {
             gEffectModelSlots[extraSlot].resource = res;
             gEffectModelSlots[extraSlot].unk4 = res->unk0;
             gEffectModelSlots[extraSlot].unk8 = res->unk8;
-            gEffectModelSlots[extraSlot].displayList = res->unk18;
+            gEffectModelSlots[extraSlot].displayList = res->displayList;
             gEffectModelSlots[extraSlot].usedTextures = NULL;
             gEffectModelSlotStates[extraSlot] = 1;
         }
@@ -220,22 +220,22 @@ void swarm_loadModel(s32 slot) {
             gEffectModelSlots[slot].resource = res;
             gEffectModelSlots[slot].unk4 = res->unk0;
             gEffectModelSlots[slot].unk8 = res->unk8;
-            gEffectModelSlots[slot].displayList = res->unk18;
-            gEffectModelSecondDls[slot] = res->unk10;
+            gEffectModelSlots[slot].displayList = res->displayList;
+            gEffectModelSecondDls[slot] = res->secondDisplayList;
             texture_resolveDl(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].usedTextures);
             gEffectModelSlotStates[slot] = 1;
         }
     }
 }
 
-/* Appends a call to the second display list of the slot whose model id is `modelId`, if it is loaded. */
-Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
+/* Appends a call to the second display list of the slot of object type `type`, if it is loaded. */
+Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 type, s32 list, s32 view) {
     s32 slot;
     s32 i;
 
     slot = -1;
     for (i = 0; i < 11; i++) {
-        if (modelId == gEffectModelSlotIds[i]) {
+        if (type == gEffectModelSlotIds[i]) {
             slot = i;
             break;
         }

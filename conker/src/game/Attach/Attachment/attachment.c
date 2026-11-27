@@ -710,7 +710,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 ref
         return gdl;
     }
     func_1502D54C(owner - movement_obj, light);
-    if (gLevelHeader->unk3E != 0) {
+    if (gLevelHeader->fogEnd != 0) {
         actor_getFogAlpha(&movement_obj[owner - movement_obj], light, view, owner - movement_obj);
     } else {
         light[3] = 0xFF;
@@ -718,7 +718,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 ref
     actor_getDrawColours(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     lit = TRUE;
-    fogOverride = gLevelHeader->unk3E;
+    fogOverride = gLevelHeader->fogEnd;
     if ((owner->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);

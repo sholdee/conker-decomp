@@ -31,7 +31,10 @@ s32 prop_findSetTimg(Gfx *dl, s32 *second) {
 
 /* Behaviour scratch state (WorldObject.touch) of an object whose display list textures prop_animateTexture animates. */
 typedef struct {
-    /* 0x7C */ s32 unk7C;
+    /* 0x7C */ union {
+        void *texScroll; /* prop_registerTextureScroll's TexScroll (prop_scrollAndAnimateTexture) */
+        s32 phase;       /* prop_bob's phase (prop_bobAndAnimateTexture) */
+    } scrollBob;
     /* 0x80 */ s32 texIndices;
     /* 0x84 */ s32 animState;
 } TexAnimWork;
@@ -164,11 +167,11 @@ void prop_scrollAndAnimateTexture(WorldObject *obj) {
     prop_animateTexture(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
 
-/* When gCutsceneStates is 1 and cutscene_isActorIndexBound accepts this object's index, clears unk7C and unk18;
+/* When gCutsceneStates is 1 and cutscene_isActorIndexBound accepts this object's index, clears the bob phase and yOffset;
  * then runs prop_bob and advances the texture animation. */
 void prop_bobAndAnimateTexture(WorldObject *obj) {
     if (gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(obj - db_Object_array, 0) != 0) {
-        WORK(obj)->unk7C = 0;
+        WORK(obj)->scrollBob.phase = 0;
         obj->yOffset = 0.0f;
     }
     prop_bob(obj);
