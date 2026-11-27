@@ -732,7 +732,7 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
     f32 t;
     f32 heightSin;
     f32 heightCos;
-    f32 unused1;
+    f32 q1;
     f32 p2;
     f32 q2;
     f32 r2;
@@ -756,15 +756,13 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
             return 0;
         }
         {
-            f32 p;
-            f32 q;
-            f32 r;
+            f32 r1;
 
             heightCos = height * cosA;
             t = heightSin * slopeZ;
-            // matching: p, q (and p2, q2, r2 below) are dead, but the original computed them
-            p = fabsf(heightSin);
-            q = sqrtf((heightSin * heightSin) + (t * t));
+            // matching: q1, r1 (and p2, q2, r2 below) are dead, but the original computed them
+            q1 = fabsf(heightSin);
+            r1 = sqrtf((heightSin * heightSin) + (t * t));
             if (0 != heightCos) { // matching: operand order changes the FP compare
                 w = heightCos * slopeX;
                 v.z = w;
@@ -816,19 +814,19 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
             return 0;
         }
         {
-            /* matching: a declaration here opens the -g3 scope the scheduler keys on */
-            extern s32 D_1513D6FC_dummy;
+            f32 a;
+            f32 b;
 
-            sinA = width * sinB;
-            t = width * cosB;
-            axes->u.x = (sinA * basisU.x) + (t * basisV.x);
-            axes->u.y = (sinA * basisU.y) + (t * basisV.y);
-            axes->u.z = (sinA * basisU.z) + (t * basisV.z);
-            sinA = -height * cosB;
-            t = height * sinB;
-            axes->v.x = (sinA * basisU.x) + (t * basisV.x);
-            axes->v.y = (sinA * basisU.y) + (t * basisV.y);
-            axes->v.z = (sinA * basisU.z) + (t * basisV.z);
+            a = width * sinB;
+            b = width * cosB;
+            axes->u.x = (a * basisU.x) + (b * basisV.x);
+            axes->u.y = (a * basisU.y) + (b * basisV.y);
+            axes->u.z = (a * basisU.z) + (b * basisV.z);
+            a = -height * cosB;
+            b = height * sinB;
+            axes->v.x = (a * basisU.x) + (b * basisV.x);
+            axes->v.y = (a * basisU.y) + (b * basisV.y);
+            axes->v.z = (a * basisU.z) + (b * basisV.z);
         }
         return 1;
     }

@@ -52,9 +52,7 @@ The IDO warning count is correct only after a clean build of the objects.
   have. Each is marked `/* matching: */`. Natural C that matches in their place is welcome:
   - `objectsize.c`: dead blocks that call stand-in functions (`dbg3`, `dbgp`, `dbgu`, `dbgx`) that
     exist nowhere.
-  - `actormotion.c` (`D_800ZZZZ`) and `quadparticle.c` (`D_1513D6FC_dummy`): block-scope declarations
-    of symbols that are never defined.
-  - `movement.c`: two blocks that only declare a type. `bonetrail.c`: dead loads in nine scopes.
+  - `bonetrail.c`: dead loads in nine scopes.
   - `levelobjects.c`: it does not include the umbrella headers, so that it can declare its own view
     of `allocate_memory` (a `u32` tag).
 - **One declaration for each symbol.** A function or global that other files use is declared once,
