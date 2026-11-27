@@ -842,7 +842,7 @@ typedef struct {
 typedef struct SeqTrackInfo {
     /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (collision_findObjectById), 3 = an actor (gfx_findObjectById)
     /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
-    /* 0x3 */ u8 unk3;
+    /* 0x3 */ u8 refId;     // types 1 and 6: the track index, object id or actor id that targetId selects
     /* 0x4 */ s16 yOffset;
     /* 0x6 */ s16 unk6;
 } SeqTrackInfo; // size 0x8

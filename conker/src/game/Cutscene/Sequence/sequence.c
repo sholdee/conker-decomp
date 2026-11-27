@@ -1665,16 +1665,16 @@ void cutscene_applyTracks(s32 scene) {
                     gCamShot.eye.z = state->z;
                     if (ENT(scene, track)->targetId == 1) {
                         gCamShot.mode = 0;
-                        gCamShot.at.look.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
-                        gCamShot.at.look.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        gCamShot.at.look.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
+                        gCamShot.at.look.focus.x = ELEM(scene, (s8)ENT(scene, track)->refId)->x;
+                        gCamShot.at.look.focus.y = ELEM(scene, (s8)ENT(scene, track)->refId)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.look.focus.z = ELEM(scene, (s8)ENT(scene, track)->refId)->z;
                         gCamShot.at.look.roll = -state->roll;
                         gCamShot.at.look.fovX = tilt3C;
                         gCamShot.at.look.fovY = tilt40;
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
-                        obj = collision_findObjectById(ENT(scene, track)->unk3);
+                        obj = collision_findObjectById(ENT(scene, track)->refId);
                         if (obj == NULL) {
                             continue;
                         }
@@ -1688,7 +1688,7 @@ void cutscene_applyTracks(s32 scene) {
                     } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *focus;
 
-                        focus = gfx_findObjectById(ENT(scene, track)->unk3);
+                        focus = gfx_findObjectById(ENT(scene, track)->refId);
                         if (focus == NULL) {
                             continue;
                         }
@@ -2281,7 +2281,7 @@ void cutscene_anchorPaths(s32 scene) {
             }
             if (gSeqTrackInfos[scene][track].targetId == 0) {
                 Actor *obj;
-                obj = collision_findObjectById(gSeqTrackInfos[scene][track].unk3);
+                obj = collision_findObjectById(gSeqTrackInfos[scene][track].refId);
                 if (obj == NULL) {
                     return;
                 }
@@ -2291,7 +2291,7 @@ void cutscene_anchorPaths(s32 scene) {
             } else if (gSeqTrackInfos[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
-                obj = (WorldObject *)(s8)gSeqTrackInfos[scene][track].unk3;
+                obj = (WorldObject *)(s8)gSeqTrackInfos[scene][track].refId;
                 obj = gfx_findObjectById((s32)obj);
                 if (obj == NULL) {
                     return;
