@@ -555,18 +555,18 @@ void camera_updateFollow(Camera *camera) {
                 camera->XZVel = 0.0f;
                 if (camera->AvailableModes & 0x200000) {
                     if (camera->Mode & 0x40) {
-                        camera->unk974 = 1.0f;
-                        camera->unk964 = 1.0f;
-                        camera->unk978 = 2.0f;
-                        camera->unk968 = 2.0f;
+                        camera->accelATarget = 1.0f;
+                        camera->accelA = 1.0f;
+                        camera->accelBTarget = 2.0f;
+                        camera->accelB = 2.0f;
                     } else {
-                        camera->unk978 = 8.0f;
-                        camera->unk968 = 8.0f;
-                        camera->unk974 = 6.0f;
-                        camera->unk964 = 6.0f;
+                        camera->accelBTarget = 8.0f;
+                        camera->accelB = 8.0f;
+                        camera->accelATarget = 6.0f;
+                        camera->accelA = 6.0f;
                     }
-                    camera->unk984 = 0.0f;
-                    camera->unk988 = 0.0f;
+                    camera->accelAVel = 0.0f;
+                    camera->accelBVel = 0.0f;
                 }
             } else {
                 if ((camera->ZoomCounter != 0) || (camera->Mode & 0x100) ||
@@ -575,16 +575,16 @@ void camera_updateFollow(Camera *camera) {
                     camera->AccelB = 10.0f;
                 } else if ((gIsMultiplayer != 0) || (camera->AvailableModes & 0x200000)) {
                     if (camera->Mode & 0x40) {
-                        camera->unk974 = 1.0f;
-                        camera->unk978 = 2.0f;
+                        camera->accelATarget = 1.0f;
+                        camera->accelBTarget = 2.0f;
                     } else {
-                        camera->unk974 = 6.0f;
-                        camera->unk978 = 8.0f;
+                        camera->accelATarget = 6.0f;
+                        camera->accelBTarget = 8.0f;
                     }
-                    math_springTo(&camera->unk964, camera->unk974, &camera->unk984, 1.0f, 2.0f, camera->SpringTime);
-                    math_springTo(&camera->unk968, camera->unk978, &camera->unk988, 1.0f, 2.0f, camera->SpringTime);
-                    camera->AccelA = camera->unk964;
-                    camera->AccelB = camera->unk968;
+                    math_springTo(&camera->accelA, camera->accelATarget, &camera->accelAVel, 1.0f, 2.0f, camera->SpringTime);
+                    math_springTo(&camera->accelB, camera->accelBTarget, &camera->accelBVel, 1.0f, 2.0f, camera->SpringTime);
+                    camera->AccelA = camera->accelA;
+                    camera->AccelB = camera->accelB;
                 } else if ((camera->CharPtr->unk102 != 0) || (camera->LockedBehind != 0) ||
                            ((camera->DoingRail != 0) && (camera->RailFlags & 0x40))) {
                     camera->AccelA = 6.0f;

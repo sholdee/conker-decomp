@@ -717,7 +717,7 @@ void camera_keepOutsideCircle(Camera *arg0) {
             math_vec3Diff(&pos, &target, &offset);
             yaw = math_vec3Heading(&offset);
             math_normalizeDegrees(&yaw);
-            arg0->unk930 = yaw;
+            arg0->avoidYaw = yaw;
             dx = math_angleDiff(outwardYaw, yaw);
             if (fabsf(dx) < 35.0f) {
                 if (dx <= 0.0f) {
@@ -732,11 +732,11 @@ void camera_keepOutsideCircle(Camera *arg0) {
             arg0->eye = pos;
         } else {
             gCameraAvoidTargetDist = 0.0f;
-            arg0->unk930 = arg0->CameraAngle;
+            arg0->avoidYaw = arg0->CameraAngle;
         }
     } else {
         gCameraAvoidTargetDist = 0.0f;
-        arg0->unk930 = 0.0f;
+        arg0->avoidYaw = 0.0f;
     }
     arg0->avoidActive = 0;
 }

@@ -1827,7 +1827,7 @@ struct Camera {
     /* 0x928 */ f32 RailMagY;
     /* 0x92C */ u8 DoingRail;
     /* 0x92D */ u8 pad92D[0x3];
-    /* 0x930 */ f32 unk930;
+    /* 0x930 */ f32 avoidYaw;
     /* 0x934 */ f32 unk934;
     /* 0x938 */ f32 avoidRadius;
     /* 0x93C */ Vec3f avoidCenter;
@@ -1840,16 +1840,16 @@ struct Camera {
     /* 0x958 */ f32 unk958;
     /* 0x95C */ f32 unk95C;
     /* 0x960 */ f32 unk960;
-    /* 0x964 */ f32 unk964;
-    /* 0x968 */ f32 unk968;
+    /* 0x964 */ f32 accelA;
+    /* 0x968 */ f32 accelB;
     /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game/Camera/YawBehind/yawbehind.c) */
     /* 0x970 */ f32 limit;
-    /* 0x974 */ f32 unk974;
-    /* 0x978 */ f32 unk978;
+    /* 0x974 */ f32 accelATarget;
+    /* 0x978 */ f32 accelBTarget;
     /* 0x97C */ f32 targetSpeed;
     /* 0x980 */ f32 targetLimit;
-    /* 0x984 */ f32 unk984;
-    /* 0x988 */ f32 unk988;
+    /* 0x984 */ f32 accelAVel;
+    /* 0x988 */ f32 accelBVel;
     /* 0x98C */ f32 speedVel;
     /* 0x990 */ f32 limitVel;
     /* 0x994 */ f32 sideOffset;
