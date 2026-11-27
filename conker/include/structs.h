@@ -3252,7 +3252,7 @@ typedef struct {
     /* 0x4 */ s8 unk4;
     /* 0x5 */ s8 unk5;
     /* 0x6 */ s16 unk6;
-} SeqEvent;
+} SeqEvent; // size 0x8
 
 /* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {

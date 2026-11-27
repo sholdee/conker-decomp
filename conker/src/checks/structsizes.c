@@ -143,6 +143,7 @@ STATIC_ASSERT(sizeof(ObjTexture) == 0xC, ObjTexture_size);
 STATIC_ASSERT(sizeof(VtxMorphGroup) == 0x8, VtxMorphGroup_size);
 STATIC_ASSERT(sizeof(WaveSample) == 0xC, WaveSample_size);
 STATIC_ASSERT(sizeof(WavePreset) == 0x18, WavePreset_size);
+STATIC_ASSERT(sizeof(SeqEvent) == 0x8, SeqEvent_size);
 STATIC_ASSERT(sizeof(HitReaction) == 0x28, HitReaction_size);
 
 /* effects.h */
