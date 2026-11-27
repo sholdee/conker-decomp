@@ -143,6 +143,32 @@ before iterating.
 - When a near-identical SIBLING already matches, mirror its exact C structure (call order,
   arg casts, last-arg literals) — often a 1-try match.
 
+## Block scopes and stack slots (-g3): replacing scope devices with real locals
+IDO -g3 opens a lexical scope for every block that declares something, and that changes scheduling and
+register choice. Old matches used dummy declarations (`extern` of a global, `typedef s32 blk_t;`, an
+unused `pad`) to get the scope. A dummy usually stands for a real local of that block.
+- **Slot order is textual order over the whole function:** function level, then each block's
+  declarations in pre-order. Only slots the code touches are fixed; the others can hold any variable.
+  Trailing untouched locals grow the frame only when compiler temps sit below them. `register` locals
+  still take slots.
+- **Read the layout from the object.** The `.mdebug` local symbols give each local's offset and block
+  nesting; matching them against the `N(sp)` references shows which slots are pinned.
+- **Sink everything first.** Move every function-level local into the innermost block that holds all its
+  uses. That alone matched several files.
+- **Often only one end of a device block matters.** A neighbouring natural block can supply it: a block
+  that ends where the device began, or starts where it ended. A scope end right after a `jal` changes how
+  as1 schedules the next statement.
+- **Object-list walks:** declare the walked pointer in the `for` body of the
+  `gObjectWalkDepth++ ... --` loop.
+- **One block per spawn section,** each with its own args struct. Unused out-parameters go in a block
+  around the call that fills them.
+- **Split a reused variable to consume a pad,** one split at a time; about half change the register
+  allocation. A `u8`/`s16` temp can sit in an alignment gap (for example after another `u8`).
+- **Probe** with a throwaway `typedef int probe_t;` to learn whether a block can be a scope before you
+  restructure it. Never land the probe.
+- If no real local fits, keep the existing device with its `/* matching: */` comment. Do not replace one
+  device with another.
+
 ## Diagnosing a FALSE non-zero score
 - A switch that matches byte-for-byte but scores non-zero may be ONLY compiler-jtbl
   rodata refs (anonymous LOCAL `.rodata` vs a NAMED jtbl symbol). Re-run with

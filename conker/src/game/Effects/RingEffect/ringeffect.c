@@ -436,15 +436,15 @@ struct BurstParticle {
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from particle_getDepthTint goes unused). */
 void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleSpawn packet;
-    f32 r;
-    f32 g;
-    f32 b;
 
-    particle_getDepthTint(pos->z, &r, &g, &b);
     {
-        typedef s32 T; // matching: a scope with a declaration orders the struct copy
-        packet.pos = *pos;
+        f32 r;
+        f32 g;
+        f32 b;
+
+        particle_getDepthTint(pos->z, &r, &g, &b);
     }
+    packet.pos = *pos;
     packet.scale.x = 1.0f;
     packet.scale.y = 1.0f;
     packet.scale.z = 1.0f;
@@ -456,10 +456,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     packet.elasticity = 0.200000003f;
     packet.rotVel.y = 0.0f;
     packet.radius = 1.0f;
-    // matching: the original math_random returned a full word; its spill is the
-    // call-argument slot at sp+0x20, 0x14 below packet
-    ((s32 *)&packet)[-5] = math_random();
-    math_dirFromBinAngles(heading, (((s32 *)&packet)[-5] % 26U) - 45,
+    math_dirFromBinAngles(heading, (math_random() % 26U) - 45,
                   (math_randomFloat() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
                   &packet.vel);
     packet.rotVel.x = (math_randomFloat() * 260.0f + -130.0f) * 0.1000000015f;

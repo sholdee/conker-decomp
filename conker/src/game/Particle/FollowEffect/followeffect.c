@@ -156,19 +156,13 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f vel;
     Vec3f hitPos;
     u8 hit;
-    s32 useDefaultBasis;
+    s32 moving;
     // matching: only 12 bytes, although collision_castRayWorld writes a whole CollisionTri (18 bytes) here
     f32 hitTri[3];
     f32 ignored0;
     f32 ignored1;
     s32 hitSurface;
     s32 type;
-    f32 dist;
-    Vec3f normal;
-    Vec3f tangentU;
-    Vec3f tangentV;
-    s32 moving;
-    ParticleSpawn piece;
 
     hit = 0;
     pos.x = obj->xpos;
@@ -199,7 +193,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     }
     moving = math_vec3Normalize(&vel, &vel, &ignored0, &ignored1) ? 1 : 0; // matching: != 0 and a plain store differ
     if (moving) {
-        typedef s32 ScopeBarrier1; // matching: -g3 scope pins the 0.0f register setup at block entry
+        f32 dist;
 
         if (collision_castRayWorld(obj->old_xpos, obj->old_ypos, obj->old_zpos, vel.x, vel.y, vel.z, 0,
                           (CollisionTri *)hitTri, &hitPos.x, &hitPos.y, &hitPos.z, &dist, 0, &hitSurface, 0.0f) &&
@@ -208,7 +202,11 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         }
     }
     {
-        typedef s32 ScopeBarrier2; // matching: -g3 scope pins the 0.0f register setup at block entry
+        Vec3f normal;
+        Vec3f tangentU;
+        Vec3f tangentV;
+        s32 useDefaultBasis;
+        ParticleSpawn piece;
 
         useDefaultBasis = 1;
         if (hit) {

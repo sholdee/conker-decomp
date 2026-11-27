@@ -95,7 +95,6 @@ void actor_updateAll(void) {
     s32 tickResult;
     OSContPad noPad;
     f32 maxStep;
-    f32 step;
     s32 j;
 
     D_800BE9EC = 0;
@@ -166,21 +165,21 @@ void actor_updateAll(void) {
             obj->old_ypos = obj->ypos;
             obj->old_zpos = obj->zpos;
             gFloorMaterialClass = (obj->floorMaterial >> 28) & 7;
-            step = gFrameDelta;
-            if (gIsMultiplayer != 0 && (gMatchFlags & 0x100)) {
-                maxStep = 5.0f;
-            }
-            if (maxStep < step) {
-                step = maxStep;
-            }
-            gActorTimeStep = obj->speedup * step;
-            gActorStepPercent = gActorTimeStep * 100.0f;
             {
-                /* matching: a -g3 scope (with this redeclaration) keeps the lbu after the sh above and lets the lui hoist */
-                extern u8 gFloorMaterialClass;
-                if (gFloorMaterialClass >= 6) {
-                    gFloorMaterialClass = 0;
+                f32 step;
+
+                step = gFrameDelta;
+                if (gIsMultiplayer != 0 && (gMatchFlags & 0x100)) {
+                    maxStep = 5.0f;
                 }
+                if (maxStep < step) {
+                    step = maxStep;
+                }
+                gActorTimeStep = obj->speedup * step;
+                gActorStepPercent = gActorTimeStep * 100.0f;
+            }
+            if (gFloorMaterialClass >= 6) {
+                gFloorMaterialClass = 0;
             }
             if (D_800B0DF0->unk49 != 0) {
                 gLevelPreUpdateFuncs[D_800B0DF0->unk49](obj);

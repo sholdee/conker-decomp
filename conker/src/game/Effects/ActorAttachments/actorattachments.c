@@ -714,16 +714,15 @@ void func_1514DA38(Actor *obj) {
 /** Sets bit 1 of obj->unk94 and attaches a effect_newCharacterWatcher object (type 0x13) with an 8-byte payload. */
 void func_1514DAA4(Actor *obj) {
     void *handle;
-    s32 payload[2];
 
     obj->unk94 |= 2;
-    payload[0] = 0;
-    payload[1] = 0;
     {
-        /* matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup */
-        extern CharacterWatcher *effect_newCharacterWatcher(Actor *chr, u8 enableActions, s32 extraSize);
+        s32 payload[2];
 
-        if ((handle = effect_newCharacterWatcher(obj, 1, sizeof(payload))) != NULL) {
+        payload[0] = 0;
+        payload[1] = 0;
+        handle = effect_newCharacterWatcher(obj, 1, sizeof(payload));
+        if (handle != NULL) {
             memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
             effect_attach(handle, obj, 0x13);
         }

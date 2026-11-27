@@ -117,31 +117,27 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     s32 kind;
     s32 index;
     u8 onGround;
-    MtxF mtx;
 
     obj->flags |= 4;
     onGround = (obj->data3 >> 24) & 0xFF;
     kind = obj->data2;
-    // matching: the labels split basic blocks, which as1 schedules separately
-start:
-    spawn.pos.x = obj->x;
-    spawn.pos.y = obj->y;
-    spawn.pos.z = obj->z;
-    math_mtxRotateRPYF(mtx, obj->pitch, obj->yaw, 0.0f);
-    math_transformPoint(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
-    spawn.rot.x += spawn.pos.x;
-    spawn.rot.y += spawn.pos.y;
-    spawn.rot.z += spawn.pos.z;
-    // matching: the typedef-only block scope changes how as1 schedules these stores
     {
-        typedef s32 PadT;
+        MtxF mtx;
 
-        emit.height1 = obj->xSize;
-        emit.width1 = emit.height1;
-        emit.height0 = obj->ySize;
-        emit.width0 = emit.height0;
-        emit.alpha1 = ((obj->data3 >> 8) & 0xFF) * 0.003921568859f;
+        spawn.pos.x = obj->x;
+        spawn.pos.y = obj->y;
+        spawn.pos.z = obj->z;
+        math_mtxRotateRPYF(mtx, obj->pitch, obj->yaw, 0.0f);
+        math_transformPoint(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+        spawn.rot.x += spawn.pos.x;
+        spawn.rot.y += spawn.pos.y;
+        spawn.rot.z += spawn.pos.z;
     }
+    emit.height1 = obj->xSize;
+    emit.width1 = emit.height1;
+    emit.height0 = obj->ySize;
+    emit.width0 = emit.height0;
+    emit.alpha1 = ((obj->data3 >> 8) & 0xFF) * 0.003921568859f;
     emit.alpha0 = (obj->data3 & 0xFF) * 0.003921568859f;
     index = (obj->data1 >> 24) & 0xFF;
     spawn.texture = gPointGlowTextures[index];
@@ -172,7 +168,6 @@ start:
     emit.offset0 = 0.200000003f;
     emit.fadeRate = 9.999999975e-07f;
     if (onGround) {
-ground:
         collision_selectMap(0);
         spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {

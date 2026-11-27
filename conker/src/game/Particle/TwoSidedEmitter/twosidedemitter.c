@@ -43,20 +43,6 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
     Vec3f *dstPoints[3];
     void *matrix;
     Vec3f localPoint;
-    Vec3f normal;
-    f32 t;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    Vec3f *linePoint;
-    u8 cameraMask;
-    s8 variant;
-    LightEffectHeader spark;
-    Vec3i sparkPos;
-    ParticleSize trailParams;
-    u8 trailCameraMask;
-    ScreenSpriteInfo effect;
-    CameraArg_150FB8C0 cameraArg;
 
     // matching: the always-false side < 0 test is needed
     if (obj == NULL || side < 0 || side >= 2) {
@@ -109,8 +95,12 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
     dstPoints[2] = &edgeB;
     math_transformOffsets(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
-        /* matching: a declaration here opens a -g3 scope block (scheduling) */
-        extern void math_vec3Cross(Vec3f *, Vec3f *, Vec3f *);
+        Vec3f normal;
+        f32 t;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        Vec3f *linePoint;
 
         linePoint = &target->mv->aimEye;
         edgeA.x -= origin.x;
@@ -136,22 +126,30 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         dir.y -= origin.y;
         dir.z -= origin.z;
     }
-    if (!useTarget || target->CameraPtr == NULL) {
-        cameraMask = 0xFF;
-    } else {
-        cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
+    {
+        u8 cameraMask;
+        s8 variant;
+
+        if (!useTarget || target->CameraPtr == NULL) {
+            cameraMask = 0xFF;
+        } else {
+            cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
+        }
+        if (level == 0x34 || level == 0x26) {
+            variant = 5;
+        } else {
+            variant = 4;
+        }
+        weapon_spawnProjectile(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
+                      252.0f, 0.003968254197f, (math_randomFloat() * 20.0f) + 75.0f, (math_randomFloat() * 250.0f) + 502.0f, 50.0f,
+                      (math_random() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
+                      cameraMask, 0, 0, arg4, arg5);
     }
-    if (level == 0x34 || level == 0x26) {
-        variant = 5;
-    } else {
-        variant = 4;
-    }
-    weapon_spawnProjectile(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
-                  252.0f, 0.003968254197f, (math_randomFloat() * 20.0f) + 75.0f, (math_randomFloat() * 250.0f) + 502.0f, 50.0f,
-                  (math_random() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
-                  cameraMask, 0, 0, arg4, arg5);
     if ((obj->cullMask & 0xF) != 0xF) {
         if (!(math_random() & 7)) {
+            LightEffectHeader spark;
+            Vec3i sparkPos;
+
             spark.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
             spark.update = -1;
             spark.lifetime = (math_random() % 5U) + 4;
@@ -162,6 +160,9 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             light_createWithEffect(&spark, &sparkPos, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         }
         if (!(math_random() & 1)) {
+            ParticleSize trailParams;
+            u8 trailCameraMask;
+
             trailParams.height = (math_randomFloat() * 2.435000181f) + 3.534000158f;
             trailParams.width = (math_randomFloat() * 43.40000153f) + 48.40000153f;
             if (!useTarget || target->CameraPtr == NULL) {
@@ -176,6 +177,9 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         }
     }
     if (useTarget && target->CameraPtr != NULL) {
+        ScreenSpriteInfo effect;
+        CameraArg_150FB8C0 cameraArg;
+
         if (side) {
             effect.x = -59.0f;
         } else {

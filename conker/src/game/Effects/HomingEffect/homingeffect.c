@@ -161,10 +161,11 @@ void effect_destroyHomingEffect(HomingEffect *effect) {
 /* Destroys the effect with the given handle, or every effect for handle 0. */
 void effect_stopHomingEffect(s32 handle) {
     s32 list;
-    HomingEffect *effect;
 
     handle--;
     for (list = 0; list != 2; list++) {
+        HomingEffect *effect;
+
         gObjectWalkDepth++;
         effect = (HomingEffect *)gObjectLists[list][0x27];
         while (effect != NULL) {
@@ -174,11 +175,7 @@ void effect_stopHomingEffect(s32 handle) {
             }
             effect = gObjectWalkNext[gObjectWalkDepth];
         }
-        {
-            s32 pad; // matching: -g3 block marker keeps the depth store out of the loop branch's delay slot
-
-            gObjectWalkDepth--;
-        }
+        gObjectWalkDepth--;
     }
 }
 
@@ -213,18 +210,17 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     s32 spawned;
     Vec3f point;
     Vec3f end;
-    f32 pad178; // matching: unused stack slots (this and pad158, unusedR) keep the frame layout
+    f32 t;
     Vec3f from;
     Vec3f dir;
     f32 length;
-    f32 pad158;
+    s32 sparkAlpha;
     f32 offsetZ;
     f32 offsetX;
     f32 unusedOut;
     f32 randWidth;
     s32 randByte;
     RayHit particle;
-    f32 unusedR;
     s32 randAngle;
 
     effect = arg0;
@@ -277,13 +273,12 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         }
     }
     if (dist != 0.0f) {
-        /* matching: a declaration opens a -g3 block marker without a stack slot */
-        extern f32 gFrameDelta;
+        f32 ratio;
 
-        scale = move / dist;
-        step.x = scale * delta.x;
-        step.y = scale * delta.y;
-        step.z = scale * delta.z;
+        ratio = move / dist;
+        step.x = ratio * delta.x;
+        step.y = ratio * delta.y;
+        step.z = ratio * delta.z;
         nextPos.x = prevPos.x + step.x;
         nextPos.y = prevPos.y + step.y;
         nextPos.z = prevPos.z + step.z;
@@ -310,7 +305,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             end.y = effect->ground.height;
         }
         {
-            /* matching: a -g3 block marker, as above */
+            /* matching: a declaration opens a -g3 block; its end, before the call, keeps these loads out of saved registers */
             extern s32 math_vec3Normalize(Vec3f *, Vec3f *, f32 *, f32 *);
 
             dir.x = end.x - from.x;
@@ -318,8 +313,8 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             dir.z = end.z - from.z;
         }
         if (math_vec3Normalize(&dir, &dir, &length, &unusedOut) != 0) {
-            move = math_randomFloat() * gFrameDelta;
-            scale = 190.0f * move;
+            t = math_randomFloat() * gFrameDelta;
+            scale = 190.0f * t;
             from.x += dir.x * scale;
             from.y += dir.y * scale;
             from.z += dir.z * scale;
@@ -344,7 +339,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         }
         particle.material = effect->ground.material;
         randWidth = math_randomFloat();
-        scale = math_randomFloat(); // matching: scale and randAngle are reused so they keep their registers
+        scale = math_randomFloat(); // matching: scale is reused so it keeps its register
         randByte = math_random();
         if (spawned != 0 || effect->follow != NULL) {
             randAngle = 2;
@@ -362,8 +357,8 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         effect->sparkAccum += (56.0f + math_randomFloat() * 235.0f) * 0.001f * gFrameDelta;
         while (effect->sparkAccum > 1.0f) {
             randByte = math_random();
-            randAngle = math_random();
-            effect_spawnFlashParticle((randByte & 3) + 6, (randAngle % 156U) + 100,
+            sparkAlpha = math_random();
+            effect_spawnFlashParticle((randByte & 3) + 6, (sparkAlpha % 156U) + 100,
                           math_randomFloat() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->header.owner, effect->header.kind);
             effect->sparkAccum -= 1.0f;
         }

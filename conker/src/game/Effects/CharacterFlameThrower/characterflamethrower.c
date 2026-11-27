@@ -2266,12 +2266,6 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             EffectTemplate spawn;
             TrailMotion motion;
             TrailRender style;
-            Vec3f delta;
-            Vec3f axisA;
-            Vec3f axisB;
-            f32 c;
-            f32 s;
-            f32 speed;
 
             style.setGeometryMode = 0x200005;
             style.clearGeometryMode = 0x1F0600;
@@ -2292,27 +2286,32 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             motion.unk1C = flame->scatter.unk40;
             motion.unk1E = flame->scatter.unk42;
             do {
-                { // matching: a block with a declaration in it steers IDO's scheduling here
-                    typedef s32 T15199C34a;
+                spawn.itemCount = (math_random() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
+                spawn.life = (math_random() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
+                motion.halfWidth = math_randomFloat() * flame->scatter.unk24 + flame->scatter.unk20;
+                {
+                    Vec3f delta;
+                    Vec3f axisA;
+                    Vec3f axisB;
+                    f32 c;
+                    f32 s;
+                    f32 speed;
 
-                    spawn.itemCount = (math_random() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
-                    spawn.life = (math_random() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
-                    motion.halfWidth = math_randomFloat() * flame->scatter.unk24 + flame->scatter.unk20;
-                }
-                spawn.pos = pos0;
-                delta = pos2;
-                delta.x -= spawn.pos.x;
-                delta.y -= spawn.pos.y;
-                delta.z -= spawn.pos.z;
-                if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
-                    speed = math_randomFloat() * flame->scatter.speedRange + flame->scatter.speedMin;
-                    math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->scatter.spread, &s, &c);
-                    motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
-                    motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
-                    motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                    motion.gravity = math_randomFloat() * flame->scatter.unk38 + flame->scatter.unk34;
-                    motion.alpha = math_randomFloat() * flame->scatter.unk3E + flame->scatter.unk3C;
-                    trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+                    spawn.pos = pos0;
+                    delta = pos2;
+                    delta.x -= spawn.pos.x;
+                    delta.y -= spawn.pos.y;
+                    delta.z -= spawn.pos.z;
+                    if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
+                        speed = math_randomFloat() * flame->scatter.speedRange + flame->scatter.speedMin;
+                        math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->scatter.spread, &s, &c);
+                        motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                        motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                        motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                        motion.gravity = math_randomFloat() * flame->scatter.unk38 + flame->scatter.unk34;
+                        motion.alpha = math_randomFloat() * flame->scatter.unk3E + flame->scatter.unk3C;
+                        trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+                    }
                 }
                 flame->scatterAccum -= 1.0f;
             } while (flame->scatterAccum > 1.0f);
@@ -2322,12 +2321,6 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         flame->particleAccum += (flame->emit.rate + math_randomFloat() * flame->emit.rateRange) * gFrameDelta;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;
-            Vec3f delta;
-            Vec3f axisA;
-            Vec3f axisB;
-            f32 c;
-            f32 s;
-            f32 speed;
 
             part.texture = 0x28;
             part.renderMode = 0x2203;
@@ -2358,25 +2351,30 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             part.drawFunc = -1;
             part.handlerSet = 0;
             do {
-                { // matching: a block with a declaration in it steers IDO's scheduling here
-                    typedef s32 T15199C34b;
+                part.timer = (math_random() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
+                part.alpha = (math_random() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
+                part.width = part.height = math_randomFloat() * flame->emit.unk20 + flame->emit.unk1C;
+                {
+                    Vec3f delta;
+                    Vec3f axisA;
+                    Vec3f axisB;
+                    f32 c;
+                    f32 s;
+                    f32 speed;
 
-                    part.timer = (math_random() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
-                    part.alpha = (math_random() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
-                    part.width = part.height = math_randomFloat() * flame->emit.unk20 + flame->emit.unk1C;
-                }
-                delta = pos3;
-                delta.x -= part.pos.x;
-                delta.y -= part.pos.y;
-                delta.z -= part.pos.z;
-                if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
-                    speed = math_randomFloat() * flame->emit.speedRange + flame->emit.speedMin;
-                    math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->emit.spread, &s, &c);
-                    part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
-                    part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
-                    part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                    part.gravity = math_randomFloat() * flame->emit.unk34 + flame->emit.unk30;
-                    particle_newSpriteParticleWithFloor(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
+                    delta = pos3;
+                    delta.x -= part.pos.x;
+                    delta.y -= part.pos.y;
+                    delta.z -= part.pos.z;
+                    if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
+                        speed = math_randomFloat() * flame->emit.speedRange + flame->emit.speedMin;
+                        math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->emit.spread, &s, &c);
+                        part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                        part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                        part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                        part.gravity = math_randomFloat() * flame->emit.unk34 + flame->emit.unk30;
+                        particle_newSpriteParticleWithFloor(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
+                    }
                 }
                 flame->particleAccum -= 1.0f;
             } while (flame->particleAccum > 1.0f);

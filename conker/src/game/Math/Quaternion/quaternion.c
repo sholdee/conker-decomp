@@ -20,15 +20,13 @@ void math_quatAlign(f32 *arg0, f32 *arg1) {
 
 void math_mtxToQuat(MtxF m, f32 *q) {
     f32 tr;
-    f32 s;
     s32 i;
     s32 j;
     s32 k;
 
     tr = m[0][0] + m[1][1] + m[2][2] + 1.0f;
     if (tr > 0.01f) {
-        /* matching: this redeclaration of sqrtf (libc/math.h) opens a -g3 scope block, which changes the scheduling */
-        extern f32 sqrtf(f32);
+        f32 s;
 
         s = sqrtf(tr);
         q[0] = s * 0.5f;
@@ -38,7 +36,7 @@ void math_mtxToQuat(MtxF m, f32 *q) {
         q[3] = (m[0][1] - m[1][0]) * s;
     } else {
         s32 nxt[3] = { 1, 2, 0 };
-        f32 t;
+        f32 s;
 
         i = 0;
         if (m[0][0] < m[1][1]) {
@@ -51,10 +49,10 @@ void math_mtxToQuat(MtxF m, f32 *q) {
         k = nxt[j];
         s = sqrtf(m[i][i] - m[j][j] - m[k][k] + 1.0f);
         q[i + 1] = s * 0.5f;
-        t = 0.5f / s;
-        q[0] = (m[j][k] - m[k][j]) * t;
-        q[j + 1] = (m[i][j] + m[j][i]) * t;
-        q[k + 1] = (m[i][k] + m[k][i]) * t;
+        s = 0.5f / s;
+        q[0] = (m[j][k] - m[k][j]) * s;
+        q[j + 1] = (m[i][j] + m[j][i]) * s;
+        q[k + 1] = (m[i][k] + m[k][i]) * s;
     }
 }
 
@@ -65,7 +63,6 @@ void math_quatSlerp(f32 *a, f32 *b, f32 t, f32 *out) {
     f32 ang1;
     f32 sinom;
     f32 scale0;
-    f32 scale1;
 
     cosom = (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]);
     if (cosom < -0.99999f) {
@@ -75,8 +72,7 @@ void math_quatSlerp(f32 *a, f32 *b, f32 t, f32 *out) {
         out[2] = scale0 * a[2] - b[2] * t;
         out[3] = scale0 * a[3] - b[3] * t;
     } else if (cosom <= 0.99999f) {
-        /* matching: this redeclaration of math_acosLookup (conker/math.h) opens a -g3 scope block, which changes the scheduling */
-        extern f32 math_acosLookup(f32);
+        f32 scale1;
 
         omega = math_acosLookup(cosom);
         ang0 = (1.0f - t) * omega;

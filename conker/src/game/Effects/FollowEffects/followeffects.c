@@ -76,8 +76,6 @@ s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
     f32 x;
     f32 y;
     f32 z;
-    Vec3f world;
-    Vec3f proj;
 
     ref = DYNMODEL_USERDATA(effect);
     owner = ref->actor;
@@ -130,7 +128,8 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
     originS = (s32)(origin[0] / 1024.0f) * 1024.0f;
     originT = (s32)(origin[1] / 1024.0f) * 1024.0f;
     {
-        s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
+        Vec3f world;
+        Vec3f proj;
 
         for (i = 0; i < 20; i++) {
             Vtx_t *vtx = &effect->vertices[gDrawBufferIndex][viewport][i].v;

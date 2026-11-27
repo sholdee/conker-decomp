@@ -21,9 +21,6 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
     u8 solid;
     s32 particleType;
     s32 big;
-    s32 hitVerts;
-    f32 hitDist;
-    s32 sfx;
 
     if (kind >= 6) {
         return;
@@ -50,11 +47,13 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             break;
     }
     if (surface == NULL) {
+        s32 hitVerts;
+        f32 hitDist;
+
         if (collision_castRayWorld(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
                           &hitVerts, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitDist, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
-            typedef s32 BlockScope; // matching: a declaration in this block changes IDO's branch layout
             hit = 0;
             surfaceId = -1;
         }
@@ -71,6 +70,8 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         big = 0;
     }
     if (kind == 1) {
+        s32 sfx;
+
         if (big) {
             sfx = (math_random() % 3U) + 0x459;
             if (gScreenLayout == 0) {

@@ -62,16 +62,13 @@ static f32 gExplosionRiseSpeedRanges[3] = { 4.0f, 5.0f, 4.0f };
  */
 void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     s32 yaw;
-    s32 i;
-    ParticleSpawn spawn;
-    u8 idx;
-    DebrisEmitter debris;
 
     // camera yaw in degrees -> 0..255 binary angle
     yaw = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
     {
-        /* matching: a block with a declaration is a -g3 scheduling barrier; an extern takes no stack slot */
-        extern const f32 gExplosionPieceKinds[15];
+        s32 i;
+        ParticleSpawn spawn;
+        u8 idx;
 
         spawn.radius = 15.0f;
         spawn.sizeY = 1.0f;
@@ -128,32 +125,36 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     particle_spawnLightFlash(pos, *(u8 *)&owner, kind);
     particle_spawnGrowFade(pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f,
                   math_random() % 56U + 200, 0.0f, *(u8 *)&owner, kind);
-    debris.count = (math_random() & 3) + 3;
-    debris.lifetime = 190;
-    debris.yawBase = yaw - 0x40;
-    debris.yawRange = 0x80;
-    debris.pitchBase = -0x3F;
-    debris.pitchRange = 0x5A;
-    debris.radius = 250.0f;
-    debris.pos = *pos;
-    debris.speedBase = 5.0f;
-    debris.velYBase = 15.0f;
-    debris.velYRange = 15.0f;
-    debris.dir.x = 0.0f;
-    debris.dir.y = 0.0f;
-    debris.landPuffs = 1;
-    debris.landPuffFlag = 1;
-    debris.landPuffLifeBase = 100;
-    debris.landPuffLifeRange = 50;
-    debris.speedRange = 10.0f;
-    debris.spinRange = 10.0f;
-    debris.dir.z = 0.0f;
-    debris.sizeBase = 0.25f;
-    debris.sizeRange = 0.5f;
-    debris.gravityBase = -0.6999999881f;
-    debris.gravityRange = -0.6200000048f;
-    debris.spinBase = -5.0f;
-    blood_spawnDebris(&debris, 0, *(u8 *)&owner, kind);
+    {
+        DebrisEmitter debris;
+
+        debris.count = (math_random() & 3) + 3;
+        debris.lifetime = 190;
+        debris.yawBase = yaw - 0x40;
+        debris.yawRange = 0x80;
+        debris.pitchBase = -0x3F;
+        debris.pitchRange = 0x5A;
+        debris.radius = 250.0f;
+        debris.pos = *pos;
+        debris.speedBase = 5.0f;
+        debris.velYBase = 15.0f;
+        debris.velYRange = 15.0f;
+        debris.dir.x = 0.0f;
+        debris.dir.y = 0.0f;
+        debris.landPuffs = 1;
+        debris.landPuffFlag = 1;
+        debris.landPuffLifeBase = 100;
+        debris.landPuffLifeRange = 50;
+        debris.speedRange = 10.0f;
+        debris.spinRange = 10.0f;
+        debris.dir.z = 0.0f;
+        debris.sizeBase = 0.25f;
+        debris.sizeRange = 0.5f;
+        debris.gravityBase = -0.6999999881f;
+        debris.gravityRange = -0.6200000048f;
+        debris.spinBase = -5.0f;
+        blood_spawnDebris(&debris, 0, *(u8 *)&owner, kind);
+    }
     {
         TimedEffect *effect;
         Vec3f effectPos;
