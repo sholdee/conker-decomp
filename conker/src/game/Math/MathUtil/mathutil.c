@@ -245,16 +245,12 @@ void math_pickPaletteColour(u8 palette, u8 *r, u8 *g, u8 *b) {
     *b = color[2];
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x3C];
-    /* 0x3C */ s16 unk3C;
-} Unk2D0View;
-
+/* Returns 1 while the actor's animation is blending into a new one (AnimInstance.blendTimer > 0). */
 s32 func_15142A5C(Actor *actor) {
-    Unk2D0View *unk2D0 = (Unk2D0View *)actor->anim;
+    AnimInstance *anim = actor->anim;
     s32 ret = 0;
 
-    if (unk2D0->unk3C > 0) {
+    if (anim->blendTimer > 0) {
         return 1;
     }
     return ret;

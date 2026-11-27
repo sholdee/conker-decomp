@@ -609,9 +609,9 @@ typedef struct {
     /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
     /* 0x129 */ s8  targetIndex;  // index into movement_obj, < 0 for none
-    /* 0x12A */ s8  aimMiss;
+    /* 0x12A */ s8  aimMiss;      // bot: 1 while its shots miss on purpose (mp_updateBotAttack; tank.c leads the target short)
     /* 0x12B */ u8  pad12B;
-    /* 0x12C */ u16 itemRemaining;
+    /* 0x12C */ u16 itemRemaining; // what is left of the current pickup: ticks, or shells for item 0x10
     /* 0x12E */ u8  pad12E[2];
     /* 0x130 */ Vec3f aimDir;
     /* 0x13C */ Vec3f aimEye;
@@ -641,7 +641,7 @@ typedef struct {
     /* 0x1A0 */ u16 unk1A0;
     /* 0x1A2 */ u16 gunRecoil;       // >> 8 = recoil pitch kick (Camera.LastGunRecoil, walk lean)
     /* 0x1A4 */ u16 gunRecoilVel;    // added to gunRecoil each tick while firing
-    /* 0x1A6 */ u16 extraHeight;
+    /* 0x1A6 */ u16 extraHeight;     // collision height an attachment adds (attach_applyOwnerEffects; actor_computeSize)
     /* 0x1A8 */ u8  skippedTime;
     /* 0x1A9 */ u8  unk1A9;
     /* 0x1AA */ s16 shotsfired;
