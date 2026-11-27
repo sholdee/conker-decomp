@@ -11,7 +11,7 @@ and rodata_extern then leaves the object alone (it also trims IDO's 16-byte padd
     ro_migrate.py check FILE                 word-by-word: the object's .rodata vs its ROM window (between
                                              the neighbouring files' slices)
     ro_migrate.py carve FILE START END       give FILE the slice [START, END) in the yaml
-  --root DIR   work on a workspace (e.g. ~/conker-ws/clean.game_X/conker) instead of the main tree
+  --root DIR   work on a workspace (e.g. $CONKER_WS/clean.game_X/conker) instead of the main tree
 
 `plan` compares each object's .rodata (relocated words masked, trailing padding stripped) with the
 original rodata regions of the yaml, at 4-byte alignment, and picks the hit that keeps slices in text

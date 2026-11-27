@@ -224,4 +224,4 @@ diverging instruction and tried its indicated fix, treat the diff as a plateau â
 best, REVERT to the stub, flag permuter. Do not keep grinding a stalled diff for magnitude.
 
 For a stubborn diff, a specific instruction pattern, or a BAIL judgment not covered here,
-grep ~/conker/tools/ido_reference.md (the full idiom set, organized by section).
+grep tools/ido_reference.md (the full idiom set, organized by section).

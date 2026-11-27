@@ -19,16 +19,17 @@ still matches, they commit. If not, they restore everything. Never rename export
 
 ## Evidence order
 Use the first kind of evidence that exists:
-1. **Original names.** The field names of Rare's debug struct viewer (`~/conker-ws/origfields/mapping.tsv`,
-   with the rules in `tools/SHARED.md`), the source paths in ROM strings, and the debugger's labels.
+1. **Original names.** The field names of Rare's debug struct viewer (in the debug prototype ROM; see
+   `tools/SHARED.md`, section "Wave 3a"), the source paths in ROM strings, and the debugger's labels.
 2. **SDK names.** A function that is Rare's copy of a libultra function gets the SDK name.
 3. **Descriptive names.** Use these where the code makes the meaning clear.
 4. **The address name.** Keep it in all other cases.
 
 Other sources of facts:
-- The cleaned code and the notes of the earlier waves in `~/conker-ws/hdr/notes/`. Agents left many
-  naming hints there, for example "func_150AD960 is a 2D distance".
-- `~/ext/conkers-bfd-decomp` is a read-only reference. Use its facts (addresses, sizes). Never copy its
+- The cleaned code, its comments and the git log. Earlier waves left many naming hints there, for
+  example "func_150AD960 is a 2D distance".
+- `$CONKER_REF` (your optional clone of DevOldSchool/conkers-bfd-decomp; see "Paths" in AGENTS.md) is a
+  read-only reference. Use its facts (addresses, sizes). Never copy its
   code.
 
 ## File names and layout (the owner's decision)

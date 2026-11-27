@@ -9,16 +9,19 @@ pinned to an absolute address. The ROM must stay byte-identical. The whole-ROM s
 it trims the 16-byte IDO padding to the slice. For the open files, the `.rodata` of the object is not
 equal to its ROM slice yet.
 
+Commands run from the repository root. `$CONKER_WS` and `$CONKER_REF` are described in "Paths" in
+AGENTS.md.
+
 ## Loop
 ```
-python3 ~/conker/tools/cw.py new game_X.c                    # workspace ~/conker-ws/clean.game_X
-python3 ~/conker/tools/ro_migrate.py check game_X --root ~/conker-ws/clean.game_X/conker
+python3 tools/cw.py new game_X.c                    # workspace $CONKER_WS/clean.game_X
+python3 tools/ro_migrate.py check game_X --root $CONKER_WS/clean.game_X/conker
 #   own .rodata against the ROM window between the slices of the neighbouring files, word by word
 #   edit conker/src/game_X.c (and, if necessary, conker/conker.us.yaml) in the workspace
-python3 ~/conker/tools/cw.py check clean.game_X              # builds; runs splat again if the yaml changed
-python3 ~/conker/tools/ro_migrate.py carve game_X 0xSTART 0xEND --root ~/conker-ws/clean.game_X/conker
-python3 ~/conker/tools/cw.py check clean.game_X              # must be MATCH with the slice carved
-python3 ~/conker/tools/cw.py land  clean.game_X -m "own .rodata"
+python3 tools/cw.py check clean.game_X              # builds; runs splat again if the yaml changed
+python3 tools/ro_migrate.py carve game_X 0xSTART 0xEND --root $CONKER_WS/clean.game_X/conker
+python3 tools/cw.py check clean.game_X              # must be MATCH with the slice carved
+python3 tools/cw.py land  clean.game_X -m "own .rodata"
 ```
 - `ro_migrate.py check` reads the last build of the workspace. After each edit, run `cw.py check`
   first.
@@ -58,11 +61,11 @@ Split a file only for a unit boundary that the ROM shows inside the file. The si
 zero padding, or front-end data (strings, const tables) after the literals of earlier functions. The first function of the new unit
 must start on a 16-byte boundary in the text.
 ```
-python3 ~/conker/tools/cw.py new --tree split.game_X          # a tree workspace: several files change
-#   in ~/conker-ws/split.game_X/conker/conker.us.yaml, add `- [0xOFF, c, game_OFF]` after the file's entry
-SPLIT_ROOT=~/conker-ws/split.game_X/conker python3 ~/conker/tools/split_tu.py plan  game_X 0xOFF
-SPLIT_ROOT=~/conker-ws/split.game_X/conker python3 ~/conker/tools/split_tu.py apply game_X 0xOFF
-python3 ~/conker/tools/cw.py check split.game_X                 # runs splat for the new entry
+python3 tools/cw.py new --tree split.game_X          # a tree workspace: several files change
+#   in $CONKER_WS/clean.split.game_X/conker/conker.us.yaml, add `- [0xOFF, c, game_OFF]` after the file's entry
+SPLIT_ROOT=$CONKER_WS/clean.split.game_X/conker python3 tools/split_tu.py plan  game_X 0xOFF
+SPLIT_ROOT=$CONKER_WS/clean.split.game_X/conker python3 tools/split_tu.py apply game_X 0xOFF
+python3 tools/cw.py check clean.split.game_X           # runs splat for the new entry
 #   carve one slice per unit (ro_migrate.py carve ... --root), check again, then land
 ```
 - Each new file keeps all top-level declarations. Delete the ones it does not use. Then make sure
@@ -73,7 +76,7 @@ python3 ~/conker/tools/cw.py check split.game_X                 # runs splat for
 
 ## Pinned words
 After a file links its own `.rodata`, every word of the slice must be reached through the object, not
-through an absolute `D_` name. Run `python3 ~/conker/tools/linkcheck.py ~/conker-ws/<workspace>/conker --list`.
+through an absolute `D_` name. Run `python3 tools/linkcheck.py $CONKER_WS/<workspace>/conker --list`.
 A pinned `D_` name can be in your file: an `extern` read of one of your own words. Replace that read
 with the literal, or define the data under that name.
 
@@ -82,14 +85,14 @@ with the literal, or define the data under that name.
 - A pointer in your const data (`&D_...` or a function pointer) becomes a relocation. That is correct,
   and it is the purpose of this work. If the ROM word is a number that is not an address, keep it as a
   number.
-- `~/ext/conkers-bfd-decomp` is a reference that you only read. For many files,
+- `$CONKER_REF` (your optional clone of DevOldSchool/conkers-bfd-decomp) is a reference that you only read. For many files,
   `docs/evidence/data-layout/<file>_*.md` shows which ROM words belong to which unit. The files in
   `config/symbols/*.txt` give the sizes of data symbols. Use these facts (addresses, sizes,
   boundaries). Do not copy its code. In some places its unit boundaries are not the same as ours.
   Thus, use them as hints only.
 - Do not edit `tools/` or the Makefile. In the yaml, change only the slice of your own file.
 - If a file cannot be done cleanly (for example, it needs a file split or a merge), stop. Write the
-  reason in `~/conker-ws/clean.<name>/notes.md`.
+  reason in `$CONKER_WS/clean.<name>/notes.md`.
 
 ## Static data and bss (.data and .bss of a C file)
 The same work applies to the `static` (and global) variables of a C file. The yaml must name the

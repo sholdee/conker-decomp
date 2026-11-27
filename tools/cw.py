@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """cw — cleanup workspaces: edit an already-matching C file into idiomatic C without changing a byte.
 
-    cw.py new  FILE       private workspace ~/conker-ws/clean.<name> for src/FILE (e.g. game_79F10.c)
+    cw.py new  FILE       private workspace $CONKER_WS/clean.<name> for src/FILE (e.g. game_79F10.c)
     cw.py check NAME      rebuild the workspace; RESULT: MATCH | MISMATCH | BUILD-FAIL, and on MISMATCH
                           the functions whose ROM bytes changed (with the first differing offset)
     cw.py land NAME [-m MSG]  3-way merge into main, rebuild, whole-bin sha gate, commit "MSG [cw]" (default "cleanup: FILE [cw]")
     cw.py list            open cleanup workspaces
 
 NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
-sha gate as mw.py. The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
+sha gate as mw.py, and the same environment variables (CONKER_WS, CONKER_CONTAINER, CONKER_REPO).
+The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
 """
 import argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
 from pathlib import Path

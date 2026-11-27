@@ -9,25 +9,25 @@ as before.
 
 ## Loop
 ```
-python3 ~/conker/tools/cw.py new --tree ITEM      # workspace ~/conker-ws/clean.ITEM (whole tree editable)
+python3 tools/cw.py new --tree ITEM      # workspace $CONKER_WS/clean.ITEM (whole tree editable)
 #   edit conker/include/*.h and any conker/src/*.c in the workspace
-python3 ~/conker/tools/cw.py check clean.ITEM     # MATCH | MISMATCH (+ every function in the ROM whose bytes moved)
-python3 ~/conker/tools/cw.py land  clean.ITEM -m "what changed"
+python3 tools/cw.py check clean.ITEM     # MATCH | MISMATCH (+ every function in the ROM whose bytes moved)
+python3 tools/cw.py land  clean.ITEM -m "what changed"
 ```
 - Change the header, then convert a few files at a time, check, and **land after every few files**. Other
   agents own other shared areas and edit some of the same files in parallel, so small lands keep merges
   trivial.
 - On a merge conflict: copy main's current version of each conflicting file
-  (`~/conker/conker/<path>`) over both your workspace copy and `base/<path>`, re-apply your edit to it,
+  (`conker/<path>` in the main tree) over both your workspace copy and `base/<path>`, re-apply your edit to it,
   then check and land.
-- Work only inside your workspace (scratch files in `my/`). Never edit ~/conker or run git there.
+- Work only inside your workspace (scratch files in `my/`). Never edit the main tree or run git there.
 
 ## Evidence
-- Wave-1 notes: `~/conker-ws/clean.*/notes.md`. Grep them for your struct or header. Agents recorded
-  field meanings, offsets, wrong prototypes and wrong global types there.
+- Comments in the code: grep `src/` and `include/` for your struct or header. Earlier waves recorded
+  field meanings, offsets, wrong prototypes and wrong global types in comments and in the git log.
 - File-local views and offset macros in `src/*.c`: grep for your struct name, its offsets and the
   `_hdr` / `#define` tricks.
-- `~/ext/conkers-bfd-decomp` (read-only) names many struct fields at the same offsets. Adopt its names
+- `$CONKER_REF` (your optional clone of DevOldSchool/conkers-bfd-decomp, read-only) names many struct fields at the same offsets. Adopt its names
   where the code supports them.
 
 ## Rules
@@ -51,7 +51,7 @@ python3 ~/conker/tools/cw.py land  clean.ITEM -m "what changed"
     `// matching:` comment.
 - **Out of scope:** renaming exported symbols (`func_XXXXXXXX`, `D_XXXXXXXX`). That is wave 3, a central
   rename. rodata_extern derives addresses from `D_<hex>` names.
-- If you run low on context: land what matches and write `~/conker-ws/clean.ITEM/notes.md` with what's
+- If you run low on context: land what matches and write `$CONKER_WS/clean.ITEM/notes.md` with what's
   done and what's next.
 
 ## Landed shared types (use these)
@@ -65,20 +65,23 @@ python3 ~/conker/tools/cw.py land  clean.ITEM -m "what changed"
 Same loop, rules and gate as wave 2. Now the goal is names: give struct fields, struct types and enums
 their real names, tree-wide.
 
-**Original names come first.** Rare's struct browser in two prototype builds named about 480 fields of
-our structs. The coordinator decoded them into `~/conker-ws/origfields/mapping.tsv` (columns:
-our_struct, our_field, offset, original_name, confidence, evidence, ...; read `notes.md` there for the
-format, the layout shifts between Oct 2000 and US, and known viewer bugs).
+**Original names come first.** Rare's struct browser in the debug prototype builds names about 480
+fields of our structs. An example is the October 2000 debug ROM (`conker.debug.yaml`): the browser is
+in its debugger segment, which starts at ROM 0x189840 (source name `rom_debug_struct.c`). The names
+are not in this repository, and the build does not extract them. To use them, read them from your own
+copy of that ROM. Each browser entry gives a field name and its offset in the Oct 2000 layout. Check
+every offset against US code: some layouts shifted between Oct 2000 and US, and the viewer has bugs.
+Many original names are already in the headers.
 - **Keep original names exactly as Rare wrote them** (`stand_on_char`, `AimTargetOn`, `FCameraIndex`,
   `xpos`): same spelling and case, no prefix, no camelCase conversion. This is the owner's decision.
-- `high` rows: apply them. `medium` rows: apply only after checking the code agrees (offset, type and use).
+- Apply an original name when the code agrees with it (offset, type and use).
 - An original name that is not a valid C identifier (`touch.i.a`, `dst_fade_alpha[1]`, `MCache[NORMAL]`)
   describes a nested struct, union or array: model that layout (keeping size and offsets) and use the
   original names for its parts.
 - An original name beats our earlier guess, even when ours reads well. Keep our guess only where the
   original row is wrong for US (a layout shift); say so in a short comment.
-- Original enums (camera modes, zone types, task flags and ids, level ids) are in
-  `~/conker-ws/origfields/enums.txt`. They are Oct 2000 orderings: check each value against US code
+- The same debugger also names original enums (camera modes, zone types, task flags and ids, level
+  ids). They are Oct 2000 orderings: check each value against US code
   before you use it. Name the enumerators in UPPER_CASE, keeping Rare's words (`CAMERA_MODE_NORMAL`).
 - Struct type names stay ours (`Actor`, `Camera`, ...). Note the original viewer title in the struct's
   comment, for example `/* original: movement_move (rom_debug_struct.c) */`.
@@ -88,7 +91,7 @@ meaning clear (same rule as RENAMING.md). Use camelCase for these names, since t
 keep. An honest `unk` beats a wrong guess.
 
 **Exported symbols are still central.** Don't rename `func_`/`D_` symbols yourself. Write proposals to
-`~/conker-ws/clean.ITEM/renames.tsv` as `old<TAB>new<TAB>confidence<TAB>evidence`, and the coordinator
+`$CONKER_WS/clean.ITEM/renames.tsv` (a file you create) as `old<TAB>new<TAB>confidence<TAB>evidence`, and the coordinator
 applies them with `tools/rename.py`. A new name that clashes with an existing local or field (for example
 `level` or `zones`) is refused: rename the clashing locals or fields in your workspace first, land that,
 then propose the global.

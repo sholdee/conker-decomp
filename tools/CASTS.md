@@ -5,7 +5,7 @@ type is wrong. The ROM must stay byte-identical. The whole-ROM sha1 decides.
 
 **Why.** A cast that hides a wrong type makes the code hard to read. Readers call it a "cast fest". Each
 compiler warning shows a place where two parts of the code disagree about a type. At the start, the
-build gave 1,917 warnings in 298 files (`~/conker-ws/hdr/warnings_baseline.txt`):
+build gave 1,917 warnings in 298 files:
 - 709 "Incompatible pointer type assignment" (1,458): one object has two struct types, or a field has
   the wrong pointer type.
 - 712 "illegal combination of pointer and integer" (340): an `s32` holds a pointer.
@@ -19,12 +19,12 @@ disagree with the definition" in `tools/HEADERS.md`.
 
 ## Loop
 ```
-python3 ~/conker/tools/cw.py new --tree cast.<name>          # a tree workspace
+python3 tools/cw.py new --tree cast.<name>          # a tree workspace
 #   edit types and code; then show the warnings of a file:
-python3 -c "import os, sys; sys.path.insert(0, os.path.expanduser('~/conker/tools')); import mw; \
-print(mw.run('make -B build/src/game_X.c.o 2>&1 | grep Warning', os.path.expanduser('~/conker-ws/clean.cast.<name>/conker')).stdout)"
-python3 ~/conker/tools/cw.py check clean.cast.<name>          # must print RESULT: MATCH
-python3 ~/conker/tools/cw.py land  clean.cast.<name> -m "types: <what>"
+python3 -c "import os, sys; sys.path.insert(0, 'tools'); import mw; \
+print(mw.run('make -B build/src/game_X.c.o 2>&1 | grep Warning', str(mw.WS_ROOT / 'clean.cast.<name>/conker')).stdout)"
+python3 tools/cw.py check clean.cast.<name>          # must print RESULT: MATCH
+python3 tools/cw.py land  clean.cast.<name> -m "types: <what>"
 ```
 Land small and often. Other agents change the same headers at the same time.
 
@@ -35,7 +35,7 @@ Land small and often. Other agents change the same headers at the same time.
 - **One object, one type.** Two struct types often describe one object (for example `ModelInstance`,
   `HudModelAnim` and `AnimInstance`). Merge them into one definition, as in phase 1 of
   `tools/HEADERS.md`. Every layout must agree: the same size and the same offsets. Apply the original
-  field names (`~/conker-ws/origfields/mapping.tsv`, rules in `tools/SHARED.md`, section "Wave 3a").
+  field names (rules in `tools/SHARED.md`, section "Wave 3a").
 - **Pointers are pointers.** A field, a variable or a parameter that holds an address gets a pointer
   type. If the code stores different types there, use `void *`.
 - **Remove an unnecessary cast.** Some casts do nothing: the value already has the type, or the

@@ -30,10 +30,10 @@ Each agent takes a family of type names. For each name:
    Every layout must agree: the same size and the same offsets. If the definitions describe different
    objects that share a name, give each object its own name. Read the code to decide. Do not guess.
 3. Put the definition in the correct header (see Layout). Remove the local copies from the C files.
-4. **Original field names.** `~/conker-ws/origfields/mapping.tsv` has the field names of Rare's debug
-   struct viewer. Wave 3a applied many of them. Keep those names. When you merge definitions, apply the
-   rows of every merged copy, by the rules in `tools/SHARED.md` (section "Wave 3a"): `high` rows
-   always, `medium` rows after you check the code. Keep each original name exactly as Rare wrote it.
+4. **Original field names.** Rare's debug struct viewer gives original field names (see
+   `tools/SHARED.md`, section "Wave 3a"). Wave 3a applied many of them. Keep those names. When you
+   merge definitions, keep the original names of every merged copy, and apply others by the rules in
+   that section, after you check the code. Keep each original name exactly as Rare wrote it.
    Our names for the other fields use camelCase.
 
 ## Phase 2: declarations
@@ -80,10 +80,10 @@ in this order. Stop at the first step that gives MATCH:
 
 ## Loop
 ```
-python3 ~/conker/tools/cw.py new --tree hdr.<name>           # a tree workspace
+python3 tools/cw.py new --tree hdr.<name>           # a tree workspace
 #   edit the headers and the C files; run check after every few files
-python3 ~/conker/tools/cw.py check clean.hdr.<name>
-python3 ~/conker/tools/cw.py land  clean.hdr.<name> -m "headers: <name>"
+python3 tools/cw.py check clean.hdr.<name>
+python3 tools/cw.py land  clean.hdr.<name> -m "headers: <name>"
 ```
 - Land often: after each type or each subsystem that matches. A small land has fewer merge conflicts.
 - Other agents edit the same headers at the same time. `land` merges by lines. If it reports a merge
