@@ -1125,7 +1125,7 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
     u8 curNode;
     u8 start;
     u8 param;
-    CamParams *p;
+    CamShot *p;
     Camera *cam;
 
     if (obj->CameraPtr == NULL) {
@@ -1202,17 +1202,17 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
     if (best > 1000.0f) {
         best = 1000.0f;
     }
-    p->unk0 = 0;
-    p->atX = obj->xpos;
-    p->atY = obj->ypos;
-    p->atZ = obj->zpos;
-    p->eyeX = obj->xpos - dx * best;
-    p->eyeY = obj->ypos - dy * best;
-    p->eyeZ = obj->zpos - dz * best;
-    p->unk4 = 0;
-    p->unk30 = 30.0f;
-    p->unk34 = 30.0f;
-    p->unk2C = 0.0f;
+    p->mode = 0;
+    p->at.look.focus.x = obj->xpos;
+    p->at.look.focus.y = obj->ypos;
+    p->at.look.focus.z = obj->zpos;
+    p->eye.x = obj->xpos - dx * best;
+    p->eye.y = obj->ypos - dy * best;
+    p->eye.z = obj->zpos - dz * best;
+    p->scene = 0;
+    p->at.look.fovX = 30.0f;
+    p->at.look.fovY = 30.0f;
+    p->at.look.roll = 0.0f;
     camera_queueMessage(obj->CameraPtr, 7, p);
     cam->FOVX = 30.0f;
     cam->TgetFOVX = 30.0f;
@@ -1233,7 +1233,7 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
     f32 angle;
     u8 next;
     PathNode *entry;
-    CamParams *p;
+    CamShot *p;
     f32 xs[4];
     f32 ys[4];
     f32 zs[4];
@@ -1247,8 +1247,8 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
     cam = obj->CameraPtr;
     p = &racer->cam;
     if (leave != 0) {
-        p->unk10 = 120;
-        p->unkC = 999.0f;
+        p->duration = 120;
+        p->yaw = 999.0f;
         camera_queueMessage(obj->CameraPtr, 10, p);
         camera_queueMessage(obj->CameraPtr, 6, (void *)cam->CNumber);
         racer->camState = 0;
@@ -1311,17 +1311,17 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
     }
     angle = racer->camT;
     p = &racer->cam;
-    p->eyeX = math_catmullRom(xs, 0, angle);
-    p->eyeY = math_catmullRom(ys, 0, angle);
-    p->eyeZ = math_catmullRom(zs, 0, angle);
-    p->atX = math_catmullRom(lxs, 0, angle);
-    p->atY = math_catmullRom(lys, 0, angle);
-    p->atZ = math_catmullRom(lzs, 0, angle);
-    p->unk0 = 0;
-    p->unk4 = 0;
-    p->unk30 = 30.0f;
-    p->unk34 = 30.0f;
-    p->unk2C = 0.0f;
+    p->eye.x = math_catmullRom(xs, 0, angle);
+    p->eye.y = math_catmullRom(ys, 0, angle);
+    p->eye.z = math_catmullRom(zs, 0, angle);
+    p->at.look.focus.x = math_catmullRom(lxs, 0, angle);
+    p->at.look.focus.y = math_catmullRom(lys, 0, angle);
+    p->at.look.focus.z = math_catmullRom(lzs, 0, angle);
+    p->mode = 0;
+    p->scene = 0;
+    p->at.look.fovX = 30.0f;
+    p->at.look.fovY = 30.0f;
+    p->at.look.roll = 0.0f;
     camera_queueMessage(obj->CameraPtr, 7, p);
 }
 

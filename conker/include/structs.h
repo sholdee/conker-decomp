@@ -593,7 +593,7 @@ typedef struct {
     /* 0x0AC */ u8  ropeSwingAngle;
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
-    /* 0x0AF */ u8  unkAF;
+    /* 0x0AF */ u8  aimTargetTimer; // 0x78 while aiming at a character (multiplayer), counted down by gFrameTicks
     /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (collision_castRay)
     /* 0x114 */ s16 height;      // cached size from actor_computeSize
     /* 0x116 */ s16 width;
@@ -3140,24 +3140,6 @@ typedef struct {
     /* 0x9 */ s8 unk9;
 } ModeEntry; /* size 0xA */
 
-/* Camera request passed to camera_queueMessage (mode 7). */
-typedef struct CamParams {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 eyeX;
-    /* 0x18 */ f32 eyeY;
-    /* 0x1C */ f32 eyeZ;
-    /* 0x20 */ f32 atX;
-    /* 0x24 */ f32 atY;
-    /* 0x28 */ f32 atZ;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} CamParams;
-
 /* Per-racer state of the race mode (gRacers[]), 0x84 bytes. */
 typedef struct Racer {
     /* 0x00 */ f32 lateral;       /* 0..1 across the track, see mp_getSplinePoints */
@@ -3190,7 +3172,7 @@ typedef struct Racer {
     /* 0x49 */ s8 camState;
     /* 0x4A */ u8 camNode;
     /* 0x4B */ u8 camNextNode;
-    /* 0x4C */ CamParams cam;
+    /* 0x4C */ CamShot cam;
 } Racer; /* size 0x84 */
 
 /* A node of the level's path graph (loaded by path_load), 0x10 bytes. */

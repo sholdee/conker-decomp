@@ -3602,7 +3602,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
         if ((attacker != victim) && (victim->mv != NULL) && (attacker->energy != 0)) {
             sound = 0;
             delay = 0;
-            attacker->mv->unkAF = 0;
+            attacker->mv->aimTargetTimer = 0;
             variants = 0;
             if (cause == 0x33) {
                 victimKind = victim->mv->rt_context_b;

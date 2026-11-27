@@ -1195,7 +1195,7 @@ void actor_updatePlayer(Actor *actor) {
                 lean = scratch;
                 if ((gIsMultiplayer != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (gCurrentPad->button & 0x2000) && ((actor->mv->rayHit.hitType == 3) || (actor->mv->rayHit.hitType == 2))) {
                     chance = 0;
-                    if (actor->mv->unkAF < 0x3C) {
+                    if (actor->mv->aimTargetTimer < 0x3C) {
                         chance = 0x30;
                     }
                     if (sound_isActorSound1Playing(actor) == 0) {
@@ -1218,17 +1218,17 @@ void actor_updatePlayer(Actor *actor) {
                             }
                         }
                     }
-                    actor->mv->unkAF = 0x78;
+                    actor->mv->aimTargetTimer = 0x78;
                 }
-                if (actor->mv->unkAF != 0) {
-                    if (gFrameTicks < actor->mv->unkAF) {
-                        actor->mv->unkAF -= gFrameTicks;
+                if (actor->mv->aimTargetTimer != 0) {
+                    if (gFrameTicks < actor->mv->aimTargetTimer) {
+                        actor->mv->aimTargetTimer -= gFrameTicks;
                     } else {
-                        actor->mv->unkAF = 0;
+                        actor->mv->aimTargetTimer = 0;
                     }
                 }
             } else {
-                actor->mv->unkAF = 0;
+                actor->mv->aimTargetTimer = 0;
             }
             if (actor->mv->lockout > 0) {
                 actor->mv->lockout -= gActorStepPercent;
@@ -3513,7 +3513,7 @@ void func_150538CC(Actor *obj) {
             done = 1;
             if ((hit == 1) && (obj->owner > 0)) {
                 owner = &movement_obj[obj->owner - 1];
-                if ((owner->mv != NULL) && (owner->mv->unkAF != 0)) {
+                if ((owner->mv != NULL) && (owner->mv->aimTargetTimer != 0)) {
                     if (sound_isActorSound1Playing(owner) == 0) {
                         actor_playSound((math_random() % 3U) + 0x53B, owner);
                     }
