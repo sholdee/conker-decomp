@@ -229,7 +229,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     obj->xpos = spawn->x;
     obj->ypos = spawn->y;
     obj->zpos = spawn->z;
-    obj->unk212[0] = 0xFF;
+    obj->pathAvoid = 0xFF;
     obj->pathNode = 0xFF;
     obj->prevPathNode = 0xFF;
     obj->pathGoal = 0xFF;

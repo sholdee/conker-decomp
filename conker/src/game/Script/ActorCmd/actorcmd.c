@@ -294,9 +294,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x5D:
         if (cmd->a[0].w < 0) {
-            obj->unk212[0] = 0xFF;
+            obj->pathAvoid = 0xFF;
         } else {
-            obj->unk212[0] = mp_findNodeById(cmd->a[0].w);
+            obj->pathAvoid = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0xB:
@@ -1245,9 +1245,9 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->pathNode != 0xFF) {
             return gPathNodes[obj->pathNode].unk7;
         }
-        gPathNearerThanNode = obj->unk212[1];
+        gPathNearerThanNode = obj->lastNearNode;
         ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
-        obj->unk212[1] = ret;
+        obj->lastNearNode = ret;
         if (ret != 0xFF) {
             return gPathNodes[ret].unk7;
         }

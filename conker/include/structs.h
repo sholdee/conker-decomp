@@ -1197,7 +1197,8 @@ struct Actor {
     /* 0x20F */ u8  pathNode;
     /* 0x210 */ u8  prevPathNode;
     /* 0x211 */ u8  pathGoal;
-    /* 0x212 */ u8  unk212[0x2];
+    /* 0x212 */ u8  pathAvoid;   // path node to avoid, 0xFF = none
+    /* 0x213 */ u8  lastNearNode;
     /* 0x214 */ s16 unk214;
     /* 0x216 */ s16 pathDistance; // route length to the goal (path_search)
     /* 0x218 */ const ObjScriptCmd *scriptCmd; // current script command

@@ -822,9 +822,6 @@ void script_jumpIfAtDestination(void) {
     }
 }
 
-/* the s16 at 0x216 overlaps Actor's s32 unk214 */
-#define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
-
 /*
  * Steps the object along the path-node graph: picks the next node (arg0 == 1: a random neighbour
  * other than the previous node, otherwise the next node towards the goal pathGoal) and stores a point
@@ -851,12 +848,12 @@ void script_stepPathGraph(void) {
     next = 0xFF;
     if (gScriptArg0 != 1) {
         if (gCurrentActor->pathNode == gCurrentActor->pathGoal) {
-            UNK216(gCurrentActor) = 0;
+            gCurrentActor->pathDistance = 0;
             gCurrentActor->task_attrib |= 0x800;
             return;
         }
         if (gCurrentActor->pathGoal == 0xFF) {
-            UNK216(gCurrentActor) = 0;
+            gCurrentActor->pathDistance = 0;
         }
     }
     gCurrentActor->task_attrib &= ~0x800;
@@ -866,7 +863,7 @@ void script_stepPathGraph(void) {
         if (gCurrentActor->pathGoal != 0xFF) {
             hasGoal = 1;
         }
-        if (gCurrentActor->unk212[0] != 0xFF) {
+        if (gCurrentActor->pathAvoid != 0xFF) {
             hasGoal2 = 1;
         }
         current = gCurrentActor->pathNode;
@@ -878,7 +875,7 @@ void script_stepPathGraph(void) {
             }
             if (next == 0xFF) {
                 next = path_getNextNode(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
-                                     hasGoal, hasGoal2, &gCurrentActor->pathGoal, gCurrentActor->unk212);
+                                     hasGoal, hasGoal2, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
             }
         } else if (current != 0xFF) {
             if (gScriptArg0 == 1) {
@@ -905,13 +902,13 @@ void script_stepPathGraph(void) {
                     next = gCurrentActor->prevPathNode;
                 }
             } else {
-                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->pathGoal, gCurrentActor->unk212);
+                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->pathGoal, &gCurrentActor->pathAvoid);
             }
         }
         if (next != 0xFF) {
             gCurrentActor->waypoint = 0;
             if (mp_getNodePos(next, &x, &y, &z)) {
-                UNK216(gCurrentActor) = gPathDistance;
+                gCurrentActor->pathDistance = gPathDistance;
                 gCurrentActor->prevPathNode = gCurrentActor->pathNode;
                 gCurrentActor->pathNode = next;
                 {
