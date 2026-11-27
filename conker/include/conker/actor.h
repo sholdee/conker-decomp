@@ -20,6 +20,7 @@
  *   game/Actor/HoverUpdates/hoverupdates.c
  *   game/Effects/Greyscale/greyscale.s
  *   game/Actor/Follower/follower.c
+ *   game/Actor/SpinDown/spindown.c
  */
 
 
@@ -388,5 +389,8 @@ void colourfb_toGreyscale(void *start, void *end);
 
 /* game/Actor/Follower/follower.c */
 void actor_updateFollower(Actor *self);
+
+/* game/Actor/SpinDown/spindown.c */
+void effect_spinDownActor(Actor *arg0);
 
 #endif

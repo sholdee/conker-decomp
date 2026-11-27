@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "conker/actor.h"
-#include "conker/effect.h"
 
 /* Spins the actor down: tilt and lean advance by their rates, which decay with the speed. */
 void effect_spinDownActor(Actor *arg0) {
