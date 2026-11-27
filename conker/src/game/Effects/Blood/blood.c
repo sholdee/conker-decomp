@@ -1784,7 +1784,7 @@ void blood_startBleeding(Actor *actor, s32 kind, u8 arg2) {
         desc.offsetB.z = 0.0f;
         desc.offsetB.y = 20.0f;
         if ((gZombieDressBloodProfiles == &gBloodProfiles[kind]) || (gZombieSuitBloodProfiles == &gBloodProfiles[kind])) {
-            desc.lifetime = (actor->unk94 & 0xE) ? 120 : 240;
+            desc.lifetime = (actor->hiddenParts & 0xE) ? 120 : 240;
         } else {
             desc.lifetime = 600;
         }
@@ -1848,7 +1848,7 @@ void blood_spawnBurst(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) 
 
 /*
  * Throws a particle_newModelParticleWithFloor chunk (model gBloodProfiles[kind].chunkModel) off the actor from position, and for
- * profiles 4-6 also the accessories it still wears (bits of unk94).
+ * profiles 4-6 also the accessories it still wears (bits of hiddenParts).
  */
 void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5) {
     Vec3f v;
@@ -1924,7 +1924,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 a
         const s32 ids[4] = { 0x87, 0x88, 0x89, 0x8A };
 
         for (i = 0; i < 4; i++) {
-            if (!(masks[i] & actor->unk94)) {
+            if (!(masks[i] & actor->hiddenParts)) {
                 spawn.model = ids[i];
                 particle_newModelParticle(&spawn, 3, 0xFF, 0, arg4, arg5);
             }
@@ -1935,7 +1935,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 a
         const s32 ids[2] = { 0x8D, 0x8B };
 
         for (i = 0; i < 2; i++) {
-            if (!(masks[i] & actor->unk94)) {
+            if (!(masks[i] & actor->hiddenParts)) {
                 spawn.model = ids[i];
                 particle_newModelParticle(&spawn, 3, 0xFF, 0, arg4, arg5);
             }

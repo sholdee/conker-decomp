@@ -50,10 +50,10 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
         break;
     }
     if (channel != 0xFF) {
-        if (actor->unk201 == 0) {
+        if (actor->levelRange == 0) {
             scale = 8191.875f;
         } else {
-            scale = actor->unk201 * 182.04444885f;
+            scale = actor->levelRange * 182.04444885f;
         }
         value = (s16)(actor->level * scale * (1.0f / 255));
         if (!skipChannel) {
@@ -62,7 +62,7 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
             cmd++;
         }
         gBoneLastChannelLevel = value;
-        value = (s16)((actor->unk202 * actor->level) / 255 * 65535.0f * (1.0f / 255));
+        value = (s16)((actor->levelJitter * actor->level) / 255 * 65535.0f * (1.0f / 255));
         if (!skipChannel) {
             // matching: maxStep doubles as the second opcode offset; a separate local changes regalloc
             cmd->opcode = channel * 6 + maxStep;
@@ -80,13 +80,13 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
             actor->levelStep = -maxStep;
         } else if (actor->levelMode == 2) {
             actor->levelStep = maxStep;
-            actor->unk202 = 0;
+            actor->levelJitter = 0;
         } else if (actor->levelStep == 0 || actor->level == 0 || actor->level == 0xFF) {
             actor->levelStep = math_random() % (u32)(maxStep - minStep) + minStep;
             if (actor->level == 0xFF) {
                 actor->levelStep = -actor->levelStep;
             } else if (actor->level == 0 && jitter != 0) {
-                actor->unk202 = math_random() % (u32)(jitter * 2) - jitter;
+                actor->levelJitter = math_random() % (u32)(jitter * 2) - jitter;
             }
         }
         sum = actor->level;
@@ -103,10 +103,10 @@ GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, 
         }
     }
     if (channel2 != 0xFF) {
-        if (actor->unk208 == 0) {
+        if (actor->level2Range == 0) {
             scale = 8191.875f;
         } else {
-            scale = actor->unk208 * 182.04444885f;
+            scale = actor->level2Range * 182.04444885f;
         }
         sign = (scale < 0.0f) ? -1 : 1;
         scale = fabsf(scale);

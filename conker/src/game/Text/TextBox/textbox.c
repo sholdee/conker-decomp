@@ -253,7 +253,7 @@ void text_updateBox(TextBox *box) {
                 box->config->callback(box->config, box->page, box->state);
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
-            movement_obj[box->config->objIndex].unk1E3 = 0;
+            movement_obj[box->config->objIndex].textBoxOpen = 0;
             player->cmdState.unk0 = 0;
             box->config->numPages = 0;
             effect_destroyObject(box);

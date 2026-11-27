@@ -993,7 +993,7 @@ void particle_levelHook17(Camera *obj);
 typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
+    /* 0x05 */ u8 prevUnk222; // target->targetIndex seen last frame
     /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
     /* 0x0C */ s8 count;      // particles left in the current burst
 } BoneBurstState;

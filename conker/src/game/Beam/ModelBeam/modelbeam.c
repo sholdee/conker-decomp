@@ -123,7 +123,7 @@ s32 beam_hookFrameTexture(ModelAttachment *att, Actor *actor) {
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
     f32 t;
 
-    anim = actor->unk2D0;
+    anim = actor->anim;
     if (anim == NULL) {
         return 0;
     }
@@ -186,7 +186,7 @@ s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
     s32 ult;
     s32 i;
 
-    anim = actor->unk2D0;
+    anim = actor->anim;
     if (anim == NULL) {
         return 0;
     }
@@ -360,7 +360,7 @@ void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
+/* Beam effect: while the owner lives and has a model (and hiddenParts bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
 void beam_updateModelBeam(ModelBeamEffect *effect) {
     ModelBeamData *data;
@@ -376,7 +376,7 @@ void beam_updateModelBeam(ModelBeamEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->ob_matrix_ptr != NULL && !(owner->unk94 & 2)) {
+    if (owner->ob_matrix_ptr != NULL && !(owner->hiddenParts & 2)) {
         ModelBeam *beam;
         LightEffect *flash;
         PointLight *light;
@@ -483,7 +483,7 @@ void func_150F64B0(DefParticleHead *obj) {
     flare_freeGlowDefault(obj);
 }
 
-/* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
+/* Burst effect: while the owner lives and has a model (and hiddenParts bit 1 is clear), every 90-180
  * frames calls sound_playAt(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
 void beam_updateFlashBurst(FlashBurstEffect *effect) {
@@ -497,7 +497,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if ((owner->ob_matrix_ptr != NULL) && !(owner->unk94 & 2)) {
+    if ((owner->ob_matrix_ptr != NULL) && !(owner->hiddenParts & 2)) {
         data->timer -= gFrameTicks;
         if (data->timer < 0) {
             sound_playAt(0x679, 0x18CE, 0, 0, 0, owner->xpos, owner->ypos, owner->zpos,

@@ -528,7 +528,7 @@ s32 collision_getHitTableIndex(Actor *obj) {
 
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
  * bounding sphere from gModelDefs[obj->id] and ray-test it; if that hits, walk the model's
- * hit-sphere table, skipping bones masked off in obj->unk9C, transform each sphere's local
+ * hit-sphere table, skipping bones masked off in obj->hiddenBones, transform each sphere's local
  * offset by its bone matrix and keep the nearest / highest-priority hit.
  *
  * ORIGINAL-GAME BUG, reproduced deliberately: the tail does `*outDist = tNear;` after the
@@ -580,8 +580,8 @@ s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *
         p = spheres;
         do {
             // matching: empty then-branch; `if (!(mask))` makes IDO rotate the s-registers
-            if ((1 << p->bone) & obj->unk9C) {
-                /* bone masked off in obj->unk9C */
+            if ((1 << p->bone) & obj->hiddenBones) {
+                /* bone masked off in obj->hiddenBones */
             } else {
                 bones = obj->ob_matrix_ptr;
                 local.x = p->x;

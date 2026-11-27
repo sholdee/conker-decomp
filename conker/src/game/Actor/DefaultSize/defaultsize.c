@@ -5,13 +5,13 @@
 
 
 void actor_setDefaultSizes(void) {
-    Actor *tmp;
+    Actor *actor;
     s32 i;
 
     for (i = 0; i < gPlayerCount; i++) {
-        tmp = &movement_obj[i];
-        tmp->mv->height = 180;
-        tmp->mv->width = 60;
-        tmp->mv->depth = 60;
+        actor = &movement_obj[i];
+        actor->mv->height = 180;
+        actor->mv->width = 60;
+        actor->mv->depth = 60;
     }
 }

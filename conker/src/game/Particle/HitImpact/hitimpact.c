@@ -923,13 +923,13 @@ s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, v
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
         if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) continue;
-        if (obj->unkD2 < obj->unkD4) {
-            radius = obj->unkD4;
+        if (obj->hitRadius < obj->hitHeight) {
+            radius = obj->hitHeight;
         } else {
-            radius = obj->unkD2;
+            radius = obj->hitRadius;
         }
         center.x = obj->xpos;
-        center.y = obj->ypos + obj->unkD6;
+        center.y = obj->ypos + obj->hitOffsetY;
         center.z = obj->zpos;
         if (math_raySphere(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
             mask &= ~(1 << i);

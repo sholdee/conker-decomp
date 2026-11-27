@@ -4,8 +4,8 @@
 #include "conker/game.h"
 
 /* matching: not in actor.h, as game/Effects/TintedObject/tintedobject.c was compiled with an s32 return (definition: game/Actor/Movement/movement.c) */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 /*
  * Per-frame update: copy the owning object's angles (unk13C is the owner's index + 100), then either
@@ -14,8 +14,8 @@ void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 
 void actor_updateFollower(Actor *self) {
     s32 searchState;
     s32 runState;
-    s32 runArg;
-    s32 stateArg;
+    s32 mountWalk;
+    s32 baseMtx;
     Actor *other;
     Actor *owner;
     f32 angle;
@@ -26,12 +26,12 @@ void actor_updateFollower(Actor *self) {
     if (self->character_type == 0x23) {
         searchState = 10;
         runState = 11;
-        runArg = 12;
-        stateArg = 1;
+        mountWalk = 12;
+        baseMtx = 1;
     } else {
         runState = 2;
-        runArg = 3;
-        stateArg = 3;
+        mountWalk = 3;
+        baseMtx = 3;
     }
     self->taskint[1] = 0;
     self->forcedCullMask = 0;
@@ -64,7 +64,7 @@ void actor_updateFollower(Actor *self) {
     }
     actor_updateCommon(self);
     if (runState == self->intelwalk) {
-        actor_seatRider(self, 100.0f, stateArg, 4, 0, runArg, 0, 0, 0, 0);
+        actor_seatRider(self, 100.0f, baseMtx, 4, 0, mountWalk, 0, 0, 0, 0);
         return;
     }
     if (searchState == self->intelwalk && (~gEliminatedPlayers & gCollidedActors) && event_getOwnedObject(self, 0) == NULL) {
@@ -80,7 +80,7 @@ void actor_updateFollower(Actor *self) {
             if (other->playernumber != 0xFF && other->attach_char == 0 && other->mv->GrenadeThrowState == 0 &&
                 other->mv->SniperState == 0 && other->lifting == 0) {
                 self->owner = i;
-                actor_startRiderJump(self, 44.0f, 3.2f, runState, stateArg);
+                actor_startRiderJump(self, 44.0f, 3.2f, runState, baseMtx);
                 other->mv->gun_before_reload = 600;
                 other->mv->ReloadTimer = 0;
                 return;

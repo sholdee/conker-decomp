@@ -167,7 +167,7 @@ void effect_advanceStage(StageObj *obj) {
 
         other = movement_obj;
         for (i = 0; i < 25; i++, other++) {
-            if (other->character_type == 0x98 && other->animseq.uh == 0x1EB && other->unk222 == 0) {
+            if (other->character_type == 0x98 && other->animseq.uh == 0x1EB && other->targetIndex == 0) {
                 count++;
             }
         }

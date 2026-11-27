@@ -61,7 +61,7 @@ void beam_fireSlot(actor, slot)
     Vec3i origin;
     MtxF *bones;
 
-    if (gBeamSlotMasks[slot] & actor->unk94) {
+    if (gBeamSlotMasks[slot] & actor->hiddenParts) {
         return;
     }
 
@@ -222,7 +222,7 @@ s32 beam_updateAimed(AimedBeam *beam) {
     if (target->unique_id != link->targetId || target->type == 0) {
         return 0;
     }
-    if (actor->unk94 & gBeamSlotMasks[link->slot]) {
+    if (actor->hiddenParts & gBeamSlotMasks[link->slot]) {
         return 0;
     }
     link->flags &= ~1;
@@ -1129,7 +1129,7 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         kind = 1;
     } else {
         const u8 masks[2] = { 4, 2 };
-        if (masks[slot] & actor->unk94) {
+        if (masks[slot] & actor->hiddenParts) {
             return;
         }
         kind = 0;

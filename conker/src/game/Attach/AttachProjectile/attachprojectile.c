@@ -29,7 +29,7 @@ s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor) {
     f32 rotZ;
     s16 yaw;
 
-    anim = actor->unk2D0;
+    anim = actor->anim;
     if (anim == NULL) {
         return 0;
     }

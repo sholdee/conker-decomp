@@ -429,10 +429,10 @@ s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures) {
 
     def = obj->listpos_ptr;
     if (gModelData[id] == NULL) {
-        ret = model_load(id, 0, def, loadTextures, obj->unkAC);
+        ret = model_load(id, 0, def, loadTextures, obj->modelLoadFlags);
     } else {
         ret = 0;
-        if ((def != NULL && (def->objFlags & 0x4000)) || (obj->unkAC & 1)) {
+        if ((def != NULL && (def->objFlags & 0x4000)) || (obj->modelLoadFlags & 1)) {
             if (gModelVtxRuns[id] == NULL) {
                 collision_buildVertexRuns(id);
             }

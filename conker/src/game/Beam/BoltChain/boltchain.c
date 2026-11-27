@@ -670,7 +670,7 @@ s32 beam_followBoundsBolt(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-/* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
+/* The point on the actor's bounds in direction yaw/pitch (vertically scaled by bodyHeightOverRadius); optionally the bounds centre. */
 void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
     Vec3f center;
     f32 radius;
@@ -678,7 +678,7 @@ void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *ce
 
     sprite_getActorBodyBounds(actor, &center, &radius, &unused);
     math_dirFromBinAngles(yaw, pitch, radius, out);
-    out->y *= actor->unkF0;
+    out->y *= actor->bodyHeightOverRadius;
     out->x += center.x;
     out->y += center.y;
     out->z += center.z;
@@ -714,7 +714,7 @@ void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4)
     if (actor->ob_matrix_ptr != NULL) {
         sprite_getActorBodyBounds(actor, &center, &radius, &unused);
         math_dirFromBinAngles(yaw, pitch, radius, &pos);
-        pos.y *= actor->unkF0;
+        pos.y *= actor->bodyHeightOverRadius;
         pos.x += center.x;
         pos.y += center.y;
         pos.z += center.z;

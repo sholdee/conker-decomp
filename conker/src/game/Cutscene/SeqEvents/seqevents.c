@@ -38,8 +38,8 @@
 #include "conker/zone.h"
 
 /* matching: not in actor.h, as game/Effects/TintedObject/tintedobject.c was compiled with an s32 return (definition: game/Actor/Movement/movement.c) */
-void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                   s32 force, s32 arg9);
+void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                   s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Screen fade colours for screen_startViewFade, picked by sequence events (black, white). */
 Color24 gCutsceneFadeColours[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
@@ -493,7 +493,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             duration = 1;
         }
         if (event->unk4 == 0) {
-            obj->unk134 = event->value;
+            obj->morphTarget = event->value;
             obj->morphDuration = duration;
         }
     } else if (event->type == 3) {
@@ -586,7 +586,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 obj->levelMode += event->unk5;
             }
             if (event->unk4 == 0) {
-                obj->unk201 = event->unk6;
+                obj->levelRange = event->unk6;
             }
         } else if (event->value == 0x16) {
             if (obj == NULL) {
@@ -597,7 +597,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 obj->level2Mode += event->unk5;
             }
             if (event->unk4 == 0) {
-                obj->unk208 = event->unk6;
+                obj->level2Range = event->unk6;
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
@@ -823,11 +823,11 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 v <<= 16;
                 v |= event->unk6;
                 if (event->unk5 == 0) {
-                    obj->unk94 = v;
+                    obj->hiddenParts = v;
                 } else if (event->unk5 == 1) {
-                    obj->unk94 |= v;
+                    obj->hiddenParts |= v;
                 } else {
-                    obj->unk94 &= ~(v | 1);
+                    obj->hiddenParts &= ~(v | 1);
                 }
             }
         } else if (event->value == 0x3D) {
@@ -887,7 +887,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
         } else if (event->value == 0x4B) {
             if (obj != NULL) {
-                obj->unk9C = (event->unk6 & 0xFFFF) | ((event->unk5 & 0xFF) << 16) | ((event->unk4 & 0xFF) << 24);
+                obj->hiddenBones = (event->unk6 & 0xFFFF) | ((event->unk5 & 0xFF) << 16) | ((event->unk4 & 0xFF) << 24);
             }
         } else if (event->value == 0x4A) {
             if (event->unk4 == 0) {
@@ -914,7 +914,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 actor_seatRider(obj, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
             }
         } else if (event->value == 0x71) {
-            movement_obj->unkCC = 0;
+            movement_obj->heightOffset = 0;
             movement_obj->mv->transport = 0;
             movement_obj->attach_char = 0;
             movement_obj->mv->jump_on_char = 0;
@@ -1036,13 +1036,13 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             gFrameRateDivider = event->unk5;
         } else if (event->value == 0x6F) {
             if (obj != NULL) {
-                obj->unk68[event->unk4] = event->unk5;
+                obj->swapTexture[event->unk4] = event->unk5;
             }
         } else if (event->value == 0x70) {
             gCutsceneHoldEnd = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                obj->unkC8 = gModelDefs[obj->character_type]->unk6;
+                obj->rootOffsetY = gModelDefs[obj->character_type]->unk6;
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;
@@ -2319,7 +2319,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         }
         duration = cutscene_findEvent(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
         if (event->unk4 == 0) {
-            if (obj->unk2D0 == NULL) {
+            if (obj->anim == NULL) {
                 return 1;
             }
             rate = 5.0f;
@@ -2345,7 +2345,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 actor_playAnim(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
-                speed = obj->unk2D0->numFrames[0] / duration * 2.0f;
+                speed = obj->anim->numFrames[0] / duration * 2.0f;
             } else {
                 speed = 0.0f;
             }

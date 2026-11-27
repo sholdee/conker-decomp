@@ -60,7 +60,7 @@ void model_placeActorQuadAnchor(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx = gActorQuadVtx[index];
     actor = &movement_obj[index];
     state = actor->animseq.uh;
-    frame = actor->unk2D0->frame[0];
+    frame = actor->anim->frame[0];
     if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
         ((state == 0x3D || state == 0xD9) && frame > 21.0f)) {
         math_transformPoint(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);
@@ -129,8 +129,8 @@ Gfx *model_drawActorQuad(Gfx *gfx, s32 index, s32 view) {
     }
     model_placeActorQuadAnchor(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, gActorQuadDl);
-    gfx = light_reemitLights(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
-                        movement_obj[index].unk302, &movement_obj[index].unk314[gDrawBufferIndex]);
+    gfx = light_reemitLights(gfx, movement_obj[index].gfxLights[view], movement_obj[index].maxLights,
+                        movement_obj[index].lightCount, &movement_obj[index].ambients[gDrawBufferIndex]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {

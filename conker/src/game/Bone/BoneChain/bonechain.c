@@ -43,7 +43,7 @@ void bone_initChain(Actor *obj) {
 }
 
 /*
- * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
+ * Flags in animFlags whether the object's current animation (unk84) poses the bone chain itself:
  * bit 1 for the animations in gChainPosingAnimsBit1, bit 0 for those in gChainPosingAnims.
  */
 void bone_updateChainPoseFlags(Actor *obj) {
@@ -52,13 +52,13 @@ void bone_updateChainPoseFlags(Actor *obj) {
     if (obj->type == 1) {
         for (i = 0; i < 3; i++) {
             if (obj->animseq.uh == gChainPosingAnimsBit1[i]) {
-                obj->unk2FB |= 2;
+                obj->animFlags |= 2;
                 return;
             }
         }
         for (i = 0; i < 90; i++) {
             if (obj->animseq.uh == gChainPosingAnims[i]) {
-                obj->unk2FB |= 1;
+                obj->animFlags |= 1;
                 return;
             }
         }
@@ -67,7 +67,7 @@ void bone_updateChainPoseFlags(Actor *obj) {
 
 /* Returns whether object objIndex simulates its bone chain (0 while the animation poses it). */
 s32 bone_isChainSimulated(s32 objIndex, BoneChain *chain) {
-    s32 flags = movement_obj[objIndex].unk2FB;
+    s32 flags = movement_obj[objIndex].animFlags;
 
     if (flags & 2) {
         chain->blendTimer = 0;
@@ -149,7 +149,7 @@ void bone_updateChain(s32 objIndex) {
         reset = 0;
     }
     /* any of the four camera hold timers, or byte 0x2FD of the object */
-    if (*(s32 *)gCameraSnapTimers != 0 || obj->unk2FD != 0) {
+    if (*(s32 *)gCameraSnapTimers != 0 || obj->snapTimer != 0) {
         reset = 1;
     }
     if (reset) {

@@ -202,7 +202,7 @@ void bone_updateObject(s32 index) {
     }
 }
 
-/* Zeroes the 3x3 rotation part of every bone matrix whose bit is set in unk9C (bones 0-31). */
+/* Zeroes the 3x3 rotation part of every bone matrix whose bit is set in hiddenBones (bones 0-31). */
 void bone_collapseMaskedBones(Actor *obj) {
     s32 bone;
     s32 row;
@@ -210,7 +210,7 @@ void bone_collapseMaskedBones(Actor *obj) {
     s32 lastBone;
     MtxF *bones;
 
-    if (obj->ob_matrix_ptr != NULL && obj->unk9C != 0) {
+    if (obj->ob_matrix_ptr != NULL && obj->hiddenBones != 0) {
         lastBone = actor_getBoneMatrixCount(obj->character_type) - 1;
         bones = obj->ob_matrix_ptr;
         bone = 31;
@@ -218,7 +218,7 @@ void bone_collapseMaskedBones(Actor *obj) {
             bone = lastBone;
         }
         for (; bone >= 0; bone--) {
-            if (obj->unk9C & (1 << bone)) {
+            if (obj->hiddenBones & (1 << bone)) {
                 for (row = 0; row < 3; row++) {
                     for (col = 0; col < 3; col++) {
                         // matching: bones[bone][row][col] lets IDO strength-reduce the row loop; the
@@ -231,7 +231,7 @@ void bone_collapseMaskedBones(Actor *obj) {
     }
 }
 
-/* Runs bone_collapseMaskedBones on every active object with a non-zero unk9C mask. */
+/* Runs bone_collapseMaskedBones on every active object with a non-zero hiddenBones mask. */
 void bone_collapseAllMaskedBones(void) {
     s32 i;
 
@@ -240,7 +240,7 @@ void bone_collapseAllMaskedBones(void) {
     }
 
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].type != 0 && movement_obj[i].unk9C != 0) {
+        if (movement_obj[i].type != 0 && movement_obj[i].hiddenBones != 0) {
             bone_collapseMaskedBones(&movement_obj[i]);
         }
     }

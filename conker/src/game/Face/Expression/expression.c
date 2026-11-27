@@ -84,20 +84,20 @@ void face_showEyeParts(Actor *actor) {
                 eyePart[i]++;
             }
         }
-        actor->unk94 |= 0x7E;
+        actor->hiddenParts |= 0x7E;
         if (eyePart[0] == 0) {
-            actor->unk94 &= ~8;
+            actor->hiddenParts &= ~8;
         } else if (eyePart[0] == 1) {
-            actor->unk94 &= ~0x10;
+            actor->hiddenParts &= ~0x10;
         } else {
-            actor->unk94 &= ~4;
+            actor->hiddenParts &= ~4;
         }
         if (eyePart[1] == 0) {
-            actor->unk94 &= ~0x20;
+            actor->hiddenParts &= ~0x20;
         } else if (eyePart[1] == 1) {
-            actor->unk94 &= ~0x40;
+            actor->hiddenParts &= ~0x40;
         } else {
-            actor->unk94 &= ~2;
+            actor->hiddenParts &= ~2;
         }
     }
 }
@@ -132,8 +132,8 @@ void face_applyExpression(Actor *actor, s32 morphDuration) {
     record = face_getExpressionRecord(actor, actor->expression);
     if (record != NULL) {
         face_startAction(actor, record->action, record->actionParam);
-        if (actor->unk134 != record->unk2) {
-            actor->unk134 = record->unk2;
+        if (actor->morphTarget != record->unk2) {
+            actor->morphTarget = record->unk2;
             if (morphDuration == 0) {
                 actor->morphDuration = record->morphDuration;
             } else {
@@ -143,14 +143,14 @@ void face_applyExpression(Actor *actor, s32 morphDuration) {
         actor->eyeCode[0] = record->eyeCode[0] + 10;
         actor->eyeCode[1] = record->eyeCode[1] + 10;
         if (record->unk8 != 0) {
-            actor->unk68[0] = record->unk8;
+            actor->swapTexture[0] = record->unk8;
         } else {
-            actor->unk68[0] = gModelDefs[actor->character_type]->eyeDefault[0];
+            actor->swapTexture[0] = gModelDefs[actor->character_type]->eyeDefault[0];
         }
         if (record->unk9 != 0) {
-            actor->unk68[1] = record->unk9;
+            actor->swapTexture[1] = record->unk9;
         } else {
-            actor->unk68[1] = gModelDefs[actor->character_type]->eyeDefault[1];
+            actor->swapTexture[1] = gModelDefs[actor->character_type]->eyeDefault[1];
         }
     }
 }

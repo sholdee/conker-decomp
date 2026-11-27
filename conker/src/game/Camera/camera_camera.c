@@ -788,17 +788,17 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
             } else if (camera->Mode & 0x100) {
                 if (camera->CharContext == 0) {
                     if (camera->aim.pitch < -15.0f) {
-                        height = camera->CharPtr->unkCC + camera->mv->height * 0.9f;
+                        height = camera->CharPtr->heightOffset + camera->mv->height * 0.9f;
                     } else {
-                        height = camera->CharPtr->unkCC + camera->mv->height * 0.75f;
+                        height = camera->CharPtr->heightOffset + camera->mv->height * 0.75f;
                     }
                 } else {
-                    height = camera->CharPtr->unkCC + camera->mv->height * 0.85f;
+                    height = camera->CharPtr->heightOffset + camera->mv->height * 0.85f;
                 }
             } else if ((camera->Snap == 0) && (camera->blocked != 0)) {
-                height = camera->CharPtr->unkCC + (f32)camera->mv->height;
+                height = camera->CharPtr->heightOffset + (f32)camera->mv->height;
             } else {
-                height = camera->CharPtr->unkCC + camera->mv->height * 0.75f;
+                height = camera->CharPtr->heightOffset + camera->mv->height * 0.75f;
             }
             if (camera->SpecialFlags & 0x100) {
                 height += 50.0f;

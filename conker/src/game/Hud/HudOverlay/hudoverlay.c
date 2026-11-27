@@ -2064,7 +2064,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                     gCurrentActor = obj;
                     dc_glbl_CharNum = gCurrentActor - movement_obj;
                     obj->scriptCmd = script_getScript(0, obj->intelwalk);
-                    obj->unk21C = 0;
+                    obj->scriptTimer = 0;
                 }
                 gCodeEntryLength = 0;
                 gCodeEntryText[gCodeEntryLength] = 0;

@@ -11,8 +11,8 @@
 #include "conker/texture.h"
 
 /* matching: movement.c defines actor_seatRider as void, but this file was compiled with an s32 return and tests it */
-s32 actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
-                  s32 force, s32 arg9);
+s32 actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
+                  s32 hitRoute, s32 force, s32 soundCmd);
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
 struct TintedObject {
@@ -178,7 +178,7 @@ void func_150D7790(Actor *obj, s32 action) {
         projectile->owner = dc_glbl_CharNum + 1;
     }
     if (projectile != NULL && variant != 0) {
-        projectile->unk221 = -1;
+        projectile->waypointStep = -1;
         oldRacer = mp_findRacer(obj);
         if (oldRacer != -1) {
             newRacer = mp_claimSpareRacer(projectile);
@@ -225,10 +225,10 @@ void func_150D7928(Actor *obj) {
     if (id == 0x48) {
         player = (Actor *)attach_getFirst(obj);
         if (player != NULL) {
-            linkType = player->unk6;
+            linkType = player->baseCharacterType;
         }
     }
-    obj->unkB0 = 25;
+    obj->floatDepth = 25;
     if (obj->bodyRadius != 0) {
         obj->unk90 = obj->bodyRadius;
     }
@@ -258,13 +258,13 @@ void func_150D7928(Actor *obj) {
                 if (speed < player->stickspeed * 1.35f) {
                     speed = player->stickspeed * 1.35f;
                 }
-                player->unkAA = 70;
+                player->speedPercent = 70;
             }
         } else {
             obj->yspd = 0.0f;
         }
-        angle = obj->unk21C;
-        obj->unk21C = angle + (s16)(n - angle) / 3;
+        angle = obj->scriptTimer;
+        obj->scriptTimer = angle + (s16)(n - angle) / 3;
         obj->langle = angle;
         obj->angle = angle;
         obj->speed = player->speed;
@@ -272,7 +272,7 @@ void func_150D7928(Actor *obj) {
             actor_testAttack(obj, dc_glbl_CharNum);
         }
     } else {
-        obj->unk21C = obj->langle;
+        obj->scriptTimer = obj->langle;
         if (obj->lifting != 0) {
             if (movement_obj[playerIndex].stunned != 0) {
                 obj->wantspeed = 15.0f;
@@ -323,7 +323,7 @@ void func_150D7928(Actor *obj) {
             obj->noshove |= 0x10000;
             actor_setHoverGravity(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
             if (obj->lifting != 0) {
-                movement_obj[obj->owner].unkCC = 30;
+                movement_obj[obj->owner].heightOffset = 30;
             }
             obj->lean_angle = -obj->yspd;
             obj->theta = obj->langle * (360.0f / 65536.0f);
@@ -346,7 +346,7 @@ void func_150D7928(Actor *obj) {
         if (timer > 10 && ((player = &movement_obj[playerIndex])->shad == 0.0f || obj->inwater != 0 ||
                             (obj->owner != 0 && player->mv->transport_surface == 2))) {
             if (obj->lifting != 0) {
-                movement_obj[obj->owner].unkCC = 0;
+                movement_obj[obj->owner].heightOffset = 0;
                 movement_obj[obj->owner].mv->transport = 0;
                 movement_obj[obj->owner].inwater = 0;
                 movement_obj[obj->owner].ygrav = 4.0f;
@@ -374,10 +374,10 @@ void func_150D7928(Actor *obj) {
         }
         if (obj->lifting != 0) {
             scratch = (s16)(fabsf(obj->lean_angle * 0.7f) + 44.0f);
-            obj->unkC8 = scratch;
-            movement_obj[obj->owner].unkCC = (s16)(scratch + 44) * obj->scale_y;
+            obj->rootOffsetY = scratch;
+            movement_obj[obj->owner].heightOffset = (s16)(scratch + 44) * obj->scale_y;
         } else {
-            obj->unkC8 = 44.0f;
+            obj->rootOffsetY = 44.0f;
         }
         if (speed > 0.2f && obj->shad < 10.0f && obj->energy != 0 && gCutsceneStates[0] != 1) {
             volume = 1000.0f * speed;

@@ -53,11 +53,11 @@ void func_150C3230(Actor *obj) {
     s32 type;
 
     obj->noshove |= 0x4000000;
-    if ((obj->unk222 != 0) && (obj->attach_char == 0)) {
+    if ((obj->targetIndex != 0) && (obj->attach_char == 0)) {
         obj->old_xpos = movement_obj[obj->owner - 1].xpos;
         obj->old_ypos = movement_obj[obj->owner - 1].ypos;
         obj->old_zpos = movement_obj[obj->owner - 1].zpos;
-        obj->unk222 = 0;
+        obj->targetIndex = 0;
     }
 
     actor_moveHorizontal(obj);
@@ -73,7 +73,7 @@ void func_150C3230(Actor *obj) {
     if (index != 0) {
         s32 anim;
 
-        obj->unk222 = index;
+        obj->targetIndex = index;
         anim = movement_obj[index - 1].animseq.uh;
         if (anim == 0x1F9) {
             type = 2;
@@ -235,9 +235,9 @@ void func_150C3994(Actor *obj) {
         }
     }
     if (obj->yspd < 0.0f) {
-        if ((obj->shad > 20.0f) && (obj->unk136 == 0) && (obj->shad < (-20.0f * obj->yspd))) {
+        if ((obj->shad > 20.0f) && (obj->spriteTexture == 0) && (obj->shad < (-20.0f * obj->yspd))) {
             sound_playActorUntracked(0x92, obj, 0x7D00, 0xC8, 0x9C4);
-            obj->unk136 = 1;
+            obj->spriteTexture = 1;
         }
     }
     if (obj->count5 == 0) {
@@ -251,7 +251,7 @@ void func_150C3994(Actor *obj) {
         }
         sound_playActorSound1(0x1A9, obj, 0x7FFF, 0x3E8, 0x7D0);
         obj->doing_hit = 1;
-        obj->unk114 = 500.0f;
+        obj->doingHitTimer = 500.0f;
         obj->noshove |= 0x01008000;
     }
     obj->imune = 0xFF;
@@ -263,7 +263,7 @@ void func_150C3994(Actor *obj) {
     actor_updatePhysics(obj);
     obj->vtilt += obj->unk148;
     obj->unk148 *= 0.96f;
-    if (((obj->shad == 0.0f) && (obj->count5 >= 0x15) && (obj->unkCC == 0)) || (obj->ivehitit != 0) || (obj->energy == 0)) {
+    if (((obj->shad == 0.0f) && (obj->count5 >= 0x15) && (obj->heightOffset == 0)) || (obj->ivehitit != 0) || (obj->energy == 0)) {
         func_150C3D5C(obj);
         sound_playActorUntracked(0x93, obj, 0x7D00, 0xC8, 0x9C4);
         actor_remove(obj, 1);

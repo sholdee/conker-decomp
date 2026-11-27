@@ -294,11 +294,11 @@ void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
     effect_spawnHitScreenFade(0, self, other);
 }
 
-// Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
+// Sets obj's hiddenBones flags and starts an id-specific animation for ids 0x75 and 0x80.
 void func_15194AB4(Actor *obj) {
     s32 anim;
 
-    obj->unk9C |= 0xFFFE;
+    obj->hiddenBones |= 0xFFFE;
     anim = -1;
     switch (obj->character_type) {
     case 0x75:
@@ -512,8 +512,8 @@ void effect_killAndSplitActor(Actor *obj) {
     copy->speed = 10.0f;
     copy->unkBC = (math_random() % 5U) + 10.0f;
     copy->unk148 = (math_random() % 10U) - 5.0f;
-    copy->unk68[0] = obj->unk68[0];
-    copy->unk68[1] = obj->unk68[1];
+    copy->swapTexture[0] = obj->swapTexture[0];
+    copy->swapTexture[1] = obj->swapTexture[1];
     copy->eyeClosed[0] = obj->eyeClosed[0];
     copy->eyeClosed[1] = obj->eyeClosed[1];
     copy->eyeCode[0] = obj->eyeCode[0];
@@ -521,7 +521,7 @@ void effect_killAndSplitActor(Actor *obj) {
     copy->angle += (math_random() % 10922U) - 65536.0f / 12;
     copy->theta = (obj->angle + 0x4000) * (360.0f / 65536);
     copy->noshove = obj->noshove;
-    copy->unk9C |= 0x0FFF0000;
+    copy->hiddenBones |= 0x0FFF0000;
     collision_allocAnimState(copy, obj->animseq.uh, 0, obj->animsp);
     level_spawnBloodStrip(obj, 0);
     level_spawnBloodStrip(copy, 1);
