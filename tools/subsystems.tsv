@@ -678,19 +678,23 @@ src/init/Audio/AudioMgr/audiomgr.c	audio	audio manager: synthesis driver setup, 
 src/libultra/audio/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
 src/init/Audio/DynamicSound/dynamicsound.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
 src/libultra/audio/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
-src/libultra/audio/n_event.c	audio	libaudio node linking helpers (alLink-style)
+src/libultra/audio/n_event.c	audio	the event queue (SDK event.c, with Rare's priority argument)
 src/libultra/audio/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
 src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (override/fallback/one-shot)
 src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers
 src/libultra/audio/n_resample.c	audio	Rare's rework of n_alResamplePull
 src/libultra/audio/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
+src/init/Audio/SeqChannel/seqchannel.c	audio	channel functions of the compact sequence player (mute, fade, message queue)
 src/init/Audio/SeqCtrl/seqctrl.c	audio	MIDI controller handlers of the compact sequence player
 src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
-src/libultra/audio/n_seqplayer.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
+src/libultra/audio/n_seqplayer.c	audio	the sequence player's voice and channel-state helpers (SDK seqplayer.c), with Conker's instrument loading
 src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path
 src/libultra/audio/n_synallocfx.c	audio	synth FX allocation wrapper (n_alFxNew)
 src/libultra/audio/n_syndelete.c	audio	n_alSynDelete
 src/init/Audio/Tune/tune.c	music	music sequence manager: tracks, volume ramps, per-frame sequence hooks
+src/init/Audio/SynLowPassCount/synlowpasscount.c	audio	posts filter type 17 (the count of the voice low-pass stage)
+src/init/Audio/SynLowPassCutoff/synlowpasscutoff.c	audio	posts filter type 19 (the cutoff of the voice low-pass)
+src/init/Audio/SynLowPassGain/synlowpassgain.c	audio	posts filter type 18 (the gain of the voice low-pass)
 src/init/Audio/VoiceLowPass/voicelowpass.c	audio	per-voice low-pass filter stage
 src/init/Boot/ArgStub/argstub.c	boot	empty early-boot stub
 src/init/Boot/BootMain/bootmain.c	boot	main and idle threads: heap/framebuffer/VI setup, boot data load and decompression

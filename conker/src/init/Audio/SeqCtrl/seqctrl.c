@@ -36,7 +36,7 @@ void audio_ctrlPriority(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 prio
     seqp->chanState[chan].priority = priority;
 }
 
-/* Controller 0x1E: sends a message with the value's low 3 bits to the player's queue (n_cspchan.c sets it). */
+/* Controller 0x1E: sends a message with the value's low 3 bits to the player's queue (init/Audio/SeqChannel/seqchannel.c sets it). */
 void audio_ctrlSendMesg(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if (seqp->msgQueue != 0) {
         osSendMesg(seqp->msgQueue, (arg3 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & -0x100), 0);

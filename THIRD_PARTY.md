@@ -68,8 +68,9 @@ project's own IDO 5.3. No code was copied from them. What was taken:
 - the SDK names of functions whose bytes match (for example `n_alCSPSetBank`, `alCSeqSetLoc`,
   `_bnkfPatchSound`, `_n_sndpVoiceHandler`, `_depth2Cents`, `initOsc`);
 - the split of `conker/src/libultra/audio/` into translation units where Perfect Dark and Donkey Kong 64
-  have the same functions in the same order, and the file names `osc.c`, `n_cspchan.c` and
-  `n_synfilter11.c` to `n_synfilter13.c` for files that the SDK does not have.
+  have the same functions in the same order (for example `bnkf.c` and `osc.c`, `n_cspsetbank.c` and
+  `n_sndplayer.c`, `n_seqplayer.c`, `n_event.c`). The file names are the SDK's. `osc.c`, which the SDK
+  does not have, is named after its functions (the SDK demo code's `initOsc`, `updateOsc`, `stopOsc`).
 
 | Project | Licence |
 |---------|---------|

@@ -455,7 +455,7 @@ s32     initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
 s32     updateOsc(struct OscState *arg0, f32 *arg1);
 void    stopOsc(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
-/* n_cspchan.c: the channels of a compact sequence player */
+/* init/Audio/SeqChannel/seqchannel.c: the channels of a compact sequence player */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue);
 void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
 void    func_10017B30(N_ALCSPlayer *seqp);
@@ -470,12 +470,12 @@ void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); 
 void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base); /* n_csq.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
 void    audio_ctrlFadeStep(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init/Audio/SeqCtrl/seqctrl.c */
-void    func_1001CA90(N_ALVoice *v, f32 fc);                            /* n_synfilter13.c: filter type 19, the cutoff of the voice's low-pass */
-void    func_1001CB40(N_ALVoice *v, u8 fgain);                          /* n_synfilter12.c: filter type 18, the gain of the voice's low-pass */
+void    func_1001CA90(N_ALVoice *v, f32 fc);                            /* init/Audio/SynLowPassCutoff/synlowpasscutoff.c: filter type 19 */
+void    func_1001CB40(N_ALVoice *v, u8 fgain);                          /* init/Audio/SynLowPassGain/synlowpassgain.c: filter type 18 */
 f32     func_1001CEA4(s32 arg0);                                        /* n_drvrNew.c: the pitch ratio of a number of semitones */
 LowPass *func_1001DA28(s16 bus);                                        /* n_syngetfxref.c: the bus's low-pass */
 void    func_1001DAE4(LowPass *lp, s16 paramID, s32 *value);            /* n_synsetfxparam.c */
-void    func_1001E350(N_ALVoice *v, u8 value);                          /* n_synfilter11.c: filter type 17 */
+void    func_1001E350(N_ALVoice *v, u8 value);                          /* init/Audio/SynLowPassCount/synlowpasscount.c: filter type 17 */
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by n_sndplayer.c; it agrees with os_libc.h. */
 void    osSyncPrintf(const char *fmt, ...);
