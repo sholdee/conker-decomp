@@ -707,7 +707,7 @@ segments:
       - [0x1199D0, c, game/Particle/FogFlash/fogflash]
       - [0x11A680, c, game/Weapon/Tank/tank]
       - [0x11C2B0, c, game/Beam/AimedBeam/aimedbeam]
-      - [0x11EEB0, c, game_11EEB0]
+      - [0x11EEB0, c, game/Effects/ActorExplosion/actorexplosion]
       - [0x11F780, c, game/Effects/SwayObject/swayobject]
       - [0x11FF10, c, game/Particle/BoneBurst/boneburst]
       - [0x120950, c, game/Player/FlyControl/flycontrol]
@@ -1103,7 +1103,7 @@ segments:
       - {start: 0x22D550, type: .data, name: game/Camera/LevelHook04/levelhook04, linker_section_order: .rodata}
       - {start: 0x22D560, type: .data, name: game/Prop/MoverSwing/moverswing, linker_section_order: .rodata}
       - {start: 0x22D590, type: .data, name: game/Particle/FogFlash/fogflash, linker_section_order: .rodata}
-      - {start: 0x22D5C0, type: .data, name: game_11EEB0, linker_section_order: .rodata}
+      - {start: 0x22D5C0, type: .data, name: game/Effects/ActorExplosion/actorexplosion, linker_section_order: .rodata}
       - {start: 0x22D5D0, type: .data, name: game/Weapon/SecondGun/secondgun, linker_section_order: .rodata}
       - {start: 0x22D5E0, type: .data, name: game/Particle/Spiral/spiral, linker_section_order: .rodata}
       - {start: 0x22D600, type: .data, name: game/Effects/SurfaceSound/surfacesound, linker_section_order: .rodata}
@@ -1431,7 +1431,7 @@ segments:
       - [0x246030, .rodata, game/Particle/FogFlash/fogflash]
       - [0x246050, .rodata, game/Weapon/Tank/tank]
       - [0x2460B0, .rodata, game/Beam/AimedBeam/aimedbeam]
-      - [0x246380, .rodata, game_11EEB0]
+      - [0x246380, .rodata, game/Effects/ActorExplosion/actorexplosion]
       - [0x2463E0, .rodata, game/Effects/SwayObject/swayobject]
       - [0x246410, .rodata, game/Particle/BoneBurst/boneburst]
       - [0x246440, .rodata, game/Player/FlyControl/flycontrol]

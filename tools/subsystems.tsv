@@ -109,7 +109,7 @@ src/game/Camera/LevelHook33/levelhook33.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook35/levelhook35.c	camera	per-level camera hook
 src/game/Camera/LevelHook04/levelhook04.c	camera	per-level camera hook
 src/game/Camera/LevelHook32/levelhook32.c	camera	per-level camera flag hook
-src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
+src/game/Effects/ActorExplosion/actorexplosion.c	beam	split from game_11C2B0.c; same subsystem
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
 src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook

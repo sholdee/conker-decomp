@@ -12,7 +12,7 @@
  *   game/Beam/BeamQuad/beamquad.c
  *   game/Beam/Tracer/tracer.c
  *   game/Beam/AimedBeam/aimedbeam.c
- *   game_11EEB0.c
+ *   game/Effects/ActorExplosion/actorexplosion.c
  *   game/Beam/ModelBeam/modelbeam.c
  *   game/Beam/CastBeam/castbeam.c
  *   game/Beam/BoltRain/boltrain.c
@@ -753,7 +753,7 @@ void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type);
 void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type);
 void beam_spawnMuzzleBurst(Actor *actor, u8 slot, u8 variant, u8 arg3, s32 arg4); /* K&R definition: the callers' view */
 
-/* game_11EEB0.c */
+/* game/Effects/ActorExplosion/actorexplosion.c */
 void func_150F1A00(Actor *actor);
 GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
 void func_150F1CB0(Actor *actor);
