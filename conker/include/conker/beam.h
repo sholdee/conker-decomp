@@ -380,45 +380,25 @@ typedef struct {
 
 typedef struct RayBeam RayBeam;
 
-/* Aim state of the beam's owner (owner->aim). */
-typedef struct {
-    u8 pad0[0xB4];
-    f32 targetDist;
-    Vec3f targetPos;
-    u8 padC4[0x24];
-    Vec3f targetDir;
-    CollisionTri targetHit;
-    u8 pad106[3];
-    u8 targetType; // 0 = no target
-    u8 pad10A[0x8D];
-    u8 unk197;
-} BeamOwnerAim;
-
-/* The actor the beam is attached to. */
-typedef struct {
-    s32 type;       /* Actor.type: 0 once the actor is gone */
-    u8 pad4[0x37];
-    u8 unique_id;   /* Actor.unique_id */
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[0x15F];
-    MtxF *boneMtx;
-    u8 pad1D8[0x144];
-    BeamOwnerAim *aim;
-} BeamOwner;
-
 /* How a child object refers back to its beam. */
 typedef struct {
     RayBeam *beam;
     u8 flags; // 1 = visible
 } RayBeamLink;
 
-/* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
+/* A 2D sine wobble: offset = base + amplitude * sin(phase), with phase advancing at speed (particle_updateWobbleOffset). */
+typedef struct {
+    /* 0x00 */ f32 offset[2];
+    /* 0x08 */ f32 base[2];
+    /* 0x10 */ f32 amplitude[2];
+    /* 0x18 */ f32 phase[2];
+    /* 0x20 */ f32 speed[2];
+} Wobble151025F4; /* size 0x28 */
+
+/* beam->data.startFx: placed at the beam's start, sized by the beam's width times its wobble offset. */
 typedef struct {
     /* 0x00 */ DescParticleHead head; /* a sprite particle */
-    /* 0xA8 */ f32 baseSizeX;
-    /* 0xAC */ f32 baseSizeY;
-    /* 0xB0 */ u8 padB0[0x20];
+    /* 0xA8 */ Wobble151025F4 wobble;
     /* 0xD0 */ RayBeamLink link;
 } BeamStartFx;
 
@@ -448,33 +428,47 @@ typedef struct {
     /* 0xA8 */ RayBeamLink link;
 } BeamEndFx;
 
-/* RayBeam.data */
+/* RayBeam.data, filled by particle_spawnRayBeam; particle_flickerRayBeam eases the width, texture velocity and alpha. */
 typedef struct {
-    BeamOwner *owner;
-    u8 ownerId; // must match owner->unique_id
-    u8 pad5[3];
-    Vec3f localStart;  // in bone space
-    Vec3f localTarget; // in bone space
-    u8 bone;
-    u8 pad21;
-    u8 unk22;
-    u8 flags; // 1 = drawn, 2 = aimed by the owner
-    BeamStartFx *startFx;
-    BeamHitFx *hitFx;
-    LightEffect *endPoint; // light at the beam's end; its payload (data.object) is the RayBeam
-    BeamLine *line;
-    BeamEndFx *endFx;
-    f32 width;
-    u8 pad3C[8];
-    f32 length;
-    f32 scrollBase;  // texture scroll speed = scrollBase + scrollRange * sin(scrollPhase)
-    f32 scrollRange;
-    f32 scrollPhase;
-    u8 pad54[4];
-    f32 texOffset;
-    u8 pad5C[0x34];
-    s16 unk90;
-} RayBeamData;
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId; // must match owner->unique_id
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ Vec3f localStart;  // in bone space
+    /* 0x14 */ Vec3f localTarget; // in bone space
+    /* 0x20 */ u8 bone;
+    /* 0x21 */ s8 ownerSlot;   // owner's index in movement_obj
+    /* 0x22 */ u8 ownerCamera; // owner->CameraPtr->CNumber, 0xFF without a camera; the beam is hidden in that view
+    /* 0x23 */ u8 flags; // 1 = drawn, 2 = aimed by the owner
+    /* 0x24 */ BeamStartFx *startFx;
+    /* 0x28 */ BeamHitFx *hitFx;
+    /* 0x2C */ LightEffect *endPoint; // light at the beam's end; its payload (data.object) is the RayBeam
+    /* 0x30 */ BeamLine *line;
+    /* 0x34 */ BeamEndFx *endFx;
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 widthTarget;
+    /* 0x40 */ f32 widthBlend;
+    /* 0x44 */ f32 length;
+    /* 0x48 */ f32 scrollBase;  // texture scroll speed = scrollBase + scrollRange * sin(scrollPhase)
+    /* 0x4C */ f32 scrollRange;
+    /* 0x50 */ f32 scrollPhase;
+    /* 0x54 */ f32 scrollPhaseRate;
+    /* 0x58 */ f32 texOffset;
+    /* 0x5C */ f32 texVelocity; // added to texOffset per unit of gFrameDelta
+    /* 0x60 */ f32 texVelocityTarget;
+    /* 0x64 */ f32 texVelocityRange;
+    /* 0x68 */ f32 texVelocityTimer;
+    /* 0x6C */ f32 texVelocityTimerRange;
+    /* 0x70 */ f32 texVelocityBlend;
+    /* 0x74 */ f32 alpha;
+    /* 0x78 */ f32 alphaTarget;
+    /* 0x7C */ f32 alphaBase;
+    /* 0x80 */ f32 alphaRange;
+    /* 0x84 */ f32 alphaTimer;
+    /* 0x88 */ f32 alphaTimerRange;
+    /* 0x8C */ f32 alphaBlend;
+    /* 0x90 */ s16 sound; // sound_play handle
+    /* 0x92 */ u8 pad92[2];
+} RayBeamData; /* size 0x94 */
 
 /* A beam that runs from a bone of its owner to the aim target or the first collision on the way
  * (placed by particle_updateRayBeam, drawn by particle_buildRayBeamQuad). */
