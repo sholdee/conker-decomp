@@ -124,6 +124,9 @@ $(BUILD_DIR)/$(SRC_DIR)/init/Audio/Env/n_env.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/AdpcmLoad/adpcmload.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/VoiceLowPass/voicelowpass.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init/Audio/Resample/n_resample.c.o: OPT_FLAGS := -g
+# Rare's audio code outside libultra/audio is -g like the library
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/OutputMode/outputmode.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Player/mp3player.c.o: OPT_FLAGS := -g
 
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/ai.c.o: OPT_FLAGS := -O1

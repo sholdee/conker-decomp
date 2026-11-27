@@ -9,7 +9,7 @@
  * that these files define, grouped by file in address order:
  *   init/Audio/Mp3Stream/mp3stream.c
  *   game/Audio/Mp3Voice/mp3voice.c
- *   libultra/audio/game_21FC90.c
+ *   game/Audio/Mp3Player/mp3player.c
  *   game/Audio/Mp3Decoder/mp3decoder.c
  *   game/Audio/Mp3Decoder/mp3huffman.s
  *   game/Audio/Mp3Decoder/mp3imdctlong.s
@@ -34,7 +34,7 @@ extern u16 gMp3LastTrack; /* the track last started */
 /* game/Audio/Mp3Voice/mp3voice.c */
 void mp3_initVoice(ALHeap *arg0);
 
-/* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
+/* game/Audio/Mp3Player/mp3player.c: the streaming music player (StreamVoice D_800E0D80) */
 extern StreamVoice D_800E0D80; /* the streaming music player's voice */
 extern s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */
 extern void *D_800E0E28;       /* the Huffman table data */

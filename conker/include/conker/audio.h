@@ -10,7 +10,7 @@
  *   init/Audio/SeqPlayer/seqplayer.c
  *   init/Audio/AudioMgr/audiomgr.c
  *   init/Audio/MixSelector/mixselector.c
- *   libultra/audio/init_17870.c
+ *   init/Audio/OutputMode/outputmode.c
  *   init/Audio/SeqVoice/seqvoice.c
  *   init/Audio/EvtQueue/n_evtqueue.c
  *   init/Audio/SynDelete/n_syndelete.c
@@ -118,7 +118,7 @@ void audio_setMixFallback(s32 selector);
 void audio_clearMixSelectors(void);
 void audio_updateMix(void);
 
-/* libultra/audio/init_17870.c */
+/* init/Audio/OutputMode/outputmode.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
 /* Output-mode flags (init/Audio/Env/n_env.c reads them): C0 = stereo/headphone, C1 = mono, C2 = headphone. */

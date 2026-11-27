@@ -2273,7 +2273,7 @@ typedef struct RopeSpawn {
 } RopeSpawn; /* size 0x24 */
 
 /* The streaming music player's voice (D_800E0D80; set up by game/Audio/Mp3Voice/mp3voice, run by
- * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
+ * game/Audio/Mp3Player/mp3player). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
  * the two rate pairs, the two targets), and from 0x30 a low-pass filter laid out as LowPass is up
  * to its first state pointer (fc, fgain, the coefficient vector, first, fstate[0]). The fields

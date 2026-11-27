@@ -13,7 +13,7 @@ src/init/Boot/Inflate/inflatetables.s	boot	hand-written asm (subsystem from its 
 src/init/Boot/Exception/exceptasm.s	boot	hand-written asm (subsystem from nearest preceding file)
 src/init/Boot/DebugTrap/debugtrap.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/FaultDebugger/faultdebugger.s	boot	hand-written asm (subsystem from its header group)
-src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
+src/init/Audio/OutputMode/outputmode.c	audio	Rare audio output-mode setup
 src/game/Model/ActorQuadAlloc/actorquadalloc.c	model	per-view vertex buffer copies for actor quads
 src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup03/levelcamsetup03.c	camera	per-level camera hook (empty)
@@ -123,7 +123,7 @@ src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
 src/game_193420.c	effect	effect stub (empty)
 src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game_1CC420.c	effect	effect stub (empty)
-src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
+src/game/Audio/Mp3Player/mp3player.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
 src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctlong.s	mp3	hand-written asm (subsystem from its header group)
 src/game/Audio/Mp3Decoder/mp3imdctshort.s	mp3	hand-written asm (subsystem from its header group)
