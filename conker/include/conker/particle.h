@@ -1592,7 +1592,7 @@ typedef struct {
     f32 growth; /* size = growth * sqrt(elapsed) */
     f32 alpha;  /* alpha - fade * elapsed^2 */
     f32 fade;
-    u8 growOneAxis; /* grow only the first size field */
+    u8 growOneAxis; /* grow only head.sizeXZ */
 } Extra1515452C;
 
 /* Copied into the object spawned by particle_spawnSwell at +0x170; advanced each frame by particle_updateSwell. */
@@ -1604,18 +1604,10 @@ typedef struct {
     f32 phaseRate;
 } Extra15154A88;
 
-/* The fields of a particle_newModelParticle object that the update functions below use. */
+/* A particle_newModelParticle object of particle_spawnGrowFade or particle_spawnSwell, with its extra data. */
 typedef struct {
-    u8 pad0[0x18];
-    f32 unk18;
-    f32 unk1C;
-    Vec3f position;
-    u8 pad2C[0x24];
-    Vec3f velocity;
-    u8 pad5C[0x14];
-    u8 alpha;
-    u8 pad71[0xFF];
-    union {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ union {
         Extra1515452C grow;
         Extra15154A88 pulse;
     } extra;
@@ -2733,12 +2725,6 @@ typedef struct {
     /* 0x98 */ EffectPayload *payload;
 } SampleTrail;
 
-typedef struct {
-    /* 0x00 */ CollisionHit *ground;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 unk8;
-} EmitterOwner;
-
 /* A camera-facing quad particle drawn from double-buffered vertices. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x1C];
@@ -2760,8 +2746,9 @@ typedef struct {
 } QuadParticle;
 
 s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
+typedef struct FxSpawnPayload FxSpawnPayload; /* defined in conker/effect.h */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
-                  s32 baseYaw, f32 radius, s32 kind, f32 arg12, EmitterOwner *owner, u8 fxOwner);
+                  s32 baseYaw, f32 radius, s32 kind, f32 arg12, FxSpawnPayload *payload, u8 fxOwner);
 Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view);
 s32 particle_growQuadParticle(QuadParticle *particle);
 s32 particle_fadeQuadParticleByLife(QuadParticle *particle);

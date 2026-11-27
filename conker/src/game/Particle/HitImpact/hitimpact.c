@@ -696,22 +696,15 @@ void particle_intersectAimPlane(Actor *obj, Vec3f *position, Vec3f *direction, V
     *outDir = NULL;
 }
 
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-} Params151D5334;
-
 /* Calls camera_startWobblePreset once for each i in 0..gScreenLayout with the same parameters. */
 void particle_startPlayerCameraWobbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invFadeRange, u8 presetIndex, u8 owner, s32 list) {
     s32 i;
-    Params151D5334 params;
+    CamWobbleFalloff params;
 
-    params.pos = *pos;
-    params.unkC = radius;
-    params.unk10 = fadeRange;
-    params.unk14 = invFadeRange;
+    params.origin = *pos;
+    params.radius = radius;
+    params.fadeRange = fadeRange;
+    params.invFadeRange = invFadeRange;
 
     for (i = 0; i < gScreenLayout + 1; i++) {
         // matching: &params goes through an int (a plain pointer changes the register allocation)

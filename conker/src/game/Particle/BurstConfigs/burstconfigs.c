@@ -1311,27 +1311,27 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     return object;
 }
 
-/* Per-frame update for particle_spawnGrowFade's objects: grow, fade, move; returns 0 once expired. */
+/* Per-frame update for particle_spawnGrowFade's objects: grow, fade, spin; returns 0 once expired. */
 s32 particle_updateGrowFade(Object15132A4C *object) {
     f32 size;
     Extra1515452C *extra;
 
     extra = &object->extra.grow;
     size = extra->growth * sqrtf(extra->elapsed);
-    object->unk18 = size;
+    object->head.sizeXZ = size;
     if (!(extra->growOneAxis & 1)) {
-        object->unk1C = size;
+        object->head.sizeY = size;
     }
     {
         f32 elapsed = extra->elapsed;
-        object->alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
+        object->head.alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
         extra->elapsed += gFrameDelta;
         if (extra->duration < extra->elapsed) {
             return 0;
         }
-        object->position.x += object->velocity.x * gFrameDelta;
-        object->position.y += object->velocity.y * gFrameDelta;
-        object->position.z += object->velocity.z * gFrameDelta;
+        object->head.rot.x += object->head.rotVel.x * gFrameDelta;
+        object->head.rot.y += object->head.rotVel.y * gFrameDelta;
+        object->head.rot.z += object->head.rotVel.z * gFrameDelta;
         return 1;
     }
 }
@@ -1422,7 +1422,7 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
     return object;
 }
 
-/* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, move; returns 0 once expired. */
+/* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, spin; returns 0 once expired. */
 s32 particle_updateSwell(Object15132A4C *object) {
     Extra15154A88 *extra;
     f32 wave;
@@ -1431,17 +1431,17 @@ s32 particle_updateSwell(Object15132A4C *object) {
     extra = &object->extra.pulse;
     wave = sinf(extra->phase);
     size = extra->size * wave;
-    object->unk1C = size;
-    object->unk18 = size;
-    object->alpha = (f32)(u8)(u32)extra->alpha * wave;
+    object->head.sizeY = size;
+    object->head.sizeXZ = size;
+    object->head.alpha = (f32)(u8)(u32)extra->alpha * wave;
     extra->remaining -= gFrameDelta;
     if (extra->remaining <= 0.0f) {
         return 0;
     }
 
     extra->phase += extra->phaseRate * gFrameDelta;
-    object->position.x += object->velocity.x * gFrameDelta;
-    object->position.y += object->velocity.y * gFrameDelta;
-    object->position.z += object->velocity.z * gFrameDelta;
+    object->head.rot.x += object->head.rotVel.x * gFrameDelta;
+    object->head.rot.y += object->head.rotVel.y * gFrameDelta;
+    object->head.rot.z += object->head.rotVel.z * gFrameDelta;
     return 1;
 }

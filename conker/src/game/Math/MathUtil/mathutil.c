@@ -1,5 +1,14 @@
 #include <ultra64.h>
 #include <math.h>
+
+/* This file's .bss: the debug breadcrumbs of math_transformOffset. It comes before the
+ * other headers: IDO's .bss order depends on the number of declarations before it. */
+static s32 gTransformOffsetStep;   /* the step reached */
+static void *gTransformOffsetMtx; /* the matrix */
+static f32 gTransformOffsetX;   /* the offset */
+static f32 gTransformOffsetY;
+static f32 gTransformOffsetZ;
+
 #include "conker/actor.h"
 #include "conker/anim.h"
 #include "conker/attach.h"
@@ -28,13 +37,6 @@ static u8 gColourPalettes[9 * 12] = {
     0x96, 0xFF, 0x96, 0x64, 0xFF, 0x64, 0x32, 0xFF, 0x32, 0x00, 0xFF, 0x00,
     0xFF, 0xFF, 0xFF, 0xFA, 0xFA, 0xFA, 0xE6, 0xE6, 0xE6, 0xC8, 0xC8, 0xC8,
 };
-
-/* This file's .bss: the debug breadcrumbs of math_transformOffset. */
-static s32 gTransformOffsetStep;   /* the step reached */
-static void *gTransformOffsetMtx; /* the matrix */
-static f32 gTransformOffsetX;   /* the offset */
-static f32 gTransformOffsetY;
-static f32 gTransformOffsetZ;
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {

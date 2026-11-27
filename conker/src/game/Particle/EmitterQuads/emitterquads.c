@@ -32,15 +32,15 @@ s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 he
  */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 yaw, s32 baseYaw, f32 radius, s32 kind, f32 arg12,
-                  EmitterOwner *owner, u8 fxOwner) {
-    EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
+                  FxSpawnPayload *payload, u8 fxOwner) {
+    FxSpawnPayload *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
     const s8 *entry;
     Vec3f position;
     Vec3f velocity;
     const EmitterConfig *config;
 
-    emitter = owner;
+    emitter = payload;
     scale = 1.0f;
     entry = &gImpactSets[kind].emitter;
     config = &gImpactEmitterConfigs[*entry];
@@ -49,13 +49,13 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
     position.z = z;
     math_dirFromBinAngles(yaw, (math_random() % (config->pitchRange + 1)) + config->pitch,
                   math_randomFloat() * config->speedRange + config->speed, &velocity);
-    particle_spawnSteamParticle(&position, &velocity, emitter->unk8,
+    particle_spawnSteamParticle(&position, &velocity, emitter->kind,
                   math_randomFloat() * config->gravityRange + config->gravity,
                   (math_random() % (config->lifetimeRange + 1)) + config->lifetime,
                   (math_random() % (config->alphaRange + 1)) + config->alpha,
                   math_randomFloat() * config->sizeRange + config->size,
-                  math_randomFloat() < config->floorHitChance, scale, scale, 1, emitter->ground, 1, 0, fxOwner,
-                  emitter->unk4);
+                  math_randomFloat() < config->floorHitChance, scale, scale, 1, emitter->hit, 1, 0, fxOwner,
+                  emitter->list);
     return 1;
 }
 
