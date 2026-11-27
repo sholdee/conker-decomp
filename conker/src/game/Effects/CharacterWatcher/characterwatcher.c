@@ -324,7 +324,7 @@ s32 effect_watcherIsOutOfWater(Actor *chr, u8 mode) {
     } else {
         if ((-10000.0f == chr->waterHeight) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->waterHeight < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
+        } else if ((chr->waterHeight < chr->ypos) || (chr->ledgeState != 0)) {
             ret = 1;
         } else {
             ret = 0;

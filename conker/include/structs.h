@@ -990,7 +990,7 @@ struct Actor {
     /* 0x048 */ f32 speedup;
     /* 0x04C */ f32 animsp;
     /* 0x050 */ f32 wantanimsp;   // not accessed in US code
-    /* 0x054 */ f32 unk54;
+    /* 0x054 */ f32 bodyLean;     // player lean in degrees, eased by mv->lean_last each update (actor_updatePlayer); drives lean_angle and the body bone commands
     /* 0x058 */ u8 *animBankTable; // ROM table [2][bank] of the animation bank (rom_findPath)
     /* 0x05C */ s32 basemtx;
     /* 0x060 */ s16 texScroll;
@@ -1047,7 +1047,7 @@ struct Actor {
     /* 0x0AB */ u8  unkAB;
     /* 0x0AC */ u8  modelLoadFlags;
     /* 0x0AD */ u8  inwater;
-    /* 0x0AE */ u8  unkAE;
+    /* 0x0AE */ u8  waterJumpTimer; // player updates left after the jump out of the water (12; actor_tickTimers): less deceleration
     /* 0x0AF */ u8  padAF;
     /* 0x0B0 */ s8  floatDepth;
     /* 0x0B1 */ u8  padB1;
@@ -1116,7 +1116,7 @@ struct Actor {
     /* 0x134 */ u8  morphTarget;
     /* 0x135 */ u8  morphDuration;
     /* 0x136 */ u8  spriteTexture;
-    /* 0x137 */ u8  unk137;
+    /* 0x137 */ u8  ledgeState;    // player: 0 none, 1 hanging from a ledge, 2 climbing up, 0xFF reset to 0 at the start of actor_updatePlayer (actor_updatePlayer, actor_updatePlayerControls)
     /* 0x138 */ u8  speccnt;
     /* 0x139 */ u8  idleRequest;      // requested idle sequence (anim_pickIdleSequence)
     /* 0x13A */ u8  idleRequestTimer; // its countdown
@@ -3241,15 +3241,80 @@ typedef struct {
     /* 0x08 */ const f32 *scales;
 } VariantList;
 
-/* One 8-byte cutscene script event (gSeqEventTracks[scene][track][i]). Each track starts with a
-   4-event header whose value is the start time (see game/Cutscene/SeqEvents/seqevents.c). */
+/* One 8-byte cutscene script event (gSeqEventTracks[scene][track][i]). Each track starts with a 4-event
+   header: [0].value is the track's start time, [1].value its end time, [2].value (track 0) the scene
+   length or -9999. An event with type 0 and delta 0 is a time marker: value is the absolute time.
+   game/Cutscene/SeqEvents/seqevents.c dispatches the other types (cutscene_dispatchEvent). */
 typedef struct {
     /* 0x0 */ s8 type;
     /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
-    /* 0x2 */ s16 value;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s16 unk6;
+    /* 0x2 */ s16 value; /* per type: time (0), LOD (1), animation (2), camera track (3), morph target (4),
+                            command (5), sound (6, 10), text index (7, 0xE-0x10, 0x12), tune (8), eye code - 10 (9),
+                            mp3 track (0xB), expression (0xC), part set - 1 (0xD), track mode slot (0x11) */
+    /* 0x4 */ union {
+        struct {
+            /* 0x4 */ s8 unk4;
+            /* 0x5 */ s8 unk5;
+            /* 0x6 */ s16 unk6;
+        } args;      /* any type: cutscene_findEvent compares unk4 and unk5, cutscene_findEventsAround only unk4 */
+        struct {
+            /* 0x4 */ s8 endMarker; /* 0: play `value`; else only ends the previous animation's span */
+            /* 0x5 */ s8 unk5;      /* play event: != 0 holds the animation (speed 0); end marker with unk5 == 1: keeps the previous animation looping */
+            /* 0x6 */ s16 blend;    /* blend frames + 1 for actor_playAnim; 0 = 5 */
+        } anim;      /* type 2 */
+        struct {
+            /* 0x4 */ s8 endMarker; /* 0: start morphing to `value`; else only ends the previous morph */
+            /* 0x5 */ s8 unk5;
+            /* 0x6 */ s16 unk6;
+        } morph;     /* type 4 */
+        struct {
+            /* 0x4 */ s8 unk4;
+            /* 0x5 */ s8 unk5;
+            /* 0x6 */ s16 unk6;
+        } cmd;       /* type 5: `value` is the command; the parameters' meaning depends on it */
+        struct {
+            /* 0x4 */ s8 unk4;   /* type 10: 0 start, 1 end, 2 fade-in end, 3 fade-out start; type 6: 2 = bus 1, else bus 0 */
+            /* 0x5 */ s8 pitch;  /* in steps of 50 cents (sound_addDynamicSound's cents) */
+            /* 0x6 */ s16 volume; /* low byte: 1-255; 0 = full */
+        } sound;     /* types 6 (plays to its end) and 10 (stops at its end event or the scene's end) */
+        struct {
+            /* 0x4 */ s8 action;  /* 0 open, 1 release, else close */
+            /* 0x5 */ s8 unk5;    /* open: colour index; release: remove now; close: close now (not after the page) */
+            /* 0x6 */ s16 closeColor; /* close: colour index + 1 to switch to; 0 = keep */
+        } subtitle;  /* types 7, 0xE, 0xF, 0x10, 0x12 (one per gTextLanguage); `value` indexes gSeqTextLists */
+        struct {
+            /* 0x4 */ s8 action;  /* 0 play, 1 set channel volume, 2 set fade, 4 fade channel volume (to action 5),
+                                     6 fade (to action 7), 8 jump to marker, 9 stop */
+            /* 0x5 */ s8 channel; /* 1-based channel (mask bit channel - 1) */
+            /* 0x6 */ s16 unk6;   /* actions 2, 4, 6: a percentage; action 1: 0 mutes the channels, > 0 sets them to full (scaled by 100, then
+                                     clamped); action 8: marker - 1 */
+        } music;     /* type 8 */
+        struct {
+            /* 0x4 */ s8 index;   /* Actor.eyeCode index */
+            /* 0x5 */ s8 unk5;
+            /* 0x6 */ s16 unk6;
+        } eye;       /* type 9 */
+        struct {
+            /* 0x4 */ s8 action;  /* 0 start, 1 fade to `volume` (until action 2), 3 stop, 4 pause, 5 resume */
+            /* 0x5 */ s8 unk5;
+            /* 0x6 */ s16 volume; /* 1-255; 0 = full */
+        } mp3;       /* type 0xB */
+        struct {
+            /* 0x4 */ s8 morphDuration; /* face_requestExpression's morphDuration */
+            /* 0x5 */ s8 hold;          /* != 0: no time limit (timer 0xFFFF) */
+            /* 0x6 */ s16 setDefault;   /* != 0: face_setDefaultExpression instead */
+        } face;      /* type 0xC */
+        struct {
+            /* 0x4 */ s8 action;  /* 0 create, 1 remove, 2 set seg6Id, 3 set seg7Id */
+            /* 0x5 */ s8 texture; /* actions 2 and 3: index into D_80090214 (texture ids) */
+            /* 0x6 */ s16 unk6;
+        } partSet;   /* type 0xD */
+        struct {
+            /* 0x4 */ s8 on;      /* != 0 stores this event's index in gSeqActiveEvents[scene][track][value], 0 clears it */
+            /* 0x5 */ s8 unk5;    /* slot 2: the track to look at; slot 1: 0 = the track's own angles, else the camera's eye position */
+            /* 0x6 */ s16 yOffset; /* slots 1 and 2: added to the look target's y */
+        } trackMode; /* type 0x11 (dispatched only in mode 1); `value` is the slot: 0 heading, 1 and 2 look target */
+    } u;
 } SeqEvent; // size 0x8
 
 /* Message table entry (D_800DD254 / D_800DD258). */

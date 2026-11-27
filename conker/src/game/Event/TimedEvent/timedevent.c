@@ -1303,7 +1303,7 @@ void func_1506D74C(void) {
         gCurrentActor->yspd = 0.0f;
     }
     gCurrentActor->ypos += 70.0f;
-    gCurrentActor->unk137 = 0;
+    gCurrentActor->ledgeState = 0;
     gCurrentActor->norun = 0;
     actor_splitVelocity(gCurrentActor->angle, gEventParam, 0, &xOff, &zOff, &yOff);
     actor_playAnim(gCurrentActor, 15, 1.0f, 0.0f, 0.0f, 0.0f, 0);

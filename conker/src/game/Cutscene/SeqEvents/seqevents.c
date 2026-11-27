@@ -115,7 +115,7 @@ s32 cutscene_updateSound(SoundRecord *voice, s32 active, u32 *volume, s32 pan, s
 
 /*
  * Searches `track` of `scene` for the first event after `after` of the given type
- * (optionally also matching value, unk4 and unk5). Stores it in *found and returns
+ * (optionally also matching value, u.args.unk4 and u.args.unk5). Stores it in *found and returns
  * its time; on failure stores NULL and returns the scene's end time.
  */
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
@@ -133,8 +133,8 @@ s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s
                 if ((after < ev) &&
                     (type == ev->type) &&
                     ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) &&
-                    ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4))) &&
+                    ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->u.args.unk5)))) {
                     *found = ev;
                     return time;
                 }
@@ -150,8 +150,8 @@ s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s
                     if ((after < ev) &&
                         (type == ev->type) &&
                         ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) &&
-                        ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4))) &&
+                        ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->u.args.unk5)))) {
                         *found = ev;
                         return time;
                     }
@@ -198,7 +198,7 @@ void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, 
             if (evTime <= time) {
                 if ((type == ev->type) &&
                     ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4)))) {
                     if (prev != NULL) {
                         *prev = ev;
                     }
@@ -210,7 +210,7 @@ void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, 
             if (evTime > time) {
                 if ((type == ev->type) &&
                     ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4)))) {
                     *next = ev;
                     *nextTime = evTime;
                     return;
@@ -229,7 +229,7 @@ void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, 
                 if (evTime <= sceneTime) {
                     if ((type == ev->type) &&
                         ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4)))) {
                         if (prev != NULL) {
                             *prev = ev;
                         }
@@ -242,7 +242,7 @@ void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, 
                 if (evTime > sceneTime) {
                     if ((type == ev->type) &&
                         ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
-                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->u.args.unk4)))) {
                         *next = ev;
                         *nextTime = evTime;
                         return;
@@ -389,10 +389,10 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             (event->type == 0x12 && gTextLanguage != 1)) {
             return 1;
         }
-        opening = event->unk4 == 0 ? 1 : 0;
+        opening = event->u.subtitle.action == 0 ? 1 : 0;
         sub = cutscene_getSubtitleSlot(track, opening);
         if (sub != NULL) {
-            if (event->unk4 == 0) {
+            if (event->u.subtitle.action == 0) {
                 if (sub->config.numPages != 0) {
                     text_removeBox(sub->handle);
                 }
@@ -414,23 +414,23 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 sub->config.screenYPercent = &gSeqTrackStates[scene][track].yaw;
                 sub->config.cutsceneOnly = 1;
                 sub->config.anglePercent = &gSeqTrackStates[scene][track].roll;
-                sub->config.r = colors[event->unk5][0];
-                sub->config.g = colors[event->unk5][1];
-                sub->config.b = colors[event->unk5][2];
-                if (event->unk5 == 2) {
+                sub->config.r = colors[event->u.subtitle.unk5][0];
+                sub->config.g = colors[event->u.subtitle.unk5][1];
+                sub->config.b = colors[event->u.subtitle.unk5][2];
+                if (event->u.subtitle.unk5 == 2) {
                     sub->config.flags |= 0x40000;
                 }
                 sub->handle = text_createBox(0, 0, 0, 0, &sub->config, sceneTag);
-            } else if (event->unk4 == 1) {
-                cutscene_releaseSubtitle(sub, event->unk5);
+            } else if (event->u.subtitle.action == 1) {
+                cutscene_releaseSubtitle(sub, event->u.subtitle.unk5);
             } else {
-                if (event->unk5 == 0) {
+                if (event->u.subtitle.unk5 == 0) {
                     sub->handle = text_closeBoxAfterPage(sub->handle);
                 } else {
                     sub->handle = text_closeBoxNow(sub->handle);
                 }
-                if (event->unk6 != 0) {
-                    s32 color = event->unk6 - 1;
+                if (event->u.subtitle.closeColor != 0) {
+                    s32 color = event->u.subtitle.closeColor - 1;
 
                     sub->config.r = colors[color][0];
                     sub->config.g = colors[color][1];
@@ -448,15 +448,15 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         s32 duration;
 
         if (event->value != 0) {
-            if (event->unk6 != 0) {
+            if (event->u.face.setDefault != 0) {
                 face_setDefaultExpression(obj, event->value);
             } else {
-                if (event->unk5 != 0) {
+                if (event->u.face.hold != 0) {
                     duration = 0xFFFF;
                 } else {
                     duration = cutscene_findEvent(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
                 }
-                face_requestExpression(obj, event->value, 3, duration, event->unk4);
+                face_requestExpression(obj, event->value, 3, duration, event->u.face.morphDuration);
             }
         }
     } else if (event->type == 0xD) {
@@ -465,17 +465,17 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         if (obj == NULL) {
             return 1;
         }
-        if (event->unk4 == 0) {
+        if (event->u.partSet.action == 0) {
             collision_createPartSet(obj, event->value + 1, 1.0f, 0);
-        } else if (event->unk4 == 1) {
+        } else if (event->u.partSet.action == 1) {
             collision_removePartSet(obj, event->value + 1);
         } else {
             att = attach_find(obj, event->value + 1, 0);
             if (att != NULL) {
-                if (event->unk4 == 2) {
-                    att->seg6Id = D_80090214[event->unk5];
-                } else if (event->unk4 == 3) {
-                    att->seg7Id = D_80090214[event->unk5];
+                if (event->u.partSet.action == 2) {
+                    att->seg6Id = D_80090214[event->u.partSet.texture];
+                } else if (event->u.partSet.action == 3) {
+                    att->seg7Id = D_80090214[event->u.partSet.texture];
                 }
             }
         }
@@ -492,7 +492,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (duration == 0) {
             duration = 1;
         }
-        if (event->unk4 == 0) {
+        if (event->u.morph.endMarker == 0) {
             obj->morphTarget = event->value;
             obj->morphDuration = duration;
         }
@@ -509,7 +509,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         if (obj == NULL) {
             return 1;
         }
-        obj->eyeCode[event->unk4] = event->value + 10;
+        obj->eyeCode[event->u.eye.index] = event->value + 10;
     } else if (event->type == 1) {
         s32 v;
 
@@ -523,28 +523,28 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         obj->forced_lod = v;
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 gLetterbox = &gSeqTrackStates[scene][track].unk28;
             } else {
                 gLetterbox = NULL;
             }
         } else if (event->value == 8) {
-            gCutsceneShowUnboundActors[scene] = !event->unk4;
+            gCutsceneShowUnboundActors[scene] = !event->u.cmd.unk4;
         } else if (event->value == 9) {
-            gCutsceneShowUnboundObjects[scene] = !event->unk4;
+            gCutsceneShowUnboundObjects[scene] = !event->u.cmd.unk4;
         } else if (event->value == 0xD) {
-            gCutsceneUpdateUnboundActors[scene] = !event->unk4;
+            gCutsceneUpdateUnboundActors[scene] = !event->u.cmd.unk4;
         } else if (event->value == 0x12) {
-            gCutsceneKeepSpawnedActors[scene] = !event->unk4;
+            gCutsceneKeepSpawnedActors[scene] = !event->u.cmd.unk4;
         } else if (event->value == 0x13) {
-            D_800C365C[scene] = event->unk4;
+            D_800C365C[scene] = event->u.cmd.unk4;
         } else if (event->value == 0x15) {
-            gCutsceneRunTimedEvents[scene] = !event->unk4;
+            gCutsceneRunTimedEvents[scene] = !event->u.cmd.unk4;
         } else if (event->value == 0x14) {
             if (obj == NULL) {
                 return 1;
             }
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 actor_handleDeath(obj);
             } else {
                 actor_remove(obj, 0);
@@ -555,10 +555,10 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             if (obj == NULL) {
                 return 1;
             }
-            if (event->unk4 == 0) {
-                obj->fogLevel = colors[event->unk5][0]; // mode 1: fogLevel/fogRate/fogFade hold the colour
-                obj->fogRate = colors[event->unk5][1];
-                obj->fogFade = colors[event->unk5][2];
+            if (event->u.cmd.unk4 == 0) {
+                obj->fogLevel = colors[event->u.cmd.unk5][0]; // mode 1: fogLevel/fogRate/fogFade hold the colour
+                obj->fogRate = colors[event->u.cmd.unk5][1];
+                obj->fogFade = colors[event->u.cmd.unk5][2];
                 obj->fogMode = 1;
                 obj->fogColor = (u32)&gSeqTrackStates[scene][track].unk30;
             } else {
@@ -569,56 +569,56 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 mode;
             s32 spawnPoint;
 
-            if (event->unk5 != 0) {
-                spawnPoint = event->unk6;
+            if (event->u.cmd.unk5 != 0) {
+                spawnPoint = event->u.cmd.unk6;
                 mode = 2;
             } else {
                 spawnPoint = 0;
                 mode = 1;
             }
-            game_requestLevelChange(mode, event->unk4, spawnPoint, 0, 0);
+            game_requestLevelChange(mode, event->u.cmd.unk4, spawnPoint, 0, 0);
         } else if (event->value == 0x17) {
             if (obj == NULL) {
                 return 1;
             }
-            obj->levelMode = !event->unk4;
+            obj->levelMode = !event->u.cmd.unk4;
             if (obj->levelMode != 0) {
-                obj->levelMode += event->unk5;
+                obj->levelMode += event->u.cmd.unk5;
             }
-            if (event->unk4 == 0) {
-                obj->levelRange = event->unk6;
+            if (event->u.cmd.unk4 == 0) {
+                obj->levelRange = event->u.cmd.unk6;
             }
         } else if (event->value == 0x16) {
             if (obj == NULL) {
                 return 1;
             }
-            obj->level2Mode = !event->unk4;
+            obj->level2Mode = !event->u.cmd.unk4;
             if (obj->level2Mode != 0) {
-                obj->level2Mode += event->unk5;
+                obj->level2Mode += event->u.cmd.unk5;
             }
-            if (event->unk4 == 0) {
-                obj->level2Range = event->unk6;
+            if (event->u.cmd.unk4 == 0) {
+                obj->level2Range = event->u.cmd.unk6;
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
             if (gSeqTrackInfos[scene][track].type == 3 && actor != NULL) {
-                if (event->unk4 == 0) {
+                if (event->u.cmd.unk4 == 0) {
                     FU8(actor, 0x6E) = 1;
                 } else {
                     FU8(actor, 0x6E) = 0;
                 }
             }
         } else if (event->value == 0x1E) {
-            gNextCutscene = event->unk4 + 1;
+            gNextCutscene = event->u.cmd.unk4 + 1;
             gNextCutsceneMap = level;
         } else if (event->value == 3) {
-            WorldObject *target = gfx_findObjectById(event->unk6);
+            WorldObject *target = gfx_findObjectById(event->u.cmd.unk6);
 
             if (target == NULL) {
                 return 1;
             }
             FU8(target, 0x73) &= ~3;
-            if (event->unk5 == 0) {
+            if (event->u.cmd.unk5 == 0) {
                 FU8(target, 0x73) |= 2;
             } else {
                 FU8(target, 0x73) |= 1;
@@ -627,7 +627,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             Vec3f point;
             Vec3f point2;
 
-            switch (event->unk4) {
+            switch (event->u.cmd.unk4) {
                 case 0:
                     point.x = gSeqTrackStates[scene][track].x;
                     point.y = gSeqTrackStates[scene][track].y;
@@ -641,10 +641,10 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     beam_spawnEmitterPreset(5, 1, 0, &point2, -10000.0f, 100.0f, -1, sceneTag, 1);
                     break;
                 case 2:
-                    effect_sendEventToTimedEffects(0, event->unk5 ? 0x2B : 0x2C);
+                    effect_sendEventToTimedEffects(0, event->u.cmd.unk5 ? 0x2B : 0x2C);
                     break;
                 case 3:
-                    if (event->unk5) {
+                    if (event->u.cmd.unk5) {
                         light_setGroupDisabled(1, 0);
                         light_setGroupDisabled(2, 1);
                     } else {
@@ -653,19 +653,19 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     }
                     break;
                 case 4:
-                    light_setDaylight(event->unk5);
+                    light_setDaylight(event->u.cmd.unk5);
                     break;
                 case 5:
                     light_sendEvent(0x28, 0x17, 0);
                     break;
                 case 6:
-                    trail_startStream(event->unk5);
+                    trail_startStream(event->u.cmd.unk5);
                     break;
                 case 7:
-                    light_setGroupDisabled(3, event->unk5 ? 0 : 1);
+                    light_setGroupDisabled(3, event->u.cmd.unk5 ? 0 : 1);
                     break;
                 case 8:
-                    effect_spawnScatterTrailVariant(event->unk5);
+                    effect_spawnScatterTrailVariant(event->u.cmd.unk5);
                     break;
                 case 9: {
                     u8 i;
@@ -701,7 +701,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     effect_broadcastEvent(0, 0x4F);
                     break;
                 case 18:
-                    trail_stopStream(event->unk5);
+                    trail_stopStream(event->u.cmd.unk5);
                     break;
                 case 19:
                     light_setGroupDisabled(0xB, 0);
@@ -713,7 +713,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     }
                     break;
                 case 21:
-                    effect_sendEventToTimedEffects(0, event->unk5 != 0 ? 0x55 : 0x56);
+                    effect_sendEventToTimedEffects(0, event->u.cmd.unk5 != 0 ? 0x55 : 0x56);
                     break;
                 case 22:
                     if (obj != NULL) {
@@ -735,8 +735,8 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 count;
 
             list = particle_getObjEmitterData(obj, &count);
-            if (list != NULL && event->unk6 < count) {
-                particle_startAnchorEmitter(obj, list[event->unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
+            if (list != NULL && event->u.cmd.unk6 < count) {
+                particle_startAnchorEmitter(obj, list[event->u.cmd.unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
             }
         } else if (event->value == 5) {
             s32 idx;
@@ -745,13 +745,13 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 ids[4] = { 0xD, 0xE, 0xF, 0x10 };
             u8 c;
 
-            if (event->unk4 == 0) {
-                idx = event->unk5;
+            if (event->u.cmd.unk4 == 0) {
+                idx = event->u.cmd.unk5;
                 if (idx >= 4) {
                     idx = 3;
                 }
-                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
-                if (event->unk6 != 0) {
+                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->u.cmd.unk5, scene) - eventTime;
+                if (event->u.cmd.unk6 != 0) {
                     duration = 999;
                     c = 0xFF;
                 } else {
@@ -760,9 +760,9 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 particle_startActorEmitter(obj, ids[idx], duration, 0, c, 0, "Cutscene 1");
             }
         } else if (event->value == 0x36) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 trail_startMatrixTrail(obj, 0, 300, 0, sceneTag, 0);
-            } else if (event->unk4 == 1) {
+            } else if (event->u.cmd.unk4 == 1) {
                 ActorRef ref;
 
                 ref.actor = obj;
@@ -776,7 +776,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 return 1;
             }
             {
-                switch (event->unk4) {
+                switch (event->u.cmd.unk4) {
                     case 0:
                         v = 0xC;
                         break;
@@ -796,21 +796,21 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 effect_sendAttachmentMessage(obj, 0xD, v, 0);
             }
         } else if (event->value == 0x46) {
-            if (event->unk4 != 0) {
+            if (event->u.cmd.unk4 != 0) {
                 beam_sendStripMessage1(obj);
             } else {
                 beam_sendStripMessage2(obj);
             }
         } else if (event->value == 0x25) {
-            if (event->unk4 != 0) {
-                gNearPlaneOverride = event->unk4;
+            if (event->u.cmd.unk4 != 0) {
+                gNearPlaneOverride = event->u.cmd.unk4;
             } else {
                 gNearPlaneOverride = gDefaultNear;
             }
             view_setClipPlanes(0, gNearPlaneOverride, gFarPlaneOverride);
         } else if (event->value == 0x58) {
-            if (event->unk6 != 0) {
-                gFarPlaneOverride = event->unk6 * 10;
+            if (event->u.cmd.unk6 != 0) {
+                gFarPlaneOverride = event->u.cmd.unk6 * 10;
             } else {
                 gFarPlaneOverride = gDefaultFar;
             }
@@ -819,12 +819,12 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 v;
 
             if (obj != NULL) {
-                v = event->unk4;
+                v = event->u.cmd.unk4;
                 v <<= 16;
-                v |= event->unk6;
-                if (event->unk5 == 0) {
+                v |= event->u.cmd.unk6;
+                if (event->u.cmd.unk5 == 0) {
                     obj->hiddenParts = v;
-                } else if (event->unk5 == 1) {
+                } else if (event->u.cmd.unk5 == 1) {
                     obj->hiddenParts |= v;
                 } else {
                     obj->hiddenParts &= ~(v | 1);
@@ -834,42 +834,42 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 r;
 
             if (obj != NULL) {
-                if (event->unk4 == 0) {
-                    r = collision_findObjectSlotById(event->unk6);
+                if (event->u.cmd.unk4 == 0) {
+                    r = collision_findObjectSlotById(event->u.cmd.unk6);
                     if (r != -1) {
                         obj->unk101 |= 4;
                         obj->attach_char = r + 1;
-                        obj->basemtx = event->unk5;
+                        obj->basemtx = event->u.cmd.unk5;
                     }
                 } else {
                     obj->attach_char = 0;
                 }
             }
         } else if (event->value == 0x42) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 gSpriteQueuedCmd = 1;
-            } else if (event->unk4 == 1) {
+            } else if (event->u.cmd.unk4 == 1) {
                 gSpriteQueuedCmd = 4;
-            } else if (event->unk4 == 3) {
+            } else if (event->u.cmd.unk4 == 3) {
                 gSpriteQueuedCmd = 2;
-            } else if (event->unk4 == 4) {
+            } else if (event->u.cmd.unk4 == 4) {
                 gSpriteQueuedCmd = 5;
-            } else if (event->unk4 == 5) {
+            } else if (event->u.cmd.unk4 == 5) {
                 gSpriteQueuedCmd = 6;
-            } else if (event->unk4 == 6) {
+            } else if (event->u.cmd.unk4 == 6) {
                 gSpriteQueuedCmd = 7;
-            } else if (event->unk4 == 7) {
+            } else if (event->u.cmd.unk4 == 7) {
                 gSpriteQueuedCmd = 8;
-            } else if (event->unk4 == 8) {
+            } else if (event->u.cmd.unk4 == 8) {
                 gSpriteQueuedCmd = 9;
-            } else if (event->unk4 == 9) {
+            } else if (event->u.cmd.unk4 == 9) {
                 gSpriteQueuedCmd = 10;
             }
         } else if (event->value == 0x43) {
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 sprite_spawnConverging(gSeqTrackStates[scene][track].unk24, gSeqTrackStates[scene][track].unk28, duration, sceneTag);
             }
@@ -877,28 +877,28 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 screen_spawnTintEffect(0, duration, 0xFF, 0, 0, gLastPlayerIndex, 0, 0);
             }
         } else if (event->value == 0x49) {
-            if (obj != NULL && event->unk4 < 3) {
-                (&obj->taskint[0])[event->unk4] = event->unk6;
+            if (obj != NULL && event->u.cmd.unk4 < 3) {
+                (&obj->taskint[0])[event->u.cmd.unk4] = event->u.cmd.unk6;
             }
         } else if (event->value == 0x4B) {
             if (obj != NULL) {
-                obj->hiddenBones = (event->unk6 & 0xFFFF) | ((event->unk5 & 0xFF) << 16) | ((event->unk4 & 0xFF) << 24);
+                obj->hiddenBones = (event->u.cmd.unk6 & 0xFFFF) | ((event->u.cmd.unk5 & 0xFF) << 16) | ((event->u.cmd.unk4 & 0xFF) << 24);
             }
         } else if (event->value == 0x4A) {
-            if (event->unk4 == 0) {
-                audio_setMixOverride(event->unk5);
+            if (event->u.cmd.unk4 == 0) {
+                audio_setMixOverride(event->u.cmd.unk5);
             } else {
                 audio_setMixOverride(0);
             }
         } else if (event->value == 0x54) {
-            gCutsceneUseCullDistance[scene] = ~event->unk4;
+            gCutsceneUseCullDistance[scene] = ~event->u.cmd.unk4;
         } else if (event->value == 0x55) {
-            effect_randomizeBounceRecordSpeeds(event->unk4);
+            effect_randomizeBounceRecordSpeeds(event->u.cmd.unk4);
         } else if (event->value == 0x59) {
             gCutsceneFadeInAtEnd = 1;
         } else if (event->value == 0x5A) {
@@ -929,9 +929,9 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             u8 colors[3][3] = { { 0xFF, 0, 0 }, { 0, 0x35, 0x46 }, { 0xFF, 0xFF, 0xFF } };
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                v = event->unk6 != 0 ? event->unk6 : 0x7F;
-                screen_startViewFlash(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
+            if (event->u.cmd.unk4 == 0) {
+                v = event->u.cmd.unk6 != 0 ? event->u.cmd.unk6 : 0x7F;
+                screen_startViewFlash(colors[event->u.cmd.unk5][0], colors[event->u.cmd.unk5][1], colors[event->u.cmd.unk5][2], v, duration, 0);
             } else {
                 gFlashFrames[0] = 0;
             }
@@ -941,9 +941,9 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 v;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                v = event->unk6 != 0 ? event->unk6 : 4;
-                screen_startTint(event->unk5, duration, v, 0x7F, 1);
+            if (event->u.cmd.unk4 == 0) {
+                v = event->u.cmd.unk6 != 0 ? event->u.cmd.unk6 : 4;
+                screen_startTint(event->u.cmd.unk5, duration, v, 0x7F, 1);
             } else {
                 gTintFrames = 0;
             }
@@ -953,18 +953,18 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 start;
             s32 end;
 
-            if (event->unk4 == 0) {
-                total = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene);
-                start = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
+            if (event->u.cmd.unk4 == 0) {
+                total = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->u.cmd.unk5, scene);
+                start = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->u.cmd.unk5, scene) - eventTime;
                 if (found == NULL) {
                     start = 0;
                 }
-                end = total - cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->unk5, scene);
+                end = total - cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->u.cmd.unk5, scene);
                 if (found == NULL) {
                     end = 0;
                 }
                 if (level == LEVEL_W5_THRONE_ROOM) {
-                    beam_showFadeSprite(start, total - eventTime - end - start, end, event->unk5);
+                    beam_showFadeSprite(start, total - eventTime - end - start, end, event->u.cmd.unk5);
                 } else if (level == LEVEL_WFRONTEND_TABLE) {
                     sprite_showFadeSprite(start, total - eventTime - end - start, end);
                 }
@@ -972,15 +972,15 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x62) {
             gLevelHeader->skyMode = 0;
         } else if (event->value == 0x7C) {
-            gCutsceneHideSky = !event->unk4;
+            gCutsceneHideSky = !event->u.cmd.unk4;
         } else if (event->value == 0x84) {
-            gCutsceneSolidSky = !event->unk4;
+            gCutsceneSolidSky = !event->u.cmd.unk4;
         } else if (event->value == 0x85) {
-            gCutsceneNoPause = !event->unk4;
+            gCutsceneNoPause = !event->u.cmd.unk4;
         } else if (event->value == 0x63) {
-            gSoundTargetVolume = event->unk6;
+            gSoundTargetVolume = event->u.cmd.unk6;
         } else if (event->value == 0x64) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 gCutsceneIrisOn = 1;
                 gCutsceneIrisClosure = &gSeqTrackStates[scene][track].unk28;
                 gCutsceneIrisX = &gSeqTrackStates[scene][track].unk24;
@@ -989,7 +989,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 gCutsceneIrisOn = 0;
             }
         } else if (event->value == 0x66) {
-            if (event->unk4 == 0) { // matching: empty, but it still shapes the code
+            if (event->u.cmd.unk4 == 0) { // matching: empty, but it still shapes the code
             }
         } else if (event->value == 0x67) {
             func_151DE7D4();
@@ -997,16 +997,16 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             save_endMatch(0);
         } else if (event->value == 0x69) {
             if (obj != NULL) {
-                if (event->unk4 == 0) {
+                if (event->u.cmd.unk4 == 0) {
                     obj->ygrav = 4.0f;
                     obj->yspd = 20.0f;
-                } else if (event->unk4 == 1) {
+                } else if (event->u.cmd.unk4 == 1) {
                     obj->ygrav = 0.0f;
                     obj->yspd = 0.0f;
-                } else if (event->unk4 == 2) {
+                } else if (event->u.cmd.unk4 == 2) {
                     collision_removePartSet(obj, 0x11);
                     obj->unkA9 = 0;
-                } else if (event->unk4 == 3) {
+                } else if (event->u.cmd.unk4 == 3) {
                     dc_glbl_CharNum = obj - movement_obj;
                     movement_obj->lifting = dc_glbl_CharNum + 100;
                     movement_obj->speed = 0.0f;
@@ -1015,28 +1015,28 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     *(u32 *) &obj->basemtx = 9; // matching: an unsigned store
                     obj->attach_char = 1;
                     obj->unk101 |= 4;
-                } else if (event->unk4 == 4) {
+                } else if (event->u.cmd.unk4 == 4) {
                     FU8(movement_obj->mv, 0x17) = 1;
-                } else if (event->unk4 == 5) {
+                } else if (event->u.cmd.unk4 == 5) {
                     gCurrentActor = obj;
                     func_15073F1C();
-                } else if (event->unk4 == 6) {
+                } else if (event->u.cmd.unk4 == 6) {
                     obj->mv->transport = 0;
                 }
             }
         } else if (event->value == 0x6A) {
-            gCutsceneCutbackAngle = event->unk6;
+            gCutsceneCutbackAngle = event->u.cmd.unk6;
         } else if (event->value == 0x7A) {
-            gCutsceneEndTransitionTime = event->unk5 * 60;
-            gCutsceneEndTransitionYaw = event->unk6;
+            gCutsceneEndTransitionTime = event->u.cmd.unk5 * 60;
+            gCutsceneEndTransitionYaw = event->u.cmd.unk6;
         } else if (event->value == 0x6B) {
         } else if (event->value == 0x6D) {
-            gCutsceneHideWorld = !event->unk4;
+            gCutsceneHideWorld = !event->u.cmd.unk4;
         } else if (event->value == 0x74) {
-            gFrameRateDivider = event->unk5;
+            gFrameRateDivider = event->u.cmd.unk5;
         } else if (event->value == 0x6F) {
             if (obj != NULL) {
-                obj->swapTexture[event->unk4] = event->unk5;
+                obj->swapTexture[event->u.cmd.unk4] = event->u.cmd.unk5;
             }
         } else if (event->value == 0x70) {
             gCutsceneHoldEnd = 1;
@@ -1057,7 +1057,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 gCutsceneKeepCamera = 1;
             }
         } else if (event->value == 0x7D) {
-            if (obj != NULL && event->unk4 == 0) {
+            if (obj != NULL && event->u.cmd.unk4 == 0) {
                 obj->drawtype = 1;
             }
         } else if (event->value == 0x7E) {
@@ -1067,17 +1067,17 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x7F) {
             D_800DBEAC = 1;
         } else if (event->value == 0x80) {
-            gClearToWhite = event->unk4;
+            gClearToWhite = event->u.cmd.unk4;
         } else if (event->value == 0x81) {
-            hud_setClockEnabled(event->unk4 ^ 1);
-            gHudClockTime = event->unk6 * 30;
+            hud_setClockEnabled(event->u.cmd.unk4 ^ 1);
+            gHudClockTime = event->u.cmd.unk6 * 30;
         } else if (event->value == 0x82) {
-            gCutsceneChainBobScale = event->unk4;
+            gCutsceneChainBobScale = event->u.cmd.unk4;
             if (gCutsceneChainBobScale > 100) {
                 gCutsceneChainBobScale = 100;
             }
         } else if (event->value == 0x83) {
-            gCutsceneCashOffset = event->unk6;
+            gCutsceneCashOffset = event->u.cmd.unk6;
         } else {
             return 0;
         }
@@ -1087,13 +1087,13 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
     return 1;
 }
 
-/* matching: an s8 texture, as the call passes event->unk5 without narrowing (definition: game/Particle/StyleParticle/styleparticle.c, u8) */
+/* matching: an s8 texture, as the call passes event->u.cmd.unk5 without narrowing (definition: game/Particle/StyleParticle/styleparticle.c, u8) */
 void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 owner, s32 list);
 
 /*
- * Second cutscene event handler: types 0xB (mp3_startTrack / func_151F2xxx) and
- * 0x11 (records the event index in gSeqActiveEvents), and the effect-spawning type-5
- * commands. Returns 1 when the event was handled.
+ * Second cutscene event handler: type 0xB (mp3 control: mp3_startTrack, mp3_setVolume,
+ * mp3_stop, mp3_pause, mp3_resume) and 0x11 (records the event index in gSeqActiveEvents),
+ * and the effect-spawning type-5 commands. Returns 1 when the event was handled.
  */
 s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (event->type == 0xB) {
@@ -1102,31 +1102,31 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         s32 duration;
         SeqEvent *found;
 
-        if (event->unk4 == 0) {
-            if (event->unk6 == 0) {
+        if (event->u.mp3.action == 0) {
+            if (event->u.mp3.volume == 0) {
                 vol = 0x10000;
             } else {
-                vol = (event->unk6 << 16) / 255;
+                vol = (event->u.mp3.volume << 16) / 255;
             }
             mp3_startTrack(event->value, vol, 0x40);
-        } else if (event->unk4 == 1) {
+        } else if (event->u.mp3.action == 1) {
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene) - eventTime;
-            if (event->unk6 == 0) {
+            if (event->u.mp3.volume == 0) {
                 vol2 = 0x10000;
             } else {
-                vol2 = (event->unk6 << 16) / 255;
+                vol2 = (event->u.mp3.volume << 16) / 255;
             }
             duration = (duration * 0x5604) / 60;
             mp3_setVolume(vol2, duration);
-        } else if (event->unk4 == 3) {
+        } else if (event->u.mp3.action == 3) {
             mp3_stop();
-        } else if (event->unk4 == 4) {
+        } else if (event->u.mp3.action == 4) {
             mp3_pause();
-        } else if (event->unk4 == 5) {
+        } else if (event->u.mp3.action == 5) {
             mp3_resume();
         }
     } else if (event->type == 0x11) {
-        if (event->unk4 != 0) {
+        if (event->u.trackMode.on != 0) {
             gSeqActiveEvents[scene][track][event->value] = index;
         } else {
             gSeqActiveEvents[scene][track][event->value] = 0xFF;
@@ -1148,18 +1148,18 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             u8 colors[3][6] = { { 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF, 0x00, 0xAB, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                if (event->unk6 == 0) {
+            if (event->u.cmd.unk4 == 0) {
+                if (event->u.cmd.unk6 == 0) {
                     param = 0x1000;
-                } else if (event->unk6 > 200) {
-                    param = event->unk6;
+                } else if (event->u.cmd.unk6 > 200) {
+                    param = event->u.cmd.unk6;
                 } else {
                     param = 200;
                 }
-                if (event->unk5 >= 3) {
+                if (event->u.cmd.unk5 >= 3) {
                     idx = 0;
                 } else {
-                    idx = event->unk5;
+                    idx = event->u.cmd.unk5;
                 }
                 r = colors[idx][0];
                 g = colors[idx][1];
@@ -1180,7 +1180,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 particle_newFallingEmitter(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xB) {
@@ -1188,7 +1188,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 particle_newFallingEmitter(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
@@ -1198,7 +1198,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             sprite.frame = 0;
             sprite.frameStep = 0x100;
             sprite.x = pos[0];
-            sprite.y = pos[1] + event->unk4;
+            sprite.y = pos[1] + event->u.cmd.unk4;
             sprite.z = pos[2];
             sprite.scaleX = 0x5DC;
             sprite.scaleY = 0x5DC;
@@ -1211,15 +1211,15 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 count;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                count = event->unk5;
+            if (event->u.cmd.unk4 == 0) {
+                count = event->u.cmd.unk5;
                 if (count == 0) {
                     count = 0xC;
                 }
-                swarm_createSwarm(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->unk6);
+                swarm_createSwarm(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->u.cmd.unk6);
             }
         } else if (event->value == 0x1A) {
-            if (event->unk4 != 0 && event->unk4 == 1) { // matching: redundant test kept for codegen
+            if (event->u.cmd.unk4 != 0 && event->u.cmd.unk4 == 1) { // matching: redundant test kept for codegen
                 Vec3f from;
                 Vec3f to;
 
@@ -1242,7 +1242,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             if (obj == NULL) {
                 return 1;
             }
-            switch (event->unk4) {
+            switch (event->u.cmd.unk4) {
                 case 0:
                     anim = 3;
                     break;
@@ -1258,10 +1258,10 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                switch (event->unk6) {
+            if (event->u.cmd.unk4 == 0) {
+                switch (event->u.cmd.unk6) {
                     case 0:
-                        particle_spawnEmitterFollowingPos(pos, duration, event->unk5, sceneTag, 0);
+                        particle_spawnEmitterFollowingPos(pos, duration, event->u.cmd.unk5, sceneTag, 0);
                         break;
                     case 1:
                         prop_startMirroredEmitters(duration);
@@ -1315,7 +1315,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 blood_startShortTrail(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
@@ -1323,7 +1323,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 screen_spawnMosaic(obj, duration, sceneTag, 0);
             }
@@ -1333,22 +1333,22 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 2) {
-                switch (event->unk5) {
+            if (event->u.cmd.unk4 == 2) {
+                switch (event->u.cmd.unk5) {
                     case 0x11:
                     case 0x12:
                     case 0x15:
-                        val[0] = event->unk6;
+                        val[0] = event->u.cmd.unk6;
                         effect_sendEventToTimedEffects((s32)val, 0x51);
                         break;
                     case 0x13:
-                        effect_sendHopMessage((event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
+                        effect_sendHopMessage((event->u.cmd.unk6 * 0.009999999776f * 300.0f) - 150.0f);
                         break;
                 }
             }
-            if (event->unk4 == 0) {
-                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene) - eventTime;
-                switch (event->unk5) {
+            if (event->u.cmd.unk4 == 0) {
+                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->u.cmd.unk5, scene) - eventTime;
+                switch (event->u.cmd.unk5) {
                     case 1:
                         particle_startSegmentEmitter(obj, duration, -1, 0, 0.000709999993f, 0, sceneTag, 1);
                         break;
@@ -1424,7 +1424,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     case 13: {
                         u16 id;
 
-                        id = event->unk6;
+                        id = event->u.cmd.unk6;
                         if (id >= 0xE9) {
                             id = 0;
                         }
@@ -1448,10 +1448,10 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         }
                         break;
                     case 17:
-                        effect_newFadeTextBox(event->unk6, gSeqTextLists[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newFadeTextBox(event->u.cmd.unk6, gSeqTextLists[scene][event->u.cmd.unk6], duration, sceneTag, 1);
                         break;
                     case 18:
-                        effect_newPromptTextBox(event->unk6, gSeqTextLists[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newPromptTextBox(event->u.cmd.unk6, gSeqTextLists[scene][event->u.cmd.unk6], duration, sceneTag, 1);
                         break;
                     case 19:
                         effect_spawnHopSprite(duration, sceneTag, 1);
@@ -1460,12 +1460,12 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         particle_startObjDustEmitter(obj, duration, sceneTag, 1);
                         break;
                     case 21:
-                        effect_newSlowFadeTextBox(event->unk6, gSeqTextLists[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newSlowFadeTextBox(event->u.cmd.unk6, gSeqTextLists[scene][event->u.cmd.unk6], duration, sceneTag, 1);
                         break;
                     case 22: {
                         u16 id;
 
-                        id = event->unk6;
+                        id = event->u.cmd.unk6;
                         if (id >= 0xCF) {
                             id = 0;
                         }
@@ -1501,7 +1501,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                             blood_spawnGrowingParticle((math_randomFloat() * 0.02000000142f) + 0.09000000358f,
                                           (math_randomFloat() * 0.0004399999743f) + 0.0008799999487f,
                                           (math_random() % 101) + 0x9B, 0xFF, duration, &floor.tri, &point,
-                                          !event->unk6, 1, sceneTag, 1);
+                                          !event->u.cmd.unk6, 1, sceneTag, 1);
                         }
                         break;
                     }
@@ -1535,15 +1535,15 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                beam_spawnWavyBeam((event->unk4 != 0) ? 5000 : duration, sceneTag, 0);
+                beam_spawnWavyBeam((event->u.cmd.unk4 != 0) ? 5000 : duration, sceneTag, 0);
             }
         } else if (event->value == 0x5D) {
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 particle_attachBoneSideEmitter(obj, duration, sceneTag, 0);
             }
@@ -1551,9 +1551,9 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk5 == 1) {
+            if (event->u.cmd.unk5 == 1) {
                 effect_startJointEmitterTask(obj, 0, 1000, sceneTag, 0);
-            } else if (event->unk4 == 0) {
+            } else if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 effect_startJointEmitterTask(obj, 0, duration, sceneTag, 0);
             }
@@ -1563,19 +1563,19 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             const u8 *list;
             s32 count;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 if (obj->character_type == 0x49 || obj->character_type == 0x58) {
                     list = particle_getObjEmitterData(obj, &count);
-                    if (list != NULL && event->unk6 < count) {
-                        particle_startAnchorEmitter(obj, list[event->unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
+                    if (list != NULL && event->u.cmd.unk6 < count) {
+                        particle_startAnchorEmitter(obj, list[event->u.cmd.unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
                     }
                 } else {
-                    particle_startActorEmitter(obj, event->unk5, duration, 0, sceneTag, 1, "Cutscene 2");
+                    particle_startActorEmitter(obj, event->u.cmd.unk5, duration, 0, sceneTag, 1, "Cutscene 2");
                 }
             }
         } else if (event->value == 0x53) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 s32 endTime;
                 SeqEvent *found;
 
@@ -1599,7 +1599,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 effect_attachBone8SegmentStrip(obj, duration, sceneTag, 0);
             }
@@ -1607,7 +1607,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 effect_attachDriftEmitter(obj, duration, sceneTag, 0);
             }
@@ -1616,8 +1616,8 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
-                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
+            if (event->u.cmd.unk4 == 0) {
+                duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->u.cmd.unk5, scene) - eventTime;
                 offset.x = (math_randomFloat() * 200.0f) + -100.0f;
                 offset.y = (math_randomFloat() * 300.0f) + -150.0f;
                 blood_spawnSplat(&offset, (math_randomFloat() * 20.0f) + 10.0f,
@@ -1631,7 +1631,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 blood_attachMirroredStrips(obj, duration, sceneTag, 1);
             }
         } else if (event->value == 0x3E || event->value == 0x3F) {
@@ -1640,7 +1640,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 beam_spawnLinkedQuad(pos, &gSeqTrackStates[scene][track].yaw, &gSeqTrackStates[scene][track].unk18,
                               &gSeqTrackStates[scene][track].unk1C, &gSeqTrackStates[scene][track].unk20, duration,
                               sceneTag, 0);
@@ -1653,8 +1653,8 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             Attachment *node;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                t = (event->unk5 <= 0) ? event->unk5 : 0;
+            if (event->u.cmd.unk4 == 0) {
+                t = (event->u.cmd.unk5 <= 0) ? event->u.cmd.unk5 : 0;
                 if (t == 0) {
                     kind = 0xD;
                 }
@@ -1676,7 +1676,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 return 1;
             }
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 func_1516F2F8(obj - movement_obj, duration, duration, 0, sceneTag, 0);
             }
         } else if (event->value == 0x22) {
@@ -1687,7 +1687,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 return 1;
             }
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 func_1516F1C0(obj - movement_obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x52) {
@@ -1696,7 +1696,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
             blood_scatterDecals(obj, 90.0f, sceneTag, 1);
         } else if (event->value == 0x5F) {
-            switch (event->unk4) {
+            switch (event->u.cmd.unk4) {
                 case 0:
                     if (obj != NULL) {
                         Vec3f pos;
@@ -1745,7 +1745,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                                 func_150FB324(obj, sceneTag, 1);
                                 break;
                             case 0x4A:
-                                effect_spawnSlotBoneBeam(obj, event->unk5, sceneTag, 1);
+                                effect_spawnSlotBoneBeam(obj, event->u.cmd.unk5, sceneTag, 1);
                                 break;
                             case 0x97:
                                 effect_spawnCutsceneBoneBeam(obj, sceneTag, 1);
@@ -1774,10 +1774,10 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         ModelAttachment *attachment;
 
                         attachment = NULL;
-                        if (event->unk6 != 0) {
-                            attachment = attach_find(obj, event->unk5 ? 0xA4 : 0xA5, 0);
+                        if (event->u.cmd.unk6 != 0) {
+                            attachment = attach_find(obj, event->u.cmd.unk5 ? 0xA4 : 0xA5, 0);
                         }
-                        weapon_fireJointShot(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
+                        weapon_fireJointShot(obj, event->u.cmd.unk5, 1, attachment, event->u.cmd.unk5 ? 0xA4 : 0xA5, sceneTag, 1);
                     }
                     break;
                 case 6:
@@ -1807,7 +1807,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         const s32 bones[3] = { 0x15, 0x20, 3 };
                         Vec3f out;
 
-                        switch (event->unk5) {
+                        switch (event->u.cmd.unk5) {
                             case 0:
                                 sel = &a[math_random() % 3];
                                 break;
@@ -1818,7 +1818,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                                 sel = &c[math_random() % 6];
                                 break;
                         }
-                        math_transformOffset(sel, &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
+                        math_transformOffset(sel, &out, &obj->ob_matrix_ptr[bones[event->u.cmd.unk5]]);
                         weapon_spawnImpactBurst(&out, sceneTag, 1);
                     }
                     break;
@@ -1846,12 +1846,12 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     p[0] = pos[0];
                     p[1] = pos[1];
                     p[2] = pos[2];
-                    id = event->unk5;
+                    id = event->u.cmd.unk5;
                     if (id >= 0xE9) {
                         id = 0;
                     }
-                    if (event->unk6 != 0) {
-                        scale = event->unk6 * 0.009999999776f;
+                    if (event->u.cmd.unk6 != 0) {
+                        scale = event->u.cmd.unk6 * 0.009999999776f;
                     } else {
                         scale = 1.0f;
                     }
@@ -1867,7 +1867,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     colour[2] = 0xFF;
                     colour[3] = (math_random() % 61) + 0x96;
                     size = (math_randomFloat() * 20.0f) + 25.0f;
-                    if (event->unk5 != 0) {
+                    if (event->u.cmd.unk5 != 0) {
                         size *= 0.349999994f;
                     }
                     beam_spawnBoundsBolt(obj, math_random() & 0xFF, (math_random() % 129) - 0x3F,
@@ -1875,7 +1875,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 }
                 case 16:
-                    beam_spawnMuzzleBurst(obj, event->unk5, event->unk6, sceneTag, 1);
+                    beam_spawnMuzzleBurst(obj, event->u.cmd.unk5, event->u.cmd.unk6, sceneTag, 1);
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
@@ -1894,7 +1894,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         Vec3f out;
                         const Vec3f offs[2] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
 
-                        math_transformOffset(&offs[event->unk5], &out, obj->ob_matrix_ptr);
+                        math_transformOffset(&offs[event->u.cmd.unk5], &out, obj->ob_matrix_ptr);
                         particle_spawnFlash(&out, 0.6460000277f, sceneTag, 0);
                     }
                     break;
@@ -1905,7 +1905,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         const Vec3f offs[8] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        math_transformOffset(&offs[event->unk5], &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
+                        math_transformOffset(&offs[event->u.cmd.unk5], &out, &obj->ob_matrix_ptr[bones[event->u.cmd.unk5]]);
                         particle_spawnFlash(&out, 6.990000248f, sceneTag, 0);
                     }
                     break;
@@ -2037,8 +2037,8 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             p.x = pos[0];
             p.y = pos[1];
             p.z = pos[2];
-            count = (event->unk4 != 0) ? event->unk4 : 0xA;
-            type = event->unk5;
+            count = (event->u.cmd.unk4 != 0) ? event->u.cmd.unk4 : 0xA;
+            type = event->u.cmd.unk5;
             if (type >= 0xD) {
                 type = 0;
             }
@@ -2046,7 +2046,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x10) {
             u8 type;
 
-            type = event->unk4;
+            type = event->u.cmd.unk4;
             if (type >= 0x1B) {
                 type = 0;
             }
@@ -2066,10 +2066,10 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             f32 f7, f9, f10;
             s16 n;
 
-            if (event->unk4 >= 0x10) {
+            if (event->u.cmd.unk4 >= 0x10) {
                 type = 0xF;
             } else {
-                type = event->unk4;
+                type = event->u.cmd.unk4;
             }
             state = &gSeqTrackStates[scene][track];
             i4 = state->unk20 * 0.05000000075f;
@@ -2078,12 +2078,12 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             f7 = (state->yOffset * 0.1000000015f) + 0.5f;
             f9 = (state->unk18 * 0.1000000015f) + 1.0f;
             f10 = state->unk1C * 0.1000000015f;
-            n = (event->unk5 != 0) ? event->unk5 : 0x64;
+            n = (event->u.cmd.unk5 != 0) ? event->u.cmd.unk5 : 0x64;
             trail_launchMotionTrail(type, pos[0], pos[1], pos[2], i4, i5, i6, f7, n, f9, f10, sceneTag);
         } else if (event->value == 0x35) {
             s32 type;
 
-            type = (event->unk4 >= 2) ? 1 : event->unk4;
+            type = (event->u.cmd.unk4 >= 2) ? 1 : event->u.cmd.unk4;
             effect_startPuffJets(obj, type, sceneTag);
         } else if (event->value == 0x26) {
             SeqEvent *found;
@@ -2093,7 +2093,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 return 1;
             }
             t = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 obj->headEffect = 1;
                 obj->headEffectTimer = t - eventTime;
             }
@@ -2105,14 +2105,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             speed = 1.0f;
             dist = 30.0f;
             n = 1;
-            if (event->unk4 != 0) {
-                n = event->unk4;
+            if (event->u.cmd.unk4 != 0) {
+                n = event->u.cmd.unk4;
             }
-            if (event->unk5 != 0) {
-                speed = event->unk5 * 0.1000000015f;
+            if (event->u.cmd.unk5 != 0) {
+                speed = event->u.cmd.unk5 * 0.1000000015f;
             }
-            if (event->unk6 >= 0) {
-                dist = event->unk6;
+            if (event->u.cmd.unk6 >= 0) {
+                dist = event->u.cmd.unk6;
             }
             particle_spawnDroplets(pos, dist, speed, n, sceneTag);
         } else if (event->value == 2) {
@@ -2123,14 +2123,14 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             speed = 1.0f;
             dist = 30.0f;
             n = 1;
-            if (event->unk4 != 0) {
-                n = event->unk4;
+            if (event->u.cmd.unk4 != 0) {
+                n = event->u.cmd.unk4;
             }
-            if (event->unk5 != 0) {
-                speed = event->unk5 * 0.1000000015f;
+            if (event->u.cmd.unk5 != 0) {
+                speed = event->u.cmd.unk5 * 0.1000000015f;
             }
-            if (event->unk6 >= 0) {
-                dist = event->unk6;
+            if (event->u.cmd.unk6 >= 0) {
+                dist = event->u.cmd.unk6;
             }
             particle_spawnModelDroplets(pos, dist, speed, n, 0x1E, 0x64, sceneTag);
         } else if (event->value == 0x28) {
@@ -2153,7 +2153,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 pad[7]; // matching: stack padding
 
             cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
-            if (event->unk4 == 0) { // matching: empty, but it still shapes the code
+            if (event->u.cmd.unk4 == 0) { // matching: empty, but it still shapes the code
             }
         } else if (event->value == 0x2F) {
             s32 duration;
@@ -2162,7 +2162,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             if (obj == NULL) {
                 return 1;
             }
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 func_1516ED68(obj - movement_obj, duration, sceneTag, 0);
             }
@@ -2170,7 +2170,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration;
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 particle_startSteamTrail(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
@@ -2181,7 +2181,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             p.x = pos[0];
             p.y = pos[1];
             p.z = pos[2];
-            count = (event->unk4 != 0) ? event->unk4 : 0xA;
+            count = (event->u.cmd.unk4 != 0) ? event->u.cmd.unk4 : 0xA;
             particle_throwSplashes(&p, count, 6, sceneTag, 0);
         } else {
             return 0;
@@ -2193,8 +2193,9 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 }
 
 /*
- * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio
- * commands (8), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
+ * Third cutscene event handler: sounds (types 6 and 10), music commands (8: music_playTune,
+ * music_setChannelVolume, music_setFade, music_fadeChannelVolume, music_jumpToMarker,
+ * music_stopTune), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
  * being skipped (gCutsceneSkipState == 2). Returns 1 when the event was handled.
  */
 s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
@@ -2204,7 +2205,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         s32 markTime;
         s32 clamped;
         SeqEvent *found;
-        s32 fade;
+        s32 cents;
         s32 fadeOut;
         s32 fadeIn;
         s32 sflags;
@@ -2212,11 +2213,11 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
         found = NULL;
         sflags = 0;
-        if ((event->unk4 == 0) || (event->type == 6)) {
-            if (event->unk6 == 0) {
+        if ((event->u.sound.unk4 == 0) || (event->type == 6)) {
+            if (event->u.sound.volume == 0) {
                 vol = 0xFF;
             } else {
-                vol = event->unk6 & 0xFF;
+                vol = event->u.sound.volume & 0xFF;
                 if (vol < 0) {
                     vol = 0;
                 } else {
@@ -2234,7 +2235,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             if ((skipping != 0) && ((event->type != 10) || (found != NULL))) {
                 return 1;
             }
-            fade = event->unk5 * 50;
+            cents = event->u.sound.pitch * 50;
             fadeOut = 0;
             fadeIn = 0;
             if (event->type == 10) {
@@ -2252,7 +2253,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         fadeOut = duration - markTime;
                     }
                 }
-            } else if (event->unk4 == 2) {
+            } else if (event->u.sound.unk4 == 2) {
                 sflags = 0x800;
             } else {
                 sflags = 0x400;
@@ -2269,41 +2270,41 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
                 sound_addDynamicSound(event->value, pos[0], pos[1], pos[2], snd->volume, 0x7D00, 0x7918,
-                              (SoundRecordCallback)cutscene_updateSound, snd, 0, sflags, fade);
+                              (SoundRecordCallback)cutscene_updateSound, snd, 0, sflags, cents);
             }
         }
     } else if (event->type == 8) {
         s32 duration;
         SeqEvent *found;
 
-        if (event->unk4 == 0) {
+        if (event->u.music.action == 0) {
             if ((skipping != 0) && (func_1000E134(event->value) != 0)) {
                 return 1;
             }
             music_playTune(event->value, 0, 0);
-            if (event->unk6 != 0) { // matching: empty under -g3 but it still shapes the code
+            if (event->u.music.unk6 != 0) { // matching: empty under -g3 but it still shapes the code
             }
-        } else if (event->unk4 == 1) {
-            music_setChannelVolume(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
-        } else if (event->unk4 == 2) {
-            music_setFade(event->value, event->unk6 * 328, 1);
-        } else if (event->unk4 == 3) {
-        } else if (event->unk4 == 4) {
-            duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 5, 1, event->unk5, scene) - eventTime;
+        } else if (event->u.music.action == 1) {
+            music_setChannelVolume(event->value, event->u.music.unk6 * 100, 1 << (event->u.music.channel + 31));
+        } else if (event->u.music.action == 2) {
+            music_setFade(event->value, event->u.music.unk6 * 328, 1);
+        } else if (event->u.music.action == 3) {
+        } else if (event->u.music.action == 4) {
+            duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 5, 1, event->u.music.channel, scene) - eventTime;
             if (skipping != 0) {
-                music_setChannelVolume(event->value, event->unk6, 1 << (event->unk5 + 31));
+                music_setChannelVolume(event->value, event->u.music.unk6, 1 << (event->u.music.channel + 31));
             } else {
-                music_fadeChannelVolume(event->value, event->unk6, 1 << (event->unk5 + 31), duration);
+                music_fadeChannelVolume(event->value, event->u.music.unk6, 1 << (event->u.music.channel + 31), duration);
             }
-        } else if (event->unk4 == 6) {
+        } else if (event->u.music.action == 6) {
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 7, 0, 0, scene) - eventTime;
             if (duration < 2) {
                 duration = 1;
             }
-            music_setFade(event->value, event->unk6 * 328, duration);
-        } else if (event->unk4 == 8) {
-            music_jumpToMarker(event->value, event->unk6 + 1, 0, -1);
-        } else if (event->unk4 == 9) {
+            music_setFade(event->value, event->u.music.unk6 * 328, duration);
+        } else if (event->u.music.action == 8) {
+            music_jumpToMarker(event->value, event->u.music.unk6 + 1, 0, -1);
+        } else if (event->u.music.action == 9) {
             music_stopTune(event->value, 0);
         }
     } else if (event->type == 2) {
@@ -2318,14 +2319,14 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             return 1;
         }
         duration = cutscene_findEvent(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
-        if (event->unk4 == 0) {
+        if (event->u.anim.endMarker == 0) {
             if (obj->anim == NULL) {
                 return 1;
             }
             rate = 5.0f;
             id = event->value;
-            if (event->unk6 > 0) {
-                rate = event->unk6 - 1;
+            if (event->u.anim.blend > 0) {
+                rate = event->u.anim.blend - 1;
             }
             if (eventTime == gCutsceneStartTime) {
                 rate = 0.0f;
@@ -2334,8 +2335,8 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 rate = 0.0f;
             }
             if (found != NULL) {
-                loop = !found->unk4;
-                if ((found->unk4 == 1) && (found->unk5 == 1)) {
+                loop = !found->u.anim.endMarker;
+                if ((found->u.anim.endMarker == 1) && (found->u.anim.unk5 == 1)) {
                     loop = 1;
                 }
             } else {
@@ -2349,7 +2350,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             } else {
                 speed = 0.0f;
             }
-            if (event->unk5 != 0) {
+            if (event->u.anim.unk5 != 0) {
                 speed = 0.0f;
             }
             actor_playAnim(obj, id, speed, rate, 0.0f, 0.0f, loop);
@@ -2361,18 +2362,18 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             SeqEvent *prev;
             s32 prevTime;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 if (skipping != 0) {
                     duration = 0;
                 }
-                screen_startViewFade(gCutsceneFadeColours[event->unk5].r, gCutsceneFadeColours[event->unk5].g, gCutsceneFadeColours[event->unk5].b, duration, !event->unk6, 0);
-                gCutsceneFadeToColor = !event->unk6;
+                screen_startViewFade(gCutsceneFadeColours[event->u.cmd.unk5].r, gCutsceneFadeColours[event->u.cmd.unk5].g, gCutsceneFadeColours[event->u.cmd.unk5].b, duration, !event->u.cmd.unk6, 0);
+                gCutsceneFadeToColor = !event->u.cmd.unk6;
             } else if (skipping != 0) {
                 cutscene_findEventsAround(&prev, &found, NULL, &prevTime, track, event->type, 1, event->value, 1, 0, gCutsceneTimes[scene], scene);
                 if (prev != NULL) {
-                    screen_startViewFade(gCutsceneFadeColours[prev->unk5].r, gCutsceneFadeColours[prev->unk5].g, gCutsceneFadeColours[prev->unk5].b, 0, !prev->unk6, 0);
-                    gCutsceneFadeToColor = !prev->unk6;
+                    screen_startViewFade(gCutsceneFadeColours[prev->u.cmd.unk5].r, gCutsceneFadeColours[prev->u.cmd.unk5].g, gCutsceneFadeColours[prev->u.cmd.unk5].b, 0, !prev->u.cmd.unk6, 0);
+                    gCutsceneFadeToColor = !prev->u.cmd.unk6;
                 }
             }
         } else if (event->value == 4) {
@@ -2383,7 +2384,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     kind = (obj->character_type == 0x4B) ? 2 : -1;
                     if (kind != -1) {
                         // matching: the original reuses the (otherwise unused) index parameter as the temp
-                        index = (event->unk4 == 0) ? -1 : event->unk4 - 1;
+                        index = (event->u.cmd.unk4 == 0) ? -1 : event->u.cmd.unk4 - 1;
                         model_breakIntoParts(obj, kind, index);
                     }
                 } else {
@@ -2396,28 +2397,28 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 fadeOut;
             s32 start;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 if (skipping == 0) {
-                    start = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene);
-                    fadeIn = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
+                    start = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->u.cmd.unk5, scene);
+                    fadeIn = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->u.cmd.unk5, scene) - eventTime;
                     if (found == NULL) {
                         fadeIn = 0;
                     }
-                    fadeOut = start - cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->unk5, scene);
+                    fadeOut = start - cutscene_findEvent(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->u.cmd.unk5, scene);
                     if (found == NULL) {
                         fadeOut = 0;
                     }
-                    beam_showFadeSprite(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->unk5);
+                    beam_showFadeSprite(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->u.cmd.unk5);
                 }
             }
         } else if (event->value == 0x56) {
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 if (skipping == 0) {
                     effect_requestRainState(3);
                 }
             } else if (skipping != 0) {
                 effect_requestRainState(2);
-            } else if (event->unk5 == 0) {
+            } else if (event->u.cmd.unk5 == 0) {
                 effect_requestRainState(0);
             } else {
                 effect_requestRainState(1);
@@ -2425,27 +2426,27 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x76) {
             s32 mode;
 
-            if (event->unk4 == 1) {
+            if (event->u.cmd.unk4 == 1) {
                 mode = 0;
-            } else if (event->unk5 == 1) {
+            } else if (event->u.cmd.unk5 == 1) {
                 mode = 2;
             } else {
                 mode = 1;
             }
-            screen_setFrameEcho(event->unk6, mode);
+            screen_setFrameEcho(event->u.cmd.unk6, mode);
         } else if (event->value == 0x2D) {
             s32 duration;
             SeqEvent *found;
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (actor != NULL) {
-                if (event->unk4 == 0) {
-                    trail_startObjectAfterimage(actor, duration, event->unk5);
+                if (event->u.cmd.unk4 == 0) {
+                    trail_startObjectAfterimage(actor, duration, event->u.cmd.unk5);
                 } else if (skipping != 0) { // matching: empty, but it still shapes the code
                 }
             } else if (obj != NULL) {
-                if (event->unk4 == 0) {
-                    trail_startActorAfterimage(obj, duration, event->unk5);
+                if (event->u.cmd.unk4 == 0) {
+                    trail_startActorAfterimage(obj, duration, event->u.cmd.unk5);
                 } else if (skipping != 0) {
                     trail_removeActorAfterimages(obj);
                 }
@@ -2454,7 +2455,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             s32 duration; // matching: unused, but its stack slot is needed
             SeqEvent *found;
 
-            if (event->unk4 == 0) {
+            if (event->u.cmd.unk4 == 0) {
                 effect_showPlayerMarker(0, cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
             } else if (skipping != 0) {
                 dc_glbl_CharNum = 0;

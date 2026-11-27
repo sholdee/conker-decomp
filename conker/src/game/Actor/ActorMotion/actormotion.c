@@ -1718,7 +1718,7 @@ void actor_accelerate(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 tu
                 }
             }
         }
-        if (actor->unkAE != 0) {
+        if (actor->waterJumpTimer != 0) {
             decel *= 0.200000003f;
         }
     }
@@ -1883,7 +1883,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
             
             landState = 0;
             if (actor->inwater == 0) {
-                actor->unk137 = 0;
+                actor->ledgeState = 0;
                 actor->ygrav = 5.0f;
             }
             if (actor->inwater == 0) {
@@ -2302,7 +2302,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         }
         victim->mv->side = 0;
         tmp = victim->attach_char;
-        victim->unk137 = 0;
+        victim->ledgeState = 0;
         if (tmp != 0) {
             Actor *other;
 
@@ -3836,7 +3836,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                     actor->speed = 0.0f;
                     actor->norun = 0xFF;
                 }
-                actor->unkAE = 0xC;
+                actor->waterJumpTimer = 0xC;
                 actor->yspd = 46.0f;
                 actor->ygrav = 3.299999952f;
                 actor->count3 = 2;
@@ -3891,26 +3891,26 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         }
         return;
     }
-    if (actor->unk137 == 1) {
+    if (actor->ledgeState == 1) {
         anim = 0;
         if (actor->mv->hang_ledge == 0) {
             if (pad->stick_y >= 0x33) {
                 speed = 2.200000048f;
                 actor->mv->side = 0xC;
                 anim = 0xEA;
-                actor->unk137 = 0;
+                actor->ledgeState = 0;
                 actor->norun = 0x10;
                 actor->count3 = 1;
                 actor->ygrav = 5.0f;
                 actor->yspd = 48.0f;
             } else if (pad->stick_y < -0x32) {
                 anim = 0x38;
-                actor->unk137 = 0;
+                actor->ledgeState = 0;
                 actor->ygrav = 3.5f;
             }
         }
         if ((gActorPressedButtons & 0x8000) || (actor->mv->bot != 0)) {
-            actor->unk137 = 2;
+            actor->ledgeState = 2;
             anim = 0x40;
             speed = 3.0f;
         }
@@ -3931,7 +3931,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         }
     }
     if ((jumpType != 0) || (height <= 0.0f) || (actor->mv->save_done != 0)) {
-        actor->unk137 = 0;
+        actor->ledgeState = 0;
         jumped = 0;
         animArg4 = 0.0f;
         if (gActorPressedButtons & 0x8000) {
@@ -4112,13 +4112,13 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         }
         actor->mv->side = 0;
     } else if ((gActorPressedButtons & 0x8000) && (actor->mv->transport == 0)) {
-        if ((actor->animseq.uh != 0x3B) && (actor->animseq.uh != 0x3C) && (actor->unk137 == 0) && (actor->lifting == 0) &&
+        if ((actor->animseq.uh != 0x3B) && (actor->animseq.uh != 0x3C) && (actor->ledgeState == 0) && (actor->lifting == 0) &&
             (actor->mv->ladder == 0) && (actor->mv->prop == 0) && (height > 55.0f)) {
             if ((actor->waterHeight != -10000.0f) && ((actor->waterHeight - actor->floorY) > 100.0f)) {
                 actor->ygrav = 6.0f;
                 actor->count3 = 1;
                 actor->norun = 0x78;
-                actor->unk137 = 0;
+                actor->ledgeState = 0;
                 anim = 0x3B;
                 actor->fallStartY = actor->ypos;
             }
@@ -4232,7 +4232,7 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
         state = 0x2A;
     }
 
-    if ((actor->lifting != 0) || (actor->unk137 != 0)) {
+    if ((actor->lifting != 0) || (actor->ledgeState != 0)) {
         if (nested == 0) {
             state = 0;
         } else {

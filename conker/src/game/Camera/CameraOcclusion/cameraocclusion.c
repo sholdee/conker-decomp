@@ -98,7 +98,7 @@ void camera_updateFloorHeights(Camera *camera) {
     if (-10000.0f != camera->zoneWaterY) {
         camera->waterY = camera->zoneWaterY;
     }
-    if (camera->CharPtr->unk137 != 0) {
+    if (camera->CharPtr->ledgeState != 0) {
         camera->floorY = camera->baseY = camera->CharPtr->ypos;
     }
     if ((gSpawnCutsceneActive != 0) || (camera->transition.state != 0)) {
@@ -157,7 +157,7 @@ void camera_updateFloorHeights(Camera *camera) {
             camera->baseY = camera->waterY + 50.0f;
         }
     }
-    if ((camera->SpecialFlags & 0x40) && (camera->CharPtr->unk137 == 0)) {
+    if ((camera->SpecialFlags & 0x40) && (camera->CharPtr->ledgeState == 0)) {
         if (camera->focus.y - camera->lastPlayerPos.y < -5.0f) {
             camera->RopeDirection = 2;
             camera->TargetRopeDisp += 10.0f;
@@ -184,7 +184,7 @@ void camera_updateFloorHeights(Camera *camera) {
         camera->RopeDirection = 0;
         camera->ropeActive = 0;
     }
-    if ((camera->Mode != 0x100) && (camera->CharPtr->unk137 == 0)) {
+    if ((camera->Mode != 0x100) && (camera->CharPtr->ledgeState == 0)) {
         if (camera->eye.y < camera->floorY + 40.0f) {
             camera->eye.y = camera->floorY + 40.0f;
         }

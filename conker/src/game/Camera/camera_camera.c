@@ -315,7 +315,7 @@ void camera_updateStatus(Camera *camera) {
     wasBelow = camera->SpecialFlags & 1;
     if (camera->mv != NULL) {
         if ((camera->mv->ropePtr != NULL) ||
-            ((camera->mv->ladder != 0) && (camera->CharPtr->unk137 == 0))) {
+            ((camera->mv->ladder != 0) && (camera->CharPtr->ledgeState == 0))) {
             camera->SpecialFlags |= 0x40;
         } else {
             camera->SpecialFlags &= ~0x40;
@@ -838,7 +838,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
                 goalY = camera->CharPtr->ypos + height * 0.25f;
             } else if (camera->AvailableModes & 0x20000000) {
                 goalY = camera->CharPtr->floorY + height;
-            } else if ((gSpawnCutsceneActive != 0) || (camera->CharPtr->unk137 != 0) ||
+            } else if ((gSpawnCutsceneActive != 0) || (camera->CharPtr->ledgeState != 0) ||
                        (camera->CharPtr->animseq.uh == 0x194) || (camera->CharPtr->inwater == 1)) {
                 goalY = camera->CharPtr->ypos + height;
             } else if ((-10000.0f == camera->waterY) && !(camera->AvailableModes & 0x20000000) && !(camera->AvailableModes & 0x200000) &&

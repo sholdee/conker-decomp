@@ -60,7 +60,7 @@ void camera_easeHeight(Camera *camera) {
         } else if (camera->CharPtr->ypos - camera->CharPtr->floorY > 600.0f && !(camera->SpecialFlags & 0x400) &&
                    camera->CharPtr->inwater == 0 && camera->CharPtr->unk102 == 0 &&
                    camera->mv->ropePtr == NULL && camera->mv->ladder == 0 &&
-                   camera->CharPtr->unk137 == 0 && camera->CharPtr->animseq.uh != 0x194 && !(camera->SpecialFlags & 0x80)) {
+                   camera->CharPtr->ledgeState == 0 && camera->CharPtr->animseq.uh != 0x194 && !(camera->SpecialFlags & 0x80)) {
             return;
         }
         if ((camera->Mode & 0x100) || cappedByCeiling) {

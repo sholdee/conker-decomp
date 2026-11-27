@@ -67,8 +67,7 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     actor = &movement_obj[index];
     sub = actor->mv;
     if ((sub != NULL) && !(actor->unk2F8 & 0x80)) {
-        // pad54 is declared u32 in structs.h but holds an f32 here
-        angle = actor->unk54 * (65536.0f / 360.0f);
+        angle = actor->bodyLean * (65536.0f / 360.0f);
         kind = actor->animseq.uh;
         if ((kind != 0x42) && (kind != 0x14) && (kind != 0x76)) {
             offset = (sub->rt_context_b == 10) ? 0 : 4;

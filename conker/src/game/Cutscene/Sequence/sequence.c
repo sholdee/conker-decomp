@@ -580,7 +580,8 @@ void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callback
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags gCutsceneChained, gCutsceneNoSkip, gCutsceneKeepPlayer, gCutsceneChangesLevel) and 0x77 (start time gCutsceneStartTime), and start
-   the screen fade (screen_startViewFade) to the gCutsceneFadeColours colour named by the earliest type-1 value-1 event. */
+   the screen fade (screen_startViewFade) to the gCutsceneFadeColours colour named by the earliest type-5 command-1 fade start
+   (u.cmd.unk4 0): u.cmd.unk5 picks the colour, u.cmd.unk6 == 1 the direction. */
 void cutscene_prescanEvents(s32 scene) {
     s32 i;
     s32 best;
@@ -633,10 +634,10 @@ void cutscene_prescanEvents(s32 scene) {
             if (found != NULL) {
                 if ((best == -1) || (score < best)) {
                     best = score;
-                    if (found->unk6 == 1) {
-                        screen_startViewFade(gCutsceneFadeColours[found->unk5].r, gCutsceneFadeColours[found->unk5].g, gCutsceneFadeColours[found->unk5].b, 0, 1, 0);
+                    if (found->u.cmd.unk6 == 1) {
+                        screen_startViewFade(gCutsceneFadeColours[found->u.cmd.unk5].r, gCutsceneFadeColours[found->u.cmd.unk5].g, gCutsceneFadeColours[found->u.cmd.unk5].b, 0, 1, 0);
                     } else {
-                        screen_startViewFade(gCutsceneFadeColours[found->unk5].r, gCutsceneFadeColours[found->unk5].g, gCutsceneFadeColours[found->unk5].b, 0, 0, 0);
+                        screen_startViewFade(gCutsceneFadeColours[found->u.cmd.unk5].r, gCutsceneFadeColours[found->u.cmd.unk5].g, gCutsceneFadeColours[found->u.cmd.unk5].b, 0, 0, 0);
                     }
                 }
             }
@@ -1815,7 +1816,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     if (obj->mv != NULL) {
                         obj->mv->actual_speed = obj->speed * 2.0f;
                     }
-                    obj->unk54 = 0.0f;
+                    obj->bodyLean = 0.0f;
                     obj->heightOffset = 0;
                     rescaled = 0;
                     gCurrentActorSlot = (target - movement_obj) + 1;
@@ -1872,11 +1873,11 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
 
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in gSeqActiveEvents (slot 2: another track's position, slot 1: this track's
-   unk24..unk2C or the player). Returns 1 when yaw, pitch and roll were written, else 0. */
+   unk24..unk2C or the camera's eye position). Returns 1 when yaw, pitch and roll were written, else 0. */
 s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
-    Camera *player;
+    Camera *camera;
     f32 none;
 
     if (gCutsceneStates[scene] != 1) {
@@ -1896,9 +1897,9 @@ s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 obj
             s32 otherTrack;
 
             event = &gSeqEventTracks[scene][track][active[2]];
-            otherTrack = event->unk5;
+            otherTrack = event->u.trackMode.unk5;
             target[0] = gSeqTrackStates[scene][otherTrack].x;
-            target[1] = gSeqTrackStates[scene][otherTrack].y + event->unk6;
+            target[1] = gSeqTrackStates[scene][otherTrack].y + event->u.trackMode.yOffset;
             target[2] = gSeqTrackStates[scene][otherTrack].z;
             return 0;
         }
@@ -1906,16 +1907,16 @@ s32 cutscene_getLookTarget(f32 *yaw, f32 *pitch, f32 *roll, f32 *target, s32 obj
             SeqEvent *event;
 
             event = &gSeqEventTracks[scene][track][active[1]];
-            if (event->unk5 == 0) {
+            if (event->u.trackMode.unk5 == 0) {
                 *yaw = gSeqTrackStates[scene][track].unk28;
                 *pitch = gSeqTrackStates[scene][track].unk24;
                 *roll = gSeqTrackStates[scene][track].unk2C;
                 return 1;
             }
-            player = camera_global_Cameras;
-            target[0] = player->eye.x;
-            target[1] = player->eye.y + event->unk6;
-            target[2] = player->eye.z;
+            camera = camera_global_Cameras;
+            target[0] = camera->eye.x;
+            target[1] = camera->eye.y + event->u.trackMode.yOffset;
+            target[2] = camera->eye.z;
             return 0;
         }
         none = -99999.0f;
@@ -2198,8 +2199,8 @@ void cutscene_runActorHandler(Actor *obj) {
     }
 }
 
-/* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
-   bound itself, 2 when bound through its parent (obj->unk65). */
+/* Whether `obj` is bound to an object track of its scene (scene 1 when obj->drawtype is 4): 1 when
+   bound itself, 2 when bound through its parent (obj->attach_char). */
 s32 cutscene_isActorBound(Actor *obj) {
     s32 i;
     s32 scene;
@@ -2256,12 +2257,13 @@ s32 cutscene_isActorIndexBound(s32 actorIndex, s32 scene) {
 
 /* Re-anchor the scene's paths. A type 6 track shifts every path key so that its own path starts at
    its object (unk2 0) or actor (unk2 1). A type 7 track instead rotates the paths about its first
-   key to the anchor gCutsceneAnchorPos/gCutsceneAnchorHeading and adjusts the heading channel (7) to match. */
+   key to the anchor gCutsceneAnchorPos/gCutsceneAnchorHeading and adjusts the heading channel (7) to match,
+   except on text tracks (first event type 7). */
 void cutscene_anchorPaths(s32 scene) {
     s32 track;
     s32 j;
     s32 k;
-    s32 hasHeadingEvent;
+    s32 isTextTrack;
     f32 y;
     f32 x;
     f32 z;
@@ -2348,7 +2350,7 @@ void cutscene_anchorPaths(s32 scene) {
             s = sinf(radians);
             dy = gCutsceneAnchorPos[1] - y;
             for (j = 0; j < gSeqTrackCounts[scene]; j++) {
-                for (k = 0, hasHeadingEvent = 0; k < gSeqPathKeyCounts[scene][j]; k++) {
+                for (k = 0, isTextTrack = 0; k < gSeqPathKeyCounts[scene][j]; k++) {
                     rx = gSeqPathKeys[scene][j][k].x - x;
                     rz = gSeqPathKeys[scene][j][k].z - z;
                     nx = rx * c + rz * s;
@@ -2358,9 +2360,9 @@ void cutscene_anchorPaths(s32 scene) {
                     gSeqPathKeys[scene][j][k].z = gCutsceneAnchorPos[2] + rz;
                 }
                 if (gSeqTrackEventCounts[scene][j] != 0 && gSeqEventTracks[scene][j][4].type == 7) {
-                    hasHeadingEvent = 1;
+                    isTextTrack = 1;
                 }
-                if (hasHeadingEvent == 0) {
+                if (isTextTrack == 0) {
                     for (k = 0; k < gSeqChannelKeyCounts[scene][j]; k++) {
                         chKey = &gSeqChannelKeys[scene][j][k];
                         if (chKey->channel == 7) {
@@ -2512,7 +2514,7 @@ s32 cutscene_releasePlayer(s32 scene) {
             if (ctl != NULL) {
                 ctl->actual_speed = 0.0f;
             }
-            obj->unk54 = 0.0f;
+            obj->bodyLean = 0.0f;
             obj->heightOffset = 0;
             obj->doing_hit = 0;
 

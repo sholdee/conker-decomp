@@ -243,7 +243,7 @@ void actor_updateAll(void) {
 
     for (j = 0; j < gPlayerCount; j++) {
         if ((movement_obj)[j].type != 0 && (movement_obj)[j].mv != NULL) {
-            if ((movement_obj)[j].unk137 != 0) {
+            if ((movement_obj)[j].ledgeState != 0) {
                 if (gActorTouchedObject[j] != 0) {
                     db_Object_array[gActorTouchedObject[j] - 1].object_status |= 0x84;
                     gWorldObjectContacts[gActorTouchedObject[j] - 1] |= 1 << j;
@@ -591,8 +591,8 @@ void actor_tickTimers(Actor *obj) {
             obj->inputLockTimer -= gFrameSteps;
         }
     }
-    if (obj->unkAE != 0) {
-        obj->unkAE--;
+    if (obj->waterJumpTimer != 0) {
+        obj->waterJumpTimer--;
     }
     if (obj->nojump != 0xFF) {
         if (obj->nojump <= gFrameSteps) {
@@ -679,7 +679,7 @@ void actor_updatePissed(Actor *obj, u16 *moveAngle, f32 *moveSpeed, s8 *arg3) {
     } else {
         obj->speedPercent = 32;
     }
-    obj->unk54 *= 0.5f;
+    obj->bodyLean *= 0.5f;
     if (obj->animseq.uh == 0x2C || obj->animseq.uh == 0xE0) {
         *arg3 = gCurrentPad->stick_y >> 1;
     } else {
@@ -1372,8 +1372,8 @@ void actor_updatePlayer(Actor *actor) {
     if (gCurrentPad->stick_y == 0) {
         actor->mv->hang_ledge = 0;
     }
-    if (actor->unk137 == 0xFF) {
-        actor->unk137 = 0;
+    if (actor->ledgeState == 0xFF) {
+        actor->ledgeState = 0;
     }
     turnRate = 0xC;
     if ((actor->mv->pissed_up > 0) || (actor->mv->rt_context_b == 3)) {
@@ -1519,7 +1519,7 @@ void actor_updatePlayer(Actor *actor) {
                     }
                 }
                 if (actor->shad > 0.0f) {
-                    actor->lean_angle += (((actor->unk54 * 4.0f) - actor->lean_angle) * 0.15f);
+                    actor->lean_angle += (((actor->bodyLean * 4.0f) - actor->lean_angle) * 0.15f);
                     actor->vtilt = actor->speed * 1.5f;
                 }
                 actor->speedPercent = 0x3C;
@@ -1532,7 +1532,7 @@ void actor_updatePlayer(Actor *actor) {
         if ((actor->slideState == 2) || (actor->animseq.uh == 0xCD)) {
             steer = -steer;
         }
-        steer = (steer - actor->unk54) / (steerDiv / gActorTimeStep);
+        steer = (steer - actor->bodyLean) / (steerDiv / gActorTimeStep);
         if ((actor->shad < 30.0f) || (actor->mv->env_suit != 0)) {
             if (((steer > 0.0f) && (actor->mv->lean_last < 0.0f)) || ((prevSteer = actor->mv->lean_last, steer < 0.0f) && (prevSteer > 0.0f))) {
                 steer = 0.0f;
@@ -1546,7 +1546,7 @@ void actor_updatePlayer(Actor *actor) {
         }
         actor->mv->lean_last = steer;
         if ((gPaused == 0) && (gFrameRateDivider == 0)) {
-            actor->unk54 += steer;
+            actor->bodyLean += steer;
         }
         if (moveSpeed != 0.0f) {
             if (moveAngle != actor->angle) {
@@ -1594,7 +1594,7 @@ void actor_updatePlayer(Actor *actor) {
                         } else {
                             moveSpeed = 0.0f;
                             turnStep = 0;
-                            if (actor->unkAE == 0) {
+                            if (actor->waterJumpTimer == 0) {
                                 actor->speed -= 2.0f;
                             }
                         }
@@ -1706,7 +1706,7 @@ void actor_updatePlayer(Actor *actor) {
         }
         if (actor->stunned != 0xFF) {
             actor_runPlayerAction(actor, gCurrentPad->button, gActorPressedButtons, actor->shad, 0);
-            actor->unk54 = 0.0f;
+            actor->bodyLean = 0.0f;
             actor->norun = 0;
             actor->count5 = 0;
             if (((actor->animseq.uh == 0xF1) || (actor->animseq.uh == 0xF6)) && (actor->shad == 0.0f)) {
@@ -1767,7 +1767,7 @@ void actor_updatePlayer(Actor *actor) {
         stickX = gCurrentPad->stick_x;
         stickY = gCurrentPad->stick_y;
         actor->mv->prop = 0;
-        actor->unk54 = 0.0f;
+        actor->bodyLean = 0.0f;
         actor->norun = 0xFF;
         actor->speed *= 0.95f;
         actor->yspd = 0.0f;
@@ -1827,7 +1827,7 @@ void actor_updatePlayer(Actor *actor) {
             actor->mv->gpoint = 0xA;
             actor->mv->prop = 0;
             actor->speed = 0.0f;
-            actor->unk54 = 0.0f;
+            actor->bodyLean = 0.0f;
             actor->norun = 0xFF;
             actor->ygrav = 0.0f;
             actor->count3 = 1;
@@ -1873,7 +1873,7 @@ void actor_updatePlayer(Actor *actor) {
                             movement_obj[gPushedActorIndex].angle = otherFacing + quadrant;
                             actor->angle = movement_obj[gPushedActorIndex].angle;
                             actor->mv->turn = 1;
-                            actor->unk54 *= 0.4f;
+                            actor->bodyLean *= 0.4f;
                         }
                     }
                 } else {
@@ -1885,7 +1885,7 @@ void actor_updatePlayer(Actor *actor) {
                         nudgeX = 30.0f;
                     }
                     nudgeX = (2.0f * movement_obj[gPushedActorIndex].bodyRadius) - nudgeX;
-                    actor->unk54 *= 0.6f;
+                    actor->bodyLean *= 0.6f;
                     actor->speed = movement_obj[gPushedActorIndex].stickspeed;
                     if (movement_obj[gPushedActorIndex].stickspeed < movement_obj[gPushedActorIndex].speed) {
                         nudgeZ = movement_obj[gPushedActorIndex].speed;
@@ -1965,7 +1965,7 @@ void actor_updatePlayer(Actor *actor) {
         } else {
             snapRange = 15.0f;
         }
-        if ((actor->noshove & 4) && (actor->mv->side <= 0) && (actor->mv->grabState == 0) && (actor->unk137 == 0) && (actor->attach_char == 0) && ((actor->mv->bot == 0) || (actor->xpos != actor->old_xpos) || (actor->ypos != actor->old_ypos) || (actor->zpos != actor->old_zpos))) {
+        if ((actor->noshove & 4) && (actor->mv->side <= 0) && (actor->mv->grabState == 0) && (actor->ledgeState == 0) && (actor->attach_char == 0) && ((actor->mv->bot == 0) || (actor->xpos != actor->old_xpos) || (actor->ypos != actor->old_ypos) || (actor->zpos != actor->old_zpos))) {
             if (actor->noshove & 0x08000000) {
                 D_800CBDD3 = 1;
             }
@@ -2126,7 +2126,7 @@ void actor_updatePlayer(Actor *actor) {
                         }
                         if ((climbTop - 80.0f) <= actor->ypos) {
                             if (!(actor->mv->ladder & 0x80)) {
-                                actor->unk137 = 2;
+                                actor->ledgeState = 2;
                                 animSpeed = 3.0f;
                                 anim = 0x262;
                                 actor->mv->ladder = 0;
@@ -2173,7 +2173,7 @@ void actor_updatePlayer(Actor *actor) {
     }
     actor_updateSlopeTilt(actor, startX, startZ, moveAngle);
     if (actor->mv->transport == 0) {
-        if ((actor->shad > 5.0f) && (actor->unk137 == 0) && (actor->norun == 0) && (actor->mv->rt_context_b == 0) && (actor->mv->env_suit == 0) && (actor->stunned == 0) && (actor->mv->bitten == 0) && (actor->inwater == 0) && (actor->lifting == 0) && (actor->floorY != -10000.0f) && (actor->energy != 0) && (actor->mv->pissed_up == 0) && (actor->mv->transport == 0) && (actor->slideState == 0) && ((actor->fallStartY - actor->ypos) < 450.0f)) {
+        if ((actor->shad > 5.0f) && (actor->ledgeState == 0) && (actor->norun == 0) && (actor->mv->rt_context_b == 0) && (actor->mv->env_suit == 0) && (actor->stunned == 0) && (actor->mv->bitten == 0) && (actor->inwater == 0) && (actor->lifting == 0) && (actor->floorY != -10000.0f) && (actor->energy != 0) && (actor->mv->pissed_up == 0) && (actor->mv->transport == 0) && (actor->slideState == 0) && ((actor->fallStartY - actor->ypos) < 450.0f)) {
             s16 ledgeAngle;
             s32 ledge;
             f32 ledgeY;
@@ -2197,7 +2197,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->mv->hang_ledge = 1;
                 actor->mv->save_done = 0;
                 actor->norun = 0xFF;
-                actor->unk137 = 1;
+                actor->ledgeState = 1;
                 actor->count3 = 1;
                 actor->speed = 0.0f;
                 actor->yspd = 0.0f;
@@ -2625,7 +2625,7 @@ void actor_updateSlopeTilt(Actor *actor, f32 x, f32 z, u16 facing) {
         if (actor->mv->transport == 2) {
             {
                 f32 yVelocity = actor->yspd;
-                sway = actor->unk54 * 6.0f;
+                sway = actor->bodyLean * 6.0f;
                 if (yVelocity < -30.0f) {
                     pitch -= -30.0f;
                 } else {
@@ -2662,7 +2662,7 @@ void actor_updateSlopeTilt(Actor *actor, f32 x, f32 z, u16 facing) {
             depth *= 0.00999999978f;
         }
         if ((fabsf(actor->vtilt) < 35.0f) && (depth > 0.0f)) {
-            roll += actor->unk54 * depth;
+            roll += actor->bodyLean * depth;
         }
         actor_stepVector2D(0.0f, 0.0f, 0.300000012f, &actor->ob_slopex, &actor->ob_slopey);
     }

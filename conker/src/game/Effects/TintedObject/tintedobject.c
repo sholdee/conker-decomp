@@ -244,7 +244,7 @@ void func_150D7928(Actor *obj) {
             dst[i] = src[i];
         }
         obj->ygrav = 6.0f;
-        angleOffset = player->unk54 * 0.45f;
+        angleOffset = player->bodyLean * 0.45f;
         obj->stickspeed = player->lean_angle;
         if (id == 0x7F) {
             player->imune = 20;
