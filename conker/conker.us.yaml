@@ -1797,6 +1797,7 @@ segments:
     start: 0x00255880
     vram:  0x16000000
     align: 8
+    subalign: 8   # the base spawn tables start on an 8-byte address (0x25A1E8)
     subsegments:
       - [0x255880, c, debugger/Debugger/CrashScreen/crashscreen]
       - [0x256F80, c, debugger/Debugger/DebuggerCont/debuggercont]
@@ -1808,7 +1809,8 @@ segments:
       - [0x259560, rodata] # font of debugger/debugger (an asset)
       - [0x259860, .rodata, debugger/Debugger/CrashScreen/crashscreen]
       - [0x25A080, .rodata, debugger/Debugger/DebuggerPrintf/debuggerprintf]
-      - [0x25A1E0, rodata]
+      - [0x25A1E0, rodata] # 8 bytes that fill the ROM up to the next 16-byte position (stale bytes of the ROM builder)
+      - [0x25A1E8, .rodata, debugger/Level/BaseSpawns/basespawns]
 
       # BSS ?
 
