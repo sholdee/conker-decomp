@@ -7,23 +7,23 @@
 
 /* Spawns an effect attached to `owner`. */
 void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
-    EffectE7970Data data;
-    TimedEffect *effect;
+    FixedEmitterData data;
+    Effect1BFDD0 *effect;
 
-    data.owner = owner;
-    data.ownerId = owner->unique_id;
+    data.object = owner;
+    data.objectId = owner->unique_id;
     data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect((math_random() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, fxOwner, fxList);
     if (effect != NULL) {
-        memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
-void particle_updateOwnerEmitter(EffectE7970 *effect) {
+void particle_updateOwnerEmitter(Effect1BFDD0 *effect) {
     Actor *owner;
-    EffectE7970Data *data;
+    FixedEmitterData *data;
     s32 heading;
     Vec3f ownerPos;
     f32 radius;
@@ -36,9 +36,9 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
     f32 speed;
     u32 randomYaw;
 
-    owner = effect->data.owner;
+    owner = effect->data.object;
     data = &effect->data;
-    if ((owner->type == 0) || (owner->unique_id != data->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != data->objectId)) {
         effect->base.header.state = -1;
         return;
     }
@@ -74,7 +74,7 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
     }
 }
 
-void particle_onOwnerEmitterEvent(EffectE7970 *effect, s32 event, u8 eventType) {
-    effect_handleTimedEffectOwnerEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
+void particle_onOwnerEmitterEvent(Effect1BFDD0 *effect, s32 event, u8 eventType) {
+    effect_handleTimedEffectOwnerEvent(event, eventType, &effect->data.object, &effect->data.objectId, effect);
 }
 

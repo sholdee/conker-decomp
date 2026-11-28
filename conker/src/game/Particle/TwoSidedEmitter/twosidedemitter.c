@@ -8,19 +8,13 @@
 #include "conker/game.h"
 #include "conker/light.h"
 #include "conker/particle.h"
+#include "conker/sight.h"
 #include "conker/sprite.h"
 #include "conker/weapon.h"
 #include "libc/string.h"
 
 
 
-
-/* First argument of sprite_sendEventToScreenSprites. */
-typedef struct {
-    /* 0x00 */ u8 side;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ Camera *camera;
-} CameraArg_150FB8C0;
 
 /* Per side (0, 1): the bone and the bone-space points of particle_spawnSideEffect's effect, for most objects... */
 static const u8 gSideEffectBones[2] = { 5, 7 };
@@ -187,7 +181,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
     }
     if (useTarget && target->CameraPtr != NULL) {
         ScreenSpriteInfo effect;
-        CameraArg_150FB8C0 cameraArg;
+        SightPanelMsg cameraArg;
 
         if (side) {
             effect.x = -59.0f;
@@ -225,7 +219,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         effect.viewport = target->CameraPtr->CNumber;
         sprite_newScreenSprite(&effect, 0, 0, 0, 0, 0, list);
         cameraArg.side = side;
-        cameraArg.camera = target->CameraPtr;
+        cameraArg.player = target->CameraPtr;
         sprite_sendEventToScreenSprites((s32)&cameraArg, 0x37);
     }
 }

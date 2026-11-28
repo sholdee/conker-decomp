@@ -304,22 +304,24 @@ s32 particle_moveTumbling(TumblingParticle *particle);
 s32 particle_fadeTumbling(TumblingParticle *particle);
 
 /* game/Particle/OwnerEmitter/owneremitter.c */
-/* Per-effect data: the object the effect is attached to and a spawn accumulator. */
+/* Data of the timed effects that follow an object and emit particles at a rate fixed in code (this file,
+ * game/Particle/SideEmitter/sideemitter.c, game/Particle/OwnerSideEmitter/ownersideemitter.c and
+ * game/Effects/PerimeterEmitter/perimeteremitter.c): an ObjectEmitterData (game/Particle/SegmentEmitter/segmentemitter.c)
+ * without the rate and the callbacks. */
 typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
-    /* 0x8 */ f32 spawnAccum;
-} EffectE7970Data; // size 0xC
+    /* 0x00 */ Actor *object;
+    /* 0x04 */ u8 objectId; /* object->unique_id when attached */
+    /* 0x08 */ f32 spawnAccum; /* += rate * gFrameDelta; one particle per 1.0 */
+} FixedEmitterData; /* size 0xC */
 
-/* Effect slot as returned by effect_newTimedEffect (a TimedEffect); the effect data lives at 0x28. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EffectE7970Data data;
-} EffectE7970;
+    /* 0x28 */ FixedEmitterData data;
+} Effect1BFDD0;
 
 void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList);
-void particle_updateOwnerEmitter(EffectE7970 *effect);
-void particle_onOwnerEmitterEvent(EffectE7970 *effect, s32 event, u8 eventType);
+void particle_updateOwnerEmitter(Effect1BFDD0 *effect);
+void particle_onOwnerEmitterEvent(Effect1BFDD0 *effect, s32 event, u8 eventType);
 
 /* game/Particle/ObjGroundEffects/objgroundeffects.c */
 s32 particle_getObjGroundPos(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3);
@@ -2431,19 +2433,6 @@ void particle_onDustEmitterEvent(DustEmitter *effect, s32 event, u8 eventType);
 void particle_renewBillboard(BillboardParticle *p);
 
 /* game/Particle/SideEmitter/sideemitter.c */
-/* Data of the effects of this file that follow an object: an ObjectEmitterData (game/Particle/SegmentEmitter/segmentemitter.c) without the
- * rate and the callbacks, which are fixed in code. */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId; /* object->unique_id when attached */
-    /* 0x08 */ f32 spawnAccum;
-} FixedEmitterData; /* size 0xC */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FixedEmitterData data;
-} Effect1BFDD0;
-
 void particle_attachSideEmitter(Actor *object);
 void particle_updateSideEmitter(Effect1BFDD0 *effect);
 Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list);
@@ -2659,21 +2648,9 @@ s32 particle_spawnYawSpraySpark(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 o
 s32 particle_dampSprayXZ(SparkParticle *spark, Vec3f *prevPos);
 
 /* game/Particle/OwnerSideEmitter/ownersideemitter.c */
-/* Per-task data kept at offset 0x28 of the task created by particle_startOwnerSideTask. */
-typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;
-    /* 0x8 */ f32 timer;
-} Data151B1AB0;
-
-typedef struct {
-    TimedEffect base;
-    Data151B1AB0 data;
-} Task151B1AB0;
-
 void particle_startOwnerSideTask(Actor *owner);
-void particle_updateOwnerSideTask(Task151B1AB0 *task);
-void particle_onOwnerSideTaskMsg(Task151B1AB0 *task, ActorMsg *msg, u8 kind);
+void particle_updateOwnerSideTask(Effect1BFDD0 *task);
+void particle_onOwnerSideTaskMsg(Effect1BFDD0 *task, ActorMsg *msg, u8 kind);
 
 /* game/Particle/SoundPulse/soundpulse.c */
 /* Object whose sound handle particle_stopPulseSound stops. */

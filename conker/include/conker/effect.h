@@ -230,8 +230,8 @@ void effect_spawnActorImpactDebris(Actor *actor, Actor *other, u8 arg2, s32 arg3
 void effect_pickPerimeterPoint(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
 void effect_attachPerimeterEmitter(Actor *owner);
 void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList);
-void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 event, u8 eventType);
-void effect_updatePerimeterEmitter(DDB60Effect *effect);
+void effect_perimeterEmitterMessage(Effect1BFDD0 *effect, s32 event, u8 eventType);
+void effect_updatePerimeterEmitter(Effect1BFDD0 *effect);
 
 /* game/Effects/BoneStreak/bonestreak.c */
 void effect_spawnBone25StreakBurst(Actor *obj, u8 arg1);
@@ -755,19 +755,12 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2);
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
 
 /* game/Effects/ChildEffect/childeffect.c */
-typedef struct Effect_129DE0 Effect_129DE0;
-/* An effect that owns another object (child), destroyed with it (see effect_destroyChildEffect). */
-struct Effect_129DE0 {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 pad28[0x10];
-    /* 0x38 */ EffectHeader *child;
-};
 s32 effect_filterExcludedTargets(Actor *obj, s32 arg1, s32 arg2);
-void effect_destroyChildEffect(Effect_129DE0 *effect);
-void effect_destroyWithChild(Effect_129DE0 *effect);
+void effect_destroyChildEffect(TwoSidedEmitter *effect);
+void effect_destroyWithChild(TwoSidedEmitter *effect);
 
 /* game/Effects/ChildEffectFree/childeffectfree.c */
-void effect_freeWithChild(Effect_129DE0 *obj);
+void effect_freeWithChild(TwoSidedEmitter *obj);
 
 /* game/Effects/AreaSpray/areaspray.c */
 typedef struct Actor150FD514 Actor150FD514;

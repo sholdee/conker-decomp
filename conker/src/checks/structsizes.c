@@ -290,7 +290,6 @@ STATIC_ASSERT(sizeof(BoltSource) == 0xC, BoltSource_size);
 STATIC_ASSERT(sizeof(FlashBurstEffect) == 0x30, FlashBurstEffect_size);
 STATIC_ASSERT(sizeof(OwnerEffectData) == 0x8, OwnerEffectData_size);
 STATIC_ASSERT(sizeof(OwnerEffect) == 0x30, OwnerEffect_size);
-STATIC_ASSERT(sizeof(DDB60EffectData) == 0xC, DDB60EffectData_size);
 STATIC_ASSERT(sizeof(TextLines) == 0x28, TextLines_size);
 STATIC_ASSERT(sizeof(DiscEmitter) == 0x10, DiscEmitter_size);
 STATIC_ASSERT(sizeof(Struct150C29F0) == 0x38, Struct150C29F0_size);
@@ -361,7 +360,6 @@ STATIC_ASSERT(sizeof(LampSwing) == 0x24, LampSwing_size);
 
 /* conker/particle.h */
 STATIC_ASSERT(sizeof(Rgb8) == 0x3, Rgb8_size);
-STATIC_ASSERT(sizeof(EffectE7970Data) == 0xC, EffectE7970Data_size);
 STATIC_ASSERT(sizeof(PoolEmitterDesc) == 0x1C, PoolEmitterDesc_size);
 STATIC_ASSERT(sizeof(PoolEmitter) == 0x48, PoolEmitter_size);
 STATIC_ASSERT(sizeof(QuadDriftMotion) == 0x40, QuadDriftMotion_size);

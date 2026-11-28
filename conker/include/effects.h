@@ -3048,21 +3048,6 @@ typedef struct ZoneEffect {
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
 
-/* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
- * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
- * moves sched_preNmiThread's static gPreNmiTime to the start of that file's .bss.) */
-typedef struct DDB60EffectData {
-    /* 0x00 */ struct Actor *owner;
-    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
-} DDB60EffectData; /* size 0xC */
-
-/* The effect object spawned by effect_spawnPerimeterEmitter. */
-typedef struct DDB60Effect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DDB60EffectData data;
-} DDB60Effect;
 
 /* Text box data (at 0x28 in its object): shows a string one line at a time. */
 typedef struct TextLines {
