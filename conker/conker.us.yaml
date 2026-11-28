@@ -683,7 +683,6 @@ segments:
       - [0x108320, c, game/Beam/BeamQuad/beamquad]
       - [0x108E90, c, game/Effects/PuffTimer/pufftimer]
       - [0x109220, c, game/Effects/FallingStream/fallingstream]
-      - [0x10B380, c, game/Effects/TrapEffect/trapeffect]
       - [0x10B7C0, c, game/Effects/LevelHookCanyon/levelhookcanyon]
       - [0x10B7D0, c, game/Effects/ZonePairEmitter/zonepairemitter]
       - [0x10C140, c, game/Effects/RainHook/rainhook]

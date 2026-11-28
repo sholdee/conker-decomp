@@ -288,7 +288,7 @@ src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c	effect	screen-sprite spawner of
 src/game/Effects/Explosion/explosion.c	effect	explosion and dropped point effects
 src/game/Effects/FadeBurst/fadeburst.c	effect	burst effect pieces
 src/game/Effects/FallingObject/fallingobject.c	effect	falling object spawns
-src/game/Effects/FallingStream/fallingstream.c	effect	falling stream with splashes
+src/game/Effects/FallingStream/fallingstream.c	effect	falling stream with splashes; the trap trigger that starts streams 1-4, trail sprite spawns
 src/game/Effects/FlagLights/flaglights.c	effect	random flag toggles and cycling segment assets
 src/game/Effects/FollowEffects/followeffects.c	effect	model-following effects and bursts
 src/game/Effects/GroundFlash/groundflash.c	effect	split from game_117490.c; same subsystem
@@ -343,7 +343,6 @@ src/game/Effects/TaskGroundFx/taskgroundfx.c	effect	ground effect under an actor
 src/game/Effects/TextLines/textlines.c	effect	split from game_FC9E0.c; same subsystem
 src/game/Effects/TimedEffect/timedeffect.c	effect	timed callback objects (TimedEffect core)
 src/game/Effects/TintedObject/tintedobject.c	effect	tinted objects (message 0x36) and texture animation clock
-src/game/Effects/TrapEffect/trapeffect.c	effect	trap trigger effects and sprite spawns
 src/game/Effects/TreadScroll/treadscroll.c	effect	level effect hook on objects
 src/game/Effects/TriggerSwap/triggerswap.c	effect	timed sound trigger
 src/game/Effects/TumblingPiece/tumblingpiece.c	effect	tumbling pieces

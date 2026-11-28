@@ -44,7 +44,6 @@
  *   game/Effects/TintedObject/tintedobject.c
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
- *   game/Effects/TrapEffect/trapeffect.c
  *   game/Effects/LevelHookCanyon/levelhookcanyon.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
@@ -514,14 +513,12 @@ void effect_updatePuffTimer(PuffTimer *timer);
 
 /* game/Effects/FallingStream/fallingstream.c */
 typedef struct StreamActor StreamActor;
+typedef struct TrapEffect TrapEffect;
+typedef struct EffectSpawnSource EffectSpawnSource;
 s32 effect_createFallingStream(u8 kind);
 s32 effect_updateFallingStream(StreamActor *actor);
 s32 effect_updateFallingStreamTrail(StreamActor *actor);
 Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view);
-
-/* game/Effects/TrapEffect/trapeffect.c */
-typedef struct TrapEffect TrapEffect;
-typedef struct EffectSpawnSource EffectSpawnSource;
 void effect_onTrapTriggered(WorldObject *trap);
 s32 effect_startTrapStream(TrapEffect *obj);
 s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
