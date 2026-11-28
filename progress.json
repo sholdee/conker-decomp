@@ -1,0 +1,23 @@
+{
+  "code_bytes": 2250852,
+  "matched_bytes": 2250852,
+  "c_bytes": 2187188,
+  "hasm_bytes": 63664,
+  "functions": 6050,
+  "functions_named": 5511,
+  "data_bytes": 537272,
+  "data_in_source_bytes": 518136,
+  "data_asm_bytes": 1168,
+  "data_asset_bytes": 17944,
+  "data_padding_bytes": 24,
+  "fields": 7352,
+  "fields_named": 6896,
+  "data_symbols": 1683,
+  "data_symbols_named": 1319,
+  "linked": true,
+  "matched_pct": 100.0,
+  "named_pct": 91.1,
+  "fields_named_pct": 93.8,
+  "data_named_pct": 78.4,
+  "data_in_source_pct": 99.8
+}

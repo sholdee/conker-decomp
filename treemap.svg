@@ -1,0 +1,1029 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="764" font-family="Verdana,DejaVu Sans,sans-serif">
+<rect width="1200" height="764" fill="#0d1117"/>
+<text x="10" y="18" font-size="14" fill="#e6edf3">Conker's Bad Fur Day (US): code by source file (2,250,852 bytes)</text>
+<rect x="10" y="27" width="12" height="12" fill="#3fb950"/><text x="27" y="38" font-size="11" fill="#e6edf3">C, byte-identical (2,187,188 bytes)</text>
+<rect x="300" y="27" width="12" height="12" fill="#388bfd"/><text x="317" y="38" font-size="11" fill="#e6edf3">hand-written asm (63,664 bytes)</text>
+<g><rect x="0.0" y="44.0" width="420.2" height="451.7" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="3.0" y="55.0" font-size="10" fill="#8b949e">game/Effects</text>
+<rect x="1.0" y="58.0" width="131.1" height="84.7" fill="#3fb950"><title>game/Effects/CharacterFlameThrower/characterflamethrower: 30,656 bytes, 69 functions (69 named), 8 data symbols (6 named)</title></rect>
+<rect x="133.1" y="58.0" width="128.5" height="84.7" fill="#3fb950"><title>game/Effects/Blood/blood: 30,064 bytes, 65 functions (65 named)</title></rect>
+<text x="136.1" y="69.0" font-size="9" fill="#0d1117">blood</text>
+<rect x="262.6" y="58.0" width="79.9" height="84.7" fill="#3fb950"><title>game/Effects/FollowEffects/followeffects: 18,768 bytes, 44 functions (43 named)</title></rect>
+<rect x="343.4" y="58.0" width="74.8" height="84.7" fill="#3fb950"><title>game/Effects/Light/light: 17,600 bytes, 78 functions (73 named), 1 data symbols (1 named)</title></rect>
+<text x="346.4" y="69.0" font-size="9" fill="#0d1117">light</text>
+<rect x="1.0" y="143.7" width="66.0" height="93.6" fill="#3fb950"><title>game/Effects/Trail/LevelStream/levelstream: 17,168 bytes, 45 functions (45 named), 4 data symbols (4 named)</title></rect>
+<rect x="1.0" y="238.3" width="66.0" height="76.7" fill="#3fb950"><title>game/Effects/Sight/effects_sight: 14,112 bytes, 27 functions (27 named)</title></rect>
+<rect x="1.0" y="316.1" width="66.0" height="60.7" fill="#3fb950"><title>game/Effects/ActorAttachments/actorattachments: 11,200 bytes, 78 functions (57 named)</title></rect>
+<rect x="1.0" y="377.8" width="66.0" height="58.2" fill="#3fb950"><title>game/Effects/Sight/SightBeam/sightbeam: 10,752 bytes, 19 functions (19 named)</title></rect>
+<rect x="1.0" y="437.0" width="66.0" height="56.7" fill="#3fb950"><title>game/Effects/ObjectList/objectlist: 10,480 bytes, 42 functions (42 named), 34 data symbols (33 named)</title></rect>
+<rect x="68.0" y="143.7" width="55.8" height="61.6" fill="#3fb950"><title>game/Effects/FallingStream/fallingstream: 9,632 bytes, 10 functions (10 named)</title></rect>
+<rect x="68.0" y="206.3" width="55.8" height="59.6" fill="#3fb950"><title>game/Effects/ActorTasks/actortasks: 9,328 bytes, 41 functions (40 named)</title></rect>
+<rect x="68.0" y="267.0" width="55.8" height="58.5" fill="#3fb950"><title>game/Effects/CharacterWatcher/characterwatcher: 9,152 bytes, 25 functions (25 named)</title></rect>
+<rect x="68.0" y="326.5" width="55.8" height="57.9" fill="#3fb950"><title>game/Effects/Trail/PissTrail/pisstrail: 9,056 bytes, 16 functions (16 named)</title></rect>
+<rect x="68.0" y="385.3" width="55.8" height="53.7" fill="#3fb950"><title>game/Effects/Trail/CharacterTrail/charactertrail: 8,416 bytes, 12 functions (12 named), 1 data symbols (1 named)</title></rect>
+<rect x="68.0" y="440.0" width="55.8" height="53.7" fill="#3fb950"><title>game/Effects/Trail/RibbonTrail/ribbontrail: 8,416 bytes, 17 functions (17 named)</title></rect>
+<rect x="124.9" y="143.7" width="54.8" height="53.0" fill="#3fb950"><title>game/Effects/ParticleBursts/particlebursts: 8,160 bytes, 6 functions (1 named)</title></rect>
+<rect x="180.7" y="143.7" width="48.4" height="53.0" fill="#3fb950"><title>game/Effects/Trail/BoneTrail/bonetrail: 7,232 bytes, 17 functions (17 named)</title></rect>
+<rect x="230.1" y="143.7" width="48.2" height="53.0" fill="#3fb950"><title>game/Effects/HoltenRope/holtenrope: 7,200 bytes, 17 functions (17 named)</title></rect>
+<rect x="279.3" y="143.7" width="46.4" height="53.0" fill="#3fb950"><title>game/Effects/ContactEffects/contacteffects: 6,928 bytes, 29 functions (27 named)</title></rect>
+<rect x="326.7" y="143.7" width="45.4" height="53.0" fill="#3fb950"><title>game/Effects/Trail/SurfaceTrail/surfacetrail: 6,784 bytes, 14 functions (14 named)</title></rect>
+<rect x="373.1" y="143.7" width="45.2" height="53.0" fill="#3fb950"><title>game/Effects/LandingBurst/landingburst: 6,752 bytes, 13 functions (13 named)</title></rect>
+<rect x="124.9" y="197.8" width="53.2" height="44.4" fill="#3fb950"><title>game/Effects/Trail/MatrixTrail/matrixtrail: 6,656 bytes, 23 functions (23 named), 1 data symbols (1 named)</title></rect>
+<rect x="179.0" y="197.8" width="51.2" height="44.4" fill="#3fb950"><title>game/Effects/DelayedBurst/delayedburst: 6,416 bytes, 17 functions (17 named), 1 data symbols (1 named)</title></rect>
+<rect x="231.2" y="197.8" width="50.0" height="44.4" fill="#3fb950"><title>game/Effects/RingEffect/ringeffect: 6,272 bytes, 7 functions (7 named)</title></rect>
+<rect x="282.3" y="197.8" width="45.2" height="44.4" fill="#3fb950"><title>game/Effects/Trail/AnchoredTrail/anchoredtrail: 5,680 bytes, 23 functions (21 named)</title></rect>
+<rect x="328.5" y="197.8" width="44.8" height="44.4" fill="#3fb950"><title>game/Effects/Trail/ScatterTrail/scattertrail: 5,632 bytes, 10 functions (10 named)</title></rect>
+<rect x="374.3" y="197.8" width="43.9" height="44.4" fill="#3fb950"><title>game/Effects/MaterialImpact/materialimpact: 5,520 bytes, 6 functions (6 named)</title></rect>
+<rect x="124.9" y="243.1" width="42.6" height="43.5" fill="#3fb950"><title>game/Effects/StageEffect/stageeffect: 5,248 bytes, 10 functions (10 named), 1 data symbols (1 named)</title></rect>
+<rect x="124.9" y="287.6" width="42.6" height="42.3" fill="#3fb950"><title>game/Effects/StatCounter/statcounter: 5,104 bytes, 13 functions (12 named)</title></rect>
+<rect x="124.9" y="330.9" width="42.6" height="41.4" fill="#3fb950"><title>game/Effects/Trail/MotionTrail/motiontrail: 5,008 bytes, 11 functions (11 named)</title></rect>
+<rect x="124.9" y="373.3" width="42.6" height="41.2" fill="#3fb950"><title>game/Effects/PipeExplode/pipeexplode: 4,976 bytes, 6 functions (6 named)</title></rect>
+<rect x="124.9" y="415.5" width="42.6" height="40.0" fill="#3fb950"><title>game/Effects/AreaSpray/areaspray: 4,832 bytes, 11 functions (11 named), 1 data symbols (1 named)</title></rect>
+<rect x="124.9" y="456.5" width="42.6" height="37.2" fill="#3fb950"><title>game/Effects/HomingEffect/homingeffect: 4,512 bytes, 13 functions (13 named), 1 data symbols (1 named)</title></rect>
+<rect x="168.4" y="243.1" width="42.1" height="37.0" fill="#3fb950"><title>game/Effects/Trail/FallingTrail/fallingtrail: 4,432 bytes, 8 functions (8 named)</title></rect>
+<rect x="211.5" y="243.1" width="41.8" height="37.0" fill="#3fb950"><title>game/Effects/ProjectilePuffs/projectilepuffs: 4,400 bytes, 7 functions (7 named)</title></rect>
+<rect x="254.3" y="243.1" width="41.4" height="37.0" fill="#3fb950"><title>game/Effects/ModelBurst/modelburst: 4,368 bytes, 9 functions (7 named)</title></rect>
+<rect x="296.7" y="243.1" width="41.1" height="37.0" fill="#3fb950"><title>game/Effects/Trail/Afterimage/afterimage: 4,336 bytes, 15 functions (15 named), 3 data symbols (3 named)</title></rect>
+<rect x="338.9" y="243.1" width="40.4" height="37.0" fill="#3fb950"><title>game/Effects/ModelEffect/modeleffect: 4,256 bytes, 16 functions (16 named), 1 data symbols (1 named)</title></rect>
+<rect x="380.2" y="243.1" width="38.0" height="37.0" fill="#3fb950"><title>game/Effects/MaterialScroll/materialscroll: 4,016 bytes, 13 functions (11 named), 3 data symbols (3 named)</title></rect>
+<rect x="168.4" y="281.2" width="38.6" height="36.2" fill="#3fb950"><title>game/Effects/ImpactRing/impactring: 3,984 bytes, 7 functions (7 named)</title></rect>
+<rect x="168.4" y="318.3" width="38.6" height="34.8" fill="#3fb950"><title>game/Effects/Rain/rain: 3,840 bytes, 9 functions (9 named), 9 data symbols (9 named)</title></rect>
+<text x="171.4" y="329.3" font-size="9" fill="#0d1117">rain</text>
+<rect x="168.4" y="354.2" width="38.6" height="34.7" fill="#3fb950"><title>game/Effects/ObjBurst/objburst: 3,824 bytes, 12 functions (12 named)</title></rect>
+<rect x="168.4" y="389.9" width="38.6" height="34.1" fill="#3fb950"><title>game/Effects/ActorDamageFx/actordamagefx: 3,760 bytes, 13 functions (11 named)</title></rect>
+<rect x="168.4" y="425.0" width="38.6" height="33.9" fill="#3fb950"><title>game/Effects/BreakUp/breakup: 3,744 bytes, 4 functions (4 named)</title></rect>
+<rect x="168.4" y="459.9" width="38.6" height="33.8" fill="#3fb950"><title>game/Effects/TintedObject/tintedobject: 3,728 bytes, 7 functions (6 named), 1 data symbols (1 named)</title></rect>
+<rect x="208.0" y="281.2" width="39.3" height="32.9" fill="#3fb950"><title>game/Effects/Trail/TrailEmitter/trailemitter: 3,696 bytes, 9 functions (9 named)</title></rect>
+<rect x="248.3" y="281.2" width="35.6" height="32.9" fill="#3fb950"><title>game/Effects/BloodDrip/blooddrip: 3,360 bytes, 8 functions (1 named)</title></rect>
+<rect x="284.9" y="281.2" width="34.9" height="32.9" fill="#3fb950"><title>game/Effects/Trail/TrackerTrail/trackertrail: 3,296 bytes, 6 functions (6 named)</title></rect>
+<rect x="320.9" y="281.2" width="32.8" height="32.9" fill="#3fb950"><title>game/Effects/ImpactSets/impactsets: 3,104 bytes, 9 functions (9 named)</title></rect>
+<rect x="354.7" y="281.2" width="31.8" height="32.9" fill="#3fb950"><title>game/Effects/SwingingLamp/swinginglamp: 3,008 bytes, 11 functions (11 named)</title></rect>
+<rect x="387.5" y="281.2" width="30.7" height="32.9" fill="#3fb950"><title>game/Effects/Explosion/explosion: 2,912 bytes, 3 functions (3 named)</title></rect>
+<rect x="208.0" y="315.0" width="33.6" height="29.5" fill="#3fb950"><title>game/Effects/Oscillator/oscillator: 2,864 bytes, 9 functions (8 named)</title></rect>
+<rect x="208.0" y="345.6" width="33.6" height="29.4" fill="#3fb950"><title>game/Effects/JointDecal/jointdecal: 2,848 bytes, 6 functions (6 named), 1 data symbols (1 named)</title></rect>
+<rect x="208.0" y="376.0" width="33.6" height="29.4" fill="#3fb950"><title>game/Effects/EffectActor/effectactor: 2,848 bytes, 12 functions (12 named)</title></rect>
+<rect x="208.0" y="406.3" width="33.6" height="29.2" fill="#3fb950"><title>game/Effects/BoneBeamParticle/bonebeamparticle: 2,832 bytes, 6 functions (6 named)</title></rect>
+<rect x="208.0" y="436.5" width="33.6" height="28.5" fill="#3fb950"><title>game/Effects/PulseEffect/pulseeffect: 2,768 bytes, 6 functions (6 named)</title></rect>
+<rect x="208.0" y="466.1" width="33.6" height="27.7" fill="#3fb950"><title>game/Effects/DynModel/dynmodel: 2,688 bytes, 13 functions (13 named)</title></rect>
+<rect x="242.6" y="315.0" width="29.8" height="30.6" fill="#3fb950"><title>game/Effects/BloodDebris/blooddebris: 2,640 bytes, 7 functions (7 named)</title></rect>
+<rect x="273.5" y="315.0" width="29.3" height="30.6" fill="#3fb950"><title>game/Effects/QuadEffect/quadeffect: 2,592 bytes, 5 functions (5 named), 1 data symbols (1 named)</title></rect>
+<rect x="303.8" y="315.0" width="29.1" height="30.6" fill="#3fb950"><title>game/Effects/PlayerMarker/playermarker: 2,576 bytes, 9 functions (9 named)</title></rect>
+<rect x="333.8" y="315.0" width="28.3" height="30.6" fill="#3fb950"><title>game/Effects/BoneFollower/bonefollower: 2,512 bytes, 19 functions (19 named), 3 data symbols (3 named)</title></rect>
+<rect x="363.2" y="315.0" width="27.2" height="30.6" fill="#3fb950"><title>game/Effects/ZonePairEmitter/zonepairemitter: 2,416 bytes, 9 functions (8 named)</title></rect>
+<rect x="391.4" y="315.0" width="26.8" height="30.6" fill="#3fb950"><title>game/Effects/ActorEffects/actoreffects: 2,384 bytes, 12 functions (11 named)</title></rect>
+<rect x="242.6" y="346.7" width="28.0" height="29.3" fill="#3fb950"><title>game/Effects/ColorAnim/coloranim: 2,384 bytes, 6 functions (6 named), 2 data symbols (2 named)</title></rect>
+<rect x="242.6" y="377.0" width="28.0" height="28.9" fill="#3fb950"><title>game/Effects/WatcherEffects/watchereffects: 2,352 bytes, 10 functions (10 named)</title></rect>
+<rect x="242.6" y="406.9" width="28.0" height="28.9" fill="#3fb950"><title>game/Effects/TextLines/textlines: 2,352 bytes, 15 functions (15 named)</title></rect>
+<rect x="242.6" y="436.9" width="28.0" height="27.9" fill="#3fb950"><title>game/Effects/FadeBurst/fadeburst: 2,272 bytes, 4 functions (4 named)</title></rect>
+<rect x="242.6" y="465.8" width="28.0" height="27.9" fill="#3fb950"><title>game/Effects/LampParticle/lampparticle: 2,272 bytes, 5 functions (5 named)</title></rect>
+<rect x="271.7" y="346.7" width="32.0" height="24.3" fill="#3fb950"><title>game/Effects/ActorExplosion/actorexplosion: 2,256 bytes, 6 functions (3 named)</title></rect>
+<rect x="304.6" y="346.7" width="28.7" height="24.3" fill="#3fb950"><title>game/Effects/HopSprite/hopsprite: 2,032 bytes, 8 functions (8 named), 4 data symbols (4 named)</title></rect>
+<rect x="334.3" y="346.7" width="28.5" height="24.3" fill="#3fb950"><title>game/Effects/PropEmitter/propemitter: 2,016 bytes, 3 functions (3 named)</title></rect>
+<rect x="363.8" y="346.7" width="27.3" height="24.3" fill="#3fb950"><title>game/Effects/SwayObject/swayobject: 1,936 bytes, 9 functions (9 named)</title></rect>
+<rect x="392.1" y="346.7" width="26.1" height="24.3" fill="#388bfd"><title>game/Effects/ObjectList/quadfxdraw: 1,856 bytes, 4 functions (4 named)</title></rect>
+<rect x="271.7" y="371.9" width="24.6" height="25.3" fill="#3fb950"><title>game/Effects/AttachedBurst/attachedburst: 1,824 bytes, 7 functions (6 named)</title></rect>
+<rect x="271.7" y="398.2" width="24.6" height="24.6" fill="#3fb950"><title>game/Effects/Trail/SprayEmitter/sprayemitter: 1,776 bytes, 4 functions (4 named)</title></rect>
+<rect x="271.7" y="423.8" width="24.6" height="23.2" fill="#3fb950"><title>game/Effects/PerimeterEmitter/perimeteremitter: 1,680 bytes, 5 functions (5 named)</title></rect>
+<rect x="271.7" y="447.9" width="24.6" height="22.5" fill="#3fb950"><title>game/Effects/EffectObj/effectobj: 1,632 bytes, 11 functions (11 named)</title></rect>
+<rect x="271.7" y="471.5" width="24.6" height="22.3" fill="#3fb950"><title>game/Effects/TumblingPiece/tumblingpiece: 1,616 bytes, 3 functions (3 named)</title></rect>
+<rect x="297.3" y="371.9" width="25.9" height="21.0" fill="#3fb950"><title>game/Effects/DebrisSplash/debrissplash: 1,600 bytes, 4 functions (3 named)</title></rect>
+<rect x="324.2" y="371.9" width="23.8" height="21.0" fill="#3fb950"><title>game/Effects/BoneGroundFx/bonegroundfx: 1,472 bytes, 7 functions (7 named)</title></rect>
+<rect x="349.0" y="371.9" width="23.2" height="21.0" fill="#3fb950"><title>game/Effects/BoneRing/bonering: 1,440 bytes, 4 functions (4 named)</title></rect>
+<rect x="373.2" y="371.9" width="22.4" height="21.0" fill="#3fb950"><title>game/Effects/BloodEmitters/bloodemitters: 1,392 bytes, 6 functions (3 named)</title></rect>
+<rect x="396.6" y="371.9" width="21.6" height="21.0" fill="#3fb950"><title>game/Effects/BonePointFx/bonepointfx: 1,344 bytes, 5 functions (5 named), 2 data symbols (0 named)</title></rect>
+<rect x="297.3" y="393.9" width="22.6" height="19.5" fill="#3fb950"><title>game/Effects/OwnerSpark/ownerspark: 1,312 bytes, 6 functions (6 named)</title></rect>
+<rect x="297.3" y="414.4" width="22.6" height="19.5" fill="#3fb950"><title>game/Effects/SplashBurst/splashburst: 1,312 bytes, 2 functions (1 named)</title></rect>
+<rect x="297.3" y="434.9" width="22.6" height="19.5" fill="#3fb950"><title>game/Effects/ColourFrameBuffer/colourframebuffer: 1,312 bytes, 6 functions (6 named)</title></rect>
+<rect x="297.3" y="455.4" width="22.6" height="18.8" fill="#3fb950"><title>game/Effects/DistantBolts/distantbolts: 1,264 bytes, 1 functions (1 named), 8 data symbols (6 named)</title></rect>
+<rect x="297.3" y="475.2" width="22.6" height="18.5" fill="#3fb950"><title>game/Effects/RaySpinner/rayspinner: 1,248 bytes, 5 functions (5 named)</title></rect>
+<rect x="320.9" y="393.9" width="19.3" height="18.8" fill="#3fb950"><title>game/Effects/GroundFlash/groundflash: 1,088 bytes, 2 functions (2 named)</title></rect>
+<rect x="341.2" y="393.9" width="19.0" height="18.8" fill="#3fb950"><title>game/Effects/SegmentTrail/segmenttrail: 1,072 bytes, 3 functions (3 named)</title></rect>
+<rect x="361.1" y="393.9" width="18.7" height="18.8" fill="#3fb950"><title>game/Effects/TimedEffect/timedeffect: 1,056 bytes, 12 functions (12 named)</title></rect>
+<rect x="380.8" y="393.9" width="18.4" height="18.8" fill="#3fb950"><title>game/Effects/ActorSoundBurst/actorsoundburst: 1,040 bytes, 1 functions (1 named)</title></rect>
+<rect x="400.2" y="393.9" width="18.1" height="18.8" fill="#388bfd"><title>game/Effects/StarField/starfield: 1,024 bytes, 1 functions (1 named)</title></rect>
+<rect x="320.9" y="413.7" width="16.6" height="20.2" fill="#3fb950"><title>game/Effects/ActorEmitterTick/actoremittertick: 1,008 bytes, 2 functions (2 named)</title></rect>
+<rect x="320.9" y="434.9" width="16.6" height="19.8" fill="#3fb950"><title>game/Effects/BounceRecords/bouncerecords: 992 bytes, 4 functions (4 named)</title></rect>
+<rect x="320.9" y="455.7" width="16.6" height="18.8" fill="#3fb950"><title>game/Effects/ActorImpact/actorimpact: 944 bytes, 1 functions (1 named)</title></rect>
+<rect x="320.9" y="475.6" width="16.6" height="18.2" fill="#3fb950"><title>game/Effects/PuffTimer/pufftimer: 912 bytes, 2 functions (2 named)</title></rect>
+<rect x="338.5" y="413.7" width="19.9" height="15.1" fill="#3fb950"><title>game/Effects/GroundHits/groundhits: 912 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="359.4" y="413.7" width="19.6" height="15.1" fill="#3fb950"><title>game/Effects/Sfx/effects_sfx_w1_bee_cavern: 896 bytes, 4 functions (4 named)</title></rect>
+<rect x="380.0" y="413.7" width="18.8" height="15.1" fill="#3fb950"><title>game/Effects/Trail/TrailRing/trailring: 864 bytes, 3 functions (3 named)</title></rect>
+<rect x="399.8" y="413.7" width="18.5" height="15.1" fill="#3fb950"><title>game/Effects/Trail/TrailSpray/trailspray: 848 bytes, 2 functions (2 named)</title></rect>
+<rect x="338.5" y="429.8" width="17.3" height="15.5" fill="#3fb950"><title>game/Effects/BloodStrips/bloodstrips: 816 bytes, 2 functions (2 named)</title></rect>
+<rect x="338.5" y="446.3" width="17.3" height="15.5" fill="#3fb950"><title>game/Effects/ImpactSplash/impactsplash: 816 bytes, 1 functions (1 named)</title></rect>
+<rect x="338.5" y="462.7" width="17.3" height="15.1" fill="#3fb950"><title>game/Effects/BoneStreak/bonestreak: 800 bytes, 2 functions (2 named)</title></rect>
+<rect x="338.5" y="478.9" width="17.3" height="14.8" fill="#3fb950"><title>game/Effects/EffectQueue/effectqueue: 784 bytes, 4 functions (4 named)</title></rect>
+<rect x="356.8" y="429.8" width="15.3" height="16.4" fill="#3fb950"><title>game/Effects/HitSpray/hitspray: 768 bytes, 2 functions (2 named)</title></rect>
+<rect x="373.1" y="429.8" width="15.0" height="16.4" fill="#3fb950"><title>game/Effects/VertexSwing/vertexswing: 752 bytes, 1 functions (1 named)</title></rect>
+<rect x="389.0" y="429.8" width="14.3" height="16.4" fill="#3fb950"><title>game/Effects/FallingObject/fallingobject: 720 bytes, 2 functions (2 named)</title></rect>
+<rect x="404.3" y="429.8" width="13.9" height="16.4" fill="#3fb950"><title>game/Effects/FlagLights/flaglights: 704 bytes, 2 functions (2 named)</title></rect>
+<rect x="356.8" y="447.2" width="13.9" height="15.6" fill="#3fb950"><title>game/Effects/ColourWave/colourwave: 672 bytes, 1 functions (1 named)</title></rect>
+<rect x="356.8" y="463.8" width="13.9" height="14.4" fill="#3fb950"><title>game/Effects/BoneGroundHit/bonegroundhit: 624 bytes, 3 functions (3 named)</title></rect>
+<rect x="356.8" y="479.3" width="13.9" height="14.4" fill="#3fb950"><title>game/Effects/DebrisBurst/debrisburst: 624 bytes, 1 functions (0 named)</title></rect>
+<rect x="371.7" y="447.2" width="13.4" height="14.2" fill="#3fb950"><title>game/Effects/LevelUpdate/levelupdate: 592 bytes, 4 functions (4 named), 5 data symbols (2 named)</title></rect>
+<rect x="371.7" y="462.4" width="13.4" height="10.1" fill="#3fb950"><title>game/Effects/OwnerEffect/ownereffect: 432 bytes, 4 functions (4 named)</title></rect>
+<rect x="371.7" y="473.4" width="13.4" height="10.1" fill="#3fb950"><title>game/Effects/DebrisEffect/debriseffect: 432 bytes, 1 functions (0 named)</title></rect>
+<rect x="371.7" y="484.5" width="13.4" height="9.2" fill="#3fb950"><title>game/Effects/ZoneSounds/zonesounds: 400 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="386.2" y="447.2" width="10.8" height="11.5" fill="#3fb950"><title>game/Effects/BurnDamage/burndamage: 400 bytes, 3 functions (3 named)</title></rect>
+<rect x="398.0" y="447.2" width="9.9" height="11.5" fill="#3fb950"><title>game/Effects/DebrisThrow/debristhrow: 368 bytes, 3 functions (3 named)</title></rect>
+<rect x="408.8" y="447.2" width="9.4" height="11.5" fill="#3fb950"><title>game/Effects/ObjectReset/objectreset: 352 bytes, 2 functions (2 named)</title></rect>
+<rect x="386.2" y="459.7" width="10.8" height="9.0" fill="#3fb950"><title>game/Effects/RotatingZone/rotatingzone: 320 bytes, 3 functions (3 named)</title></rect>
+<rect x="398.0" y="459.7" width="9.6" height="9.0" fill="#3fb950"><title>game/Effects/LevelActorHooks/levelactorhooks: 288 bytes, 3 functions (3 named)</title></rect>
+<rect x="408.6" y="459.7" width="9.6" height="9.0" fill="#3fb950"><title>game/Effects/SurfaceHandlers/surfacehandlers: 288 bytes, 2 functions (2 named)</title></rect>
+<rect x="386.2" y="469.7" width="10.6" height="7.7" fill="#3fb950"><title>game/Effects/SurfaceSound/surfacesound: 272 bytes, 3 functions (3 named), 2 data symbols (2 named)</title></rect>
+<rect x="386.2" y="478.4" width="10.6" height="7.2" fill="#3fb950"><title>game/Effects/ParticleCallbacks/particlecallbacks: 256 bytes, 2 functions (2 named)</title></rect>
+<rect x="386.2" y="486.6" width="10.6" height="7.2" fill="#3fb950"><title>game/Effects/TaskGroundFx/taskgroundfx: 256 bytes, 1 functions (1 named)</title></rect>
+<rect x="397.7" y="469.7" width="9.8" height="7.2" fill="#3fb950"><title>game/Effects/AmbientPulse/ambientpulse: 240 bytes, 2 functions (2 named)</title></rect>
+<rect x="408.5" y="469.7" width="9.8" height="7.2" fill="#3fb950"><title>game/Effects/BloodSpray/bloodspray: 240 bytes, 1 functions (1 named)</title></rect>
+<rect x="397.7" y="478.0" width="7.1" height="9.2" fill="#3fb950"><title>game/Effects/BeamZones/beamzones: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="397.7" y="488.2" width="7.1" height="5.6" fill="#3fb950"><title>game/Effects/TreadScroll/treadscroll: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="405.8" y="478.0" width="6.5" height="6.1" fill="#3fb950"><title>game/Effects/TriggerSwap/triggerswap: 144 bytes, 2 functions (2 named)</title></rect>
+<rect x="413.4" y="478.0" width="4.9" height="6.1" fill="#388bfd"><title>game/Effects/Greyscale/greyscale: 112 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="405.8" y="485.0" width="5.7" height="4.3" fill="#3fb950"><title>game/Effects/EffectQueueInit/effectqueueinit: 96 bytes, 3 functions (2 named)</title></rect>
+<rect x="405.8" y="490.3" width="5.7" height="3.4" fill="#3fb950"><title>game/Effects/SpawnEmitterHook/spawnemitterhook: 80 bytes, 1 functions (0 named)</title></rect>
+<rect x="412.5" y="485.0" width="2.3" height="4.3" fill="#3fb950"><title>game/Effects/HomingReset/homingreset: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="415.9" y="485.0" width="2.3" height="4.3" fill="#3fb950"><title>game/Effects/RainHook/rainhook: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="412.5" y="490.3" width="1.7" height="3.4" fill="#3fb950"><title>game/Effects/ActorEventStub/actoreventstub: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="415.2" y="490.3" width="1.0" height="1.9" fill="#3fb950"><title>game/Effects/LevelHookCanyon/levelhookcanyon: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="417.2" y="490.3" width="1.0" height="1.9" fill="#3fb950"><title>game/Effects/LevelHookHeist/levelhookheist: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="415.2" y="493.3" width="3.0" height="0.5" fill="#3fb950"><title>game/Effects/LevelUpdateStub/levelupdatestub: 16 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="0.0" y="495.7" width="420.2" height="268.3" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="3.0" y="506.7" font-size="10" fill="#8b949e">game/Particle</text>
+<rect x="1.0" y="509.7" width="77.1" height="101.0" fill="#3fb950"><title>game/Particle/BurstConfigs/burstconfigs: 22,096 bytes, 35 functions (35 named)</title></rect>
+<rect x="1.0" y="611.8" width="77.1" height="83.5" fill="#3fb950"><title>game/Particle/QuadParticle/quadparticle: 18,288 bytes, 59 functions (56 named)</title></rect>
+<rect x="1.0" y="696.2" width="77.1" height="65.8" fill="#3fb950"><title>game/Particle/Steam/steam: 14,464 bytes, 62 functions (50 named), 1 data symbols (1 named)</title></rect>
+<text x="4.0" y="707.2" font-size="9" fill="#0d1117">steam</text>
+<rect x="79.1" y="509.7" width="65.6" height="76.0" fill="#3fb950"><title>game/Particle/StyleParticle/styleparticle: 14,224 bytes, 30 functions (23 named), 1 data symbols (1 named)</title></rect>
+<rect x="79.1" y="586.7" width="65.6" height="65.3" fill="#3fb950"><title>game/Particle/EmissionSource/emissionsource: 12,256 bytes, 29 functions (28 named), 3 data symbols (1 named)</title></rect>
+<rect x="79.1" y="653.0" width="65.6" height="57.3" fill="#3fb950"><title>game/Particle/HitImpact/hitimpact: 10,768 bytes, 28 functions (28 named)</title></rect>
+<rect x="79.1" y="711.3" width="65.6" height="50.7" fill="#3fb950"><title>game/Particle/SphereEmitter/sphereemitter: 9,552 bytes, 22 functions (18 named)</title></rect>
+<rect x="145.7" y="509.7" width="57.2" height="54.7" fill="#3fb950"><title>game/Particle/RayBeam/raybeam: 8,992 bytes, 23 functions (23 named)</title></rect>
+<text x="148.7" y="520.7" font-size="9" fill="#0d1117">raybeam</text>
+<rect x="145.7" y="565.4" width="57.2" height="52.6" fill="#3fb950"><title>game/Particle/AreaParticles/areaparticles: 8,656 bytes, 7 functions (5 named)</title></rect>
+<rect x="145.7" y="619.0" width="57.2" height="48.6" fill="#3fb950"><title>game/Particle/SpriteParticle/spriteparticle: 8,016 bytes, 31 functions (31 named)</title></rect>
+<rect x="145.7" y="668.7" width="57.2" height="47.6" fill="#3fb950"><title>game/Particle/ModelParticle/modelparticle: 7,840 bytes, 31 functions (29 named), 5 data symbols (5 named)</title></rect>
+<rect x="145.7" y="717.2" width="57.2" height="44.8" fill="#3fb950"><title>game/Particle/FollowEffect/followeffect: 7,392 bytes, 17 functions (17 named)</title></rect>
+<rect x="204.0" y="509.7" width="50.7" height="49.6" fill="#3fb950"><title>game/Particle/GroundCluster/groundcluster: 7,248 bytes, 19 functions (19 named)</title></rect>
+<rect x="255.7" y="509.7" width="45.2" height="49.6" fill="#3fb950"><title>game/Particle/ActorEmitter/actoremitter: 6,480 bytes, 14 functions (14 named), 2 data symbols (2 named)</title></rect>
+<rect x="301.9" y="509.7" width="39.5" height="49.6" fill="#3fb950"><title>game/Particle/RegionEmitter/regionemitter: 5,680 bytes, 14 functions (13 named)</title></rect>
+<rect x="342.4" y="509.7" width="37.6" height="49.6" fill="#3fb950"><title>game/Particle/SegmentEmitter/segmentemitter: 5,408 bytes, 10 functions (10 named)</title></rect>
+<rect x="381.0" y="509.7" width="37.2" height="49.6" fill="#3fb950"><title>game/Particle/ShatterPieces/shatterpieces: 5,360 bytes, 8 functions (8 named), 4 data symbols (4 named)</title></rect>
+<rect x="204.0" y="560.3" width="41.7" height="43.7" fill="#3fb950"><title>game/Particle/SmokeEmitter/smokeemitter: 5,296 bytes, 18 functions (18 named)</title></rect>
+<rect x="204.0" y="605.0" width="41.7" height="43.2" fill="#3fb950"><title>game/Particle/Drips/drips: 5,232 bytes, 13 functions (13 named)</title></rect>
+<text x="207.0" y="616.0" font-size="9" fill="#0d1117">drips</text>
+<rect x="204.0" y="649.1" width="41.7" height="41.5" fill="#3fb950"><title>game/Particle/AnchorEmitter/anchoremitter: 5,040 bytes, 23 functions (23 named)</title></rect>
+<rect x="204.0" y="691.7" width="41.7" height="36.3" fill="#3fb950"><title>game/Particle/TwoSidedEmitter/twosidedemitter: 4,416 bytes, 9 functions (9 named)</title></rect>
+<rect x="204.0" y="729.0" width="41.7" height="33.0" fill="#3fb950"><title>game/Particle/SprayObjects/sprayobjects: 4,032 bytes, 6 functions (2 named)</title></rect>
+<rect x="246.7" y="560.3" width="36.7" height="37.5" fill="#3fb950"><title>game/Particle/FloorSprite/floorsprite: 4,016 bytes, 7 functions (7 named)</title></rect>
+<rect x="284.4" y="560.3" width="34.1" height="37.5" fill="#3fb950"><title>game/Particle/SideDust/sidedust: 3,744 bytes, 10 functions (10 named), 1 data symbols (1 named)</title></rect>
+<rect x="319.5" y="560.3" width="33.8" height="37.5" fill="#3fb950"><title>game/Particle/StreakParticle/streakparticle: 3,712 bytes, 10 functions (10 named), 1 data symbols (1 named)</title></rect>
+<rect x="354.3" y="560.3" width="32.8" height="37.5" fill="#3fb950"><title>game/Particle/BoneGroundBurst/bonegroundburst: 3,600 bytes, 6 functions (6 named)</title></rect>
+<rect x="388.0" y="560.3" width="30.2" height="37.5" fill="#3fb950"><title>game/Particle/DriftQuad/driftquad: 3,328 bytes, 5 functions (5 named), 1 data symbols (1 named)</title></rect>
+<rect x="246.7" y="598.7" width="33.3" height="33.2" fill="#3fb950"><title>game/Particle/FogFlash/fogflash: 3,248 bytes, 7 functions (7 named), 9 data symbols (9 named)</title></rect>
+<rect x="246.7" y="632.9" width="33.3" height="32.5" fill="#3fb950"><title>game/Particle/SparkEmitter/sparkemitter: 3,184 bytes, 6 functions (6 named)</title></rect>
+<rect x="246.7" y="666.4" width="33.3" height="31.8" fill="#3fb950"><title>game/Particle/Spiral/spiral: 3,120 bytes, 6 functions (6 named)</title></rect>
+<rect x="246.7" y="699.2" width="33.3" height="31.0" fill="#3fb950"><title>game/Particle/DustEmitter/dustemitter: 3,040 bytes, 8 functions (8 named)</title></rect>
+<rect x="246.7" y="731.2" width="33.3" height="30.8" fill="#3fb950"><title>game/Particle/SpinDebris/spindebris: 3,024 bytes, 10 functions (10 named), 2 data symbols (2 named)</title></rect>
+<rect x="281.0" y="598.7" width="35.0" height="28.0" fill="#3fb950"><title>game/Particle/SlidingSprite/slidingsprite: 2,896 bytes, 12 functions (12 named)</title></rect>
+<rect x="317.0" y="598.7" width="34.0" height="28.0" fill="#3fb950"><title>game/Particle/BounceDebris/bouncedebris: 2,816 bytes, 4 functions (4 named)</title></rect>
+<rect x="352.0" y="598.7" width="32.6" height="28.0" fill="#3fb950"><title>game/Particle/PuffSprays/puffsprays: 2,704 bytes, 8 functions (3 named)</title></rect>
+<rect x="385.6" y="598.7" width="32.6" height="28.0" fill="#3fb950"><title>game/Particle/SideSpray/sidespray: 2,704 bytes, 7 functions (7 named)</title></rect>
+<rect x="281.0" y="627.8" width="26.8" height="33.8" fill="#3fb950"><title>game/Particle/ChannelParticle/channelparticle: 2,688 bytes, 7 functions (7 named)</title></rect>
+<rect x="281.0" y="662.6" width="26.8" height="33.6" fill="#3fb950"><title>game/Particle/SideEmitter/sideemitter: 2,672 bytes, 6 functions (6 named)</title></rect>
+<rect x="281.0" y="697.2" width="26.8" height="33.0" fill="#3fb950"><title>game/Particle/BoneBurst/boneburst: 2,624 bytes, 9 functions (8 named), 1 data symbols (0 named)</title></rect>
+<rect x="281.0" y="731.3" width="26.8" height="30.7" fill="#3fb950"><title>game/Particle/Droplets/droplets: 2,448 bytes, 5 functions (5 named)</title></rect>
+<rect x="308.8" y="627.8" width="27.8" height="28.4" fill="#3fb950"><title>game/Particle/WatcherEmitter/watcheremitter: 2,352 bytes, 10 functions (10 named)</title></rect>
+<rect x="337.7" y="627.8" width="26.9" height="28.4" fill="#3fb950"><title>game/Particle/ImpactStreak/impactstreak: 2,272 bytes, 5 functions (5 named)</title></rect>
+<rect x="365.5" y="627.8" width="26.3" height="28.4" fill="#3fb950"><title>game/Particle/PoolEmitter/poolemitter: 2,224 bytes, 7 functions (7 named)</title></rect>
+<rect x="392.8" y="627.8" width="25.5" height="28.4" fill="#3fb950"><title>game/Particle/FallingParticle/fallingparticle: 2,160 bytes, 4 functions (4 named)</title></rect>
+<rect x="308.8" y="657.2" width="24.8" height="26.1" fill="#3fb950"><title>game/Particle/SpawnShapes/spawnshapes: 1,936 bytes, 4 functions (4 named)</title></rect>
+<rect x="308.8" y="684.2" width="24.8" height="25.6" fill="#3fb950"><title>game/Particle/DiscEmitter/discemitter: 1,904 bytes, 4 functions (4 named)</title></rect>
+<rect x="308.8" y="710.9" width="24.8" height="25.2" fill="#3fb950"><title>game/Particle/ImpactBurst/impactburst: 1,872 bytes, 2 functions (2 named)</title></rect>
+<rect x="308.8" y="737.0" width="24.8" height="25.0" fill="#3fb950"><title>game/Particle/ColorEmitter/coloremitter: 1,856 bytes, 3 functions (3 named)</title></rect>
+<rect x="334.6" y="657.2" width="28.4" height="20.4" fill="#3fb950"><title>game/Particle/FlickerParticle/flickerparticle: 1,744 bytes, 6 functions (6 named)</title></rect>
+<rect x="364.0" y="657.2" width="26.8" height="20.4" fill="#3fb950"><title>game/Particle/PuffQuad/puffquad: 1,648 bytes, 5 functions (5 named)</title></rect>
+<rect x="391.8" y="657.2" width="26.5" height="20.4" fill="#3fb950"><title>game/Particle/PointEmitter/pointemitter: 1,632 bytes, 4 functions (4 named)</title></rect>
+<rect x="334.6" y="678.6" width="24.7" height="21.5" fill="#3fb950"><title>game/Particle/SegmentBurst/segmentburst: 1,600 bytes, 4 functions (4 named)</title></rect>
+<rect x="334.6" y="701.0" width="24.7" height="20.3" fill="#3fb950"><title>game/Particle/MoveHitBurst/movehitburst: 1,520 bytes, 4 functions (4 named)</title></rect>
+<rect x="334.6" y="722.4" width="24.7" height="19.4" fill="#3fb950"><title>game/Particle/OwnerSideEmitter/ownersideemitter: 1,456 bytes, 3 functions (3 named)</title></rect>
+<rect x="334.6" y="742.8" width="24.7" height="19.2" fill="#3fb950"><title>game/Particle/YawLaunch/yawlaunch: 1,440 bytes, 3 functions (3 named)</title></rect>
+<rect x="360.3" y="678.6" width="21.3" height="21.8" fill="#3fb950"><title>game/Particle/AreaFlash/areaflash: 1,408 bytes, 3 functions (3 named)</title></rect>
+<rect x="382.6" y="678.6" width="17.7" height="21.8" fill="#3fb950"><title>game/Particle/PlacementRing/placementring: 1,184 bytes, 1 functions (1 named)</title></rect>
+<rect x="401.3" y="678.6" width="17.0" height="21.8" fill="#3fb950"><title>game/Particle/OwnerEmitter/owneremitter: 1,136 bytes, 3 functions (3 named)</title></rect>
+<rect x="360.3" y="701.4" width="19.0" height="18.3" fill="#3fb950"><title>game/Particle/FastSpark/fastspark: 1,072 bytes, 3 functions (3 named)</title></rect>
+<rect x="380.4" y="701.4" width="18.7" height="18.3" fill="#3fb950"><title>game/Particle/SoundPulse/soundpulse: 1,056 bytes, 4 functions (3 named)</title></rect>
+<rect x="400.1" y="701.4" width="18.1" height="18.3" fill="#3fb950"><title>game/Particle/FootDust/footdust: 1,024 bytes, 1 functions (1 named)</title></rect>
+<rect x="360.3" y="720.7" width="15.8" height="20.3" fill="#3fb950"><title>game/Particle/BillboardBurst/billboardburst: 992 bytes, 1 functions (1 named)</title></rect>
+<rect x="360.3" y="742.0" width="15.8" height="20.0" fill="#3fb950"><title>game/Particle/BoneGlow/boneglow: 976 bytes, 6 functions (6 named)</title></rect>
+<rect x="377.1" y="720.7" width="13.5" height="18.4" fill="#3fb950"><title>game/Particle/WakePuff/wakepuff: 784 bytes, 2 functions (2 named)</title></rect>
+<rect x="391.6" y="720.7" width="13.5" height="18.4" fill="#3fb950"><title>game/Particle/Pulse/pulse: 784 bytes, 2 functions (2 named)</title></rect>
+<rect x="406.2" y="720.7" width="12.1" height="18.4" fill="#3fb950"><title>game/Particle/YawStreak/yawstreak: 704 bytes, 3 functions (3 named)</title></rect>
+<rect x="377.1" y="740.1" width="20.5" height="10.6" fill="#3fb950"><title>game/Particle/ObjGroundEffects/objgroundeffects: 688 bytes, 3 functions (3 named)</title></rect>
+<rect x="377.1" y="751.7" width="20.5" height="10.3" fill="#3fb950"><title>game/Particle/GrowingBillboard/growingbillboard: 672 bytes, 2 functions (2 named)</title></rect>
+<rect x="398.5" y="740.1" width="19.7" height="9.9" fill="#3fb950"><title>game/Particle/Bob/bob: 624 bytes, 4 functions (4 named)</title></rect>
+<rect x="398.5" y="751.0" width="7.7" height="11.0" fill="#3fb950"><title>game/Particle/DepthTint/depthtint: 288 bytes, 1 functions (1 named)</title></rect>
+<rect x="407.2" y="751.0" width="7.2" height="11.0" fill="#3fb950"><title>game/Particle/SmallDebris/smalldebris: 272 bytes, 1 functions (1 named)</title></rect>
+<rect x="415.4" y="751.0" width="2.9" height="5.0" fill="#3fb950"><title>game/Particle/StyleTimerReset/styletimerreset: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="415.4" y="757.0" width="2.9" height="5.0" fill="#3fb950"><title>game/Particle/BillboardRenew/billboardrenew: 64 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="420.2" y="44.0" width="186.2" height="339.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="423.2" y="55.0" font-size="10" fill="#8b949e">game/Actor</text>
+<rect x="421.2" y="58.0" width="183.2" height="106.6" fill="#3fb950"><title>game/Actor/ActorMotion/actormotion: 54,592 bytes, 89 functions (88 named)</title></rect>
+<text x="424.2" y="69.0" font-size="9" fill="#0d1117">actormotion</text>
+<rect x="421.2" y="165.6" width="183.2" height="91.4" fill="#3fb950"><title>game/Actor/Movement/movement: 46,880 bytes, 57 functions (42 named), 37 data symbols (31 named)</title></rect>
+<text x="424.2" y="176.6" font-size="9" fill="#0d1117">movement</text>
+<rect x="421.2" y="257.9" width="84.6" height="123.1" fill="#3fb950"><title>game/Actor/ActorActions/actoractions: 29,280 bytes, 19 functions (14 named)</title></rect>
+<rect x="506.9" y="257.9" width="97.6" height="62.4" fill="#3fb950"><title>game/Actor/ObjectUpdate/objectupdate: 17,216 bytes, 38 functions (36 named), 10 data symbols (9 named)</title></rect>
+<text x="509.9" y="268.9" font-size="9" fill="#0d1117">objectupdate</text>
+<rect x="506.9" y="321.3" width="38.5" height="59.7" fill="#3fb950"><title>game/Actor/KillRespawn/killrespawn: 6,608 bytes, 18 functions (13 named), 5 data symbols (5 named)</title></rect>
+<rect x="546.4" y="321.3" width="35.6" height="31.3" fill="#3fb950"><title>game/Actor/HoverUpdates/hoverupdates: 3,264 bytes, 5 functions (0 named)</title></rect>
+<rect x="583.0" y="321.3" width="21.5" height="31.3" fill="#3fb950"><title>game/Actor/MountControl/mountcontrol: 2,000 bytes, 1 functions (1 named)</title></rect>
+<rect x="546.4" y="353.6" width="22.7" height="27.4" fill="#3fb950"><title>game/Actor/MovementHit/movementhit: 1,856 bytes, 16 functions (10 named), 2 data symbols (2 named)</title></rect>
+<rect x="570.1" y="353.6" width="16.8" height="27.4" fill="#3fb950"><title>game/Actor/ObjectSize/objectsize: 1,392 bytes, 2 functions (2 named)</title></rect>
+<rect x="587.9" y="353.6" width="16.6" height="15.5" fill="#3fb950"><title>game/Actor/Follower/follower: 800 bytes, 1 functions (1 named)</title></rect>
+<rect x="587.9" y="370.1" width="10.2" height="5.2" fill="#3fb950"><title>game/Actor/ClearActors/clearactors: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="587.9" y="376.3" width="10.2" height="4.7" fill="#3fb950"><title>game/Actor/ClearModelTables/clearmodeltables: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.1" y="370.1" width="5.4" height="5.4" fill="#3fb950"><title>game/Actor/SpinDown/spindown: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.1" y="376.5" width="5.4" height="4.5" fill="#3fb950"><title>game/Actor/DefaultSize/defaultsize: 96 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="420.2" y="383.0" width="186.2" height="204.9" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="423.2" y="394.0" font-size="10" fill="#8b949e">libultra</text>
+<rect x="421.2" y="397.0" width="56.0" height="54.1" fill="#3fb950"><title>libultra/audio/n_sndplayer: 8,912 bytes, 16 functions (16 named), 8 data symbols (0 named)</title></rect>
+<rect x="478.2" y="397.0" width="54.9" height="54.1" fill="#3fb950"><title>libultra/audio/n_csplayer: 8,752 bytes, 5 functions (5 named), 1 data symbols (0 named)</title></rect>
+<rect x="534.2" y="397.0" width="35.1" height="54.1" fill="#3fb950"><title>libultra/audio/n_reverb: 5,648 bytes, 7 functions (7 named)</title></rect>
+<rect x="570.3" y="397.0" width="34.2" height="54.1" fill="#3fb950"><title>libultra/audio/n_seqplayer: 5,504 bytes, 17 functions (17 named)</title></rect>
+<rect x="421.2" y="452.1" width="36.8" height="38.9" fill="#3fb950"><title>libultra/audio/n_env: 4,288 bytes, 5 functions (5 named)</title></rect>
+<rect x="421.2" y="492.0" width="36.8" height="30.9" fill="#3fb950"><title>libultra/io/contpfs: 3,424 bytes, 8 functions (8 named), 2 data symbols (2 named)</title></rect>
+<rect x="421.2" y="523.9" width="36.8" height="30.9" fill="#3fb950"><title>libultra/io/contpfs2: 3,424 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="421.2" y="555.8" width="36.8" height="30.1" fill="#3fb950"><title>libultra/audio/n_drvrNew: 3,344 bytes, 6 functions (6 named)</title></rect>
+<rect x="459.0" y="452.1" width="29.7" height="36.8" fill="#3fb950"><title>libultra/audio/n_csq: 3,296 bytes, 7 functions (7 named)</title></rect>
+<rect x="459.0" y="489.9" width="29.7" height="35.1" fill="#3fb950"><title>libultra/audio/n_synthesizer: 3,152 bytes, 8 functions (8 named), 2 data symbols (0 named)</title></rect>
+<rect x="459.0" y="526.0" width="29.7" height="29.5" fill="#3fb950"><title>libultra/io/pfschecker: 2,656 bytes, 3 functions (3 named)</title></rect>
+<rect x="459.0" y="556.5" width="29.7" height="29.5" fill="#3fb950"><title>libultra/io/pfschecker2: 2,656 bytes, 3 functions (3 named)</title></rect>
+<rect x="489.7" y="452.1" width="32.5" height="22.5" fill="#3fb950"><title>libultra/io/leointerrupt: 2,240 bytes, 1 functions (1 named)</title></rect>
+<rect x="523.3" y="452.1" width="22.7" height="22.5" fill="#3fb950"><title>libultra/audio/n_event: 1,584 bytes, 4 functions (4 named)</title></rect>
+<rect x="547.0" y="452.1" width="20.6" height="22.5" fill="#3fb950"><title>libultra/audio/osc: 1,440 bytes, 5 functions (5 named), 2 data symbols (1 named)</title></rect>
+<rect x="568.6" y="452.1" width="17.9" height="22.5" fill="#3fb950"><title>libultra/audio/n_synallocvoice: 1,264 bytes, 2 functions (2 named)</title></rect>
+<rect x="587.5" y="452.1" width="17.0" height="22.5" fill="#3fb950"><title>libultra/audio/bnkf: 1,200 bytes, 7 functions (5 named)</title></rect>
+<rect x="489.7" y="475.6" width="18.4" height="20.5" fill="#3fb950"><title>libultra/audio/n_mainbus: 1,184 bytes, 1 functions (1 named)</title></rect>
+<rect x="489.7" y="497.1" width="18.4" height="18.5" fill="#3fb950"><title>libultra/audio/n_auxbus: 1,072 bytes, 1 functions (1 named)</title></rect>
+<rect x="489.7" y="516.6" width="18.4" height="17.6" fill="#3fb950"><title>libultra/os/timerintr: 1,024 bytes, 4 functions (4 named), 9 data symbols (9 named)</title></rect>
+<rect x="489.7" y="535.2" width="18.4" height="16.4" fill="#3fb950"><title>libultra/io/controller: 960 bytes, 3 functions (3 named), 6 data symbols (6 named)</title></rect>
+<rect x="489.7" y="552.6" width="18.4" height="16.2" fill="#3fb950"><title>libultra/io/contramwrite: 944 bytes, 1 functions (1 named)</title></rect>
+<rect x="489.7" y="569.8" width="18.4" height="16.2" fill="#3fb950"><title>libultra/io/contramread: 944 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="509.1" y="475.6" width="19.2" height="15.5" fill="#3fb950"><title>libultra/io/contramread2: 944 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="529.2" y="475.6" width="19.2" height="15.5" fill="#3fb950"><title>libultra/io/contramwrite2: 944 bytes, 1 functions (1 named)</title></rect>
+<rect x="549.4" y="475.6" width="17.8" height="15.5" fill="#3fb950"><title>libultra/io/pfsisplug: 880 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="568.2" y="475.6" width="17.8" height="15.5" fill="#3fb950"><title>libultra/io/pfsisplug2: 880 bytes, 3 functions (3 named)</title></rect>
+<rect x="587.0" y="475.6" width="17.5" height="15.5" fill="#3fb950"><title>libultra/io/viswapcontext: 864 bytes, 1 functions (1 named)</title></rect>
+<rect x="509.1" y="492.0" width="15.0" height="16.2" fill="#3fb950"><title>libultra/io/vimgr: 784 bytes, 1 functions (1 named), 2 data symbols (1 named)</title></rect>
+<rect x="509.1" y="509.3" width="15.0" height="16.2" fill="#388bfd"><title>libultra/libc/bcopy: 784 bytes, 1 functions (1 named)</title></rect>
+<rect x="509.1" y="526.5" width="15.0" height="14.5" fill="#3fb950"><title>libultra/io/sptask: 704 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="509.1" y="542.0" width="15.0" height="14.5" fill="#3fb950"><title>libultra/libc/ll: 704 bytes, 10 functions (10 named)</title></rect>
+<rect x="509.1" y="557.4" width="15.0" height="13.8" fill="#3fb950"><title>libultra/os/initialize: 672 bytes, 1 functions (1 named), 5 data symbols (5 named)</title></rect>
+<rect x="509.1" y="572.2" width="15.0" height="13.8" fill="#3fb950"><title>libultra/libc/xlitob: 672 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="525.1" y="492.0" width="16.1" height="12.5" fill="#3fb950"><title>libultra/gu/guPerspectiveF: 656 bytes, 2 functions (2 named)</title></rect>
+<rect x="542.2" y="492.0" width="15.3" height="12.5" fill="#3fb950"><title>libultra/gu/mtxutil: 624 bytes, 4 functions (2 named)</title></rect>
+<rect x="558.5" y="492.0" width="14.9" height="12.5" fill="#3fb950"><title>libultra/io/contreaddata: 608 bytes, 2 functions (2 named)</title></rect>
+<rect x="574.4" y="492.0" width="14.9" height="12.5" fill="#3fb950"><title>libultra/io/contreaddata2: 608 bytes, 1 functions (1 named)</title></rect>
+<rect x="590.3" y="492.0" width="14.2" height="12.5" fill="#3fb950"><title>libultra/audio/n_resample: 580 bytes, 1 functions (1 named)</title></rect>
+<rect x="525.1" y="505.5" width="12.7" height="10.9" fill="#3fb950"><title>libultra/gu/guRotateF: 464 bytes, 2 functions (2 named)</title></rect>
+<rect x="538.8" y="505.5" width="12.7" height="10.9" fill="#388bfd"><title>libultra/gu/guMtxF2L: 464 bytes, 1 functions (1 named)</title></rect>
+<rect x="552.5" y="505.5" width="12.2" height="10.9" fill="#3fb950"><title>libultra/gu/sinf_init: 448 bytes, 1 functions (1 named)</title></rect>
+<rect x="565.8" y="505.5" width="12.2" height="10.9" fill="#3fb950"><title>libultra/io/pfsinit: 448 bytes, 2 functions (2 named)</title></rect>
+<rect x="579.0" y="505.5" width="12.2" height="10.9" fill="#3fb950"><title>libultra/io/pfsinit2: 448 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.2" y="505.5" width="12.2" height="10.9" fill="#3fb950"><title>libultra/gu/ortho: 448 bytes, 2 functions (0 named)</title></rect>
+<rect x="525.1" y="517.4" width="10.7" height="11.5" fill="#3fb950"><title>libultra/gu/sinf: 416 bytes, 1 functions (1 named), 4 data symbols (4 named)</title></rect>
+<rect x="525.1" y="529.9" width="10.7" height="11.0" fill="#3fb950"><title>libultra/libc/ldiv: 400 bytes, 2 functions (2 named)</title></rect>
+<rect x="525.1" y="541.9" width="10.7" height="10.5" fill="#3fb950"><title>libultra/io/pimgr: 384 bytes, 1 functions (1 named), 6 data symbols (3 named)</title></rect>
+<rect x="525.1" y="553.4" width="10.7" height="10.5" fill="#3fb950"><title>libultra/io/crc: 384 bytes, 2 functions (2 named)</title></rect>
+<rect x="525.1" y="564.9" width="10.7" height="10.5" fill="#3fb950"><title>libultra/io/crc2: 384 bytes, 2 functions (0 named)</title></rect>
+<rect x="525.1" y="576.4" width="10.7" height="9.5" fill="#3fb950"><title>libultra/io/aisetfreq: 352 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="517.4" width="11.0" height="9.3" fill="#3fb950"><title>libultra/gu/cosf: 352 bytes, 1 functions (1 named), 4 data symbols (4 named)</title></rect>
+<rect x="548.8" y="517.4" width="10.4" height="9.3" fill="#3fb950"><title>libultra/os/startthread: 336 bytes, 1 functions (1 named)</title></rect>
+<rect x="560.3" y="517.4" width="10.4" height="9.3" fill="#3fb950"><title>libultra/os/sendmesg: 336 bytes, 1 functions (1 named)</title></rect>
+<rect x="571.7" y="517.4" width="10.4" height="9.3" fill="#3fb950"><title>libultra/io/vi: 336 bytes, 1 functions (1 named), 3 data symbols (3 named)</title></rect>
+<rect x="583.1" y="517.4" width="10.4" height="9.3" fill="#3fb950"><title>libultra/os/jammesg: 336 bytes, 1 functions (1 named)</title></rect>
+<rect x="594.6" y="517.4" width="9.9" height="9.3" fill="#3fb950"><title>libultra/os/recvmesg: 320 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="527.8" width="8.4" height="10.4" fill="#3fb950"><title>libultra/audio/n_synstartvoiceparam: 304 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="539.1" width="8.4" height="9.2" fill="#3fb950"><title>libultra/io/pidma: 272 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="549.3" width="8.4" height="8.6" fill="#3fb950"><title>libultra/audio/n_synfreevoice: 256 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="558.9" width="8.4" height="8.6" fill="#3fb950"><title>libultra/audio/n_synsetfxparam: 256 bytes, 2 functions (2 named)</title></rect>
+<rect x="536.8" y="568.4" width="8.4" height="8.6" fill="#3fb950"><title>libultra/os/destroythread: 256 bytes, 1 functions (1 named)</title></rect>
+<rect x="536.8" y="578.0" width="8.4" height="8.0" fill="#3fb950"><title>libultra/audio/n_syngetfxref: 240 bytes, 2 functions (2 named)</title></rect>
+<rect x="546.3" y="527.8" width="8.4" height="8.0" fill="#3fb950"><title>libultra/io/leodiskinit: 240 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="546.3" y="536.7" width="8.4" height="7.4" fill="#3fb950"><title>libultra/audio/n_synaddplayer: 224 bytes, 2 functions (2 named)</title></rect>
+<rect x="546.3" y="545.1" width="8.4" height="7.4" fill="#3fb950"><title>libultra/audio/n_cseqnextdelta: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="546.3" y="553.5" width="8.4" height="7.4" fill="#3fb950"><title>libultra/os/setthreadpri: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="546.3" y="561.8" width="8.4" height="7.4" fill="#3fb950"><title>libultra/io/pirawdma: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="546.3" y="570.2" width="8.4" height="7.4" fill="#3fb950"><title>libultra/io/epirawdma: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="546.3" y="578.6" width="8.4" height="7.4" fill="#3fb950"><title>libultra/os/settimer: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="555.7" y="527.8" width="8.2" height="7.6" fill="#3fb950"><title>libultra/os/settimer2: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="564.9" y="527.8" width="7.5" height="7.6" fill="#3fb950"><title>libultra/os/createthread: 208 bytes, 1 functions (1 named)</title></rect>
+<rect x="573.4" y="527.8" width="7.5" height="7.6" fill="#3fb950"><title>libultra/audio/n_synsetvol: 208 bytes, 1 functions (1 named)</title></rect>
+<rect x="581.9" y="527.8" width="6.9" height="7.6" fill="#3fb950"><title>libultra/audio/n_sl: 192 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="589.7" y="527.8" width="6.9" height="7.6" fill="#3fb950"><title>libultra/os/stopthread: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="597.6" y="527.8" width="6.9" height="7.6" fill="#3fb950"><title>libultra/os/piacs: 192 bytes, 3 functions (3 named), 2 data symbols (2 named)</title></rect>
+<rect x="555.7" y="536.4" width="7.4" height="7.0" fill="#3fb950"><title>libultra/io/siacs: 192 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="564.1" y="536.4" width="7.4" height="7.0" fill="#388bfd"><title>libultra/os/maptlb: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="572.5" y="536.4" width="7.4" height="7.0" fill="#388bfd"><title>libultra/os/probetlb: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="580.9" y="536.4" width="7.4" height="7.0" fill="#3fb950"><title>libultra/gu/mtxcatl: 192 bytes, 2 functions (2 named)</title></rect>
+<rect x="589.3" y="536.4" width="7.4" height="7.0" fill="#3fb950"><title>libultra/io/siacs2: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="597.7" y="536.4" width="6.7" height="7.0" fill="#3fb950"><title>libultra/audio/heap: 176 bytes, 2 functions (2 named)</title></rect>
+<rect x="555.7" y="544.4" width="6.3" height="7.5" fill="#3fb950"><title>libultra/audio/n_synsetpitch: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="555.7" y="552.9" width="6.3" height="7.5" fill="#3fb950"><title>libultra/audio/n_synsetfxmix: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="555.7" y="561.4" width="6.3" height="7.5" fill="#3fb950"><title>libultra/audio/n_synsetpan: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="555.7" y="569.9" width="6.3" height="7.5" fill="#388bfd"><title>libultra/os/invaldcache: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="555.7" y="578.4" width="6.3" height="7.5" fill="#3fb950"><title>libultra/io/sirawdma: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="563.0" y="544.4" width="6.7" height="7.1" fill="#3fb950"><title>libultra/io/sirawdma2: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.6" y="544.4" width="6.0" height="7.1" fill="#3fb950"><title>libultra/io/aisetnextbuf: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.6" y="544.4" width="6.0" height="7.1" fill="#3fb950"><title>libultra/audio/cents2ratio: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="584.6" y="544.4" width="6.0" height="7.1" fill="#3fb950"><title>libultra/audio/n_synstopvoice: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="591.5" y="544.4" width="6.0" height="7.1" fill="#388bfd"><title>libultra/libc/bzero: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="598.5" y="544.4" width="6.0" height="7.1" fill="#3fb950"><title>libultra/libc/string: 160 bytes, 3 functions (3 named)</title></rect>
+<rect x="563.0" y="552.5" width="6.5" height="6.5" fill="#388bfd"><title>libultra/os/setintmask: 160 bytes, 1 functions (1 named), 1 data symbols (0 named)</title></rect>
+<rect x="563.0" y="560.0" width="6.5" height="5.7" fill="#3fb950"><title>libultra/audio/n_synallocfx: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="563.0" y="566.7" width="6.5" height="5.7" fill="#3fb950"><title>libultra/io/sprawdma: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="563.0" y="573.5" width="6.5" height="5.7" fill="#3fb950"><title>libultra/os/gettime: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="563.0" y="580.2" width="6.5" height="5.7" fill="#3fb950"><title>libultra/gu/guNormalize: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.5" y="552.5" width="5.7" height="6.6" fill="#3fb950"><title>libultra/os/gettime2: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.5" y="560.1" width="5.7" height="5.7" fill="#3fb950"><title>libultra/audio/n_cspsendmidi: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.5" y="566.8" width="5.7" height="5.7" fill="#388bfd"><title>libultra/os/invalicache: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.5" y="573.5" width="5.7" height="5.7" fill="#3fb950"><title>libultra/os/virtualtophysical: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="570.5" y="580.2" width="5.7" height="5.7" fill="#388bfd"><title>libultra/os/writebackdcache: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="552.5" width="5.3" height="6.2" fill="#3fb950"><title>libultra/io/sptaskyielded: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.5" y="552.5" width="4.5" height="6.2" fill="#3fb950"><title>libultra/audio/n_cspsetpan: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="589.0" y="552.5" width="4.5" height="6.2" fill="#3fb950"><title>libultra/os/seteventmesg: 112 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="594.5" y="552.5" width="4.5" height="6.2" fill="#3fb950"><title>libultra/io/visetmode: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="600.0" y="552.5" width="4.5" height="6.2" fill="#3fb950"><title>libultra/io/visetevent: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="559.7" width="5.0" height="5.6" fill="#3fb950"><title>libultra/io/viblack: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="566.2" width="5.0" height="4.6" fill="#388bfd"><title>libultra/os/maptlbrdb: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="571.9" width="5.0" height="4.6" fill="#3fb950"><title>libultra/io/pirawread: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="577.5" width="5.0" height="3.7" fill="#3fb950"><title>libultra/audio/n_cspsetbank: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="577.2" y="582.2" width="5.0" height="3.7" fill="#3fb950"><title>libultra/audio/n_cspplay: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.2" y="559.7" width="4.6" height="4.1" fill="#3fb950"><title>libultra/audio/n_cspgettempo: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="588.7" y="559.7" width="4.6" height="4.1" fill="#3fb950"><title>libultra/audio/n_cspstop: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="594.3" y="559.7" width="4.6" height="4.1" fill="#3fb950"><title>libultra/audio/n_cspsetseq: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.9" y="559.7" width="4.6" height="4.1" fill="#3fb950"><title>libultra/audio/n_cspsetvol: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.2" y="564.7" width="4.1" height="4.6" fill="#3fb950"><title>libultra/io/viswapbuf: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.2" y="570.3" width="4.1" height="4.6" fill="#3fb950"><title>libultra/io/sirawread: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.2" y="575.8" width="4.1" height="4.6" fill="#3fb950"><title>libultra/io/sirawwrite: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.2" y="581.4" width="4.1" height="4.6" fill="#3fb950"><title>libultra/os/sethwinterrupt: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="588.2" y="564.7" width="4.1" height="4.6" fill="#388bfd"><title>libultra/gu/guMtxIdentF: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="593.3" y="564.7" width="3.1" height="4.6" fill="#388bfd"><title>libultra/os/interrupt: 64 bytes, 2 functions (2 named)</title></rect>
+<rect x="597.4" y="564.7" width="3.1" height="4.6" fill="#3fb950"><title>libultra/io/spsetpc: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.4" y="564.7" width="3.1" height="4.6" fill="#3fb950"><title>libultra/os/thread: 64 bytes, 1 functions (1 named), 4 data symbols (4 named)</title></rect>
+<rect x="588.2" y="570.3" width="3.1" height="4.6" fill="#3fb950"><title>libultra/io/vigetcurrframebuf: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="588.2" y="575.8" width="3.1" height="4.6" fill="#3fb950"><title>libultra/io/vigetnextframebuf: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="588.2" y="581.4" width="3.1" height="4.6" fill="#388bfd"><title>libultra/os/unmaptlb: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="570.3" width="3.4" height="2.8" fill="#3fb950"><title>libultra/io/ai: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.7" y="570.3" width="3.4" height="2.8" fill="#3fb950"><title>libultra/os/createmesgqueue: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.1" y="570.3" width="3.4" height="2.8" fill="#3fb950"><title>libultra/io/sp: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="574.1" width="3.0" height="3.3" fill="#388bfd"><title>libultra/os/writebackdcacheall: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="578.4" width="3.0" height="3.3" fill="#3fb950"><title>libultra/io/pigetcmdq: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="582.7" width="3.0" height="3.3" fill="#3fb950"><title>libultra/io/si: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.2" y="574.1" width="2.1" height="2.7" fill="#3fb950"><title>libultra/audio/n_cspgetstate: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.3" y="574.1" width="2.1" height="2.7" fill="#3fb950"><title>libultra/audio/n_syndelete: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="602.4" y="574.1" width="2.1" height="2.7" fill="#3fb950"><title>libultra/audio/n_synsetpriority: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.2" y="577.8" width="2.1" height="2.7" fill="#3fb950"><title>libultra/os/getthreadpri: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.2" y="581.4" width="2.1" height="2.7" fill="#3fb950"><title>libultra/io/sptaskyield: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.2" y="585.1" width="2.1" height="0.8" fill="#388bfd"><title>libultra/os/setsr: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.3" y="577.8" width="1.0" height="1.7" fill="#388bfd"><title>libultra/os/getsr: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.4" y="577.8" width="1.0" height="1.7" fill="#388bfd"><title>libultra/os/setfpccsr: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="603.4" y="577.8" width="1.0" height="1.7" fill="#3fb950"><title>libultra/io/spsetstat: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.3" y="580.5" width="1.0" height="1.7" fill="#3fb950"><title>libultra/io/vigetcurrcontext: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.4" y="580.5" width="1.0" height="1.7" fill="#388bfd"><title>libultra/os/getcount: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="603.4" y="580.5" width="1.0" height="1.7" fill="#3fb950"><title>libultra/io/aigetstat: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.3" y="583.3" width="2.1" height="0.8" fill="#3fb950"><title>libultra/io/pigetstat: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.3" y="585.1" width="2.1" height="0.8" fill="#388bfd"><title>libultra/gu/sqrtf: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="602.4" y="583.3" width="2.1" height="0.8" fill="#388bfd"><title>libultra/os/setcompare: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="602.4" y="585.1" width="2.1" height="0.8" fill="#3fb950"><title>libultra/io/spgetstat: 16 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="420.2" y="587.9" width="186.2" height="176.1" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="423.2" y="598.9" font-size="10" fill="#8b949e">game/Camera</text>
+<rect x="421.2" y="601.9" width="68.6" height="117.9" fill="#3fb950"><title>game/Camera/camera_camera: 23,808 bytes, 45 functions (45 named), 2 data symbols (2 named)</title></rect>
+<rect x="421.2" y="720.8" width="68.6" height="41.2" fill="#3fb950"><title>game/Camera/CameraOcclusion/cameraocclusion: 8,448 bytes, 15 functions (13 named), 7 data symbols (7 named)</title></rect>
+<rect x="490.8" y="601.9" width="60.6" height="41.5" fill="#3fb950"><title>game/Camera/AimCamera/aimcamera: 7,536 bytes, 5 functions (5 named)</title></rect>
+<rect x="552.5" y="601.9" width="52.0" height="41.5" fill="#3fb950"><title>game/Camera/CameraCommands/cameracommands: 6,480 bytes, 2 functions (2 named)</title></rect>
+<rect x="490.8" y="644.4" width="49.2" height="36.2" fill="#3fb950"><title>game/Camera/CameraWobble/camerawobble: 5,376 bytes, 9 functions (9 named), 1 data symbols (1 named)</title></rect>
+<rect x="541.0" y="644.4" width="34.7" height="36.2" fill="#3fb950"><title>game/Camera/ViewMatrix/viewmatrix: 3,824 bytes, 6 functions (6 named), 3 data symbols (3 named)</title></rect>
+<rect x="576.6" y="644.4" width="27.8" height="36.2" fill="#3fb950"><title>game/Camera/CameraMessages/cameramessages: 3,088 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="490.8" y="681.6" width="22.6" height="28.5" fill="#3fb950"><title>game/Camera/CameraViews/cameraviews: 2,000 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="490.8" y="711.1" width="22.6" height="26.8" fill="#3fb950"><title>game/Camera/FreeFlyCamera/freeflycamera: 1,888 bytes, 2 functions (2 named)</title></rect>
+<rect x="490.8" y="738.9" width="22.6" height="23.1" fill="#3fb950"><title>game/Camera/ViewEnvelope/viewenvelope: 1,632 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="514.4" y="681.6" width="20.5" height="21.0" fill="#3fb950"><title>game/Camera/LevelHookDinoArena/levelhookdinoarena: 1,360 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="514.4" y="703.6" width="20.5" height="20.7" fill="#3fb950"><title>game/Camera/OrbitEye/orbiteye: 1,344 bytes, 1 functions (1 named), 2 data symbols (1 named)</title></rect>
+<rect x="514.4" y="725.3" width="20.5" height="18.9" fill="#3fb950"><title>game/Camera/TiltPresets/tiltpresets: 1,232 bytes, 1 functions (1 named)</title></rect>
+<rect x="514.4" y="745.2" width="20.5" height="16.8" fill="#3fb950"><title>game/Camera/YawBehind/yawbehind: 1,104 bytes, 1 functions (1 named)</title></rect>
+<rect x="535.9" y="681.6" width="17.6" height="17.8" fill="#3fb950"><title>game/Camera/RailCamera/railcamera: 1,008 bytes, 2 functions (2 named)</title></rect>
+<rect x="554.6" y="681.6" width="17.3" height="17.8" fill="#3fb950"><title>game/Camera/LevelHookBarnInside/levelhookbarninside: 992 bytes, 1 functions (1 named), 1 data symbols (0 named)</title></rect>
+<rect x="572.9" y="681.6" width="15.3" height="17.8" fill="#3fb950"><title>game/Camera/CameraPoses/cameraposes: 880 bytes, 2 functions (1 named), 4 data symbols (3 named)</title></rect>
+<rect x="589.2" y="681.6" width="15.3" height="17.8" fill="#3fb950"><title>game/Camera/HeightEasing/heighteasing: 880 bytes, 1 functions (1 named)</title></rect>
+<rect x="535.9" y="700.4" width="15.1" height="15.2" fill="#3fb950"><title>game/Camera/ZRowCopy/zrowcopy: 752 bytes, 1 functions (1 named)</title></rect>
+<rect x="535.9" y="716.7" width="15.1" height="14.9" fill="#3fb950"><title>game/Camera/SpeedDistance/speeddistance: 736 bytes, 1 functions (1 named)</title></rect>
+<rect x="535.9" y="732.6" width="15.1" height="14.6" fill="#3fb950"><title>game/Camera/HeadingToPoint/headingtopoint: 720 bytes, 1 functions (1 named)</title></rect>
+<rect x="535.9" y="748.1" width="15.1" height="13.9" fill="#3fb950"><title>game/Camera/SegmentProgress/segmentprogress: 688 bytes, 1 functions (1 named)</title></rect>
+<rect x="552.0" y="700.4" width="13.0" height="14.5" fill="#3fb950"><title>game/Camera/LevelHookTankFactory/levelhooktankfactory: 624 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="566.0" y="700.4" width="12.6" height="14.5" fill="#3fb950"><title>game/Camera/LevelHook15/levelhook15: 608 bytes, 1 functions (1 named)</title></rect>
+<rect x="579.6" y="700.4" width="12.3" height="14.5" fill="#3fb950"><title>game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole: 592 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.9" y="700.4" width="11.6" height="14.5" fill="#3fb950"><title>game/Camera/GroupFraming/groupframing: 560 bytes, 1 functions (1 named)</title></rect>
+<rect x="552.0" y="715.9" width="11.7" height="12.1" fill="#3fb950"><title>game/Camera/LevelHookTheWindmill/levelhookthewindmill: 480 bytes, 1 functions (1 named)</title></rect>
+<rect x="552.0" y="729.0" width="11.7" height="11.6" fill="#3fb950"><title>game/Camera/ManualOrbit/manualorbit: 464 bytes, 1 functions (1 named)</title></rect>
+<rect x="552.0" y="741.6" width="11.7" height="9.9" fill="#3fb950"><title>game/Camera/MessageQueue/messagequeue: 400 bytes, 4 functions (4 named), 1 data symbols (1 named)</title></rect>
+<rect x="552.0" y="752.5" width="11.7" height="9.5" fill="#3fb950"><title>game/Camera/LevelHookHorrorIntro/levelhookhorrorintro: 384 bytes, 1 functions (1 named)</title></rect>
+<rect x="564.7" y="715.9" width="9.4" height="10.7" fill="#3fb950"><title>game/Camera/LevelCamSetup24/levelcamsetup24: 352 bytes, 2 functions (2 named)</title></rect>
+<rect x="575.2" y="715.9" width="9.4" height="10.7" fill="#3fb950"><title>game/Camera/LevelHookBullPaddock/levelhookbullpaddock: 352 bytes, 1 functions (1 named)</title></rect>
+<rect x="585.6" y="715.9" width="9.4" height="10.7" fill="#3fb950"><title>game/Camera/YawFollow/yawfollow: 352 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.0" y="715.9" width="8.5" height="10.7" fill="#3fb950"><title>game/Camera/LevelHookRaptor/levelhookraptor: 320 bytes, 1 functions (1 named)</title></rect>
+<rect x="564.7" y="727.7" width="7.6" height="11.9" fill="#3fb950"><title>game/Camera/AimAtObject/aimatobject: 320 bytes, 1 functions (1 named)</title></rect>
+<rect x="564.7" y="740.5" width="7.6" height="11.2" fill="#3fb950"><title>game/Camera/LevelHookDogFish/levelhookdogfish: 304 bytes, 1 functions (1 named)</title></rect>
+<rect x="564.7" y="752.7" width="7.6" height="9.3" fill="#3fb950"><title>game/Camera/LevelHookCogLand/levelhookcogland: 256 bytes, 1 functions (1 named)</title></rect>
+<rect x="573.4" y="727.7" width="8.8" height="7.0" fill="#3fb950"><title>game/Camera/LevelHookTraining/levelhooktraining: 224 bytes, 1 functions (1 named)</title></rect>
+<rect x="583.1" y="727.7" width="7.4" height="7.0" fill="#3fb950"><title>game/Camera/DistanceReset/distancereset: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="591.5" y="727.7" width="6.0" height="7.0" fill="#3fb950"><title>game/Camera/LevelHookHarbour/levelhookharbour: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="598.5" y="727.7" width="6.0" height="7.0" fill="#3fb950"><title>game/Camera/Heading/heading: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="573.4" y="735.6" width="6.1" height="6.0" fill="#3fb950"><title>game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="573.4" y="742.7" width="6.1" height="6.0" fill="#3fb950"><title>game/Camera/LevelHookBankEntrance/levelhookbankentrance: 144 bytes, 2 functions (2 named)</title></rect>
+<rect x="573.4" y="749.7" width="6.1" height="6.0" fill="#3fb950"><title>game/Camera/LevelHookEndArena/levelhookendarena: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="573.4" y="756.7" width="6.1" height="5.3" fill="#3fb950"><title>game/Camera/LevelCamSetup10/levelcamsetup10: 128 bytes, 2 functions (2 named)</title></rect>
+<rect x="580.5" y="735.6" width="5.7" height="5.7" fill="#3fb950"><title>game/Camera/LevelCamSetupArena/levelcamsetuparena: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="587.1" y="735.6" width="5.7" height="5.7" fill="#3fb950"><title>game/Camera/YawSpring/yawspring: 128 bytes, 2 functions (1 named)</title></rect>
+<rect x="593.8" y="735.6" width="4.8" height="5.7" fill="#3fb950"><title>game/Camera/LevelCamSetupTraining/levelcamsetuptraining: 112 bytes, 2 functions (2 named)</title></rect>
+<rect x="599.6" y="735.6" width="4.8" height="5.7" fill="#3fb950"><title>game/Camera/LevelHookTankTunnel/levelhooktanktunnel: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="580.5" y="742.3" width="5.4" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetupBarnInside/levelcamsetupbarninside: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="580.5" y="747.5" width="5.4" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetupHeist/levelcamsetupheist: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="580.5" y="752.6" width="5.4" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetup12/levelcamsetup12: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="580.5" y="757.8" width="5.4" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetupRaptor/levelcamsetupraptor: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="586.9" y="742.3" width="5.5" height="4.1" fill="#3fb950"><title>game/Camera/LevelHookBarnOutside/levelhookbarnoutside: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="593.5" y="742.3" width="5.5" height="4.1" fill="#3fb950"><title>game/Camera/LevelHookMachineGunNest/levelhookmachinegunnest: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="600.0" y="742.3" width="4.4" height="4.1" fill="#3fb950"><title>game/Camera/LevelCamSetup/levelcamsetup: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="586.9" y="747.4" width="4.3" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetup01/levelcamsetup01: 80 bytes, 2 functions (2 named)</title></rect>
+<rect x="586.9" y="752.6" width="4.3" height="4.2" fill="#3fb950"><title>game/Camera/LevelCamSetup09/levelcamsetup09: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="586.9" y="757.8" width="4.3" height="4.2" fill="#3fb950"><title>game/Camera/LevelHookInsideSafe/levelhookinsidesafe: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="747.4" width="3.4" height="4.1" fill="#3fb950"><title>game/Camera/LevelCamSetupTankFactory/levelcamsetuptankfactory: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.7" y="747.4" width="3.4" height="4.1" fill="#3fb950"><title>game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.1" y="747.4" width="3.4" height="4.1" fill="#3fb950"><title>game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="752.5" width="3.2" height="4.3" fill="#3fb950"><title>game/Camera/LevelCamSetup19/levelcamsetup19: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="592.3" y="757.7" width="3.2" height="4.3" fill="#3fb950"><title>game/Camera/LevelCamSetup20/levelcamsetup20: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.5" y="752.5" width="3.5" height="4.0" fill="#3fb950"><title>game/Camera/LevelCamSetupUBend/levelcamsetupubend: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.0" y="752.5" width="3.5" height="4.0" fill="#3fb950"><title>game/Camera/LevelCamSetup26/levelcamsetup26: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="596.5" y="757.4" width="2.0" height="4.6" fill="#3fb950"><title>game/Camera/LevelHookArena/levelhookarena: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.5" y="757.4" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/LevelCamSetupDogFish/levelcamsetupdogfish: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="599.5" y="760.2" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/LevelCamSetupBarnOutside/levelcamsetupbarnoutside: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.5" y="757.4" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/LevelCamSetupDinoArena/levelcamsetupdinoarena: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="603.5" y="757.4" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="601.5" y="760.2" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/LevelCamSetupHorrorIntro/levelcamsetuphorrorintro: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="603.5" y="760.2" width="1.0" height="1.8" fill="#3fb950"><title>game/Camera/CameraStub/camerastub: 16 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="606.5" y="44.0" width="158.6" height="169.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="609.5" y="55.0" font-size="10" fill="#8b949e">game/Script</text>
+<rect x="607.5" y="58.0" width="93.5" height="97.9" fill="#3fb950"><title>game/Script/ObjScript/objscript: 27,056 bytes, 211 functions (195 named), 5 data symbols (5 named)</title></rect>
+<text x="610.5" y="69.0" font-size="9" fill="#0d1117">objscript</text>
+<rect x="607.5" y="156.9" width="93.5" height="54.7" fill="#3fb950"><title>game/Script/ActorCmd/actorcmd: 15,248 bytes, 4 functions (4 named)</title></rect>
+<text x="610.5" y="167.9" font-size="9" fill="#0d1117">actorcmd</text>
+<rect x="702.0" y="58.0" width="30.0" height="43.5" fill="#3fb950"><title>game/Script/CameraCmd/cameracmd: 4,000 bytes, 7 functions (7 named), 5 data symbols (5 named)</title></rect>
+<rect x="733.0" y="58.0" width="30.0" height="43.5" fill="#3fb950"><title>game/Script/TaskSet/taskset: 4,000 bytes, 17 functions (16 named), 19 data symbols (14 named)</title></rect>
+<rect x="702.0" y="102.5" width="34.4" height="37.3" fill="#3fb950"><title>game/Script/ObjectCmd/objectcmd: 3,920 bytes, 17 functions (17 named)</title></rect>
+<rect x="737.4" y="102.5" width="25.7" height="37.3" fill="#3fb950"><title>game/Script/EffectCmd/effectcmd: 2,960 bytes, 4 functions (4 named)</title></rect>
+<rect x="702.0" y="140.8" width="32.1" height="22.1" fill="#3fb950"><title>game/Script/TaskCmd/taskcmd: 2,208 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="735.1" y="140.8" width="28.0" height="22.1" fill="#388bfd"><title>game/Script/ScriptInterp/scriptinterp: 1,936 bytes, 8 functions (1 named), 12 data symbols (6 named)</title></rect>
+<rect x="702.0" y="163.9" width="25.4" height="23.9" fill="#3fb950"><title>game/Script/TaskTable/tasktable: 1,904 bytes, 15 functions (14 named), 2 data symbols (1 named)</title></rect>
+<rect x="702.0" y="188.8" width="25.4" height="22.8" fill="#3fb950"><title>game/Script/MiscCmd/misccmd: 1,824 bytes, 4 functions (4 named), 3 data symbols (3 named)</title></rect>
+<rect x="728.4" y="163.9" width="17.3" height="28.6" fill="#3fb950"><title>game/Script/ZoneCmd/zonecmd: 1,568 bytes, 2 functions (2 named)</title></rect>
+<rect x="746.7" y="163.9" width="16.3" height="28.6" fill="#3fb950"><title>game/Script/CutsceneCmd/cutscenecmd: 1,488 bytes, 3 functions (3 named)</title></rect>
+<rect x="728.4" y="193.5" width="11.7" height="18.1" fill="#3fb950"><title>game/Script/MusicCmd/musiccmd: 704 bytes, 4 functions (4 named)</title></rect>
+<rect x="741.2" y="193.5" width="11.7" height="18.1" fill="#3fb950"><title>game/Script/TimerCmd/timercmd: 704 bytes, 5 functions (5 named), 1 data symbols (1 named)</title></rect>
+<rect x="753.9" y="193.5" width="9.1" height="17.0" fill="#3fb950"><title>game/Script/SwarmCmd/swarmcmd: 528 bytes, 8 functions (8 named)</title></rect>
+<rect x="753.9" y="211.5" width="9.1" height="0.1" fill="#388bfd"><title>game/Script/TaskExit/taskexit: 32 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="765.1" y="44.0" width="151.0" height="169.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="768.1" y="55.0" font-size="10" fill="#8b949e">game/Prop</text>
+<rect x="766.1" y="58.0" width="90.7" height="60.7" fill="#3fb950"><title>game/Prop/PropUpdates/propupdates: 16,400 bytes, 23 functions (23 named)</title></rect>
+<text x="769.1" y="69.0" font-size="9" fill="#0d1117">propupdates</text>
+<rect x="857.8" y="58.0" width="56.3" height="60.7" fill="#3fb950"><title>game/Prop/DoorsLifts/doorslifts: 10,240 bytes, 14 functions (14 named)</title></rect>
+<rect x="766.1" y="119.7" width="34.9" height="63.6" fill="#3fb950"><title>game/Prop/Scenery/scenery: 6,720 bytes, 10 functions (9 named)</title></rect>
+<rect x="766.1" y="184.3" width="34.9" height="27.3" fill="#3fb950"><title>game/Prop/WaveDeformer/wavedeformer: 2,944 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="802.0" y="119.7" width="30.9" height="30.7" fill="#3fb950"><title>game/Prop/PropMover/propmover: 2,928 bytes, 7 functions (7 named)</title></rect>
+<rect x="802.0" y="151.4" width="30.9" height="30.4" fill="#3fb950"><title>game/Prop/Seesaw/seesaw: 2,896 bytes, 6 functions (6 named)</title></rect>
+<rect x="802.0" y="182.8" width="30.9" height="28.8" fill="#3fb950"><title>game/Prop/WaveChain/wavechain: 2,752 bytes, 4 functions (4 named), 4 data symbols (3 named)</title></rect>
+<rect x="833.8" y="119.7" width="29.0" height="30.1" fill="#3fb950"><title>game/Prop/MoverSwing/moverswing: 2,704 bytes, 5 functions (5 named)</title></rect>
+<rect x="863.8" y="119.7" width="28.1" height="30.1" fill="#3fb950"><title>game/Prop/PropMotions/propmotions: 2,624 bytes, 7 functions (7 named)</title></rect>
+<rect x="892.9" y="119.7" width="21.2" height="30.1" fill="#388bfd"><title>game/Prop/WaveVertices/wavevertices: 2,000 bytes, 19 functions (5 named)</title></rect>
+<rect x="833.8" y="150.9" width="27.7" height="21.9" fill="#3fb950"><title>game/Prop/RippleMesh/ripplemesh: 1,904 bytes, 2 functions (2 named)</title></rect>
+<rect x="833.8" y="173.8" width="27.7" height="18.4" fill="#3fb950"><title>game/Prop/Pendulum/pendulum: 1,616 bytes, 6 functions (3 named), 2 data symbols (1 named)</title></rect>
+<rect x="833.8" y="193.2" width="27.7" height="18.4" fill="#3fb950"><title>game/Prop/Clock/clock: 1,616 bytes, 4 functions (4 named)</title></rect>
+<rect x="862.6" y="150.9" width="25.6" height="17.5" fill="#3fb950"><title>game/Prop/LinkedSpinners/linkedspinners: 1,424 bytes, 7 functions (4 named), 2 data symbols (1 named)</title></rect>
+<rect x="889.1" y="150.9" width="25.0" height="17.5" fill="#3fb950"><title>game/Prop/PushBob/pushbob: 1,392 bytes, 4 functions (4 named)</title></rect>
+<rect x="862.6" y="169.4" width="18.2" height="22.3" fill="#3fb950"><title>game/Prop/ShakeSink/shakesink: 1,296 bytes, 7 functions (7 named)</title></rect>
+<rect x="862.6" y="192.7" width="18.2" height="18.9" fill="#3fb950"><title>game/Prop/Pickup/pickup: 1,104 bytes, 1 functions (1 named)</title></rect>
+<rect x="881.7" y="169.4" width="16.6" height="17.6" fill="#3fb950"><title>game/Prop/TextureAnim/textureanim: 944 bytes, 4 functions (4 named)</title></rect>
+<rect x="899.3" y="169.4" width="14.8" height="17.6" fill="#3fb950"><title>game/Prop/WaveChainStart/wavechainstart: 848 bytes, 2 functions (2 named)</title></rect>
+<rect x="881.7" y="187.9" width="18.7" height="11.6" fill="#3fb950"><title>game/Prop/SwingBounce/swingbounce: 720 bytes, 4 functions (4 named)</title></rect>
+<rect x="881.7" y="200.6" width="18.7" height="11.1" fill="#3fb950"><title>game/Prop/ScrollBob/scrollbob: 688 bytes, 3 functions (3 named)</title></rect>
+<rect x="901.4" y="187.9" width="12.7" height="16.0" fill="#3fb950"><title>game/Prop/PropLinks/proplinks: 672 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="901.4" y="204.9" width="6.2" height="6.7" fill="#3fb950"><title>game/Prop/LinkedToggle/linkedtoggle: 160 bytes, 1 functions (0 named)</title></rect>
+<rect x="908.6" y="204.9" width="5.5" height="3.3" fill="#3fb950"><title>game/Prop/SwingSpring/swingspring: 80 bytes, 2 functions (2 named)</title></rect>
+<rect x="908.6" y="209.2" width="5.5" height="2.4" fill="#3fb950"><title>game/Prop/DrawHooks/drawhooks: 64 bytes, 3 functions (3 named)</title></rect>
+</g>
+<g><rect x="916.1" y="44.0" width="149.3" height="169.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="919.1" y="55.0" font-size="10" fill="#8b949e">game/Collision</text>
+<rect x="917.1" y="58.0" width="82.3" height="53.3" fill="#3fb950"><title>game/Collision/Probe/probe: 13,104 bytes, 38 functions (34 named), 1 data symbols (1 named)</title></rect>
+<text x="920.1" y="69.0" font-size="9" fill="#0d1117">probe</text>
+<rect x="1000.4" y="58.0" width="62.9" height="53.3" fill="#3fb950"><title>game/Collision/Spawn/spawn: 10,048 bytes, 27 functions (25 named), 11 data symbols (11 named)</title></rect>
+<text x="1003.4" y="69.0" font-size="9" fill="#0d1117">spawn</text>
+<rect x="917.1" y="112.3" width="45.6" height="53.5" fill="#3fb950"><title>game/Collision/QuadTree/quadtree: 7,360 bytes, 25 functions (25 named), 10 data symbols (10 named)</title></rect>
+<rect x="917.1" y="166.8" width="45.6" height="44.8" fill="#3fb950"><title>game/Collision/Floor/floor: 6,192 bytes, 14 functions (14 named), 32 data symbols (32 named)</title></rect>
+<text x="920.1" y="177.8" font-size="9" fill="#0d1117">floor</text>
+<rect x="963.7" y="112.3" width="45.4" height="44.3" fill="#388bfd"><title>game/Collision/WallCollide/wallcollide: 6,096 bytes, 36 functions (2 named), 4 data symbols (2 named)</title></rect>
+<rect x="963.7" y="157.6" width="45.4" height="27.9" fill="#3fb950"><title>game/Collision/RayCast/raycast: 3,888 bytes, 4 functions (4 named)</title></rect>
+<rect x="963.7" y="186.5" width="45.4" height="25.1" fill="#388bfd"><title>game/Collision/RayWorld/rayworld: 3,504 bytes, 12 functions (1 named)</title></rect>
+<rect x="1010.1" y="112.3" width="26.4" height="30.1" fill="#3fb950"><title>game/Collision/MapBackground/mapbackground: 2,464 bytes, 2 functions (2 named)</title></rect>
+<rect x="1037.5" y="112.3" width="25.8" height="30.1" fill="#3fb950"><title>game/Collision/HitSphere/hitsphere: 2,416 bytes, 4 functions (4 named)</title></rect>
+<rect x="1010.1" y="143.3" width="32.0" height="24.3" fill="#388bfd"><title>game/Collision/GroundQuery/groundquery: 2,416 bytes, 8 functions (3 named), 4 data symbols (2 named)</title></rect>
+<rect x="1043.1" y="143.3" width="20.2" height="24.3" fill="#388bfd"><title>game/Collision/PropTris/proptris: 1,556 bytes, 7 functions (2 named), 1 data symbols (1 named)</title></rect>
+<rect x="1010.1" y="168.6" width="19.1" height="22.6" fill="#3fb950"><title>game/Collision/ActorWalls/actorwalls: 1,376 bytes, 5 functions (3 named), 14 data symbols (10 named)</title></rect>
+<rect x="1010.1" y="192.3" width="19.1" height="19.3" fill="#3fb950"><title>game/Collision/GroundHeight/groundheight: 1,184 bytes, 5 functions (1 named)</title></rect>
+<rect x="1030.2" y="168.6" width="19.5" height="18.9" fill="#388bfd"><title>game/Collision/ActorHitMesh/actorhitmesh: 1,180 bytes, 3 functions (1 named)</title></rect>
+<rect x="1050.7" y="168.6" width="12.6" height="18.9" fill="#3fb950"><title>game/Collision/WobbleQuad/wobblequad: 784 bytes, 3 functions (2 named)</title></rect>
+<rect x="1030.2" y="188.5" width="19.3" height="11.9" fill="#388bfd"><title>game/Collision/PropBoxQuery/propboxquery: 760 bytes, 4 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="1030.2" y="201.4" width="19.3" height="10.2" fill="#3fb950"><title>game/Collision/ObjectRay/objectray: 656 bytes, 1 functions (1 named)</title></rect>
+<rect x="1050.5" y="188.5" width="12.9" height="6.6" fill="#3fb950"><title>game/Collision/CylinderSets/cylindersets: 304 bytes, 1 functions (1 named)</title></rect>
+<rect x="1050.5" y="196.1" width="12.9" height="6.2" fill="#388bfd"><title>game/Collision/ActorGround/actorground: 288 bytes, 2 functions (1 named)</title></rect>
+<rect x="1050.5" y="203.2" width="9.0" height="8.4" fill="#388bfd"><title>game/Collision/PropGround/propground: 272 bytes, 2 functions (1 named)</title></rect>
+<rect x="1060.5" y="203.2" width="2.8" height="8.4" fill="#388bfd"><title>game/Collision/PropQuery/propquery: 104 bytes, 2 functions (1 named)</title></rect>
+</g>
+<g><rect x="1065.3" y="44.0" width="134.7" height="169.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1068.3" y="55.0" font-size="10" fill="#8b949e">game/Cutscene</text>
+<rect x="1066.3" y="58.0" width="131.7" height="74.9" fill="#3fb950"><title>game/Cutscene/SeqEvents/seqevents: 29,216 bytes, 11 functions (11 named)</title></rect>
+<text x="1069.3" y="69.0" font-size="9" fill="#0d1117">seqevents</text>
+<rect x="1066.3" y="133.9" width="124.5" height="77.7" fill="#3fb950"><title>game/Cutscene/Sequence/sequence: 28,656 bytes, 57 functions (57 named), 93 data symbols (88 named)</title></rect>
+<text x="1069.3" y="144.9" font-size="9" fill="#0d1117">sequence</text>
+<rect x="1191.9" y="133.9" width="6.1" height="73.1" fill="#3fb950"><title>game/Cutscene/EventEffects/eventeffects: 1,536 bytes, 7 functions (7 named)</title></rect>
+<rect x="1191.9" y="208.0" width="6.1" height="3.6" fill="#3fb950"><title>game/Cutscene/StartCallback/startcallback: 96 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="606.5" y="213.6" width="145.2" height="148.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="609.5" y="224.6" font-size="10" fill="#8b949e">game/Beam</text>
+<rect x="607.5" y="227.6" width="50.7" height="73.1" fill="#3fb950"><title>game/Beam/AimedBeam/aimedbeam: 11,264 bytes, 38 functions (37 named)</title></rect>
+<rect x="607.5" y="301.7" width="50.7" height="57.9" fill="#3fb950"><title>game/Beam/BoltChain/boltchain: 8,960 bytes, 37 functions (37 named)</title></rect>
+<rect x="659.2" y="227.6" width="46.2" height="41.2" fill="#3fb950"><title>game/Beam/ModelBeam/modelbeam: 5,856 bytes, 24 functions (21 named)</title></rect>
+<rect x="706.4" y="227.6" width="43.2" height="41.2" fill="#3fb950"><title>game/Beam/Tracer/tracer: 5,488 bytes, 8 functions (7 named), 1 data symbols (1 named)</title></rect>
+<rect x="659.2" y="269.8" width="33.7" height="45.1" fill="#3fb950"><title>game/Beam/BoltRain/boltrain: 4,704 bytes, 11 functions (11 named)</title></rect>
+<rect x="659.2" y="315.9" width="33.7" height="43.7" fill="#3fb950"><title>game/Beam/Lightning/lightning: 4,560 bytes, 11 functions (11 named)</title></rect>
+<rect x="693.9" y="269.8" width="30.9" height="39.1" fill="#3fb950"><title>game/Beam/AreaEmitter/areaemitter: 3,760 bytes, 12 functions (12 named)</title></rect>
+<rect x="725.8" y="269.8" width="23.8" height="39.1" fill="#3fb950"><title>game/Beam/BeamQuad/beamquad: 2,928 bytes, 6 functions (6 named)</title></rect>
+<rect x="693.9" y="309.9" width="32.8" height="25.5" fill="#3fb950"><title>game/Beam/Strip/strip: 2,640 bytes, 15 functions (15 named)</title></rect>
+<rect x="693.9" y="336.5" width="32.8" height="23.1" fill="#3fb950"><title>game/Beam/WavyBeam/wavybeam: 2,400 bytes, 3 functions (3 named), 2 data symbols (2 named)</title></rect>
+<rect x="727.7" y="309.9" width="21.9" height="24.7" fill="#3fb950"><title>game/Beam/CastBeam/castbeam: 1,728 bytes, 7 functions (7 named), 1 data symbols (1 named)</title></rect>
+<rect x="727.7" y="335.6" width="21.9" height="24.0" fill="#3fb950"><title>game/Beam/BeamMotion/beammotion: 1,680 bytes, 5 functions (5 named)</title></rect>
+</g>
+<g><rect x="606.5" y="361.6" width="145.2" height="139.4" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="609.5" y="372.6" font-size="10" fill="#8b949e">init/Audio</text>
+<rect x="607.5" y="375.6" width="75.5" height="63.8" fill="#3fb950"><title>init/Audio/Tune/tune: 14,672 bytes, 50 functions (44 named), 17 data symbols (13 named)</title></rect>
+<text x="610.5" y="386.6" font-size="9" fill="#0d1117">tune</text>
+<rect x="607.5" y="440.4" width="75.5" height="58.5" fill="#3fb950"><title>init/Audio/DynamicSound/dynamicsound: 13,472 bytes, 54 functions (54 named), 14 data symbols (13 named)</title></rect>
+<rect x="683.9" y="375.6" width="37.0" height="45.8" fill="#3fb950"><title>init/Audio/AudioMgr/audiomgr: 5,264 bytes, 15 functions (15 named), 34 data symbols (33 named)</title></rect>
+<rect x="721.9" y="375.6" width="27.7" height="45.8" fill="#3fb950"><title>init/Audio/SeqCtrl/seqctrl: 3,984 bytes, 20 functions (18 named)</title></rect>
+<rect x="683.9" y="422.4" width="33.0" height="34.8" fill="#3fb950"><title>init/Audio/SeqPlayer/seqplayer: 3,600 bytes, 27 functions (24 named), 9 data symbols (9 named)</title></rect>
+<rect x="717.9" y="422.4" width="31.8" height="34.8" fill="#3fb950"><title>init/Audio/SoundPan/soundpan: 3,472 bytes, 3 functions (3 named)</title></rect>
+<rect x="683.9" y="458.2" width="22.4" height="40.7" fill="#3fb950"><title>init/Audio/AdpcmLoad/adpcmload: 2,896 bytes, 3 functions (3 named)</title></rect>
+<rect x="707.4" y="458.2" width="19.5" height="23.3" fill="#3fb950"><title>init/Audio/MixSelector/mixselector: 1,472 bytes, 5 functions (5 named), 9 data symbols (8 named)</title></rect>
+<rect x="707.4" y="482.5" width="19.5" height="16.4" fill="#3fb950"><title>init/Audio/VoiceLowPass/voicelowpass: 1,056 bytes, 2 functions (2 named)</title></rect>
+<rect x="727.8" y="458.2" width="10.8" height="19.2" fill="#3fb950"><title>init/Audio/Mp3Stream/mp3stream: 704 bytes, 7 functions (7 named), 4 data symbols (3 named)</title></rect>
+<rect x="739.6" y="458.2" width="10.0" height="19.2" fill="#3fb950"><title>init/Audio/SeqChannel/seqchannel: 656 bytes, 8 functions (7 named)</title></rect>
+<rect x="727.8" y="478.4" width="10.5" height="14.5" fill="#3fb950"><title>init/Audio/OutputMode/outputmode: 528 bytes, 2 functions (2 named), 6 data symbols (0 named)</title></rect>
+<rect x="727.8" y="493.9" width="10.5" height="5.1" fill="#3fb950"><title>init/Audio/SeqFxMix/seqfxmix: 208 bytes, 2 functions (2 named)</title></rect>
+<rect x="739.3" y="478.4" width="4.6" height="9.5" fill="#3fb950"><title>init/Audio/SynLowPassCutoff/synlowpasscutoff: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="745.0" y="478.4" width="4.6" height="9.5" fill="#3fb950"><title>init/Audio/SynLowPassGain/synlowpassgain: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="739.3" y="488.9" width="4.4" height="10.0" fill="#3fb950"><title>init/Audio/SynLowPassCount/synlowpasscount: 176 bytes, 1 functions (0 named)</title></rect>
+<rect x="744.7" y="488.9" width="4.9" height="5.4" fill="#3fb950"><title>init/Audio/SeqFxParam/seqfxparam: 112 bytes, 1 functions (1 named)</title></rect>
+<rect x="744.7" y="495.4" width="4.9" height="3.6" fill="#3fb950"><title>init/Audio/SeqPause/seqpause: 80 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="606.5" y="501.0" width="145.2" height="132.5" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="609.5" y="512.0" font-size="10" fill="#8b949e">game/Hud</text>
+<rect x="607.5" y="515.0" width="77.5" height="116.5" fill="#3fb950"><title>game/Hud/HudOverlay/hudoverlay: 27,456 bytes, 26 functions (23 named), 14 data symbols (12 named)</title></rect>
+<text x="610.5" y="526.0" font-size="9" fill="#0d1117">hudoverlay</text>
+<rect x="685.9" y="515.0" width="63.7" height="116.4" fill="#3fb950"><title>game/Hud/PlayerOverlay/playeroverlay: 22,624 bytes, 18 functions (18 named), 20 data symbols (19 named)</title></rect>
+<rect x="685.9" y="632.4" width="63.7" height="0.0" fill="#3fb950"><title>game/Hud/CodeFlags/codeflags: 16 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="606.5" y="633.4" width="145.2" height="130.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="609.5" y="644.4" font-size="10" fill="#8b949e">game/Save</text>
+<rect x="607.5" y="647.4" width="126.1" height="114.6" fill="#3fb950"><title>game/Save/FrontEnd/frontend: 43,840 bytes, 61 functions (51 named), 96 data symbols (64 named)</title></rect>
+<text x="610.5" y="658.4" font-size="9" fill="#0d1117">frontend</text>
+<rect x="734.6" y="647.4" width="15.1" height="102.2" fill="#3fb950"><title>game/Save/SaveData/savedata: 4,944 bytes, 18 functions (17 named), 17 data symbols (13 named)</title></rect>
+<rect x="734.6" y="750.6" width="15.1" height="11.4" fill="#3fb950"><title>game/Save/EepromTimedWrite/eepromtimedwrite: 592 bytes, 2 functions (2 named), 4 data symbols (4 named)</title></rect>
+</g>
+<g><rect x="751.6" y="213.6" width="127.8" height="145.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="754.6" y="224.6" font-size="10" fill="#8b949e">game/Weapon</text>
+<rect x="752.6" y="227.6" width="72.2" height="58.5" fill="#3fb950"><title>game/Weapon/Projectile/projectile: 12,848 bytes, 19 functions (19 named), 1 data symbols (1 named)</title></rect>
+<rect x="825.8" y="227.6" width="51.6" height="58.5" fill="#3fb950"><title>game/Weapon/Bullet/bullet: 9,232 bytes, 25 functions (25 named), 2 data symbols (2 named)</title></rect>
+<text x="828.8" y="238.6" font-size="9" fill="#0d1117">bullet</text>
+<rect x="752.6" y="287.1" width="33.4" height="70.1" fill="#3fb950"><title>game/Weapon/Tank/tank: 7,216 bytes, 8 functions (8 named)</title></rect>
+<text x="755.6" y="298.1" font-size="9" fill="#0d1117">tank</text>
+<rect x="787.0" y="287.1" width="37.0" height="36.3" fill="#3fb950"><title>game/Weapon/SegmentShot/segmentshot: 4,176 bytes, 8 functions (7 named)</title></rect>
+<rect x="787.0" y="324.4" width="37.0" height="32.8" fill="#3fb950"><title>game/Weapon/JointShot/jointshot: 3,792 bytes, 8 functions (8 named)</title></rect>
+<rect x="825.0" y="287.1" width="28.1" height="32.0" fill="#3fb950"><title>game/Weapon/AttachedGun/attachedgun: 2,832 bytes, 9 functions (8 named)</title></rect>
+<rect x="854.1" y="287.1" width="23.3" height="32.0" fill="#3fb950"><title>game/Weapon/GunShot/gunshot: 2,368 bytes, 7 functions (6 named), 1 data symbols (1 named)</title></rect>
+<rect x="825.0" y="320.1" width="29.0" height="20.0" fill="#3fb950"><title>game/Weapon/BulletParticle/bulletparticle: 1,856 bytes, 6 functions (6 named)</title></rect>
+<rect x="825.0" y="341.0" width="29.0" height="16.2" fill="#3fb950"><title>game/Weapon/TwinMuzzle/twinmuzzle: 1,520 bytes, 3 functions (2 named)</title></rect>
+<rect x="855.0" y="320.1" width="22.5" height="19.3" fill="#3fb950"><title>game/Weapon/Launcher/launcher: 1,408 bytes, 5 functions (5 named), 1 data symbols (1 named)</title></rect>
+<rect x="855.0" y="340.4" width="22.5" height="16.8" fill="#3fb950"><title>game/Weapon/ForwardShot/forwardshot: 1,232 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+</g>
+<g><rect x="879.4" y="213.6" width="112.6" height="145.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="882.4" y="224.6" font-size="10" fill="#8b949e">game/Event</text>
+<rect x="880.4" y="227.6" width="109.6" height="129.6" fill="#3fb950"><title>game/Event/TimedEvent/timedevent: 42,704 bytes, 330 functions (267 named), 7 data symbols (6 named)</title></rect>
+<text x="883.4" y="238.6" font-size="9" fill="#0d1117">timedevent</text>
+</g>
+<g><rect x="992.0" y="213.6" width="107.8" height="145.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="995.0" y="224.6" font-size="10" fill="#8b949e">game/Level</text>
+<rect x="993.0" y="227.6" width="70.9" height="48.6" fill="#3fb950"><title>game/Level/ZoneSpawn/zonespawn: 10,544 bytes, 32 functions (30 named), 3 data symbols (3 named)</title></rect>
+<text x="996.0" y="238.6" font-size="9" fill="#0d1117">zonespawn</text>
+<rect x="1064.9" y="227.6" width="32.9" height="48.6" fill="#3fb950"><title>game/Level/LevelObjects/levelobjects: 4,976 bytes, 9 functions (7 named), 3 data symbols (3 named)</title></rect>
+<rect x="993.0" y="277.2" width="31.4" height="28.1" fill="#3fb950"><title>game/Level/LevelHookUBend/levelhookubend: 2,784 bytes, 5 functions (5 named), 9 data symbols (9 named)</title></rect>
+<rect x="993.0" y="306.2" width="31.4" height="27.6" fill="#3fb950"><title>game/Level/SpawnTable/spawntable: 2,736 bytes, 3 functions (3 named), 3 data symbols (3 named)</title></rect>
+<rect x="993.0" y="334.8" width="31.4" height="22.4" fill="#3fb950"><title>game/Level/LevelModels/levelmodels: 2,240 bytes, 9 functions (8 named), 11 data symbols (10 named)</title></rect>
+<rect x="1025.4" y="277.2" width="26.0" height="22.3" fill="#3fb950"><title>game/Level/LevelSetupDogFish/levelsetupdogfish: 1,856 bytes, 3 functions (3 named)</title></rect>
+<rect x="1052.4" y="277.2" width="25.5" height="22.3" fill="#3fb950"><title>game/Level/LevelSetupThroneRoom/levelsetupthroneroom: 1,824 bytes, 3 functions (3 named)</title></rect>
+<rect x="1078.9" y="277.2" width="19.0" height="22.3" fill="#3fb950"><title>game/Level/LevelSetupReset/levelsetupreset: 1,376 bytes, 6 functions (5 named)</title></rect>
+<rect x="1025.4" y="300.4" width="17.9" height="23.3" fill="#3fb950"><title>game/Level/LevelSetupLab/levelsetuplab: 1,360 bytes, 1 functions (1 named)</title></rect>
+<rect x="1025.4" y="324.7" width="17.9" height="19.0" fill="#3fb950"><title>game/Level/LevelSetupCogLand/levelsetupcogland: 1,120 bytes, 2 functions (2 named)</title></rect>
+<rect x="1025.4" y="344.8" width="17.9" height="12.4" fill="#3fb950"><title>game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern: 752 bytes, 1 functions (1 named)</title></rect>
+<rect x="1044.3" y="300.4" width="13.9" height="15.7" fill="#3fb950"><title>game/Level/LevelSetupDinoArena/levelsetupdinoarena: 736 bytes, 3 functions (3 named), 1 data symbols (1 named)</title></rect>
+<rect x="1059.2" y="300.4" width="13.9" height="15.7" fill="#3fb950"><title>game/Level/LevelSetup18/levelsetup18: 736 bytes, 3 functions (3 named)</title></rect>
+<rect x="1074.0" y="300.4" width="11.9" height="15.7" fill="#3fb950"><title>game/Level/PipeBurstSetup/pipeburstsetup: 640 bytes, 1 functions (1 named)</title></rect>
+<rect x="1086.9" y="300.4" width="10.9" height="15.7" fill="#3fb950"><title>game/Level/LevelSetupBarnOutside/levelsetupbarnoutside: 592 bytes, 2 functions (2 named)</title></rect>
+<rect x="1044.3" y="317.2" width="11.4" height="13.8" fill="#3fb950"><title>game/Level/LevelSetup30/levelsetup30: 544 bytes, 2 functions (2 named)</title></rect>
+<rect x="1044.3" y="332.0" width="11.4" height="12.1" fill="#3fb950"><title>game/Level/ZoneSpray/zonespray: 480 bytes, 1 functions (1 named)</title></rect>
+<rect x="1044.3" y="345.1" width="11.4" height="12.1" fill="#3fb950"><title>game/Level/LevelSetupMainWar/levelsetupmainwar: 480 bytes, 2 functions (2 named)</title></rect>
+<rect x="1056.7" y="317.2" width="9.7" height="13.2" fill="#3fb950"><title>game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro: 448 bytes, 1 functions (1 named)</title></rect>
+<rect x="1056.7" y="331.4" width="9.7" height="12.7" fill="#3fb950"><title>game/Level/GroundParticles/groundparticles: 432 bytes, 1 functions (1 named)</title></rect>
+<rect x="1056.7" y="345.0" width="9.7" height="12.2" fill="#3fb950"><title>game/Level/LevelSetupBarnArena/levelsetupbarnarena: 416 bytes, 3 functions (3 named)</title></rect>
+<rect x="1067.4" y="317.2" width="10.8" height="10.0" fill="#3fb950"><title>game/Level/LevelTints/leveltints: 384 bytes, 1 functions (1 named)</title></rect>
+<rect x="1079.2" y="317.2" width="8.8" height="10.0" fill="#3fb950"><title>game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse: 320 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1089.0" y="317.2" width="8.8" height="10.0" fill="#3fb950"><title>game/Level/LevelSetupFrontEnd/levelsetupfrontend: 320 bytes, 2 functions (2 named)</title></rect>
+<rect x="1067.4" y="328.2" width="8.5" height="9.8" fill="#3fb950"><title>game/Level/LevelSetupPooCabin/levelsetuppoocabin: 304 bytes, 1 functions (1 named)</title></rect>
+<rect x="1067.4" y="338.9" width="8.5" height="8.6" fill="#3fb950"><title>game/Level/LevelSetupHarbour/levelsetupharbour: 272 bytes, 2 functions (2 named)</title></rect>
+<rect x="1067.4" y="348.6" width="8.5" height="8.6" fill="#3fb950"><title>game/Level/AmbientColourCycle/ambientcolourcycle: 272 bytes, 2 functions (2 named)</title></rect>
+<rect x="1076.9" y="328.2" width="7.7" height="7.1" fill="#3fb950"><title>game/Level/LevelSetup25/levelsetup25: 208 bytes, 3 functions (3 named)</title></rect>
+<rect x="1085.6" y="328.2" width="6.3" height="7.1" fill="#3fb950"><title>game/Level/ZoneShapeEmitter/zoneshapeemitter: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="1092.9" y="328.2" width="5.0" height="7.1" fill="#3fb950"><title>game/Level/ZoneAreaEmitter/zoneareaemitter: 144 bytes, 1 functions (1 named)</title></rect>
+<rect x="1076.9" y="336.3" width="4.9" height="6.3" fill="#3fb950"><title>game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1076.9" y="343.6" width="4.9" height="6.3" fill="#3fb950"><title>game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1076.9" y="350.9" width="4.9" height="6.3" fill="#3fb950"><title>game/Level/LevelSetupBoilerRoom/levelsetupboilerroom: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1082.8" y="336.3" width="7.0" height="4.4" fill="#3fb950"><title>game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1090.8" y="336.3" width="7.0" height="4.4" fill="#3fb950"><title>game/Level/LevelSetupBankEntrance/levelsetupbankentrance: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1082.8" y="341.7" width="7.0" height="4.4" fill="#3fb950"><title>game/Level/AmbientAction3/ambientaction3: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1090.8" y="341.7" width="7.0" height="4.4" fill="#3fb950"><title>game/Level/AmbientAction5/ambientaction5: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1082.8" y="347.1" width="4.3" height="5.1" fill="#3fb950"><title>game/Level/HeightCheck/heightcheck: 96 bytes, 1 functions (1 named)</title></rect>
+<rect x="1082.8" y="353.1" width="4.3" height="4.1" fill="#3fb950"><title>game/Level/EffectKind/effectkind: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1088.2" y="347.1" width="5.7" height="3.0" fill="#3fb950"><title>game/Level/LevelHooks/levelhooks: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1094.9" y="347.1" width="3.0" height="3.0" fill="#3fb950"><title>game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="1088.2" y="351.1" width="3.6" height="2.5" fill="#3fb950"><title>game/Level/LevelSetupHeist/levelsetupheist: 48 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1088.2" y="354.7" width="3.6" height="2.5" fill="#3fb950"><title>game/Level/WaveReset/wavereset: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="1092.8" y="351.1" width="2.1" height="2.5" fill="#3fb950"><title>game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="1095.8" y="351.1" width="2.1" height="2.5" fill="#3fb950"><title>game/Level/LevelSetupTankFactory/levelsetuptankfactory: 32 bytes, 1 functions (1 named)</title></rect>
+<rect x="1092.8" y="354.7" width="2.1" height="0.8" fill="#3fb950"><title>game/Level/LevelSetupBarnInside/levelsetupbarninside: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="1092.8" y="356.4" width="2.1" height="0.8" fill="#3fb950"><title>game/Level/LevelSetupRockSolid/levelsetuprocksolid: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="1095.8" y="354.7" width="2.1" height="0.8" fill="#3fb950"><title>game/Level/LevelSetup07/levelsetup07: 16 bytes, 1 functions (1 named)</title></rect>
+<rect x="1095.8" y="356.4" width="2.1" height="0.8" fill="#3fb950"><title>game/Level/SetupResetStub/setupresetstub: 16 bytes, 1 functions (0 named)</title></rect>
+</g>
+<g><rect x="1099.9" y="213.6" width="100.1" height="145.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1102.9" y="224.6" font-size="10" fill="#8b949e">game/Math</text>
+<rect x="1100.9" y="227.6" width="97.1" height="60.5" fill="#3fb950"><title>game/Math/MathUtil/mathutil: 17,872 bytes, 77 functions (72 named), 5 data symbols (5 named)</title></rect>
+<text x="1103.9" y="238.6" font-size="9" fill="#0d1117">mathutil</text>
+<rect x="1100.9" y="289.1" width="26.9" height="25.5" fill="#388bfd"><title>game/Math/TriBoxFace/triboxface: 2,192 bytes, 2 functions (2 named)</title></rect>
+<rect x="1100.9" y="315.6" width="26.9" height="21.7" fill="#3fb950"><title>game/Math/VectorOps/vectorops: 1,872 bytes, 10 functions (10 named), 7 data symbols (7 named)</title></rect>
+<rect x="1100.9" y="338.3" width="26.9" height="18.9" fill="#3fb950"><title>game/Math/Quaternion/quaternion: 1,648 bytes, 4 functions (4 named)</title></rect>
+<rect x="1128.7" y="289.1" width="19.9" height="20.4" fill="#3fb950"><title>game/Math/MtxBuild/mtxbuild: 1,328 bytes, 6 functions (6 named)</title></rect>
+<rect x="1128.7" y="310.5" width="19.9" height="16.9" fill="#388bfd"><title>game/Math/TriBoxOverlap/triboxoverlap: 1,112 bytes, 2 functions (1 named)</title></rect>
+<rect x="1128.7" y="328.4" width="19.9" height="15.4" fill="#388bfd"><title>game/Math/TriCube/tricube: 1,016 bytes, 3 functions (2 named)</title></rect>
+<rect x="1128.7" y="344.7" width="19.9" height="12.5" fill="#388bfd"><title>game/Math/TriBoxBevel/triboxbevel: 836 bytes, 5 functions (5 named)</title></rect>
+<rect x="1149.7" y="289.1" width="17.0" height="11.6" fill="#3fb950"><title>game/Math/MtxInverse/mtxinverse: 672 bytes, 1 functions (1 named)</title></rect>
+<rect x="1167.7" y="289.1" width="15.3" height="11.6" fill="#388bfd"><title>game/Math/MtxRotateRPY/mtxrotaterpy: 608 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1184.0" y="289.1" width="14.0" height="11.6" fill="#3fb950"><title>game/Math/Spring/spring: 560 bytes, 2 functions (2 named)</title></rect>
+<rect x="1149.7" y="301.7" width="11.6" height="11.8" fill="#3fb950"><title>game/Math/TriBox/tribox: 480 bytes, 3 functions (3 named), 13 data symbols (12 named)</title></rect>
+<rect x="1162.3" y="301.7" width="11.6" height="11.8" fill="#3fb950"><title>game/Math/Powf/powf: 480 bytes, 1 functions (1 named)</title></rect>
+<rect x="1175.0" y="301.7" width="11.2" height="11.8" fill="#3fb950"><title>game/Math/AsinTable/asintable: 464 bytes, 3 functions (3 named)</title></rect>
+<rect x="1187.2" y="301.7" width="10.8" height="11.8" fill="#3fb950"><title>game/Math/CatmullRom/catmullrom: 448 bytes, 2 functions (2 named)</title></rect>
+<rect x="1149.7" y="314.5" width="10.6" height="10.5" fill="#388bfd"><title>game/Math/TriBoxPointInTri/triboxpointintri: 396 bytes, 1 functions (1 named), 1 data symbols (0 named)</title></rect>
+<rect x="1149.7" y="326.0" width="10.6" height="10.4" fill="#388bfd"><title>game/Math/MtxFToL/mtxftol: 392 bytes, 1 functions (1 named)</title></rect>
+<rect x="1149.7" y="337.3" width="10.6" height="9.7" fill="#3fb950"><title>game/Math/BoxInView/boxinview: 368 bytes, 1 functions (1 named)</title></rect>
+<rect x="1149.7" y="348.0" width="10.6" height="9.2" fill="#3fb950"><title>game/Math/BinAngle/binangle: 352 bytes, 4 functions (4 named)</title></rect>
+<rect x="1161.3" y="314.5" width="8.5" height="10.9" fill="#3fb950"><title>game/Math/Expf/expf: 336 bytes, 1 functions (1 named)</title></rect>
+<rect x="1170.9" y="314.5" width="8.5" height="10.9" fill="#388bfd"><title>game/Math/MtxRotateRPYF/mtxrotaterpyf: 336 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1180.4" y="314.5" width="8.5" height="10.9" fill="#388bfd"><title>game/Math/Rand64/rand64: 336 bytes, 4 functions (4 named), 2 data symbols (2 named)</title></rect>
+<rect x="1189.9" y="314.5" width="8.1" height="10.9" fill="#3fb950"><title>game/Math/AcosLookup/acoslookup: 320 bytes, 2 functions (2 named)</title></rect>
+<rect x="1161.3" y="326.4" width="9.1" height="9.7" fill="#3fb950"><title>game/Math/Atan2/atan2: 320 bytes, 1 functions (1 named)</title></rect>
+<rect x="1161.3" y="337.1" width="9.1" height="9.7" fill="#3fb950"><title>game/Math/AcosTable/acostable: 320 bytes, 3 functions (3 named)</title></rect>
+<rect x="1161.3" y="347.8" width="9.1" height="9.4" fill="#388bfd"><title>game/Math/MtxMulF/mtxmulf: 312 bytes, 1 functions (1 named)</title></rect>
+<rect x="1171.4" y="326.4" width="8.6" height="9.8" fill="#388bfd"><title>game/Math/MtxRotScaleF/mtxrotscalef: 308 bytes, 2 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1181.0" y="326.4" width="8.5" height="9.8" fill="#388bfd"><title>game/Math/SinCos/sincos: 304 bytes, 3 functions (3 named), 12 data symbols (4 named)</title></rect>
+<rect x="1190.5" y="326.4" width="7.5" height="9.8" fill="#3fb950"><title>game/Math/Logf/logf: 272 bytes, 1 functions (1 named)</title></rect>
+<rect x="1171.4" y="337.2" width="8.5" height="7.0" fill="#3fb950"><title>game/Math/RotateAroundY/rotatearoundy: 224 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+<rect x="1171.4" y="345.1" width="8.5" height="5.8" fill="#3fb950"><title>game/Math/AngleLerp/anglelerp: 192 bytes, 2 functions (2 named)</title></rect>
+<rect x="1171.4" y="352.0" width="8.5" height="5.3" fill="#3fb950"><title>game/Math/MtxTranslate/mtxtranslate: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="1180.9" y="337.2" width="5.0" height="8.0" fill="#388bfd"><title>game/Math/TransformPoint/transformpoint: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="1186.9" y="337.2" width="5.0" height="8.0" fill="#388bfd"><title>game/Math/MtxScale/mtxscale: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="1193.0" y="337.2" width="5.0" height="8.0" fill="#388bfd"><title>game/Math/TranslateMtx/translatemtx: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="1180.9" y="346.1" width="3.9" height="5.6" fill="#388bfd"><title>game/Math/DotLength/dotlength: 96 bytes, 2 functions (2 named)</title></rect>
+<rect x="1180.9" y="352.7" width="3.9" height="4.5" fill="#388bfd"><title>game/Math/MtxScaleF/mtxscalef: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1185.8" y="346.1" width="3.5" height="5.0" fill="#388bfd"><title>game/Math/MtxTranslateF/mtxtranslatef: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1185.8" y="352.2" width="3.5" height="5.0" fill="#388bfd"><title>game/Math/Cross3/cross3: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1190.3" y="346.1" width="3.4" height="4.0" fill="#3fb950"><title>game/Math/Tanf/tanf: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="1194.6" y="346.1" width="3.4" height="4.0" fill="#388bfd"><title>game/Math/MtxIdentity/mtxidentity: 64 bytes, 1 functions (1 named)</title></rect>
+<rect x="1190.3" y="351.1" width="4.5" height="2.9" fill="#388bfd"><title>game/Math/Distance2D/distance2d: 64 bytes, 2 functions (1 named)</title></rect>
+<rect x="1190.3" y="355.0" width="4.5" height="2.2" fill="#388bfd"><title>game/Math/TransformW/transformw: 52 bytes, 1 functions (1 named)</title></rect>
+<rect x="1195.8" y="351.1" width="2.2" height="4.0" fill="#3fb950"><title>game/Math/Random/random: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="1195.8" y="356.1" width="2.2" height="1.1" fill="#388bfd"><title>game/Math/TransformPointW/transformpointw: 20 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="751.6" y="359.2" width="98.5" height="137.1" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="754.6" y="370.2" font-size="10" fill="#8b949e">game/Sprite</text>
+<rect x="752.6" y="373.2" width="58.7" height="61.5" fill="#3fb950"><title>game/Sprite/LevelSprites/levelsprites: 11,136 bytes, 14 functions (13 named), 26 data symbols (24 named)</title></rect>
+<rect x="812.3" y="373.2" width="35.8" height="61.5" fill="#3fb950"><title>game/Sprite/SpriteDraw/spritedraw: 6,864 bytes, 16 functions (16 named), 15 data symbols (15 named)</title></rect>
+<rect x="752.6" y="435.7" width="31.0" height="58.6" fill="#3fb950"><title>game/Sprite/LevelSpriteSetup/levelspritesetup: 5,696 bytes, 13 functions (13 named), 5 data symbols (4 named)</title></rect>
+<rect x="784.7" y="435.7" width="37.1" height="33.9" fill="#3fb950"><title>game/Sprite/SpriteRoutines/spriteroutines: 3,968 bytes, 17 functions (11 named), 3 data symbols (3 named)</title></rect>
+<rect x="784.7" y="470.6" width="37.1" height="23.6" fill="#3fb950"><title>game/Sprite/ScreenSprite/screensprite: 2,800 bytes, 6 functions (6 named)</title></rect>
+<rect x="822.7" y="435.7" width="25.4" height="25.2" fill="#3fb950"><title>game/Sprite/TexQuad/texquad: 2,064 bytes, 12 functions (11 named)</title></rect>
+<rect x="822.7" y="461.9" width="25.4" height="18.1" fill="#3fb950"><title>game/Sprite/PointGroup/pointgroup: 1,504 bytes, 4 functions (3 named), 3 data symbols (3 named)</title></rect>
+<rect x="822.7" y="481.0" width="19.7" height="13.2" fill="#3fb950"><title>game/Sprite/Sprite2D/sprite2d: 880 bytes, 4 functions (4 named)</title></rect>
+<rect x="843.4" y="481.0" width="4.6" height="13.2" fill="#3fb950"><title>game/Sprite/FadeSprite/fadesprite: 240 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="751.6" y="496.3" width="98.5" height="136.3" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="754.6" y="507.3" font-size="10" fill="#8b949e">game/Audio</text>
+<rect x="752.6" y="510.3" width="95.5" height="57.2" fill="#3fb950"><title>game/Audio/Mp3Decoder/mp3decoder: 16,768 bytes, 9 functions (9 named), 5 data symbols (5 named)</title></rect>
+<text x="755.6" y="521.3" font-size="9" fill="#0d1117">mp3decoder</text>
+<rect x="752.6" y="568.4" width="47.2" height="35.5" fill="#3fb950"><title>game/Audio/Mp3Player/mp3player: 5,248 bytes, 14 functions (14 named), 6 data symbols (0 named)</title></rect>
+<rect x="752.6" y="604.9" width="47.2" height="25.7" fill="#388bfd"><title>game/Audio/Mp3Decoder/mp3imdctlong: 3,840 bytes, 1 functions (1 named), 67 data symbols (0 named)</title></rect>
+<rect x="800.8" y="568.4" width="23.4" height="31.5" fill="#3fb950"><title>game/Audio/LevelMusic/levelmusic: 2,368 bytes, 4 functions (3 named)</title></rect>
+<rect x="825.2" y="568.4" width="22.9" height="31.5" fill="#3fb950"><title>game/Audio/Mp3Frame/mp3frame: 2,320 bytes, 4 functions (4 named), 1 data symbols (1 named)</title></rect>
+<rect x="800.8" y="600.9" width="16.5" height="29.6" fill="#3fb950"><title>game/Audio/ObjectSound/objectsound: 1,600 bytes, 5 functions (5 named), 1 data symbols (1 named)</title></rect>
+<rect x="818.3" y="600.9" width="26.3" height="15.5" fill="#388bfd"><title>game/Audio/Mp3Decoder/mp3imdctshort: 1,344 bytes, 1 functions (1 named), 23 data symbols (0 named)</title></rect>
+<rect x="818.3" y="617.4" width="26.3" height="13.1" fill="#388bfd"><title>game/Audio/Mp3Decoder/mp3huffman: 1,152 bytes, 5 functions (5 named)</title></rect>
+<rect x="845.6" y="600.9" width="2.5" height="29.6" fill="#3fb950"><title>game/Audio/Mp3Voice/mp3voice: 320 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="751.6" y="632.6" width="98.5" height="131.4" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="754.6" y="643.6" font-size="10" fill="#8b949e">game/Mp</text>
+<rect x="752.6" y="646.6" width="95.5" height="73.1" fill="#3fb950"><title>game/Mp/MpGame/mpgame: 21,456 bytes, 33 functions (30 named), 1 data symbols (1 named)</title></rect>
+<text x="755.6" y="657.6" font-size="9" fill="#0d1117">mpgame</text>
+<rect x="752.6" y="720.7" width="95.5" height="41.3" fill="#3fb950"><title>game/Mp/Race/race: 12,256 bytes, 35 functions (34 named), 11 data symbols (10 named)</title></rect>
+<text x="755.6" y="731.7" font-size="9" fill="#0d1117">race</text>
+</g>
+<g><rect x="850.1" y="359.2" width="106.5" height="102.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="853.1" y="370.2" font-size="10" fill="#8b949e">game/Text</text>
+<rect x="851.1" y="373.2" width="60.4" height="54.6" fill="#3fb950"><title>game/Text/TextBox/textbox: 10,640 bytes, 11 functions (10 named)</title></rect>
+<text x="854.1" y="384.2" font-size="9" fill="#0d1117">textbox</text>
+<rect x="851.1" y="428.9" width="60.4" height="30.4" fill="#3fb950"><title>game/Text/FontDraw/fontdraw: 6,000 bytes, 4 functions (4 named), 20 data symbols (13 named)</title></rect>
+<rect x="912.5" y="373.2" width="42.1" height="30.0" fill="#3fb950"><title>game/Text/TextQueue/textqueue: 4,160 bytes, 16 functions (16 named), 19 data symbols (12 named)</title></rect>
+<rect x="912.5" y="404.2" width="20.7" height="30.2" fill="#3fb950"><title>game/Text/AmountText/amounttext: 2,112 bytes, 7 functions (7 named)</title></rect>
+<rect x="934.2" y="404.2" width="20.4" height="30.2" fill="#3fb950"><title>game/Text/ContextText/contexttext: 2,080 bytes, 11 functions (11 named), 14 data symbols (14 named)</title></rect>
+<rect x="912.5" y="435.4" width="17.0" height="23.8" fill="#3fb950"><title>game/Text/FontLoad/fontload: 1,392 bytes, 3 functions (2 named)</title></rect>
+<rect x="930.5" y="435.4" width="19.3" height="11.7" fill="#3fb950"><title>game/Text/FixedFont/fixedfont: 800 bytes, 4 functions (4 named), 1 data symbols (1 named)</title></rect>
+<rect x="930.5" y="448.1" width="19.3" height="11.1" fill="#3fb950"><title>game/Text/TextBoxCreate/textboxcreate: 768 bytes, 2 functions (2 named), 5 data symbols (0 named)</title></rect>
+<rect x="950.9" y="435.4" width="3.8" height="23.8" fill="#3fb950"><title>game/Text/TextInit/textinit: 368 bytes, 2 functions (2 named), 1 data symbols (1 named)</title></rect>
+</g>
+<g><rect x="956.6" y="359.2" width="90.8" height="102.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="959.6" y="370.2" font-size="10" fill="#8b949e">game/Screen</text>
+<rect x="957.6" y="373.2" width="53.2" height="86.0" fill="#3fb950"><title>game/Screen/ViewEffects/vieweffects: 14,736 bytes, 28 functions (28 named), 30 data symbols (29 named)</title></rect>
+<rect x="1011.8" y="373.2" width="33.6" height="24.8" fill="#3fb950"><title>game/Screen/FrameImage/frameimage: 2,784 bytes, 5 functions (5 named)</title></rect>
+<rect x="1011.8" y="399.0" width="17.2" height="28.6" fill="#3fb950"><title>game/Screen/Tint/tint: 1,680 bytes, 6 functions (6 named)</title></rect>
+<rect x="1030.0" y="399.0" width="15.4" height="28.6" fill="#3fb950"><title>game/Screen/Mosaic/mosaic: 1,520 bytes, 4 functions (4 named)</title></rect>
+<rect x="1011.8" y="428.6" width="18.7" height="15.4" fill="#3fb950"><title>game/Screen/Overlay/overlay: 1,008 bytes, 4 functions (4 named)</title></rect>
+<rect x="1011.8" y="444.9" width="18.7" height="14.3" fill="#3fb950"><title>game/Screen/Fade/fade: 944 bytes, 4 functions (4 named)</title></rect>
+<rect x="1031.6" y="428.6" width="13.9" height="16.9" fill="#3fb950"><title>game/Screen/Strobe/strobe: 832 bytes, 7 functions (7 named), 1 data symbols (1 named)</title></rect>
+<rect x="1031.6" y="446.5" width="7.9" height="12.8" fill="#3fb950"><title>game/Screen/ResetEffects/reseteffects: 384 bytes, 2 functions (2 named)</title></rect>
+<rect x="1040.5" y="446.5" width="5.0" height="12.8" fill="#3fb950"><title>game/Screen/StarSky/starsky: 256 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1047.5" y="359.2" width="76.9" height="102.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1050.5" y="370.2" font-size="10" fill="#8b949e">game/Attach</text>
+<rect x="1048.5" y="373.2" width="73.9" height="70.7" fill="#3fb950"><title>game/Attach/Attachment/attachment: 16,848 bytes, 40 functions (36 named), 1 data symbols (1 named)</title></rect>
+<rect x="1048.5" y="444.9" width="32.0" height="14.3" fill="#3fb950"><title>game/Attach/TextureScroll/texturescroll: 1,584 bytes, 6 functions (5 named)</title></rect>
+<rect x="1081.4" y="444.9" width="12.7" height="14.3" fill="#3fb950"><title>game/Attach/FlashingLight/flashinglight: 656 bytes, 1 functions (1 named)</title></rect>
+<rect x="1095.1" y="444.9" width="10.7" height="14.3" fill="#3fb950"><title>game/Attach/BonePoint/bonepoint: 560 bytes, 3 functions (3 named)</title></rect>
+<rect x="1106.7" y="444.9" width="7.7" height="14.3" fill="#3fb950"><title>game/Attach/AttachProjectile/attachprojectile: 416 bytes, 1 functions (1 named)</title></rect>
+<rect x="1115.4" y="444.9" width="7.0" height="14.3" fill="#3fb950"><title>game/Attach/AttachModel/attachmodel: 384 bytes, 2 functions (2 named), 3 data symbols (3 named)</title></rect>
+</g>
+<g><rect x="1124.4" y="359.2" width="75.6" height="102.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1127.4" y="370.2" font-size="10" fill="#8b949e">game/Aim</text>
+<rect x="1125.4" y="373.2" width="72.6" height="82.5" fill="#3fb950"><title>game/Aim/AimUpdate/aimupdate: 19,280 bytes, 19 functions (15 named), 7 data symbols (7 named)</title></rect>
+<text x="1128.4" y="384.2" font-size="9" fill="#0d1117">aimupdate</text>
+<rect x="1125.4" y="456.7" width="58.2" height="2.5" fill="#3fb950"><title>game/Aim/AimPoints/aimpoints: 656 bytes, 1 functions (1 named)</title></rect>
+<rect x="1184.6" y="456.7" width="13.4" height="2.5" fill="#3fb950"><title>game/Aim/AimRemove/aimremove: 160 bytes, 1 functions (1 named), 2 data symbols (2 named)</title></rect>
+</g>
+<g><rect x="850.1" y="461.2" width="92.8" height="76.8" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="853.1" y="472.2" font-size="10" fill="#8b949e">game/Swarm</text>
+<rect x="851.1" y="475.2" width="49.2" height="60.8" fill="#3fb950"><title>game/Swarm/SwarmActor/swarmactor: 10,272 bytes, 9 functions (9 named)</title></rect>
+<rect x="901.3" y="475.2" width="39.6" height="27.1" fill="#3fb950"><title>game/Swarm/SwarmCentre/swarmcentre: 3,776 bytes, 11 functions (11 named), 1 data symbols (0 named)</title></rect>
+<rect x="901.3" y="503.3" width="32.9" height="32.7" fill="#3fb950"><title>game/Swarm/ModelSlots/modelslots: 3,776 bytes, 9 functions (8 named), 5 data symbols (5 named)</title></rect>
+<rect x="935.2" y="503.3" width="5.7" height="24.1" fill="#3fb950"><title>game/Swarm/WaveBob/wavebob: 560 bytes, 1 functions (1 named)</title></rect>
+<rect x="935.2" y="528.4" width="5.7" height="7.6" fill="#3fb950"><title>game/Swarm/SwarmReset/swarmreset: 192 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="850.1" y="538.0" width="92.8" height="76.3" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="853.1" y="549.0" font-size="10" fill="#8b949e">game/Shadow</text>
+<rect x="851.1" y="552.0" width="65.3" height="60.3" fill="#3fb950"><title>game/Shadow/RealTimeShadow/realtimeshadow: 13,456 bytes, 28 functions (28 named), 28 data symbols (23 named)</title></rect>
+<rect x="917.3" y="552.0" width="23.6" height="39.8" fill="#3fb950"><title>game/Shadow/BlobShadow/blobshadow: 3,328 bytes, 5 functions (5 named)</title></rect>
+<rect x="917.3" y="592.9" width="23.6" height="19.4" fill="#388bfd"><title>game/Shadow/ShadowFaces/shadowfaces: 1,664 bytes, 7 functions (3 named), 6 data symbols (4 named)</title></rect>
+</g>
+<g><rect x="850.1" y="614.3" width="92.8" height="75.1" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="853.1" y="625.3" font-size="10" fill="#8b949e">game/Zone</text>
+<rect x="851.1" y="628.3" width="61.3" height="59.1" fill="#3fb950"><title>game/Zone/ZoneState/zonestate: 12,448 bytes, 28 functions (28 named), 12 data symbols (10 named)</title></rect>
+<rect x="913.3" y="628.3" width="27.6" height="32.0" fill="#3fb950"><title>game/Zone/ZoneBounds/zonebounds: 3,136 bytes, 6 functions (6 named)</title></rect>
+<rect x="913.3" y="661.3" width="13.2" height="26.1" fill="#3fb950"><title>game/Zone/RandomPoint/randompoint: 1,280 bytes, 1 functions (1 named)</title></rect>
+<rect x="927.5" y="661.3" width="13.4" height="15.1" fill="#388bfd"><title>game/Zone/CodeTree/codetree: 768 bytes, 8 functions (1 named), 3 data symbols (1 named)</title></rect>
+<rect x="927.5" y="677.3" width="12.5" height="10.0" fill="#3fb950"><title>game/Zone/ZoneTree/zonetree: 496 bytes, 3 functions (3 named), 2 data symbols (2 named)</title></rect>
+<rect x="941.1" y="677.3" width="0.0" height="10.0" fill="#3fb950"><title>game/Zone/ZoneCursor/zonecursor: 32 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="850.1" y="689.4" width="92.8" height="74.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="853.1" y="700.4" font-size="10" fill="#8b949e">game/Model</text>
+<rect x="851.1" y="703.4" width="53.4" height="30.4" fill="#3fb950"><title>game/Model/ObjParts/objparts: 5,696 bytes, 22 functions (21 named), 1 data symbols (1 named)</title></rect>
+<rect x="851.1" y="734.8" width="53.4" height="27.2" fill="#3fb950"><title>game/Model/Reflection/reflection: 5,104 bytes, 8 functions (8 named), 2 data symbols (2 named)</title></rect>
+<rect x="905.4" y="703.4" width="35.5" height="29.9" fill="#3fb950"><title>game/Model/ModelLoad/modelload: 3,760 bytes, 15 functions (15 named), 17 data symbols (15 named)</title></rect>
+<rect x="905.4" y="734.3" width="17.7" height="27.7" fill="#3fb950"><title>game/Model/ActorQuad/actorquad: 1,792 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="924.2" y="734.3" width="16.7" height="19.6" fill="#3fb950"><title>game/Model/VertexColour/vertexcolour: 1,216 bytes, 1 functions (1 named)</title></rect>
+<rect x="924.2" y="754.9" width="8.5" height="7.1" fill="#3fb950"><title>game/Model/PartsReset/partsreset: 256 bytes, 2 functions (2 named)</title></rect>
+<rect x="933.6" y="754.9" width="5.5" height="7.1" fill="#3fb950"><title>game/Model/ActorQuadAlloc/actorquadalloc: 176 bytes, 1 functions (1 named)</title></rect>
+<rect x="940.1" y="754.9" width="0.8" height="7.1" fill="#3fb950"><title>game/Model/AttachReset/attachreset: 48 bytes, 2 functions (2 named)</title></rect>
+</g>
+<g><rect x="942.9" y="461.2" width="92.7" height="74.7" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="945.9" y="472.2" font-size="10" fill="#8b949e">game/Lighting</text>
+<rect x="943.9" y="475.2" width="36.9" height="58.7" fill="#3fb950"><title>game/Lighting/PointLight/pointlight: 7,536 bytes, 22 functions (20 named), 15 data symbols (13 named)</title></rect>
+<rect x="981.8" y="475.2" width="51.8" height="36.6" fill="#3fb950"><title>game/Lighting/LevelLights/levellights: 6,608 bytes, 69 functions (54 named)</title></rect>
+<rect x="981.8" y="512.8" width="40.5" height="21.1" fill="#3fb950"><title>game/Lighting/AmbientZone/ambientzone: 3,056 bytes, 13 functions (8 named), 14 data symbols (14 named)</title></rect>
+<rect x="1023.3" y="512.8" width="10.3" height="21.1" fill="#3fb950"><title>game/Lighting/PlayerLight/playerlight: 832 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+</g>
+<g><rect x="1035.6" y="461.2" width="85.5" height="74.7" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1038.6" y="472.2" font-size="10" fill="#8b949e">game/Anim</text>
+<rect x="1036.6" y="475.2" width="49.0" height="33.5" fill="#3fb950"><title>game/Anim/IdleAnim/idleanim: 5,760 bytes, 16 functions (16 named), 2 data symbols (2 named)</title></rect>
+<rect x="1036.6" y="509.7" width="49.0" height="24.2" fill="#388bfd"><title>game/Anim/BoneMtxEval/bonemtxeval: 4,204 bytes, 20 functions (0 named)</title></rect>
+<rect x="1086.6" y="475.2" width="32.4" height="20.4" fill="#3fb950"><title>game/Anim/VertexMorph/vertexmorph: 2,384 bytes, 2 functions (2 named), 1 data symbols (1 named)</title></rect>
+<rect x="1086.6" y="496.6" width="32.4" height="15.7" fill="#388bfd"><title>game/Anim/BoneMatrices/bonematrices: 1,864 bytes, 6 functions (1 named), 1 data symbols (0 named)</title></rect>
+<rect x="1086.6" y="513.3" width="19.4" height="20.6" fill="#3fb950"><title>game/Anim/AnimPlayback/animplayback: 1,472 bytes, 3 functions (3 named)</title></rect>
+<rect x="1107.0" y="513.3" width="12.1" height="18.4" fill="#3fb950"><title>game/Anim/AnimInstance/animinstance: 848 bytes, 4 functions (4 named)</title></rect>
+<rect x="1107.0" y="532.7" width="5.5" height="1.2" fill="#3fb950"><title>game/Anim/MorphReset/morphreset: 48 bytes, 1 functions (1 named)</title></rect>
+<rect x="1113.5" y="532.7" width="5.5" height="1.2" fill="#388bfd"><title>game/Anim/BoneMtxState/bonemtxstate: 48 bytes, 1 functions (1 named), 16 data symbols (3 named)</title></rect>
+</g>
+<g><rect x="1121.1" y="461.2" width="78.9" height="74.7" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1124.1" y="472.2" font-size="10" fill="#8b949e">game/Env</text>
+<rect x="1122.1" y="475.2" width="48.4" height="58.7" fill="#3fb950"><title>game/Env/Sky/sky: 9,856 bytes, 12 functions (12 named), 6 data symbols (4 named)</title></rect>
+<text x="1125.1" y="486.2" font-size="9" fill="#0d1117">sky</text>
+<rect x="1171.4" y="475.2" width="26.6" height="21.7" fill="#3fb950"><title>game/Env/VtxColourSetup/vtxcoloursetup: 2,096 bytes, 4 functions (4 named), 7 data symbols (7 named)</title></rect>
+<rect x="1171.4" y="498.0" width="26.6" height="17.9" fill="#3fb950"><title>game/Env/Fog/fog: 1,744 bytes, 5 functions (4 named), 9 data symbols (5 named)</title></rect>
+<text x="1174.4" y="509.0" font-size="9" fill="#0d1117">fog</text>
+<rect x="1171.4" y="516.9" width="13.1" height="17.0" fill="#3fb950"><title>game/Env/VtxColourFade/vtxcolourfade: 848 bytes, 3 functions (3 named)</title></rect>
+<rect x="1185.5" y="516.9" width="12.5" height="17.0" fill="#3fb950"><title>game/Env/SkyGradient/skygradient: 816 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="942.9" y="535.9" width="67.3" height="80.4" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="945.9" y="546.9" font-size="10" fill="#8b949e">game/Gfx</text>
+<rect x="943.9" y="549.9" width="64.3" height="44.3" fill="#3fb950"><title>game/Gfx/WorldObject/worldobject: 9,776 bytes, 21 functions (21 named), 19 data symbols (12 named)</title></rect>
+<rect x="943.9" y="595.2" width="38.4" height="19.1" fill="#388bfd"><title>game/Gfx/CullLevelDl/cullleveldl: 2,612 bytes, 14 functions (2 named), 1 data symbols (0 named)</title></rect>
+<rect x="983.3" y="595.2" width="19.7" height="19.1" fill="#3fb950"><title>game/Gfx/Turret/turret: 1,376 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1004.0" y="595.2" width="4.2" height="10.1" fill="#3fb950"><title>game/Gfx/DisplayListAlloc/displaylistalloc: 192 bytes, 1 functions (1 named)</title></rect>
+<rect x="1004.0" y="606.3" width="4.2" height="8.0" fill="#388bfd"><title>game/Gfx/CullDl/culldl: 156 bytes, 1 functions (1 named), 6 data symbols (5 named)</title></rect>
+</g>
+<g><rect x="942.9" y="616.4" width="67.3" height="80.2" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="945.9" y="627.4" font-size="10" fill="#8b949e">debugger/Debugger</text>
+<rect x="943.9" y="630.4" width="31.7" height="64.2" fill="#3fb950"><title>debugger/Debugger/DebuggerPrintf/debuggerprintf: 7,040 bytes, 10 functions (10 named), 6 data symbols (6 named)</title></rect>
+<rect x="976.6" y="630.4" width="31.6" height="53.6" fill="#3fb950"><title>debugger/Debugger/CrashScreen/crashscreen: 5,888 bytes, 23 functions (21 named), 16 data symbols (14 named)</title></rect>
+<rect x="976.6" y="685.0" width="26.1" height="9.5" fill="#3fb950"><title>debugger/Debugger/DebuggerCont/debuggercont: 944 bytes, 7 functions (6 named)</title></rect>
+<rect x="1003.8" y="685.0" width="4.5" height="7.8" fill="#388bfd"><title>debugger/Debugger/TlbSnapshot/tlbsnapshot: 160 bytes, 1 functions (1 named)</title></rect>
+<rect x="1003.8" y="693.8" width="4.5" height="0.8" fill="#3fb950"><title>debugger/Debugger/DebuggerStub/debuggerstub: 32 bytes, 1 functions (0 named)</title></rect>
+</g>
+<g><rect x="942.9" y="696.5" width="67.3" height="67.5" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="945.9" y="707.5" font-size="10" fill="#8b949e">init/Boot</text>
+<rect x="943.9" y="710.5" width="25.8" height="31.6" fill="#388bfd"><title>init/Boot/Exception/exceptasm: 3,024 bytes, 12 functions (12 named), 4 data symbols (4 named)</title></rect>
+<rect x="943.9" y="743.1" width="25.8" height="18.9" fill="#388bfd"><title>init/Boot/Inflate/huftbuild: 1,840 bytes, 10 functions (2 named)</title></rect>
+<rect x="970.8" y="710.5" width="18.9" height="21.6" fill="#388bfd"><title>init/Boot/Paging/pagefault: 1,556 bytes, 5 functions (5 named)</title></rect>
+<rect x="990.7" y="710.5" width="17.6" height="21.6" fill="#388bfd"><title>init/Boot/Inflate/inflateblock: 1,452 bytes, 6 functions (3 named), 6 data symbols (6 named)</title></rect>
+<rect x="970.8" y="733.1" width="20.0" height="16.7" fill="#3fb950"><title>init/Boot/BootMain/bootmain: 1,280 bytes, 7 functions (7 named), 12 data symbols (11 named)</title></rect>
+<rect x="970.8" y="750.8" width="20.0" height="11.2" fill="#388bfd"><title>init/Boot/FaultDebugger/faultdebugger: 884 bytes, 2 functions (2 named), 11 data symbols (5 named)</title></rect>
+<rect x="991.8" y="733.1" width="16.5" height="7.7" fill="#3fb950"><title>init/Boot/ScreenInit/screeninit: 528 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="991.8" y="741.9" width="7.8" height="9.1" fill="#388bfd"><title>init/Boot/Inflate/inflatetables: 308 bytes, 1 functions (1 named)</title></rect>
+<rect x="1000.6" y="741.9" width="7.7" height="9.1" fill="#388bfd"><title>init/Boot/Paging/pagesetup: 304 bytes, 3 functions (3 named), 6 data symbols (4 named)</title></rect>
+<rect x="991.8" y="752.0" width="4.5" height="10.0" fill="#388bfd"><title>init/Boot/Inflate/inflatestream: 208 bytes, 2 functions (1 named)</title></rect>
+<rect x="997.2" y="752.0" width="3.3" height="4.6" fill="#388bfd"><title>init/Boot/Inflate/inflate: 84 bytes, 1 functions (1 named)</title></rect>
+<rect x="997.2" y="757.6" width="3.3" height="4.4" fill="#388bfd"><title>init/Boot/EntryPoint/entrypoint: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1001.6" y="752.0" width="3.2" height="4.3" fill="#388bfd"><title>init/Boot/Paging/pagebitmap: 76 bytes, 1 functions (1 named)</title></rect>
+<rect x="1005.7" y="752.0" width="2.5" height="4.3" fill="#3fb950"><title>init/Boot/HardwareCheck/hardwarecheck: 64 bytes, 2 functions (0 named), 2 data symbols (0 named)</title></rect>
+<rect x="1001.6" y="757.3" width="2.2" height="4.7" fill="#388bfd"><title>init/Boot/Inflate/inflatefixed: 64 bytes, 1 functions (1 named), 3 data symbols (2 named)</title></rect>
+<rect x="1004.8" y="757.3" width="1.4" height="2.9" fill="#3fb950"><title>init/Boot/ArgStub/argstub: 32 bytes, 1 functions (0 named)</title></rect>
+<rect x="1007.2" y="757.3" width="1.1" height="2.9" fill="#388bfd"><title>init/Boot/Inflate/decompress: 28 bytes, 1 functions (1 named)</title></rect>
+<rect x="1004.8" y="761.2" width="1.5" height="0.8" fill="#3fb950"><title>init/Boot/VoidStub/voidstub: 16 bytes, 1 functions (0 named)</title></rect>
+<rect x="1007.4" y="761.2" width="0.9" height="0.8" fill="#388bfd"><title>init/Boot/DebugTrap/debugtrap: 12 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1010.3" y="535.9" width="65.2" height="67.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1013.3" y="546.9" font-size="10" fill="#8b949e">game/Flare</text>
+<rect x="1011.3" y="549.9" width="43.2" height="28.5" fill="#3fb950"><title>game/Flare/Glow/glow: 4,512 bytes, 16 functions (16 named), 1 data symbols (1 named)</title></rect>
+<text x="1014.3" y="560.9" font-size="9" fill="#0d1117">glow</text>
+<rect x="1011.3" y="579.5" width="43.2" height="22.0" fill="#3fb950"><title>game/Flare/LensFlare/lensflare: 3,520 bytes, 8 functions (8 named), 3 data symbols (2 named)</title></rect>
+<rect x="1055.5" y="549.9" width="18.0" height="36.3" fill="#3fb950"><title>game/Flare/VisProbe/visprobe: 2,448 bytes, 3 functions (3 named), 5 data symbols (5 named)</title></rect>
+<rect x="1055.5" y="587.2" width="15.6" height="14.3" fill="#3fb950"><title>game/Flare/ScreenFlash/screenflash: 880 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1072.1" y="587.2" width="1.4" height="14.3" fill="#3fb950"><title>game/Flare/FlareReset/flarereset: 128 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1075.5" y="535.9" width="64.9" height="67.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1078.5" y="546.9" font-size="10" fill="#8b949e">game/Rope</text>
+<rect x="1076.5" y="549.9" width="38.9" height="51.6" fill="#3fb950"><title>game/Rope/SwingRope/swingrope: 7,248 bytes, 14 functions (14 named)</title></rect>
+<rect x="1116.4" y="549.9" width="22.0" height="51.6" fill="#3fb950"><title>game/Rope/RopeTie/ropetie: 4,176 bytes, 18 functions (18 named)</title></rect>
+</g>
+<g><rect x="1140.4" y="535.9" width="59.6" height="67.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1141.4" y="535.9" width="56.6" height="37.0" fill="#3fb950"><title>game/Bone/BoneChain/bonechain: 5,984 bytes, 5 functions (5 named), 2 data symbols (2 named)</title></rect>
+<rect x="1141.4" y="573.9" width="26.8" height="27.6" fill="#3fb950"><title>game/Bone/BoneCommands/bonecommands: 2,176 bytes, 10 functions (5 named)</title></rect>
+<rect x="1169.2" y="573.9" width="21.1" height="27.6" fill="#3fb950"><title>game/Bone/BoneChannels/bonechannels: 1,728 bytes, 2 functions (2 named), 1 data symbols (1 named)</title></rect>
+<rect x="1191.2" y="573.9" width="6.8" height="27.6" fill="#3fb950"><title>game/Bone/BoneLookAt/bonelookat: 608 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1010.3" y="603.5" width="71.4" height="54.1" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1013.3" y="614.5" font-size="10" fill="#8b949e">game/Player</text>
+<rect x="1011.3" y="617.5" width="26.0" height="38.1" fill="#3fb950"><title>game/Player/FlyControl/flycontrol: 3,920 bytes, 2 functions (2 named)</title></rect>
+<rect x="1038.3" y="617.5" width="24.5" height="26.3" fill="#3fb950"><title>game/Player/SpawnPoint/spawnpoint: 2,576 bytes, 5 functions (5 named), 4 data symbols (4 named)</title></rect>
+<rect x="1038.3" y="644.8" width="24.5" height="10.8" fill="#3fb950"><title>game/Player/PlayerStats/playerstats: 1,120 bytes, 3 functions (3 named), 7 data symbols (6 named)</title></rect>
+<rect x="1063.8" y="617.5" width="15.9" height="11.8" fill="#3fb950"><title>game/Player/PlayerWarp/playerwarp: 800 bytes, 5 functions (5 named), 2 data symbols (2 named)</title></rect>
+<rect x="1063.8" y="630.3" width="7.7" height="13.8" fill="#3fb950"><title>game/Player/SpawnLoad/spawnload: 480 bytes, 3 functions (3 named)</title></rect>
+<rect x="1072.5" y="630.3" width="7.2" height="13.8" fill="#3fb950"><title>game/Player/StatsInit/statsinit: 448 bytes, 3 functions (2 named)</title></rect>
+<rect x="1063.8" y="645.1" width="9.1" height="10.5" fill="#3fb950"><title>game/Player/HudBlockInit/hudblockinit: 432 bytes, 2 functions (2 named)</title></rect>
+<rect x="1073.9" y="645.1" width="5.8" height="10.5" fill="#3fb950"><title>game/Player/LinkGroups/linkgroups: 288 bytes, 2 functions (2 named)</title></rect>
+</g>
+<g><rect x="1010.3" y="657.6" width="71.4" height="53.8" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1013.3" y="668.6" font-size="10" fill="#8b949e">game/Game</text>
+<rect x="1011.3" y="671.6" width="47.5" height="37.8" fill="#3fb950"><title>game/Game/MainLoop/mainloop: 6,992 bytes, 16 functions (16 named), 10 data symbols (9 named)</title></rect>
+<rect x="1059.8" y="671.6" width="19.9" height="28.1" fill="#3fb950"><title>game/Game/LevelStart/levelstart: 2,256 bytes, 6 functions (6 named)</title></rect>
+<rect x="1059.8" y="700.7" width="8.3" height="8.7" fill="#3fb950"><title>game/Game/LevelInit/levelinit: 336 bytes, 1 functions (1 named)</title></rect>
+<rect x="1069.1" y="700.7" width="7.4" height="8.7" fill="#3fb950"><title>game/Game/LevelChange/levelchange: 304 bytes, 1 functions (1 named), 37 data symbols (34 named)</title></rect>
+<rect x="1077.6" y="700.7" width="2.1" height="5.9" fill="#3fb950"><title>game/Game/ClearBss/clearbss: 80 bytes, 1 functions (1 named)</title></rect>
+<rect x="1077.6" y="707.6" width="0.6" height="1.8" fill="#3fb950"><title>game/Game/FrameStub/framestub: 16 bytes, 1 functions (0 named)</title></rect>
+<rect x="1079.1" y="707.6" width="0.6" height="1.8" fill="#3fb950"><title>game/Game/UpdateStub/updatestub: 16 bytes, 1 functions (0 named)</title></rect>
+</g>
+<g><rect x="1010.3" y="711.4" width="71.4" height="52.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1013.3" y="722.4" font-size="10" fill="#8b949e">game/View</text>
+<rect x="1011.3" y="725.4" width="29.8" height="36.6" fill="#3fb950"><title>game/View/Views/views: 4,352 bytes, 11 functions (10 named), 12 data symbols (11 named)</title></rect>
+<rect x="1042.1" y="725.4" width="26.1" height="36.6" fill="#3fb950"><title>game/View/Projection/projection: 3,824 bytes, 11 functions (10 named), 21 data symbols (17 named)</title></rect>
+<rect x="1069.2" y="725.4" width="10.5" height="12.0" fill="#3fb950"><title>game/View/ViewLayout/viewlayout: 560 bytes, 2 functions (2 named)</title></rect>
+<rect x="1069.2" y="738.4" width="10.5" height="8.7" fill="#388bfd"><title>game/View/CylinderInView/cylinderinview: 416 bytes, 3 functions (2 named)</title></rect>
+<rect x="1069.2" y="748.1" width="10.5" height="6.8" fill="#388bfd"><title>game/View/QuadInView/quadinview: 336 bytes, 2 functions (1 named), 1 data symbols (1 named)</title></rect>
+<rect x="1069.2" y="755.9" width="10.5" height="6.1" fill="#3fb950"><title>game/View/ViewOrtho/viewortho: 304 bytes, 2 functions (2 named)</title></rect>
+</g>
+<g><rect x="1081.7" y="603.5" width="60.5" height="42.3" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<text x="1084.7" y="614.5" font-size="10" fill="#8b949e">game/Texture</text>
+<rect x="1082.7" y="617.5" width="26.1" height="26.3" fill="#3fb950"><title>game/Texture/TextureLoad/textureload: 3,088 bytes, 9 functions (9 named), 6 data symbols (6 named)</title></rect>
+<rect x="1109.8" y="617.5" width="25.3" height="26.3" fill="#3fb950"><title>game/Texture/UvWobble/uvwobble: 2,992 bytes, 3 functions (3 named), 2 data symbols (2 named)</title></rect>
+<rect x="1136.0" y="617.5" width="4.2" height="26.3" fill="#3fb950"><title>game/Texture/TextureUse/textureuse: 592 bytes, 5 functions (5 named), 8 data symbols (8 named)</title></rect>
+</g>
+<g><rect x="1142.2" y="603.5" width="57.8" height="42.3" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1143.2" y="603.5" width="22.0" height="40.3" fill="#3fb950"><title>game/Debug/DlCheck/dlcheck: 2,624 bytes, 65 functions (64 named), 4 data symbols (4 named)</title></rect>
+<rect x="1166.2" y="603.5" width="31.8" height="25.5" fill="#3fb950"><title>game/Debug/TaskMenu/taskmenu: 2,400 bytes, 3 functions (3 named), 12 data symbols (10 named)</title></rect>
+<rect x="1166.2" y="630.0" width="31.4" height="13.8" fill="#3fb950"><title>game/Debug/PixelMarker/pixelmarker: 1,328 bytes, 4 functions (3 named)</title></rect>
+<rect x="1198.6" y="630.0" width="0.0" height="13.8" fill="#388bfd"><title>game/Debug/FatalTrap/fataltrap: 16 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1081.7" y="645.8" width="38.1" height="62.8" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1082.7" y="645.8" width="35.1" height="32.6" fill="#3fb950"><title>init/Libc/Xprintf/xprintf: 3,392 bytes, 4 functions (4 named), 3 data symbols (2 named)</title></rect>
+<rect x="1082.7" y="679.4" width="35.1" height="27.2" fill="#3fb950"><title>init/Libc/Xldtob/xldtob: 2,848 bytes, 3 functions (3 named)</title></rect>
+</g>
+<g><rect x="1081.7" y="708.6" width="38.1" height="55.4" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1082.7" y="708.6" width="35.1" height="29.5" fill="#3fb950"><title>game/Cont/PadRead/padread: 3,088 bytes, 8 functions (8 named), 27 data symbols (27 named)</title></rect>
+<rect x="1082.7" y="739.1" width="22.9" height="22.9" fill="#3fb950"><title>game/Cont/Rumble/rumble: 1,600 bytes, 11 functions (11 named), 1 data symbols (1 named)</title></rect>
+<rect x="1106.6" y="739.1" width="11.2" height="22.9" fill="#3fb950"><title>game/Cont/PadInit/padinit: 816 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+</g>
+<g><rect x="1119.8" y="645.8" width="40.5" height="39.8" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1120.8" y="645.8" width="37.5" height="37.8" fill="#3fb950"><title>game/Path/PathGraph/pathgraph: 4,192 bytes, 6 functions (6 named), 9 data symbols (8 named)</title></rect>
+</g>
+<g><rect x="1160.3" y="645.8" width="39.7" height="39.8" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1161.3" y="645.8" width="19.7" height="19.1" fill="#3fb950"><title>game/Os/EepromWrite/eepromwrite: 1,168 bytes, 4 functions (4 named), 3 data symbols (3 named)</title></rect>
+<rect x="1182.0" y="645.8" width="16.0" height="19.1" fill="#3fb950"><title>game/Os/ContInit/continit: 960 bytes, 3 functions (3 named), 6 data symbols (6 named)</title></rect>
+<rect x="1161.3" y="665.9" width="10.6" height="17.7" fill="#3fb950"><title>game/Os/EepromRead/eepromread: 608 bytes, 2 functions (2 named)</title></rect>
+<rect x="1172.8" y="665.9" width="9.0" height="17.7" fill="#3fb950"><title>game/Os/MtxCatF/mtxcatf: 528 bytes, 2 functions (2 named)</title></rect>
+<rect x="1182.9" y="665.9" width="15.1" height="8.9" fill="#3fb950"><title>game/Os/ViSetSpecial/visetspecial: 448 bytes, 1 functions (1 named)</title></rect>
+<rect x="1182.9" y="675.7" width="6.7" height="7.8" fill="#3fb950"><title>game/Os/EepromLongRead/eepromlongread: 192 bytes, 1 functions (0 named)</title></rect>
+<rect x="1190.6" y="675.7" width="7.4" height="4.4" fill="#3fb950"><title>game/Os/EepromProbe/eepromprobe: 128 bytes, 1 functions (1 named)</title></rect>
+<rect x="1190.6" y="681.2" width="7.4" height="2.4" fill="#3fb950"><title>game/Os/PiReadIo/pireadio: 80 bytes, 2 functions (1 named)</title></rect>
+</g>
+<g><rect x="1119.8" y="685.6" width="34.7" height="45.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1120.8" y="685.6" width="31.7" height="43.0" fill="#3fb950"><title>game/Rom/RomTable/romtable: 4,064 bytes, 15 functions (13 named), 2 data symbols (2 named)</title></rect>
+</g>
+<g><rect x="1119.8" y="730.5" width="34.7" height="33.5" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1120.8" y="730.5" width="23.4" height="31.5" fill="#3fb950"><title>game/Face/Expression/expression: 2,256 bytes, 15 functions (14 named), 1 data symbols (1 named)</title></rect>
+<rect x="1145.2" y="730.5" width="7.3" height="31.5" fill="#3fb950"><title>game/Face/ScriptedExpression/scriptedexpression: 768 bytes, 4 functions (4 named), 5 data symbols (3 named)</title></rect>
+</g>
+<g><rect x="1154.5" y="685.6" width="45.5" height="25.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1155.5" y="685.6" width="24.4" height="23.0" fill="#3fb950"><title>init/Sched/Scheduler/scheduler: 1,728 bytes, 5 functions (5 named), 16 data symbols (12 named)</title></rect>
+<rect x="1180.9" y="685.6" width="17.1" height="23.0" fill="#3fb950"><title>init/Sched/SchedInit/schedinit: 1,232 bytes, 6 functions (5 named), 19 data symbols (16 named)</title></rect>
+</g>
+<g><rect x="1154.5" y="710.5" width="28.6" height="31.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1155.5" y="710.5" width="25.6" height="27.7" fill="#3fb950"><title>init/Heap/Allocator/allocator: 2,208 bytes, 8 functions (8 named), 10 data symbols (10 named)</title></rect>
+<rect x="1155.5" y="739.3" width="22.6" height="0.9" fill="#3fb950"><title>init/Heap/MemoryLayout/memorylayout: 128 bytes, 1 functions (1 named), 4 data symbols (4 named)</title></rect>
+<rect x="1179.1" y="739.3" width="2.0" height="0.9" fill="#3fb950"><title>init/Heap/ExpansionPak/expansionpak: 16 bytes, 1 functions (1 named), 1 data symbols (1 named)</title></rect>
+</g>
+<g><rect x="1183.1" y="710.5" width="16.9" height="31.6" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1184.1" y="710.5" width="13.9" height="29.6" fill="#3fb950"><title>init/Rom/RomDma/romdma: 1,392 bytes, 5 functions (5 named), 14 data symbols (13 named)</title></rect>
+</g>
+<g><rect x="1154.5" y="742.1" width="23.6" height="21.9" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1155.5" y="742.1" width="10.6" height="19.9" fill="#3fb950"><title>init/Cont/MotorInit/motorinit: 720 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+<rect x="1167.1" y="742.1" width="9.0" height="19.9" fill="#3fb950"><title>init/Cont/Motor/motor: 624 bytes, 2 functions (2 named), 2 data symbols (2 named)</title></rect>
+</g>
+<g><rect x="1178.1" y="742.1" width="19.1" height="11.9" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1179.1" y="742.1" width="16.1" height="9.9" fill="#3fb950"><title>init/Os/DevMgr/devmgr: 592 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1178.1" y="754.0" width="19.1" height="10.0" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1179.1" y="754.0" width="16.1" height="8.0" fill="#3fb950"><title>game/Boot/GameMain/gamemain: 496 bytes, 1 functions (1 named)</title></rect>
+</g>
+<g><rect x="1197.2" y="742.1" width="2.8" height="21.9" fill="#161b22" stroke="#0d1117" stroke-width="2"/>
+<rect x="1198.2" y="742.1" width="0.0" height="15.7" fill="#3fb950"><title>game/Libc/Sprintf/sprintf: 128 bytes, 2 functions (1 named)</title></rect>
+<rect x="1198.2" y="758.8" width="0.0" height="3.2" fill="#388bfd"><title>game/Libc/FillBytes/fillbytes: 32 bytes, 1 functions (1 named)</title></rect>
+</g>
+</svg>
