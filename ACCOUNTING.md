@@ -154,33 +154,37 @@ change the layout. It writes two tables, which hold addresses, names and grades 
 
 The tool uses these facts:
 
-- IDO pads the code of each object to 16 bytes. It puts no padding between the functions of one object.
-  So zero words between two functions show a file boundary. A function that starts on an address that is
-  not 16-aligned, directly after the previous function, is in the same object. A function on a 16-aligned
-  address with no zero words before it shows nothing.
-- The `.data`, `.rodata` and `.bss` of one object are each one block, in link order. Each block starts on
-  a 16-aligned address.
+- IDO pads the code of each C object to 16 bytes. It puts no padding between the functions of one
+  object. So zero words after a return, between two C functions, show a file boundary. A function that
+  starts on an address that is not 16-aligned, directly after the previous function, is in the same
+  object. A function on a 16-aligned address with no zero words before it shows nothing.
+- These rules are for compiled C only. A hand-written `.s` file can hold `.align` or `.balign`, data words
+  and nops. So zero words next to hand-written asm are not a proof.
+- The `.data` and `.rodata` of one C object are each one block, in link order. Each block starts on a
+  16-aligned address. This is not true for hand-written asm, whose data is 4-aligned, or for `.bss`.
+  Also, the linker script places the code and data sections with `SUBALIGN(4)` (8 in the debugger), so our layout decides where a block
+  starts. The tool uses only the `.data` and `.rodata` of two C objects.
 - One object is compiled once, with one set of flags. C and hand-written asm are never one object.
 - Two older builds have almost the same link order: the ECTS build (August 2000) and the debug build
   (October 2000). The padding in them is evidence too. But a file can change between builds.
 
 | Evidence | Meaning |
 |----------|---------|
-| `padding-us` | Zero words between the last function of the left object and the first function of the right object, in US |
+| `padding-us` | Zero words after the return of the last function of the left object, before the first function of the right object, in US |
 | `padding-ects`, `padding-debug` | In that build, the partners of the functions next to the boundary are in two objects: there is padding between them. The build has them in the US order, with no other paired function between them |
-| `data-edge` | The block of the right object directly follows the block of the left object, in `.data`, `.rodata` or `.bss`. It starts on a 16-aligned address |
-| `flags-change` | The two objects have different `-O` or `-mips` flags in `conker/Makefile`, or one is C and the other hand-written asm |
+| `data-edge` | Two C objects: the block of the right object directly follows the block of the left object, in `.data` or `.rodata`. It starts on a 16-aligned address |
+| `flags-change` | The two objects have different `-O` or `-mips` flags in `conker/Makefile`, or one is C and the other hand-written asm. If the asm function next to the boundary has only search evidence (ACCOUNTING.md, "Search tier"), this is not a proof |
 | `rare-name` | Functions of the two objects use two different source file paths (the path strings of the debug tunables) |
 
 The grades:
 
-- **proven**: `padding-us`, `flags-change`, `rare-name` that is pinned, or `padding-ects` or
-  `padding-debug` that is pinned and that the other old build does not contradict. Pinned means that the
-  paired functions are the two functions next to the boundary. US joins (starts that are not 16-aligned)
-  can also tie them to those functions. If the evidence is not pinned, the boundary can be one function
-  away.
-- **likely**: other evidence. `data-edge` alone is weak, because a block can start on a 16-aligned
-  address by chance.
+- **proven**: between two C objects, `padding-us`, or `padding-ects` or `padding-debug` that is pinned
+  and that the other old build does not contradict. Also `flags-change`, and `rare-name` that is pinned.
+  Pinned means that the paired functions are the two functions next to the boundary. US joins (starts
+  that are not 16-aligned) can also tie them to those functions. If the evidence is not pinned, the
+  boundary can be one function away.
+- **likely**: other evidence. Padding between two hand-written asm objects is only likely. `data-edge`
+  alone is weak, because a block can start on a 16-aligned address by chance.
 - **unproven**: no evidence. Sometimes the US code shows that the two sides are one object: the right
   object starts on an address that is not 16-aligned. Such a boundary is also unproven. The note gives
   the evidence against the boundary.
@@ -189,8 +193,10 @@ In the candidates table, `order_agrees` says that the old build has the two func
 with no other paired function between them. `us_16_aligned` says whether the US address is 16-aligned.
 A split needs this, because IDO starts each object on a 16-aligned address. `other_old_build` says what
 the other old build shows: it agrees, it contradicts, or it is silent. `us_code` says what the US code
-shows at the address: padding, a join or neither (flush). A candidate is not a decision. Read the code
-before you change the layout.
+shows at the address: padding, a join or neither (flush). Splits come only from C objects. A C data block
+that starts on an address that is not 16-aligned gives a merge candidate. But if the code proves two
+objects there, the note says "data split suspect" instead: then our data split is the likely error. A
+candidate is not a decision. Read the code before you change the layout.
 
 To make the tables again, you need `conker/conker.us.bin` (from `make -C conker extract`). For the
 evidence of the old builds, you also need the two prerelease ROMs and the files that pair their functions
