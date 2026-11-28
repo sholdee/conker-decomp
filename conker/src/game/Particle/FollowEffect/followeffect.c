@@ -377,7 +377,7 @@ void particle_spawnRandomSwell(Vec3f *pos, u8 owner, s32 list) {
 /* No caller in the tree. Fills in a fixed JetSpray and its cone spread, the same form as weapon_initImpactSpray (whose
  * callers pass DirectedJetSpray.spread or SurfaceJetSpray.source.spread there); its eventFunc is -1 (no trail bursts)
  * when gScreenLayout >= 2 or gPlayerCount >= 8, else 0. */
-void func_150D64E8(JetSpray *config, f32 *spread) {
+void particle_initJetSprayPreset(JetSpray *config, f32 *spread) {
     config->countBase = 6;
     config->countRange = 3;
     *spread = 1263.0f;

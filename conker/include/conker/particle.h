@@ -197,7 +197,7 @@ s32 particle_updateSineOscillator(OscillatorSprite *obj);
 void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 owner, s32 list);
 void particle_freeCharSpriteEmitters(void);
 void particle_fireActorBoneTracer(s32 altBone);
-void func_150B003C(s32 unused);
+void particle_levelUpdateContactHitsAndWindmillRain(s32 unused);
 void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list);
 void particle_freeProjectileTrail(TrailProjectile *projectile);
 void particle_destroyTrailProjectile(TrailProjectile *projectile);
@@ -402,7 +402,7 @@ s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle);
 s32 particle_expireRingParticleOffBearing(ChannelParticle *particle);
 
 /* game/Particle/SprayObjects/sprayobjects.c */
-Gfx *func_150C3160(Gfx *gdl, Actor *obj);
+Gfx *particle_setProgressTextureScroll(Gfx *gdl, Actor *obj);
 void func_150C3230(Actor *obj);
 void func_150C3574(Actor *obj);
 void func_150C3994(Actor *obj);
@@ -696,7 +696,7 @@ void particle_freeFollowEffect(TimedEffect *effect);
 void particle_spawnBreakup(Actor *obj, u8 owner, s32 list);
 void particle_spawnRandomGrowFade(Vec3f *pos, u8 owner, s32 list);
 void particle_spawnRandomSwell(Vec3f *pos, u8 owner, s32 list);
-void func_150D64E8(JetSpray *config, f32 *spread);
+void particle_initJetSprayPreset(JetSpray *config, f32 *spread);
 void particle_spawnRandomSurfaceMark(CollisionTri *surface, Vec3f *pos, u8 owner, s32 list);
 void particle_flashScreenWhite(u8 view, u8 owner, s32 list);
 void particle_spawnFollowDrift(Actor *obj, u8 owner, s32 list);
@@ -960,7 +960,7 @@ typedef struct {
     /* 0x110 */ ParticleState state;
 } BoneBurstParticle;
 
-void func_150F2A60(s32 unused);
+void particle_levelUpdateScrollingHazardProps(s32 unused);
 void particle_spawnBoneBurstEmitter(Actor *target);
 void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter);
 void particle_onBoneBurstEmitterEvent(BoneBurstEmitter *emitter, s32 event, u8 eventType);
@@ -1092,9 +1092,9 @@ s32 particle_flickerRayBeam(RayBeam *beam);
 s32 particle_updateWobbleOffset(BeamStartFx *obj, Vec3f *prevPos);
 RayBeam *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 aimed, u8 owner, s32 list);
 void particle_stopObjEffect(Actor *actor);
-s32 func_1510281C(BeamStartFx *startFx, s16 view);
-s32 func_15102884(BeamEndFx *endFx, s32 view);
-s32 func_151028AC(BeamLine *line, s16 view);
+s32 particle_isBeamStartFxVisible(BeamStartFx *startFx, s16 view);
+s32 particle_isBeamEndFxOn(BeamEndFx *endFx, s32 view);
+s32 particle_isBeamLineVisible(BeamLine *line, s16 view);
 
 /* game/Particle/AreaFlash/areaflash.c */
 /*

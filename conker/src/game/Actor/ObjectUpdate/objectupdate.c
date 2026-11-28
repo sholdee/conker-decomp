@@ -1683,7 +1683,7 @@ Gfx *actor_setTextureScroll(Gfx *gdl, s32 index) {
 
     id = movement_obj[index].character_type;
     if (id == 0x89 || id == 0xBA) {
-        return func_150C3160(gdl, &movement_obj[index]);
+        return particle_setProgressTextureScroll(gdl, &movement_obj[index]);
     }
     if (id == 0) {
         texIndex = 14;

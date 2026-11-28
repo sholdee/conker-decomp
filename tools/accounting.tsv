@@ -2697,7 +2697,7 @@ particle_updateSineOscillator	0x150AFBF4	116	game	c		build/src/game/Particle/Smo
 particle_spawnBoneSpriteEmitter	0x150AFC68	328	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_freeCharSpriteEmitters	0x150AFDB0	180	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_fireActorBoneTracer	0x150AFE64	472	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
-func_150B003C	0x150B003C	88	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
+particle_levelUpdateContactHitsAndWindmillRain	0x150B003C	88	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_fireTrailProjectile	0x150B0094	556	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_freeProjectileTrail	0x150B02C0	48	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
 particle_destroyTrailProjectile	0x150B02F0	44	game	c		build/src/game/Particle/SmokeEmitter/smokeemitter.c.o
@@ -2869,7 +2869,7 @@ particle_emitDiscParticle	0x150C29F0	528	game	c		build/src/game/Particle/DiscEmi
 particle_updateOriginRingEmitter	0x150C2C00	972	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 particle_shrinkBallisticChannelParticle	0x150C2FCC	192	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
 particle_expireRingParticleOffBearing	0x150C308C	212	game	c		build/src/game/Particle/DiscEmitter/discemitter.c.o
-func_150C3160	0x150C3160	208	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
+particle_setProgressTextureScroll	0x150C3160	208	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3230	0x150C3230	836	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3574	0x150C3574	1056	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
 func_150C3994	0x150C3994	948	game	c		build/src/game/Particle/SprayObjects/sprayobjects.c.o
@@ -3071,7 +3071,7 @@ particle_freeFollowEffect	0x150D5A4C	32	game	c		build/src/game/Particle/FollowEf
 particle_spawnBreakup	0x150D5A6C	2332	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnRandomGrowFade	0x150D6388	172	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnRandomSwell	0x150D6434	180	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
-func_150D64E8	0x150D64E8	264	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
+particle_initJetSprayPreset	0x150D64E8	264	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnRandomSurfaceMark	0x150D65F0	180	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_flashScreenWhite	0x150D66A4	140	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
 particle_spawnFollowDrift	0x150D6730	1384	game	c		build/src/game/Particle/FollowEffect/followeffect.c.o
@@ -3327,7 +3327,7 @@ effect_buildSwayMatrix	0x150F2518	136	game	c		build/src/game/Effects/SwayObject/
 effect_placeSwayLight	0x150F25A0	256	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_levelHook26	0x150F26A0	756	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 func_150F2994	0x150F2994	204	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
-func_150F2A60	0x150F2A60	556	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
+particle_levelUpdateScrollingHazardProps	0x150F2A60	556	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_spawnBoneBurstEmitter	0x150F2C8C	136	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_updateBoneBurstEmitter	0x150F2D14	1152	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_onBoneBurstEmitterEvent	0x150F3194	64	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
@@ -3498,9 +3498,9 @@ particle_flickerRayBeam	0x151022AC	840	game	c		build/src/game/Particle/RayBeam/r
 particle_updateWobbleOffset	0x151025F4	200	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 particle_startObjRayBeam	0x151026BC	300	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 particle_stopObjEffect	0x151027E8	52	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
-func_1510281C	0x1510281C	104	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
-func_15102884	0x15102884	40	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
-func_151028AC	0x151028AC	116	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
+particle_isBeamStartFxVisible	0x1510281C	104	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
+particle_isBeamEndFxOn	0x15102884	40	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
+particle_isBeamLineVisible	0x151028AC	116	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 effect_spawnSurfaceSprite	0x15102920	536	game	c		build/src/game/Effects/BoneBeamParticle/bonebeamparticle.c.o
 effect_spawnBoneBeamParticle	0x15102B38	536	game	c		build/src/game/Effects/BoneBeamParticle/bonebeamparticle.c.o
 effect_boneBeamMessage	0x15102D50	64	game	c		build/src/game/Effects/BoneBeamParticle/bonebeamparticle.c.o

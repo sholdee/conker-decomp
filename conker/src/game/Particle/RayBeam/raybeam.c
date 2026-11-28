@@ -946,7 +946,7 @@ void particle_stopObjEffect(Actor *actor) {
 
 /* Draw test of the beam's startFx: 0 in the owner's camera view (ownerCamera) when the owner is NULL or aims in first
  * person (SniperState), else bit 0 of link.flags. */
-s32 func_1510281C(BeamStartFx *startFx, s16 view) {
+s32 particle_isBeamStartFxVisible(BeamStartFx *startFx, s16 view) {
     RayBeamData *data = &startFx->link.beam->data;
     Actor *owner;
 
@@ -963,15 +963,15 @@ s32 func_1510281C(BeamStartFx *startFx, s16 view) {
 }
 
 /* Returns bit 0 of endFx->link.flags. */
-s32 func_15102884(BeamEndFx *endFx, s32 view) {
+s32 particle_isBeamEndFxOn(BeamEndFx *endFx, s32 view) {
     if (!(endFx->link.flags & 1)) {
         return 0;
     }
     return 1;
 }
 
-/* Same test as func_1510281C, for the beam's line (gGlowVisibilityTests). */
-s32 func_151028AC(BeamLine *line, s16 view) {
+/* Same test as particle_isBeamStartFxVisible, for the beam's line (gGlowVisibilityTests). */
+s32 particle_isBeamLineVisible(BeamLine *line, s16 view) {
     RayBeamData *data = &line->link.beam->data;
     Actor *owner;
 

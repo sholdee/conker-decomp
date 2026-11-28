@@ -24,7 +24,7 @@ typedef struct {
     s32 checksum;
 } Struct150C3D5CLocals;
 
-Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
+Gfx *particle_setProgressTextureScroll(Gfx *gdl, Actor *obj) {
     s32 total;
     s32 uls;
     s32 ult;
