@@ -3,7 +3,7 @@
 Every byte of the CPU code in Conker's Bad Fur Day (US) is accounted for. It is either C that compiles to
 byte-identical code, or hand-written assembly. No undecompiled asm remains: there are no `GLOBAL_ASM`
 stubs, no inline asm, and no `asm` code segments. Two `GLOBAL_ASM` blocks remain in C files
-(`hudoverlay.c`, `n_resample.c`). Each is a run of `nop`s that pads between objects, not code.
+(`codeflags.c`, `n_resample.c`). Each is a run of `nop`s that pads between objects, not code.
 
 The hand-written assembly is 63,664 bytes (2.8% of the code), counted in 289 labelled pieces. A piece is
 a `glabel`. 126 pieces are `jal` targets, and 139 are entry points: a `jal` target, an address stored in

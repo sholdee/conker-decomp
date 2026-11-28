@@ -74,7 +74,7 @@ static char gTaskMenuErrorLabel[] = "ERROR";
 static const char gTaskMenuResetAllLabel[] = "RESETTING ALL TASKS";
 static const char gTaskMenuFlagMark[] = "."; // drawn above flagged tasks
 static const char gTaskMenuResetPrompt[] = "RESET TO PLAY !";
-/* Bit `idx` of the task bitset at gTaskDoneBits (see game/Script/EffectCmd/effectcmd.c). */
+/* Bit `idx` of the task bitset at gTaskDoneBits (see game/Script/TaskTable/tasktable.c). */
 #define TASK_BIT_SET(idx) (gTaskDoneBits[(idx) >> 3] & (1 << ((idx) & 7)))
 
 #define MENU_MAX_ROWS 19

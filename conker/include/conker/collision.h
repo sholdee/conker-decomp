@@ -11,6 +11,7 @@
  *   game/Collision/MapBackground/mapbackground.c
  *   game/Collision/QuadTree/quadtree.c
  *   game/Collision/CylinderSets/cylindersets.c
+ *   game/Collision/ActorWalls/actorwalls.c
  *   game/Collision/Probe/probe.c
  *   game/Collision/HitSphere/hitsphere.c
  *   game/Collision/RayCast/raycast.c
@@ -97,12 +98,24 @@ extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game/Game/ClearBss/cl
 /* game/Collision/CylinderSets/cylindersets.c */
 void collision_loadCylinderSets(s32 levelId);
 
-/* game/Collision/Probe/probe.c */
+/* game/Collision/ActorWalls/actorwalls.c */
 void func_15044370(void);
 s32 collision_resolveActorWalls(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass);
 void collision_rotateTriVerts(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset);
 void func_15044658(void);
 void collision_setProbeHeights(Actor *obj, f32 x, f32 y, f32 z);
+extern f32 gLedgeZ; // ledge probe results (written by collision_findLedge, game/Collision/WallCollide/wallcollide.s)
+extern f32 gLedgeAngle1;
+extern f32 gLedgeAngle2;
+extern u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+extern u8 gWallProbeIsCamera;
+extern u8 D_800CBDD3;
+extern u8 D_800CBDD4;
+extern f32 gLedgeHeight1; // ledge heights, -32768.0f if none
+extern f32 gLedgeHeight2;
+extern f32 gLedgeX;
+
+/* game/Collision/Probe/probe.c */
 TriggerVolume *collision_addTriggerVolume(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
                              s16 *position, s16 *size);
 TriggerNode *collision_addTriggerNode(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
@@ -146,16 +159,6 @@ void guLookAtReflectF(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt,
                    f32 zUp);
 void guLookAtReflect(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
-extern f32 gLedgeZ; // ledge probe results (written by collision_findLedge, game/Collision/WallCollide/wallcollide.s)
-extern f32 gLedgeAngle1;
-extern f32 gLedgeAngle2;
-extern u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
-extern u8 gWallProbeIsCamera;
-extern u8 D_800CBDD3;
-extern u8 D_800CBDD4;
-extern f32 gLedgeHeight1; // ledge heights, -32768.0f if none
-extern f32 gLedgeHeight2;
-extern f32 gLedgeX;
 extern TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 /* game/Collision/HitSphere/hitsphere.c */

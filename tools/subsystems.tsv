@@ -25,7 +25,8 @@ src/game/Camera/LevelCamSetupHeist/levelcamsetupheist.c	camera	per-level camera 
 src/game/Camera/LevelCamSetup09/levelcamsetup09.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup10/levelcamsetup10.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup12/levelcamsetup12.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup13/levelcamsetup13.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss.c	camera	per-level camera hook (empty)
 src/game/Camera/LevelCamSetupArena/levelcamsetuparena.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c	camera	per-level camera preset hooks
@@ -111,6 +112,7 @@ src/game/Camera/LevelHookTankFactory/levelhooktankfactory.c	camera	per-level cam
 src/game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c	camera	per-level camera flag hook
 src/game/Effects/ActorExplosion/actorexplosion.c	effect	bone pulse, tilt commands, texture swaps, death explosion, random level sounds (update hook 25, LEVEL_W2_WARBOSS)
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
+src/game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c	camera	per-level camera hook
 src/game/Camera/LevelHookBankEntrance/levelhookbankentrance.c	camera	per-level camera flag hook
 src/game/Camera/LevelHookEndArena/levelhookendarena.c	camera	per-level camera hook
 src/game/Screen/StarSky/starsky.c	screen	black view fill with view-projection matrix
@@ -158,7 +160,8 @@ src/game/Attach/BonePoint/bonepoint.c	attach	split from game_105760.c; same subs
 src/game/Attach/FlashingLight/flashinglight.c	attach	attachment hook 8: flashing light
 src/game/Attach/TextureScroll/texturescroll.c	attach	attachment hooks 1 and 19 (texture scroll) and impact effects
 src/game/Audio/LevelMusic/levelmusic.c	music	per-level music setup and update (LevelMusic)
-src/game/Audio/Mp3Decoder/mp3decoder.c	mp3	MPEG layer III decoder
+src/game/Audio/Mp3Decoder/mp3decoder.c	mp3	MPEG layer III decoder core: tables, dequantize, scalefactors, Huffman, reorder, antialias, side info
+src/game/Audio/Mp3Frame/mp3frame.c	mp3	MPEG stream front end: frame sync, bit reservoir, open, decode frame
 src/game/Audio/Mp3Voice/mp3voice.c	mp3	streamed-audio player voice init
 src/game/Audio/ObjectSound/objectsound.c	sound	object sound record callback
 src/game/Beam/AimedBeam/aimedbeam.c	beam	beam slots, flashes and glows
@@ -217,7 +220,8 @@ src/game/Collision/HitSphere/hitsphere.c	collision	hit-sphere point/ray tests
 src/game/Collision/MapBackground/mapbackground.c	collision	map background setup and triangle quadtree (collision triangle tables)
 src/game/Collision/ObjectRay/objectray.c	collision	ray cast against the first 25 objects
 src/game/Collision/PartSets/partsets.c	collision	data-only unit: model part sets, sub-model lists, object filters
-src/game/Collision/Probe/probe.c	collision	collision sets, floors/ceilings, trigger volumes and nodes
+src/game/Collision/ActorWalls/actorwalls.c	collision	actor wall resolution per collision set, probe heights
+src/game/Collision/Probe/probe.c	collision	trigger volumes and nodes, floor and ceiling probes, guLookAt
 src/game/Collision/QuadTree/quadtree.c	collision	split from game_2DF70.c (unit boundary in the ROM); collision-triangle code
 src/game/Collision/RayCast/raycast.c	collision	ray casts against world and objects, cylinders
 src/game/Collision/Spawn/spawn.c	collision	split from game_AEB40.c; same subsystem
@@ -243,7 +247,8 @@ src/game/Effects/ActorTasks/actortasks.c	effect	actor task effects: pulses, loop
 src/game/Effects/AmbientPulse/ambientpulse.c	light	ambient colour pulse
 src/game/Effects/AnchorLight/anchorlight.c	effect	effect bound to an actor
 src/game/Effects/AreaSpray/areaspray.c	effect	area effects with sounds and particle bursts
-src/game/Effects/AttachedBurst/attachedburst.c	effect	actor-attached effect lists; level flag hook; code checksum (anti-tamper)
+src/game/Camera/LevelHookTheWindmill/levelhookthewindmill.c	camera	per-level camera hook
+src/game/Effects/AttachedBurst/attachedburst.c	effect	actor-attached effect lists; code checksum (anti-tamper)
 src/game/Effects/AttachmentTables/attachmenttables.c	effect	data-only unit (effect tables)
 src/game/Effects/BeamZones/beamzones.c	effect	level setup of cylinders and light toggles
 src/game/Effects/Blood/blood.c	blood	blood effects (../Effects/Blood/blood.c)
@@ -322,7 +327,8 @@ src/game/Effects/Rain/rain.c	effect	QuadFx objects
 src/game/Effects/RainHook/rainhook.c	effect	effect reset
 src/game/Effects/RaySpinner/rayspinner.c	effect	spinning ray-casting object moving its children to hit points
 src/game/Effects/RibbonChild/ribbonchild.c	effect	effect kind handlers
-src/game/Effects/RingEffect/ringeffect.c	effect	expanding ring effects and radial bursts
+src/game/Effects/RingEffect/ringeffect.c	effect	expanding ring effect: new, update, draw, emit and hit callbacks
+src/game/Effects/ImpactRing/impactring.c	effect	impact ring at an actor, ground circle, damped and tumbling particles
 src/game/Effects/RotatingZone/rotatingzone.c	effect	rotated slot positions driven by an object's angle
 src/game/Effects/SegmentTrail/segmenttrail.c	effect	split from game_E8C10.c; same subsystem
 src/game/Effects/SpawnEmitterHook/spawnemitterhook.c	effect	emitter attachment hook
@@ -371,6 +377,7 @@ src/game/Gfx/Turret/turret.c	gfx	object visibility and per-view draw lists
 src/game/Gfx/WorldObject/worldobject.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
 src/game/Hud/CounterFree/counterfree.c	hud	counter destructor
 src/game/Hud/HudOverlay/hudoverlay.c	hud	HUD overlay, HUD models and sprites
+src/game/Hud/CodeFlags/codeflags.c	hud	clears the cheat-code flags at game start
 src/game/Hud/PlayerOverlay/playeroverlay.c	hud	per-player HUD overlay: blocks, water, bubbles, race time/laps
 src/game/Level/AmbientAction3/ambientaction3.c	level	per-level setup: timed effect
 src/game/Level/AmbientAction5/ambientaction5.c	level	per-level setup: timed effect
@@ -552,7 +559,8 @@ src/game/Player/PlayerStats/playerstats.c	player	split from game_B21B0.c; same s
 src/game/Player/PlayerWarp/playerwarp.c	player	pending warps and respawn
 src/game/Player/SpawnLoad/spawnload.c	player	spawn point table load
 src/game/Player/SpawnPoint/spawnpoint.c	player	player stats and spawn points
-src/game/Player/StatsInit/statsinit.c	player	player stats init per player mask
+src/game/Player/StatsInit/statsinit.c	player	match state init per player mask
+src/game/Player/LinkGroups/linkgroups.c	player	level link groups: load and offset object ids
 src/game/Prop/Clock/clock.c	prop	clock hands behaviour; frustum point test
 src/game/Prop/DoorsLifts/doorslifts.c	prop	lifts, slides, hatches, swings
 src/game/Prop/DrawHooks/drawhooks.c	prop	empty draw hooks
@@ -595,7 +603,8 @@ src/game/Script/ActorCmd/actorcmd.c	script	script set commands for objects
 src/game/Script/CameraCmd/cameracmd.c	script	scripted actor moves to camera poses
 src/game/Script/CmdTables/cmdtables.c	script	data-only unit: script command handler tables by class (start, end, query, command)
 src/game/Script/CutsceneCmd/cutscenecmd.c	script	script event handler
-src/game/Script/EffectCmd/effectcmd.c	script	task resources: dependencies, loaded bits, script command start/end/poll
+src/game/Script/EffectCmd/effectcmd.c	script	script effect commands: start, end, advance, poll
+src/game/Script/TaskTable/tasktable.c	script	task resources: dependencies, loaded bits, resource table
 src/game/Script/MiscCmd/misccmd.c	script	script command/query handlers with integer params
 src/game/Script/MusicCmd/musiccmd.c	script	script handlers: music/sound start and stop
 src/game/Script/ObjScript/objscript.c	script	object byte-code script interpreter commands

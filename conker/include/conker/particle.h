@@ -974,7 +974,6 @@ extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its 
 /* game/Player/FlyControl/flycontrol.c */
 f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch);
 void player_updateFlying(Actor *actor);
-void player_levelHookHorrorIntro(Camera *actor);
 
 /* game/Particle/Spiral/spiral.c */
 /* Per-object state of the effect spawned by particle_spawnSpiral: it circles a centre that moves

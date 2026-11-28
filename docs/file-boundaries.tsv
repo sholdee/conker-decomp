@@ -201,8 +201,9 @@ us_address	left_object	right_object	grade	evidence	note
 0x15005C30	game/Camera/LevelCamSetupHeist/levelcamsetupheist	game/Camera/LevelCamSetup09/levelcamsetup09	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005BD0
 0x15005C80	game/Camera/LevelCamSetup09/levelcamsetup09	game/Camera/LevelCamSetup10/levelcamsetup10	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005C20
 0x15005D00	game/Camera/LevelCamSetup10/levelcamsetup10	game/Camera/LevelCamSetup12/levelcamsetup12	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000DB0 (not pinned: camera_levelSetupTank..camera_levelSetup12); debug: 4 zero bytes before 0x15005CA0
-0x15005D60	game/Camera/LevelCamSetup12/levelcamsetup12	game/Camera/LevelCamSetup13/levelcamsetup13	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000E10; debug: 8 zero bytes before 0x15005D00
-0x15005DB0	game/Camera/LevelCamSetup13/levelcamsetup13	game/Camera/LevelCamSetupArena/levelcamsetuparena	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000E50; debug: 4 zero bytes before 0x15005D50
+0x15005D60	game/Camera/LevelCamSetup12/levelcamsetup12	game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000E10; debug: 8 zero bytes before 0x15005D00
+0x15005DA0	game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin	game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss	proven	padding-ects	ects: 4 zero bytes before 0x15000E40
+0x15005DB0	game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss	game/Camera/LevelCamSetupArena/levelcamsetuparena	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000E50; debug: 4 zero bytes before 0x15005D50
 0x15005E30	game/Camera/LevelCamSetupArena/levelcamsetuparena	game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace	proven	padding-us	
 0x15005E70	game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace	game/Camera/LevelCamSetupTraining/levelcamsetuptraining	proven	padding-us	
 0x15005EE0	game/Camera/LevelCamSetupTraining/levelcamsetuptraining	game/Camera/LevelCamSetup19/levelcamsetup19	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000F60; debug: 8 zero bytes before 0x15005E60
@@ -286,7 +287,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x15016670	game/Text/TextInit/textinit	game/Player/SpawnLoad/spawnload	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15016040
 0x15016850	game/Player/SpawnLoad/spawnload	game/Level/SpawnTable/spawntable	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15016220
 0x15017300	game/Level/SpawnTable/spawntable	game/Player/StatsInit/statsinit	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15010780; debug: 4 zero bytes before 0x15016C90
-0x150175E0	game/Player/StatsInit/statsinit	game/Player/HudBlockInit/hudblockinit	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15010C90 (not pinned: player_loadLinkGroups..player_resetHudBlocks); debug: order differs
+0x150174C0	game/Player/StatsInit/statsinit	game/Player/LinkGroups/linkgroups	proven	padding-ects,padding-debug	ects: 4 zero bytes before 0x15010930; debug: 4 zero bytes before 0x15016E40
+0x150175E0	game/Player/LinkGroups/linkgroups	game/Player/HudBlockInit/hudblockinit	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15010C90 (not pinned: player_loadLinkGroups..player_resetHudBlocks); debug: order differs
 0x15017790	game/Player/HudBlockInit/hudblockinit	game/Zone/ZoneBounds/zonebounds	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x15010F80; debug: order differs; rodata at 0x800968C0
 0x150183D0	game/Zone/ZoneBounds/zonebounds	game/Zone/CodeTree/codetree	proven	padding-us,padding-debug,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; debug: 8 zero bytes before 0x150180D0; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
 0x150186D0	game/Zone/CodeTree/codetree	game/Game/MainLoop/mainloop	proven	padding-us,padding-debug,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; debug: 8 zero bytes before 0x150183D0; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
@@ -323,7 +325,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x15042D50	game/Text/FontDraw/fontdraw	game/Text/TextQueue/textqueue	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150434E0; data at 0x800859A0; rodata at 0x80098B90
 0x15043D90	game/Text/TextQueue/textqueue	game/Math/MtxBuild/mtxbuild	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1503B7E0; debug: 4 zero bytes before 0x150444A0
 0x150442C0	game/Math/MtxBuild/mtxbuild	game/Math/MtxTranslate/mtxtranslate	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1503BD10; debug: 4 zero bytes before 0x150449D0
-0x15044370	game/Math/MtxTranslate/mtxtranslate	game/Collision/Probe/probe	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1503BDC0; debug: 12 zero bytes before 0x15044A80
+0x15044370	game/Math/MtxTranslate/mtxtranslate	game/Collision/ActorWalls/actorwalls	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1503BDC0; debug: 12 zero bytes before 0x15044A80
+0x150448D0	game/Collision/ActorWalls/actorwalls	game/Collision/Probe/probe	proven	padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1503D3E0; debug: 12 zero bytes before 0x15045010; data at 0x80085E80; rodata at 0x80098D40
 0x15047C00	game/Collision/Probe/probe	libultra/gu/cosf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15040670; debug: 8 zero bytes before 0x150487A0; data at 0x80085EA0; rodata at 0x80098D70
 0x15047D60	libultra/gu/cosf	libultra/gu/sinf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150407D0; debug: 12 zero bytes before 0x15048900; data at 0x80085EB0; rodata at 0x80098D90
 0x15047F00	libultra/gu/sinf	libultra/gu/guPerspectiveF	likely	data-edge	rodata at 0x80098DB0
@@ -374,7 +377,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x15097910	game/Script/CameraCmd/cameracmd	game/Script/ActorCmd/actorcmd	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x1508F1E0; rodata at 0x8009DF50
 0x1509B4A0	game/Script/ActorCmd/actorcmd	game/Script/TaskSet/taskset	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x15092600
 0x1509C440	game/Script/TaskSet/taskset	game/Script/CutsceneCmd/cutscenecmd	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150933E0 (not pinned: script_reallocTaskDoneBits..script_cutsceneCommand); debug: 4 zero bytes before 0x1509BB70
-0x1509CA10	game/Script/CutsceneCmd/cutscenecmd	game/Script/EffectCmd/effectcmd	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150938C0; debug: 12 zero bytes before 0x1509C120
+0x1509CA10	game/Script/CutsceneCmd/cutscenecmd	game/Script/TaskTable/tasktable	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150938C0; debug: 12 zero bytes before 0x1509C120
+0x1509D180	game/Script/TaskTable/tasktable	game/Script/EffectCmd/effectcmd	proven	padding-ects,padding-debug	ects: 8 zero bytes before 0x15094100; debug: 4 zero bytes before 0x1509C9A0
 0x1509DD10	game/Script/EffectCmd/effectcmd	game/Script/SwarmCmd/swarmcmd	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15094B20; debug: 4 zero bytes before 0x1509D4F0
 0x1509DF20	game/Script/SwarmCmd/swarmcmd	game/Script/MiscCmd/misccmd	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15094D20
 0x1509E640	game/Script/MiscCmd/misccmd	game/Script/MusicCmd/musiccmd	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150953A0; debug: 4 zero bytes before 0x1509DD80; rodata at 0x8009F3D0
@@ -432,7 +436,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x150ADAF0	game/Math/Rand64/rand64	game/Script/ScriptInterp/scriptinterp	likely	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150A3EA0; debug: 12 zero bytes before 0x150ACF40; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
 0x150AE280	game/Script/ScriptInterp/scriptinterp	game/Script/TaskExit/taskexit	unproven	none	
 0x150AE2A0	game/Script/TaskExit/taskexit	game/Collision/WobbleQuad/wobblequad	proven	padding-us,padding-debug,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; debug: 8 zero bytes before 0x150AD6F0; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
-0x150AE5B0	game/Collision/WobbleQuad/wobblequad	game/Effects/AttachedBurst/attachedburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150A48E0; debug: 4 zero bytes before 0x150ADA00; rodata at 0x8009F760
+0x150AE5B0	game/Collision/WobbleQuad/wobblequad	game/Camera/LevelHookTheWindmill/levelhookthewindmill	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150A48E0; debug: 4 zero bytes before 0x150ADA00
+0x150AE790	game/Camera/LevelHookTheWindmill/levelhookthewindmill	game/Effects/AttachedBurst/attachedburst	proven	padding-ects	ects: 8 zero bytes before 0x150A4A50
 0x150AEEB0	game/Effects/AttachedBurst/attachedburst	game/Effects/Trail/TrailSpray/trailspray	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150AE280
 0x150AF200	game/Effects/Trail/TrailSpray/trailspray	game/Particle/SmokeEmitter/smokeemitter	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150A5660 (not pinned: trail_fadeMotionTrail..particle_spawnZoneGroundFxNearCamera); debug: 8 zero bytes before 0x150AE5D0 (not pinned: trail_fadeMotionTrail..particle_spawnZoneGroundFxNearCamera)
 0x150B06B0	game/Particle/SmokeEmitter/smokeemitter	game/Effects/ActorImpact/actorimpact	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150AF9A0; rodata at 0x8009F810
@@ -486,7 +491,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x150C8350	game/Camera/LevelHookDinoArena/levelhookdinoarena	game/Effects/BounceRecords/bouncerecords	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150C6FE0; data at 0x80088810
 0x150C8730	game/Effects/BounceRecords/bouncerecords	game/Attach/AttachProjectile/attachprojectile	unproven	none	against: ects: one object (attach_hookSpawnProjectile joins effect_bindBounceRecordFrames)
 0x150C88D0	game/Attach/AttachProjectile/attachprojectile	game/Effects/RingEffect/ringeffect	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x150BA930; rodata at 0x800A0500
-0x150CB0E0	game/Effects/RingEffect/ringeffect	game/Particle/SideDust/sidedust	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BD170; debug: 8 zero bytes before 0x150C9CF0; rodata at 0x800A05E0
+0x150CA150	game/Effects/RingEffect/ringeffect	game/Effects/ImpactRing/impactring	proven	padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150BC1B0; debug: 8 zero bytes before 0x150C8DC0; rodata at 0x800A05A0
+0x150CB0E0	game/Effects/ImpactRing/impactring	game/Particle/SideDust/sidedust	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BD170; debug: 8 zero bytes before 0x150C9CF0; rodata at 0x800A05E0
 0x150CBF80	game/Particle/SideDust/sidedust	game/Particle/BoneGroundBurst/bonegroundburst	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x150BDFF0; rodata at 0x800A0640
 0x150CCD90	game/Particle/BoneGroundBurst/bonegroundburst	game/Particle/DepthTint/depthtint	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BEEA0; debug: 8 zero bytes before 0x150CB970; rodata at 0x800A0700
 0x150CCEB0	game/Particle/DepthTint/depthtint	game/Particle/DriftQuad/driftquad	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150BEFC0; debug: 4 zero bytes before 0x150CBA90; rodata at 0x800A0710
@@ -555,7 +561,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x150F22D0	game/Effects/ActorExplosion/actorexplosion	game/Effects/SwayObject/swayobject	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150DD210 (not pinned: effect_spawnActorExplosion..effect_getLegBonePoint); debug: 12 zero bytes before 0x150EFAB0 (not pinned: effect_levelUpdateRandomSounds..effect_getLegBonePoint); rodata at 0x800A1920
 0x150F2A60	game/Effects/SwayObject/swayobject	game/Particle/BoneBurst/boneburst	proven	padding-us,data-edge	rodata at 0x800A1950
 0x150F34A0	game/Particle/BoneBurst/boneburst	game/Player/FlyControl/flycontrol	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150DD720 (not pinned: particle_levelUpdateScrollingHazardProps..player_getFlyingAnimSpeed); debug: 4 zero bytes before 0x150F0920; rodata at 0x800A1980
-0x150F4570	game/Player/FlyControl/flycontrol	game/Particle/Spiral/spiral	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F1830
+0x150F43F0	game/Player/FlyControl/flycontrol	game/Camera/LevelHookHorrorIntro/levelhookhorrorintro	proven	padding-debug	debug: 8 zero bytes before 0x150F1730
+0x150F4570	game/Camera/LevelHookHorrorIntro/levelhookhorrorintro	game/Particle/Spiral/spiral	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F1830
 0x150F51A0	game/Particle/Spiral/spiral	game/Effects/SurfaceSound/surfacesound	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150F2480; data at 0x80088B40
 0x150F52B0	game/Effects/SurfaceSound/surfacesound	game/Camera/LevelHookBankEntrance/levelhookbankentrance	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F2590 (not pinned: effect_updateSurfaceSound..camera_levelUpdateWaveChains)
 0x150F5340	game/Camera/LevelHookBankEntrance/levelhookbankentrance	game/Effects/BeamZones/beamzones	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F25C0
@@ -818,7 +825,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x151DD4E0	game/Os/EepromProbe/eepromprobe	game/Os/EepromWrite/eepromwrite	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151BED80; debug: 12 zero bytes before 0x151DFA10
 0x151DD970	game/Os/EepromWrite/eepromwrite	game/Save/FrontEnd/frontend	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151BF210; debug: 4 zero bytes before 0x151DFEA0
 0x151E84B0	game/Save/FrontEnd/frontend	game/Hud/HudOverlay/hudoverlay	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x151C8E80 (not pinned: save_clearMenuCharacters..hud_texRectScaled); data at 0x8008FFC0; rodata at 0x800ABA90
-0x151EF040	game/Hud/HudOverlay/hudoverlay	game/Os/PiReadIo/pireadio	proven	padding-us,padding-debug,flags-change	us gap 64 bytes; flags -O2 -g3 -mips2 -o32 game | -O1 -mips2 -o32 game; debug: 64 zero bytes before 0x151F08E0 (not pinned: hud_clearCodeFlags..func_151EF080)
+0x151EEFF0	game/Hud/HudOverlay/hudoverlay	game/Hud/CodeFlags/codeflags	proven	padding-ects,padding-debug	ects: 12 zero bytes before 0x151CE130; debug: 12 zero bytes before 0x151F0890
+0x151EF040	game/Hud/CodeFlags/codeflags	game/Os/PiReadIo/pireadio	proven	padding-us,padding-debug,flags-change	us gap 64 bytes; flags -O2 -g3 -mips2 -o32 game | -O1 -mips2 -o32 game; debug: 64 zero bytes before 0x151F08E0 (not pinned: hud_clearCodeFlags..func_151EF080)
 0x151EF090	game/Os/PiReadIo/pireadio	game/Os/ContInit/continit	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151CE150; debug: 8 zero bytes before 0x151F08F0
 0x151EF450	game/Os/ContInit/continit	libultra/io/pfsinit2	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: 4 zero bytes before 0x151CE510; debug: 4 zero bytes before 0x151F0CB0
 0x151EF610	libultra/io/pfsinit2	game/Math/Random/random	proven	flags-change	flags -O1 -mips2 -o32 ultralib | -O2 -g3 -mips2 -o32 game; ects: order differs; debug: order differs
@@ -842,7 +850,8 @@ us_address	left_object	right_object	grade	evidence	note
 0x151F27E0	libultra/io/contramwrite2	libultra/io/crc2	proven	padding-us	CFLAGS differ (ultralib | game), the -O and -mips flags do not
 0x151F2960	libultra/io/crc2	game/Audio/Mp3Player/mp3player	proven	flags-change	flags -O1 -mips2 -o32 game | -g -mips2 -o32 game
 0x151F3DE0	game/Audio/Mp3Player/mp3player	game/Audio/Mp3Decoder/mp3decoder	proven	padding-us	ects: order differs; debug: order differs
-0x151F8870	game/Audio/Mp3Decoder/mp3decoder	game/Audio/Mp3Decoder/mp3huffman	proven	padding-us,flags-change	flags -g -mips2 -o32 game | asm; ects: order differs; debug: order differs; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
+0x151F7F60	game/Audio/Mp3Decoder/mp3decoder	game/Audio/Mp3Frame/mp3frame	proven	padding-ects,padding-debug	ects: 8 zero bytes before 0x151DFD20; debug: 8 zero bytes before 0x152021A0
+0x151F8870	game/Audio/Mp3Frame/mp3frame	game/Audio/Mp3Decoder/mp3huffman	proven	padding-us,flags-change	flags -g -mips2 -o32 game | asm; ects: order differs; debug: order differs; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
 0x151F8CF0	game/Audio/Mp3Decoder/mp3huffman	game/Audio/Mp3Decoder/mp3imdctlong	likely	padding-ects,padding-debug	ects: 4 zero bytes before 0x151E7F30; debug: 8 zero bytes before 0x1520A290; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
 0x151F9BF0	game/Audio/Mp3Decoder/mp3imdctlong	game/Audio/Mp3Decoder/mp3imdctshort	likely	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151E8E30; debug: 8 zero bytes before 0x1520B190; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
 0x16001700	debugger/Debugger/CrashScreen/crashscreen	debugger/Debugger/DebuggerCont/debuggercont	unproven	none	against: debug: one object (debugger_contStartReadData joins debugger_returnArg)

@@ -32,6 +32,7 @@
  *   game/Effects/ParticleCallbacks/particlecallbacks.c
  *   game/Effects/BounceRecords/bouncerecords.c
  *   game/Effects/RingEffect/ringeffect.c
+ *   game/Effects/ImpactRing/impactring.c
  *   game/Effects/RotatingZone/rotatingzone.c
  *   game/Effects/ActorEmitterTick/actoremittertick.c
  *   game/Effects/HopSprite/hopsprite.c
@@ -216,7 +217,6 @@ Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of 
 
 /* game/Effects/AttachedBurst/attachedburst.c */
 typedef struct AttachedEffect AttachedEffect;
-void effect_levelHookTheWindmill(Camera *camera);
 void effect_updateAttachedBurst(AttachedEffect *effect);
 void effect_spawnAttachedBursts(Actor *actor);
 void func_150AECCC(struct42 *particle);
@@ -381,8 +381,12 @@ Gfx *effect_bindBounceRecordFrames(Gfx *gdl);
 
 /* game/Effects/RingEffect/ringeffect.c */
 typedef struct RadialEffect RadialEffect;
-typedef struct ParticleObject ParticleObject;
 typedef struct BurstParticle BurstParticle;
+/* Object spawned by particle_newModelParticle from a ParticleSpawn. */
+struct BurstParticle {
+    u8 pad0[0x10];
+    ParticleSpawn p; /* 0x10 */
+};
 RadialEffect *effect_newRingEffect(RadialEffectDef *def, s32 extraSize, u8 owner, s32 list);
 void effect_updateRingEffect(RadialEffect *effect);
 Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 view);
@@ -390,10 +394,13 @@ void effect_ringEmitDarkParticle(RadialEffect *effect, Vec3f *pos, u8 heading, f
 void effect_ringHitActors(RadialEffect *effect, f32 oldRadius);
 void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine);
 s32 effect_moveBurstParticle(BurstParticle *particle);
-void effect_spawnImpactRing(Actor *actor);
-void effect_emitGroundCircle(Vec3f *pos);
 extern Gfx gRingRenderSetupDl[];
 extern Gfx gRingRenderResetDl[];
+
+/* game/Effects/ImpactRing/impactring.c */
+typedef struct ParticleObject ParticleObject;
+void effect_spawnImpactRing(Actor *actor);
+void effect_emitGroundCircle(Vec3f *pos);
 s32 effect_capQuadSpriteAlphaByLife(QuadSprite *sprite);
 s32 effect_spawnDampedParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 heading, s32 baseAngle,
                   f32 radius, s32 arg11, s32 arg12, void *data, u8 owner);

@@ -4,14 +4,14 @@
 /*
  * A data-only unit: the resource (task) manifest and the handler tables of the script commands.
  *
- * The unit lies between game/Script/CutsceneCmd/cutscenecmd and game/Script/EffectCmd/effectcmd. Its
+ * The unit lies between game/Script/CutsceneCmd/cutscenecmd and game/Script/TaskTable/tasktable. Its
  * .rodata (0x242F30, the manifest's dependency lists and names) follows the jump table of cutscenecmd and
  * ends at 0x243B84 with the padding of a unit, before effectcmd's .rodata. Its .data (0x22BEF0) follows
  * that of game/Script/TaskSet/taskset. The handler tables come directly after the manifest (0x22CEE0), and
- * none of the code units after it (effectcmd .. game/Script/TaskCmd/taskcmd) defines them, so they are
+ * none of the code units after it (tasktable .. game/Script/TaskCmd/taskcmd) defines them, so they are
  * taken as the tail of this unit.
  *
- * The manifest: one ResourceDescriptor for each task (game/Script/EffectCmd/effectcmd reads it). The names
+ * The manifest: one ResourceDescriptor for each task (game/Script/TaskTable/tasktable reads it). The names
  * are game text, so the .rodata of this unit stays data that the build extracts from the ROM; the
  * descriptors refer to its lists and names by their address names.
  *

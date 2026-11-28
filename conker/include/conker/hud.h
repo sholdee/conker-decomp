@@ -11,6 +11,7 @@
  *   game/Hud/PlayerOverlay/playeroverlay.c
  *   game/Hud/CounterFree/counterfree.c
  *   game/Hud/HudOverlay/hudoverlay.c
+ *   game/Hud/CodeFlags/codeflags.c
  */
 
 /* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
@@ -104,7 +105,6 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale);
 void hud_initCodeEntry(void);
 Gfx *hud_updateCodeEntry(Gfx *gfx);
 Gfx *hud_drawImagePanel(Gfx *gfx, s32 index);
-void hud_clearCodeFlags(void);
 extern Gfx *(*gHudModeOverlayDrawers[13])(Gfx *);
 extern Gfx *(*gHudModeDrawers[13])(Gfx *);
 extern Gfx gHudSpriteDl[];
@@ -119,6 +119,9 @@ extern Gfx gHudModelTexOnDl[];
 extern Gfx gHudModelTexOffDl[];
 extern CodeEntryKey *gCodeEntryKeys;
 extern HudSprite gHudImagePanelSprite;
+
+/* game/Hud/CodeFlags/codeflags.c */
+void hud_clearCodeFlags(void);
 
 /* Texture asset ids of the HUD. Each is a link-time symbol whose address is the id (undefined_syms_auto.txt);
  * the code passes the address, and &D_D16 + n is the id 0xD16 + n. */
