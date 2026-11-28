@@ -2574,18 +2574,16 @@ typedef struct RegionEmitterState {
     /* 0x6C */ ZoneNode *zone;
 } RegionEmitterState; // size 0x70
 
-typedef struct Game1D3420Listener Game1D3420Listener;
-typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
-typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;
 void particle_updateRegionEmitter(u8 *effect);
 void particle_destroyRegionEmitter(TimedEffect *effect);
 void particle_freeRegionEmitter(TimedEffect *effect);
 void particle_stopEffectSound(u16 soundHandle);
 QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, s16 duration, u8 lit, u8 arg6,
                           u8 owner, s32 list);
-void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *data, u8 type);
+void particle_handleRegionEmitterMessage(ZoneEffect *listener, void *data, u8 type);
 void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
-Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner, s16 index);
+struct ZoneEmitter; /* game/Particle/ZoneEmitter/zoneemitter.c, below */
+Vtx *particle_buildYawedVerticalQuad(struct ZoneEmitter *owner, s16 index);
 
 /* game/Particle/ZoneEmitter/zoneemitter.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (particle_updateZoneEmitter, particle_shutZoneEmitter). */

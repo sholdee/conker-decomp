@@ -1728,10 +1728,9 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-struct S151BEB20;
 typedef struct S151BECB8 S151BECB8;
 void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
-s32 effect_buildStatPickupMatrix(struct S151BEB20 *fx);
+s32 effect_buildStatPickupMatrix(S151BECB8 *fx);
 Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 s32 effect_updateStatPickup(S151BECB8 *fx);
 s32 effect_isPlayerActor(Actor *obj);

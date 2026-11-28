@@ -8,15 +8,6 @@
 #include "conker/prop.h"
 #include "conker/script.h"
 
-/* An 8-byte entry of the list at WorldObject.displayList; the list ends with an entry whose kind is -14. */
-typedef struct {
-    union {
-        s8  kind;
-        s32 word;
-    } head;
-    s32 unk4;
-} F4D20Entry;
-
 /* Whatever an object's work word points to in prop_scrollTextureByObject3. */
 typedef struct {
     /* 0x00 */ u8 pad00[0x13];
@@ -122,26 +113,26 @@ void prop_levelUpdateMusicAndDebris(s32 view) {
     }
 }
 
-/* Stores an angle (0x400 per turn) in the low 12 bits of the list's terminating entry (its index is found once
- * and cached in the work word). The angle comes from the unk12 of object (params & 0xFF), mirrored when params bit 15
+/* Stores an angle (0x400 per turn) in the low 12 bits of w0 of the first G_SETTILESIZE (0xF2) command of the object's
+ * display list (its index is found once and cached in the work word). The angle comes from the unk12 of object (params & 0xFF), mirrored when params bit 15
  * is set. */
 void func_150C7C90(WorldObject *obj) {
-    F4D20Entry *pad; // matching: unused, but -g3 gives it the stack slot that puts last at sp+0x18
-    F4D20Entry *last;
+    Gfx *pad; // matching: unused, but -g3 gives it the stack slot that puts last at sp+0x18
+    Gfx *last;
     s32 index;
     s32 count;
     s32 angle;
 
     index = WORK(obj)->count;
     if (index == 0) {
-        last = (F4D20Entry *)obj->displayList;
-        // matching: reading kind through a cast keeps IDO from strength-reducing last[count] to a cursor
+        last = obj->displayList;
+        // matching: reading the opcode byte through a cast keeps IDO from strength-reducing last[count] to a cursor
         for (count = 0; *(s8 *)&last[count] != -14; count++) {
         }
         WORK(obj)->count = count;
         index = count;
     }
-    last = &((F4D20Entry *)obj->displayList)[index];
+    last = &obj->displayList[index];
     angle = -669 - gfx_findObjectById(obj->moveData.word & 0xFF)->y;
     if (obj->moveData.word & 0x8000) {
         angle = 836 - angle;
@@ -152,8 +143,8 @@ void func_150C7C90(WorldObject *obj) {
     while (angle >= 0x400) {
         angle -= 0x400;
     }
-    last->head.word &= ~0xFFF;
-    last->head.word |= angle;
+    last->words.w0 &= ~0xFFF;
+    last->words.w0 |= angle;
 }
 
 /* Places the object at (-30, +50, +30) from the Actor that collision_findObjectById(0xC) returns. */

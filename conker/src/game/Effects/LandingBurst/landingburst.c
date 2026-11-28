@@ -8,13 +8,6 @@
 #include "conker/particle.h"
 #include "libc/string.h"
 
-/* One row of the per-actor-type effect profile table. */
-typedef struct Game1DD500Profile {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u8 unkE; /* 1: flagged effect, 2: no effect */
-    /* 0x0F */ u8 padF;
-} Game1DD500Profile; // size 0x10
-
 /* Impact point in the space of joint 6 (effect_spawnJointImpact). */
 static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
 

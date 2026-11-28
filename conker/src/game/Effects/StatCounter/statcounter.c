@@ -13,12 +13,31 @@
 #include "conker/sound.h"
 #include "conker/sprite.h"
 
-/* Extension block copied into the spawned effect at 0x120. */
+/* Extension block of the model effect func_151BE850 spawns, at 0x120 (S151BECB8.params). */
 typedef struct {
-    /* 0x00 */ f32 angle;
+    /* 0x00 */ f32 angle;   /* func_151BEEE0's angle; the y rotation of effect_buildStatPickupMatrix */
     /* 0x04 */ Vec3f pos;
-    /* 0x10 */ u8 count;
-} Extra151BE850;
+    /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
+} S151BECB8Params;
+
+/* The model effect func_151BE850 spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
+ * dispatch reads past gModelEffectUpdate2Funcs as gModelEffectUpdate2FuncsTail[0] (effect_buildStatPickupMatrix). */
+struct S151BECB8 {
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 flags;       /* EffectParams.flags */
+    /* 0x011 */ u8 pad11[0x37];
+    /* 0x048 */ u8 unk48;
+    /* 0x049 */ u8 pad49[0xB];
+    /* 0x054 */ Vec3f pos;       /* EffectParams.pos */
+    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
+    /* 0x064 */ u8 pad64[0x18];
+    /* 0x07C */ MtxF mtx[2];     /* double-buffered, indexed by gDrawBufferIndex */
+    /* 0x0FC */ s32 unkFC;
+    /* 0x100 */ u8 pad100[0x1B];
+    /* 0x11B */ u8 unk11B;
+    /* 0x11C */ u8 pad11C[4];
+    /* 0x120 */ S151BECB8Params params;
+};
 
 
 /*
@@ -30,7 +49,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     void *fx;
     ZoneNode *zone;
     EffectParams params;
-    Extra151BE850 extra;
+    S151BECB8Params extra;
 
     collision_selectMap(0);
     zone = collision_findZoneLeaf(pos->x, pos->z);
@@ -91,7 +110,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         params.mask = zone;
         fx = effect_newModelEffect(&params, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
         if (fx != NULL) {
-            // copies the whole 0x18-byte extension (extraSize above); a 0x18-byte Extra151BE850 grows the frame
+            // copies the whole 0x18-byte extension (extraSize above); a 0x18-byte S151BECB8Params grows the frame
             memcpy((u8 *)fx + 0x120, &extra, 0x18);
         }
     } else {
@@ -100,20 +119,11 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     return fx;
 }
 
-struct S151BEB20 {
-    u8 pad0[0x54];
-    Vec3f pos;
-    u8 pad60[0x7C - 0x60];
-    MtxF mtx[2]; /* double-buffered, indexed by gDrawBufferIndex */
-    u8 padFC[0x120 - 0xFC];
-    f32 rotY;
-};
-
-/* Rebuilds this frame's matrix: rotation by `rotY`, translation to `pos`, axes scaled by 0.923. */
-s32 effect_buildStatPickupMatrix(struct S151BEB20 *fx) {
+/* Rebuilds this frame's matrix: y rotation by `params.angle`, translation to `pos`, axes scaled by 0.923. */
+s32 effect_buildStatPickupMatrix(S151BECB8 *fx) {
     f32 scale;
 
-    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, fx->rotY, 0.0f);
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, fx->params.angle, 0.0f);
 
     scale = 0.9230000377f;
     fx->mtx[gDrawBufferIndex][3][0] = fx->pos.x;
@@ -138,28 +148,6 @@ Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *need
     *proceed = TRUE;
     return gfx;
 }
-
-typedef struct {
-    /* 0x00 */ f32 angle;   /* func_151BEEE0's angle */
-    /* 0x04 */ Vec3f pos;
-    /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
-} S151BECB8Params;
-
-struct S151BECB8 {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 flags;       /* EffectParams.flags */
-    /* 0x011 */ u8 pad11[0x37];
-    /* 0x048 */ u8 unk48;
-    /* 0x049 */ u8 pad49[0xB];
-    /* 0x054 */ Vec3f pos;       /* EffectParams.pos */
-    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
-    /* 0x064 */ u8 pad64[0x98];
-    /* 0x0FC */ s32 unkFC;
-    /* 0x100 */ u8 pad100[0x1B];
-    /* 0x11B */ u8 unk11B;
-    /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ S151BECB8Params params;
-};
 
 
 /*

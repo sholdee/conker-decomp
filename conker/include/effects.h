@@ -3048,6 +3048,14 @@ typedef struct ZoneEffect {
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
 
+/* Message 0x35 to the timed effects (beam_onPropArrival, game/Beam/BoltRain/boltrain.c): each zone effect whose
+ * ZoneEffectData.id is in ids fires once (particle_handleRegionEmitterMessage). */
+typedef struct ZoneTriggerMsg {
+    /* 0x00 */ s32 count;
+    /* 0x04 */ const u8 *ids;
+    /* 0x08 */ struct Actor *player; /* stored in ZoneEffectData.actor */
+} ZoneTriggerMsg;
+
 
 /* Text box data (at 0x28 in its object): shows a string one line at a time. */
 typedef struct TextLines {
