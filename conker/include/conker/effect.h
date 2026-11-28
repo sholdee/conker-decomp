@@ -579,7 +579,6 @@ TimedEffect *effect_spawnPropEmitter(u8 index, u8 owner, s32 kind);
 void effect_updatePropEmitter(PropEmitterEffect *effect);
 
 /* game/Effects/HomingEffect/homingeffect.c */
-typedef struct Obj4174 Obj4174;
 typedef struct Obj4010 Obj4010;
 typedef struct HomingEffect HomingEffect;
 HomingEffect *effect_newHomingEffect(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
@@ -595,7 +594,7 @@ void effect_getHomingEffectPos(s32 handle, s32 *x, s32 *y, s32 *z);
 void effect_updateHomingEffect(HomingEffect *arg0);
 void effect_runAttackOnExpire(Obj4010 *obj);
 void effect_spawnHitEffectsOnExpire(struct WeaponProjectile *trail);
-s32 effect_growQuadAtRates(Obj4174 *obj);
+s32 effect_growQuadAtRates(DefParticleHead *p);
 extern HomingEffect *gHomingEffects[8]; /* live homing effects by handle - 1 */
 
 /* game/Effects/GroundHits/groundhits.c */

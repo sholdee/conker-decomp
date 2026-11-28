@@ -403,20 +403,10 @@ void effect_spawnHitEffectsOnExpire(WeaponProjectile *trail) {
     weapon_spawnHitEffects(trail, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
-struct Obj4174 {
-    /* 0x00 */ u8 pad0[0x2C];
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ u8 pad34[0x18];
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ u8 pad50[4];
-    /* 0x54 */ f32 unk54;
-};
-
-/* Quad particle update (gQuadParticleUpdate1Funcs[34]): grows the width (0x2C, def.width) by the rate at 0x4C (def.scale.x)
- * and the height (0x30, def.height) by the rate at 0x54 (def.scale.z), times gFrameDelta. */
-s32 effect_growQuadAtRates(Obj4174 *obj) {
-    obj->unk2C += obj->unk4C * gFrameDelta;
-    obj->unk30 += obj->unk54 * gFrameDelta;
+/* Quad particle update (gQuadParticleUpdate1Funcs[34]): grows def.width by the rate def.scale.x and def.height by the rate
+ * def.scale.z, times gFrameDelta (particle_growQuadAtRate has one rate for both). */
+s32 effect_growQuadAtRates(DefParticleHead *p) {
+    p->def.width += p->def.scale.x * gFrameDelta;
+    p->def.height += p->def.scale.z * gFrameDelta;
     return 1;
 }
