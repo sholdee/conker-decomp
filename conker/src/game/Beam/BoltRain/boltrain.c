@@ -212,11 +212,11 @@ void beam_destroyOnMessage4B(EffectHeader *obj, s32 data, u8 msg) {
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the arcs for 300 frames. */
-void beam_boltArcMessage(BoltArcObj *obj, struct Actor **data, u8 msg) {
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **player, u8 msg) {
     BoltArcState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
-        state->actor = *data;
+        state->actor = *player;
         state->timer = 300;
     }
 }

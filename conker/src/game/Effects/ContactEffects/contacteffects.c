@@ -413,19 +413,19 @@ void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *result) {
     }
 }
 
-void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2) {
-    u8 result;
+void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *result) {
+    u8 killResult;
     u32 rand1;
     u32 rand0;
 
-    result = 0;
+    killResult = 0;
     if (other->CameraPtr != NULL) {
         rand0 = math_random();
         rand1 = math_random();
         screen_spawnFlash(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
-    effect_hitReactKill(self, other, &result);
+    effect_hitReactKill(self, other, &killResult);
 }
 
 void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *result) {

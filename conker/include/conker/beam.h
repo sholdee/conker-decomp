@@ -755,7 +755,7 @@ void beam_updateBoltRain(BoltRainObj *obj);
 void beam_boltRainMessage(BoltRainObj *obj, s32 data, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
 void beam_destroyOnMessage4B(EffectHeader *obj, s32 data, u8 msg);
-void beam_boltArcMessage(BoltArcObj *obj, struct Actor **data, u8 msg);
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **player, u8 msg);
 void beam_spawnImpactEffects(struct WeaponProjectile *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 data, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);

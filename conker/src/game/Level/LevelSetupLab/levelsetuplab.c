@@ -18,8 +18,8 @@ void level_setupLab(void) {
     ParticleSpawn78 part;
     s32 i;
     DynModelDesc desc;
-    SwayBlock tail;
-    Sway sp;
+    SwayBlock block;
+    Sway sway;
     f32 rnd;
     DynModel *ent;
     LightEffectHeader header;
@@ -74,56 +74,56 @@ void level_setupLab(void) {
     part.rotVel.y = 0.0f;
     part.rotVel.z = 0.0f;
     part.gravity = 0.0f;
-    tail.rotX = 0.0f;
-    tail.rotZ = 0.0f;
+    block.rotX = 0.0f;
+    block.rotZ = 0.0f;
 
     for (i = 0; i < 6; i++) {
         pos = gSetup23ModelPositions[i];
         part.pos = pos;
-        tail.pos = pos;
+        block.pos = pos;
 
         collision_selectMap(0);
         part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.phaseX = (rnd + rnd) * 3.141592741f;
-        tail.sway.phaseX = sp.phaseX;
+        sway.phaseX = (rnd + rnd) * 3.141592741f;
+        block.sway.phaseX = sway.phaseX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.phaseZ = (rnd + rnd) * 3.141592741f;
-        tail.sway.phaseZ = sp.phaseZ;
+        sway.phaseZ = (rnd + rnd) * 3.141592741f;
+        block.sway.phaseZ = sway.phaseZ;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.amplitudeX = rnd * 3.800000191f + 2.0f;
-        tail.sway.amplitudeX = sp.amplitudeX;
+        sway.amplitudeX = rnd * 3.800000191f + 2.0f;
+        block.sway.amplitudeX = sway.amplitudeX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.amplitudeZ = rnd * 3.800000191f + 2.0f;
-        tail.sway.amplitudeZ = sp.amplitudeZ;
+        sway.amplitudeZ = rnd * 3.800000191f + 2.0f;
+        block.sway.amplitudeZ = sway.amplitudeZ;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.speedX = rnd * 0.1100000069f + 0.05000000075f;
-        tail.sway.speedX = sp.speedX;
+        sway.speedX = rnd * 0.1100000069f + 0.05000000075f;
+        block.sway.speedX = sway.speedX;
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
-        sp.speedZ = rnd * 0.1100000069f + 0.05000000075f;
-        tail.sway.speedZ = sp.speedZ;
+        sway.speedZ = rnd * 0.1100000069f + 0.05000000075f;
+        block.sway.speedZ = sway.speedZ;
 
         result = particle_newModelParticle(&part, 3, 0xFF, 0x18, 0xFF, 1);
         if (result != NULL) {
-            memcpy(result + 1, &sp, sizeof(sp));
+            memcpy(result + 1, &sway, sizeof(sway));
         }
 
         if (gSetup23ModelLights[i] != 0) {
             ent = effect_newDynModel(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
-                memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
+                memcpy(DYNMODEL_USERDATA(ent), &block, sizeof(block));
             }
             header2.x = gSetup23ModelPositions[i].x;
             header2.y = gSetup23ModelPositions[i].y;

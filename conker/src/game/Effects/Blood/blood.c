@@ -1544,8 +1544,8 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
 }
 
 /* particle_spawnSoundPulse or particle_spawnPulse */
-typedef PulseParticle *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s16, u8, s32, f32, u8, u8,
-                                          u8, s32);
+typedef PulseParticle *(*PulseSpawnFunc)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s16, u8, s32, f32, u8, u8,
+                                         u8, s32);
 
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
 void blood_spawnDeathEffects(Actor *actor, u8 owner, s32 list) {
@@ -1561,7 +1561,7 @@ void blood_spawnDeathEffects(Actor *actor, u8 owner, s32 list) {
     Vec3f velocity;
     Vec3f rotation;
     Vec3f spin;
-    Blood3783CSpawn spawn;
+    PulseSpawnFunc spawn;
 
     if (actor == NULL) {
         return;

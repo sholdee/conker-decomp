@@ -643,8 +643,8 @@ typedef struct FlashSpawner {
     /* 0x38 */ f32 speedRange;
     /* 0x3C */ u8  colour[4];
 } FlashSpawner; /* size 0x40 */
-typedef struct struct_EAB10 struct_EAB10;
-void effect_spawnGroundFlashes(struct_EAB10 *actor);
+typedef struct FlashSpawnerEffect FlashSpawnerEffect;
+void effect_spawnGroundFlashes(FlashSpawnerEffect *effect);
 s32 effect_updateGroundFlash(LightEffect *obj);
 
 /* game/Effects/BoneGroundHit/bonegroundhit.c */
@@ -1500,7 +1500,7 @@ void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *result);
 void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *result);
 void effect_hitReactLava(Actor *self, Actor *other, u8 *result);
 void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *result);
-void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2);
+void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *result);
 void effect_hitReactBulletHitAndKill(Actor *self, Actor *other, u8 *result);
 void effect_setOnFire(); /* (Actor *self, Actor *other, u8 damaging); K&R definition, declared without a prototype */
 void effect_killAndSplitActor(Actor *obj);

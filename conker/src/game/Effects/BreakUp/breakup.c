@@ -256,7 +256,7 @@ void effect_spawnBreakUpPieces(Vec3f *center, f32 *height, f32 *radius, f32 *ySc
 /* Live particle returned by particle_newOwnedSpriteParticle; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 extra;
+    /* 0xA8 */ f32 drag; /* update func 10 (particle_updateDragXZ) */
 } FloatDataParticle;
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
@@ -303,10 +303,10 @@ void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg
     particle_newOwnedSpriteParticle(&spawn, 1, 0, arg3, arg4);
 }
 
-/* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */
+/* Spawns one particle at (x, y, z) moving along `angle`; its extra data is the drag of update func 10. */
 s32 effect_spawnBreakUpGroundParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 angle, s32 baseAngle,
                   s32 radius, s32 arg11, s32 arg12, s32 data, u8 owner) {
-    f32 extra;
+    f32 drag;
     FloatDataParticle *particle;
     ParticleDesc spawn;
 
@@ -314,7 +314,7 @@ s32 effect_spawnBreakUpGroundParticle(s32 shape, s32 index, f32 x, f32 y, f32 z,
     spawn.renderMode = 0xE03;
     spawn.setGeometryMode = 0x200005;
     spawn.clearGeometryMode = 0;
-    extra = 0.9172409773f;
+    drag = 0.9172409773f;
     spawn.timer = (math_random() & 0xF) + 25;
     spawn.frame = 0;
     spawn.frameRate = 0;
@@ -348,9 +348,9 @@ s32 effect_spawnBreakUpGroundParticle(s32 shape, s32 index, f32 x, f32 y, f32 z,
     spawn.drawFunc = -1;
     spawn.handlerSet = 0;
     spawn.scaleRate = 1.033332944f;
-    particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), owner, 1);
+    particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(drag), owner, 1);
     if (particle != NULL) {
-        memcpy(&particle->extra, &extra, sizeof(extra));
+        memcpy(&particle->drag, &drag, sizeof(drag));
     }
     return 1;
 }
