@@ -2425,7 +2425,7 @@ void particle_onBoneSideEmitterMsg(FixedEmitter *effect, void *msg, u8 msgType);
 void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list);
 void particle_attachBloodStrip(Actor *owner, s32 fxOwner, s32 fxList);
 s32 particle_sampleSegmentPower(BloodStrip *emitter);
-void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *emitter);
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *emitter);
 
 /* game/Particle/FastSpark/fastspark.c */
 /* Data of the spark emitter effect, stored at 0x28 in the effect object from effect_newTimedEffectNoDraw. */

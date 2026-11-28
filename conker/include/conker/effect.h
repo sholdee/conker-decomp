@@ -1545,7 +1545,7 @@ void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit);
 void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, BloodDrip *task);
 PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task);
 s32 effect_restartTaskPulse(PulseFx *fx);
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj);
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *obj);
 f32 effect_stepTaskPulse(PulseFx *fx);
 void effect_refreshTaskEffects(ActorTask *task);
 void effect_destroyTaskPulse(PulseFx *fx);
