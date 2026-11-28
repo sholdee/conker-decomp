@@ -632,7 +632,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     point.x = gSeqTrackStates[scene][track].x;
                     point.y = gSeqTrackStates[scene][track].y;
                     point.z = gSeqTrackStates[scene][track].z;
-                    func_151BE850(&point, gSeqTrackStates[scene][track].yaw, 1, 0, 2, 0xFF, 1);
+                    effect_spawnStatPickup(&point, gSeqTrackStates[scene][track].yaw, 1, 0, 2, 0xFF, 1);
                     break;
                 case 1:
                     point2.x = gSeqTrackStates[scene][track].x;
@@ -1742,7 +1742,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                                 }
                                 break;
                             case 0x86:
-                                func_150FB324(obj, sceneTag, 1);
+                                effect_spawnBoneBeamAndDirParticle(obj, sceneTag, 1);
                                 break;
                             case 0x4A:
                                 effect_spawnSlotBoneBeam(obj, event->u.cmd.unk5, sceneTag, 1);
@@ -1763,7 +1763,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     p.x = gSeqTrackStates[scene][track].x;
                     p.y = gSeqTrackStates[scene][track].y;
                     p.z = gSeqTrackStates[scene][track].z;
-                    func_151BE850(&p, gSeqTrackStates[scene][track].yaw, 1, 0, 2, sceneTag, 1);
+                    effect_spawnStatPickup(&p, gSeqTrackStates[scene][track].yaw, 1, 0, 2, sceneTag, 1);
                     break;
                 }
                 case 4:
@@ -1784,7 +1784,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     particle_spawnObjEffects(obj, 9, -1);
                     break;
                 case 7:
-                    func_150E0870(obj, sceneTag, 1);
+                    effect_spawnScorchExplosion(obj, sceneTag, 1);
                     break;
                 case 8: {
                     Vec3f p;

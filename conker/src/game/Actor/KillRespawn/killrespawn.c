@@ -457,7 +457,7 @@ s32 actor_runDeathEffect(Actor *actor) {
         }
         return 0;
     case 0x79:
-        func_150BE494(actor, 0xFF, 1);
+        effect_spawnDeathDebrisSplash(actor, 0xFF, 1);
         break;
     case 0x05:
     case 0xAD:
@@ -528,7 +528,7 @@ s32 actor_runDeathEffect(Actor *actor) {
         func_151A6C90(actor, 0xFF, 1);
         break;
     case 0x34:
-        func_150E0870(actor, 0xFF, 1);
+        effect_spawnScorchExplosion(actor, 0xFF, 1);
         break;
     case 0x44:
         effect_spawnDeathDebrisBurst(actor, 0xFF, 1);

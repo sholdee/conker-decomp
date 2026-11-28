@@ -785,7 +785,7 @@ void trail_sprayFromRing(Actor *obj, u8 owner);
 s32 trail_fadeMotionTrail(MotionTrail *trail);
 
 /* game/Effects/Trail/ScatterTrail/scattertrail.c */
-void func_150B3DD0(void);
+void trail_stopScatterTrailsAndEmitters(void);
 void trail_destroyScatterTrail(ScatterTrail *trail);
 void trail_freeScatterTrail(ScatterTrail *trail);
 ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 capacity);
@@ -875,7 +875,7 @@ void trail_freeActorAfterimage(BoneTrail *trail);
 void trail_freeObjectAfterimage(BoneTrail *trail);
 Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player);
 Gfx *trail_drawObjectAfterimage(Gfx *gfx, BoneTrail *trail, s16 player);
-void func_151898C0(Actor *object, s32 value);
+void trail_setActorAfterimageHiddenParts(Actor *object, s32 value);
 
 /* game/Effects/Trail/SprayEmitter/sprayemitter.c */
 void trail_createSprayEmitter(SprayDesc *desc, u8 floorSplash);

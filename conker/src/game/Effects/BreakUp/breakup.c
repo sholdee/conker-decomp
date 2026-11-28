@@ -304,7 +304,7 @@ void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg
 }
 
 /* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */
-s32 func_150B879C(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 angle, s32 baseAngle,
+s32 effect_spawnBreakUpGroundParticle(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 angle, s32 baseAngle,
                   s32 radius, s32 arg11, s32 arg12, s32 data, u8 owner) {
     f32 extra;
     FloatDataParticle *particle;

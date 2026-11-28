@@ -212,7 +212,7 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
  * Per-frame update (gParticleCallbacks[13]): halfHeight ramps up to 90/256 of heightScale over the first 9 ticks
  * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
  */
-void func_150E4CBC(QuadFx *fx) {
+void effect_updateMaterialImpactQuad(QuadFx *fx) {
     if (fx->data.cb.impact.timer < 9) {
         fx->data.halfHeight = fx->data.cb.impact.timer * 90 / 9 * fx->data.cb.impact.heightScale / 256.0f;
     } else {

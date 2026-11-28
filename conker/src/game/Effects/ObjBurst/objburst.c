@@ -387,7 +387,7 @@ void effect_spawnScatterTrailVariant(u8 variant) {
 
 /** Light attach callback (gLightAttachCallbacks[1]): by the attached actor's swapTexture[0], disables the light
  * (15), or enables it with radius 20 (16) or 40 (any other texture). */
-s32 func_150B66DC(LightEffect *effect) {
+s32 effect_setLightBySwapTexture(LightEffect *effect) {
     Actor *actor = effect->data.attach.actor;
 
     switch (actor->swapTexture[0] - 15) { // matching: `switch (actor->swapTexture[0])` with case 15-17 labels mismatches

@@ -9,7 +9,7 @@
  * and gLevelPostUpdateFuncs[1] in game/Actor/Movement/movement.c). Only the level header of LEVEL_W1_RAPTOR_NEST selects
  * them. They make world object 0xF9 active only while an actor other than the first one updates.
  */
-void func_150D1410(Actor *actor) {
+void effect_preUpdateActivateObjectForNonPlayer(Actor *actor) {
     WorldObject *prop;
 
     prop = gfx_findObjectById(0xF9);
@@ -22,7 +22,7 @@ void func_150D1410(Actor *actor) {
     }
 }
 
-void func_150D146C(Actor *actor) {
+void effect_postUpdateDeactivateObject(Actor *actor) {
     WorldObject *prop;
 
     prop = gfx_findObjectById(0xF9);

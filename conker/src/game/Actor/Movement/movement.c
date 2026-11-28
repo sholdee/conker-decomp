@@ -95,8 +95,8 @@ static const u16 gImpactSounds[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE }
 s32 D_80086000 = 0; /* cleared by game_43760.c */
 
 /* Level callbacks run for each object, before and after its update (indexed by the level header's unk49, unk4A). */
-static void (*gLevelPreUpdateFuncs[])(Actor *) = { NULL, func_150D1410 };
-static void (*gLevelPostUpdateFuncs[])(Actor *) = { NULL, func_150D146C };
+static void (*gLevelPreUpdateFuncs[])(Actor *) = { NULL, effect_preUpdateActivateObjectForNonPlayer };
+static void (*gLevelPostUpdateFuncs[])(Actor *) = { NULL, effect_postUpdateDeactivateObject };
 
 /* Per-type update handlers, indexed by the object's type (also run by game/Cutscene/Sequence/sequence.c). */
 void (*gActorUpdateHandlers[])(Actor *) = {
@@ -2076,7 +2076,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->mv->itemRemaining = 0;
             }
             if ((actor->mv->pressedButtons & 0x2000) && (actor->energy != 0)) {
-                func_150D7790(actor, actor->mv->context_b & 0x7F);
+                effect_useHeldItem(actor, actor->mv->context_b & 0x7F);
             }
         }
         if ((actor->ypos < (floorY + snapRange)) && (actor->yspd < 0.0f) && ((snapRange > 20.0f) || (actor->shad == 0.0f))) {
@@ -2980,7 +2980,7 @@ void actor_updatePathFollower(Actor *obj) {
                 obj->mv->itemRemaining = 0;
             }
             if ((obj->mv->pressedButtons & 0x2000) && (obj->energy != 0)) {
-                func_150D7790(obj, obj->mv->context_b & 0x7F);
+                effect_useHeldItem(obj, obj->mv->context_b & 0x7F);
             }
         }
         func_1504CA60(obj);

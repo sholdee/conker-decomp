@@ -1891,7 +1891,7 @@ void event_setAfterimage(void) {
 }
 
 void func_1506EEAC(void) {
-    func_151898C0(gCurrentActor, gEventParam);
+    trail_setActorAfterimageHiddenParts(gCurrentActor, gEventParam);
 }
 
 void event_setWallHitScript(void) {
@@ -2799,7 +2799,7 @@ void event_spawnDelayedBurst(s32 cmd) {
 }
 
 void func_15071860(s32 cmd) {
-    func_1519072C(gCurrentActor);
+    effect_destroyActorEmitters(gCurrentActor);
 }
 
 void func_15071888(s32 cmd) {

@@ -11,7 +11,7 @@
 /* Until finished (task_flag state TASK_FLAG_ON): calls prop_updatePush(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */
-void func_150BE210(WorldObject *obj) {
+void effect_turnWhilePushed(WorldObject *obj) {
     if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
@@ -30,7 +30,7 @@ void func_150BE210(WorldObject *obj) {
     }
 }
 
-/* Variant tables of func_150BE494's debris (model ids and scales). */
+/* Variant tables of effect_spawnDeathDebrisSplash's debris (model ids and scales). */
 const s32 D_800A0010[10] = { 0xC6, 0xC7, 0xC8, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD };
 const f32 D_800A0038[10] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 const s32 D_800A0060[1] = { 0x39 };
@@ -87,7 +87,7 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 
 /* Spawns the burst of effects at `obj`'s centre: one particle_spawnDebrisSpray, one particle_spawnDebrisBurst
  * and three particle_spawnSplashSprayAtAngles particle sets (kinds 0, 2 and 10). */
-void func_150BE494(Actor *obj, u8 owner, s32 list) {
+void effect_spawnDeathDebrisSplash(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
     f32 radius;
     f32 height;

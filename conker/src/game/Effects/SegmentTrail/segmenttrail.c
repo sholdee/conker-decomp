@@ -26,7 +26,7 @@ const Vec3f D_8009FFA0[4] = {
 };
 
 /* Transforms three 4-point tables by the actor's ob_matrix_ptr and emits two segments (point 2->3 and 3->0). */
-void func_150BD740(Actor *actor, u8 owner, s32 list) {
+void effect_emitSquareEdgeSegmentTrails(Actor *actor, u8 owner, s32 list) {
     Vec3f points[4];
     Vec3f dirFrom[4];
     Vec3f dirTo[4];
@@ -55,7 +55,7 @@ void func_150BD740(Actor *actor, u8 owner, s32 list) {
 }
 
 /* Spawns one trail at (x, y, z) moving along dir. */
-s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
+s32 effect_spawnSegmentTrail(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
                   f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11,
                   s32 arg12, f32 *dir, u8 owner) {
     u8 pad[4]; // matching: frame size
@@ -96,7 +96,7 @@ s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
     return 1;
 }
 
-/* Motion trail update (gMotionTrailUpdateProcs[11], the trails func_150BD954 creates): caps the trail's alpha at its
+/* Motion trail update (gMotionTrailUpdateProcs[11], the trails effect_spawnSegmentTrail creates): caps the trail's alpha at its
  * life * 8. */
 s32 effect_fadeSegmentTrailByLife(MotionTrail *obj) {
     TrailParams *sub = obj->params;

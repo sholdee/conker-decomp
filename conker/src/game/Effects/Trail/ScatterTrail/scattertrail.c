@@ -18,7 +18,7 @@
 
 #define TRAIL_ATTACHED  2 /* trail->flags: the ribbon starts at the emitter position */
 
-void func_150B3DD0(void) {
+void trail_stopScatterTrailsAndEmitters(void) {
     u8 msg[4];
 
     effect_sendEventToEffectObjs(0, 5);

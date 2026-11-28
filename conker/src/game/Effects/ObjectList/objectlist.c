@@ -221,7 +221,7 @@ static void (*gParticleCallbacks[])() = {
     particle_updateFallingParticle, effect_updateRainDrop, effect_billboardDelayFade, NULL,
     NULL, particle_updateWakePuff, swarm_updateMember, particle_updateDropToSplash,
     NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
-    effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
+    effect_shrinkBillboard, effect_updateMaterialImpactQuad, effect_updateRainSplash, effect_updateFallingObject,
     particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
     blood_billboardFadeGrowThenTint, blood_billboardFadeGrowTint,
 };

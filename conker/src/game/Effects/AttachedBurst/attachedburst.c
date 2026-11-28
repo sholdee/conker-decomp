@@ -249,7 +249,7 @@ void effect_growBillboard(BillboardParticle *p) {
 
 /* Motion trail update (gMotionTrailUpdateProcs[2]): sets the alpha to 8 per unit of the trail's life, capped at 255.
  * Always returns 1. */
-s32 func_150AED9C(MotionTrail *trail) {
+s32 effect_fadeAttachedBurstTrailByLife(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 value = trail->head.tmpl.life * 8;
 

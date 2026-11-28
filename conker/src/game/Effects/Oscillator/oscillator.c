@@ -253,7 +253,7 @@ void effect_levelUpdateDistantTracers(s32 unused) {
 }
 
 /* Level hook gProjectileHitCallback: sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
-void func_150EA904(Vec3f *pos, s32 index) {
+void effect_onProjectileHitObject(Vec3f *pos, s32 index) {
     // matching: the no-op cast makes IDO load the array base before scaling index
     WorldObject *prop = (WorldObject *)db_Object_array + index;
 

@@ -165,7 +165,7 @@ void effect_watcherFallIntoDeepWater(ActorTask *task) {
 }
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
-void func_151A9DC0(ActorTask *task) {
+void effect_watcherDiveIntoShallowWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
@@ -189,7 +189,7 @@ void func_151A9DC0(ActorTask *task) {
 }
 
 /* Ground effect 2 (sound 0x6978), then effect_attachFallingDriftIfSolid and effect_stopActorDripEmitters. */
-void func_151A9EC0(ActorTask *task) {
+void effect_watcherDiveIntoDeepWater(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {

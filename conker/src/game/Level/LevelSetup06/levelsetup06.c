@@ -6,5 +6,5 @@
 
 
 void level_setup06(void) {
-    gProjectileHitCallback = func_150EA904;
+    gProjectileHitCallback = effect_onProjectileHitObject;
 }

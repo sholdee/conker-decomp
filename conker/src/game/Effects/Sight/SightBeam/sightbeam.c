@@ -934,7 +934,7 @@ s32 sight_updateStatusLight(LightEffect *obj) {
 
 /* Bone glow follow handler 3 (gBoneGlowFollowFuncs): reports through `visible` whether the glow's target actor's
  * expression is clear; clears flag 2 otherwise. */
-s32 func_151C9B64(BoneGlow *emitter, u8 *visible) {
+s32 sight_hideBoneGlowWithExpression(BoneGlow *emitter, u8 *visible) {
     Actor *target = emitter->attach.target;
     if (target->expression == 0) {
         *visible = 1;

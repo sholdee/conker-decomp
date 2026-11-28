@@ -146,7 +146,7 @@ Gfx *effect_bindAnimatedTextures(Gfx *gdl) {
 /* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set itemRemaining to 120; 0x32/0x33 fire a
  * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
  * slot). Each spends one use of ammo_count, and nothing happens once those run out. */
-void func_150D7790(Actor *obj, s32 action) {
+void effect_useHeldItem(Actor *obj, s32 action) {
     s32 newRacer;
     s32 oldRacer;
     s32 variant;

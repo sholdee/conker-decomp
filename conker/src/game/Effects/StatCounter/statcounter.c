@@ -13,14 +13,14 @@
 #include "conker/sound.h"
 #include "conker/sprite.h"
 
-/* Extension block of the model effect func_151BE850 spawns, at 0x120 (StatPickupEffect.params). */
+/* Extension block of the model effect effect_spawnStatPickup spawns, at 0x120 (StatPickupEffect.params). */
 typedef struct {
     /* 0x00 */ f32 angle;   /* func_151BEEE0's angle; the y rotation of effect_buildStatPickupMatrix */
     /* 0x04 */ Vec3f pos;
     /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
 } StatPickupData;
 
-/* The model effect func_151BE850 spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
+/* The model effect effect_spawnStatPickup spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
  * dispatch reads past gModelEffectUpdate2Funcs as gModelEffectUpdate2FuncsTail[0] (effect_buildStatPickupMatrix).
  * A view of ModelEffect with its 0x18-byte extension: unk11B is the low byte of attach.lightMask (an lbu). */
 struct StatPickupEffect {
@@ -46,7 +46,7 @@ struct StatPickupEffect {
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
  * The callers also pass the usual effect owner and list, which it does not use.
  */
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 altObjectType, u8 variant, u8 owner, s32 list) {
+void *effect_spawnStatPickup(Vec3f *pos, f32 angle, u8 count, u8 altObjectType, u8 variant, u8 owner, s32 list) {
     void *fx;
     ZoneNode *zone;
     EffectParams params;
