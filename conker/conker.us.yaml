@@ -1003,6 +1003,7 @@ segments:
       - [0x21FC90, c, libultra/io/crc2] # dupe of libultra/io/crc; -O1
       - [0x21FE10, c, game/Audio/Mp3Player/mp3player] # -g
       - [0x221290, c, game/Audio/Mp3Decoder/mp3decoder]
+      - [0x225410, c, game/Audio/Mp3Frame/mp3frame]
       - [0x225D20, hasm, game/Audio/Mp3Decoder/mp3huffman]
       - [0x2261A0, hasm, game/Audio/Mp3Decoder/mp3imdctlong]
       - [0x2270A0, hasm, game/Audio/Mp3Decoder/mp3imdctshort]
@@ -1802,6 +1803,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
       - {start: 0x255880, type: .bss, vram: 0x800E0D30, name: game/Audio/Mp3Player/mp3player}
       - {start: 0x255880, type: .bss, vram: 0x800E0E30, name: game/Audio/Mp3Decoder/mp3decoder}
+      - {start: 0x255880, type: .bss, vram: 0x800E1880, name: game/Audio/Mp3Frame/mp3frame}
 
   - name:  debugger
     type:  code

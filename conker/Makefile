@@ -144,8 +144,9 @@ $(BUILD_DIR)/$(SRC_DIR)/init/Heap/ExpansionPak/expansionpak.c.o: OPT_FLAGS := -O
 
 # Per-file flags (proven by the sha1 gate). libultra shipped without debug info, and the game
 # links its own private libultra copy at 0x151Dxxxx-0x151Fxxxx built at plain -O1/-O2.
-# Rare's compressed-audio bitstream decoder: the whole TU is unoptimised -g output.
+# Rare's compressed-audio bitstream decoder: both of its TUs are unoptimised -g output.
 $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Decoder/mp3decoder.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Frame/mp3frame.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfschecker2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/gu/guNormalize.c.o: OPT_FLAGS := -O2

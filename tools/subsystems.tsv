@@ -158,7 +158,8 @@ src/game/Attach/BonePoint/bonepoint.c	attach	split from game_105760.c; same subs
 src/game/Attach/FlashingLight/flashinglight.c	attach	attachment hook 8: flashing light
 src/game/Attach/TextureScroll/texturescroll.c	attach	attachment hooks 1 and 19 (texture scroll) and impact effects
 src/game/Audio/LevelMusic/levelmusic.c	music	per-level music setup and update (LevelMusic)
-src/game/Audio/Mp3Decoder/mp3decoder.c	mp3	MPEG layer III decoder
+src/game/Audio/Mp3Decoder/mp3decoder.c	mp3	MPEG layer III decoder core: tables, dequantize, scalefactors, Huffman, reorder, antialias, side info
+src/game/Audio/Mp3Frame/mp3frame.c	mp3	MPEG stream front end: frame sync, bit reservoir, open, decode frame
 src/game/Audio/Mp3Voice/mp3voice.c	mp3	streamed-audio player voice init
 src/game/Audio/ObjectSound/objectsound.c	sound	object sound record callback
 src/game/Beam/AimedBeam/aimedbeam.c	beam	beam slots, flashes and glows

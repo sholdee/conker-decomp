@@ -5998,10 +5998,10 @@ mp3_reorder	0x151F6970	440	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.
 mp3_antialias	0x151F6B28	1192	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
 mp3_readSideInfo	0x151F6FD0	2276	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
 mp3_decodeLayer3	0x151F78B4	1708	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
-mp3_appendReservoir	0x151F7F60	296	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
-mp3_syncFrame	0x151F8088	1340	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
-mp3_open	0x151F85C4	236	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
-mp3_decodeFrame	0x151F86B0	448	game	c		build/src/game/Audio/Mp3Decoder/mp3decoder.c.o
+mp3_appendReservoir	0x151F7F60	296	game	c		build/src/game/Audio/Mp3Frame/mp3frame.c.o
+mp3_syncFrame	0x151F8088	1340	game	c		build/src/game/Audio/Mp3Frame/mp3frame.c.o
+mp3_open	0x151F85C4	236	game	c		build/src/game/Audio/Mp3Frame/mp3frame.c.o
+mp3_decodeFrame	0x151F86B0	448	game	c		build/src/game/Audio/Mp3Frame/mp3frame.c.o
 mp3_decodeHuffCode	0x151F8870	188	game	hasm	b,c	build/src/game/Audio/Mp3Decoder/mp3huffman.s.o
 mp3_getBitsReg	0x151F892C	52	game	hasm	b,c	build/src/game/Audio/Mp3Decoder/mp3huffman.s.o
 mp3_getBits	0x151F8960	52	game	hasm	b	build/src/game/Audio/Mp3Decoder/mp3huffman.s.o
