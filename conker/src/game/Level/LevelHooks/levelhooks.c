@@ -8,15 +8,15 @@
 /* Per-level hooks, indexed by the level's hook number (gLevelHeader->hookCallback; 0 = none). The handlers take
  * different arguments, so the table has no prototype. */
 static void (*gLevelHooks[])() = {
-    NULL, camera_levelHook01, effect_levelHook02, camera_levelHook03,
-    camera_levelHook04, camera_levelHook05, camera_levelHook06, camera_levelHook07,
-    effect_emptyLevelHook8, camera_levelHook09, camera_levelHook10, camera_resetDistances,
-    effect_levelHook12, camera_levelHook13, effect_emptyLevelHook14, camera_levelHook15,
-    effect_levelHook16, particle_levelHook17, camera_levelHook18, camera_levelHook19,
-    camera_scaleBySpeed, particle_levelHook21, camera_levelHook22, camera_levelHook23,
-    player_levelHook24, camera_levelHook25, effect_levelHook26, effect_levelHook27,
-    camera_levelHook28, particle_levelHook29, level_hook30, light_levelHook31,
-    camera_levelHook32, camera_levelHook33, camera_levelHook34, camera_levelHook35,
+    NULL, camera_levelHookCogLand, effect_levelHook02, camera_levelHookDogFish,
+    camera_levelHookTankFactory, camera_levelHookBarnOutside, camera_levelHookDinoArena, camera_levelHookBarnInside,
+    effect_emptyLevelHookHeist, camera_levelHookHarbour, camera_levelHookDogFishNurseryPart1, camera_resetDistances,
+    effect_levelHook12, camera_levelHookInsideSafe, effect_emptyLevelHookCanyon, camera_levelHook15,
+    effect_levelHook16, particle_levelHook17, camera_levelHookBullPaddock, camera_levelHookArena,
+    camera_scaleBySpeed, particle_levelHook21, camera_levelHookTraining, camera_levelHook23,
+    player_levelHook24, camera_levelHookRaptor, effect_levelHook26, effect_levelHook27,
+    camera_levelHookEndArena, particle_levelHook29, level_hookUBend, light_levelHook31,
+    camera_levelHookTankTunnel, camera_levelHookMachineGunNest, camera_levelHookBankEntrance, camera_levelHookOutsideMolehole,
 };
 
 void level_runHook(void *camera, s32 levelId) {

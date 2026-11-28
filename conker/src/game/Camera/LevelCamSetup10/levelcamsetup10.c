@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup10(Camera *camera) {
+void camera_levelSetupTank(Camera *camera) {
     camera->Mode = 8;
     camera->AvailableModes |= 0x1300000;
     camera->DistIndex = 1;
@@ -18,5 +18,5 @@ void camera_levelSetup10(Camera *camera) {
     camera->IdealTripodMagnitude = 370.0f;
 }
 
-void camera_emptyLevelSetup11(Camera *camera) {
+void camera_emptyLevelSetupCanyon(Camera *camera) {
 }

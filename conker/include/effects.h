@@ -3099,14 +3099,14 @@ typedef struct DiscEmitter {
 } DiscEmitter; /* size 0x10 */
 
 /* Timed effect with a DiscEmitter as its data: the object of expire callback 5 (particle_emitDiscParticle,
- * game/Particle/DiscEmitter/discemitter.c), made by level_setup05 with a 0x10-byte data size. */
+ * game/Particle/DiscEmitter/discemitter.c), made by level_setupBrontoCavern with a 0x10-byte data size. */
 typedef struct DiscEmitterEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiscEmitter disc;
 } DiscEmitterEffect; /* size 0x38 */
 
 /* The timed effect of tick 18 (particle_updateOriginRingEmitter, game/Particle/DiscEmitter/discemitter.c), made by
- * level_setup12 with a 4-byte data size: the spawn accumulator. */
+ * level_setupDinoArena with a 4-byte data size: the spawn accumulator. */
 typedef struct OriginRingEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ f32 accum;

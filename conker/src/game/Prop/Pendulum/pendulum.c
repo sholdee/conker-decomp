@@ -159,7 +159,7 @@ void prop_rampTextureScroll(WorldObject *obj) {
     texture_addBinding(obj, addr, tailAddr, 4, 5);
 }
 
-// the four objects level_setup08 spawns with level_spawnFlatSprite
+// the four objects level_setupDogFish spawns with level_spawnFlatSprite
 
 /* Destroys the four objects in gLevelSprayEffects (effect_destroyObject) and clears their slots. */
 void prop_destroyLevelSprays(void) {

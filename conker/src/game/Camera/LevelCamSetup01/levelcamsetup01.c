@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup01(Camera *camera) {
+void camera_levelSetupCogLand(Camera *camera) {
     camera->DistIndex = 1;
     camera->DistMask = 3;
     camera->height = 230.0f;
@@ -12,5 +12,5 @@ void camera_levelSetup01(Camera *camera) {
     camera->IdealTripodMagnitude = 290.0f;
 }
 
-void camera_emptyLevelSetup02(Camera *camera) {
+void camera_emptyLevelSetupTheWindmill(Camera *camera) {
 }
