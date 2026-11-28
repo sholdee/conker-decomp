@@ -374,35 +374,36 @@ void particle_spawnRandomSwell(Vec3f *pos, u8 owner, s32 list) {
     particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, owner, list);
 }
 
-/* Fills in a fixed JetSpray (no caller in the tree); its eventFunc is -1 (no trail bursts) when gScreenLayout >= 2 or
- * gPlayerCount >= 8, else 0. */
-void func_150D64E8(JetSpray *info, f32 *outValue) {
-    info->countBase = 6;
-    info->countRange = 3;
-    *outValue = 1263.0f;
-    info->speedBase = 0.08999999613f;
-    info->speedRange = 0.03029999882f;
-    info->sizeBase = 150.0f;
-    info->sizeRange = 105.0f;
-    info->sizeSlopeBase = 396.0f;
-    info->sizeSlopeRange = 612.0f;
-    info->particleCountBase = 4;
-    info->particleCountRange = 3;
-    info->spread = 25.0f;
-    info->drag = 0.8120000362f;
-    info->gravityBase = -2.0f;
-    info->gravityRange = 1.618000031f;
-    info->delayBase = 20;
-    info->delayRange = 30;
-    info->alphaBase = 100;
-    info->alphaRange = 100;
-    info->fadeStart = 12;
-    info->fadeOutStart = 20;
+/* No caller in the tree. Fills in a fixed JetSpray and its cone spread, the same form as weapon_initImpactSpray (whose
+ * callers pass DirectedJetSpray.spread or SurfaceJetSpray.source.spread there); its eventFunc is -1 (no trail bursts)
+ * when gScreenLayout >= 2 or gPlayerCount >= 8, else 0. */
+void func_150D64E8(JetSpray *config, f32 *spread) {
+    config->countBase = 6;
+    config->countRange = 3;
+    *spread = 1263.0f;
+    config->speedBase = 0.08999999613f;
+    config->speedRange = 0.03029999882f;
+    config->sizeBase = 150.0f;
+    config->sizeRange = 105.0f;
+    config->sizeSlopeBase = 396.0f;
+    config->sizeSlopeRange = 612.0f;
+    config->particleCountBase = 4;
+    config->particleCountRange = 3;
+    config->spread = 25.0f;
+    config->drag = 0.8120000362f;
+    config->gravityBase = -2.0f;
+    config->gravityRange = 1.618000031f;
+    config->delayBase = 20;
+    config->delayRange = 30;
+    config->alphaBase = 100;
+    config->alphaRange = 100;
+    config->fadeStart = 12;
+    config->fadeOutStart = 20;
 
     if (gScreenLayout >= 2 || gPlayerCount >= 8) {
-        info->eventFunc = -1;
+        config->eventFunc = -1;
     } else {
-        info->eventFunc = 0;
+        config->eventFunc = 0;
     }
 }
 
