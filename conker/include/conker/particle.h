@@ -1096,8 +1096,6 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj);
 void particle_onTwoSidedEmitterMsg(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType);
 
 /* game/Particle/RayBeam/raybeam.c */
-typedef struct Struct15101F50 Struct15101F50;
-typedef struct Owner151025F4 Owner151025F4;
 RayBeam *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 bone, s16 lifetime, u8 r, u8 g, u8 b, f32 arg8,
                               f32 scrollBase, f32 scrollRange, f32 argB, u8 aimed, u8 fxOwner, s32 fxList);
 void particle_destroyRayBeam(RayBeam *beam);
@@ -1114,9 +1112,9 @@ void particle_destroyBeamEndFx(BeamEndFx *fx);
 void particle_freeBeamEndFx(BeamEndFx *fx);
 s8 particle_updateRayBeam(RayBeam *beam);
 Vtx *particle_buildRayBeamQuad(RayBeam *beam, s16 viewport);
-Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport);
+Vtx *particle_buildCentredAxisQuad(BeamHitFx *particle, s16 viewport);
 s32 particle_flickerRayBeam(RayBeam *beam);
-s32 particle_updateWobbleOffset(Owner151025F4 *obj, Vec3f *prevPos);
+s32 particle_updateWobbleOffset(BeamStartFx *obj, Vec3f *prevPos);
 RayBeam *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 aimed, u8 owner, s32 list);
 void particle_stopObjEffect(Actor *actor);
 s32 func_1510281C(BeamStartFx *sprite, s16 view);
@@ -1893,7 +1891,9 @@ typedef struct StyleParticle {
 typedef struct SpriteEmitter {
     /* 0x00 */ u8 type; /* EffectHeader.type: 0x11, or 0x66 for an emitter whose particles are 0x67s */
     /* 0x01 */ u8 list; /* EffectHeader byte 1: the object list (effect_newObject) */
-    /* 0x02 */ u8 pad2[0xA];
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ struct EffectHeader *prev; /* EffectHeader.prev */
+    /* 0x08 */ struct EffectHeader *next; /* EffectHeader.next */
     /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x; /* also a pointer's high half (flags 0x30) or a gSpriteEmitterSegments row */

@@ -55,11 +55,6 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x60];
-    /* 0x60 */ s32 flags;
-} Struct150C5310;
-
 /*
  * Vtx_t with named coordinates. matching: Vtx_t's ob[] subscripts make IDO schedule the coordinate
  * loads in a different order.
@@ -105,7 +100,7 @@ void prop_rampTextureScroll(WorldObject *obj);
 void prop_destroyLevelSprays(void);
 s32 func_150C5280(void);
 s32 func_150C52CC(void *fx);
-s32 func_150C5310(Struct150C5310 *obj);
+s32 func_150C5310(struct ModelParticle *obj);
 /* Texture asset ids 0x2C1 and 0x1C0 of prop_rampTextureScroll: link-time symbols whose address is the id (undefined_syms.us.txt). */
 extern u8 D_2C1;
 extern u8 D_1C0;

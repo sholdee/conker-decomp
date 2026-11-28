@@ -96,25 +96,14 @@ s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX,
     return 1;
 }
 
-struct Sub150BDB3C {
-    /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 alpha;
-};
+/* Motion trail update (gMotionTrailUpdateProcs[11], the trails func_150BD954 creates): caps the trail's alpha at its
+ * life * 8. */
+s32 effect_fadeSegmentTrailByLife(MotionTrail *obj) {
+    TrailParams *sub = obj->params;
+    s32 limit = obj->head.tmpl.life * 8;
 
-struct Obj150BDB3C {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 life;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ struct Sub150BDB3C *params;
-};
-
-/* Caps obj->params->alpha at obj->life * 8. */
-s32 effect_fadeSegmentTrailByLife(struct Obj150BDB3C *obj) {
-    struct Sub150BDB3C *sub = obj->params;
-    s32 limit = obj->life * 8;
-
-    if (limit < sub->alpha) {
-        sub->alpha = limit;
+    if (limit < sub->motion.alpha) {
+        sub->motion.alpha = limit;
     }
     return 1;
 }

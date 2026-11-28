@@ -11,12 +11,6 @@
  * 0x28 is a FixedEmitterData.
  */
 
-/* Live particle returned by particle_newOwnedSpriteParticle; its caller-sized data starts at 0xA8. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 drag; /* read by update func 10 (particle_updateDragXZ) */
-} Particle1BFDD0;
-
 /* Attaches effect 0x23 to the object. */
 void particle_attachSideEmitter(Actor *object) {
     Effect1BFDD0 *effect;
@@ -44,7 +38,7 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
     f32 drag;
     const Vec3f *dir;
     f32 speed;
-    Particle1BFDD0 *particle;
+    SpriteParticle *particle;
 
     data = &effect->data;
     data->spawnAccum += (312.0f + (math_randomFloat() * 599.0f)) * 0.001f * gFrameDelta;
@@ -96,7 +90,7 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
             desc.vel.z = dir->z * speed;
             particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->drag, &drag, sizeof(drag));
+                memcpy(&particle->data.drag, &drag, sizeof(drag));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
@@ -133,7 +127,7 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
     f32 drag;
     s32 rand;
     Vec3f offset;
-    Particle1BFDD0 *particle;
+    SpriteParticle *particle;
 
     data = &effect->data;
     data->spawnAccum += (792.0f + (math_randomFloat() * 1202.0f)) * 0.001f * gFrameDelta;
@@ -195,7 +189,7 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
                 }
                 particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
-                    memcpy(&particle->drag, &drag, sizeof(drag));
+                    memcpy(&particle->data.drag, &drag, sizeof(drag));
                 }
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);

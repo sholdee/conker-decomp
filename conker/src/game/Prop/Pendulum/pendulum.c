@@ -190,8 +190,9 @@ s32 func_150C52CC(void *fx) {
     return gModelEffectUpdate2FuncsTail[0](fx);
 }
 
-/* Callback (table at 0x80089910): sets flags bit 0x20000 while func_150C5280 holds, clears it otherwise. */
-s32 func_150C5310(Struct150C5310 *obj) {
+/* Model particle update callback (gModelParticleUpdateFuncs[24]): sets flags bit 0x20000 while func_150C5280 holds,
+ * clears it otherwise. */
+s32 func_150C5310(ModelParticle *obj) {
     if (func_150C5280()) {
         obj->flags |= 0x20000;
     } else {

@@ -469,25 +469,12 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     particle_newModelParticle(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
-struct Struct150E5810 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 radius; // ModelParticle.radius: it comes to rest this far above the ground
-    /* 0x14 */ f32 bounce; // restitution applied on each ground hit
-    /* 0x18 */ u8 pad18[0x20];
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ f32 velX;
-    /* 0x48 */ f32 velY;
-    /* 0x4C */ f32 velZ;
-    /* 0x50 */ Vec3f rotVel;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 flags;
-};
-
 /*
- * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
- * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
+ * Floor-hit callback of the model particles (gModelParticleFloorFuncs[3]). A slow fall comes to rest radius above the
+ * ground; otherwise the velocity is reflected off the hit triangle `verts` (or just flipped vertically without one) and
+ * damped by elasticity.
  */
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
+s32 effect_bounceOffTriangle(ModelParticle *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
     Tri3f tri;
     s32 i;
     f32 len;
@@ -498,11 +485,11 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
     Vec3f unit;
 
     obj->pos.y = obj->radius * 1.100000024f + groundY;
-    if (obj->velY > -2.0f) {
-        obj->velX = 0.0f;
+    if (obj->vel.y > -2.0f) {
+        obj->vel.x = 0.0f;
         obj->flags &= ~0x6F;
-        obj->velY = 0.0f;
-        obj->velZ = 0.0f;
+        obj->vel.y = 0.0f;
+        obj->vel.z = 0.0f;
     } else {
         if (verts != NULL) {
         lbl: // matching: a block boundary that stops IDO hoisting the loop setup above the NULL test
@@ -518,24 +505,24 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
             len = math_length3(&normal.x);
             if (len > 9.999999747e-06f) {
                 math_vec3Scale(&normal, 1.0f / len, &unit);
-                vel.x = obj->velX;
-                vel.y = obj->velY;
-                vel.z = obj->velZ;
+                vel.x = obj->vel.x;
+                vel.y = obj->vel.y;
+                vel.z = obj->vel.z;
                 dot = math_dot3(&unit.x, &vel.x);
                 math_vec3Scale(&unit, 2.0f * dot, &normal);
                 math_vec3Sub(&vel, &normal, &normal);
-                obj->velX = obj->bounce * normal.x * 0.8000000119f;
-                obj->velY = obj->bounce * normal.y;
-                obj->velZ = obj->bounce * normal.z * 0.8000000119f;
+                obj->vel.x = obj->elasticity * normal.x * 0.8000000119f;
+                obj->vel.y = obj->elasticity * normal.y;
+                obj->vel.z = obj->elasticity * normal.z * 0.8000000119f;
             }
         } else {
-            obj->velX *= obj->bounce;
-            obj->velY = -obj->velY * obj->bounce;
-            obj->velZ *= obj->bounce;
+            obj->vel.x *= obj->elasticity;
+            obj->vel.y = -obj->vel.y * obj->elasticity;
+            obj->vel.z *= obj->elasticity;
         }
-        obj->rotVel.x *= obj->bounce;
-        obj->rotVel.y *= obj->bounce;
-        obj->rotVel.z *= obj->bounce;
+        obj->rotVel.x *= obj->elasticity;
+        obj->rotVel.y *= obj->elasticity;
+        obj->rotVel.z *= obj->elasticity;
     }
     return 1;
 }

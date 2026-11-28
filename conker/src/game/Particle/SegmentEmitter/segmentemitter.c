@@ -11,12 +11,6 @@
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
 
-/* Live particle returned by particle_newOwnedSpriteParticle; its extra data (dataSize bytes) starts at 0xA8. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 drag;
-} Particle1368C0;
-
 /* This file's .rodata. Emission segments of effect 0x1A: particles start on segment i (gSegmentEmitterPoints[i] to
  * gSegmentEmitterPoints[i + 1]), picked with weight gSegmentEmitterWeights[i]; gSegmentEmitterWeights[6] is the weight total. */
 static const Vec3f gSegmentEmitterPoints[7] = {
@@ -452,7 +446,7 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
     f32 extra;
     f32 speed;
     u8 side;
-    Particle1368C0 *particle;
+    SpriteParticle *particle;
 
     data = &effect->data.pair;
     object = data->object;
@@ -525,7 +519,7 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
             spawn.vel.z = dirs[side].z * speed;
             particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->drag, &extra, sizeof(extra));
+                memcpy(&particle->data.drag, &extra, sizeof(extra));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);

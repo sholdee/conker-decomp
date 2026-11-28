@@ -289,20 +289,18 @@ s32 effect_spawnJointPiece(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
                   s32 arg11, s32 arg12, void *data, u8 owner);
 
 /* game/Effects/ParticleBursts/particlebursts.c */
-struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
 s32 func_150BCBBC(Actor *actor);
-s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floorY);
+s32 effect_bounceOnGround(ModelParticle *obj, f32 x, f32 y, f32 z, f32 floorY);
 void func_150BD070(u8 owner, s32 list);
 
 /* game/Effects/SegmentTrail/segmenttrail.c */
-struct Obj150BDB3C;
 void func_150BD740(Actor *actor, u8 owner, s32 list);
 s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
                   s32 arg11, s32 arg12, f32 *dir, u8 owner);
-s32 effect_fadeSegmentTrailByLife(struct Obj150BDB3C *obj);
+s32 effect_fadeSegmentTrailByLife(MotionTrail *obj);
 extern const Vec3f D_8009FF40[4];
 extern const Vec3f D_8009FF70[4];
 extern const Vec3f D_8009FFA0[4];
@@ -604,14 +602,13 @@ void effect_scatterGroundHits(s32 count);
 void effect_scatterGroundHitsAhead(s32 amount);
 
 /* game/Effects/MaterialImpact/materialimpact.c */
-typedef struct Struct150E5810 Struct150E5810;
 typedef struct Struct150E4CBC Struct150E4CBC;
 void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot);
 void effect_spawnGroundImpactsUnder(WorldObject *obj);
 void func_150E4CBC(Struct150E4CBC *fx);
 void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot);
 void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]);
+s32 effect_bounceOffTriangle(ModelParticle *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]);
 
 /* game/Effects/DistantBolts/distantbolts.c */
 void effect_updateDistantTracers(void);
@@ -728,7 +725,6 @@ void effect_spawnGunMuzzleEffects(Actor *obj, u8 owner, s32 list);
 extern const u8 gStagePartObjectIds[8][8];
 
 /* game/Effects/DelayedBurst/delayedburst.c */
-typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
 typedef struct FadeInSprite FadeInSprite;
 typedef struct FadeInEffect FadeInEffect;
@@ -742,7 +738,7 @@ void effect_updateLineEmitter(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void effect_turnLightsOn(void);
 void effect_turnLightsOff(void);
-void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
+void func_150FADC8(DefParticleHead *obj, s32 arg1, u8 event);
 void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind);
 s32 effect_placeScreenCashModel(ModelEffect *fx);
 Gfx *effect_preDrawScreenCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);

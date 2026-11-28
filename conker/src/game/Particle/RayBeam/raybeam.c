@@ -765,16 +765,9 @@ end: // matching: an unused label here keeps IDO's block layout
     return NULL;
 }
 
-/* A quad particle (same layout as Particle in game/Particle/QuadParticle/quadparticle.c), followed by its motion state at 0x110. */
-struct Struct15101F50 {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 flags;
-    /* 0x111 */ u8 unk111;
-    /* 0x112 */ CollisionTri surface;
-};
-
-/* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
-Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport) {
+/* Vertex function 0x13 of the beam's hit sprite (BeamHitFx): fills the viewport's vertex buffer with a quad centred on
+ * pos, in the plane of the hit triangle, half-axes axisU * width and axisV * height; none while data.flags bit 0 is clear. */
+Vtx *particle_buildCentredAxisQuad(BeamHitFx *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot in the original frame
     Vtx *vtx;
     Vtx *ret;
@@ -794,11 +787,11 @@ Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport) {
         return NULL;
     }
 
-    if (!(particle->flags & 1)) {
+    if (!(particle->data.flags & 1)) {
         return NULL;
     }
 
-    if (math_getTriEdges(&particle->surface, &axisU, &axisV, NULL) == 0) {
+    if (math_getTriEdges(&particle->data.hit, &axisU, &axisV, NULL) == 0) {
         return NULL;
     }
 
@@ -885,13 +878,8 @@ s32 particle_flickerRayBeam(RayBeam *beam) {
     return 1;
 }
 
-struct Owner151025F4 {
-    DescParticleHead head;
-    Wobble151025F4 wobble;
-};
-
-/* Per-frame update of the owner's wobble offset. */
-s32 particle_updateWobbleOffset(Owner151025F4 *obj, Vec3f *prevPos) {
+/* Sprite update (gSpriteUpdateFuncs[11]) of the beam's start sprite: advances its wobble offset. */
+s32 particle_updateWobbleOffset(BeamStartFx *obj, Vec3f *prevPos) {
     Wobble151025F4 *wobble = &obj->wobble;
     s32 pad; // matching: unused stack slot in the original frame
     f32 sinX;
