@@ -31,7 +31,7 @@ typedef struct BulletParticle {
 } BulletParticle;
 
 /* Projectile state, stored at offset 0x110 of the object weapon_spawnProjectile spawns. */
-typedef struct Game1EF500TrailExt {
+typedef struct WeaponProjectileState {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1[3];
     /* 0x04 */ Vec3f velocity;
@@ -53,21 +53,21 @@ typedef struct Game1EF500TrailExt {
     /* 0xA8 */ s8 filter; /* collision_castRay's filter */
     /* 0xA9 */ u8 padA9[3];
     /* 0xAC */ s32 handle;
-} Game1EF500TrailExt; /* 0xB0 */
+} WeaponProjectileState; /* 0xB0 */
 
 /* The projectile object (allocated by particle_newQuadParticle). */
-typedef struct Game1EF500Trail {
+typedef struct WeaponProjectile {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Game1EF500TrailExt trail;
-} Game1EF500Trail;
+    /* 0x110 */ WeaponProjectileState trail;
+} WeaponProjectile;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ StreamEmitter emitter;
-} Game1EF500TimedOwner;
+} StreamEmitterEffect;
 
 /* game/Weapon/TwinMuzzle/twinmuzzle.c */
-Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 fxOwner, s32 fxList);
+WeaponProjectile *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 fxOwner, s32 fxList);
 s32 func_150EC3D4(Actor *actor, Actor *self);
 void weapon_spawnHitEffectsNoFlash(void *particle);
 
@@ -86,7 +86,7 @@ extern const Vec3f gSecondGunMuzzle; /* the second gun's muzzle point */
 extern u8 gSecondGunMuzzleBone;          /* the bone it is on */
 
 /* game/Weapon/Launcher/launcher.c */
-Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 fxOwner, s32 fxList);
+WeaponProjectile *weapon_fireLauncherProjectile(Actor *obj, s32 fxOwner, s32 fxList);
 void weapon_runLauncherMuzzle(); /* (Actor *obj, u8 fxOwner, s32 fxList, Vec3f *muzzleOut, Vec3f *launchOut); K&R definition, declared without a prototype */
 void weapon_spawnLauncherFlash(); /* (Actor *obj, Vec3f *muzzle, u8 fxOwner, s32 fxList); K&R definition, declared without a prototype */
 void weapon_getLauncherMuzzlePos(Actor *obj, s16 unused, Vec3f *out);
@@ -177,31 +177,31 @@ extern const Vec3f gBulletMuzzleOffsets[3];
 typedef void (*TrailHitCallback)(Vec3f *pos, s32 index);
 extern TrailHitCallback gProjectileHitCallback;
 void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance);
-Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+WeaponProjectile *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 distScale, f32 width,
                                f32 driftSpeed, f32 defaultRemaining, u8 alpha, Actor *owner, u8 castRay, u8 collide, u8 hitModels,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 hitFlags,
                                f32 dt, u8 viewportMask, s8 filter, s32 extraSize, u8 fxOwner, s32 fxList);
-s8 weapon_updateProjectile(Game1EF500Trail *trail);
-Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index);
+s8 weapon_updateProjectile(WeaponProjectile *trail);
+Vtx *weapon_buildProjectileTail(WeaponProjectile *trail, s16 index);
 s32 weapon_isOtherLiveObject(Actor *obj, Actor *self);
 s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self);
-s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 weapon_onProjectileImpact(void *actor, Actor *owner, WeaponProjectile *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit);
-void weapon_onProjectileExpire(Game1EF500Trail *trail);
+void weapon_onProjectileExpire(WeaponProjectile *trail);
 void weapon_spawnImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList);
-void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
+void weapon_spawnHitEffects(WeaponProjectile *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg);
-void weapon_easeProjectileAccel(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
-u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
+void weapon_easeProjectileAccel(WeaponProjectile *trail, WeaponProjectileState *ext, s32 steps);
+u8 weapon_traceProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt);
+void weapon_moveProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt);
+s32 weapon_countdownProjectileRange(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt);
+void weapon_updateStreamEmitter(StreamEmitterEffect *owner);
 
 
 /* game/Weapon/ProjectileRay/projectileray.c */
-void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event);
+void weapon_projectileMessage(WeaponProjectile *obj, ActorSwapMsg *swap, u8 event);
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 filter, u8 collide, u8 hitModels, s32 ignoreMask, u8 recast);
@@ -222,7 +222,7 @@ extern const Vec3f gSegmentShotBeamEnd;
 extern const Vec3f gSegmentShotEnd;
 
 /* game/Weapon/JointShot/jointshot.c */
-Game1EF500Trail *weapon_fireJointShot(Actor *obj, u8 side, u8 jointAim, ModelAttachment *attachment, s16 node, u8 fxOwner,
+WeaponProjectile *weapon_fireJointShot(Actor *obj, u8 side, u8 jointAim, ModelAttachment *attachment, s16 node, u8 fxOwner,
                                s32 fxList);
 void weapon_getSide0JointPos(Actor *obj, s16 unused, Vec3f *out);
 void weapon_getSide1JointPos(Actor *obj, s16 unused, Vec3f *out);

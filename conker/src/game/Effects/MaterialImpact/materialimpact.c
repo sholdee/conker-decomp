@@ -13,16 +13,16 @@
 
 
 /* Per-material impact effects, indexed by the material id from collision_getSurfaceType. */
-typedef struct Struct800A1070 {
+typedef struct MaterialImpactDef {
     /* 0x00 */ u16 objectType;   // object spawned through effect_spawnQuadFx (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the weapon_spawnImpactBurst effect
     /* 0x05 */ u8 debrisType;    // effect_sprayDebris debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
-} Struct800A1070;
+} MaterialImpactDef;
 
-static const Struct800A1070 gMaterialImpactDefs[] = {
+static const MaterialImpactDef gMaterialImpactDefs[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
     { 62, 0, 0, 10, 60, 20 },
@@ -58,7 +58,7 @@ static const f32 gMaterialImpactCountScales[] = { 0.33f, 1.0f, 2.0f };
  * Bit 0x8000 of `material` is forwarded to effect_sprayDebris.
  */
 void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
-    const Struct800A1070 *entry;
+    const MaterialImpactDef *entry;
     s32 lifetime;
     s32 flag;
     s32 count;

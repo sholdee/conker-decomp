@@ -13,7 +13,7 @@
  */
 
 /* Turret settings (WorldObject.moveData.data); angles in degrees. */
-typedef struct Turret15112520Cfg {
+typedef struct TurretConfig {
     /* 0x00 */ f32 speedNear;
     /* 0x04 */ f32 speedFar;
     /* 0x08 */ f32 maxStep;
@@ -28,7 +28,7 @@ typedef struct Turret15112520Cfg {
     /* 0x2C */ f32 range;
     /* 0x30 */ u16 sfx;
     /* 0x32 */ u16 sfxCooldown; // frames before the motor sound can start again
-} Turret15112520Cfg;
+} TurretConfig;
 
 /* A sound started by gfx_playObjectSound that follows its object. */
 typedef struct ObjSound {
@@ -46,7 +46,7 @@ void gfx_allocDisplayLists(void);
 
 /* game/Gfx/Turret/turret.c */
 void gfx_aimTurret(WorldObject *turret);
-extern Turret15112520Cfg gTurretDefaultCfg;
+extern TurretConfig gTurretDefaultCfg;
 
 /* game/Gfx/WorldObject/worldobject.c */
 void gfx_buildDrawLists(s32 player);

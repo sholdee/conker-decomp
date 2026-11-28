@@ -273,7 +273,7 @@ void particle_startSteamTrail(f32 *x, f32 *y, f32 *z, s16 delay, s32 owner, s32 
     blood_spawnTrail(&params, 0, owner, list);
 }
 
-void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
+void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter) {
     Vec3f pos;
     Vec3f vel;
     f32 speed;
@@ -296,5 +296,5 @@ void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 d
     particle_spawnSteamParticle(&pos, &vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
-                    emitter->base.header.owner, emitter->base.header.kind);
+                    emitter->owner, emitter->kind);
 }

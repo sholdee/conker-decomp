@@ -1807,7 +1807,7 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     return gfx;
 }
 
-Struct151EDF4C *gCodeEntryKeys = NULL;
+CodeEntryKey *gCodeEntryKeys = NULL;
 HudSprite gHudImagePanelSprite = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
 
 /*
@@ -1827,7 +1827,7 @@ void hud_initCodeEntry(void) {
     gCodeEntryKeys = NULL;
     gCodeEntryText = allocate_memory(0x1A8, 1, 0, 0);
     if (gCodeEntryText != NULL) {
-        gCodeEntryKeys = (Struct151EDF4C *)(gCodeEntryText + 0x40);
+        gCodeEntryKeys = (CodeEntryKey *)(gCodeEntryText + 0x40);
         for (i = 0x1C5, j = 0; i < 0x1E3; i++, j++) {
             data = rom_loadPathTable(0, 1, 0, 2, 9, i);
             gCodeEntryKeys[j].data = data;

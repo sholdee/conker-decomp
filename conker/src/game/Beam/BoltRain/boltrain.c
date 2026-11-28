@@ -229,8 +229,8 @@ static const F32x1 gImpactDebrisScales = { { 0.1f } };
 
 /* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
-void beam_spawnImpactEffects(Game1EF500Trail *obj) {
-    Game1EF500TrailExt *hit;
+void beam_spawnImpactEffects(WeaponProjectile *obj) {
+    WeaponProjectileState *hit;
     u32 surfaceFlags;
     // matching: one struct keeps IDO's stack order (scales, ids, desc) above the spilled locals
     struct {

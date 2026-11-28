@@ -382,12 +382,12 @@ typedef struct {
     /* 0x10 */ f32 amplitude[2];
     /* 0x18 */ f32 phase[2];
     /* 0x20 */ f32 speed[2];
-} Wobble151025F4; /* size 0x28 */
+} Wobble2D; /* size 0x28 */
 
 /* beam->data.startFx: placed at the beam's start, sized by the beam's width times its wobble offset. */
 typedef struct {
     /* 0x00 */ DescParticleHead head; /* a sprite particle */
-    /* 0xA8 */ Wobble151025F4 wobble;
+    /* 0xA8 */ Wobble2D wobble;
     /* 0xD0 */ RayBeamLink link;
 } BeamStartFx;
 
@@ -699,7 +699,7 @@ void beam_unlinkGlow(Glow *glow);
 void beam_destroyFlash(LightEffect *flash);
 void beam_freeFlash(LightEffect *flash);
 void beam_unlinkFlash(LightEffect *flash);
-struct Game1EF500Trail *beam_fireSlotProjectile(); /* (Actor *actor, u8 slot, u8 fxOwner, s32 fxList); K&R definition, declared without a prototype */
+struct WeaponProjectile *beam_fireSlotProjectile(); /* (Actor *actor, u8 slot, u8 fxOwner, s32 fxList); K&R definition, declared without a prototype */
 void beam_sparkMessage(Bolt *spark, s32 data, u8 type);
 void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type);
 void beam_attachActorLights(Actor *actor);
@@ -756,7 +756,7 @@ void beam_boltRainMessage(BoltRainObj *obj, s32 data, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
 void beam_destroyOnMessage4B(EffectHeader *obj, s32 data, u8 msg);
 void beam_boltArcMessage(BoltArcObj *obj, struct Actor **data, u8 msg);
-void beam_spawnImpactEffects(struct Game1EF500Trail *obj);
+void beam_spawnImpactEffects(struct WeaponProjectile *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 data, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);
 void beam_updateSparkZone(SparkObj *obj);

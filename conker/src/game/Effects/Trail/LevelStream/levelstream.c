@@ -558,8 +558,8 @@ LevelStream *trail_findStream(s32 id) {
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one
  * 0x6A effect packet at a random point of the shape (only when its zone's view mask has one of its
  * low gScreenLayout + 1 bits set, i.e. a view can see it; otherwise the accumulated units are discarded). */
-void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
-    Game1FBB80Effect *effect;
+void trail_updateRandomPointEmitter(RandomPointEmitter *object) {
+    RandomPointEmitterData *effect;
     s32 index;
     s16 mask;
 

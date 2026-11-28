@@ -14,7 +14,7 @@
 
 /* The data of the beam's startFx, at BeamStartFx.wobble (0xA8 in the sprite). */
 typedef struct {
-    /* 0x00 */ Wobble151025F4 wobble;
+    /* 0x00 */ Wobble2D wobble;
     /* 0x28 */ RayBeamLink link;
 } BeamStartFxData;
 
@@ -880,7 +880,7 @@ s32 particle_flickerRayBeam(RayBeam *beam) {
 
 /* Sprite update (gSpriteUpdateFuncs[11]) of the beam's start sprite: advances its wobble offset. */
 s32 particle_updateWobbleOffset(BeamStartFx *obj, Vec3f *prevPos) {
-    Wobble151025F4 *wobble = &obj->wobble;
+    Wobble2D *wobble = &obj->wobble;
     s32 pad; // matching: unused stack slot in the original frame
     f32 sinX;
     f32 sinY;

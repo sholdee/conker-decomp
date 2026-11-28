@@ -133,31 +133,33 @@ typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ s16 timer; // countdown to the next emitter spawn
     /* 0x06 */ s16 unk6;
-} EB340Spawn;
+} BeeCavernSpawner;
 
 /* The object effect_newEmitterSpawner creates; effect_updateEmitterSpawner is its per-frame update. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EB340Spawn spawn;
-} EB340Obj;
+    /* 0x28 */ BeeCavernSpawner spawn;
+} BeeCavernSpawnerEffect;
 
-/* Copied to +0x70 of the emitter object sprite_newScreenSprite returns. */
+/* Copied to +0x70 of the kind 7 screen sprites effect_updateEmitterSpawner spawns. The size and the fields at 0x00
+ * and 0x0D are SightSpritePayload's: kind 7 makes sight_handleSpriteMessage (gScreenSpriteMsgHandlers[7]) their
+ * message handler, which reads player and kind. */
 typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ u8   pad4[0x8];
-    /* 0x0C */ u8   unkC;
-    /* 0x0D */ u8   unkD;
+    /* 0x0C */ u8   flags;
+    /* 0x0D */ u8   kind;   /* SightSpritePayload.kind */
     /* 0x0E */ u8   padE[0x2];
-    /* 0x10 */ f32  unk10;
+    /* 0x10 */ f32  ySpeed; /* added to sprite.info.y per frame (effect_updateRisingScreenSprite) */
     /* 0x14 */ u8   pad14[0x44];
-} EB340Payload;
+} BeeCavernSpritePayload;
 
+/* The screen sprites of the spawner (update kind 10, gScreenSpriteUpdates[10] = effect_updateRisingScreenSprite).
+ * Screen y grows downward: they start at the top (y = -120) and end below 120. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ f32 y;      /* ScreenSprite info.y */
-    /* 0x18 */ u8  pad18[0x68];
-    /* 0x80 */ f32 ySpeed;
-} EB340Rising;
+    /* 0x00 */ ScreenSprite sprite;
+    /* 0x70 */ BeeCavernSpritePayload payload;
+} BeeCavernSprite;
 
 /* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
 typedef struct {
@@ -307,9 +309,9 @@ extern const Vec3f D_8009FFA0[4];
 
 /* game/Effects/Sfx/effects_sfx_w1_bee_cavern.c */
 void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList);
-void effect_updateEmitterSpawner(EB340Obj *obj);
-void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
-s32 effect_updateRisingScreenSprite(EB340Rising *sprite);
+void effect_updateEmitterSpawner(BeeCavernSpawnerEffect *obj);
+void effect_emitterSpawnerMessage(BeeCavernSpawnerEffect *obj, void **msg, u8 event);
+s32 effect_updateRisingScreenSprite(BeeCavernSprite *sprite);
 
 /* game/Effects/DebrisSplash/debrissplash.c */
 void func_150BE210(WorldObject *obj);
@@ -367,8 +369,8 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher);
 extern const struct CeilingProbe gWatcherCeilingProbe;
 
 /* game/Effects/ParticleCallbacks/particlecallbacks.c */
-typedef struct Obj150C7670 Obj150C7670;
-s32 func_150C7670(Obj150C7670 *particle);
+typedef struct LightAlphaParticle LightAlphaParticle;
+s32 func_150C7670(LightAlphaParticle *particle);
 s32 effect_setParticleIdentityMtx(void *mtx, s32 particle);
 
 /* game/Effects/BounceRecords/bouncerecords.c */
@@ -592,7 +594,7 @@ void effect_stopHomingEffect(s32 handle);
 void effect_getHomingEffectPos(s32 handle, s32 *x, s32 *y, s32 *z);
 void effect_updateHomingEffect(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
-void effect_spawnHitEffectsOnExpire(struct Game1EF500Trail *trail);
+void effect_spawnHitEffectsOnExpire(struct WeaponProjectile *trail);
 s32 func_150E4174(Obj4174 *obj);
 extern HomingEffect *gHomingEffects[8]; /* live homing effects by handle - 1 */
 
@@ -779,7 +781,7 @@ void effect_levelUpdateCutsceneTreads(s32 unused);
 extern u8 D_80088B90;
 extern const Vec3f D_800A1FB0;
 extern const Vec3f D_800A1FBC;
-struct Game1EF500Trail *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2);
+struct WeaponProjectile *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2);
 void effect_spawnBonePointShotFx(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void effect_spawnBonePointBeam(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
 void effect_getBonePointPos(Actor *obj, s16 arg1, Vec3f *out);

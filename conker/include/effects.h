@@ -3090,7 +3090,7 @@ typedef struct ZonePairEmitter {
     /* 0x08 */ TriggerZone *target;
 } ZonePairEmitter;
 
-/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
+/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/DiscEmitter/discemitter.c): particles at a random point of a disc. */
 typedef struct DiscEmitter {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 z;
@@ -3098,15 +3098,19 @@ typedef struct DiscEmitter {
     /* 0x0C */ f32 y;
 } DiscEmitter; /* size 0x10 */
 
-/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks particle_emitDiscParticle and
- * particle_updateOriginRingEmitter (game/Particle/DiscEmitter/discemitter.c) and of particle_emitSteamTrailSpray (game/Particle/PuffSprays/puffsprays.c). */
-typedef struct Struct150C29F0 {
+/* Timed effect with a DiscEmitter as its data: the object of expire callback 5 (particle_emitDiscParticle,
+ * game/Particle/DiscEmitter/discemitter.c), made by level_setup05 with a 0x10-byte data size. */
+typedef struct DiscEmitterEffect {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        DiscEmitter disc;
-        f32 accum;
-    } data;
-} Struct150C29F0; /* size 0x38 */
+    /* 0x28 */ DiscEmitter disc;
+} DiscEmitterEffect; /* size 0x38 */
+
+/* The timed effect of tick 18 (particle_updateOriginRingEmitter, game/Particle/DiscEmitter/discemitter.c), made by
+ * level_setup12 with a 4-byte data size: the spawn accumulator. */
+typedef struct OriginRingEmitter {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ f32 accum;
+} OriginRingEmitter;
 
 /* Sight beams (laser tripwires) and sight sprites, game/Effects/Sight/SightBeam/sightbeam.c and game/Effects/Sight/effects_sight.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */

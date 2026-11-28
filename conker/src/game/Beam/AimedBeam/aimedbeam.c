@@ -661,13 +661,13 @@ void beam_unlinkFlash(LightEffect *flash) {
 
 /* Fires a projectile (weapon_spawnProjectile) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a effect_spawnBoneBeamParticle effect at the muzzle. */
-Game1EF500Trail *beam_fireSlotProjectile(actor, slot, fxOwner, fxList)
+WeaponProjectile *beam_fireSlotProjectile(actor, slot, fxOwner, fxList)
     Actor *actor;
     u8 slot;
     u8 fxOwner;
     s32 fxList;
 {
-    Game1EF500Trail *ret;
+    WeaponProjectile *ret;
     Vec3f muzzle;
     Vec3f dir;
     const Vec3f *src[2];

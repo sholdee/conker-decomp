@@ -117,12 +117,13 @@ void actor_hitSpawnTrails(Actor *obj, s32 arg) {
     trail_spawnFollowTrail(obj, 0xFF, 1);
 }
 
-/* Spawns an effect that carries the object and the two words at arg as its data. */
-void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
+/* Hit handler 9: spawns a flamethrower controller (tick 35, flamethrower_updateController) for obj, whose flame
+ * stays alive while obj's animation is one of the two in arg. */
+void func_1506AA48(Actor *obj, FlameAliveAnims *arg) {
     TimedEffect *effect;
     struct {
         ActorRef ref;
-        Pair1506AA48 value;
+        FlameAliveAnims value;
     } data;
 
     data.ref.actor = obj;

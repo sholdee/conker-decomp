@@ -137,11 +137,11 @@ void particle_drawGreyscaleScreen(void *effect, u8 *framebuffer) {
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
-void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
-    Obj150AFBF4 *sprite;
+void particle_updateSmokeSource(SmokeSource *source) {
+    OscillatorSprite *sprite;
     ScreenSpriteInfo puff;
     TimeOscillator motion;
-    GameDC6B0SmokeTimers *timers;
+    SmokeSourceTimers *timers;
     ScreenSpriteInfo spark;
 
     timers = &source->timers;
@@ -229,7 +229,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
 }
 
 /* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to the sprite's x. */
-s32 particle_updateSineOscillator(Obj150AFBF4 *obj) {
+s32 particle_updateSineOscillator(OscillatorSprite *obj) {
     TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * gFrameDelta;
@@ -312,10 +312,10 @@ void func_150B003C(s32 unused) {
 }
 
 /* Arguments the projectile's ribbon trail keeps (trail_spawnRibbon selector 1). */
-typedef struct GameDC6B0TrailArgs {
-    GameDC6B0Projectile *source;
+typedef struct ProjectileRibbonArgs {
+    TrailProjectile *source;
     s32 unk4;
-} GameDC6B0TrailArgs;
+} ProjectileRibbonArgs;
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
@@ -324,8 +324,8 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list) {
     Vec3f dir;
     f32 length;
     f32 invLength;
-    GameDC6B0Projectile *projectile;
-    GameDC6B0TrailArgs trailArgs;
+    TrailProjectile *projectile;
+    ProjectileRibbonArgs trailArgs;
     EffectObj **trail;
 
     trailArgs.unk4 = 0;
@@ -375,7 +375,7 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list) {
 }
 
 /* Releases the projectile's ribbon trail, if any. */
-void particle_freeProjectileTrail(GameDC6B0Projectile *projectile) {
+void particle_freeProjectileTrail(TrailProjectile *projectile) {
     EffectObj **trail = &projectile->trail;
 
     if (*trail != NULL) {
@@ -384,13 +384,13 @@ void particle_freeProjectileTrail(GameDC6B0Projectile *projectile) {
 }
 
 /* Releases the trail, then particle_destroyModelParticleDefault. */
-void particle_destroyTrailProjectile(GameDC6B0Projectile *projectile) {
+void particle_destroyTrailProjectile(TrailProjectile *projectile) {
     particle_freeProjectileTrail(projectile);
     particle_destroyModelParticleDefault(&projectile->head);
 }
 
 /* Releases the trail, then particle_freeModelParticleDefault. */
-void particle_freeTrailProjectile(GameDC6B0Projectile *projectile) {
+void particle_freeTrailProjectile(TrailProjectile *projectile) {
     particle_freeProjectileTrail(projectile);
     particle_freeModelParticleDefault(&projectile->head);
 }

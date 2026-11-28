@@ -7,16 +7,16 @@
 
 typedef struct {
     u8 lightIds[5];
-} Struct15100340;
+} FlagLightIds;
 
 /* This file's .data: the light ids of the five gFlagLightStates flags. */
-static Struct15100340 gFlagLightEventIds = { { 9, 10, 11, 12, 13 } };
+static FlagLightIds gFlagLightEventIds = { { 9, 10, 11, 12, 13 } };
 
 /* When arg0 is 0: advances gLevelTexFrame, then randomly toggles each of the five gFlagLightStates flags,
  * passing the matching gFlagLightEventIds id to light_sendEvent on each toggle. */
 void effect_levelUpdateFlagLights(s32 arg0) {
     s32 pad; // matching: unused stack slot, sets the frame size
-    Struct15100340 ids = gFlagLightEventIds;
+    FlagLightIds ids = gFlagLightEventIds;
     s32 i;
     u8 *flag;
     u32 chance;

@@ -349,7 +349,7 @@ void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri
 }
 
 /* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
-struct S151D4408Temps {
+struct BoneMatrixTemps {
     f32 scaleX;
     f32 scaleY;
     f32 scaleZ;
@@ -362,7 +362,7 @@ struct S151D4408Temps {
 /* Spawns one particle at pos flying along dir, oriented by matrix mtx and attached to owner. */
 void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 fxOwner, s32 fxList) {
     ParticleSpawn p;
-    struct S151D4408Temps unused;
+    struct BoneMatrixTemps unused;
     f32 speed;
 
     model_decomposeBoneMatrix(mtx, &unused.x, &unused.y, &unused.z, &p.rot.x, &p.rot.y, &p.rot.z,

@@ -15,8 +15,8 @@ static const u8 gTwinMuzzleBones[2] = { 2, 4 };
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
  * light_createWithEffect flash at the muzzle and a effect_spawnBoneBeamParticle beam on the muzzle's bone. */
-Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 fxOwner, s32 fxList) {
-    Game1EF500Trail *tracer;
+WeaponProjectile *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 fxOwner, s32 fxList) {
+    WeaponProjectile *tracer;
     Vec3f aimStart;
     Vec3f aimDir;
     Vec3f muzzle;

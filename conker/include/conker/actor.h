@@ -31,10 +31,10 @@ typedef struct {
     s8 unk2;
 } Struct80099140;
 
+/* The two owner animations (Actor.animseq) a flamethrower flame stays alive in (FlamethrowerController.aliveState). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1506AA48;
+    s32 anims[2];
+} FlameAliveAnims;
 
 /* Hit-handler argument of func_1506AB7C / func_1506ABC4 (gActorHitHandlers[0xB] / [0xE]; the same layout as
    actoractions.c's ThrowPacket; game/Particle/SprayObjects/sprayobjects.c sends one too). */
@@ -339,7 +339,7 @@ void func_1506A83C(Actor *obj, s32 arg);
 void actor_hitSpawnFlash(Actor *obj, s32 arg);
 void func_1506A968(Actor *obj, s32 arg);
 void actor_hitSpawnTrails(Actor *obj, s32 arg);
-void func_1506AA48(Actor *obj, Pair1506AA48 *arg);
+void func_1506AA48(Actor *obj, FlameAliveAnims *arg);
 void actor_hitBloodImpacts(Actor *obj, s32 arg);
 void func_1506AB7C(Actor *obj, ImpactBlastArgs *arg);
 void func_1506ABC4(Actor *obj, ImpactBlastArgs *arg);

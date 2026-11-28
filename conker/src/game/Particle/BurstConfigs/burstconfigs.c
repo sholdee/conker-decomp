@@ -1216,10 +1216,10 @@ void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero sizeY
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
 void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 sizeY, u8 owner, s32 list) {
-    void *object;
+    GrowFadeParticle *object;
     s32 oneAxis;
     ParticleSpawn78 spawn;
-    Extra1515452C extra;
+    GrowFadeData extra;
     s32 pad[2]; // matching: unused stack slots
 
     if (duration <= 0.0f) {
@@ -1298,17 +1298,17 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
 
     object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
-        memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
+        memcpy(&object->grow, &extra, sizeof(extra));
     }
     return object;
 }
 
 /* Per-frame update for particle_spawnGrowFade's objects: grow, fade, spin; returns 0 once expired. */
-s32 particle_updateGrowFade(Object15132A4C *object) {
+s32 particle_updateGrowFade(GrowFadeParticle *object) {
     f32 size;
-    Extra1515452C *extra;
+    GrowFadeData *extra;
 
-    extra = &object->extra.grow;
+    extra = &object->grow;
     size = extra->growth * sqrtf(extra->elapsed);
     object->head.sizeXZ = size;
     if (!(extra->growOneAxis & 1)) {
@@ -1356,9 +1356,9 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
 /* Spawns a single object at `position` whose size and alpha swell and shrink along half a sine wave
  * over `duration`. */
 void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 owner, s32 list) {
-    void *object;
+    SwellParticle *object;
     ParticleSpawn spawn;
-    Extra15154A88 extra;
+    SwellData extra;
 
     if (duration <= 0.0f) {
         return NULL;
@@ -1409,18 +1409,18 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
 
     object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
-        memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
+        memcpy(&object->swell, &extra, sizeof(extra));
     }
     return object;
 }
 
 /* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, spin; returns 0 once expired. */
-s32 particle_updateSwell(Object15132A4C *object) {
-    Extra15154A88 *extra;
+s32 particle_updateSwell(SwellParticle *object) {
+    SwellData *extra;
     f32 wave;
     f32 size;
 
-    extra = &object->extra.pulse;
+    extra = &object->swell;
     wave = sinf(extra->phase);
     size = extra->size * wave;
     object->head.sizeY = size;

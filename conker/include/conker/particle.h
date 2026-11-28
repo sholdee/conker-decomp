@@ -156,15 +156,15 @@ typedef struct {
     /* 0x28 */ SmokeEmitterData data;
 } SmokeEmitter;
 
-typedef struct GameDC6B0SmokeTimers {
+typedef struct SmokeSourceTimers {
     s16 puff;
     s16 spark;
-} GameDC6B0SmokeTimers;
+} SmokeSourceTimers;
 
-typedef struct GameDC6B0SmokeSource {
+typedef struct SmokeSource {
     TimedEffect base;
-    GameDC6B0SmokeTimers timers;
-} GameDC6B0SmokeSource;
+    SmokeSourceTimers timers;
+} SmokeSource;
 
 /* A sine oscillator: value = base + amplitude * sin(phase), with phase advancing by rate. */
 typedef struct {
@@ -178,13 +178,13 @@ typedef struct {
 typedef struct {
     /* 0x00 */ ScreenSprite sprite;
     /* 0x70 */ TimeOscillator osc;
-} Obj150AFBF4;
+} OscillatorSprite;
 
 /* A projectile created by particle_newModelParticleWithFloor. */
 typedef struct {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ EffectObj *trail; /* ribbon effect (trail_spawnRibbon) following the projectile */
-} GameDC6B0Projectile;
+} TrailProjectile;
 
 void particle_hitPlayerOnObjectContact(s32 idA, s32 idB);
 void particle_spawnZoneGroundFxNearCamera(void *obj, TriggerZone *range);
@@ -192,16 +192,16 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter);
 s32 particle_wobbleSmoke(SpriteParticle *particle, Vec3f *prevPos);
 void particle_startGreyscaleScreen(s16 lifetime, u8 owner, s32 list);
 void particle_drawGreyscaleScreen(void *effect, u8 *framebuffer);
-void particle_updateSmokeSource(GameDC6B0SmokeSource *source);
-s32 particle_updateSineOscillator(Obj150AFBF4 *obj);
+void particle_updateSmokeSource(SmokeSource *source);
+s32 particle_updateSineOscillator(OscillatorSprite *obj);
 void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 owner, s32 list);
 void particle_freeCharSpriteEmitters(void);
 void particle_fireActorBoneTracer(s32 altBone);
 void func_150B003C(s32 unused);
 void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 owner, s32 list);
-void particle_freeProjectileTrail(GameDC6B0Projectile *projectile);
-void particle_destroyTrailProjectile(GameDC6B0Projectile *projectile);
-void particle_freeTrailProjectile(GameDC6B0Projectile *projectile);
+void particle_freeProjectileTrail(TrailProjectile *projectile);
+void particle_destroyTrailProjectile(TrailProjectile *projectile);
+void particle_freeTrailProjectile(TrailProjectile *projectile);
 void particle_spawnObjDebrisBurst(Actor *obj, u8 owner, s32 list);
 /* (u8 id, LightSwing *out); declared without a prototype: game/Lighting/LevelLights/levellights.c passes a third argument */
 s32 particle_initLightSwingOnObject();
@@ -393,11 +393,11 @@ s32 func_150C2558(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 or
 s32 func_150C2700(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
                   s32 argB, s32 argC, void *data, u8 owner);
 void particle_startSteamTrail(f32 *x, f32 *y, f32 *z, s16 delay, s32 owner, s32 list);
-void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter);
+void particle_emitSteamTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter);
 
 /* game/Particle/DiscEmitter/discemitter.c */
-void particle_emitDiscParticle(Struct150C29F0 *emitter);
-void particle_updateOriginRingEmitter(Struct150C29F0 *emitter);
+void particle_emitDiscParticle(DiscEmitterEffect *emitter);
+void particle_updateOriginRingEmitter(OriginRingEmitter *emitter);
 s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle);
 s32 particle_expireRingParticleOffBearing(ChannelParticle *particle);
 
@@ -415,24 +415,24 @@ void func_150C3D5C(Actor *obj);
 typedef struct {
     /* 0x0 */ FlickerSprite *volatile particle;
     /* 0x4 */ WatcherEmitter *volatile linked;
-} GameF3270Children;
+} WatcherEmitterChildren;
 
-/* A character watcher with GameF3270Children as extra data. */
-typedef struct GameF3270Emitter {
+/* A character watcher with WatcherEmitterChildren as extra data. */
+typedef struct WatcherEmitterOwner {
     /* 0x00 */ CharacterWatcher watcher;
-    /* 0x58 */ GameF3270Children children;
-} GameF3270Emitter;
+    /* 0x58 */ WatcherEmitterChildren children;
+} WatcherEmitterOwner;
 
-void particle_keepFlickerSprite(GameF3270Emitter *emitter);
+void particle_keepFlickerSprite(WatcherEmitterOwner *emitter);
 s8 particle_updateFlickerSprite(FlickerSprite *particle);
 s32 particle_detachFlickerSprite(FlickerSprite *particle);
-void particle_keepWatcherEmitter(GameF3270Emitter *emitter);
-WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emitter);
+void particle_keepWatcherEmitter(WatcherEmitterOwner *emitter);
+WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, WatcherEmitterOwner *emitter);
 void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source);
 s32 particle_updateWatcherLink(WatcherEmitter *obj);
 void particle_destroyWatcherLink(WatcherEmitter *obj);
 void particle_freeWatcherLink(WatcherEmitter *obj);
-FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter);
+FlickerSprite *particle_spawnFlickerSprite(WatcherEmitterOwner *emitter);
 
 /* game/Particle/SideDust/sidedust.c */
 /* Growth applied by particle_updateDustPuff, stored in the dust particle at 0x128. */
@@ -1065,7 +1065,7 @@ typedef struct {
 } TwoSidedEmitter;
 
 void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 owner, s32 list);
-void particle_spawnHitEffectsHideOwnerSparks(struct Game1EF500Trail *trail); /* an expire handler of gProjectileExpireHandlers */
+void particle_spawnHitEffectsHideOwnerSparks(struct WeaponProjectile *trail); /* an expire handler of gProjectileExpireHandlers */
 void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3);
 void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj);
 void particle_onTwoSidedEmitterMsg(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType);
@@ -1466,7 +1466,7 @@ typedef struct {
     f32 alpha;  /* alpha - fade * elapsed^2 */
     f32 fade;
     u8 growOneAxis; /* grow only head.sizeXZ */
-} Extra1515452C;
+} GrowFadeData;
 
 /* Copied into the object spawned by particle_spawnSwell at +0x170; advanced each frame by particle_updateSwell. */
 typedef struct {
@@ -1475,16 +1475,19 @@ typedef struct {
     f32 alpha;
     f32 phase; /* size and alpha are scaled by sinf(phase) */
     f32 phaseRate;
-} Extra15154A88;
+} SwellData;
 
-/* A particle_newModelParticle object of particle_spawnGrowFade or particle_spawnSwell, with its extra data. */
+/* The particle_newModelParticle object of particle_spawnGrowFade (update function 15, particle_updateGrowFade). */
 typedef struct {
     /* 0x000 */ ModelParticle head;
-    /* 0x170 */ union {
-        Extra1515452C grow;
-        Extra15154A88 pulse;
-    } extra;
-} Object15132A4C;
+    /* 0x170 */ GrowFadeData grow;
+} GrowFadeParticle;
+
+/* The particle_newModelParticle object of particle_spawnSwell (update function 18, particle_updateSwell). */
+typedef struct {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ SwellData swell;
+} SwellParticle;
 
 void particle_initConeFromTri(TriangleSource *source, ConeBasis *cone);
 s32 particle_completeConeBasis(ConeBasis *cone);
@@ -1522,10 +1525,10 @@ void particle_spawnSplashSprayOnTri(TriangleSource *source, SplashSpray *config,
 void particle_spawnSplashSpray(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 owner, s32 list);
 void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 owner, s32 list);
 void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 sizeY, u8 owner, s32 list);
-s32 particle_updateGrowFade(Object15132A4C *object);
+s32 particle_updateGrowFade(GrowFadeParticle *object);
 void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list);
 void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 owner, s32 list);
-s32 particle_updateSwell(Object15132A4C *object);
+s32 particle_updateSwell(SwellParticle *object);
 
 /* game/Particle/StreakParticle/streakparticle.c */
 extern BurstPoint gPipeBurstPoints[3][10]; /* random burst points around each pipe (level_initPipeBurstPoints fills them) */
@@ -1979,16 +1982,16 @@ typedef struct {
     /* 0x56 */ u16 color;     // RGBA5551
     /* 0x58 */ u8 animIndex;  // index into gEffectAnimTextures
     /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
-} Particle19F150;
+} FloorSprite;
 
-Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 owner,
+FloorSprite *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 owner,
                               s32 list);
 void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size, s32 flags,
                    s32 animSpeed, s32 arg11, u8 owner, s32 list);
 void particle_spawnTriSprite(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
                    s32 animSpeed, s32 arg10, u8 owner, s32 list);
-void particle_updateFloorSprite(Particle19F150 *particle);
-Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 view);
+void particle_updateFloorSprite(FloorSprite *particle);
+Gfx *particle_drawFloorSprite(Gfx *gfx, FloorSprite *particle, s32 view);
 s32 particle_layQuadOnTri(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
@@ -2801,12 +2804,12 @@ void particle_newFallingEmitter(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s1
 void particle_updateFallingEmitter(FallingEmitter *emitter);
 
 /* game/Particle/WobbleStream/wobblestream.c */
-typedef struct Game1F1CD0Actor {
+typedef struct ProjectileStreamEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ProjectileStream emission;
-} Game1F1CD0Actor;
+} ProjectileStreamEffect;
 
-void particle_updateWobbleStream(Game1F1CD0Actor *actor);
+void particle_updateWobbleStream(ProjectileStreamEffect *actor);
 
 /* game/Particle/HitImpact/hitimpact.c */
 extern const Vec3f *gGunMuzzlePoints[]; /* muzzle point of each gun (game/Weapon/GunShot/gunshot reads gun 0) */

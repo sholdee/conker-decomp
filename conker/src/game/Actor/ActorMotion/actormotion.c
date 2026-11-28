@@ -196,23 +196,23 @@ typedef struct {
     u16 anim;
     u8 speed; /* percent */
     u8 flags; /* bit 0: copied to unk10B; & 0xFE: stun time / 100 */
-} Game83300AnimSub;
+} ActorReactionStep;
 
 /* An actor type's reaction (0x18 bytes); ANIM_HEADER(gModelAnimTables[id])->reactions points to the table. */
-typedef struct Game83300AnimEntry {
+typedef struct ActorReaction {
     u8 kind; /* matched by actor_findReaction */
     u8 pad1[3];
     s32 sound;
     u8 unk8;
     u8 pad9;
-    Game83300AnimSub sub[3];
+    ActorReactionStep sub[3];
     u8 pad16[2];
-} Game83300AnimEntry;
+} ActorReaction;
 
 /* Moves the actor toward its host movement_obj[unk13D - 100] and picks the carried animation. */
 void actor_moveToHost(Actor *actor) {
     ActorAnim *animTable;
-    Game83300AnimEntry *anims;
+    ActorReaction *anims;
     MtxS16 *hostBone;
     u32 animIdx;
     f32 heightOffset;
@@ -1365,7 +1365,7 @@ static u16 gCarryReactionKinds[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x0
 
 /* Attaches the actor to movement_obj[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void actor_attachToHost(Actor *actor, s32 hostIdx) {
-    Game83300AnimEntry *anims;
+    ActorReaction *anims;
     ActorAnim *animTable;
     s32 variant;
 
@@ -3445,8 +3445,8 @@ u32 actor_findReaction(s32 kind, Actor *actor) {
     s32 id;
     ActorAnim *animTable;
     u32 count;
-    Game83300AnimEntry *table;
-    Game83300AnimEntry *entry;
+    ActorReaction *table;
+    ActorReaction *entry;
     u32 i;
 
     id = actor->character_type;
@@ -3461,7 +3461,7 @@ u32 actor_findReaction(s32 kind, Actor *actor) {
     if (count == 0) {
         return 0;
     }
-    count = count / sizeof(Game83300AnimEntry);
+    count = count / sizeof(ActorReaction);
     table = ANIM_HEADER(animTable)->reactions;
     if (table == NULL) {
         return 0;
@@ -3487,7 +3487,7 @@ u32 actor_findReaction(s32 kind, Actor *actor) {
  */
 void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
     ActorAnim *ptr;
-    Game83300AnimEntry *table;
+    ActorReaction *table;
     f32 animSpeed;
     f32 blend;
     s32 i;

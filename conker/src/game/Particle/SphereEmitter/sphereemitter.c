@@ -599,7 +599,7 @@ void particle_updateSwellTint(BillboardParticle *particle) {
 typedef struct {
     /* 0x0 */ f32 drag;
     /* 0x4 */ FadeEvent fade;
-} ParticleData151A26EC;
+} DragFadeSpawnData;
 
 /* Fade event handlers (FadeEvent.eventFunc), called with the particle and its event time; declared
    without a prototype as the handlers take only the particle. */
@@ -609,7 +609,7 @@ static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, par
 s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 owner, s32 list) {
-    ParticleData151A26EC data;
+    DragFadeSpawnData data;
     SpriteParticle *particle;
     ParticleDesc desc;
 

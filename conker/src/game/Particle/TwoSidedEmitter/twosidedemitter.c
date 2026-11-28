@@ -227,7 +227,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
 
 /* Calls weapon_spawnHitEffects for a projectile. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
-void particle_spawnHitEffectsHideOwnerSparks(Game1EF500Trail *trail) {
+void particle_spawnHitEffectsHideOwnerSparks(WeaponProjectile *trail) {
     u8 cameraMask;
     Actor *owner;
 

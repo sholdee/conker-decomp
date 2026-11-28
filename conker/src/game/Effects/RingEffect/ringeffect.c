@@ -503,12 +503,13 @@ s32 effect_moveBurstParticle(BurstParticle *particle) {
     return 1;
 }
 
-/* The first 0x1C bytes of a SpriteDef, for particle_spawnFlatQuadSpriteNoModel (which copies sizeof(SpriteDef)). */
+/* The first 0x1C bytes of a SpriteDef, for particle_spawnFlatQuadSpriteNoModel (which copies sizeof(SpriteDef)).
+ * matching: a whole SpriteDef local in its place moves effect_spawnImpactRing's stack slots. */
 typedef struct {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
     /* 0x06 */ u8 texture;
-    /* 0x07 */ u8 pad7;
+    /* 0x07 */ u8 handlerSet;
     /* 0x08 */ s32 frame;
     /* 0x0C */ s32 frameSpeed;
     /* 0x10 */ u8 alpha;
@@ -517,7 +518,7 @@ typedef struct {
     /* 0x16 */ u8 primMode;
     /* 0x17 */ u8 envMode;
     /* 0x18 */ s32 renderModes;
-} Fx_150CA150;
+} SpriteDef1C;
 
 /*
  * Impact effect at the actor: finds the floor below it, spawns an expanding ring there and,
@@ -581,7 +582,7 @@ void effect_spawnImpactRing(Actor *actor) {
             effect_newRingEffect(&def, 0, 0xFF, 1);
         }
         if (onGround) {
-            Fx_150CA150 fx;
+            SpriteDef1C fx;
             f32 pad; // matching: unused stack slot
             f32 size;
             f32 extent;

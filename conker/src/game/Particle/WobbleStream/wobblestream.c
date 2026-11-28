@@ -7,7 +7,7 @@
 #include "conker/weapon.h"
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
-void particle_updateWobbleStream(Game1F1CD0Actor *actor) {
+void particle_updateWobbleStream(ProjectileStreamEffect *actor) {
     ProjectileStream *emission;
     f32 inverse;
     f32 time;

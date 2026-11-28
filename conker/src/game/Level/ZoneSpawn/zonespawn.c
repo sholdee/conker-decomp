@@ -86,13 +86,14 @@ start:
 }
 
 /* GlowOrbit as level_spawnPointGlowZone fills it: the object whose t and v rotations GlowOrbit.angles
- * points at (its first field, so object = angles). */
+ * points at (its first field, so object = angles).
+ * matching: GlowOrbit with the object in a second local moves the frame by 8. */
 typedef struct {
     /* 0x00 */ f32 distance;
     /* 0x04 */ f32 spread;
     /* 0x08 */ WorldObject *object;
     /* 0x0C */ f32 pivot[3];
-} Payload18_150130B4;
+} PointGlowOrbit;
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
 s32 level_spawnPointGlowZone(TriggerZone *obj) {
@@ -211,7 +212,7 @@ s32 level_spawnPointGlowZone(TriggerZone *obj) {
     case 17:
     case 18: {
         GlowObj *particle;
-        Payload18_150130B4 orbit;
+        PointGlowOrbit orbit;
         u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
 
         orbit.object = gfx_findObjectById(ids[kind - 13]);
@@ -592,7 +593,7 @@ s32 func_1501407C(TriggerZone *obj) {
 
 /* Declared s32 but returns no value; giving it a return value or void changes the code. */
 s32 level_spawnRandomPointZone(TriggerZone *obj) {
-    Game1FBB80Effect data;
+    RandomPointEmitterData data;
     TimedEffect *effect;
 
     obj->flags |= 4;

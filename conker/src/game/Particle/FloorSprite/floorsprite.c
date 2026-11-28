@@ -23,9 +23,9 @@ Gfx gFloorSpriteEndDl[] = {
 };
 
 /* Allocates a particle and initialises its animation state. */
-Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 owner,
+FloorSprite *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 owner,
                               s32 list) {
-    Particle19F150 *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, list, sizeof(Particle19F150), 1, owner, 1);
+    FloorSprite *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, list, sizeof(FloorSprite), 1, owner, 1);
 
     if (particle == NULL) {
         return NULL;
@@ -49,7 +49,7 @@ Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s
  */
 void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size,
                    s32 flags, s32 animSpeed, s32 arg11, u8 owner, s32 list) {
-    Particle19F150 *particle;
+    FloorSprite *particle;
 
     particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg11, owner, list);
     if (particle != NULL) {
@@ -74,7 +74,7 @@ void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
 void particle_spawnTriSprite(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
                    s32 animSpeed, s32 arg10, u8 owner, s32 list) {
-    Particle19F150 *particle;
+    FloorSprite *particle;
 
     particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg10, owner, list);
     if (particle != NULL) {
@@ -85,7 +85,7 @@ void particle_spawnTriSprite(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 c
 }
 
 /* Per-frame update: counts the lifetime down by the frame delta and advances the animation. */
-void particle_updateFloorSprite(Particle19F150 *particle) {
+void particle_updateFloorSprite(FloorSprite *particle) {
     s32 lifetime;
     s32 frameCount;
 
@@ -133,7 +133,7 @@ void particle_updateFloorSprite(Particle19F150 *particle) {
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
  * primitive colour only when they differ from the cached state in gCachedTexture..gCachedPrimA.
  */
-Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 view) {
+Gfx *particle_drawFloorSprite(Gfx *gfx, FloorSprite *particle, s32 view) {
     s32 r;
     s32 g;
     s32 b;

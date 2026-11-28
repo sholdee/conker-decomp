@@ -122,7 +122,7 @@ typedef struct {
 } TeamSetup;
 
 /* Cue table row: cutscene_start(map, cutscene or altCutscene). */
-struct Struct151E4314 {
+struct ModeCue {
     s16 map;
     s8 cutscene;
     s8 altCutscene;
@@ -209,7 +209,7 @@ static const s16 gModeHudFlags[10] = { 0x15, 0xC14, 0x1C, 0x4014, 0xC14, 0x54, 0
 /* per mode: gMatchFlags */
 static const s16 gModeMatchFlags[10] = { 0x100, 0x0, 0xB, 0x300, 0x0, 0x21, 0x0, 0x0, 0x100, 0x140 };
 /* cue per mode (ModeEntry.introCue), menu 0 */
-static const struct Struct151E4314 gModeIntroCues[6] = {
+static const struct ModeCue gModeIntroCues[6] = {
     { 26, 1, 1 },
     { 36, 1, 1 },
     { 45, 1, 3 },
@@ -218,7 +218,7 @@ static const struct Struct151E4314 gModeIntroCues[6] = {
     { 63, 1, 3 },
 };
 /* cue per mode, menu 1 */
-static const struct Struct151E4314 gModeResultCues[6] = {
+static const struct ModeCue gModeResultCues[6] = {
     { 26, 2, 3 },
     { 36, 2, 2 },
     { 48, 1, 5 },
@@ -2870,7 +2870,7 @@ void save_updateModeIntro(void) {
 
 /* Plays the mode's intro cue (entry introCue) and waits in state 5, or sets up the match directly. */
 void save_playModeIntro(void) {
-    const struct Struct151E4314 *entry;
+    const struct ModeCue *entry;
     s32 cueIdx;
     s32 param;
 
@@ -3844,7 +3844,7 @@ void save_forgetTextBanks(void) {
 typedef struct {
     u16 forwardTune;
     u16 backTune;
-} Snd151E6C1C;
+} MenuStopTunes;
 
 u8 D_8008FF40[6] = { 1, 2, 3, 4, 5, 6 };
 f32 D_8008FF48[6] = { 0.0085f, 0.05f, 0.03f, 0.03f, 0.03f, 0.03f };
@@ -3854,7 +3854,7 @@ s8 D_8008FF80[6] = { 30, 100, 80, 60, 60, 60 };
 u8 D_8008FF88[8] = { 17, 18, 19, 20, 21, 22, 23, 24 };
 f32 D_8008FF90[8] = { 0.012f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f };
 u8 D_8008FFB0[2][6] = { { 1, 0xFF, 4, 6, 8, 3 }, { 0xFF, 0xFF, 0xFF, 0xFF, 9, 5 } };
-static const Snd151E6C1C D_800AB908[6] = {
+static const MenuStopTunes D_800AB908[6] = {
     { 40, 41 },
     { 38, 39 },
     { 38, 39 },
@@ -3862,7 +3862,7 @@ static const Snd151E6C1C D_800AB908[6] = {
     { 38, 39 },
     { 38, 39 },
 };
-static const Snd151E6C1C D_800AB920[8] = {
+static const MenuStopTunes D_800AB920[8] = {
     { 41, 40 },
     { 42, 43 },
     { 42, 43 },
@@ -3896,7 +3896,7 @@ void save_updateMenuCamera(s32 index) {
     f32 z[16];
     s8 path[16];
     u8 *nodeTable;
-    const Snd151E6C1C *sounds;
+    const MenuStopTunes *sounds;
     WorldObject *r;
     WorldObject *r2;
     PathNode *node;
