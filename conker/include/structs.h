@@ -830,7 +830,7 @@ typedef struct ActorAnim {
 typedef struct AnimHeader {
     /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
     /* 0x4 */ const struct HitReaction *hits;           // 83300: hit-reaction table (actor_getHitReactions)
-    /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
+    /* 0x8 */ struct ActorReaction *reactions;   // 83300: reaction entries
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
 
@@ -1352,7 +1352,7 @@ struct WorldObject {
     /* 0x34 */ f32 zScale;
     /* 0x38 */ void (*moveProc)(WorldObject *obj); // per-frame behaviour
     /* 0x3C */ union {
-        void *data;                  // per-kind data, e.g. a Turret15112520Cfg
+        void *data;                  // per-kind data, e.g. a TurretConfig
         s32 word;
         struct {
             s16 hi;
@@ -3425,6 +3425,14 @@ typedef struct IdList2 {
 typedef struct IdList3 {
     /* 0x0 */ s32 ids[3];
 } IdList3;
+
+typedef struct IdList4 {
+    /* 0x0 */ s32 ids[4];
+} IdList4;
+
+typedef struct IdList6 {
+    /* 0x0 */ s32 ids[6];
+} IdList6;
 
 /* A file's range in the ROM (gRomFiles, the compressed game code). */
 typedef struct RomFile {

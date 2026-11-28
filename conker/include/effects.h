@@ -3048,21 +3048,14 @@ typedef struct ZoneEffect {
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
 
-/* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
- * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
- * moves sched_preNmiThread's static gPreNmiTime to the start of that file's .bss.) */
-typedef struct DDB60EffectData {
-    /* 0x00 */ struct Actor *owner;
-    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
-} DDB60EffectData; /* size 0xC */
+/* Message 0x35 to the timed effects (beam_onPropArrival, game/Beam/BoltRain/boltrain.c): each zone effect whose
+ * ZoneEffectData.id is in ids fires once (particle_handleRegionEmitterMessage). */
+typedef struct ZoneTriggerMsg {
+    /* 0x00 */ s32 count;
+    /* 0x04 */ const u8 *ids;
+    /* 0x08 */ struct Actor *player; /* stored in ZoneEffectData.actor */
+} ZoneTriggerMsg;
 
-/* The effect object spawned by effect_spawnPerimeterEmitter. */
-typedef struct DDB60Effect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DDB60EffectData data;
-} DDB60Effect;
 
 /* Text box data (at 0x28 in its object): shows a string one line at a time. */
 typedef struct TextLines {
@@ -3097,7 +3090,7 @@ typedef struct ZonePairEmitter {
     /* 0x08 */ TriggerZone *target;
 } ZonePairEmitter;
 
-/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
+/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/DiscEmitter/discemitter.c): particles at a random point of a disc. */
 typedef struct DiscEmitter {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 z;
@@ -3105,15 +3098,19 @@ typedef struct DiscEmitter {
     /* 0x0C */ f32 y;
 } DiscEmitter; /* size 0x10 */
 
-/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks particle_emitDiscParticle and
- * particle_updateOriginRingEmitter (game/Particle/DiscEmitter/discemitter.c) and of particle_emitSteamTrailSpray (game/Particle/PuffSprays/puffsprays.c). */
-typedef struct Struct150C29F0 {
+/* Timed effect with a DiscEmitter as its data: the object of expire callback 5 (particle_emitDiscParticle,
+ * game/Particle/DiscEmitter/discemitter.c), made by level_setup05 with a 0x10-byte data size. */
+typedef struct DiscEmitterEffect {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        DiscEmitter disc;
-        f32 accum;
-    } data;
-} Struct150C29F0; /* size 0x38 */
+    /* 0x28 */ DiscEmitter disc;
+} DiscEmitterEffect; /* size 0x38 */
+
+/* The timed effect of tick 18 (particle_updateOriginRingEmitter, game/Particle/DiscEmitter/discemitter.c), made by
+ * level_setup12 with a 4-byte data size: the spawn accumulator. */
+typedef struct OriginRingEmitter {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ f32 accum;
+} OriginRingEmitter;
 
 /* Sight beams (laser tripwires) and sight sprites, game/Effects/Sight/SightBeam/sightbeam.c and game/Effects/Sight/effects_sight.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
@@ -3234,14 +3231,28 @@ typedef struct {
 /*
  * Template / payload of a type 0xE QuadFx object (game/Effects/ObjectList/objectlist.c): a textured quad pair animated through an
  * TextureDesc. effect_initQuadFxTemplate fills a template's vertices, effect_spawnQuadFx copies it into a new object.
- * The fields between the animation fields belong to the callback (gParticleCallbacks); their names come from the
- * rain drops of game/Effects/Rain/rain.c.
+ * The bytes at 0x80-0x87 belong to the callback (gParticleCallbacks): cb has one member per callback that uses them
+ * (callers without such a callback write the rain names).
  */
 typedef struct QuadFxData {
     /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 dropFlags;   /* rain: 1: hidden until it first wraps, 2: remove when it next wraps */
-    /* 0x84 */ s16 slot;        /* rain: index in gRainDrops */
-    /* 0x86 */ s16 unk86;
+    /* 0x80 */ union {
+        struct {
+            /* 0x80 */ s32 dropFlags;   /* 1: hidden until it first wraps, 2: remove when it next wraps */
+            /* 0x84 */ s16 slot;        /* index in gRainDrops */
+            /* 0x86 */ s16 unk86;
+        } rain;                         /* callback 1, effect_updateRainDrop (game/Effects/Rain/rain.c) */
+        struct {
+            /* 0x80 */ s32 timer;       /* ticks since the spawn */
+            /* 0x84 */ s16 widthScale;  /* halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0]) */
+            /* 0x86 */ s16 heightScale; /* halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1]) */
+        } impact;                       /* callback 13, func_150E4CBC (game/Effects/MaterialImpact/materialimpact.c) */
+        struct {
+            /* 0x80 */ u8 pad80[4];
+            /* 0x84 */ s16 fallSpeed;
+            /* 0x86 */ s16 maxHalfHeight;
+        } falling;                      /* callback 15, effect_updateFallingObject (game/Effects/FallingObject/fallingobject.c) */
+    } cb;
     /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
     /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
     /* 0x8C */ s16 x;

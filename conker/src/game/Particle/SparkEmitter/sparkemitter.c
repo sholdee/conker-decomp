@@ -122,10 +122,11 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
 }
 
 /*
- * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's
- * vertex buffer, filling a fresh buffer from the template first. Returns the vertices, or NULL.
+ * Vertex function 0x1F of the ring sparks: builds the spark's camera-facing quad (head.def.pos to head.def.rot,
+ * head.def.width to each side) in this frame's vertex buffer, filling a fresh buffer from the template first. Returns the
+ * vertices, or NULL.
  */
-Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
+Vtx *particle_buildSparkBeamQuad(RingSparkParticle *beam, s16 index) {
     Vtx *vertices;
     Vtx *result;
     Vec3f *camera;
@@ -135,7 +136,7 @@ Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
     Vec3f view;
     Vec3f side;
     f32 lengthSquared;
-    f32 *texture;
+    SparkMotion *motion;
     u8 fresh;
 
     particle_getViewBuffer(beam->head.vtxBuffers, index, sizeof(beam->head.vtxTemplate), &vertices, &fresh);
@@ -149,7 +150,7 @@ Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
     } else {
         return NULL;
     }
-    texture = beam->texture;
+    motion = &beam->motion; /* posY and posX are the texture S of the start and the end */
     camera = math_getCameraPos(index);
     delta.x = beam->head.def.rot.x - beam->head.def.pos.x;
     delta.y = beam->head.def.rot.y - beam->head.def.pos.y;
@@ -180,25 +181,25 @@ Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
     vertices->v.ob[0] = beam->head.def.pos.x - side.x;
     vertices->v.ob[1] = beam->head.def.pos.y - side.y;
     vertices->v.ob[2] = beam->head.def.pos.z - side.z;
-    vertices->v.tc[0] = texture[1];
+    vertices->v.tc[0] = motion->posY;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x - side.x;
     vertices->v.ob[1] = end.y - side.y;
     vertices->v.ob[2] = end.z - side.z;
-    vertices->v.tc[0] = texture[0];
+    vertices->v.tc[0] = motion->posX;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x + side.x;
     vertices->v.ob[1] = end.y + side.y;
     vertices->v.ob[2] = end.z + side.z;
-    vertices->v.tc[0] = texture[0];
+    vertices->v.tc[0] = motion->posX;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = beam->head.def.pos.x + side.x;
     vertices->v.ob[1] = beam->head.def.pos.y + side.y;
     vertices->v.ob[2] = beam->head.def.pos.z + side.z;
-    vertices->v.tc[0] = texture[1];
+    vertices->v.tc[0] = motion->posY;
     vertices->v.flag = 0;
     return result;
 }

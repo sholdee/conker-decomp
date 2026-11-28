@@ -530,17 +530,11 @@ void light_runCallback(PointLight *light, s32 id) {
     }
 }
 
-/** Payload (at +0x28) of the effect_newTimedEffect effect spawned by light_startColourWave. */
-typedef struct Game36680ParticleEffect {
-    TimedEffect base;
-    f32 params[12];
-} Game36680ParticleEffect;
-
-/** Ambient action 2: spawns a particle effect with three random angles. */
+/** Ambient action 2: starts a colour wave (timed effect tick 45, light_updateColourWave) with random r, g and b phases. */
 void light_startColourWave(s32 unused) {
     f32 params[12];
     f32 fraction;
-    Game36680ParticleEffect *effect;
+    ColourWaveEffect *effect;
 
     params[0] = 35.0f;
     params[1] = 35.0f;
@@ -567,7 +561,7 @@ void light_startColourWave(s32 unused) {
 
     effect = effect_newTimedEffect(300, -1, 45, -1, 0, 0, sizeof(params), 255, 1);
     if (effect != NULL) {
-        memcpy(effect->params, params, sizeof(params));
+        memcpy(&effect->wave, params, sizeof(params));
     }
 }
 

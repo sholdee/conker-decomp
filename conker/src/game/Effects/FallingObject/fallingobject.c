@@ -33,7 +33,7 @@ void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
     spawn.halfHeight = 0;
     spawn.callback = 15;
     spawn.animIndex = 0x45;
-    spawn.unk86 = 10;
+    spawn.cb.falling.maxHalfHeight = 10;
     spawn.unkA3 = pos->markOnLanding;
     spawn.flags = 0x4880;
     spawn.alpha = 0x80;

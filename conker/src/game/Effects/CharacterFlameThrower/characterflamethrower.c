@@ -3221,11 +3221,11 @@ void *flamethrower_buildFlameLineQuad(SceneParticle *beam, s16 view) {
 typedef struct CharacterFlamethrowerFlameEx {
     /* 0x000 */ CharacterFlamethrowerFlame flame;
     /* 0x154 */ u8 pad154[4];
-    /* 0x158 */ s32 aliveState; /* owner->unk84.uh values the flame stays alive in */
+    /* 0x158 */ s32 aliveState; /* owner->animseq.uh values the flame stays alive in */
     /* 0x15C */ s32 aliveState2;
 } CharacterFlamethrowerFlameEx;
 
-/* Flame update callback (gFlameUpdateProcs): keeps the flame only while its owner's unk84 is one of aliveState. */
+/* Flame update callback (gFlameUpdateProcs): keeps the flame only while its owner's animseq is one of aliveState. */
 s32 flamethrower_checkOwnerAlive(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlameEx *state = actor->state;
     Actor *owner = state->flame.seed.owner;

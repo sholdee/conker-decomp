@@ -404,7 +404,7 @@ void sprite_buildLevelParticles(void) {
         sprite_setupParticleSlot(i, gParticleSlotResources[i].id, gParticleSlotResources[i].flags);
     }
 
-    gLevelSprites = allocate_memory(gLevelHeader->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
+    gLevelSprites = allocate_memory(gLevelHeader->maxParticles * sizeof(LevelSprite), 1, 2, 0);
     collision_selectMap(0);
 
     if (gMeshTriMaterials != NULL) {

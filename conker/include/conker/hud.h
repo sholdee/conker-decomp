@@ -30,11 +30,12 @@ typedef struct {
     /* 0x00 */ s32 v[7];
 } PlaceValueTable;
 
+/* One of the 30 code entry keys (gCodeEntryKeys, display lists 0x1C5..0x1E2), drawn by hud_updateCodeEntry. */
 typedef struct {
     Gfx *dl;
     s32 *data;
     s16 *usedTextures; /* the distinct textures dl uses (texture_resolveDl's usedOut) */
-} Struct151EDF4C;
+} CodeEntryKey;
 
 /* game/Hud/PlayerOverlay/playeroverlay.c */
 void hud_resetBubbles(void);
@@ -116,7 +117,7 @@ extern s32 gHudDigitTextures[10];
 extern PlaceValueTable gPlaceValues;
 extern Gfx gHudModelTexOnDl[];
 extern Gfx gHudModelTexOffDl[];
-extern Struct151EDF4C *gCodeEntryKeys;
+extern CodeEntryKey *gCodeEntryKeys;
 extern HudSprite gHudImagePanelSprite;
 
 /* Texture asset ids of the HUD. Each is a link-time symbol whose address is the id (undefined_syms_auto.txt);

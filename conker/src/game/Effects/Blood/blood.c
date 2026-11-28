@@ -60,12 +60,6 @@ const s32 *gBloodModelLists[20] = {
     gDecoratedSoldierBloodModels, gBroadTedizBloodModels, gGreggBloodModels, gHoodedGreggBloodModels, D_800A3ED4, D_800A3EF0,
 };
 
-
-typedef struct {
-    s32 value[4];
-} Struct15136698Table;
-
-
 /* Actor model ids (Actor::id) that have a blood profile. */
 enum {
     MODEL_CONKER = 0,
@@ -377,43 +371,33 @@ void blood_freeDrip(BloodDrip *drip) {
     gBloodDripFreeHandlers[index]();
 }
 
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    u8 ownerId;
-    u8 pad19[0x3];
-    Actor *owner;
-    u8 pad20[0x1D];
-    u8 handlerSet;
-} SubA_151347CC;
-
-/* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
+/* Message handler of the blood drips (gObjectTypes[40].handleEvent): frees the effect when its owner goes away, follows owner handle swaps. */
 void blood_handleDripMessage(void *obj, ActorMsg *msg, u8 message) {
-    SubA_151347CC *effect = obj; // matching: copying the parameter keeps IDO's register choice in case 0x2D
+    BloodDrip *effect = obj; // matching: copying the parameter keeps IDO's register choice in case 0x2D
     Actor *actorA;
 
     if ((message == 0) || (message == 3)) {
-        if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+        if ((msg->ref.actor == effect->desc.owner) || (msg->ref.uniqueId == effect->desc.ownerId)) {
             effect_destroyObject(&effect->header);
         }
     } else if (message == 0x11) {
-        if (effect->handlerSet == 5) {
-            if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+        if (effect->desc.handlerSet == 5) {
+            if ((msg->ref.actor == effect->desc.owner) || (msg->ref.uniqueId == effect->desc.ownerId)) {
                 effect_destroyObject(&effect->header);
             }
         }
     } else if (message == 0x16) {
-        if ((Actor *)msg == effect->owner) {
+        if ((Actor *)msg == effect->desc.owner) {
             effect_destroyObject(&effect->header);
         }
     } else if (message == 0x2D) {
         actorA = msg->swap.actorA;
-        if (effect->owner == actorA) {
-            effect->owner = msg->swap.actorB;
-            effect->ownerId = msg->swap.idB;
-        } else if (effect->owner == msg->swap.actorB) {
-            effect->owner = actorA;
-            effect->ownerId = msg->swap.idA;
+        if (effect->desc.owner == actorA) {
+            effect->desc.owner = msg->swap.actorB;
+            effect->desc.ownerId = msg->swap.idB;
+        } else if (effect->desc.owner == msg->swap.actorB) {
+            effect->desc.owner = actorA;
+            effect->desc.ownerId = msg->swap.idA;
         }
     }
 }
@@ -868,25 +852,26 @@ const BloodProfile D_800A40F8[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [19] */
 };
 
+/* Two texture ids; the splat and its sparks each pick one at random. A struct so the pair copies whole. */
 typedef struct {
-    u8 value[2];
-} Blood356D4Kinds;
+    u8 textures[2];
+} BloodTexturePair;
 
 /* Spawns a blood splat particle at *position plus a ring of smaller spark particles around it. */
 void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 owner, s32 list) {
     BloodSplat *result;
     ScreenSpriteInfo particle;
-    Blood356D4Motion motion;
-    Blood356D4Kinds kinds = { { 0x3A, 0x3B } };
+    BloodSplatMotion motion;
+    BloodTexturePair kinds = { { 0x3A, 0x3B } };
     s32 spriteKinds[1] = { 2 };
     f32 scale;
     f32 count;
     ScreenSpriteInfo spark;
-    Blood356D4Kinds sparkKinds;
+    BloodTexturePair sparkKinds;
     s32 flip;
     // matching: the spark textures are copied from a static each iteration (an initializer in the loop moves
     // the stack slot)
-    static Blood356D4Kinds sparkTextures = { { 0x3C, 0x3D } };
+    static BloodTexturePair sparkTextures = { { 0x3C, 0x3D } };
 
     motion.timer = delay;
     motion.growth = (math_randomFloat() * 100.0f + 100.0f) * size * 0.001f;
@@ -898,7 +883,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
     *(Vec2f *)&particle.x = *position;
     particle.halfWidth = size;
     particle.halfHeight = size;
-    particle.texture = kinds.value[math_random() & 1];
+    particle.texture = kinds.textures[math_random() & 1];
     particle.timer = lifetime;
     flip = (math_random() & 1) ? 2 : 0;
     particle.flags = ((particle.texture == 58) ? ((math_random() & 1) ? 4 : 0) : 0) | 9 | flip;
@@ -968,7 +953,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
                 spark.x = position->x + distance * sine;
                 spark.y = position->y + distance * cosine;
             }
-            spark.texture = sparkKinds.value[math_random() & 1];
+            spark.texture = sparkKinds.textures[math_random() & 1];
             spark.flags &= ~6;
             if (math_random() & 1) {
                 spark.flags |= 2;
@@ -986,7 +971,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
 
 /* BloodSplat callback: grows the splat, then lets it fall; returns 0 once it leaves the area. */
 s32 blood_updateSplat(BloodSplat *splat) {
-    Blood356D4Motion *motion;
+    BloodSplatMotion *motion;
     s32 alive;
 
     motion = &splat->motion;
@@ -1139,7 +1124,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
     GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
-    Struct15136698Table textures = { { 0x3A, 0x3B, 0x3C, 0x3D } };
+    IdList4 textures = { { 0x3A, 0x3B, 0x3C, 0x3D } };
     s32 argB;
     s32 argC;
     s32 value;
@@ -1147,7 +1132,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
     s32 random0;
 
     extra = growth;
-    desc.texture = textures.value[math_random() & 3];
+    desc.texture = textures.ids[math_random() & 3];
     if (arg7 != 0) {
         value = 2;
     } else {

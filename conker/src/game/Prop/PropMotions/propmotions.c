@@ -36,9 +36,9 @@ typedef union {
         s32 state;
         s32 timer;
     } bob;
-} Work14C3F0;
+} PropMotionWork;
 
-#define WORK(prop) ((Work14C3F0 *)&(prop)->touch)
+#define WORK(prop) ((PropMotionWork *)&(prop)->touch)
 
 /* State of prop_carryCharacterInArc's swing, allocated on its first update. */
 struct SwingMotion {

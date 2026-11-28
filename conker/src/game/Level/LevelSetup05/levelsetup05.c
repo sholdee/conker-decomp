@@ -8,14 +8,8 @@
 #include "conker/light.h"
 #include "conker/texture.h"
 
-/* Timed effect (expire callback 5, particle_emitDiscParticle) carrying a DiscEmitter at 0x28. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DiscEmitter data;
-} Effect1500EF20;
-
 void level_setup05(void) {
-    Effect1500EF20 *effect;
+    DiscEmitterEffect *effect; /* expire callback 5: particle_emitDiscParticle */
     DiscEmitter tmp;
 
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902B8, 1, -1, 0, 0, 0, -8);
@@ -27,7 +21,7 @@ void level_setup05(void) {
     tmp.radius = 400.0f;
     effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &tmp, sizeof(tmp));
+        memcpy(&effect->disc, &tmp, sizeof(tmp));
     }
 
     tmp.x = 7207.0f;
@@ -35,13 +29,13 @@ void level_setup05(void) {
     tmp.y = -1733.0f;
     effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &tmp, sizeof(tmp));
+        memcpy(&effect->disc, &tmp, sizeof(tmp));
     }
 
     tmp.z = 1412.0f;
     effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &tmp, sizeof(tmp));
+        memcpy(&effect->disc, &tmp, sizeof(tmp));
     }
 
     tmp.x = 9776.0f;
@@ -49,7 +43,7 @@ void level_setup05(void) {
     tmp.y = -1278.0f;
     effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (effect != NULL) {
-        memcpy(&effect->data, &tmp, sizeof(tmp));
+        memcpy(&effect->disc, &tmp, sizeof(tmp));
     }
 
     gAmbientEaseRed = gAmbientColour[0];

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include "effects.h"
 #include "conker/actor.h"
 #include "conker/beam.h"
 #include "conker/collision.h"
@@ -10,12 +11,6 @@
 #include "conker/sound.h"
 #include "conker/trail.h"
 #include "conker/weapon.h"
-
-typedef struct {
-    s32 count;
-    const u8 *list;
-    Actor *player;
-} Msg35;
 
 /* Arrival callback of a level prop (db_Object_array entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
@@ -41,28 +36,28 @@ void beam_onPropArrival(WorldObject *prop) {
         }
     }
     if (prop->unique_id == 0xF9 || prop->unique_id == 0xF8 || prop->unique_id == 0xF7) {
-        Msg35 msg;
+        ZoneTriggerMsg msg;
 
         msg.player = player;
         if (prop->unique_id == 0xF9) {
             const u8 list[9] = { 0, 1, 2, 3, 4, 5, 15, 16, 17 };
 
             msg.count = 9;
-            msg.list = list;
+            msg.ids = list;
         } else if (prop->unique_id == 0xF8) {
             const u8 list[9] = { 6, 7, 8, 24, 25, 26, 18, 19, 20 };
 
             msg.count = 9;
-            msg.list = list;
+            msg.ids = list;
         } else if (prop->unique_id == 0xF7) {
             const u8 list[9] = { 9, 10, 11, 12, 13, 14, 21, 22, 23 };
 
             msg.count = 9;
-            msg.list = list;
+            msg.ids = list;
         }
         effect_sendEventToTimedEffects((s32)&msg, 0x35);
     } else if (prop->unique_id == 0xF6) {
-        Msg35 msg;
+        ZoneTriggerMsg msg;
 
         msg.player = player;
         effect_sendEventToTimedEffects((s32)&msg.player, 0x38);
@@ -234,8 +229,8 @@ static const F32x1 gImpactDebrisScales = { { 0.1f } };
 
 /* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
-void beam_spawnImpactEffects(Game1EF500Trail *obj) {
-    Game1EF500TrailExt *hit;
+void beam_spawnImpactEffects(WeaponProjectile *obj) {
+    WeaponProjectileState *hit;
     u32 surfaceFlags;
     // matching: one struct keeps IDO's stack order (scales, ids, desc) above the spilled locals
     struct {

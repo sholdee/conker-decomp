@@ -247,8 +247,8 @@ void effect_spawnRainDrop(s32 scatterY, s32 dropFlags) {
     packet.halfHeight = rand + 35;
     packet.flags = 0x8C00;
     packet.speed = rand + 10;
-    packet.dropFlags = dropFlags;
-    packet.slot = gRainDropCount;
+    packet.cb.rain.dropFlags = dropFlags;
+    packet.cb.rain.slot = gRainDropCount;
 
     drop = effect_spawnQuadFx(&packet, 0xFF, 0);
     if (drop != NULL) {
@@ -319,14 +319,14 @@ void effect_updateRainDrop(QuadFx *drop) {
         drop->data.z = cz + (drop->data.z - cz) - 1000;
         wrapped = TRUE;
     }
-    dropFlags = drop->data.dropFlags;
+    dropFlags = drop->data.cb.rain.dropFlags;
     if ((dropFlags & 2) && wrapped) {
         gRainDropCount--;
-        RAIN_DROP(drop->data.slot) = NULL;
+        RAIN_DROP(drop->data.cb.rain.slot) = NULL;
         effect_destroyObject(&drop->link);
     } else if (dropFlags & 1) {
         if (wrapped) {
-            drop->data.dropFlags = dropFlags ^ 1;
+            drop->data.cb.rain.dropFlags = dropFlags ^ 1;
         } else {
             drop->data.alpha = 0;
         }
@@ -350,8 +350,8 @@ void effect_markRainDropForRemoval(void) {
     slot = (QuadFx **)((u8 *)gRainDrops + offset);
     do {
         drop = *slot;
-        if (drop != NULL && !(drop->data.dropFlags & 2)) {
-            drop->data.dropFlags |= 2;
+        if (drop != NULL && !(drop->data.cb.rain.dropFlags & 2)) {
+            drop->data.cb.rain.dropFlags |= 2;
             return;
         }
         offset -= stride;
@@ -378,7 +378,7 @@ void effect_spawnRainSplashes(s32 count) {
         z = (math_randomU8() % 500) + centerZ;
         groundY = collision_findMeshFloorNear(x, 10000, z, 0);
         if (groundY != -10000.0f) {
-            packet.dropFlags = 0;
+            packet.cb.rain.dropFlags = 0;
             packet.frameStep = 0x80;
             packet.x = x;
             packet.y = groundY;

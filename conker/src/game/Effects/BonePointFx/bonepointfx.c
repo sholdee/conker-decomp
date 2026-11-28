@@ -18,7 +18,7 @@ u8 D_80088B90 = 9;
 static u8 D_80088B94 = 9;
 
 /* Runs the effect_spawnBonePointShotFx effects for `obj`, then spawns a weapon_spawnProjectile effect from the result. */
-Game1EF500Trail *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2) {
+WeaponProjectile *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f axis0;
     Vec3f position;

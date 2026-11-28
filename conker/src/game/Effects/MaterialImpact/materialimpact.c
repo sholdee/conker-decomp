@@ -13,16 +13,16 @@
 
 
 /* Per-material impact effects, indexed by the material id from collision_getSurfaceType. */
-typedef struct Struct800A1070 {
+typedef struct MaterialImpactDef {
     /* 0x00 */ u16 objectType;   // object spawned through effect_spawnQuadFx (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the weapon_spawnImpactBurst effect
     /* 0x05 */ u8 debrisType;    // effect_sprayDebris debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
-} Struct800A1070;
+} MaterialImpactDef;
 
-static const Struct800A1070 gMaterialImpactDefs[] = {
+static const MaterialImpactDef gMaterialImpactDefs[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
     { 62, 0, 0, 10, 60, 20 },
@@ -58,7 +58,7 @@ static const f32 gMaterialImpactCountScales[] = { 0.33f, 1.0f, 2.0f };
  * Bit 0x8000 of `material` is forwarded to effect_sprayDebris.
  */
 void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
-    const Struct800A1070 *entry;
+    const MaterialImpactDef *entry;
     s32 lifetime;
     s32 flag;
     s32 count;
@@ -111,8 +111,8 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         obj.z = z;
         obj.callback = 0xD;
         obj.animIndex = entry->objectType;
-        obj.slot = gMaterialImpactScales[size][0];
-        obj.unk86 = gMaterialImpactScales[size][1];
+        obj.cb.impact.widthScale = gMaterialImpactScales[size][0];
+        obj.cb.impact.heightScale = gMaterialImpactScales[size][1];
         obj.flags = 0x2A00;
         obj.halfWidth = 1;
         obj.halfHeight = 1;
@@ -208,40 +208,26 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
     }
 }
 
-struct Struct150E4CBC {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ Vtx vtx[8];
-    /* 0x90 */ s32 timer;
-    /* 0x94 */ s16 widthScale;  // halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0])
-    /* 0x96 */ s16 heightScale; // halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1])
-    /* 0x98 */ s16 frame;       // QuadFxData.frame; set to -1 when the effect is finished
-    /* 0x9A */ u8 pad9A[8];
-    /* 0xA2 */ s16 halfWidth;   // QuadFxData.halfWidth
-    /* 0xA4 */ s16 halfHeight;
-    /* 0xA6 */ u8 padA6[0xE];
-    /* 0xB4 */ u8 alpha;
-};
-
 /*
  * Per-frame update (gParticleCallbacks[13]): halfHeight ramps up to 90/256 of heightScale over the first 9 ticks
  * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
  */
-void func_150E4CBC(Struct150E4CBC *fx) {
-    if (fx->timer < 9) {
-        fx->halfHeight = fx->timer * 90 / 9 * fx->heightScale / 256.0f;
+void func_150E4CBC(QuadFx *fx) {
+    if (fx->data.cb.impact.timer < 9) {
+        fx->data.halfHeight = fx->data.cb.impact.timer * 90 / 9 * fx->data.cb.impact.heightScale / 256.0f;
     } else {
-        fx->halfHeight = (90 - (fx->timer * 90 - 810) / 600) * fx->heightScale / 256.0f;
-        if (fx->alpha > gFrameTicks * 17) {
-            fx->alpha -= gFrameTicks * 17;
+        fx->data.halfHeight = (90 - (fx->data.cb.impact.timer * 90 - 810) / 600) * fx->data.cb.impact.heightScale / 256.0f;
+        if (fx->data.alpha > gFrameTicks * 17) {
+            fx->data.alpha -= gFrameTicks * 17;
         } else {
-            fx->frame = -1;
+            fx->data.frame = -1;
         }
     }
-    fx->halfWidth = (s32)(fx->widthScale * 14.0f) >> 8;
-    if (fx->timer > 608) {
-        fx->frame = -1;
+    fx->data.halfWidth = (s32)(fx->data.cb.impact.widthScale * 14.0f) >> 8;
+    if (fx->data.cb.impact.timer > 608) {
+        fx->data.frame = -1;
     }
-    fx->timer += gFrameTicks;
+    fx->data.cb.impact.timer += gFrameTicks;
 }
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in gTriPlaneNormalX..gTriPlaneNormalZ. */
@@ -469,25 +455,12 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     particle_newModelParticle(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
-struct Struct150E5810 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 radius; // ModelParticle.radius: it comes to rest this far above the ground
-    /* 0x14 */ f32 bounce; // restitution applied on each ground hit
-    /* 0x18 */ u8 pad18[0x20];
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ f32 velX;
-    /* 0x48 */ f32 velY;
-    /* 0x4C */ f32 velZ;
-    /* 0x50 */ Vec3f rotVel;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 flags;
-};
-
 /*
- * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
- * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
+ * Floor-hit callback of the model particles (gModelParticleFloorFuncs[3]). A slow fall comes to rest radius above the
+ * ground; otherwise the velocity is reflected off the hit triangle `verts` (or just flipped vertically without one) and
+ * damped by elasticity.
  */
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
+s32 effect_bounceOffTriangle(ModelParticle *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]) {
     Tri3f tri;
     s32 i;
     f32 len;
@@ -498,11 +471,11 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
     Vec3f unit;
 
     obj->pos.y = obj->radius * 1.100000024f + groundY;
-    if (obj->velY > -2.0f) {
-        obj->velX = 0.0f;
+    if (obj->vel.y > -2.0f) {
+        obj->vel.x = 0.0f;
         obj->flags &= ~0x6F;
-        obj->velY = 0.0f;
-        obj->velZ = 0.0f;
+        obj->vel.y = 0.0f;
+        obj->vel.z = 0.0f;
     } else {
         if (verts != NULL) {
         lbl: // matching: a block boundary that stops IDO hoisting the loop setup above the NULL test
@@ -518,24 +491,24 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
             len = math_length3(&normal.x);
             if (len > 9.999999747e-06f) {
                 math_vec3Scale(&normal, 1.0f / len, &unit);
-                vel.x = obj->velX;
-                vel.y = obj->velY;
-                vel.z = obj->velZ;
+                vel.x = obj->vel.x;
+                vel.y = obj->vel.y;
+                vel.z = obj->vel.z;
                 dot = math_dot3(&unit.x, &vel.x);
                 math_vec3Scale(&unit, 2.0f * dot, &normal);
                 math_vec3Sub(&vel, &normal, &normal);
-                obj->velX = obj->bounce * normal.x * 0.8000000119f;
-                obj->velY = obj->bounce * normal.y;
-                obj->velZ = obj->bounce * normal.z * 0.8000000119f;
+                obj->vel.x = obj->elasticity * normal.x * 0.8000000119f;
+                obj->vel.y = obj->elasticity * normal.y;
+                obj->vel.z = obj->elasticity * normal.z * 0.8000000119f;
             }
         } else {
-            obj->velX *= obj->bounce;
-            obj->velY = -obj->velY * obj->bounce;
-            obj->velZ *= obj->bounce;
+            obj->vel.x *= obj->elasticity;
+            obj->vel.y = -obj->vel.y * obj->elasticity;
+            obj->vel.z *= obj->elasticity;
         }
-        obj->rotVel.x *= obj->bounce;
-        obj->rotVel.y *= obj->bounce;
-        obj->rotVel.z *= obj->bounce;
+        obj->rotVel.x *= obj->elasticity;
+        obj->rotVel.y *= obj->elasticity;
+        obj->rotVel.z *= obj->elasticity;
     }
     return 1;
 }

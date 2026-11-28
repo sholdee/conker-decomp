@@ -26,9 +26,9 @@ typedef union {
     struct {
         /* 0x7C */ struct ScrollState *state; // allocated on first use
     } scroll;
-} WorkF21D0;
+} PendulumWork;
 
-#define WORK(obj) ((WorkF21D0 *)&(obj)->touch)
+#define WORK(obj) ((PendulumWork *)&(obj)->touch)
 
 /*
  * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward
@@ -190,8 +190,9 @@ s32 func_150C52CC(void *fx) {
     return gModelEffectUpdate2FuncsTail[0](fx);
 }
 
-/* Callback (table at 0x80089910): sets flags bit 0x20000 while func_150C5280 holds, clears it otherwise. */
-s32 func_150C5310(Struct150C5310 *obj) {
+/* Model particle update callback (gModelParticleUpdateFuncs[24]): sets flags bit 0x20000 while func_150C5280 holds,
+ * clears it otherwise. */
+s32 func_150C5310(ModelParticle *obj) {
     if (func_150C5280()) {
         obj->flags |= 0x20000;
     } else {

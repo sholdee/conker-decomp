@@ -349,7 +349,7 @@ void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri
 }
 
 /* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
-struct S151D4408Temps {
+struct BoneMatrixTemps {
     f32 scaleX;
     f32 scaleY;
     f32 scaleZ;
@@ -362,7 +362,7 @@ struct S151D4408Temps {
 /* Spawns one particle at pos flying along dir, oriented by matrix mtx and attached to owner. */
 void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 fxOwner, s32 fxList) {
     ParticleSpawn p;
-    struct S151D4408Temps unused;
+    struct BoneMatrixTemps unused;
     f32 speed;
 
     model_decomposeBoneMatrix(mtx, &unused.x, &unused.y, &unused.z, &p.rot.x, &p.rot.y, &p.rot.z,
@@ -712,27 +712,21 @@ void particle_startPlayerCameraWobbles(Vec3f *pos, f32 radius, f32 fadeRange, f3
     }
 }
 
-/* User data of the effects particle_startPlayerRumbles creates. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 innerRadius;
-    /* 0x10 */ f32 falloffRange;
-    /* 0x14 */ f32 falloffScale;
-    /* 0x18 */ u8 index;
-    /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
-} Params151D5404;
-
-/* Creates one cont_spawnRumble effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
+/* Creates one cont_spawnRumble falloff rumble (update kind 0) for each player i in 0..gScreenLayout, with a duration random in
+ * [base, base + range]. */
 void particle_startPlayerRumbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invFadeRange, s32 base, s32 range, s32 owner, s32 list) {
-    Params151D5404 params;
+    struct {
+        RumbleFalloff falloff;
+        u8 pad1C[4];
+    } params; // matching: the original stack slot is 0x20 bytes; only the falloff (0x1C) is copied
     RumbleParams header;
     void *effect;
     s32 i;
 
-    params.pos = *pos;
-    params.innerRadius = radius;
-    params.falloffRange = fadeRange;
-    params.falloffScale = invFadeRange;
+    params.falloff.pos = *pos;
+    params.falloff.innerRadius = radius;
+    params.falloff.falloffRange = fadeRange;
+    params.falloff.falloffScale = invFadeRange;
     header.flags = 1;
     header.duration = (math_random() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;
@@ -740,10 +734,10 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 radius, f32 fadeRange, f32 invF
 
     for (i = 0; i < gScreenLayout + 1; i++) {
         header.playerMask = 1 << i;
-        params.index = i;
+        params.falloff.view = i;
         effect = cont_spawnRumble(&header, 0x1C, 255, 0);
         if (effect != NULL) {
-            memcpy((u8 *)effect + 0x18, &params, 0x1C);
+            memcpy((u8 *)effect + 0x18, &params.falloff, sizeof(params.falloff)); /* RumbleFalloffObj.falloff */
         }
     }
 }

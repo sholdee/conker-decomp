@@ -19,9 +19,9 @@ typedef struct {
     /* 0x7C */ s32 homeY;
     /* 0x80 */ s32 timer;
     /* 0x84 */ s32 returning;
-} Work142560;
+} ShakeSinkWork;
 
-#define WORK(obj) ((Work142560 *)&(obj)->touch)
+#define WORK(obj) ((ShakeSinkWork *)&(obj)->touch)
 
 void prop_emptyBehavior22(WorldObject *obj) {
 }

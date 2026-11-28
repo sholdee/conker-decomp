@@ -6,7 +6,7 @@
 
 /*
  * Per-type update routines for world objects (WorldObject): moving platforms, a seesaw and a
- * scrolling texture. flags bit 2 is set while triggered; per-type state lives in work (Work142A70).
+ * scrolling texture. flags bit 2 is set while triggered; per-type state lives in work (SeesawWork).
  */
 
 /*
@@ -27,9 +27,9 @@ typedef union {
         f32 weightX;
         f32 weightZ;
     } seesaw;
-} Work142A70;
+} SeesawWork;
 
-#define WORK(obj) ((Work142A70 *)&(obj)->touch)
+#define WORK(obj) ((SeesawWork *)&(obj)->touch)
 
 /* Moves the object vertically to a target height while triggered, waits, then returns home.
  * param: s16 target y | u8 steps << 16 | u8 (wait frames - 1) << 24. */

@@ -312,7 +312,7 @@ s32 trail_spawnHitPuff(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY) {
 
     params = trail->params;
     points = trail->points;
-    fx.dropFlags = 0;
+    fx.cb.rain.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
@@ -338,7 +338,7 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
 
     params = trail->params;
     points = trail->points;
-    fx.dropFlags = 0;
+    fx.cb.rain.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;

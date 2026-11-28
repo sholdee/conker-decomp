@@ -16,7 +16,7 @@
 #include "libc/string.h"
 
 /* This file's .data. */
-/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
+/* Expiry handlers, chosen by WeaponProjectileState.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
 static void (*gProjectileExpireHandlers[])() = {
     weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, weapon_spawnHitEffectsNoFlash, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
@@ -76,14 +76,14 @@ TrailHitCallback gProjectileHitCallback;
  * sets up its path and runs its first update of dt. Returns NULL if it could not be placed or
  * if that first update already ended it.
  */
-Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+WeaponProjectile *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 distScale, f32 width,
                                f32 driftSpeed, f32 defaultRemaining, u8 alpha, Actor *owner, u8 castRay, u8 collide, u8 hitModels,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 hitFlags,
                                f32 dt, u8 viewportMask, s8 filter, s32 extraSize, u8 fxOwner, s32 fxList) {
-    Game1EF500Trail *result;
+    WeaponProjectile *result;
     ParticleDef spawn;
-    Game1EF500TrailExt ext;
+    WeaponProjectileState ext;
     Vec3f sourceDir;
     u8 useSource;
     Vec3f targetDir;
@@ -196,9 +196,9 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
  * Per-frame update of a projectile: moves it, checks collisions and expiry, and plays a fly-by
  * sound once it passes close in front of a player. Returns 0 once the projectile is finished.
  */
-s8 weapon_updateProjectile(Game1EF500Trail *trail) {
+s8 weapon_updateProjectile(WeaponProjectile *trail) {
     s8 alive;
-    Game1EF500TrailExt *ext;
+    WeaponProjectileState *ext;
     Camera *player;
     s32 sound;
     s32 sfxIndex;
@@ -274,14 +274,14 @@ s8 weapon_updateProjectile(Game1EF500Trail *trail) {
  * by width perpendicular to the view and faded to zero alpha at the far end. Returns the 4
  * vertices, or NULL if no vertex buffer was available.
  */
-Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
+Vtx *weapon_buildProjectileTail(WeaponProjectile *trail, s16 index) {
     Vec3f start;
     Vec3f end;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
     Vec3f mid;
     f32 unusedX, unusedY; // matching: unused locals that still take stack slots
-    Game1EF500TrailExt *ext;
+    WeaponProjectileState *ext;
     f32 lengthSq;
     f32 scale;
     Vtx *vertices;
@@ -384,15 +384,15 @@ s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
 }
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 weapon_onProjectileImpact(void *actor, Actor *owner, WeaponProjectile *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit) {
     return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.hitFlags, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
 /* Expiry handler 0 (gProjectileExpireHandlers[0]): debris, a flash and sometimes a burst where the projectile ended. */
-void weapon_onProjectileExpire(Game1EF500Trail *trail) {
-    Game1EF500TrailExt *ext;
+void weapon_onProjectileExpire(WeaponProjectile *trail) {
+    WeaponProjectileState *ext;
     LightEffectHeader header;
     Vec3i header2;
 
@@ -692,10 +692,10 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList) {
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
  * and a flash. Their look depends on the hit surface's material and on the level (level).
  */
-void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
+void weapon_spawnHitEffects(WeaponProjectile *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg) {
     s32 material;
-    Game1EF500TrailExt *ext;
+    WeaponProjectileState *ext;
     s32 type;
 
     material = trail->trail.path.material & 0x1F;
@@ -858,7 +858,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
 }
 
 /* Eases the projectile's accel toward its drift, once per elapsed step. */
-void weapon_easeProjectileAccel(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
+void weapon_easeProjectileAccel(WeaponProjectile *trail, WeaponProjectileState *ext, s32 steps) {
     while (steps > 0) {
         steps--;
         ext->accel.x += (ext->drift.x - ext->accel.x) * 0.228659004f;
@@ -872,7 +872,7 @@ void weapon_easeProjectileAccel(Game1EF500Trail *trail, Game1EF500TrailExt *ext,
  * Casts a ray along the projectile's flight over the distance it moves this frame; on a hit,
  * runs the impact handler and returns 0.
  */
-u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+u8 weapon_traceProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt) {
     u8 result;
     Actor *owner;
     f32 length;
@@ -904,14 +904,14 @@ u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 d
 }
 
 /* Moves the projectile by velocity * dt. */
-void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+void weapon_moveProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt) {
     trail->head.def.pos.x += ext->velocity.x * dt;
     trail->head.def.pos.y += ext->velocity.y * dt;
     trail->head.def.pos.z += ext->velocity.z * dt;
 }
 
 /* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
-s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+s32 weapon_countdownProjectileRange(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt) {
     s32 alive;
     TrailHitCallback callback;
     WorldObject *target;
@@ -939,10 +939,10 @@ s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *
 }
 
 /* StreamEmitter update: when its timer runs out, starts one ProjectileStream and picks a new random delay. */
-void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
+void weapon_updateStreamEmitter(StreamEmitterEffect *owner) {
     StreamEmitter *emitter;
     ProjectileStream data;
-    Game1F1CD0Actor *effect;
+    ProjectileStreamEffect *effect;
 
     emitter = &owner->emitter;
     emitter->timer -= gFrameTicks;

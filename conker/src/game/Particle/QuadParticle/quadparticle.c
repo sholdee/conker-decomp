@@ -38,12 +38,7 @@ typedef union {
         u8 pad0[0x18];
         f32 rate;
     } grow;             /* particle_updateGrowMotion */
-    struct {
-        Vec3f vel;
-        f32 gravity;
-        f32 drag;
-        Vec3f rotVel;
-    } ballistic;        /* particle_updateBallisticMotion */
+    BallisticMotion ballistic; /* particle_updateBallisticMotion */
 } DefParticleMotion;
 
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))

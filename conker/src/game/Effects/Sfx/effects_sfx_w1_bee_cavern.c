@@ -18,8 +18,8 @@
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
 void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList) {
-    EB340Spawn spawn;
-    EB340Obj *obj;
+    BeeCavernSpawner spawn;
+    BeeCavernSpawnerEffect *obj;
 
     spawn.owner = owner;
     spawn.timer = 0;
@@ -32,11 +32,11 @@ void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList) {
 
 /* Spawner update: when the timer runs out, spawns one emitter near the owner and
  * restarts the timer at a random 25..175. */
-void effect_updateEmitterSpawner(EB340Obj *obj) {
-    EB340Spawn *spawn;
+void effect_updateEmitterSpawner(BeeCavernSpawnerEffect *obj) {
+    BeeCavernSpawner *spawn;
     ScreenSpriteInfo emitter;
     void *effect;
-    EB340Payload payload;
+    BeeCavernSpritePayload payload;
 
     obj->spawn.timer -= gFrameTicks;
     spawn = &obj->spawn;
@@ -75,12 +75,12 @@ void effect_updateEmitterSpawner(EB340Obj *obj) {
         emitter.offsetS = 0.0f;
         emitter.offsetT = 0.0f;
         payload.owner = spawn->owner;
-        payload.unkD = 0;
-        payload.unkC = 0;
-        payload.unk10 = (math_randomFloat() * 4.06400013f) + 2.513000011f;
+        payload.kind = 0;
+        payload.flags = 0;
+        payload.ySpeed = (math_randomFloat() * 4.06400013f) + 2.513000011f;
         effect = sprite_newScreenSprite(&emitter, 10, 0, 0, sizeof(emitter), obj->base.header.owner, 0);
         if (effect != NULL) {
-            memcpy((u8 *)effect + 0x70, &payload, sizeof(payload));
+            memcpy(&((BeeCavernSprite *)effect)->payload, &payload, sizeof(payload));
         }
         spawn->timer = (math_random() % 151U) + 25;
     }
@@ -88,7 +88,7 @@ void effect_updateEmitterSpawner(EB340Obj *obj) {
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */
-void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
+void effect_emitterSpawnerMessage(BeeCavernSpawnerEffect *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
             effect_destroyObject(&obj->base.header);
@@ -102,10 +102,10 @@ void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
     }
 }
 
-/* Advances y by ySpeed per frame; returns 0 once it passes 120. */
-s32 effect_updateRisingScreenSprite(EB340Rising *sprite) {
-    sprite->y += sprite->ySpeed * gFrameDelta;
-    if (sprite->y > 120.0f) {
+/* Advances y by ySpeed per frame (down the screen); returns 0 once it passes 120 (Rare's BOTTOM_OF_SCREEN). */
+s32 effect_updateRisingScreenSprite(BeeCavernSprite *sprite) {
+    sprite->sprite.info.y += sprite->payload.ySpeed * gFrameDelta;
+    if (sprite->sprite.info.y > 120.0f) {
         return 0;
     }
     return 1;

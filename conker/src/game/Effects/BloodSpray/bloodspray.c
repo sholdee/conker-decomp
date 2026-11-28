@@ -9,9 +9,9 @@ typedef struct {
     /* 0x01 */ u8 pad1[3];
     /* 0x04 */ Vec3f from;
     /* 0x10 */ Vec3f to;
-} struct_AF4D0;
+} BloodBonePoint;
 
-static const struct_AF4D0 gBloodBonePoints[] = {
+static const BloodBonePoint gBloodBonePoints[] = {
     { 8, { 0 }, { 0.0f, 11.0f, -25.0f }, { 0.0f, 11.0f, -60.0f } },
     { 8, { 0 }, { 37.0f, 0.0f, 0.0f }, { 70.0f, 0.0f, 0.0f } },
     { 8, { 0 }, { -37.0f, 0.0f, 0.0f }, { -70.0f, 0.0f, 0.0f } },
@@ -51,7 +51,7 @@ void blood_sprayFromBone(obj, type, sceneTag, list)
     Vec3f from;
     Vec3f to;
     MtxF *boneMtx;
-    const struct_AF4D0 *entry;
+    const BloodBonePoint *entry;
 
     if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->cullMask & 0xF) != 0xF) {
         entry = &gBloodBonePoints[type];

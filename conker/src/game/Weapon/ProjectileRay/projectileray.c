@@ -6,8 +6,8 @@
 
 /* Projectile message handler (gQuadParticleEventFuncs[8]): on message 0x2D (two actors swap identities), a
  * projectile owned by one of them takes the other as its owner. */
-void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event) {
-    Game1EF500TrailExt *state = &obj->trail;
+void weapon_projectileMessage(WeaponProjectile *obj, ActorSwapMsg *swap, u8 event) {
+    WeaponProjectileState *state = &obj->trail;
 
     if (event == 0x2D) {
         if (state->owner == swap->actorA) {

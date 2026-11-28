@@ -1,8 +1,10 @@
 #include <ultra64.h>
 #include "conker/effect.h"
+#include "conker/particle.h"
 
-/* Runs effect_destroyChildEffect on the object (which destroys its child object), then the shared effect_defaultFreeTimedEffect. */
-void effect_freeWithChild(Effect_129DE0 *obj) {
+/* gTimedEffectFreeFuncs callback of the two-sided emitters (set 37): effect_destroyChildEffect (which destroys the camera
+ * wobble), then the shared effect_defaultFreeTimedEffect. */
+void effect_freeWithChild(TwoSidedEmitter *obj) {
     effect_destroyChildEffect(obj);
     effect_defaultFreeTimedEffect(&obj->base);
 }

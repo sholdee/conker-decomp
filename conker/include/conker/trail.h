@@ -956,6 +956,20 @@ void trail_updateRetryTask(TrailRetryTask *task);
 void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type);
 
 /* game/Effects/Trail/RibbonTrail/ribbontrail.c */
+/* Particle a ribbon effect drags along (see trail_moveRibbon). */
+typedef struct LinkedParticle {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ Vec3f pos;
+} LinkedParticle;
+
+/* State block of a ribbon effect (trail_spawnRibbon). A copy of its arguments follows at +0x10. */
+typedef struct RibbonState {
+    /* 0x00 */ LinkedParticle *linked;
+    /* 0x04 */ void *args;
+    /* 0x08 */ u8 selector; /* index into gRibbonSourceProcs and gRibbonMessageProcs */
+    /* 0x09 */ u8 pad9[3];
+} RibbonState;
+
 void trail_spawnFollowTrail(Actor *target, u8 owner, s32 list);
 s32 trail_ageFollowTrail(EffectObj *obj);
 s32 trail_followTarget(EffectObj *obj);
@@ -1044,20 +1058,20 @@ void trail_testStreamContact(Actor *actor, TriggerZone *source);
 LevelStream *trail_findStream(s32 id);
 
 /* Data of the random-point emitter (a TimedEffect's data). */
-typedef struct Game1FBB80Effect {
+typedef struct RandomPointEmitterData {
     /* 0x00 */ TriggerZone *shape; /* the zone whose area the packets start in (math_randomZoneFootprintPoint) */
     /* 0x04 */ f32 rate;
     /* 0x08 */ f32 accumulator;
     /* 0x0C */ ZoneNode *zone;     /* the emitter's zone: it emits only while a view can see it */
     /* 0x10 */ CollisionHit floor; /* the last floor probe (collision_probeCeilingSet0Cached) under a packet */
-} Game1FBB80Effect;
+} RandomPointEmitterData;
 
-typedef struct Game1FBB80Object {
+typedef struct RandomPointEmitter {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game1FBB80Effect effect;
-} Game1FBB80Object;
+    /* 0x28 */ RandomPointEmitterData effect;
+} RandomPointEmitter;
 
-void trail_updateRandomPointEmitter(Game1FBB80Object *object);
+void trail_updateRandomPointEmitter(RandomPointEmitter *object);
 s32 trail_integrateScalarMotion(TrailScalarMotion *motion);
 WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 smooth, u8 fxOwner, s32 fxList);
 s32 trail_getWaveTrailAnchor(Vec3f *out, Actor *owner, DescParticleHead *anchor);

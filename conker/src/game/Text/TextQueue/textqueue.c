@@ -11,8 +11,8 @@ static u8 gQueuedTextRed; // red
 static u8 gQueuedTextGreen; // green
 static u8 gQueuedTextBlue; // blue
 static u8 gQueuedTextAlpha; // alpha
-static struct Game70200TextNode *gTextQueueHead; // head node
-static struct Game70200TextNode *gTextQueueTail; // tail node
+static struct TextQueueNode *gTextQueueHead; // head node
+static struct TextQueueNode *gTextQueueTail; // tail node
 static u8 D_800CBD6C; // node unk12..unk15
 static u8 D_800CBD6D;
 static u8 D_800CBD6E;
@@ -35,7 +35,7 @@ static f32 gQueuedTextScale;    // scale
 #include "libc/string.h"
 
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
-typedef struct Game70200TextNode {
+typedef struct TextQueueNode {
     Actor *anchor; /* if set, the text is drawn over this actor */
     f32 scale;
     s16 x;
@@ -51,22 +51,22 @@ typedef struct Game70200TextNode {
     u8 unk14;
     u8 unk15;
     u8 pad16[2];
-    struct Game70200TextNode *next;
+    struct TextQueueNode *next;
     u8 text[0x40];
-} Game70200TextNode;
+} TextQueueNode;
 
 #define TEXT_FLAG_CENTERED 0x01 /* centre horizontally on x */
 #define TEXT_FLAG_SCREEN_SPACE 0x40 /* x/y are already in screen pixels: skip the resolution scale */
 #define TEXT_FLAG_SHADOW 0x80
 
 /* HUD icon table entry (gHudIcons). */
-typedef struct Game70200Glyph {
+typedef struct HudIcon {
     u8 width;
     u8 height;
     u8 scale; /* 128 = 1.0 */
     u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
     u8 *image; /* texture id (a symbol address), consecutive ids for animation frames */
-} Game70200Glyph;
+} HudIcon;
 
 /* This file's .data. */
 
@@ -83,7 +83,7 @@ static f32 D_800859C8[4] = { 4096.0f, 4096.0f, 4096.0f, 4096.0f }; /* not refere
 static s32 D_800859D8[2] = { 0x101F0000, 0 };                     /* not referenced */
 
 /* The HUD icons, by icon number - 1. */
-static Game70200Glyph gHudIcons[] = {
+static HudIcon gHudIcons[] = {
     { 1, 1, 0x80, 0, (u8 *)0x894 },
     { 1, 1, 0x80, 0, (u8 *)0x895 },
     { 1, 1, 0x80, 0, (u8 *)0x896 },
@@ -231,8 +231,8 @@ void text_parseFormat(u8 *format, s32 *argumentWords) {
     s32 pad; // matching: pads place `finished` at sp+0x50 and `newNode` at sp+0x48
     s32 finished;
     s32 pad2;
-    Game70200TextNode *newNode;
-    Game70200TextNode *node;
+    TextQueueNode *newNode;
+    TextQueueNode *node;
     u8 *out;
     s32 argumentIndex;
     s32 conversionIndex;
@@ -242,7 +242,7 @@ void text_parseFormat(u8 *format, s32 *argumentWords) {
     argumentIndex = 0;
     spec = D_80085CC4;
     while (*format != 0) {
-        newNode = allocate_memory(sizeof(Game70200TextNode), 1, 0, 1);
+        newNode = allocate_memory(sizeof(TextQueueNode), 1, 0, 1);
         if (newNode == NULL) {
             return;
         }
@@ -390,8 +390,8 @@ Gfx *text_drawQueue(Gfx *gfx) {
     s32 height;
     s32 lines;
     s32 icon;
-    Game70200TextNode *node;
-    Game70200TextNode *next;
+    TextQueueNode *node;
+    TextQueueNode *next;
     Actor *anchor;
     u32 visible;
     s32 shadow;

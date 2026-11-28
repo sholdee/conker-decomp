@@ -142,7 +142,7 @@ s32 func_150BBB5C(Actor *actor) {
         request.callback = -1;
         request.animIndex = 0x2E;
         request.flags = 0x34;
-        request.dropFlags = alpha;
+        request.cb.rain.dropFlags = alpha;
         request.speed = 0;
         effect_initQuadFxTemplate(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         effect_spawnQuadFx(&request, 0xFF, 0);
@@ -586,21 +586,9 @@ s32 func_150BCBBC(Actor *actor) {
     }
 }
 
-
-struct Obj150BCFB8 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 radius;
-    /* 0x14 */ f32 bounce;
-    /* 0x18 */ u8 pad18[0x38 - 0x18];
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ Vec3f vel;
-    /* 0x50 */ Vec3f rotVel;
-    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x60 */ s32 flags;
-};
-
-/* Ground-hit callback: comes to rest when falling slowly, otherwise bounces, scaling all motion by obj->bounce. */
-s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floorY) {
+/* Floor-hit callback of the model particles (gModelParticleFloorFuncs[2]): comes to rest when falling slowly, otherwise
+ * bounces, scaling all motion by obj->elasticity. */
+s32 effect_bounceOnGround(ModelParticle *obj, f32 x, f32 y, f32 z, f32 floorY) {
     obj->pos.y = obj->radius * 1.1f + floorY;
     if (-2.0f < obj->vel.y) {
         obj->vel.x = 0.0f;
@@ -608,12 +596,12 @@ s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floo
         obj->vel.y = 0.0f;
         obj->vel.z = 0.0f;
     } else {
-        obj->vel.x *= obj->bounce;
-        obj->vel.y = -obj->vel.y * obj->bounce;
-        obj->vel.z *= obj->bounce;
-        obj->rotVel.x *= obj->bounce;
-        obj->rotVel.y *= obj->bounce;
-        obj->rotVel.z *= obj->bounce;
+        obj->vel.x *= obj->elasticity;
+        obj->vel.y = -obj->vel.y * obj->elasticity;
+        obj->vel.z *= obj->elasticity;
+        obj->rotVel.x *= obj->elasticity;
+        obj->rotVel.y *= obj->elasticity;
+        obj->rotVel.z *= obj->elasticity;
     }
     return 1;
 }

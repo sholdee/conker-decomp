@@ -3,9 +3,9 @@
 #include "conker/effect.h"
 #include "conker/game.h"
 
-struct FF0E0Object {
+struct RaySpinner {
     TimedEffect base;
-    FF0E0State state;
+    RaySpinnerState state;
 };
 
 /*
@@ -23,7 +23,7 @@ const u8 gRaySpinnerChildColors[13][3] = {
     { 0x00, 0x00, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0xFF },
     { 0xFF, 0x00, 0x00 },
 };
-const FF0E0SpinMsg gRaySpinnerSpinPresets[3] = {
+const RaySpinnerSpin gRaySpinnerSpinPresets[3] = {
     { { 0.91200006f, 2.4320002f, -1.064f }, 0.00129f },
     { { 1.2160001f, 5.6250005f, -0.76000005f }, 0.012363f },
     { { 3.3450003f, 9.882001f, -2.4320002f }, 0.03f },
@@ -31,8 +31,8 @@ const FF0E0SpinMsg gRaySpinnerSpinPresets[3] = {
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
  * moving each child's light to the hit point (light->disabled = 0) or setting light->disabled = 1 on a miss or while disabled. */
-void effect_updateRaySpinner(FF0E0Object *obj) {
-    FF0E0State *state;
+void effect_updateRaySpinner(RaySpinner *obj) {
+    RaySpinnerState *state;
     LightEffect *child;
     MtxF mtx;
     s32 i;
@@ -77,9 +77,9 @@ void effect_updateRaySpinner(FF0E0Object *obj) {
 }
 /* Message handler: 0x32 sets the spin and intensity, 0x30/0x31 enable/disable the object when the
  * argument is its zone, 0x4E resets the spin from gZeroVec3f, 0x4F passes the object to effect_destroyObject. */
-void effect_raySpinnerMessage(FF0E0Object *obj, void *arg, u8 msg) {
-    FF0E0State *state;
-    FF0E0SpinMsg *msgData;
+void effect_raySpinnerMessage(RaySpinner *obj, void *arg, u8 msg) {
+    RaySpinnerState *state;
+    RaySpinnerSpin *msgData;
 
     state = &obj->state;
     if (msg == 0x32) {
@@ -106,8 +106,8 @@ void effect_raySpinnerMessage(FF0E0Object *obj, void *arg, u8 msg) {
 }
 
 /* Passes every child to effect_destroyObject. */
-void effect_destroyRaySpinnerChildren(FF0E0Object *obj) {
-    FF0E0State *state;
+void effect_destroyRaySpinnerChildren(RaySpinner *obj) {
+    RaySpinnerState *state;
     LightEffect *child;
     u8 i;
 
@@ -120,12 +120,12 @@ void effect_destroyRaySpinnerChildren(FF0E0Object *obj) {
     }
 }
 
-void effect_destroyRaySpinner(FF0E0Object *obj) {
+void effect_destroyRaySpinner(RaySpinner *obj) {
     effect_destroyRaySpinnerChildren(obj);
     effect_defaultFreeTimedEffect(&obj->base);
 }
 
-void effect_freeRaySpinner(FF0E0Object *obj) {
+void effect_freeRaySpinner(RaySpinner *obj) {
     effect_destroyRaySpinnerChildren(obj);
     effect_defaultDestroyTimedEffect(&obj->base);
 }

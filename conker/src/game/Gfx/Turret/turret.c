@@ -8,7 +8,7 @@
 static f32 gTurretPlayerDistSq; // turret's squared distance to the player
 
 /* Turret settings in the data (no code reads this name; a turret object's moveData can point here). */
-Turret15112520Cfg gTurretDefaultCfg = {
+TurretConfig gTurretDefaultCfg = {
     0.1f, 0.05f, 15.0f, 90.0f, -90.0f, 30.0f, 40.0f, -20.0f, 20.0f, 145.0f, -10.0f, 1000.0f, 27, 0,
 };
 
@@ -22,7 +22,7 @@ void gfx_aimTurret(WorldObject *turret) {
     f32 delta;
     s32 volume;
     f32 speed;
-    Turret15112520Cfg *cfg;
+    TurretConfig *cfg;
     s32 pad; // matching: unused stack slot
     static s16 gTurretSoundTimer = 0; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 

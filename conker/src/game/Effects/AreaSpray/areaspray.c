@@ -155,19 +155,20 @@ typedef struct {
     /* 0x1C */ f32 texPhase0;
     /* 0x20 */ f32 texPhase1;
     /* 0x24 */ LightEffect *light; /* from light_createJitterAt, released with effect_destroyObject */
-    /* 0x28 */ Actor150FD514 *groundParticle;
+    /* 0x28 */ DefParticleHead *groundParticle; /* particle_spawnAxisQuadParticle's particle lying on the ground */
     /* 0x2C */ f32 emitCounter;
     /* 0x30 */ CollisionHit ground;
     /* 0x54 */ u16 soundHandle;
     /* 0x56 */ u16 soundHandle2;
     /* 0x58 */ u8 burstDone;
     /* 0x59 */ u8 onGround;
-} Ext150FCFD4; /* 0x5C */
+} ActorBeamState; /* 0x5C */
 
-/* A particle (Particle in game/Particle/QuadParticle/quadparticle.c) with Ext150FCFD4 as its motion state. */
-struct Actor150FD514 {
+/* The quad particle effect_spawnActorBeam makes (update2 0x2B effect_updateActorBeam, vertex 0x24
+ * effect_buildActorBeamQuad), with ActorBeamState as its motion state. */
+struct ActorBeamParticle {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Ext150FCFD4 ext;
+    /* 0x110 */ ActorBeamState ext;
 };
 
 /*
@@ -181,9 +182,9 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     u8 flag;
     Vec3f probe;
     ParticleDef def;
-    Ext150FCFD4 ext;
-    Actor150FD514 *particle;
-    Ext150FCFD4 *dst;
+    ActorBeamState ext;
+    ActorBeamParticle *particle;
+    ActorBeamState *dst;
 
     if (obj->alpha < 0xFF) {
         return;
@@ -305,9 +306,9 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
  * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a
  * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
  */
-s32 effect_updateActorBeam(Actor150FD514 *particle) {
+s32 effect_updateActorBeam(ActorBeamParticle *particle) {
     Actor *owner;
-    Ext150FCFD4 *ext;
+    ActorBeamState *ext;
     f32 z;
     f32 x;
     Vec3f groundPos;
@@ -368,10 +369,10 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
     ext->texS0 = math_sin(ext->texPhase0) * 1666.0f + -4633.0f;
     ext->texS1 = math_sin(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {
-        ext->groundParticle->head.def.width = ext->groundParticle->head.def.height = particle->head.def.width * 0.02f;
-        ext->groundParticle->head.def.alpha = particle->head.def.alpha;
-        ext->groundParticle->head.def.pos.x = x;
-        ext->groundParticle->head.def.pos.z = z;
+        ext->groundParticle->def.width = ext->groundParticle->def.height = particle->head.def.width * 0.02f;
+        ext->groundParticle->def.alpha = particle->head.def.alpha;
+        ext->groundParticle->def.pos.x = x;
+        ext->groundParticle->def.pos.z = z;
     }
     particle->head.def.pos.x = x;
     particle->head.def.pos.z = z;
@@ -384,15 +385,15 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
 
 
 /* Message handler: retargets (0x2D, an actor swap) or drops (0, the actor went away) the owner link. */
-void effect_actorBeamMessage(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
-    Ext150FCFD4 *link = &actor->ext;
+void effect_actorBeamMessage(ActorBeamParticle *actor, ActorMsg *msg, u8 eventId) {
+    ActorBeamState *link = &actor->ext;
 
     if (eventId == 0x2D) {
         if (link->owner == msg->swap.actorA) {
             link->owner = msg->swap.actorB;
             link->ownerId = msg->swap.idB;
         } else if (link->owner == msg->swap.actorB) {
-            Ext150FCFD4 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
+            ActorBeamState *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
 
             dst->owner = msg->swap.actorA;
             dst->ownerId = msg->swap.idA;
@@ -407,7 +408,7 @@ void effect_actorBeamMessage(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
 }
 
 /* Draws the actor's camera-facing quad, then sets the corners' S texture coordinates to its scroll values. */
-Vtx *effect_buildActorBeamQuad(Actor150FD514 *actor, s16 viewport) {
+Vtx *effect_buildActorBeamQuad(ActorBeamParticle *actor, s16 viewport) {
     Vtx *vertices;
 
     vertices = particle_buildUprightQuadRev(actor, viewport);
@@ -421,14 +422,14 @@ Vtx *effect_buildActorBeamQuad(Actor150FD514 *actor, s16 viewport) {
 }
 
 /* Releases the effects and sound handles this actor's ext owns. */
-void effect_releaseActorBeam(Actor150FD514 *actor) {
-    Ext150FCFD4 *ext = &actor->ext;
+void effect_releaseActorBeam(ActorBeamParticle *actor) {
+    ActorBeamState *ext = &actor->ext;
 
     if (ext->light != NULL) {
         effect_destroyObject(ext->light);
     }
     if (ext->groundParticle != NULL) {
-        effect_destroyObject(&ext->groundParticle->head.header);
+        effect_destroyObject(&ext->groundParticle->header);
     }
     if (ext->soundHandle != 0) {
         sound_stop(ext->soundHandle);
@@ -439,13 +440,13 @@ void effect_releaseActorBeam(Actor150FD514 *actor) {
 }
 
 /* Releases the ext resources, then hands the particle to particle_destroyQuadParticleDefault. */
-void effect_destroyActorBeam(Actor150FD514 *actor) {
+void effect_destroyActorBeam(ActorBeamParticle *actor) {
     effect_releaseActorBeam(actor);
     particle_destroyQuadParticleDefault(&actor->head);
 }
 
 /* Releases the ext resources, then hands the particle to particle_freeQuadParticleDefault. */
-void effect_freeActorBeam(Actor150FD514 *actor) {
+void effect_freeActorBeam(ActorBeamParticle *actor) {
     effect_releaseActorBeam(actor);
     particle_freeQuadParticleDefault(&actor->head);
 }

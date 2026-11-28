@@ -208,40 +208,19 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface,
                          lit ? 3 : 0, lit ? 0xFF : 0, 0, owner, list);
 }
 
-/* Message 0x35: the list of trigger ids that fired. */
-typedef struct Game1D3420Message {
-    /* 0x00 */ s32 count;
-    /* 0x04 */ u8 *ids;
-    /* 0x08 */ s32 value;
-} Game1D3420Message;
-
-typedef struct Game1D3420Target {
-    /* 0x00 */ TriggerZone *emitter; /* inactive is 1 while the effect can still be triggered */
-    /* 0x04 */ u8 id;
-    /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ ZoneNode *zone; /* the effect's spawn zone (ParticleDef.zone) */
-    /* 0x0C */ u8 flags; /* bit 0: play sounds, bit 1: copied into the effect's hasZone */
-    /* 0x0D */ u8 pad0D[3];
-    /* 0x10 */ s32 value;
-} Game1D3420Target;
-
-struct Game1D3420Listener {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game1D3420Target target;
-};
-
-/* Message handler: on message 0x35 whose id list contains this listener's target id, fires the
- * target emitter's effect once and records the message value. */
-void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *data, u8 type) {
-    Game1D3420Message *msg = data;
+/* Message handler of the zone effects (gTimedEffectMessageFuncs[0x2C]): on message 0x35 whose id list contains the
+ * effect's id, fires the effect's zone once (while its inactive is 1) and records the message's player. Bit 0 of
+ * flags plays sounds, bit 1 is copied into the zone emitter's hasZone; node is the spawn zone (ParticleDef.zone). */
+void particle_handleRegionEmitterMessage(ZoneEffect *listener, void *data, u8 type) {
+    ZoneTriggerMsg *msg = data;
     s32 i;
     s32 found;
-    Game1D3420Target *target;
+    ZoneEffectData *target;
 
     if (type != 0x35) {
         return;
     }
-    target = &listener->target;
+    target = &listener->data;
     i = 0;
     found = FALSE;
     while (i < msg->count && !found) {
@@ -251,11 +230,11 @@ void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *dat
             i++;
         }
     }
-    if (found && target->emitter->inactive == 1) {
-        particle_fireRegionEmitter(target->emitter, target->zone, target->flags & 1, target->flags & 2,
+    if (found && target->zone->inactive == 1) {
+        particle_fireRegionEmitter(target->zone, target->node, target->flags & 1, target->flags & 2,
                       listener->base.header.owner, listener->base.header.kind);
-        target->emitter->inactive = 0;
-        target->value = msg->value;
+        target->zone->inactive = 0;
+        target->actor = msg->player;
     }
 }
 
@@ -328,33 +307,12 @@ void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSou
     }
 }
 
-/* A quad vertex (the Vtx layout). */
-struct Game1D2B10QuadVertex {
-    s16 x, y, z, flag;
-    s16 s, t;
-    u8 r, g, b, a;
-};
-
-struct Game1D2B10QuadOwner {
-    u8 unknown0[0x2C];
-    f32 width;
-    f32 height;
-    f32 x, y, z;
-    u8 unknown40[0x80];
-    Game1D2B10QuadVertex vertexTemplate[4];
-    u8 *buffers[5]; /* each holds two copies of vertexTemplate */
-    f32 texScroll; /* texture s of the quad's first edge */
-    f32 texScrollSpeed;
-    f32 texSpan; /* texture s span */
-    u8 unknown120[6];
-    u8 alpha;
-};
-
-/* Writes the 4 vertices of a vertical quad rotated by table angle `index` into the owner's vertex
- * buffer `index` (initialised from the template the first time) and returns them, or NULL. */
-Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner, s16 index) {
-    Game1D2B10QuadVertex *vertices;
-    Game1D2B10QuadVertex *result;
+/* Vertex function 0x20 of the zone emitters' particles (particle_fireRegionEmitter): writes the 4 vertices of a vertical
+ * quad rotated by table angle `index` into the vertex buffer `index` (initialised from the template the first time) and
+ * returns them, or NULL. */
+Vtx *particle_buildYawedVerticalQuad(ZoneEmitter *owner, s16 index) {
+    Vtx *vertices;
+    Vtx *result;
     f32 dz;
     f32 dx;
     s16 sStart;
@@ -362,52 +320,51 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
     s32 pad; // matching: unused stack slot in the original frame
     u8 isNew;
 
-    particle_getViewBuffer(owner->buffers, index, 0x40, &vertices, &isNew);
+    particle_getViewBuffer(owner->head.vtxBuffers, index, sizeof(owner->head.vtxTemplate), &vertices, &isNew);
     result = vertices;
     if (vertices != NULL) {
         if (isNew) {
-            memcpy(owner->buffers[index], owner->vertexTemplate, sizeof(owner->vertexTemplate));
-            memcpy(owner->buffers[index] + sizeof(owner->vertexTemplate), owner->vertexTemplate,
-                   sizeof(owner->vertexTemplate));
+            memcpy(owner->head.vtxBuffers[index], owner->head.vtxTemplate, sizeof(owner->head.vtxTemplate));
+            memcpy(owner->head.vtxBuffers[index] + 4, owner->head.vtxTemplate, sizeof(owner->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
     {
         s16 tMax = 0x7C0;
-        sStart = owner->texScroll;
-        sEnd = owner->texScroll + owner->texSpan;
-        dz = gCameraAngleSines[index] * owner->width;
-        dx = gCameraAngleCosines[index] * owner->width;
-        vertices->x = owner->x + dx;
-        vertices->y = owner->y;
-        vertices->z = owner->z - dz;
-        vertices->s = sStart;
-        vertices->t = tMax;
-        vertices->a = owner->alpha;
-        vertices->flag = 0;
+        sStart = owner->state.texScroll;
+        sEnd = owner->state.texScroll + owner->state.texSpan;
+        dz = gCameraAngleSines[index] * owner->head.def.width;
+        dx = gCameraAngleCosines[index] * owner->head.def.width;
+        vertices->v.ob[0] = owner->head.def.pos.x + dx;
+        vertices->v.ob[1] = owner->head.def.pos.y;
+        vertices->v.ob[2] = owner->head.def.pos.z - dz;
+        vertices->v.tc[0] = sStart;
+        vertices->v.tc[1] = tMax;
+        vertices->v.cn[3] = owner->state.alpha;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = owner->x - dx;
-        vertices->y = owner->y;
-        vertices->z = owner->z + dz;
+        vertices->v.ob[0] = owner->head.def.pos.x - dx;
+        vertices->v.ob[1] = owner->head.def.pos.y;
+        vertices->v.ob[2] = owner->head.def.pos.z + dz;
         // matching: the comma joins below shift ugen's tree slots onto the heap state particle_fireRegionEmitter leaves
-        vertices->s = sStart, vertices->t = 0;
-        vertices->a = owner->alpha;
-        vertices->flag = 0;
+        vertices->v.tc[0] = sStart, vertices->v.tc[1] = 0;
+        vertices->v.cn[3] = owner->state.alpha;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = owner->x - dx;
-        vertices->y = owner->y + owner->height;
-        vertices->z = owner->z + dz;
-        vertices->s = sEnd;
-        vertices->t = 0, vertices->a = 0, vertices->flag = 0;
+        vertices->v.ob[0] = owner->head.def.pos.x - dx;
+        vertices->v.ob[1] = owner->head.def.pos.y + owner->head.def.height;
+        vertices->v.ob[2] = owner->head.def.pos.z + dz;
+        vertices->v.tc[0] = sEnd;
+        vertices->v.tc[1] = 0, vertices->v.cn[3] = 0, vertices->v.flag = 0;
         vertices++;
-        vertices->x = owner->x + dx;
-        vertices->y = owner->y + owner->height;
-        vertices->z = owner->z - dz;
-        vertices->s = sEnd;
-        vertices->t = tMax;
-        vertices->a = 0;
-        vertices->flag = 0;
+        vertices->v.ob[0] = owner->head.def.pos.x + dx;
+        vertices->v.ob[1] = owner->head.def.pos.y + owner->head.def.height;
+        vertices->v.ob[2] = owner->head.def.pos.z - dz;
+        vertices->v.tc[0] = sEnd;
+        vertices->v.tc[1] = tMax;
+        vertices->v.cn[3] = 0;
+        vertices->v.flag = 0;
     }
     return result;
 }

@@ -18,7 +18,7 @@ static u8 gLauncherBone = 9; // bone of the muzzle points above
  * effects of weapon_runLauncherMuzzle. Returns weapon_spawnProjectile's result, or NULL without an obj. */
 // matching: fxOwner is a u8 read from its stack slot at each use; a K&R u8 parameter is
 // narrowed once into a spilled copy instead
-Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 fxOwner, s32 fxList) {
+WeaponProjectile *weapon_fireLauncherProjectile(Actor *obj, s32 fxOwner, s32 fxList) {
     s32 pad; // matching: unused stack slot
     Vec3f dir;
     Vec3f muzzle;

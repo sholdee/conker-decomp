@@ -260,20 +260,15 @@ void effect_watcherLeaveDeepWater(ActorTask *task) {
 void effect_watcherNoAction(s32 task) {
 }
 
-typedef struct {
-    /* 0x00 */ Actor *character;
-    /* 0x04 */ u8 characterId;
-} Msg151AA17C;
-
-/* Sends message 10 ({unk18, unk1C}) through effect_sendEventToEffectObjs and effect_sendEventToTimedEffects, then trail_startSurfaceTrails. */
+/* Sends message 10 (an ActorRef to the watched character) through effect_sendEventToEffectObjs and effect_sendEventToTimedEffects, then trail_startSurfaceTrails. */
 void effect_watcherStartSurfaceTrails1(SurfaceTrailOwner *owner) {
     s32 word;
-    Msg151AA17C msg;
+    ActorRef msg;
 
     // matching: one int local carries the character and then &msg (a pointer local is rematerialized)
     word = (s32)owner->watcher.character;
-    msg.character = (Actor *)word;
-    msg.characterId = owner->watcher.characterId;
+    msg.actor = (Actor *)word;
+    msg.uniqueId = owner->watcher.characterId;
     word = (s32)&msg;
     effect_sendEventToEffectObjs(word, 10);
     effect_sendEventToTimedEffects(word, 10);
@@ -291,12 +286,12 @@ void effect_watcherReleaseSurfaceTrails2(void) {
 /* Same as effect_watcherStartSurfaceTrails1. */
 void effect_watcherStartSurfaceTrails2(SurfaceTrailOwner *owner) {
     s32 word;
-    Msg151AA17C msg;
+    ActorRef msg;
 
     // matching: one int local carries the character and then &msg (a pointer local is rematerialized)
     word = (s32)owner->watcher.character;
-    msg.character = (Actor *)word;
-    msg.characterId = owner->watcher.characterId;
+    msg.actor = (Actor *)word;
+    msg.uniqueId = owner->watcher.characterId;
     word = (s32)&msg;
     effect_sendEventToEffectObjs(word, 10);
     effect_sendEventToTimedEffects(word, 10);
@@ -327,20 +322,15 @@ void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit) {
     }
 }
 
-struct Task151AA30C {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ Actor *actor;
-};
-
-/* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task) {
+/* Blood drip emitter 2 (gBloodDripEmitters[2], the drip effect_attachFallingDriftIfSolid spawns): one falling particle at
+ * (x, y, z) when that point is not above the owner's waterHeight. */
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, BloodDrip *task) {
     Vec3f pos;
     Vec3f vel;
     Actor *actor;
     CollisionHit *ground;
 
-    actor = task->actor;
+    actor = task->desc.owner;
     if (actor->waterHeight < y) {
         return;
     }
@@ -1038,17 +1028,12 @@ void effect_emitterTaskMessage(EmitterTask *task, ActorMsg *msg, u8 msgId) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ s8 actorId;
-} Msg151ABE00;
-
-/* Broadcasts message 0x20 ({actor, unique_id}) via effect_sendEventToType. */
+/* Sends message 12 (an ActorRef to the actor) to the drip emitters (object type 0x20, particle_onDripEmitterMsg). */
 void effect_stopActorDripEmitters(Actor *actor) {
-    Msg151ABE00 msg;
+    ActorRef msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
 
     effect_sendEventToType(0x20, (s32)&msg, 12);
 }

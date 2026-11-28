@@ -1,38 +1,31 @@
 #include <ultra64.h>
+#include "structs.h"
 #include "conker/game.h"
 #include "conker/model.h"
 
 
-typedef struct Game48B10Vertex {
-    s16 position[3];
-    u16 flags;
-    s16 uv[2];
-    u8 r, g, b, a;
-} Game48B10Vertex;
-typedef struct Game48B10Color { u8 r, g, b; } Game48B10Color;
-
 /* The number of colours in the ramp of each vertex group (groups 1..5). */
 static const u8 gVtxRampLengths[] = { 4, 4, 3, 3, 2 };
 /* The colour ramps. */
-static const Game48B10Color gVtxRamp0[4] = {
+static const Color24 gVtxRamp0[4] = {
     { 0xFF, 0x64, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color gVtxRamp2[4] = {
+static const Color24 gVtxRamp2[4] = {
     { 0xFF, 0x5A, 0x00 }, { 0xFF, 0x1E, 0x00 }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color gVtxRamp3[4] = {
+static const Color24 gVtxRamp3[4] = {
     { 0xB4, 0x3C, 0x00 }, { 0xB4, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color gVtxRamp4[4] = {
+static const Color24 gVtxRamp4[4] = {
     { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 },
 };
 /* The colour ramp of each vertex group. */
-static const Game48B10Color *gVtxRamps[] = { gVtxRamp0, gVtxRamp0, gVtxRamp2, gVtxRamp3, gVtxRamp4 };
+static const Color24 *gVtxRamps[] = { gVtxRamp0, gVtxRamp0, gVtxRamp2, gVtxRamp3, gVtxRamp4 };
 
 void model_rampVertexGroupColours(Actor *arg0, f32 *arg1, s32 arg2) {
-    Game48B10Vertex *vertices;
-    const Game48B10Color *first;
-    const Game48B10Color *second;
+    Vtx *vertices;
+    const Color24 *first;
+    const Color24 *second;
     f32 value;
     f32 interval;
     f32 fraction;
@@ -44,14 +37,14 @@ void model_rampVertexGroupColours(Actor *arg0, f32 *arg1, s32 arg2) {
     s32 i;
     u8 steps;
 
-    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][gDrawBufferIndex]; // the model's vertex copy
+    vertices = (Vtx *)arg0->modelData[arg0->current_lod][gDrawBufferIndex]; // the model's vertex copy
     if (vertices == NULL) {
         return;
     }
     previous = -1;
     for (i = 0; i < gModelVertexCounts[arg0->character_type]; i++) {
-        if (vertices[i].flags & 0x7F00) {
-            group = (vertices[i].flags & 0x7F00) >> 8;
+        if (vertices[i].v.flag & 0x7F00) {
+            group = (vertices[i].v.flag & 0x7F00) >> 8;
             if (group != previous) {
                 if (group >= 6) {
                     continue;
@@ -76,9 +69,9 @@ void model_rampVertexGroupColours(Actor *arg0, f32 *arg1, s32 arg2) {
                 b = first->b;
                 outB = (s32)(second->b - b) * fraction + b;
             }
-            vertices[i].r = outR;
-            vertices[i].g = outG;
-            vertices[i].b = outB;
+            vertices[i].v.cn[0] = outR;
+            vertices[i].v.cn[1] = outG;
+            vertices[i].v.cn[2] = outB;
         }
     }
 }

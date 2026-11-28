@@ -42,11 +42,6 @@ Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
     gDPSetTileSize(gdl++, 4, uls, ult, 0x1FE, 0x03E);
     return gdl;
 }
-typedef struct {
-    Actor *source;
-    f32 pos[3];
-    s32 targetIndex;
-} Struct150C3230;
 
 void func_150C3230(Actor *obj) {
     s32 index;
@@ -115,13 +110,13 @@ void func_150C3230(Actor *obj) {
                 mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
         } else {
-            Struct150C3230 eventData;
+            ImpactBlastArgs eventData;
 
-            eventData.pos[0] = obj->xpos;
-            eventData.pos[1] = obj->ypos;
-            eventData.pos[2] = obj->zpos;
+            eventData.pos.x = obj->xpos;
+            eventData.pos.y = obj->ypos;
+            eventData.pos.z = obj->zpos;
             eventData.source = &movement_obj[obj->owner - 1];
-            eventData.targetIndex = obj->attach_char;
+            eventData.unk10 = obj->attach_char;
             if (target != NULL) {
                 target->imune = target->stunned = 0;
                 if (target->energy != 0) {

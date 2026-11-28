@@ -9,7 +9,7 @@
 #include "conker/view.h"
 #include "libc/string.h"
 
-void particle_emitDiscParticle(Struct150C29F0 *emitter) {
+void particle_emitDiscParticle(DiscEmitterEffect *emitter) {
     DiscEmitter *pos;
     ParticleEmitterDesc particle;
     f32 scaleA;
@@ -22,7 +22,7 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     angle = math_random() & 0xFF;
     cosine = math_cosBinAngleMasked(angle - 0x40);
     sine = math_cosBinAngleMasked(angle);
-    pos = &emitter->data.disc;
+    pos = &emitter->disc;
     radius = math_randomFloat() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
     particle.color[0] = 0;
@@ -58,7 +58,7 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
 /* Timed effect update: while the camera is over 1581 from the world origin in xz, spawns channel particles on a
  * ring of radius 3900-5178 around the origin, only at angles within 0.4 rad of the camera's bearing; each keeps its
  * angle in particle->extra. */
-void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
+void particle_updateOriginRingEmitter(OriginRingEmitter *emitter) {
     f32 *timer;
     f32 *pos;
     f32 distSq;
@@ -68,7 +68,7 @@ void particle_updateOriginRingEmitter(Struct150C29F0 *emitter) {
     f32 scaleB;
     ChannelParticle *created;
 
-    timer = &emitter->data.accum;
+    timer = &emitter->accum;
     *timer += math_randomFloat() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2

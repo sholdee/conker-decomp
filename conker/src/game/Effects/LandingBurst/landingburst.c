@@ -8,13 +8,6 @@
 #include "conker/particle.h"
 #include "libc/string.h"
 
-/* One row of the per-actor-type effect profile table. */
-typedef struct Game1DD500Profile {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u8 unkE; /* 1: flagged effect, 2: no effect */
-    /* 0x0F */ u8 padF;
-} Game1DD500Profile; // size 0x10
-
 /* Impact point in the space of joint 6 (effect_spawnJointImpact). */
 static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
 
@@ -193,7 +186,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 owner, s32 list) {
 }
 
 /* Per-particle motion block at 0x110 of a particle object. */
-typedef struct Game1DD500Motion {
+typedef struct JointParticleMotion {
     /* 0x00 */ Vec3f velocity;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ u8 phaseWidth;     /* oscillator angles */
@@ -207,41 +200,41 @@ typedef struct Game1DD500Motion {
     /* 0x24 */ u8 checkGround;   /* splat when it reaches the ground */
     /* 0x25 */ u8 kind;
     /* 0x26 */ u8 pad26[2];
-} Game1DD500Motion; // size 0x28
+} JointParticleMotion; // size 0x28
 
 /* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.alpha the alpha. */
-struct Game1DD500Particle {
+struct JointEmitterParticle {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Game1DD500Motion motion;
+    /* 0x110 */ JointParticleMotion motion;
 };
 
 /* A particle held at one of the owner's joints until its timer runs out. */
-typedef struct Game1DD500Slot {
-    /* 0x0 */ Game1DD500Particle *particle;
+typedef struct JointEmitterSlot {
+    /* 0x0 */ JointEmitterParticle *particle;
     /* 0x4 */ s32 timer;
-    /* 0x8 */ struct Game1DD500Slot *next; /* ring of free slots while spawning */
-} Game1DD500Slot;
+    /* 0x8 */ struct JointEmitterSlot *next; /* ring of free slots while spawning */
+} JointEmitterSlot;
 
 /* Effect that keeps particles stuck to an actor's joints and drops them over time. */
-typedef struct Game1DD500Emitter {
+typedef struct JointEmitter {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;   /* owner->unique_id at creation */
     /* 0x08 */ s32 count;    /* attached particles */
-    /* 0x0C */ Game1DD500Slot slots[11];
+    /* 0x0C */ JointEmitterSlot slots[11];
     /* 0x90 */ f32 spawnTime;
     /* 0x94 */ u8 profileFlag;
-} Game1DD500Emitter; // size 0x98
+} JointEmitter; // size 0x98
 
 /* Effect task: a TimedEffect header followed by the effect's data. */
-struct Game1DD500Task {
+struct JointEmitterTask {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game1DD500Emitter emitter;
+    /* 0x28 */ JointEmitter emitter;
 };
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list) {
-    Game1DD500Task *task;
-    Game1DD500Emitter emitter;
+JointEmitterTask *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list) {
+    JointEmitterTask *task;
+    JointEmitter emitter;
     s32 profile;
     s16 life;
     u8 timed;
@@ -293,14 +286,14 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
 }
 
 /* A joint and an offset in that joint's space where an emitter particle sits. */
-typedef struct Game1DD500Mount {
+typedef struct JointEmitterMount {
     /* 0x0 */ u8 joint;
     /* 0x1 */ u8 pad1[3];
     /* 0x4 */ Vec3f offset;
-} Game1DD500Mount;
+} JointEmitterMount;
 
 /* Where the emitter keeps its particles: one mount per slot. */
-static const Game1DD500Mount gJointEmitterMounts[11] = {
+static const JointEmitterMount gJointEmitterMounts[11] = {
     { 5, { 0 }, { 0.0f, -10.0f, 159.0f } },
     { 5, { 0 }, { 34.0f, -8.0f, 145.0f } },
     { 5, { 0 }, { -34.0f, -8.0f, 145.0f } },
@@ -315,7 +308,7 @@ static const Game1DD500Mount gJointEmitterMounts[11] = {
 };
 
 /* actor type 0x36 */
-static const Game1DD500Mount gJointEmitterMounts36[11] = {
+static const JointEmitterMount gJointEmitterMounts36[11] = {
     { 4, { 0 }, { 0.0f, -32.0f, 195.0f } },
     { 4, { 0 }, { 40.0f, -25.0f, 154.0f } },
     { 4, { 0 }, { 69.0f, 8.0f, 86.0f } },
@@ -330,8 +323,8 @@ static const Game1DD500Mount gJointEmitterMounts36[11] = {
 };
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
-void effect_updateJointEmitterTask(Game1DD500Task *task) {
-    Game1DD500Emitter *emitter = &task->emitter;
+void effect_updateJointEmitterTask(JointEmitterTask *task) {
+    JointEmitter *emitter = &task->emitter;
     u8 failed; // matching: ending the task directly in the check reorders the whole function
 
     failed = FALSE;
@@ -339,8 +332,8 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
         failed = TRUE;
     }
     if (!failed) {
-        Game1DD500Slot *head;
-        Game1DD500Slot *last;
+        JointEmitterSlot *head;
+        JointEmitterSlot *last;
         s32 i;
         u32 freeCount;
 
@@ -349,7 +342,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
             last = NULL;
             freeCount = 0;
             for (i = 0; i < 11; i++) {
-                Game1DD500Slot *slot = &emitter->slots[i];
+                JointEmitterSlot *slot = &emitter->slots[i];
                 s32 isFree;
 
                 if (slot->particle != NULL) {
@@ -389,7 +382,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                 emitter->spawnTime += math_randomFloat() * 307.0f * 0.001f * gFrameDelta;
                 if (emitter->spawnTime > 1.0f) {
                     ParticleDef desc;
-                    Game1DD500Motion motion;
+                    JointParticleMotion motion;
 
                     last->next = head;
                     desc.texture = gKindSpriteTextures[emitter->profileFlag];
@@ -421,7 +414,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     do {
                         u32 skip;
                         s32 index;
-                        Game1DD500Particle *particle;
+                        JointEmitterParticle *particle;
 
                         skip = math_random() % freeCount;
                         while (skip--) {
@@ -464,11 +457,11 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
 
 /* Moves a released particle under drag and gravity; with checkGround set, a particle that reaches
  * the ground leaves a splat there and the function returns 0 (otherwise 1). */
-s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
+s32 effect_moveReleasedParticle(JointEmitterParticle *particle) {
     f32 dx;
     f32 dz;
     f32 dy;
-    Game1DD500Motion *motion;
+    JointParticleMotion *motion;
     s8 alive;
     f32 oldY;
     f32 oldVz;
@@ -519,7 +512,7 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
 }
 
 /* Fades a particle out over the last 32 frames of its life. */
-s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle) {
+s32 effect_fadeLandingParticleByLife(JointEmitterParticle *particle) {
     s32 fade;
 
     if (particle->head.def.lifetime < 32) {
@@ -533,7 +526,7 @@ s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle) {
 
 /* Writes a particle's quad for view into that view's vertex buffer, facing the camera and tilted
  * by the particle's sideways motion. Returns the vertices, or NULL when there is no buffer. */
-Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
+Vtx *effect_buildJointParticleQuad(JointEmitterParticle *particle, s16 view) {
     Vtx *quad;
     Vtx *ret;
     f32 sine;
@@ -606,9 +599,9 @@ Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
 }
 
 /* Swings a particle's width and height around their base sizes, each on its own phase. */
-s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
-    Game1DD500Particle *particle = arg0; // matching: the copy of the argument sets the stack frame size
-    Game1DD500Motion *motion = &arg0->motion;
+s32 effect_swingParticleSize(JointEmitterParticle *arg0) {
+    JointEmitterParticle *particle = arg0; // matching: the copy of the argument sets the stack frame size
+    JointParticleMotion *motion = &arg0->motion;
     f32 swingW;
     f32 swingH;
 
@@ -622,15 +615,15 @@ s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
 }
 
 /* Frees every attached particle and resets the emitter. */
-void effect_freeJointEmitterParticles(Game1DD500Task *task) {
-    Game1DD500Emitter *emitter;
+void effect_freeJointEmitterParticles(JointEmitterTask *task) {
+    JointEmitter *emitter;
     s32 i;
 
     emitter = &task->emitter;
     emitter->count = 0;
     emitter->spawnTime = 0.0f;
     for (i = 0; i < 11; i++) {
-        Game1DD500Slot *slot = &emitter->slots[i];
+        JointEmitterSlot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
             effect_destroyObject(&slot->particle->head.header);
@@ -643,8 +636,8 @@ void effect_freeJointEmitterParticles(Game1DD500Task *task) {
 
 /* Emitter message handler: ends the task when its owner goes away (messages 0 and 0x13) and
  * follows the owner through an identity swap (0x2D). */
-void effect_jointEmitterTaskMessage(Game1DD500Task *task, void *msg, u8 type) {
-    Game1DD500Emitter *emitter = &task->emitter;
+void effect_jointEmitterTaskMessage(JointEmitterTask *task, void *msg, u8 type) {
+    JointEmitter *emitter = &task->emitter;
     ActorRef *actorMsg = msg;
     ActorSwapMsg *swap = msg;
     Actor *owner = emitter->owner;
@@ -665,13 +658,13 @@ void effect_jointEmitterTaskMessage(Game1DD500Task *task, void *msg, u8 type) {
 }
 
 /* Task handler: frees the attached particles, then passes the task on to effect_defaultDestroyTimedEffect. */
-void effect_destroyJointEmitterTask(Game1DD500Task *task) {
+void effect_destroyJointEmitterTask(JointEmitterTask *task) {
     effect_freeJointEmitterParticles(task);
     effect_defaultDestroyTimedEffect(&task->base);
 }
 
 /* Task handler: frees the attached particles, then passes the task on to effect_defaultFreeTimedEffect. */
-void effect_freeJointEmitterTask(Game1DD500Task *task) {
+void effect_freeJointEmitterTask(JointEmitterTask *task) {
     effect_freeJointEmitterParticles(task);
     effect_defaultFreeTimedEffect(&task->base);
 }

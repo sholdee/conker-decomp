@@ -10,32 +10,23 @@
 #include "conker/zone.h"
 #include "libc/string.h"
 
-struct Msg151419D0 {
-    /* 0x00 */ s32 actorA;
-    /* 0x04 */ union {
-        s32 w;
-        u8 b;
-    } unk4;
-    /* 0x08 */ u8 idA;
-    /* 0x09 */ u8 idB;
-};
-
-/* The block at 0x28 of the receiving object. */
+/* Payload copied into an attached effect (see effect_attachActorEffect). */
 typedef struct {
-    /* 0x00 */ s32 handler; /* index into gActorEffects (EffectInfo.handler) */
-    /* 0x04 */ s32 owner;   /* the owner actor */
-    /* 0x08 */ u8 ownerId;  /* owner->unique_id */
-} Link151419D0;
+    /* 0x00 */ s32 handler;    /* index into gActorEffects */
+    /* 0x04 */ Actor *owner;
+    /* 0x08 */ u8 ownerId;     /* owner->unique_id */
+} EffectInfo;
 
-/* An object carrying a Link151419D0 at 0x28. */
-struct LinkedObject151419D0 {
+/* Timed effect (callback set 50) that runs handler gActorEffects[info.handler] on its owner while it lasts
+ * (effect_attachActorEffect); listed on the owner as ATTACH_TIMED_EFFECT. */
+typedef struct TimedHandlerEffect {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Link151419D0 link;
-};
+    /* 0x28 */ EffectInfo info;
+} TimedHandlerEffect;
 
-/* Calls effect_detachHandle with the object and its owner (link.owner). */
-void effect_detachTimedHandler(LinkedObject151419D0 *obj) {
-    effect_detachHandle(obj, (Actor *)obj->link.owner);
+/* Calls effect_detachHandle with the object and its owner (info.owner). */
+void effect_detachTimedHandler(TimedHandlerEffect *obj) {
+    effect_detachHandle(obj, obj->info.owner);
 }
 
 void effect_destroyTimedHandler(void *arg0) {
@@ -46,40 +37,26 @@ void effect_freeTimedHandler(void *arg0) {
     effect_detachTimedHandler(arg0);
 }
 
-/* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
-void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
-    Link151419D0 *link = &obj->link;
-    s32 first;
+/* Message handler: message 0 destroys the object if it refers to its owner; 0x2D follows an owner swap. */
+void effect_timedHandlerMessage(TimedHandlerEffect *obj, ActorMsg *msg, u8 msgType) {
+    EffectInfo *link = &obj->info;
+    Actor *first;
 
     if (msgType == 0) {
-        first = msg->actorA;
-        if ((first == link->owner) || (msg->unk4.b == link->ownerId)) {
+        first = msg->ref.actor;
+        if ((first == link->owner) || (msg->ref.uniqueId == link->ownerId)) {
             effect_destroyObject(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
-        if (link->owner == msg->actorA) {
-            link->owner = msg->unk4.w;
-            link->ownerId = msg->idB;
-        } else if (link->owner == msg->unk4.w) {
-            link->owner = msg->actorA;
-            link->ownerId = msg->idA;
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
+            link->ownerId = msg->swap.idB;
+        } else if (link->owner == msg->swap.actorB) {
+            link->owner = msg->swap.actorA;
+            link->ownerId = msg->swap.idA;
         }
     }
 }
-
-/* Payload copied into an attached effect (see effect_attachActorEffect). */
-typedef struct {
-    /* 0x00 */ s32 handler;    /* index into gActorEffects */
-    /* 0x04 */ Actor *owner;
-    /* 0x08 */ u8 ownerId;     /* owner->unique_id */
-} EffectInfo;
-
-/* Timed effect that runs handler gActorEffects[info.handler] on its owner while it lasts (effect_attachActorEffect); listed
- * on the owner as ATTACH_TIMED_EFFECT. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EffectInfo info;
-} TimedHandlerEffect;
 
 /* List tag of the attached timed effects. */
 #define ATTACH_TIMED_EFFECT 0x1A
@@ -308,20 +285,11 @@ void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f
     particle_spawnSurfaceQuadSprite(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
-/* Template copied onto the stack for zone_findActorZone. */
-struct Args151420F8 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-};
-
-const Args151420F8 D_800A5200 = { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 };
+/* Zone ids copied onto the stack for zone_findActorZone. */
+const IdList6 D_800A5200 = { { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 } };
 
 s32 func_151420F8(Actor *actor) {
-    Args151420F8 args;
+    IdList6 args;
 
     args = D_800A5200;
     if (zone_findActorZone(actor - movement_obj, 6, &args, actor) == -1) {

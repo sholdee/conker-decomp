@@ -133,31 +133,33 @@ typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ s16 timer; // countdown to the next emitter spawn
     /* 0x06 */ s16 unk6;
-} EB340Spawn;
+} BeeCavernSpawner;
 
 /* The object effect_newEmitterSpawner creates; effect_updateEmitterSpawner is its per-frame update. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EB340Spawn spawn;
-} EB340Obj;
+    /* 0x28 */ BeeCavernSpawner spawn;
+} BeeCavernSpawnerEffect;
 
-/* Copied to +0x70 of the emitter object sprite_newScreenSprite returns. */
+/* Copied to +0x70 of the kind 7 screen sprites effect_updateEmitterSpawner spawns. The size and the fields at 0x00
+ * and 0x0D are SightSpritePayload's: kind 7 makes sight_handleSpriteMessage (gScreenSpriteMsgHandlers[7]) their
+ * message handler, which reads player and kind. */
 typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ u8   pad4[0x8];
-    /* 0x0C */ u8   unkC;
-    /* 0x0D */ u8   unkD;
+    /* 0x0C */ u8   flags;
+    /* 0x0D */ u8   kind;   /* SightSpritePayload.kind */
     /* 0x0E */ u8   padE[0x2];
-    /* 0x10 */ f32  unk10;
+    /* 0x10 */ f32  ySpeed; /* added to sprite.info.y per frame (effect_updateRisingScreenSprite) */
     /* 0x14 */ u8   pad14[0x44];
-} EB340Payload;
+} BeeCavernSpritePayload;
 
+/* The screen sprites of the spawner (update kind 10, gScreenSpriteUpdates[10] = effect_updateRisingScreenSprite).
+ * Screen y grows downward: they start at the top (y = -120) and end below 120. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ f32 y;      /* ScreenSprite info.y */
-    /* 0x18 */ u8  pad18[0x68];
-    /* 0x80 */ f32 ySpeed;
-} EB340Rising;
+    /* 0x00 */ ScreenSprite sprite;
+    /* 0x70 */ BeeCavernSpritePayload payload;
+} BeeCavernSprite;
 
 /* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
 typedef struct {
@@ -230,8 +232,8 @@ void effect_spawnActorImpactDebris(Actor *actor, Actor *other, u8 arg2, s32 arg3
 void effect_pickPerimeterPoint(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
 void effect_attachPerimeterEmitter(Actor *owner);
 void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList);
-void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 event, u8 eventType);
-void effect_updatePerimeterEmitter(DDB60Effect *effect);
+void effect_perimeterEmitterMessage(FixedEmitter *effect, s32 event, u8 eventType);
+void effect_updatePerimeterEmitter(FixedEmitter *effect);
 
 /* game/Effects/BoneStreak/bonestreak.c */
 void effect_spawnBone25StreakBurst(Actor *obj, u8 arg1);
@@ -250,7 +252,6 @@ void effect_ownerSparkMessage(OwnerSparkEffect *effect, ActorMsg *event, u8 even
 /* game/Effects/ObjBurst/objburst.c */
 typedef struct ObjBurstEffect ObjBurstEffect;
 typedef struct BoltRingEffect BoltRingEffect;
-typedef struct Arg150B66DC Arg150B66DC;
 GameCommand *effect_emitFacingCommand(GameCommand *cmd, s32 objIndex);
 void effect_updateObjBurst(ObjBurstEffect *effect);
 void effect_spawnObjBurstAt(Vec3f *pos, u8 owner, s32 kind);
@@ -261,7 +262,7 @@ void effect_getBone5Point(Actor *obj, Vec3f *out);
 void effect_updateBoltRing(BoltRingEffect *effect);
 void effect_boltRingMessage(EffectHeader *effect, s32 arg1, u8 msg);
 void effect_spawnScatterTrailVariant(u8 variant);
-s32 func_150B66DC(Arg150B66DC *ctx);
+s32 func_150B66DC(LightEffect *effect);
 void effect_flashViewLightBlue(u8 owner, s32 kind);
 
 /* game/Effects/BreakUp/breakup.c */
@@ -290,29 +291,27 @@ s32 effect_spawnJointPiece(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
                   s32 arg11, s32 arg12, void *data, u8 owner);
 
 /* game/Effects/ParticleBursts/particlebursts.c */
-struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
 s32 func_150BCBBC(Actor *actor);
-s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, f32 x, f32 y, f32 z, f32 floorY);
+s32 effect_bounceOnGround(ModelParticle *obj, f32 x, f32 y, f32 z, f32 floorY);
 void func_150BD070(u8 owner, s32 list);
 
 /* game/Effects/SegmentTrail/segmenttrail.c */
-struct Obj150BDB3C;
 void func_150BD740(Actor *actor, u8 owner, s32 list);
 s32 func_150BD954(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
                   s32 arg11, s32 arg12, f32 *dir, u8 owner);
-s32 effect_fadeSegmentTrailByLife(struct Obj150BDB3C *obj);
+s32 effect_fadeSegmentTrailByLife(MotionTrail *obj);
 extern const Vec3f D_8009FF40[4];
 extern const Vec3f D_8009FF70[4];
 extern const Vec3f D_8009FFA0[4];
 
 /* game/Effects/Sfx/effects_sfx_w1_bee_cavern.c */
 void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList);
-void effect_updateEmitterSpawner(EB340Obj *obj);
-void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event);
-s32 effect_updateRisingScreenSprite(EB340Rising *sprite);
+void effect_updateEmitterSpawner(BeeCavernSpawnerEffect *obj);
+void effect_emitterSpawnerMessage(BeeCavernSpawnerEffect *obj, void **msg, u8 event);
+s32 effect_updateRisingScreenSprite(BeeCavernSprite *sprite);
 
 /* game/Effects/DebrisSplash/debrissplash.c */
 void func_150BE210(WorldObject *obj);
@@ -370,8 +369,8 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher);
 extern const struct CeilingProbe gWatcherCeilingProbe;
 
 /* game/Effects/ParticleCallbacks/particlecallbacks.c */
-typedef struct Obj150C7670 Obj150C7670;
-s32 func_150C7670(Obj150C7670 *particle);
+typedef struct LightAlphaParticle LightAlphaParticle;
+s32 func_150C7670(LightAlphaParticle *particle);
 s32 effect_setParticleIdentityMtx(void *mtx, s32 particle);
 
 /* game/Effects/BounceRecords/bouncerecords.c */
@@ -462,10 +461,10 @@ void func_150D146C(Actor *arg0);
 void effect_updateAmbientPulse(AmbientPulse *arg0);
 
 /* game/Effects/RaySpinner/rayspinner.c */
-typedef struct FF0E0Object FF0E0Object;
+typedef struct RaySpinner RaySpinner;
 /* Per-object state stored at offset 0x28 of the object (spawned by level_spawnDiscoBallZone,
  * game/Level/ZoneSpawn/zonespawn.c). */
-typedef struct FF0E0State {
+typedef struct RaySpinnerState {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ Vec3f rotation;        /* degrees */
     /* 0x18 */ Vec3f angularVelocity; /* degrees per frame unit; message 0x32 replaces it */
@@ -473,19 +472,19 @@ typedef struct FF0E0State {
     /* 0x3C */ f32 intensity;         /* light radius at a full-length ray */
     /* 0x40 */ TriggerZone *zone;     /* messages 0x30/0x31 for this zone enable/disable it */
     /* 0x44 */ u8 flags; // bit 0: enabled
-} FF0E0State; /* size 0x48 */
+} RaySpinnerState; /* size 0x48 */
 /* Payload of message 0x32 (passed as the argument). */
 typedef struct {
     Vec3f angularVelocity;
     f32 intensity;
-} FF0E0SpinMsg;
+} RaySpinnerSpin;
 extern const u8 gRaySpinnerChildColors[13][3];
-extern const FF0E0SpinMsg gRaySpinnerSpinPresets[3];
-void effect_updateRaySpinner(FF0E0Object *obj);
-void effect_raySpinnerMessage(FF0E0Object *obj, void *arg, u8 msg);
-void effect_destroyRaySpinnerChildren(FF0E0Object *obj);
-void effect_destroyRaySpinner(FF0E0Object *obj);
-void effect_freeRaySpinner(FF0E0Object *obj);
+extern const RaySpinnerSpin gRaySpinnerSpinPresets[3];
+void effect_updateRaySpinner(RaySpinner *obj);
+void effect_raySpinnerMessage(RaySpinner *obj, void *arg, u8 msg);
+void effect_destroyRaySpinnerChildren(RaySpinner *obj);
+void effect_destroyRaySpinner(RaySpinner *obj);
+void effect_freeRaySpinner(RaySpinner *obj);
 
 /* game/Effects/HitSpray/hitspray.c */
 void effect_spawnRayHitDebris(Vec3f *pos, u8 fxOwner, s32 fxList);
@@ -595,7 +594,7 @@ void effect_stopHomingEffect(s32 handle);
 void effect_getHomingEffectPos(s32 handle, s32 *x, s32 *y, s32 *z);
 void effect_updateHomingEffect(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
-void effect_spawnHitEffectsOnExpire(struct Game1EF500Trail *trail);
+void effect_spawnHitEffectsOnExpire(struct WeaponProjectile *trail);
 s32 func_150E4174(Obj4174 *obj);
 extern HomingEffect *gHomingEffects[8]; /* live homing effects by handle - 1 */
 
@@ -605,14 +604,12 @@ void effect_scatterGroundHits(s32 count);
 void effect_scatterGroundHitsAhead(s32 amount);
 
 /* game/Effects/MaterialImpact/materialimpact.c */
-typedef struct Struct150E5810 Struct150E5810;
-typedef struct Struct150E4CBC Struct150E4CBC;
 void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot);
 void effect_spawnGroundImpactsUnder(WorldObject *obj);
-void func_150E4CBC(Struct150E4CBC *fx);
+void func_150E4CBC(QuadFx *fx);
 void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot);
 void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
-s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]);
+s32 effect_bounceOffTriangle(ModelParticle *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]);
 
 /* game/Effects/DistantBolts/distantbolts.c */
 void effect_updateDistantTracers(void);
@@ -729,7 +726,6 @@ void effect_spawnGunMuzzleEffects(Actor *obj, u8 owner, s32 list);
 extern const u8 gStagePartObjectIds[8][8];
 
 /* game/Effects/DelayedBurst/delayedburst.c */
-typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
 typedef struct FadeInSprite FadeInSprite;
 typedef struct FadeInEffect FadeInEffect;
@@ -743,7 +739,7 @@ void effect_updateLineEmitter(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void effect_turnLightsOn(void);
 void effect_turnLightsOff(void);
-void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
+void func_150FADC8(DefParticleHead *obj, s32 arg1, u8 event);
 void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind);
 s32 effect_placeScreenCashModel(ModelEffect *fx);
 Gfx *effect_preDrawScreenCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
@@ -756,34 +752,27 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2);
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
 
 /* game/Effects/ChildEffect/childeffect.c */
-typedef struct Effect_129DE0 Effect_129DE0;
-/* An effect that owns another object (child), destroyed with it (see effect_destroyChildEffect). */
-struct Effect_129DE0 {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 pad28[0x10];
-    /* 0x38 */ EffectHeader *child;
-};
 s32 effect_filterExcludedTargets(Actor *obj, s32 arg1, s32 arg2);
-void effect_destroyChildEffect(Effect_129DE0 *effect);
-void effect_destroyWithChild(Effect_129DE0 *effect);
+void effect_destroyChildEffect(TwoSidedEmitter *effect);
+void effect_destroyWithChild(TwoSidedEmitter *effect);
 
 /* game/Effects/ChildEffectFree/childeffectfree.c */
-void effect_freeWithChild(Effect_129DE0 *obj);
+void effect_freeWithChild(TwoSidedEmitter *obj);
 
 /* game/Effects/AreaSpray/areaspray.c */
-typedef struct Actor150FD514 Actor150FD514;
+typedef struct ActorBeamParticle ActorBeamParticle;
 extern TriggerZone *gSprayAreas[3];
 void effect_eruptSprayAreas(void);
 void effect_sprayFromArea(u8 index);
 f32 effect_getSprayAreaWobbleScale(void *arg0);
 void effect_levelUpdateSprayCooldowns(s32 arg0);
 void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2);
-s32 effect_updateActorBeam(Actor150FD514 *particle);
-void effect_actorBeamMessage(Actor150FD514 *actor, ActorMsg *msg, u8 eventId);
-Vtx *effect_buildActorBeamQuad(Actor150FD514 *actor, s16 viewport);
-void effect_releaseActorBeam(Actor150FD514 *actor);
-void effect_destroyActorBeam(Actor150FD514 *actor);
-void effect_freeActorBeam(Actor150FD514 *actor);
+s32 effect_updateActorBeam(ActorBeamParticle *particle);
+void effect_actorBeamMessage(ActorBeamParticle *actor, ActorMsg *msg, u8 eventId);
+Vtx *effect_buildActorBeamQuad(ActorBeamParticle *actor, s16 viewport);
+void effect_releaseActorBeam(ActorBeamParticle *actor);
+void effect_destroyActorBeam(ActorBeamParticle *actor);
+void effect_freeActorBeam(ActorBeamParticle *actor);
 
 /* game/Effects/TreadScroll/treadscroll.c */
 void effect_levelUpdateCutsceneTreads(s32 unused);
@@ -792,7 +781,7 @@ void effect_levelUpdateCutsceneTreads(s32 unused);
 extern u8 D_80088B90;
 extern const Vec3f D_800A1FB0;
 extern const Vec3f D_800A1FBC;
-struct Game1EF500Trail *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2);
+struct WeaponProjectile *effect_fireBonePointProjectile(Actor *obj, u8 arg1, s32 arg2);
 void effect_spawnBonePointShotFx(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void effect_spawnBonePointBeam(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
 void effect_getBonePointPos(Actor *obj, s16 arg1, Vec3f *out);
@@ -854,13 +843,11 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport);
 s32 effect_updateWarpModel(DynModel *obj);
 
 /* game/Effects/ActorEffects/actoreffects.c */
-typedef struct Msg151419D0 Msg151419D0;
-typedef struct LinkedObject151419D0 LinkedObject151419D0;
-typedef struct Args151420F8 Args151420F8;
-void effect_detachTimedHandler(LinkedObject151419D0 *obj);
+struct TimedHandlerEffect; /* defined in game/Effects/ActorEffects/actoreffects.c */
+void effect_detachTimedHandler(struct TimedHandlerEffect *obj);
 void effect_destroyTimedHandler(void *arg0);
 void effect_freeTimedHandler(void *arg0);
-void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType);
+void effect_timedHandlerMessage(struct TimedHandlerEffect *obj, ActorMsg *msg, u8 msgType);
 void effect_runActorEffects(Actor *actor, s32 arg1);
 s32 effect_getActorEffectSelector(Actor *actor);
 s32 effect_getSurfaceEffectVariant(u32 type);
@@ -871,7 +858,7 @@ s32 func_151420F8(Actor *actor);
 void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
 extern void (*gProbeVisibleCallbacks[])(void *probe, s32 r, s32 g, s32 b); /* probe visible callbacks of game/Flare/VisProbe/visprobe.c */
 extern ActorEffectDef gActorEffects[20];
-extern const Args151420F8 D_800A5200;
+extern const IdList6 D_800A5200;
 
 /* game/Math/MathUtil/mathutil.c */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
@@ -1537,7 +1524,6 @@ void func_151A6C90(Actor *obj, u8 owner, s32 list);
 
 /* game/Effects/ActorTasks/actortasks.c */
 struct SurfaceTrailOwner;
-typedef struct Task151AA30C Task151AA30C;
 typedef struct PulseFx PulseFx;
 typedef struct LoopSoundFx LoopSoundFx;
 typedef struct EmitterTask EmitterTask;
@@ -1556,7 +1542,7 @@ void effect_watcherReleaseSurfaceTrails1(void);
 void effect_watcherReleaseSurfaceTrails2(void);
 void effect_watcherStartSurfaceTrails2(struct SurfaceTrailOwner *owner);
 void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit);
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task);
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, BloodDrip *task);
 PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task);
 s32 effect_restartTaskPulse(PulseFx *fx);
 void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj);
@@ -1633,32 +1619,31 @@ s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 he
 void effect_watcherEnterWater(CharacterWatcher *task);
 
 /* game/Effects/LandingBurst/landingburst.c */
-typedef struct Game1DD500Task Game1DD500Task;
-typedef struct Game1DD500Particle Game1DD500Particle;
+typedef struct JointEmitterTask JointEmitterTask;
+typedef struct JointEmitterParticle JointEmitterParticle;
 s32 effect_spawnPitchYawSplash(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s16 pitch, s16 yaw, f32 radius,
                   s32 argB, s32 argC, void *data, u8 owner);
 void effect_spawnJointImpact(Actor *actor, Actor *other);
 void effect_spawnLandingBurst(Actor *actor, u8 owner, s32 list);
-Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list);
-void effect_updateJointEmitterTask(Game1DD500Task *task);
-s32 effect_moveReleasedParticle(Game1DD500Particle *particle);
-s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle);
-Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view);
-s32 effect_swingParticleSize(Game1DD500Particle *arg0);
-void effect_freeJointEmitterParticles(Game1DD500Task *task);
-void effect_jointEmitterTaskMessage(Game1DD500Task *task, void *msg, u8 type);
-void effect_destroyJointEmitterTask(Game1DD500Task *task);
-void effect_freeJointEmitterTask(Game1DD500Task *task);
+JointEmitterTask *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 owner, s32 list);
+void effect_updateJointEmitterTask(JointEmitterTask *task);
+s32 effect_moveReleasedParticle(JointEmitterParticle *particle);
+s32 effect_fadeLandingParticleByLife(JointEmitterParticle *particle);
+Vtx *effect_buildJointParticleQuad(JointEmitterParticle *particle, s16 view);
+s32 effect_swingParticleSize(JointEmitterParticle *arg0);
+void effect_freeJointEmitterParticles(JointEmitterTask *task);
+void effect_jointEmitterTaskMessage(JointEmitterTask *task, void *msg, u8 type);
+void effect_destroyJointEmitterTask(JointEmitterTask *task);
+void effect_freeJointEmitterTask(JointEmitterTask *task);
 
 /* game/Effects/SpawnEmitterHook/spawnemitterhook.c */
 /* (Actor *spawner, Actor *spawned); declared without a prototype: game/Event/TimedEvent/timedevent.c also passes an angle */
 void func_151B5BA0();
 
 /* game/Effects/RibbonChild/ribbonchild.c */
-typedef struct Effect1E5820 Effect1E5820;
-void effect_destroyRibbonParticle(Effect1E5820 *effect);
-void effect_destroyRibbon(Effect1E5820 *effect);
-void effect_freeRibbon(Effect1E5820 *effect);
+void effect_destroyRibbonParticle(EffectObj *effect);
+void effect_destroyRibbon(EffectObj *effect);
+void effect_freeRibbon(EffectObj *effect);
 
 /* game/Effects/FollowEffects/followeffects.c */
 typedef struct SoundChannel SoundChannel;
@@ -1738,12 +1723,11 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-struct S151BEB20;
-typedef struct S151BECB8 S151BECB8;
+typedef struct StatPickupEffect StatPickupEffect;
 void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
-s32 effect_buildStatPickupMatrix(struct S151BEB20 *fx);
+s32 effect_buildStatPickupMatrix(StatPickupEffect *fx);
 Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
-s32 effect_updateStatPickup(S151BECB8 *fx);
+s32 effect_updateStatPickup(StatPickupEffect *fx);
 s32 effect_isPlayerActor(Actor *obj);
 void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 owner, s32 list);
 void effect_spawnStatPickupBurst(Vec3f *pos);

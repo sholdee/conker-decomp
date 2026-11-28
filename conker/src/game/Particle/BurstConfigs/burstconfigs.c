@@ -448,14 +448,6 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 altDisplayList, u8 owner, s
     }
 }
 
-/* Copied into the spawned object at +0x110. */
-typedef struct {
-    Vec3f velocity;
-    f32 gravity;
-    f32 drag;
-    Vec3f spin;
-} Local151511FCExtra;
-
 /* Spawns a random number of objects off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal. */
 void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
@@ -470,7 +462,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
     f32 normalLength;
     f32 normalInverse;
     ParticleDef desc;
-    Local151511FCExtra extra;
+    BallisticMotion extra; /* copied into the particle at +0x110 (update func 25) */
     f32 speed;
     f32 second;
     f32 first;
@@ -505,7 +497,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
             normal.y = -normal.y;
             normal.z = -normal.z;
         }
-        extra.spin.y = 0.0f;
+        extra.rotVel.y = 0.0f;
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
@@ -519,12 +511,12 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
             desc.rot.y = math_randomFloat() * 360.0f;
             desc.rot.z = math_randomFloat() * 360.0f;
             desc.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
-            extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
-            extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
-            extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
+            extra.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
+            extra.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
+            extra.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
             extra.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
-            extra.spin.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
-            extra.spin.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
+            extra.rotVel.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
+            extra.rotVel.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             // matching: the comma expression makes IDO load &gWhiteVtxColors inside the loop's register plan
             object = particle_newQuadParticle(&desc, (0, &gWhiteVtxColors), 25, 0, 0, 23, ((math_random() & 1) * 2) + (math_random() & 1),
                                    config->maxLights, config->lightMask, 32, owner, list);
@@ -1224,10 +1216,10 @@ void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero sizeY
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
 void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 sizeY, u8 owner, s32 list) {
-    void *object;
+    GrowFadeParticle *object;
     s32 oneAxis;
     ParticleSpawn78 spawn;
-    Extra1515452C extra;
+    GrowFadeData extra;
     s32 pad[2]; // matching: unused stack slots
 
     if (duration <= 0.0f) {
@@ -1306,17 +1298,17 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
 
     object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
-        memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
+        memcpy(&object->grow, &extra, sizeof(extra));
     }
     return object;
 }
 
 /* Per-frame update for particle_spawnGrowFade's objects: grow, fade, spin; returns 0 once expired. */
-s32 particle_updateGrowFade(Object15132A4C *object) {
+s32 particle_updateGrowFade(GrowFadeParticle *object) {
     f32 size;
-    Extra1515452C *extra;
+    GrowFadeData *extra;
 
-    extra = &object->extra.grow;
+    extra = &object->grow;
     size = extra->growth * sqrtf(extra->elapsed);
     object->head.sizeXZ = size;
     if (!(extra->growOneAxis & 1)) {
@@ -1364,9 +1356,9 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 owner, s32 list) {
 /* Spawns a single object at `position` whose size and alpha swell and shrink along half a sine wave
  * over `duration`. */
 void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 owner, s32 list) {
-    void *object;
+    SwellParticle *object;
     ParticleSpawn spawn;
-    Extra15154A88 extra;
+    SwellData extra;
 
     if (duration <= 0.0f) {
         return NULL;
@@ -1417,18 +1409,18 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
 
     object = particle_newModelParticle(&spawn, 0, 0, sizeof(extra), owner, list);
     if (object != NULL) {
-        memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
+        memcpy(&object->swell, &extra, sizeof(extra));
     }
     return object;
 }
 
 /* Per-frame update for particle_spawnSwell's objects: pulse size and alpha, spin; returns 0 once expired. */
-s32 particle_updateSwell(Object15132A4C *object) {
-    Extra15154A88 *extra;
+s32 particle_updateSwell(SwellParticle *object) {
+    SwellData *extra;
     f32 wave;
     f32 size;
 
-    extra = &object->extra.pulse;
+    extra = &object->swell;
     wave = sinf(extra->phase);
     size = extra->size * wave;
     object->head.sizeY = size;

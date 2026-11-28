@@ -26,7 +26,7 @@ void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
                    Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 hitsObjects,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
-    Game10EF60Effect *effect;
+    Tracer *effect;
     s32 i;
     s32 sMax;
     s32 tMax;
@@ -98,7 +98,7 @@ void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1
 }
 
 /* Per-frame update of a tracer: re-fires attached ones from the owner's bone, then moves it. */
-void beam_updateTracer(Game10EF60Effect *effect) {
+void beam_updateTracer(Tracer *effect) {
     f32 vx;
     f32 vy;
     f32 vz;
@@ -294,7 +294,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
 
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
-Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
+Gfx *beam_drawTracer(Gfx *gfx, Tracer *effect, s16 view) {
     Vec3f points[2];
     f32 camera[3];
     f32 normal[3];
@@ -403,7 +403,7 @@ s32 beam_endTracerDraw(s32 gfx, s32 type, s16 view) {
 }
 
 /* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */
-void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg) {
+void beam_tracerSwapMessage(Tracer *effect, ActorSwapMsg *swap, u8 msg) {
     if (msg == 0x2D) {
         if (effect->owner == swap->actorA) {
             effect->owner = swap->actorB;

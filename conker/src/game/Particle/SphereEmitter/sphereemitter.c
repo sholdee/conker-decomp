@@ -235,7 +235,8 @@ void particle_updateGatherParticle(BillboardParticle *particle) {
     }
 }
 
-/* Data copied to 0x28 of the effect created by particle_startHoverEmitter. */
+/* Data copied to 0x28 of the effect created by particle_startHoverEmitter: EmitterParams without growRate and
+ * growRateRange, with pos as the spawner's Words3 (a word copy). */
 typedef struct {
     /* 0x00 */ Words3 pos;
     /* 0x0C */ f32 radius;
@@ -245,12 +246,12 @@ typedef struct {
     /* 0x1A */ s16 frameStepRange;
     /* 0x1C */ s16 size;
     /* 0x1E */ s16 sizeRange;
-} EffectData151A18DC;
+} HoverEmitterParams;
 
 /* Creates a type 3 effect_newTimedEffectNoDraw effect from the spawner's settings. */
 void particle_startHoverEmitter(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
-    EffectData151A18DC data;
+    HoverEmitterParams data;
     TimedEffect *effect;
 
     data.pos = spawner->pos;
@@ -388,7 +389,8 @@ void particle_updateHoverParticle(BillboardParticle *particle) {
     }
 }
 
-/* Data copied to 0x28 of the effect created by particle_startSwellEmitter. */
+/* Data copied to 0x28 of the effect created by particle_startSwellEmitter: EmitterParams with pos as the spawner's
+ * Words3 (a word copy). */
 typedef struct {
     /* 0x00 */ Words3 pos;
     /* 0x0C */ f32 radius;
@@ -400,12 +402,12 @@ typedef struct {
     /* 0x1E */ s16 sizeRange;
     /* 0x20 */ s16 growRate;
     /* 0x22 */ s16 growRateRange;
-} EffectData151A1EE8;
+} SwellEmitterParams;
 
 /* Creates a type 4 effect_newTimedEffectNoDraw effect from the spawner's settings. */
 void particle_startSwellEmitter(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
-    EffectData151A1EE8 data;
+    SwellEmitterParams data;
     TimedEffect *effect;
 
     data.pos = spawner->pos;
@@ -597,7 +599,7 @@ void particle_updateSwellTint(BillboardParticle *particle) {
 typedef struct {
     /* 0x0 */ f32 drag;
     /* 0x4 */ FadeEvent fade;
-} ParticleData151A26EC;
+} DragFadeSpawnData;
 
 /* Fade event handlers (FadeEvent.eventFunc), called with the particle and its event time; declared
    without a prototype as the handlers take only the particle. */
@@ -607,7 +609,7 @@ static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, par
 s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 owner, s32 list) {
-    ParticleData151A26EC data;
+    DragFadeSpawnData data;
     SpriteParticle *particle;
     ParticleDesc desc;
 

@@ -8,7 +8,7 @@
 #include "libc/string.h"
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */
-void particle_keepFlickerSprite(GameF3270Emitter *emitter) {
+void particle_keepFlickerSprite(WatcherEmitterOwner *emitter) {
     if (emitter->children.particle != NULL) {
         SpriteFlicker *flicker = &emitter->children.particle->flicker;
 
@@ -40,7 +40,7 @@ s8 particle_updateFlickerSprite(FlickerSprite *particle) {
 
 /* Particle destructor: detaches it from its emitter. */
 s32 particle_detachFlickerSprite(FlickerSprite *particle) {
-    GameF3270Children *children = &((GameF3270Emitter *)particle->flicker.owner)->children;
+    WatcherEmitterChildren *children = &((WatcherEmitterOwner *)particle->flicker.owner)->children;
 
     children->particle = NULL;
     particle->quad.def.flags |= 2;
@@ -50,7 +50,7 @@ s32 particle_detachFlickerSprite(FlickerSprite *particle) {
 }
 
 /* Keeps the emitter's linked object alive, spawning it if it doesn't exist yet. */
-void particle_keepWatcherEmitter(GameF3270Emitter *emitter) {
+void particle_keepWatcherEmitter(WatcherEmitterOwner *emitter) {
     Actor *actor = emitter->watcher.character;
 
     if (emitter->children.linked != NULL) {
@@ -64,7 +64,7 @@ void particle_keepWatcherEmitter(GameF3270Emitter *emitter) {
 
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
-WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emitter) {
+WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, WatcherEmitterOwner *emitter) {
     BloodDripDesc desc;
     WatcherEmitterLink link;
     WatcherEmitter *obj;
@@ -187,7 +187,7 @@ s32 particle_updateWatcherLink(WatcherEmitter *obj) {
 
 /* Linked-object destructor: detaches it from its emitter. */
 void particle_destroyWatcherLink(WatcherEmitter *obj) {
-    GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
+    WatcherEmitterChildren *children = &((WatcherEmitterOwner *)obj->link.owner)->children;
 
     children->linked = NULL;
     blood_destroyDripDefault(&obj->header);
@@ -195,7 +195,7 @@ void particle_destroyWatcherLink(WatcherEmitter *obj) {
 
 /* Linked-object destructor: detaches it from its emitter. */
 void particle_freeWatcherLink(WatcherEmitter *obj) {
-    GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
+    WatcherEmitterChildren *children = &((WatcherEmitterOwner *)obj->link.owner)->children;
 
     children->linked = NULL;
     blood_freeDripDefault(&obj->header);
@@ -204,7 +204,7 @@ void particle_freeWatcherLink(WatcherEmitter *obj) {
 static Vec3f gFlickerSpriteOrigin = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
-FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
+FlickerSprite *particle_spawnFlickerSprite(WatcherEmitterOwner *emitter) {
     FlickerSprite *particle;
     Vec3f pos;
     Actor *actor;

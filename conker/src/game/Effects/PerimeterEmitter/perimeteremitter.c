@@ -57,14 +57,14 @@ void effect_attachPerimeterEmitter(Actor *owner) {
     effect_spawnPerimeterEmitter(owner, 0xFF, 1);
 }
 
-/* Attaches a DDB60Effect (updated by effect_updatePerimeterEmitter) to owner. */
+/* Attaches a timed effect (updated by effect_updatePerimeterEmitter) to owner. */
 void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
-    DDB60EffectData data;
-    DDB60Effect *effect;
+    FixedEmitterData data;
+    FixedEmitter *effect;
 
-    data.owner = owner;
-    data.ownerId = owner->unique_id;
-    data.timer = 0.0f;
+    data.object = owner;
+    data.objectId = owner->unique_id;
+    data.spawnAccum = 0.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x58, -1, 0, 0x43, sizeof(data), fxOwner, fxList);
     if (effect != NULL) {
@@ -73,8 +73,8 @@ void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
 }
 
 /* Effect callback: hands effect_handleOwnerActorEvent the owner reference. */
-void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 event, u8 eventType) {
-    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
+void effect_perimeterEmitterMessage(FixedEmitter *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.object, &effect->data.objectId, effect);
 }
 
 /* Emit-rate base and random range per emitter. */
@@ -82,11 +82,11 @@ static const f32 gPerimeterEmitRates[] = { 1.0f, 1.259000063f };
 static const f32 gPerimeterEmitRateRanges[] = { 0.0f, 1.078999996f };
 
 /*
- * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,
+ * Update of the effect_spawnPerimeterEmitter effect: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
-void effect_updatePerimeterEmitter(DDB60Effect *effect) {
-    DDB60EffectData *data;
+void effect_updatePerimeterEmitter(FixedEmitter *effect) {
+    FixedEmitterData *data;
     Actor *owner;
     s32 emit;
     f32 speed;
@@ -99,9 +99,9 @@ void effect_updatePerimeterEmitter(DDB60Effect *effect) {
     Vec3f vel;
     s16 angle;
 
-    owner = effect->data.owner;
+    owner = effect->data.object;
     data = &effect->data;
-    if (owner->type == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->objectId) {
         effect->base.header.state = -1;
         return;
     }
@@ -120,8 +120,8 @@ void effect_updatePerimeterEmitter(DDB60Effect *effect) {
         }
     }
     if (emit) {
-        data->timer += (gPerimeterEmitRates[emit] + math_randomFloat() * gPerimeterEmitRateRanges[emit]) * gFrameDelta;
-        if (data->timer > 1.0f) {
+        data->spawnAccum += (gPerimeterEmitRates[emit] + math_randomFloat() * gPerimeterEmitRateRanges[emit]) * gFrameDelta;
+        if (data->spawnAccum > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &gZeroVec3f;
             }
@@ -137,8 +137,8 @@ void effect_updatePerimeterEmitter(DDB60Effect *effect) {
                               (math_random() % 21) + 20, (math_random() % 101) + 155,
                               math_randomFloat() * 50.0f + 80.0f, math_randomFloat() < 0.04400000349f, 1.399999976f,
                               1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
-                data->timer -= 1.0f;
-            } while (data->timer > 1.0f);
+                data->spawnAccum -= 1.0f;
+            } while (data->spawnAccum > 1.0f);
         }
     }
 }

@@ -16,6 +16,7 @@
 #include "conker/effect.h"
 #include "conker/face.h"
 #include "conker/flamethrower.h"
+#include "conker/hud.h"
 #include "conker/level.h"
 #include "conker/libc.h"
 #include "conker/light.h"
@@ -290,10 +291,9 @@ STATIC_ASSERT(sizeof(BoltSource) == 0xC, BoltSource_size);
 STATIC_ASSERT(sizeof(FlashBurstEffect) == 0x30, FlashBurstEffect_size);
 STATIC_ASSERT(sizeof(OwnerEffectData) == 0x8, OwnerEffectData_size);
 STATIC_ASSERT(sizeof(OwnerEffect) == 0x30, OwnerEffect_size);
-STATIC_ASSERT(sizeof(DDB60EffectData) == 0xC, DDB60EffectData_size);
 STATIC_ASSERT(sizeof(TextLines) == 0x28, TextLines_size);
 STATIC_ASSERT(sizeof(DiscEmitter) == 0x10, DiscEmitter_size);
-STATIC_ASSERT(sizeof(Struct150C29F0) == 0x38, Struct150C29F0_size);
+STATIC_ASSERT(sizeof(DiscEmitterEffect) == 0x38, DiscEmitterEffect_size);
 STATIC_ASSERT(sizeof(QuadFxData) == 0xA8, QuadFxData_size);
 STATIC_ASSERT(sizeof(QuadFx) == 0xB8, QuadFx_size);
 STATIC_ASSERT(sizeof(RenderModePair) == 0x8, RenderModePair_size);
@@ -305,7 +305,7 @@ STATIC_ASSERT(sizeof(BoltLink) == 0x28, BoltLink_size);
 STATIC_ASSERT(sizeof(StripDesc) == 0x24, StripDesc_size);
 STATIC_ASSERT(sizeof(AimedBeamState) == 0x44, AimedBeamState_size);
 STATIC_ASSERT(sizeof(RayBeamData) == 0x94, RayBeamData_size);
-STATIC_ASSERT(sizeof(Wobble151025F4) == 0x28, Wobble151025F4_size);
+STATIC_ASSERT(sizeof(Wobble2D) == 0x28, Wobble2D_size);
 STATIC_ASSERT(sizeof(SparkLink) == 0x10, SparkLink_size);
 STATIC_ASSERT(sizeof(EmitterLink) == 0x8, EmitterLink_size);
 STATIC_ASSERT(sizeof(ActorTrailLink) == 0x18, ActorTrailLink_size);
@@ -318,6 +318,7 @@ STATIC_ASSERT(sizeof(BoltRainState) == 0x48, BoltRainState_size);
 STATIC_ASSERT(sizeof(BoltArcState) == 0x74, BoltArcState_size);
 STATIC_ASSERT(sizeof(SparkState) == 0x10, SparkState_size);
 STATIC_ASSERT(sizeof(BeamPart) == 0x5C, BeamPart_size);
+STATIC_ASSERT(sizeof(Tracer) == 0x100, Tracer_size);
 
 /* conker/blood.h */
 STATIC_ASSERT(sizeof(Struct15134CEC) == 0x78, Struct15134CEC_size);
@@ -337,7 +338,7 @@ STATIC_ASSERT(sizeof(TextureFrameTables) == 0x8, TextureFrameTables_size);
 STATIC_ASSERT(sizeof(FxImpactSet) == 0x5, FxImpactSet_size);
 STATIC_ASSERT(sizeof(EmitterConfig) == 0x2C, EmitterConfig_size);
 STATIC_ASSERT(sizeof(FlashSpawner) == 0x40, FlashSpawner_size);
-STATIC_ASSERT(sizeof(FF0E0State) == 0x48, FF0E0State_size);
+STATIC_ASSERT(sizeof(RaySpinnerState) == 0x48, RaySpinnerState_size);
 STATIC_ASSERT(sizeof(DiskEmitter) == 0x34, DiskEmitter_size);
 STATIC_ASSERT(sizeof(Sway) == 0x18, Sway_size);
 STATIC_ASSERT(sizeof(SwayBlock) == 0x2C, SwayBlock_size);
@@ -350,6 +351,9 @@ STATIC_ASSERT(sizeof(FlameLineParams) == 0x44, FlameLineParams_size);
 STATIC_ASSERT(sizeof(FlameScatterParams) == 0x44, FlameScatterParams_size);
 STATIC_ASSERT(sizeof(FlameEmitParams) == 0x3C, FlameEmitParams_size);
 
+/* conker/hud.h */
+STATIC_ASSERT(sizeof(CodeEntryKey) == 0xC, CodeEntryKey_size);
+
 /* conker/level.h */
 STATIC_ASSERT(sizeof(ObjectSpawn) == 0x44, ObjectSpawn_size);
 
@@ -361,13 +365,12 @@ STATIC_ASSERT(sizeof(LampSwing) == 0x24, LampSwing_size);
 
 /* conker/particle.h */
 STATIC_ASSERT(sizeof(Rgb8) == 0x3, Rgb8_size);
-STATIC_ASSERT(sizeof(EffectE7970Data) == 0xC, EffectE7970Data_size);
 STATIC_ASSERT(sizeof(PoolEmitterDesc) == 0x1C, PoolEmitterDesc_size);
 STATIC_ASSERT(sizeof(PoolEmitter) == 0x48, PoolEmitter_size);
 STATIC_ASSERT(sizeof(QuadDriftMotion) == 0x40, QuadDriftMotion_size);
 STATIC_ASSERT(sizeof(RingSparkEmitter) == 0x60, RingSparkEmitter_size);
 STATIC_ASSERT(sizeof(StreakImpact) == 0x30, StreakImpact_size);
-STATIC_ASSERT(sizeof(Game113D60Emission) == 0x44, Game113D60Emission_size);
+STATIC_ASSERT(sizeof(SourceEmission) == 0x44, SourceEmission_size);
 STATIC_ASSERT(sizeof(TwoSidedEmitterState) == 0x20, TwoSidedEmitterState_size);
 STATIC_ASSERT(sizeof(ObjectEmitterData) == 0x14, ObjectEmitterData_size);
 STATIC_ASSERT(sizeof(MatrixEmitterData) == 0x10, MatrixEmitterData_size);
@@ -398,6 +401,7 @@ STATIC_ASSERT(sizeof(EmitterTrigger) == 0x54, EmitterTrigger_size);
 STATIC_ASSERT(sizeof(BurstSpawner) == 0x18, BurstSpawner_size);
 STATIC_ASSERT(sizeof(AreaEmitterData) == 0xC, AreaEmitterData_size);
 STATIC_ASSERT(sizeof(StyleParticle) == 0x34, StyleParticle_size);
+STATIC_ASSERT(sizeof(BallisticMotion) == 0x20, BallisticMotion_size);
 
 /* conker/rope.h */
 STATIC_ASSERT(sizeof(HoltenRopeDesc) == 0x38, HoltenRopeDesc_size);
@@ -413,7 +417,7 @@ STATIC_ASSERT(sizeof(ShadowVtx) == 0x14, ShadowVtx_size);
 
 /* conker/sprite.h */
 STATIC_ASSERT(sizeof(ScreenSprite) == 0x70, ScreenSprite_size);
-STATIC_ASSERT(sizeof(Game1A89B0Position) == 0xE, Game1A89B0Position_size);
+STATIC_ASSERT(sizeof(LevelSprite) == 0xE, LevelSprite_size);
 
 /* conker/swarm.h */
 STATIC_ASSERT(sizeof(SwarmFlight) == 0x38, SwarmFlight_size);
@@ -428,7 +432,7 @@ STATIC_ASSERT(sizeof(SprayEmitter) == 0x78, SprayEmitter_size);
 STATIC_ASSERT(sizeof(TrailEmitterParams) == 0x1C, TrailEmitterParams_size);
 STATIC_ASSERT(sizeof(TrailEmitter) == 0x44, TrailEmitter_size);
 STATIC_ASSERT(sizeof(SurfaceTrailPoint) == 0x24, SurfaceTrailPoint_size);
-STATIC_ASSERT(sizeof(Game1FBB80Effect) == 0x34, Game1FBB80Effect_size);
+STATIC_ASSERT(sizeof(RandomPointEmitterData) == 0x34, RandomPointEmitterData_size);
 
 /* conker/weapon.h */
-STATIC_ASSERT(sizeof(Game1EF500TrailExt) == 0xB0, Game1EF500TrailExt_size);
+STATIC_ASSERT(sizeof(WeaponProjectileState) == 0xB0, WeaponProjectileState_size);

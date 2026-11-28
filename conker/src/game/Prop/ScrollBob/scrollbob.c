@@ -17,9 +17,9 @@ typedef union {
     void *texScroll;
     f32 groundY;
     s32 phase; /* scaled by 360/65536 before cosf */
-} Work1435C0;
+} ScrollBobWork;
 
-#define WORK(obj) ((Work1435C0 *)&(obj)->touch)
+#define WORK(obj) ((ScrollBobWork *)&(obj)->touch)
 
 /* Registers the object's texture scroll once, from the packed scroll word in param (bits 0-14 texture,
  * >> 15 doubled, bits 16-23 speedT, 24-31 speedS), then clears the word. */

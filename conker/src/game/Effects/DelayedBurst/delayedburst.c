@@ -492,17 +492,12 @@ void effect_turnLightsOff(void) {
     effect_sendEventToTimedEffects(0, 0x4C);
 }
 
-struct Obj150FADC8 {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ s32 flags;
-};
-
-/* Event handler: event 0x53 sets flag 2 of the object, event 0x54 clears it. */
-void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
+/* Glow message handler (gGlowMsgHandlers[17]): event 0x53 sets flag 2 of the glow's def.flags, event 0x54 clears it. */
+void func_150FADC8(DefParticleHead *obj, s32 arg1, u8 event) {
     if (event == 0x53) {
-        obj->flags |= 2;
+        obj->def.flags |= 2;
     } else if (event == 0x54) {
-        obj->flags &= ~2;
+        obj->def.flags &= ~2;
     }
 }
 

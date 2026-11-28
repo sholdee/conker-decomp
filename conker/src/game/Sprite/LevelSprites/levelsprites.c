@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* A billboard queued by sprite_queueBillboard and drawn by sprite_drawQueuedBillboards. */
-struct Entry1517D578 {
+struct QueuedBillboard {
     s16 x;
     s16 y;
     s16 z;
@@ -15,7 +15,7 @@ struct Entry1517D578 {
 /*
  * .bss, linked at 0x800DD470..0x800DDD60 in this order. Defined before conker/sprite.h declares them: IDO
  * lays out .bss in first-declaration order, and an extern there would count. The struct tags of
- * SpriteTexSize and Game1A89B0Position are completed by conker/sprite.h.
+ * SpriteTexSize and LevelSprite are completed by conker/sprite.h.
  */
 struct { s16 x; s16 y; s16 z; } gSpriteDisturbPoint; /* set by sprite_setDisturbPoint; x == 0 means unset */
 s32 gSpriteTypeFrames[15 * 26]; // matching: an int that holds an address; a pointer type changes IDO's registers
@@ -36,11 +36,11 @@ s16 gSpriteTypePhases[60];
 s32 D_800DDD08; /* not referenced */
 s32 gSpriteMaxPerFrame;
 Vtx *gSpriteVtxBuffers[2];
-struct Game1A89B0Position *gLevelSprites;
+struct LevelSprite *gLevelSprites;
 u8 gBillboardAnimCounter;
 s32 gLevelSpriteCount;
 s32 gBillboardTexture; /* texture strip of the billboards */
-struct Entry1517D578 gBillboardQueue[3];
+struct QueuedBillboard gBillboardQueue[3];
 s32 gSpriteVtxCount; /* sprites in this frame's vertex buffer */
 
 #include <math.h>
@@ -96,7 +96,7 @@ static Gfx gLevelSpriteRenderDl[] = {
  */
 
 /* Advances the phase by half again, wrapping at the frame count, and drifts the height toward 41 with jitter. */
-s32 sprite_animJitterHeight(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animJitterHeight(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 diff;
     s32 limit;
     s32 rnd;
@@ -129,7 +129,7 @@ s32 sprite_animJitterHeight(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *a
 }
 
 /* Once the phase reaches 0x600, offsets the vertex by it, fades the alpha and holds the phase at 0x600. */
-s32 sprite_animFadeOffset(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animFadeOffset(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 fade;
 
     if (*phase >= 0x600) {
@@ -150,7 +150,7 @@ s32 sprite_animFadeOffset(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alp
 
 
 /* Pulls a phase above 0x500 back by 0x200 and clamps 0x300..0x500 to 0x300. */
-s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 func_1517B7A8(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 cur = *phase;
 
     if (cur >= 0x300) {
@@ -168,7 +168,7 @@ s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
 }
 
 /* Hops along a parabola peaking at phase 0x600; hidden once the phase reaches 0xD00. */
-s32 sprite_animHop(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animHop(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 t;
     s32 cur;
 
@@ -217,7 +217,7 @@ void sprite_sortLevelSprites(s32 first, s32 last) {
             }
             if (left < right) {
                 {
-                    Game1A89B0Position swap = gLevelSprites[left];
+                    LevelSprite swap = gLevelSprites[left];
                     gLevelSprites[left] = gLevelSprites[right];
                     gLevelSprites[right] = swap;
                 }
@@ -228,7 +228,7 @@ void sprite_sortLevelSprites(s32 first, s32 last) {
             }
         }
         {
-            Game1A89B0Position pivotSwap = gLevelSprites[left];
+            LevelSprite pivotSwap = gLevelSprites[left];
             gLevelSprites[left] = gLevelSprites[last];
             gLevelSprites[last] = pivotSwap;
             sprite_sortLevelSprites(first, left - 1);
@@ -615,7 +615,7 @@ Gfx *sprite_drawBillboard(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidt
 
 /* Queues a billboard (at most 3 per frame; gBillboardQueueCount counts them). */
 void sprite_queueBillboard(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 frame) {
-    struct Entry1517D578 *e;
+    struct QueuedBillboard *e;
     u8 idx = gBillboardQueueCount;
 
     if (gBillboardQueueCount < 3) {

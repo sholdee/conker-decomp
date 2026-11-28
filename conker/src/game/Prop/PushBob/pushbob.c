@@ -17,9 +17,9 @@ typedef union {
         /* 0x7C */ s32 unk7C;
         /* 0x80 */ s32 timer; // > 0: counting down before the push decays, -1: done
     } push;
-} Work143870;
+} PushBobWork;
 
-#define WORK(obj) ((Work143870 *)&(obj)->touch)
+#define WORK(obj) ((PushBobWork *)&(obj)->touch)
 
 /* Bobs the object (yOffset) and sways it (rotX): param bytes are (height scale, sway scale, height rate, sway rate) from low to high. */
 void prop_bobAndSway(WorldObject *obj) {
