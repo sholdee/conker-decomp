@@ -24,6 +24,12 @@ Readers see this as repeated definitions.
   `structs.h` needs must be in `structs.h`. Each header includes the headers that it needs and compiles
   on its own. A pointer to a struct that another header defines can use the struct tag
   (`struct ZoneEmitter *`) and needs no include.
+- Exception: a payload type that one subsystem reads stays in the reading subsystem's header when a
+  file of another subsystem only fills it and passes it to a spawn function of the reading subsystem.
+  That file already includes the reading subsystem's header for the spawn function. Examples:
+  `DiskEmitter`, `FlashSpawner` and `SwayBlock` in `conker/effect.h`, which
+  `game/Level/ZoneSpawn/zonespawn.c` and `game/Level/LevelSetupLab/levelsetuplab.c` fill. (`Sway` stays
+  in `conker/effect.h` for another reason: `SwayBlock` contains it.)
 
 ## Phase 1: types
 Each agent takes a family of type names. For each name:
