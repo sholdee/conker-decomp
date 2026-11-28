@@ -5936,8 +5936,8 @@ hud_drawModel	0x151EDBDC	880	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.
 hud_initCodeEntry	0x151EDF4C	568	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_updateCodeEntry	0x151EE184	2660	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_drawImagePanel	0x151EEBE8	1032	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-hud_clearCodeFlags	0x151EEFF0	16	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-pad_151EF000	0x151EF000	64	game	pad		build/src/game/Hud/HudOverlay/hudoverlay.c.o
+hud_clearCodeFlags	0x151EEFF0	16	game	c		build/src/game/Hud/CodeFlags/codeflags.c.o
+pad_151EF000	0x151EF000	64	game	pad		build/src/game/Hud/CodeFlags/codeflags.c.o
 osPiReadIo	0x151EF040	64	game	c		build/src/game/Os/PiReadIo/pireadio.c.o
 func_151EF080	0x151EF080	16	game	c		build/src/game/Os/PiReadIo/pireadio.c.o
 osContInit2	0x151EF090	504	game	c		build/src/game/Os/ContInit/continit.c.o

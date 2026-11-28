@@ -978,6 +978,7 @@ segments:
       - [0x20A990, c, game/Os/EepromWrite/eepromwrite]
       - [0x20AE20, c, game/Save/FrontEnd/frontend]
       - [0x215960, c, game/Hud/HudOverlay/hudoverlay]
+      - [0x21C4A0, c, game/Hud/CodeFlags/codeflags]
       - [0x21C4F0, c, game/Os/PiReadIo/pireadio]
       - [0x21C540, c, game/Os/ContInit/continit]
       - [0x21C900, c, libultra/io/pfsinit2] # dupe of libultra/io/pfsinit

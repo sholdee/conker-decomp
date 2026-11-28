@@ -373,6 +373,7 @@ src/game/Gfx/Turret/turret.c	gfx	object visibility and per-view draw lists
 src/game/Gfx/WorldObject/worldobject.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
 src/game/Hud/CounterFree/counterfree.c	hud	counter destructor
 src/game/Hud/HudOverlay/hudoverlay.c	hud	HUD overlay, HUD models and sprites
+src/game/Hud/CodeFlags/codeflags.c	hud	clears the cheat-code flags at game start
 src/game/Hud/PlayerOverlay/playeroverlay.c	hud	per-player HUD overlay: blocks, water, bubbles, race time/laps
 src/game/Level/AmbientAction3/ambientaction3.c	level	per-level setup: timed effect
 src/game/Level/AmbientAction5/ambientaction5.c	level	per-level setup: timed effect
