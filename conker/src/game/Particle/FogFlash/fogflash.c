@@ -160,7 +160,7 @@ static f32 gEasedColorVelB = 0.0f;
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise
  * resets the colour to white. Then eases the current colour toward the target and sends it out. */
-void particle_levelHook17(Camera *obj) {
+void particle_levelHookWarboss(Camera *obj) {
     s32 value9C;
     s32 value9A;
     s32 half;

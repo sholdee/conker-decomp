@@ -7,11 +7,11 @@
 #include "conker/light.h"
 #include "conker/particle.h"
 
-static const Vec3f gSetup23ModelPositions[6] = {
+static const Vec3f gLabModelPositions[6] = {
     { 3432.0f, 593.0f, -255.0f }, { 3627.0f, 593.0f, 291.0f }, { 3065.0f, 593.0f, 290.0f },
     { 2984.0f, 593.0f, -274.0f }, { 2489.0f, 593.0f, 298.0f }, { 2519.0f, 593.0f, -261.0f },
 };
-static const u8 gSetup23ModelLights[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
+static const u8 gLabModelLights[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
 
 void level_setupLab(void) {
     ModelParticle *result;
@@ -78,7 +78,7 @@ void level_setupLab(void) {
     block.rotZ = 0.0f;
 
     for (i = 0; i < 6; i++) {
-        pos = gSetup23ModelPositions[i];
+        pos = gLabModelPositions[i];
         part.pos = pos;
         block.pos = pos;
 
@@ -120,14 +120,14 @@ void level_setupLab(void) {
             memcpy(result + 1, &sway, sizeof(sway));
         }
 
-        if (gSetup23ModelLights[i] != 0) {
+        if (gLabModelLights[i] != 0) {
             ent = effect_newDynModel(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
                 memcpy(DYNMODEL_USERDATA(ent), &block, sizeof(block));
             }
-            header2.x = gSetup23ModelPositions[i].x;
-            header2.y = gSetup23ModelPositions[i].y;
-            header2.z = gSetup23ModelPositions[i].z;
+            header2.x = gLabModelPositions[i].x;
+            header2.y = gLabModelPositions[i].y;
+            header2.z = gLabModelPositions[i].z;
             payload = result;
             header.flags = 2;
             header.update = 0x16;

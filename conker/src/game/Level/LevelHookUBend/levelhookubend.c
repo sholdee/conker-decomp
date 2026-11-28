@@ -17,15 +17,15 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
                              u8 alpha, s16 fadeFrames, s16 fadeStep, u8 spin, u8 owner, s32 list);
 
 /* This file's .data: the current values, targets and easing velocities of three channels. */
-static f32 gHook30Value0 = 255.0f;
-static f32 gHook30Value1 = 255.0f;
-static f32 gHook30Value2 = 255.0f;
-static f32 gHook30Target0 = 255.0f;
-static f32 gHook30Target1 = 255.0f;
-static f32 gHook30Target2 = 255.0f;
-static f32 gHook30Velocity0 = 0.0f;
-static f32 gHook30Velocity1 = 0.0f;
-static f32 gHook30Velocity2 = 0.0f;
+static f32 gUBendValue0 = 255.0f;
+static f32 gUBendValue1 = 255.0f;
+static f32 gUBendValue2 = 255.0f;
+static f32 gUBendTarget0 = 255.0f;
+static f32 gUBendTarget1 = 255.0f;
+static f32 gUBendTarget2 = 255.0f;
+static f32 gUBendVelocity0 = 0.0f;
+static f32 gUBendVelocity1 = 0.0f;
+static f32 gUBendVelocity2 = 0.0f;
 static s32 D_800888E4[7] = { 0 }; /* not referenced */
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
@@ -34,38 +34,38 @@ void level_hookUBend(Camera *camera) {
     if (script_query(1, 0x403D, 6, 0x9000)) {
         camera->AvailableModes |= 0x80021000;
         if (script_query(1, 0x4043, 6, 0x9000)) {
-            gHook30Target0 = 64.0f;
-            gHook30Target1 = 255.0f;
-            gHook30Target2 = 255.0f;
+            gUBendTarget0 = 64.0f;
+            gUBendTarget1 = 255.0f;
+            gUBendTarget2 = 255.0f;
         } else if (script_query(1, 0x4044, 6, 0x9000)) {
-            gHook30Target0 = 255.0f;
-            gHook30Target1 = 64.0f;
-            gHook30Target2 = 255.0f;
+            gUBendTarget0 = 255.0f;
+            gUBendTarget1 = 64.0f;
+            gUBendTarget2 = 255.0f;
         } else if (script_query(1, 0x4045, 6, 0x9000)) {
-            gHook30Target0 = 255.0f;
-            gHook30Target1 = 255.0f;
-            gHook30Target2 = 64.0f;
+            gUBendTarget0 = 255.0f;
+            gUBendTarget1 = 255.0f;
+            gUBendTarget2 = 64.0f;
         } else {
-            gHook30Target0 = 255.0f;
-            gHook30Target1 = 255.0f;
-            gHook30Target2 = 255.0f;
+            gUBendTarget0 = 255.0f;
+            gUBendTarget1 = 255.0f;
+            gUBendTarget2 = 255.0f;
         }
     } else {
-        gHook30Target0 = 255.0f;
-        gHook30Target1 = 255.0f;
-        gHook30Target2 = 255.0f;
+        gUBendTarget0 = 255.0f;
+        gUBendTarget1 = 255.0f;
+        gUBendTarget2 = 255.0f;
         camera->AvailableModes &= ~0x80021000;
         camera->AvailableModes |= 8;
     }
-    math_springTo(&gHook30Value0, gHook30Target0, &gHook30Velocity0, 4.0f, 6.0f, camera->SpringTime);
-    math_springTo(&gHook30Value1, gHook30Target1, &gHook30Velocity1, 4.0f, 6.0f, camera->SpringTime);
-    math_springTo(&gHook30Value2, gHook30Target2, &gHook30Velocity2, 4.0f, 6.0f, camera->SpringTime);
-    script_command(1, 0x30F5, 0x12, (u8)gHook30Value0);
-    script_command(1, 0x30F4, 0x12, (u8)gHook30Value1);
-    script_command(1, 0x30F3, 0x12, (u8)gHook30Value2);
-    script_command(1, 0x30FA, 0x12, (u8)gHook30Value0);
-    script_command(1, 0x30F9, 0x12, (u8)gHook30Value1);
-    script_command(1, 0x30F8, 0x12, (u8)gHook30Value2);
+    math_springTo(&gUBendValue0, gUBendTarget0, &gUBendVelocity0, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&gUBendValue1, gUBendTarget1, &gUBendVelocity1, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&gUBendValue2, gUBendTarget2, &gUBendVelocity2, 4.0f, 6.0f, camera->SpringTime);
+    script_command(1, 0x30F5, 0x12, (u8)gUBendValue0);
+    script_command(1, 0x30F4, 0x12, (u8)gUBendValue1);
+    script_command(1, 0x30F3, 0x12, (u8)gUBendValue2);
+    script_command(1, 0x30FA, 0x12, (u8)gUBendValue0);
+    script_command(1, 0x30F9, 0x12, (u8)gUBendValue1);
+    script_command(1, 0x30F8, 0x12, (u8)gUBendValue2);
 }
 
 /* Steps four scroll counters by gFrameTicks; then, unless movement_obj[0]'s mv->death_State is set, kills

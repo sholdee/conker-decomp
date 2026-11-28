@@ -343,7 +343,7 @@ void player_updateFlying(Actor *actor) {
     actor_playAnim(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
 }
 
-void player_levelHook24(Camera *actor) {
+void player_levelHookHorrorIntro(Camera *actor) {
     if (actor->CharContext == 0x3B) {
         script_command(0, 0x405C, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {

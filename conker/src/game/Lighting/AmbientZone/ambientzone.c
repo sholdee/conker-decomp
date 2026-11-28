@@ -201,7 +201,7 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
     s32 targetIndex;
 
     target = NULL;
-    link = beam_findZoneRectEffect(zone);
+    link = beam_findBoltArcEffect(zone);
     if (link != NULL) {
         target = link->state.actor;
     }

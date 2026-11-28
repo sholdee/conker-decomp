@@ -275,7 +275,7 @@ void camera_levelHookBankEntrance(Camera *camera);
 void camera_levelUpdateWaveChains(s32 unused);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
-void camera_levelHook23(Camera *camera);
+void camera_levelHookBank(Camera *camera);
 
 /* game/Camera/LevelHookEndArena/levelhookendarena.c */
 void camera_levelHookEndArena(Camera *camera);

@@ -6,7 +6,7 @@
 
 
 /* This file's .data. */
-static s32 gLevelHook06DefaultsApplied = 0; /* 1 once the query-0x5072 branch has restored the default camera; 0 again in the 0x5071-only branch */
+static s32 gDinoArenaDefaultsApplied = 0; /* 1 once the query-0x5072 branch has restored the default camera; 0 again in the 0x5071-only branch */
 
 /* Updates camera flags and range fields (YOffsetTget/height/idealHeight/IdealTripodMagnitude) from script_query state queries 0x5071/0x5072. */
 void camera_levelHookDinoArena(Camera *camera)
@@ -102,7 +102,7 @@ void camera_levelHookDinoArena(Camera *camera)
       {
         camera->CharTrackingSpeed = 0.0f;
       }
-      gLevelHook06DefaultsApplied = 0;
+      gDinoArenaDefaultsApplied = 0;
       if (camera->SpecialFlags & 4)
       {
         target = collision_findObjectById(0x10);
@@ -131,10 +131,10 @@ void camera_levelHookDinoArena(Camera *camera)
         }
       }
     }
-    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (gLevelHook06DefaultsApplied == 0))
+    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (gDinoArenaDefaultsApplied == 0))
     {
       camera->AvailableModes |= 4;
-      gLevelHook06DefaultsApplied = 1;
+      gDinoArenaDefaultsApplied = 1;
       camera_attachToObject(camera, 0);
       camera->mv->AimState = 0;
       camera->DoingAim = 0;

@@ -41,9 +41,9 @@ static s32 (*gAttachMessageFuncs[])() = {
 
 /* Emitter offsets. */
 static const Vec3f gBone2LightOffset = { 0.0f, 75.0f, 96.0f };
-static const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
-static const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
-static const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
+static const Vec3f gBone12BeamStart = { 0.0f, 66.0f, 50.0f };
+static const Vec3f gBone12BeamEnd = { 0.0f, 66.0f, 274.0f };
+static const Vec3f gBone0LightOffset = { 0.0f, 31.0f, 73.0f };
 
 /**
  * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
@@ -849,13 +849,13 @@ void func_1514DE88(Actor *obj) {
 void func_1514DE94(Actor *obj) {
     ModelAttachment *part;
 
-    light_createBeam(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
+    light_createBeam(obj, 12, &gBone12BeamStart, &gBone12BeamEnd, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
     if (gLevelLoadState == 0) {
         part->hookState = 2400;
     }
-    effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
+    effect_attach(light_createAttached(obj, 0, &gBone0LightOffset, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
@@ -1087,9 +1087,9 @@ void effect_attachCharacterEffect3(Actor *obj) {
 }
 
 /* Emitter offsets of effect_attachBone1RedLightAndGlow and effect_attachTankEffects. */
-static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
-static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
-static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
+static const Vec3f gBone1LightOffset = { 0.0f, 90.0f, 0.0f };
+static const Vec3f gBone1GlowP0 = { 0.0f, 70.0f, 0.0f };
+static const Vec3f gBone1GlowP1 = { 0.0f, 120.0f, 0.0f };
 static const Vec3f gTankFrontLightOffset = { 0.0f, 112.0f, 151.0f };
 static const Vec3f gTankRearLightOffset = { 0.0f, 74.0f, -161.0f };
 
@@ -1394,7 +1394,7 @@ void effect_attachActorTracker(Actor *obj) {
 void effect_attachBone1RedLightAndGlow(Actor *obj) {
     void *handle;
 
-    handle = light_createAttached(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
+    handle = light_createAttached(obj, 1, &gBone1LightOffset, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     effect_attach(handle, obj, 0x19);
     {
         ParticleDef spawn;
@@ -1445,8 +1445,8 @@ void effect_attachBone1RedLightAndGlow(Actor *obj) {
 
         attach.targetId = obj->unique_id;
         attach.target = obj;
-        attach.p0 = D_800A5940;
-        attach.p1 = D_800A594C;
+        attach.p0 = gBone1GlowP0;
+        attach.p1 = gBone1GlowP1;
         attach.bone = 1;
         emitter.visibility[0] = 0;
         emitter.visibility[1] = 0;

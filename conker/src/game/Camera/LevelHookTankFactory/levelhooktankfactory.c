@@ -2,11 +2,11 @@
 #include "conker/camera.h"
 #include "conker/script.h"
 
-static s32 gLevelHook04TransportOn = 0; /* 1 while the camera is in the transport mode this hook set */
+static s32 gTankFactoryTransportOn = 0; /* 1 while the camera is in the transport mode this hook set */
 
 /*
  * When both script_query queries succeed, switch flags 0x405D-0x4061 on and (unless Mode is 0x100
- * or cmdRunning is set) put the camera into its transport mode and set gLevelHook04TransportOn. Otherwise leave that
+ * or cmdRunning is set) put the camera into its transport mode and set gTankFactoryTransportOn. Otherwise leave that
  * state, switch the flags off again and mirror query 0x4040 into bit 0x80 of AvailableModes.
  */
 void camera_levelHookTankFactory(Camera *camera)
@@ -34,7 +34,7 @@ void camera_levelHookTankFactory(Camera *camera)
             camera->Tightness = 0;
             camera->height = camera->idealHeight = 320.0f;
             camera->YOffsetTget = 180.0f;
-            gLevelHook04TransportOn = 1;
+            gTankFactoryTransportOn = 1;
             script_command(0, 0x405C, 0);
         }
     } else {
@@ -43,7 +43,7 @@ void camera_levelHookTankFactory(Camera *camera)
             camera_attachToObject(camera, camera->CNumber);
             camera->SpecialFlags &= ~0x10;
             camera->CharTrackingSpeedTarget = 0.0f;
-            gLevelHook04TransportOn = 0;
+            gTankFactoryTransportOn = 0;
         }
         script_command(0, 0x405C, 1);
         script_command(0, 0x405D, 0);

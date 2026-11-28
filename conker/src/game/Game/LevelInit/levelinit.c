@@ -24,12 +24,12 @@ static void (*gLevelSetupFuncs[])(void) = {
     level_setupTankFactory, level_setupCogLand, level_setupDinoArena,
     level_setupThroneRoom, level_setupHeist, level_setupHarbour,
     level_setupLiftTunnel, level_setupFrontEnd, level_setupWarboss,
-    level_setupPooCabin, level_setupCanyon, level_setup21,
+    level_setupPooCabin, level_setupCanyon, level_setupTraining,
     level_setupMachineGunNest, level_setupLab, level_setupW1VolcanoRace,
     level_setupWmpVolcanoRace, level_setupMainWar, level_emptySetupRockSolid,
     level_setup28, level_setup29, level_setupPooBoss,
     level_setupBankEntrance, level_setupUBend, level_setupW3HauntedHouse,
-    level_setupBrontoThroat, level_setupHauntedOuthouse, level_setup36,
+    level_setupBrontoThroat, level_setupHauntedOuthouse, level_setupBeeCavern,
     level_setupHorrorIntro,
 };
 

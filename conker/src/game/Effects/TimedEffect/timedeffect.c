@@ -99,7 +99,7 @@ static void (*gTimedEffectMessageFuncs[74])(TimedEffect *object, s32 msg, u8 msg
     particle_onDripRetryMsg, effect_emitterTaskMessage, NULL, NULL, NULL, NULL, NULL, effect_jointEmitterTaskMessage, particle_onSideEmitterMsg, particle_onOwnerSideTaskMsg,
     rope_tieMessage, rope_lineMessage, NULL, beam_wavyBeamMessage, particle_onBoneSideEmitterMsg, NULL, NULL, NULL, particle_onSegmentEmitterSwap, NULL,
     particle_onPointPairEmitterSwap, particle_onDustEmitterEvent, trail_onStreamTaskEvent, NULL, NULL, NULL, beam_areaEmitterMessage, effect_ownerSparkMessage, particle_onAreaEmitterEvent,
-    particle_onTwoSidedEmitterMsg, NULL, effect_attachedEffectMessage, particle_onFollowEffectMsg, effect_raySpinnerMessage, particle_onSparkTrigger, effect_actorEmitterMessage, particle_handleRegionEmitterMessage,
+    particle_onTwoSidedEmitterMsg, NULL, effect_attachedEffectMessage, particle_onFollowEffectMsg, effect_raySpinnerMessage, particle_onSparkTrigger, effect_actorEmitterMessage, particle_handleZoneEffectMessage,
     beam_boltRainMessage, beam_boltArcMessage, beam_sparkRegionMessage, beam_boltChainMessage, trail_onOwnedEffectMessage, effect_timedHandlerMessage, effect_boneBurstMessage,
     beam_modelBeamMessage, particle_onPointEmitterMsg, trail_onAnchoredEmitterMessage, beam_castBeamMessage, effect_stageMessage, NULL, beam_trailEmitterMessage, effect_ownerEffectMessage,
     effect_emitterSpawnerMessage, effect_boltEmitterMessage, beam_boneSparksMessage, particle_onOwnerEmitterEvent, effect_pulseEffectMessage, effect_handleLightSwitchEvent, beam_flashBurstMessage,

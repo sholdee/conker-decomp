@@ -10,7 +10,7 @@
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
    checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
-void effect_levelHook02(Camera *camera) {
+void effect_levelHookTheWindmill(Camera *camera) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
             if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_PICKED_UP) != 0) {

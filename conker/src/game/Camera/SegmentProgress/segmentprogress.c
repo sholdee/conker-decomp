@@ -5,7 +5,7 @@
 #include "conker/math.h"
 #include "conker/script.h"
 
-/* The ends of the segment that camera_levelHook23 measures progress along. */
+/* The ends of the segment that camera_levelHookBank measures progress along. */
 static const Vec3f gSegmentProgressStart = { 0.0f, 98.0f, -5530.0f };
 static const Vec3f gSegmentProgressEnd = { 0.0f, 98.0f, 1198.0f };
 
@@ -17,7 +17,7 @@ static const Vec3f gSegmentProgressEnd = { 0.0f, 98.0f, 1198.0f };
  * derived from it to script_command; also sets unk374 and turns unk37C via math_springAngleTo. Otherwise clears
  * the flags it set.
  */
-void camera_levelHook23(Camera *camera) {
+void camera_levelHookBank(Camera *camera) {
     f32 vertical;
     Vec3f normalized;
     Vec3f offset;

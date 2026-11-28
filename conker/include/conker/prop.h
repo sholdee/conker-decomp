@@ -81,7 +81,7 @@ void prop_clearWaveChains(void);
 void prop_startWaveChain(s32 presetId);
 
 /* game/Prop/Scenery/scenery.c */
-void prop_emptyLevelUpdateHook2(s32 unused);
+void prop_emptyLevelUpdateHookBrontoCavern(s32 unused);
 void prop_startMirroredEmitters(s32 duration);
 struct StyleParticle; /* conker/particle.h */
 s32 prop_updateStyleFadeGrow(struct StyleParticle *entry);

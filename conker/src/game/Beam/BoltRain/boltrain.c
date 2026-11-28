@@ -361,7 +361,7 @@ void beam_updateSparkZone(SparkObj *obj) {
 
 /* Returns the BoltArcObj (callbackSet 0x2E) of `zone` in either object list, searching the two
  * object types listed in gTimedEffectTypes, or NULL. */
-BoltArcObj *beam_findZoneRectEffect(TriggerZone *zone) {
+BoltArcObj *beam_findBoltArcEffect(TriggerZone *zone) {
     u8 i;
     u8 list;
     BoltArcObj *obj;

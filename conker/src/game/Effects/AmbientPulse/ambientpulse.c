@@ -11,7 +11,7 @@ void light_updateAmbientRedDrift(AmbientPulse *arg0) {
 }
 
 
-void light_levelHook31(s32 *arg0) {
+void light_levelHookRockSolid(s32 *arg0) {
     if (script_query(1, 0x402C, 6, 0x2000) != 0) {
         arg0[0x21] |= 0x10;
     } else {

@@ -964,7 +964,7 @@ s32 particle_isBeamStartFxVisible(BeamStartFx *startFx, s16 view) {
 
 /* Draw test of the beam's endFx: bit 0 of link.flags, which particle_updateRayBeam sets while the beam ends on a hit of
  * type 2 or 3. */
-s32 particle_isBeamEndFxOn(BeamEndFx *endFx, s32 view) {
+s32 particle_isBeamEndFxVisible(BeamEndFx *endFx, s32 view) {
     if (!(endFx->link.flags & 1)) {
         return 0;
     }

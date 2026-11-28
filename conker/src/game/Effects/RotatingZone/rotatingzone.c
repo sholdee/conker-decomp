@@ -41,6 +41,6 @@ f32 effect_getAngleAroundRotatingZonePivot(s32 x, s32 y) {
     return math_atan2(x, y) * 57.295776f;
 }
 
-void effect_levelHook16(s32 *arg0) {
+void effect_levelHookPooCabin(s32 *arg0) {
     arg0[0x21] |= 0x4000;
 }

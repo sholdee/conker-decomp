@@ -150,11 +150,11 @@ typedef struct {
     /* 0x0C */ u8   flags;
     /* 0x0D */ u8   kind;   /* SightSpritePayload.kind */
     /* 0x0E */ u8   padE[0x2];
-    /* 0x10 */ f32  ySpeed; /* added to sprite.info.y per frame (effect_updateRisingScreenSprite) */
+    /* 0x10 */ f32  ySpeed; /* added to sprite.info.y per frame (effect_updateFallingScreenSprite) */
     /* 0x14 */ u8   pad14[0x44];
 } BeeCavernSpritePayload;
 
-/* The screen sprites of the spawner (update kind 10, gScreenSpriteUpdates[10] = effect_updateRisingScreenSprite).
+/* The screen sprites of the spawner (update kind 10, gScreenSpriteUpdates[10] = effect_updateFallingScreenSprite).
  * Screen y grows downward: they start at the top (y = -120) and end below 120. */
 typedef struct {
     /* 0x00 */ ScreenSprite sprite;
@@ -216,7 +216,7 @@ Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of 
 
 /* game/Effects/AttachedBurst/attachedburst.c */
 typedef struct AttachedEffect AttachedEffect;
-void effect_levelHook02(Camera *camera);
+void effect_levelHookTheWindmill(Camera *camera);
 void effect_updateAttachedBurst(AttachedEffect *effect);
 void effect_spawnAttachedBursts(Actor *actor);
 void func_150AECCC(struct42 *particle);
@@ -311,7 +311,7 @@ extern const Vec3f D_8009FFA0[4];
 void effect_newEmitterSpawner(Camera *owner, u8 fxOwner, s32 fxList);
 void effect_updateEmitterSpawner(BeeCavernSpawnerEffect *obj);
 void effect_emitterSpawnerMessage(BeeCavernSpawnerEffect *obj, void **msg, u8 event);
-s32 effect_updateRisingScreenSprite(BeeCavernSprite *sprite);
+s32 effect_updateFallingScreenSprite(BeeCavernSprite *sprite);
 
 /* game/Effects/DebrisSplash/debrissplash.c */
 void effect_turnWhilePushed(WorldObject *obj);
@@ -331,7 +331,7 @@ void effect_spawnQuadrupedFootprint(s32 actor, s32 side, s32 strength);
 s32 effect_getQuadrupedFootPosAlt(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
 s32 effect_selectQuadrupedFootEffectAlt(s32 arg0, s32 arg1);
 void effect_spawnQuadrupedFootprintAlt(s32 actor, s32 side, s32 strength);
-void effect_levelHook27(Camera *arg0);
+void effect_levelHookBrontoCavern(Camera *arg0);
 
 /* game/Effects/BoneRing/bonering.c */
 s32 effect_getStompFootPos(Vec3f *pos, Actor *actor, u8 side);
@@ -405,7 +405,7 @@ s32 effect_moveTumblingBurst(BurstParticle *particle);
 /* game/Effects/RotatingZone/rotatingzone.c */
 void effect_levelUpdateRotatingZone(s32 unused);
 f32 effect_getAngleAroundRotatingZonePivot(s32 x, s32 y);
-void effect_levelHook16(s32 *arg0);
+void effect_levelHookPooCabin(s32 *arg0);
 
 /* game/Effects/ActorEmitterTick/actoremittertick.c */
 typedef struct ActorEmitter ActorEmitter;
@@ -685,8 +685,8 @@ s32 effect_updateSway(SwayObject *obj);
 s32 effect_updateModelSway(DynModel *model);
 s32 effect_buildSwayMatrix(DynModel *model, s32 viewport);
 s32 effect_placeSwayLight(LightEffect *effect);
-void effect_levelHook26(Camera *actor);
-void effect_setTransportZonesDisabled(Camera *camera, s32 disabled);
+void effect_levelHookW3HauntedHouse(Camera *actor);
+void effect_setZonesDisabledForTransport(Camera *camera, s32 disabled);
 
 /* game/Effects/SurfaceSound/surfacesound.c */
 void effect_setZoneFlag(Actor *obj, TriggerZone *zone);

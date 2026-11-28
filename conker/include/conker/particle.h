@@ -219,10 +219,10 @@ typedef struct {
     PointEmitterData data;
 } PointEmitter;
 
-void particle_levelHook29(Camera *camera);
+void particle_levelHookWindmillExploded(Camera *camera);
 void particle_spawnPointEmitter(EffectHeader *spawner, Vec3f *pos, f32 top, u8 noGround);
 void particle_updatePointEmitter(PointEmitter *effect);
-void particle_levelHook21(Camera *camera);
+void particle_levelHookBarnArena(Camera *camera);
 
 /* game/Particle/YawStreak/yawstreak.c */
 s32 particle_selectObjGroundBurst(s32 kind, Actor *actor);
@@ -923,7 +923,7 @@ void particle_attachFogFlash(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 du
 void particle_onFogFlashEvent(EmitterEffect *effect, s32 event, u8 eventType);
 void particle_updateFogFlash(EmitterEffect *effect);
 void particle_spawnFloorImpactGreenFlash(Actor *obj, u8 owner, s32 list);
-void particle_levelHook17(Camera *obj);
+void particle_levelHookWarboss(Camera *obj);
 
 /* game/Particle/BoneBurst/boneburst.c */
 /* State the emitter object keeps at +0x28: particle_spawnBoneBurstEmitter fills it, particle_updateBoneBurstEmitter updates it each frame. */
@@ -974,7 +974,7 @@ extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its 
 /* game/Player/FlyControl/flycontrol.c */
 f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch);
 void player_updateFlying(Actor *actor);
-void player_levelHook24(Camera *actor);
+void player_levelHookHorrorIntro(Camera *actor);
 
 /* game/Particle/Spiral/spiral.c */
 /* Per-object state of the effect spawned by particle_spawnSpiral: it circles a centre that moves
@@ -1093,7 +1093,7 @@ s32 particle_updateWobbleOffset(BeamStartFx *obj, Vec3f *prevPos);
 RayBeam *particle_startObjRayBeam(Actor *obj, s16 lifetime, u8 kind, u8 aimed, u8 owner, s32 list);
 void particle_stopObjEffect(Actor *actor);
 s32 particle_isBeamStartFxVisible(BeamStartFx *startFx, s16 view);
-s32 particle_isBeamEndFxOn(BeamEndFx *endFx, s32 view);
+s32 particle_isBeamEndFxVisible(BeamEndFx *endFx, s32 view);
 s32 particle_isBeamLineVisible(BeamLine *line, s16 view);
 
 /* game/Particle/AreaFlash/areaflash.c */
@@ -2561,7 +2561,7 @@ void particle_freeRegionEmitter(TimedEffect *effect);
 void particle_stopEffectSound(u16 soundHandle);
 QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *pos, s16 duration, u8 lit, u8 arg6,
                           u8 owner, s32 list);
-void particle_handleRegionEmitterMessage(ZoneEffect *listener, void *data, u8 type);
+void particle_handleZoneEffectMessage(ZoneEffect *listener, void *data, u8 type);
 void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
 struct ZoneEmitter; /* game/Particle/ZoneEmitter/zoneemitter.c, below */
 Vtx *particle_buildYawedVerticalQuad(struct ZoneEmitter *owner, s16 index);

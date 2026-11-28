@@ -24,8 +24,8 @@ u8 D_8008CD00 = 0;
 /* Per-level update hooks, indexed by the level header's updateCallback (0: none). */
 static void (*gLevelUpdateHooks[])(s32) = {
     NULL,
-    attach_emptyLevelUpdateHook1,
-    prop_emptyLevelUpdateHook2,
+    attach_emptyLevelUpdateHookBoilerRoom,
+    prop_emptyLevelUpdateHookBrontoCavern,
     effect_levelUpdateDistantTracers,
     effect_levelUpdateRain,
     sprite_runQueuedCommand,

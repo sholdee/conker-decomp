@@ -70,7 +70,7 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner);
 s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor);
 
 /* game/Attach/TextureScroll/texturescroll.c */
-void attach_emptyLevelUpdateHook1(s32 unused);
+void attach_emptyLevelUpdateHookBoilerRoom(s32 unused);
 s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
 GameCommand *func_150D8590(GameCommand *cmd, s32 index);

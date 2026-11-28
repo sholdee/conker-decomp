@@ -2280,7 +2280,7 @@ typedef struct {
     u8 pad5[3];
 } VtxMorphFrame;
 
-/* The two end points of a rope (level data such as gSetup11Rope1Ends), higher end first. */
+/* The two end points of a rope (level data such as gCogLandRope1Ends), higher end first. */
 typedef struct RopeEnds {
     /* 0x00 */ Vec3f top;
     /* 0x0C */ Vec3f bottom;
