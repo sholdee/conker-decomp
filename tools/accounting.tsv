@@ -800,7 +800,7 @@ level_setup30	0x150102D0	272	game	c		build/src/game/Level/LevelSetup30/levelsetu
 level_setup32	0x150103E0	272	game	c		build/src/game/Level/LevelSetup30/levelsetup30.c.o
 level_setup15	0x150104F0	72	game	c		build/src/game/Level/LevelSetupHarbour/levelsetupharbour.c.o
 level_spawnBoltEmitter	0x15010538	200	game	c		build/src/game/Level/LevelSetupHarbour/levelsetupharbour.c.o
-level_setup02	0x15010600	128	game	c		build/src/game/Level/LevelSetupHarbour/levelsetupharbour.c.o
+level_setup02	0x15010600	128	game	c		build/src/game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c.o
 level_setup06	0x15010680	32	game	c		build/src/game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c.o
 level_emptySetup07	0x150106A0	16	game	c		build/src/game/Level/LevelSetup07/levelsetup07.c.o
 level_setup10	0x150106B0	32	game	c		build/src/game/Level/LevelSetupTankFactory/levelsetuptankfactory.c.o

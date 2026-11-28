@@ -403,6 +403,7 @@ segments:
       - [0x3D770, c, game/Level/LevelSetupRockSolid/levelsetuprocksolid]
       - [0x3D780, c, game/Level/LevelSetup30/levelsetup30]
       - [0x3D9A0, c, game/Level/LevelSetupHarbour/levelsetupharbour]
+      - [0x3DAB0, c, game/Level/LevelSetupBoilerRoom/levelsetupboilerroom]
       - [0x3DB30, c, game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole]
       - [0x3DB50, c, game/Level/LevelSetup07/levelsetup07]
       - [0x3DB60, c, game/Level/LevelSetupTankFactory/levelsetuptankfactory]

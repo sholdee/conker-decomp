@@ -26,6 +26,7 @@
  *   game/Level/LevelSetupRockSolid/levelsetuprocksolid.c
  *   game/Level/LevelSetup30/levelsetup30.c
  *   game/Level/LevelSetupHarbour/levelsetupharbour.c
+ *   game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c
  *   game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c
  *   game/Level/LevelSetup07/levelsetup07.c
  *   game/Level/LevelSetupTankFactory/levelsetuptankfactory.c
@@ -216,6 +217,8 @@ void level_setup32(void);
 /* game/Level/LevelSetupHarbour/levelsetupharbour.c */
 void level_setup15(void);
 void level_spawnBoltEmitter(Actor *obj);
+
+/* game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c */
 void level_setup02(void);
 
 /* game_3DB30.c */

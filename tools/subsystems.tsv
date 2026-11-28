@@ -382,7 +382,8 @@ src/game/Level/LevelHookUBend/levelhookubend.c	level	level logic: channel easing
 src/game/Level/LevelHooks/levelhooks.c	level	per-level hook dispatch
 src/game/Level/LevelModels/levelmodels.c	level	level model loading/rebasing, vertex colour groups, texture size table
 src/game/Level/LevelObjects/levelobjects.c	level	level object placements: spawning objects from the level's object lists
-src/game/Level/LevelSetupHarbour/levelsetupharbour.c	level	per-level setup: object tables and timed effects
+src/game/Level/LevelSetupHarbour/levelsetupharbour.c	level	per-level setup: material glow reset and a bolt emitter effect
+src/game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c	level	per-level setup: clears the script command 2 flag and its two tables
 src/game/Level/LevelSetupBarnInside/levelsetupbarninside.c	level	per-level setup stub (empty)
 src/game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c	level	per-level setup: timed effects at fixed points
 src/game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern.c	level	per-level setup: timed effect carrying a struct
