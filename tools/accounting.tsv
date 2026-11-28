@@ -3,10 +3,10 @@ boot_romEntry	0x10001000	80	init	hasm	b	build/src/init/Boot/EntryPoint/entrypoin
 boot_entry	0x10001050	168	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_idleThread	0x100010F8	156	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_mainThread	0x10001194	652	init	c		build/src/init/Boot/BootMain/bootmain.c.o
-libc_clearPageSlots	0x10001420	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_resetPaging	0x10001444	92	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_stopMainThread	0x100014A0	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_reinitPaging	0x100014C4	140	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+boot_clearPageSlots	0x10001420	36	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+boot_resetPaging	0x10001444	92	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+boot_stopMainThread	0x100014A0	36	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+boot_reinitPaging	0x100014C4	140	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 _Ldtob	0x10001550	1184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldunscale	0x100019F0	184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Genld	0x10001AA8	1480	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
@@ -30,7 +30,7 @@ heap_initMemoryLayout	0x10003930	128	init	c		build/src/init/Heap/MemoryLayout/me
 func_100039B0	0x100039B0	16	init	c		build/src/init/Boot/VoidStub/voidstub.c.o
 boot_initScreen	0x100039C0	268	init	c		build/src/init/Boot/ScreenInit/screeninit.c.o
 boot_clearFramebuffers	0x10003ACC	260	init	c		build/src/init/Boot/ScreenInit/screeninit.c.o
-heap_init	0x10003BD0	112	init	c		build/src/init/Heap/HeapInit/heapinit.c.o
+heap_init	0x10003BD0	112	init	c		build/src/init/Heap/Allocator/allocator.c.o
 allocate_memory	0x10003C40	44	init	c		build/src/init/Heap/Allocator/allocator.c.o
 heap_alloc	0x10003C6C	1032	init	c		build/src/init/Heap/Allocator/allocator.c.o
 heap_free	0x10004074	476	init	c		build/src/init/Heap/Allocator/allocator.c.o

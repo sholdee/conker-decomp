@@ -36,10 +36,6 @@ typedef struct {
 } _Pft; /* size 0x38 */
 
 /* init/Libc/Xldtob/xldtob.c */
-void libc_clearPageSlots(void);
-void libc_resetPaging(void);
-void libc_stopMainThread(void);
-void libc_reinitPaging(s32 arg0);
 void _Ldtob(void *arg0, unsigned char code);
 s16 _Ldunscale(s16 *pex, _Pft *px);
 void _Genld(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
@@ -54,8 +50,5 @@ void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 /* game/Libc/Sprintf/sprintf.c */
 u8 *proutSprintf(u8 *dst, u8 *src, u32 count);
 s32 func_151EFF94(u8 *buf, u8 *fmt, ...);
-
-/* in the rspboot data (undefined_syms.us.txt) */
-extern s32 *D_1002AAD0;
 
 #endif

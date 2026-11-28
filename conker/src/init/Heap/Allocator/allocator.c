@@ -29,6 +29,22 @@ static s32 gHeapLastAllocMode;
 
 static s32 gHeapLargestFreeSize = 0x10000000; // size of the largest free block
 
+void heap_init(void) {
+    AllocatorFreeBlock *heap;
+
+    // the whole heap starts as one free block
+    gHeapFirstBlock = (AllocatorBlock *)D_800E9D10;
+    gHeapFirstBlock->next = NULL;
+    gHeapFirstBlock->prev = NULL;
+    gHeapFirstBlock->taggedSize = gHeapEnd - (u32)D_800E9D10 - sizeof(AllocatorFreeBlock);
+    ((AllocatorFreeBlock *)gHeapFirstBlock)->nextFree = NULL;
+    ((AllocatorFreeBlock *)gHeapFirstBlock)->prevFree = NULL;
+    heap = (AllocatorFreeBlock *)gHeapFirstBlock;
+    gHeapFreeTail = heap;
+    gHeapFreeHead = gHeapFreeTail;
+    gHeapLargestFree = heap;
+}
+
 /* Allocates size bytes from the front of the heap; see heap_alloc. */
 void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
     return heap_alloc(size, tag, align, FALSE, mode);

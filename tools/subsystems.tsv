@@ -701,16 +701,15 @@ src/init/Audio/SynLowPassCutoff/synlowpasscutoff.c	audio	posts filter type 19 (t
 src/init/Audio/SynLowPassGain/synlowpassgain.c	audio	posts filter type 18 (the gain of the voice low-pass)
 src/init/Audio/VoiceLowPass/voicelowpass.c	audio	per-voice low-pass filter stage
 src/init/Boot/ArgStub/argstub.c	boot	empty early-boot stub
-src/init/Boot/BootMain/bootmain.c	boot	main and idle threads: heap/framebuffer/VI setup, boot data load and decompression
+src/init/Boot/BootMain/bootmain.c	boot	main and idle threads: heap/framebuffer/VI setup, boot data load and decompression, paging reset helpers
 src/init/Boot/ScreenInit/screeninit.c	boot	screen width/height setup
 src/init/Boot/VoidStub/voidstub.c	boot	empty early-boot stub
 src/init/Cont/Motor/motor.c	cont	Rumble Pak motor control (osMotorStop/Start copy)
 src/init/Cont/MotorInit/motorinit.c	cont	Rumble Pak motor init (osMotorInit and its helper _MakeMotorData)
-src/init/Heap/Allocator/allocator.c	heap	tagged block allocator: alloc, free, alignment classes
+src/init/Heap/Allocator/allocator.c	heap	tagged block allocator: init, alloc, free, alignment classes
 src/init/Heap/ExpansionPak/expansionpak.c	heap	clears the expansion-pak flag used for memory layout
-src/init/Heap/HeapInit/heapinit.c	heap	heap initialisation: whole heap as one free block
 src/init/Heap/MemoryLayout/memorylayout.c	heap	selects top-of-RAM buffer addresses for 4MB vs 8MB (expansion pak)
-src/init/Libc/Xldtob/xldtob.c	libc	printf back end (_Ldtob/_Ldunscale/_Genld) and a block release helper
+src/init/Libc/Xldtob/xldtob.c	libc	printf back end (_Ldtob/_Ldunscale/_Genld)
 src/init/Libc/Xprintf/xprintf.c	libc	printf back end (_Litob-style integer conversion with jump table)
 src/init/Os/DevMgr/devmgr.c	os	Rare's copy of __osDevMgrMain with PI-thread interlock
 src/init/Rom/RomDma/romdma.c	rom	cartridge ROM reads: blocking/non-blocking PI DMA and uncached copies

@@ -211,7 +211,7 @@ glabel boot_runFaultDebugger
     /* 80A8 100080A8 24010020 */  addiu      $at, $zero, 0x20
     /* 80AC 100080AC 1621FFFA */  bne        $s1, $at, .L10008098
     /* 80B0 100080B0 00000000 */   nop
-    /* 80B4 100080B4 0C000508 */  jal        libc_clearPageSlots
+    /* 80B4 100080B4 0C000508 */  jal        boot_clearPageSlots
     /* 80B8 100080B8 00000000 */   nop
     /* 80BC 100080BC 0C0016F8 */  jal        boot_resetPageBitmap
     /* 80C0 100080C0 00000000 */   nop

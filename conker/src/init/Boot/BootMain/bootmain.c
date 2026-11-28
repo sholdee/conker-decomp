@@ -19,7 +19,6 @@ s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, 
 #include "conker/boot.h"
 #include "conker/heap.h"
 #include "conker/level.h"
-#include "conker/libc.h"
 #include "conker/music.h"
 #include "conker/os.h"
 #include "conker/rom.h"
@@ -109,7 +108,61 @@ void boot_mainThread(void *arg) {
     }
     gPagePool = 0;
     boot_initPaging(0xEB);
-    libc_clearPageSlots();
+    boot_clearPageSlots();
     boot_resetPageBitmap();
     boot_runGame();
+}
+
+/* Zeroes the 0xFE0-byte block at gPageSlots, one word at a time. */
+void boot_clearPageSlots(void) {
+    // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0
+    // (plain loop is byte-identical but uses v0/v1); no idiomatic form found
+    s32 zero0 = 0;
+    s32 zero1 = 0;
+    s32 size = 0xFE0;
+    s32 zero2;
+    s32 zero3;
+    s32 *p = gPageSlots;
+
+    if (1) {
+        zero2 = 0;
+        zero3 = 0;
+        do {
+            *p++ = 0;
+        } while ((u32)p < (u32)gPageSlots + size + zero0 + zero1 + zero2 + zero3);
+    }
+}
+
+/* With interrupts disabled: clears gPageSlots and invalidates the I-cache from
+ * D_1002AAD0 up to the end of 4MB RDRAM. */
+void boot_resetPaging(void) {
+    u32 saveMask = __osDisableInt();
+    boot_invalidateTlbEntries(2, 31);
+    boot_clearPageSlots();
+    boot_resetPageBitmap();
+    osInvalICache(&D_1002AAD0, 0x80400000 - (u32)&D_1002AAD0);
+    __osRestoreInt(saveMask);
+}
+
+/* Stops thread gMainThread. */
+void boot_stopMainThread(void) {
+    osStopThread(&gMainThread);
+}
+
+/* With interrupts disabled: releases the gPagePool and gPageFreeBitmap blocks (as KSEG0
+ * pointers) through heap_free, then hands arg0 to boot_initPaging and clears gPageSlots. */
+void boot_reinitPaging(s32 arg0) {
+    u32 saveMask = __osDisableInt();
+    boot_invalidateTlbEntries(2, 31);
+
+    if (gPagePool) {
+        heap_free((void *)(gPagePool | 0x80000000));
+    }
+    if (gPageFreeBitmap) {
+        heap_free((void *)(gPageFreeBitmap | 0x80000000));
+    }
+    boot_initPaging(arg0);
+    boot_clearPageSlots();
+    boot_resetPageBitmap();
+    __osRestoreInt(saveMask);
 }

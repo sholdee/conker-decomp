@@ -34,7 +34,7 @@ segments:
       # -O2 -g3 from here
       - [0x1000, hasm, init/Boot/EntryPoint/entrypoint]
       - [0x1050, c, init/Boot/BootMain/bootmain]
-      - [0x1420, c, init/Libc/Xldtob/xldtob]
+      - [0x1550, c, init/Libc/Xldtob/xldtob]
       - [0x2070, c, init/Libc/Xprintf/xprintf]
       - [0x2DB0, c, libultra/io/aisetnextbuf]
       - [0x2E50, c, init/Os/DevMgr/devmgr]
@@ -48,8 +48,7 @@ segments:
       - [0x3930, c, init/Heap/MemoryLayout/memorylayout]
       - [0x39B0, c, init/Boot/VoidStub/voidstub]
       - [0x39C0, c, init/Boot/ScreenInit/screeninit]
-      - [0x3BD0, c, init/Heap/HeapInit/heapinit]
-      - [0x3C40, c, init/Heap/Allocator/allocator]
+      - [0x3BD0, c, init/Heap/Allocator/allocator]
       - [0x4470, c, init/Rom/RomDma/romdma]
       - [0x49E0, c, init/Sched/Scheduler/scheduler]
       - [0x50A0, c, init/Sched/SchedInit/schedinit]

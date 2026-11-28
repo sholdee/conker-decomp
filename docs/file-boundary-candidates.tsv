@@ -3,8 +3,6 @@
 # Builds used: ECTS ROM, debug ROM. Missing: none.
 # Addresses are US vram. No ROM bytes. See ACCOUNTING.md, "File boundaries".
 kind	us_address	left_object	right_object	left_function	right_function	source	evidence	order_agrees	us_16_aligned	other_old_build	us_code	note
-merge	0x10001420	init/Boot/BootMain/bootmain	init/Libc/Xldtob/xldtob	boot_mainThread	libc_clearPageSlots	debug	libc_clearPageSlots starts at 0x100013B8 right after boot_mainThread, not 16-aligned	yes	yes	silent	flush	
-merge	0x10003C40	init/Heap/HeapInit/heapinit	init/Heap/Allocator/allocator	heap_init	allocate_memory	ects	allocate_memory starts at 0x100037D8 right after heap_init, not 16-aligned	yes	yes	silent	flush	
 merge	0x10005BE0	init/Boot/Paging/pagesetup	init/Boot/Paging/pagebitmap	boot_allocPagePool	boot_resetPageBitmap	debug	boot_resetPageBitmap starts at 0x10004904 right after boot_allocPagePool, not 16-aligned	yes	yes	agrees	flush	asm on both sides
 merge	0x10005BE0	init/Boot/Paging/pagesetup	init/Boot/Paging/pagebitmap	boot_allocPagePool	boot_resetPageBitmap	ects	boot_resetPageBitmap starts at 0x10004548 right after boot_allocPagePool, not 16-aligned	yes	yes	agrees	flush	asm on both sides
 merge	0x10005C2C	init/Boot/Paging/pagebitmap	init/Boot/Paging/pagefault	boot_resetPageBitmap	boot_handleGamePageFault	us	R starts at 0x10005C2C, not 16-aligned, right after L	n.a.	no	ects agrees, debug silent	join	asm on both sides
@@ -113,7 +111,6 @@ merge	0x151C4AB0	game/Particle/WobbleStream/wobblestream	game/Weapon/ProjectileR
 merge	0x151D15D0	game/Effects/Trail/LevelStream/levelstream	game/Effects/Trail/TrackerTrail/trackertrail	trail_spawnTrackerTrail	trail_sampleTrackerTrail	debug	trail_sampleTrackerTrail starts at 0x151D4104 right after trail_spawnTrackerTrail, not 16-aligned	yes	yes	no partners	flush	
 merge	0x151D15D0	game/Effects/Trail/LevelStream/levelstream	game/Effects/Trail/TrackerTrail/trackertrail	trail_spawnTrackerTrail	trail_sampleTrackerTrail	us-rodata	R's .rodata starts at 0x800AB0A8, not 16-aligned, right after L's	n.a.	yes	n.a.	flush	
 merge	0x16001700	debugger/Debugger/CrashScreen/crashscreen	debugger/Debugger/DebuggerCont/debuggercont	debugger_returnArg	debugger_contStartReadData	debug	debugger_contStartReadData starts at 0x160032B4 right after debugger_returnArg, not 16-aligned	yes	yes	silent	flush	
-split	0x10001550	init/Libc/Xldtob/xldtob	init/Libc/Xldtob/xldtob	libc_stopMainThread	_Ldtob	debug	debug: 4 zero bytes before 0x10001460	yes	yes	silent	flush	
 split	0x150006E0	game/Audio/LevelMusic/levelmusic	game/Audio/LevelMusic/levelmusic	music_startLevelMusic	music_initLevelViewState	debug	debug: 4 zero bytes before 0x150006E0	yes	yes	no partners	flush	
 split	0x15002F40	game/Collision/QuadTree/quadtree	game/Collision/QuadTree/quadtree	collision_buildVertexRuns	collision_loadMapSettings	debug	debug: 4 zero bytes before 0x15002FD0	yes	yes (2 places: 0x15002F40,0x15002FA0)	no partners	flush	
 split	0x15005DA0	game/Camera/LevelCamSetup13/levelcamsetup13	game/Camera/LevelCamSetup13/levelcamsetup13	camera_levelSetupPooCabin	camera_emptyLevelSetupWarboss	ects	ects: 4 zero bytes before 0x15000E40	yes	yes	silent	flush	
