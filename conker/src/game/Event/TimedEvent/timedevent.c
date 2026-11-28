@@ -159,7 +159,7 @@ void (*gAnimCommandProcs[])(s32) = {
     event_spawnBonePointImpact1, event_spawnBonePointImpact2, event_emitLineBursts, func_15071A64,
     event_startDustEmitter, func_15071B18, event_spawnImpactBurstNearBone,
 };
-/* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
+/* End-of-anim state handlers (run when the anim reaches its last frame), indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
     event_doNothing, anim_updateIdle, func_1506AF74, func_1506AFE0,
     func_1506B020, event_emptyAnimState05, func_1506B078, event_doNothing,
@@ -1318,7 +1318,7 @@ void event_finishClimbUp(void) {
 
 void event_finishLadderGrabFromTop(void) {
     gCurrentActor->ypos -= 80.0f;
-    actor_playAnim(gCurrentActor, 663, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(gCurrentActor, 0x297, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     gCurrentActor->unk100 &= 0xFFDF;
     gCurrentActor->count5 = 0;
     gCurrentActor->norun = 0;
@@ -2339,7 +2339,7 @@ void event_spawnShortLight(s32 cmd) {
 }
 
 
-/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect effect_spawnBoneBeamParticle at bone 4. */
+/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect_spawnBoneBeamParticle at bone 4. */
 void event_fireTankGun(s32 cmd) {
     u8 useBullet;
     Actor *shooter;
