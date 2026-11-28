@@ -323,7 +323,8 @@ src/game/Effects/Rain/rain.c	effect	QuadFx objects
 src/game/Effects/RainHook/rainhook.c	effect	effect reset
 src/game/Effects/RaySpinner/rayspinner.c	effect	spinning ray-casting object moving its children to hit points
 src/game/Effects/RibbonChild/ribbonchild.c	effect	effect kind handlers
-src/game/Effects/RingEffect/ringeffect.c	effect	expanding ring effects and radial bursts
+src/game/Effects/RingEffect/ringeffect.c	effect	expanding ring effect: new, update, draw, emit and hit callbacks
+src/game/Effects/ImpactRing/impactring.c	effect	impact ring at an actor, ground circle, damped and tumbling particles
 src/game/Effects/RotatingZone/rotatingzone.c	effect	rotated slot positions driven by an object's angle
 src/game/Effects/SegmentTrail/segmenttrail.c	effect	split from game_E8C10.c; same subsystem
 src/game/Effects/SpawnEmitterHook/spawnemitterhook.c	effect	emitter attachment hook
