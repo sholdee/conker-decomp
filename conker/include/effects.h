@@ -3227,14 +3227,28 @@ typedef struct {
 /*
  * Template / payload of a type 0xE QuadFx object (game/Effects/ObjectList/objectlist.c): a textured quad pair animated through an
  * TextureDesc. effect_initQuadFxTemplate fills a template's vertices, effect_spawnQuadFx copies it into a new object.
- * The fields between the animation fields belong to the callback (gParticleCallbacks); their names come from the
- * rain drops of game/Effects/Rain/rain.c.
+ * The bytes at 0x80-0x87 belong to the callback (gParticleCallbacks): cb has one member per callback that uses them
+ * (callers without such a callback write the rain names).
  */
 typedef struct QuadFxData {
     /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 dropFlags;   /* rain: 1: hidden until it first wraps, 2: remove when it next wraps */
-    /* 0x84 */ s16 slot;        /* rain: index in gRainDrops */
-    /* 0x86 */ s16 unk86;
+    /* 0x80 */ union {
+        struct {
+            /* 0x80 */ s32 dropFlags;   /* 1: hidden until it first wraps, 2: remove when it next wraps */
+            /* 0x84 */ s16 slot;        /* index in gRainDrops */
+            /* 0x86 */ s16 unk86;
+        } rain;                         /* callback 1, effect_updateRainDrop (game/Effects/Rain/rain.c) */
+        struct {
+            /* 0x80 */ s32 timer;       /* ticks since the spawn */
+            /* 0x84 */ s16 widthScale;  /* halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0]) */
+            /* 0x86 */ s16 heightScale; /* halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1]) */
+        } impact;                       /* callback 13, func_150E4CBC (game/Effects/MaterialImpact/materialimpact.c) */
+        struct {
+            /* 0x80 */ u8 pad80[4];
+            /* 0x84 */ s16 fallSpeed;
+            /* 0x86 */ s16 maxHalfHeight;
+        } falling;                      /* callback 15, effect_updateFallingObject (game/Effects/FallingObject/fallingobject.c) */
+    } cb;
     /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
     /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
     /* 0x8C */ s16 x;

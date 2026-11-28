@@ -371,43 +371,33 @@ void blood_freeDrip(BloodDrip *drip) {
     gBloodDripFreeHandlers[index]();
 }
 
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    u8 ownerId;
-    u8 pad19[0x3];
-    Actor *owner;
-    u8 pad20[0x1D];
-    u8 handlerSet;
-} SubA_151347CC;
-
-/* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
+/* Message handler of the blood drips (gObjectTypes[40].handleEvent): frees the effect when its owner goes away, follows owner handle swaps. */
 void blood_handleDripMessage(void *obj, ActorMsg *msg, u8 message) {
-    SubA_151347CC *effect = obj; // matching: copying the parameter keeps IDO's register choice in case 0x2D
+    BloodDrip *effect = obj; // matching: copying the parameter keeps IDO's register choice in case 0x2D
     Actor *actorA;
 
     if ((message == 0) || (message == 3)) {
-        if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+        if ((msg->ref.actor == effect->desc.owner) || (msg->ref.uniqueId == effect->desc.ownerId)) {
             effect_destroyObject(&effect->header);
         }
     } else if (message == 0x11) {
-        if (effect->handlerSet == 5) {
-            if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+        if (effect->desc.handlerSet == 5) {
+            if ((msg->ref.actor == effect->desc.owner) || (msg->ref.uniqueId == effect->desc.ownerId)) {
                 effect_destroyObject(&effect->header);
             }
         }
     } else if (message == 0x16) {
-        if ((Actor *)msg == effect->owner) {
+        if ((Actor *)msg == effect->desc.owner) {
             effect_destroyObject(&effect->header);
         }
     } else if (message == 0x2D) {
         actorA = msg->swap.actorA;
-        if (effect->owner == actorA) {
-            effect->owner = msg->swap.actorB;
-            effect->ownerId = msg->swap.idB;
-        } else if (effect->owner == msg->swap.actorB) {
-            effect->owner = actorA;
-            effect->ownerId = msg->swap.idA;
+        if (effect->desc.owner == actorA) {
+            effect->desc.owner = msg->swap.actorB;
+            effect->desc.ownerId = msg->swap.idB;
+        } else if (effect->desc.owner == msg->swap.actorB) {
+            effect->desc.owner = actorA;
+            effect->desc.ownerId = msg->swap.idA;
         }
     }
 }

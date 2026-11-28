@@ -52,9 +52,6 @@ typedef struct ScriptCmd {
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
 
-/* A type that game/Script/TimerCmd/timercmd.c defines; the declarations below use it. */
-typedef struct Src150A0264 Src150A0264;
-
 /* game/Script/ObjScript/objscript.c */
 void script_jump(s32 target);
 void script_applyMoveFlags(void);
@@ -428,8 +425,8 @@ s32 script_taskQuery(s32 id, s32 opcode, ScriptCmd *cmd);
 /* game/Script/TimerCmd/timercmd.c */
 void script_resetTimers(void);
 void script_updateTimers(void);
-s32 script_startTimer(s32 timer, Src150A0264 *cmd);
-s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd);
+s32 script_startTimer(s32 timer, ScriptCmd *cmd);
+s32 script_timerCommand(s32 timer, s32 opcode, ScriptCmd *cmd);
 s32 script_timerQuery(s32 timer, s32 opcode, s32 cmd);
 
 /* game/Script/ZoneCmd/zonecmd.c */

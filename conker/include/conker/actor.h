@@ -36,8 +36,8 @@ typedef struct {
     s32 unk4;
 } Pair1506AA48;
 
-/* Hit-handler argument of func_1506AB7C / func_1506ABC4 (the same layout as actoractions.c's ThrowPacket and
-   sprayobjects.c's Struct150C3230). */
+/* Hit-handler argument of func_1506AB7C / func_1506ABC4 (gActorHitHandlers[0xB] / [0xE]; the same layout as
+   actoractions.c's ThrowPacket; game/Particle/SprayObjects/sprayobjects.c sends one too). */
 typedef struct {
     /* 0x00 */ Actor *source; // the thrower (actor_throwGrenade) or the spray object's owner (sprayobjects.c)
     /* 0x04 */ Vec3f pos;     // where the blast happens

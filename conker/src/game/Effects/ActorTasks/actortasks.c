@@ -322,20 +322,15 @@ void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit) {
     }
 }
 
-struct Task151AA30C {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ Actor *actor;
-};
-
-/* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task) {
+/* Blood drip emitter 2 (gBloodDripEmitters[2], the drip effect_attachFallingDriftIfSolid spawns): one falling particle at
+ * (x, y, z) when that point is not above the owner's waterHeight. */
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, BloodDrip *task) {
     Vec3f pos;
     Vec3f vel;
     Actor *actor;
     CollisionHit *ground;
 
-    actor = task->actor;
+    actor = task->desc.owner;
     if (actor->waterHeight < y) {
         return;
     }

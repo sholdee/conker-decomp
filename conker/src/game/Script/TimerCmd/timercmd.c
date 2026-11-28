@@ -16,12 +16,6 @@ typedef struct Rec150A0264 {
     u32 ticks; /* ticks towards the next count */
 } Rec150A0264;
 
-struct Src150A0264 {
-    s32 id;    /* the record's command word (ScriptCmd.id) */
-    s32 unit;  /* the timer unit (Rec150A0264.unit) of the start command */
-    s32 value; /* the count that command 2 sets */
-};
-
 static Rec150A0264 gScriptTimers[10];
 
 /* Defined here (not extern): as1 then knows the array's alignment and shares one `lui at`
@@ -59,7 +53,8 @@ void script_updateTimers(void) {
 }
 
 
-s32 script_startTimer(s32 timer, Src150A0264 *cmd) {
+/* Start handler (gScriptStartHandlers): claims timer `timer`, stopped, counting in unit cmd->arg (Rec150A0264.unit). */
+s32 script_startTimer(s32 timer, ScriptCmd *cmd) {
     Rec150A0264 *r = &gScriptTimers[timer];
 
     if (r->active != 0) {
@@ -67,12 +62,13 @@ s32 script_startTimer(s32 timer, Src150A0264 *cmd) {
     }
     r->active = 1;
     r->running = 0;
-    r->unit = cmd->unit;
+    r->unit = cmd->arg.w;
     r->count = 0;
     return 1;
 }
 
-s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd) {
+/* Command handler (gScriptCommandHandlers): 0 runs the timer, 1 stops it, 2 sets its count to cmd->a[0]. */
+s32 script_timerCommand(s32 timer, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 0:
         gScriptTimers[timer].running = 1;
@@ -81,7 +77,7 @@ s32 script_timerCommand(s32 timer, s32 opcode, Src150A0264 *cmd) {
         gScriptTimers[timer].running = 0;
         return 1;
     case 2:
-        gScriptTimers[timer].count = cmd->value;
+        gScriptTimers[timer].count = cmd->a[0].w;
         return 1;
     }
     return 0;

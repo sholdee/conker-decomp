@@ -111,8 +111,8 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         obj.z = z;
         obj.callback = 0xD;
         obj.animIndex = entry->objectType;
-        obj.slot = gMaterialImpactScales[size][0];
-        obj.unk86 = gMaterialImpactScales[size][1];
+        obj.cb.impact.widthScale = gMaterialImpactScales[size][0];
+        obj.cb.impact.heightScale = gMaterialImpactScales[size][1];
         obj.flags = 0x2A00;
         obj.halfWidth = 1;
         obj.halfHeight = 1;
@@ -208,40 +208,26 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
     }
 }
 
-struct Struct150E4CBC {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ Vtx vtx[8];
-    /* 0x90 */ s32 timer;
-    /* 0x94 */ s16 widthScale;  // halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0])
-    /* 0x96 */ s16 heightScale; // halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1])
-    /* 0x98 */ s16 frame;       // QuadFxData.frame; set to -1 when the effect is finished
-    /* 0x9A */ u8 pad9A[8];
-    /* 0xA2 */ s16 halfWidth;   // QuadFxData.halfWidth
-    /* 0xA4 */ s16 halfHeight;
-    /* 0xA6 */ u8 padA6[0xE];
-    /* 0xB4 */ u8 alpha;
-};
-
 /*
  * Per-frame update (gParticleCallbacks[13]): halfHeight ramps up to 90/256 of heightScale over the first 9 ticks
  * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
  */
-void func_150E4CBC(Struct150E4CBC *fx) {
-    if (fx->timer < 9) {
-        fx->halfHeight = fx->timer * 90 / 9 * fx->heightScale / 256.0f;
+void func_150E4CBC(QuadFx *fx) {
+    if (fx->data.cb.impact.timer < 9) {
+        fx->data.halfHeight = fx->data.cb.impact.timer * 90 / 9 * fx->data.cb.impact.heightScale / 256.0f;
     } else {
-        fx->halfHeight = (90 - (fx->timer * 90 - 810) / 600) * fx->heightScale / 256.0f;
-        if (fx->alpha > gFrameTicks * 17) {
-            fx->alpha -= gFrameTicks * 17;
+        fx->data.halfHeight = (90 - (fx->data.cb.impact.timer * 90 - 810) / 600) * fx->data.cb.impact.heightScale / 256.0f;
+        if (fx->data.alpha > gFrameTicks * 17) {
+            fx->data.alpha -= gFrameTicks * 17;
         } else {
-            fx->frame = -1;
+            fx->data.frame = -1;
         }
     }
-    fx->halfWidth = (s32)(fx->widthScale * 14.0f) >> 8;
-    if (fx->timer > 608) {
-        fx->frame = -1;
+    fx->data.halfWidth = (s32)(fx->data.cb.impact.widthScale * 14.0f) >> 8;
+    if (fx->data.cb.impact.timer > 608) {
+        fx->data.frame = -1;
     }
-    fx->timer += gFrameTicks;
+    fx->data.cb.impact.timer += gFrameTicks;
 }
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in gTriPlaneNormalX..gTriPlaneNormalZ. */

@@ -688,31 +688,6 @@ typedef struct {
     } data;
 } FollowParticle;
 
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ u8  pad08[0xC];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s8  unk50;
-} Struct150D64E8;
-
 void particle_attachFollowEffect(Actor *obj, u8 owner, s32 list);
 void particle_updateFollowEffect(FollowEffect *effect);
 void particle_onFollowEffectMsg(FollowEffect *effect, ActorMsg *msg, u8 type);
@@ -721,7 +696,7 @@ void particle_freeFollowEffect(TimedEffect *effect);
 void particle_spawnBreakup(Actor *obj, u8 owner, s32 list);
 void particle_spawnRandomGrowFade(Vec3f *pos, u8 owner, s32 list);
 void particle_spawnRandomSwell(Vec3f *pos, u8 owner, s32 list);
-void func_150D64E8(Struct150D64E8 *info, f32 *outValue);
+void func_150D64E8(JetSpray *info, f32 *outValue);
 void particle_spawnRandomSurfaceMark(CollisionTri *surface, Vec3f *pos, u8 owner, s32 list);
 void particle_flashScreenWhite(u8 view, u8 owner, s32 list);
 void particle_spawnFollowDrift(Actor *obj, u8 owner, s32 list);

@@ -602,10 +602,9 @@ void effect_scatterGroundHits(s32 count);
 void effect_scatterGroundHitsAhead(s32 amount);
 
 /* game/Effects/MaterialImpact/materialimpact.c */
-typedef struct Struct150E4CBC Struct150E4CBC;
 void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot);
 void effect_spawnGroundImpactsUnder(WorldObject *obj);
-void func_150E4CBC(Struct150E4CBC *fx);
+void func_150E4CBC(QuadFx *fx);
 void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot);
 void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
 s32 effect_bounceOffTriangle(ModelParticle *obj, f32 x, f32 y, f32 z, f32 groundY, s16 (*verts)[3]);
@@ -1523,7 +1522,6 @@ void func_151A6C90(Actor *obj, u8 owner, s32 list);
 
 /* game/Effects/ActorTasks/actortasks.c */
 struct SurfaceTrailOwner;
-typedef struct Task151AA30C Task151AA30C;
 typedef struct PulseFx PulseFx;
 typedef struct LoopSoundFx LoopSoundFx;
 typedef struct EmitterTask EmitterTask;
@@ -1542,7 +1540,7 @@ void effect_watcherReleaseSurfaceTrails1(void);
 void effect_watcherReleaseSurfaceTrails2(void);
 void effect_watcherStartSurfaceTrails2(struct SurfaceTrailOwner *owner);
 void effect_attachFallingDriftIfSolid(Actor *actor, CollisionHit *hit);
-void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, Task151AA30C *task);
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 dx, f32 scale, f32 dz, BloodDrip *task);
 PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task);
 s32 effect_restartTaskPulse(PulseFx *fx);
 void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj);

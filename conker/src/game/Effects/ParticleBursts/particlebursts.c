@@ -142,7 +142,7 @@ s32 func_150BBB5C(Actor *actor) {
         request.callback = -1;
         request.animIndex = 0x2E;
         request.flags = 0x34;
-        request.dropFlags = alpha;
+        request.cb.rain.dropFlags = alpha;
         request.speed = 0;
         effect_initQuadFxTemplate(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         effect_spawnQuadFx(&request, 0xFF, 0);
