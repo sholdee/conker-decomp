@@ -279,7 +279,7 @@ void camera_levelHookTankFactory(Camera *camera);
 void camera_levelHookTankTunnel(Camera *camera);
 
 /* game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c */
-void camera_levelHookHorrorIntro(Camera *actor);
+void camera_levelHookHorrorIntro(Camera *camera);
 
 /* game/Camera/LevelHookBankEntrance/levelhookbankentrance.c */
 void camera_levelHookBankEntrance(Camera *camera);

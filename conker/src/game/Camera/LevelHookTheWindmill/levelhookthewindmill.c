@@ -4,8 +4,8 @@
 #include "conker/script.h"
 
 
-/* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
-   checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
+/* Updates AvailableModes bits (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
+   checks are skipped when gTaskDoneBits[0x4] bit 0x80 / gTaskDoneBits[0x1] bit 4 are set. */
 void camera_levelHookTheWindmill(Camera *camera) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
