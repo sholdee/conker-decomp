@@ -9,6 +9,7 @@
  * that these files define, grouped by file in address order:
  *   game/Player/SpawnLoad/spawnload.c
  *   game/Player/StatsInit/statsinit.c
+ *   game/Player/LinkGroups/linkgroups.c
  *   game/Player/HudBlockInit/hudblockinit.c
  *   game/Player/SpawnPoint/spawnpoint.c
  *   game/Player/PlayerStats/playerstats.c
@@ -24,6 +25,8 @@ void player_loadSpawnPoints(s32 levelId);
 void player_initMatch(s16 mode, s16 playerMask);
 void func_1501748C(s16 playerMask);
 void player_clearMatch(void);
+
+/* game/Player/LinkGroups/linkgroups.c */
 void player_offsetLinkGroupObjects(s32 offset);
 void player_loadLinkGroups(s32 levelId);
 

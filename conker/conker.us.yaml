@@ -442,6 +442,7 @@ segments:
       - [0x43B20, c, game/Player/SpawnLoad/spawnload]
       - [0x43D00, c, game/Level/SpawnTable/spawntable]
       - [0x447B0, c, game/Player/StatsInit/statsinit]
+      - [0x44970, c, game/Player/LinkGroups/linkgroups]
       - [0x44A90, c, game/Player/HudBlockInit/hudblockinit]
       - [0x44C40, c, game/Zone/ZoneBounds/zonebounds]
       - [0x45880, hasm, game/Zone/CodeTree/codetree]

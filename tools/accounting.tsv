@@ -894,8 +894,8 @@ level_allocSpawnPaths	0x15017114	492	game	c		build/src/game/Level/SpawnTable/spa
 player_initMatch	0x15017300	396	game	c		build/src/game/Player/StatsInit/statsinit.c.o
 func_1501748C	0x1501748C	12	game	c		build/src/game/Player/StatsInit/statsinit.c.o
 player_clearMatch	0x15017498	40	game	c		build/src/game/Player/StatsInit/statsinit.c.o
-player_offsetLinkGroupObjects	0x150174C0	184	game	c		build/src/game/Player/StatsInit/statsinit.c.o
-player_loadLinkGroups	0x15017578	104	game	c		build/src/game/Player/StatsInit/statsinit.c.o
+player_offsetLinkGroupObjects	0x150174C0	184	game	c		build/src/game/Player/LinkGroups/linkgroups.c.o
+player_loadLinkGroups	0x15017578	104	game	c		build/src/game/Player/LinkGroups/linkgroups.c.o
 player_initHudBlockCount	0x150175E0	96	game	c		build/src/game/Player/HudBlockInit/hudblockinit.c.o
 player_resetHudBlocks	0x15017640	336	game	c		build/src/game/Player/HudBlockInit/hudblockinit.c.o
 zone_resetTaskProgress	0x15017790	104	game	c		build/src/game/Zone/ZoneBounds/zonebounds.c.o

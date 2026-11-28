@@ -2769,7 +2769,7 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by player_loadLinkGroups in game/Player/StatsInit/statsinit).
+/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by player_loadLinkGroups in game/Player/LinkGroups/linkgroups).
  * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;

@@ -552,7 +552,8 @@ src/game/Player/PlayerStats/playerstats.c	player	split from game_B21B0.c; same s
 src/game/Player/PlayerWarp/playerwarp.c	player	pending warps and respawn
 src/game/Player/SpawnLoad/spawnload.c	player	spawn point table load
 src/game/Player/SpawnPoint/spawnpoint.c	player	player stats and spawn points
-src/game/Player/StatsInit/statsinit.c	player	player stats init per player mask
+src/game/Player/StatsInit/statsinit.c	player	match state init per player mask
+src/game/Player/LinkGroups/linkgroups.c	player	level link groups: load and offset object ids
 src/game/Prop/Clock/clock.c	prop	clock hands behaviour; frustum point test
 src/game/Prop/DoorsLifts/doorslifts.c	prop	lifts, slides, hatches, swings
 src/game/Prop/DrawHooks/drawhooks.c	prop	empty draw hooks
