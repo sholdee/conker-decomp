@@ -965,11 +965,11 @@ void effect_spawnFootprintAndSplash(s32 actor, s32 side, s32 strength, u8 alt);
 void effect_spawnFootprintAtFoot(s32 actor, s32 side, s32 strength);
 void effect_spawnFootSplash(s32 actor, s32 side, s32 strength);
 void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength);
-s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw, s32 baseYaw, s32 radius,
+s32 effect_spawnSmallYawColorSprite(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw, s32 baseYaw, s32 radius,
                   s32 arg11, s32 arg12, s32 data, u8 owner);
-void func_15147318(s32 actor, s32 side, s32 strength);
-void func_15147478(s32 actor, s32 side, s32 strength);
-void func_151475D8(s32 actor, s32 side, s32 strength);
+void effect_spawnKind0FootprintAndSplash(s32 actor, s32 side, s32 strength);
+void effect_spawnKind6FootprintAndSplash(s32 actor, s32 side, s32 strength);
+void effect_spawnKind11FootprintAndSplash(s32 actor, s32 side, s32 strength);
 
 /* game/Effects/EffectObj/effectobj.c */
 extern Gfx gEffectObjRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -1020,10 +1020,10 @@ s32 effect_isAttachTypeInTree(s16 root, s16 type);
 void effect_attachFixedPointStripToBone6(Actor *obj);
 void effect_attachRedBoneGlowsAndLight(Actor *obj);
 void func_1514D96C(Actor *obj);
-void func_1514D978(Actor *obj);
+void effect_attachSurfaceTrailWatcher(Actor *obj);
 void effect_attachWatcherAndRopeRider(Actor *obj);
 void func_1514DA38(Actor *obj);
-void func_1514DAA4(Actor *obj);
+void effect_hidePart1AndAttachEmitterWatcher(Actor *obj);
 void effect_attachCharacterWatcher(Actor *obj);
 void func_1514DB58(Actor *obj);
 void effect_spawnRopeTieInDinoArena(Actor *obj);
@@ -1089,7 +1089,7 @@ void effect_attachTrailToBone2(Actor *obj);
 void effect_attachTrailToBone3(Actor *obj);
 void effect_attachTrailToBone4(Actor *obj);
 void effect_attachPulseEffect(Actor *obj);
-void func_1514F590(Actor *obj);
+void effect_attachModelBeamAndFlashBurst(Actor *obj);
 void effect_spawnActorPoolEmitter(Actor *obj);
 
 /* game/Effects/AttachmentTables/attachmenttables.c (data only, linked after game/Effects/ActorAttachments/actorattachments) */
@@ -1484,16 +1484,16 @@ void effect_hitReactSplash(Actor *self, Actor *other, u8 *result);
 void effect_hitReactSmallSplash();
 void effect_hitReactLavaBoulder(Actor *self, Actor *other, u8 *result);
 void effect_hitReactFireImp(Actor *self, Actor *other, u8 *result);
-void func_15194408(Actor *self, Actor *other);
-void func_15194588(Actor *self, Actor *other, u8 *result);
+void effect_spawnSprayAndDrip(Actor *self, Actor *other);
+void effect_hitReactStripsSprayAndDrip(Actor *self, Actor *other, u8 *result);
 void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *result);
-void func_15194794(Actor *self, Actor *other, u8 *result);
+void effect_hitReactJointImpactAndDrip(Actor *self, Actor *other, u8 *result);
 void effect_hitReactSprayAndRumble(Actor *self, Actor *other, u8 *result);
 void effect_hitReactNone(Actor *self, Actor *other, u8 *result);
 void effect_spawnHitScreenFade(s32 mode, Actor *self, Actor *other);
 void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *result);
-void func_15194AB4(Actor *obj);
-void func_15194B1C(Actor *obj);
+void effect_collapseBones1To15(Actor *obj);
+void effect_bleedAndCollapseBones1To15(Actor *obj);
 void func_15194B94(Actor *self, Actor *other, u8 *result);
 void effect_hitReactKill(Actor *self, Actor *other, u8 *result);
 void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *result);

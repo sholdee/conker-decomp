@@ -15,7 +15,7 @@ EmitterCallback gParticleKindCallbacks[28] = {
     particle_spawnYawSteam, func_150BD954, particle_spawnYawSpark,
     particle_spawnYawModelParticle, particle_spawnYawSpraySpark, particle_spawnYawDampedSprite,
     particle_spawnYawTumbler, effect_spawnDampedParticle, effect_spawnTumblingBurst,
-    effect_spawnPitchYawSplash, func_151470FC, particle_spawnYawColorSprite,
+    effect_spawnPitchYawSplash, effect_spawnSmallYawColorSprite, particle_spawnYawColorSprite,
     particle_spawnYawSpinModel, func_150B879C, NULL,
     NULL,
 };

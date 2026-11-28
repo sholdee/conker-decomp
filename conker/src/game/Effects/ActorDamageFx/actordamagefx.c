@@ -194,7 +194,7 @@ void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength) {
 }
 
 /* Spawn one particle_newOwnedSpriteParticle particle at (x, y, z), flying off at a random pitch along `yaw`. */
-s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw,
+s32 effect_spawnSmallYawColorSprite(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw,
                   s32 baseYaw, s32 radius, s32 arg11, s32 arg12, s32 data, u8 owner) {
     ParticleDesc desc;
     TimedEffect *particle;
@@ -256,7 +256,7 @@ s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 or
 
 /* Effect 0 at the ground below the actor's bone on `side` when strength is at least 115, then
    effect D_8008FD04[0]() there. */
-void func_15147318(s32 actor, s32 side, s32 strength) {
+void effect_spawnKind0FootprintAndSplash(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
@@ -273,7 +273,7 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
 
 /* Effect D_8008FD04[6]() at the ground below the actor's bone on `side`, plus effect 6 there when
    strength is at least 115. */
-void func_15147478(s32 actor, s32 side, s32 strength) {
+void effect_spawnKind6FootprintAndSplash(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
@@ -290,7 +290,7 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
 
 /* Effect D_8008FD04[11]() at the ground below the actor's bone on `side`, plus effect 0xB there when
    strength is at least 115. */
-void func_151475D8(s32 actor, s32 side, s32 strength) {
+void effect_spawnKind11FootprintAndSplash(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 

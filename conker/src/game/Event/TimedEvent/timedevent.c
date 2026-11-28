@@ -228,7 +228,7 @@ s32 D_80086690 = 0x0FA10CDF; /* not referenced */
 void (*gHitReactionProcs[])() = {
     event_emptyHitReaction0, event_emptyHitReaction1, effect_hitReactLavaBoulder, func_15074C00,
     event_hitReactProjectile, effect_hitReactFireImp, event_hitReactSetTaskInt1, event_hitReactSetUpSmoke,
-    func_15194588, func_15074E80, effect_hitReactBloodSpray, effect_hitReactSprayAndRumble,
+    effect_hitReactStripsSprayAndDrip, func_15074E80, effect_hitReactBloodSpray, effect_hitReactSprayAndRumble,
     func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
     effect_hitReactNone, event_hitReactHop, effect_hitReactKill, effect_hitReactSetOnFireDamaging,
     effect_hitReactHeadShot, effect_hitReactImpactDebris, func_15194B94, effect_hitReactFlashAndKill,
@@ -4121,7 +4121,7 @@ void event_hitReactSetUpSmoke(Actor *self, Actor *other, u8 *result) {
 void func_15074E80(Actor *self, Actor *other, u8 *result) {
     u8 hitResult = 0;
 
-    func_15194794(self, other, &hitResult);
+    effect_hitReactJointImpactAndDrip(self, other, &hitResult);
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
@@ -4151,7 +4151,7 @@ void func_15074F48(Actor *self, Actor *other, u8 *result) {
 
     other->angle = actor_getDirectionAngle(dx, dz, 0);
     other->speed = sqrtf(dx * dx + dz * dz) * 0.03f;
-    func_15194408(self, other);
+    effect_spawnSprayAndDrip(self, other);
 }
 
 void func_15074FD4(Actor *self, Actor *other, u8 *result) {
@@ -4184,7 +4184,7 @@ void func_150750C4(Actor *self, Actor *other, u8 *result) {
     if (other->character_type == 0x88 && self->ivehitit < 55) {
         self->speccnt += 3;
     }
-    func_15194794(self, other, result);
+    effect_hitReactJointImpactAndDrip(self, other, result);
     if (other->character_type != 0x53) {
         func_15145A50(other);
         other->energy = 0;
