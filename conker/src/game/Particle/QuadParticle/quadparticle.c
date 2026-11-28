@@ -58,7 +58,7 @@ static s32 (*gQuadParticleUpdate1Funcs[])() = {
     beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, particle_growQuadParticle, particle_wobbleDrip, particle_fallDrip, particle_updateSteamEffect,
     particle_moveImpactStreak, effect_moveReleasedParticle, effect_swingParticleSize, particle_growQuadAtRate, particle_updateDriftQuad, particle_expireRingParticleOffBearing, particle_updateRayBeam,
     weapon_updateProjectile, func_150AE35C, particle_updateGrowMotion, particle_updateBallisticMotion, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
-    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, particle_updateJitterBallisticEased, particle_updateJitterBallistic, func_150E4174, particle_bobQuad,
+    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, particle_updateJitterBallisticEased, particle_updateJitterBallistic, effect_growQuadAtRates, particle_bobQuad,
     effect_updateTrailPuff, flare_glowOrbit, particle_updateBoneBurstParticle, cutscene_updateTrackParticle, effect_moveTravelParticle, effect_updateBoneBeamParticle,
 };
 static s32 (*gQuadParticleUpdate2Funcs[])() = {

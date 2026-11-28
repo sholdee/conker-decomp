@@ -64,7 +64,7 @@ ObjectBehavior gObjectBehaviors[89] = {
     /* 47 */ { prop_swingClockPendulum, NULL, 0 },
     /* 48 */ { effect_bobAndRockProp, NULL, 0 },
     /* 49 */ { func_150CF0A0, NULL, 0 },
-    /* 50 */ { func_150BE210, NULL, 0 },
+    /* 50 */ { effect_turnWhilePushed, NULL, 0 },
     /* 51 */ { prop_snapToGround, NULL, 0 },
     /* 52 */ { prop_wobbleTilt, NULL, 0 },
     /* 53 */ { prop_registerTextureScroll, NULL, 0 },

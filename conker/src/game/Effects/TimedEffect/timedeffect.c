@@ -103,7 +103,7 @@ static void (*gTimedEffectMessageFuncs[74])(TimedEffect *object, s32 msg, u8 msg
     beam_boltRainMessage, beam_boltArcMessage, beam_sparkRegionMessage, beam_boltChainMessage, trail_onOwnedEffectMessage, effect_timedHandlerMessage, effect_boneBurstMessage,
     beam_modelBeamMessage, particle_onPointEmitterMsg, trail_onAnchoredEmitterMessage, beam_castBeamMessage, effect_stageMessage, NULL, beam_trailEmitterMessage, effect_ownerEffectMessage,
     effect_emitterSpawnerMessage, effect_boltEmitterMessage, beam_boneSparksMessage, particle_onOwnerEmitterEvent, effect_pulseEffectMessage, effect_handleLightSwitchEvent, beam_flashBurstMessage,
-    effect_perimeterEmitterMessage, particle_onBoneBurstEmitterEvent, particle_onFogFlashEvent, func_150FACE4, effect_textBoxMessage, trail_onTrackerMessage, hud_counterMessage,
+    effect_perimeterEmitterMessage, particle_onBoneBurstEmitterEvent, particle_onFogFlashEvent, effect_lineEmitterMessage, effect_textBoxMessage, trail_onTrackerMessage, hud_counterMessage,
 };
 
 

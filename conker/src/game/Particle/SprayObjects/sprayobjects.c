@@ -24,7 +24,10 @@ typedef struct {
     s32 checksum;
 } Struct150C3D5CLocals;
 
-Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
+/* actor_setTextureScroll for character types 0x89 and 0xBA: sets tile 4's uls to 500 x (1 - r) + 2, where
+ * r = taskint[0] / taskint[1] (1 when taskint[1] is 0), and its ult to 2 - (the previous uls / 3, kept in taskint[2]),
+ * raised by 64 until it is not negative. */
+Gfx *particle_setProgressTextureScroll(Gfx *gdl, Actor *obj) {
     s32 total;
     s32 uls;
     s32 ult;

@@ -81,10 +81,10 @@ static s32 (*gActorEffectSelectors[12])() = {
  */
 ActorEffectDef gActorEffects[20] = {
     { func_15146BB8, 130 }, { func_15146BD8, 130 }, { effect_spawnFootPieceSpray, 85 },  { effect_spawnFootprintAtFoot, 85 },
-    { effect_spawnFootSplash, 80 },  { effect_spawnFootCircleBurst, -1 },  { func_15147318, 130 }, { effect_spawnStompRing, -1 },
+    { effect_spawnFootSplash, 80 },  { effect_spawnFootCircleBurst, -1 },  { effect_spawnKind0FootprintAndSplash, 130 }, { effect_spawnStompRing, -1 },
     { attach_spawnBonePointEffects, -1 },  { particle_spawnObjEffects, -1 },  { particle_spawnObjGroundBurst, -1 },  { particle_spawnSideDust, -1 },
-    { particle_spawnSideSpray, -1 },  { effect_spawnFootprintAtAltFoot, 85 },  { effect_spawnLegImpactBurst, -1 },  { func_15147478, 130 },
-    { func_151475D8, 130 }, { effect_spawnQuadrupedFootprint, 85 },  { effect_spawnQuadrupedFootprintAlt, 85 },  { NULL, -1 },
+    { particle_spawnSideSpray, -1 },  { effect_spawnFootprintAtAltFoot, 85 },  { effect_spawnLegImpactBurst, -1 },  { effect_spawnKind6FootprintAndSplash, 130 },
+    { effect_spawnKind11FootprintAndSplash, 130 }, { effect_spawnQuadrupedFootprint, 85 },  { effect_spawnQuadrupedFootprintAlt, 85 },  { NULL, -1 },
 };
 
 

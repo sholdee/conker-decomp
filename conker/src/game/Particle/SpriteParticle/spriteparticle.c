@@ -199,7 +199,7 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
 
 /* Draw functions, indexed by ParticleDesc.drawFunc. */
 static s32 (*gSpriteDrawFuncs[])() = {
-    func_1510281C, func_15102884, func_15104620, particle_hideSpriteDraw,
+    particle_isBeamStartFxVisible, particle_isBeamEndFxOn, func_15104620, particle_hideSpriteDraw,
 };
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */

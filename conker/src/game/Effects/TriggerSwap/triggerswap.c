@@ -25,7 +25,7 @@ void effect_periodicTriggerMessage(PeriodicObject *self, ObjectPair *pair, u8 ms
 }
 
 /* Sends messages 0x2A and 0x49 carrying a reference to this object. */
-void func_1519072C(Actor *self) {
+void effect_destroyActorEmitters(Actor *self) {
     ActorRef ref;
 
     ref.actor = self;

@@ -18,7 +18,7 @@
  */
 
 
-/* A screen sprite of update kind 1 (gScreenSpriteUpdates[1] = func_15134CEC), with its extra data at 0x70. */
+/* A screen sprite of update kind 1 (gScreenSpriteUpdates[1] = blood_updateFallingScreenSprite), with its extra data at 0x70. */
 typedef struct {
     /* 0x00 */ ScreenSprite sprite;
     /* 0x70 */ f32 speedY;          /* added to sprite.info.y each frame; grows by 0.125 per frame */
@@ -161,7 +161,7 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 owner, s32 list);
 void blood_updateTrail(BloodTrail *trail);
 void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
 void blood_emitNoTrailDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
-s32 func_15134CEC(Struct15134CEC *particle);
+s32 blood_updateFallingScreenSprite(Struct15134CEC *particle);
 void *blood_spawnStrip(BloodStripDesc *desc, s32 extraSize); /* a BloodStrip, then extraSize bytes */
 void blood_updateStrip(BloodStrip *obj);
 void blood_destroyStripDefault(EffectHeader *effect);
@@ -182,7 +182,7 @@ void blood_scatterDecals(Actor *actor, f32 radius, u8 owner, s32 list);
 GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
                                     Vec3f *position, u8 arg7, u8 arg8, u8 owner, s32 list);
 s32 blood_updateGrowingParticle(GrowingBloodParticle *particle);
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
+void blood_spawnSurfaceDecal(f32 size, u8 alpha, u8 colorLevel, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
                    s32 list);
 s32 blood_capQuadSpriteAlphaByLife(DefParticleHead *particle);
 void blood_startShortTrail(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 owner, s32 list);
@@ -204,7 +204,7 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *hit, u8 ow
 s32 blood_onChunkLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
 void blood_spawnBoneHit(Actor *actor, u8 owner, s32 list);
 void blood_spawnFatalHit(Actor *actor, u8 owner, s32 list);
-void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list);
+void blood_spawnSoldierAndVillagerGore(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list);
 s32 blood_onGorePartLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
 void blood_spawnTedizGore(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 owner, s32 list);
 void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 owner, s32 list);
@@ -292,11 +292,11 @@ void blood_destroyDebris(BloodDebrisParticle *particle);
 /* game/Effects/BloodDrip/blooddrip.c */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 owner, s32 list);
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *emitter);
-void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 owner);
-void func_151AEAB4(Vec3f *pos, u8 flag, u8 owner);
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 hitsFloor, u8 owner);
+void func_151AEAB4(Vec3f *pos, u8 hitsFloor, u8 owner);
 void blood_spawnGroundBurst(Actor *obj, u8 owner, s32 list);
 void *func_151AF270(Actor *actor, u8 owner, s32 list);
-void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 
 /* game/Effects/BloodSpray/bloodspray.c */

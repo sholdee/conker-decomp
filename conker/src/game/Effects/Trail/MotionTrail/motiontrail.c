@@ -45,7 +45,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
     NULL, trail_moveAndAppendPoint, trail_movePoints, trail_movePointsGroundTest, trail_dropNewestPoint, trail_updateEmittedTrail,
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
-    NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
+    NULL,          trail_fadeEmittedTrail, effect_fadeAttachedBurstTrailByLife, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
     pipeexplode_fadeByLife, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, particle_fadeTrailByLife,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */

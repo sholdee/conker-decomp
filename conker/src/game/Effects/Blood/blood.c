@@ -511,7 +511,7 @@ void blood_emitNoTrailDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHe
 
 /* Screen sprite update (gScreenSpriteUpdates[1]): accelerates the sprite along y and grows its halfHeight while
  * sprite.info.color1.alpha fades; returns 0 to kill it (past y 130, or faded out). */
-s32 func_15134CEC(Struct15134CEC *particle) {
+s32 blood_updateFallingScreenSprite(Struct15134CEC *particle) {
     s32 fade;
 
     particle->speedY += 0.125f * gFrameDelta;
@@ -1199,7 +1199,7 @@ s32 blood_updateGrowingParticle(GrowingBloodParticle *particle) {
 }
 
 /* Spawns a particle_spawnSurfaceQuadSpriteNoModel particle (type 0xD) of the given size at position. */
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
+void blood_spawnSurfaceDecal(f32 size, u8 alpha, u8 colorLevel, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
                    s32 list) {
     SpriteDef desc;
     f64 pad; // matching: an unused 8-byte stack slot
@@ -1209,8 +1209,8 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, Collisio
     desc.flags = 0x300;
     desc.frame = 0;
     desc.frameSpeed = 0;
-    desc.alpha = arg1;
-    desc.colorLevel = arg2;
+    desc.alpha = alpha;
+    desc.colorLevel = colorLevel;
     desc.rgba[0] = 0;
     desc.rgba[1] = 0;
     desc.rgba[2] = 0;
@@ -1999,11 +1999,11 @@ void blood_spawnFatalHit(Actor *actor, u8 owner, s32 list) {
                 blood_spawnConkerGore(actor, &position, &hit, owner, list);
                 return;
             case 3:
-                func_15138E98(actor, &position, 1, &hit, owner, list);
+                blood_spawnSoldierAndVillagerGore(actor, &position, 1, &hit, owner, list);
                 return;
             case 5:
             case 6:
-                func_15138E98(actor, &position, 0, &hit, owner, list);
+                blood_spawnSoldierAndVillagerGore(actor, &position, 0, &hit, owner, list);
                 return;
             case 15:
                 blood_spawnTedizGore(actor, &position, 0.6f, &hit, owner, list);
@@ -2047,7 +2047,7 @@ const Vec3f D_800A4188[4] = {
 const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
-void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list) {
+void blood_spawnSoldierAndVillagerGore(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list) {
     u8 index;
     Vec3f boneRot;
 

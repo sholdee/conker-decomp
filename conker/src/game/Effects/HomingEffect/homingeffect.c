@@ -370,7 +370,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
     }
 }
 
-/* The part of an object that func_150E4010 reads, at +0x110 of it. */
+/* The part of an object that effect_runAttackOnExpire reads, at +0x110 of it. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];
     /* 0x30 */ f32 x;
@@ -389,7 +389,7 @@ struct Obj4010 {
 };
 
 /* If unkA4 is set, calls actor_runAttackAt at the state position with the heading of (unk60, unk64) as a binary angle. */
-void func_150E4010(Obj4010 *obj) {
+void effect_runAttackOnExpire(Obj4010 *obj) {
     Obj4010State *state;
 
     state = &obj->state;
@@ -414,7 +414,7 @@ struct Obj4174 {
 };
 
 /* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
-s32 func_150E4174(Obj4174 *obj) {
+s32 effect_growQuadAtRates(Obj4174 *obj) {
     obj->unk2C += obj->unk4C * gFrameDelta;
     obj->unk30 += obj->unk54 * gFrameDelta;
     return 1;

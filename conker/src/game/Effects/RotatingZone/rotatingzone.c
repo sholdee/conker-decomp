@@ -35,10 +35,10 @@ void effect_levelUpdateRotatingZone(s32 unused) {
     effect_advanceLevelTexFrame(5, 3);
 }
 
-f32 func_150CF040(s32 arg0, s32 arg1) {
-    arg0 += 1;
-    arg1 -= 0x2C;
-    return math_atan2(arg0, arg1) * 57.295776f;
+f32 effect_getAngleAroundRotatingZonePivot(s32 x, s32 y) {
+    x += 1;
+    y -= 0x2C;
+    return math_atan2(x, y) * 57.295776f;
 }
 
 void effect_levelHook16(s32 *arg0) {

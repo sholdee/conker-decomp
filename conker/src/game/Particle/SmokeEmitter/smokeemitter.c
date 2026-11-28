@@ -301,8 +301,9 @@ void particle_fireActorBoneTracer(s32 altBone) {
     }
 }
 
-/* Runs particle_hitPlayerOnObjectContact on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
-void func_150B003C(s32 unused) {
+/* gLevelUpdateHooks[23]: runs particle_hitPlayerOnObjectContact on objects 0xE2/0xE1 (after effect_updateRain(0)) on
+ * LEVEL_THE_WINDMILL, else on 0xDF/0xDE. */
+void particle_levelUpdateContactHitsAndWindmillRain(s32 unused) {
     if (level == LEVEL_THE_WINDMILL) {
         effect_updateRain(0);
         particle_hitPlayerOnObjectContact(0xE2, 0xE1);

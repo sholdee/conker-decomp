@@ -6,22 +6,22 @@
 #include "conker/particle.h"
 #include "conker/texture.h"
 
-void func_151A0E40(f32 x, f32 y, f32 z, u8 arg3, s32 arg4) {
+void func_151A0E40(f32 x, f32 y, f32 z, u8 owner, s32 list) {
     func_151A11CC(x, y, z, 163.0f, 2.019000053f, 160, 75, 1055, 1270,
                   1, 2.019000053f, 135, 68, 1055, 1270, 2,
                   1, 2.019000053f, 70, 66, 1055, 1270, 7, 65,
-                  4, 1, arg3, arg4);
+                  4, 1, owner, list);
 }
 
-void func_151A0F28(f32 x, f32 y, f32 z, u8 arg3, s32 arg4) {
+void func_151A0F28(f32 x, f32 y, f32 z, u8 owner, s32 list) {
     func_151A11CC(x, y, z, 163.0f, 2.019000053f, 160, 75, 1055, 1270,
                   1, 2.019000053f, 135, 68, 1055, 1270, 2,
                   1, 2.019000053f, 70, 66, 1055, 1270, 7, 65,
-                  4, 1, arg3, arg4);
+                  4, 1, owner, list);
 }
 
 /* Calls func_151A11CC with parameters scaled by scaleA/scaleB and a duration-derived count. */
-void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8 arg6, s32 arg7) {
+void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8 owner, s32 list) {
     s16 count;
     s32 offset;
     s16 a;
@@ -48,7 +48,7 @@ void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8
                   90.0f * scaleB, 20.0f * scaleB, c, d,
                   count, 16, 1.0f,
                   a, b, c, d,
-                  15.0f * scaleA, 10.0f * scaleA, 18, offset + 16, arg6, arg7);
+                  15.0f * scaleA, 10.0f * scaleA, 18, offset + 16, owner, list);
 }
 
 /* Empty in this build; func_151A0E40, func_151A0F28 and func_151A1010 call it with full parameter lists. */
@@ -58,7 +58,7 @@ void func_151A11CC(f32 x, f32 y, f32 z, f32 arg3,
                   s32 arg12, s32 arg13, s32 arg14, s32 arg15,
                   s32 arg16, f32 arg17, s32 arg18, s32 arg19,
                   s32 arg20, s32 arg21, s32 arg22, s32 arg23,
-                  s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
+                  s32 arg24, s32 arg25, s32 owner, s32 list) {
 }
 
 /*

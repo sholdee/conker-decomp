@@ -484,7 +484,7 @@ Gfx *trail_drawObjectAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
 }
 
 /* Sets hiddenParts of an object's type-0 trail. */
-void func_151898C0(Actor *object, s32 value) {
+void trail_setActorAfterimageHiddenParts(Actor *object, s32 value) {
     BoneTrail *trail;
 
     for (trail = gBoneTrailLists[0]; trail != NULL; trail = trail->next) {

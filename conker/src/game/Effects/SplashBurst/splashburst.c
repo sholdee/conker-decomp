@@ -14,8 +14,8 @@ void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *
                    u8 b, u8 owner, s32 list);
 
 
-/* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */
-void func_150E0870(Actor *obj, u8 owner, s32 list) {
+/* Spawns an explosion at obj: two sounds, a black impact mark when there is solid floor below, rumble, camera wobble, blast spray, light flash, grow-fade, hit effects and an attack pair. */
+void effect_spawnScorchExplosion(Actor *obj, u8 owner, s32 list) {
     Vec3f origin;
     Vec3f impact;
     u8 hitGround;

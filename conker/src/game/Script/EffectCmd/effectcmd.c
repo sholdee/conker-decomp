@@ -514,7 +514,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             effect_stopHomingEffect(cmdId >> 6);
             break;
         case 8:
-            func_150B3DD0();
+            trail_stopScatterTrailsAndEmitters();
             break;
         case 9:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));

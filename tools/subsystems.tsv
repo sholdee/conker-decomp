@@ -92,7 +92,7 @@ src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-wr
 src/game/Effects/ObjBurst/objburst.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game/Camera/LevelHookBarnInside/levelhookbarninside.c	camera	per-level camera setup from game-flag queries
 src/game/Camera/LevelHookBarnOutside/levelhookbarnoutside.c	camera	per-level camera flag hook
-src/game/Effects/DebrisSplash/debrissplash.c	effect	debris and splash sprays at an actor's death (func_150BE494), path mover, pushed turner (the file after effects_sfx_w1_bee_cavern.c)
+src/game/Effects/DebrisSplash/debrissplash.c	effect	debris and splash sprays at an actor's death (effect_spawnDeathDebrisSplash), path mover, pushed turner (effect_turnWhilePushed) (the file after effects_sfx_w1_bee_cavern.c)
 src/game/Camera/LevelHookBullPaddock/levelhookbullpaddock.c	camera	per-level camera hook
 src/game/Camera/LevelHookDogFish/levelhookdogfish.c	camera	per-level camera flag hook
 src/game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1.c	camera	per-level camera flag hook

@@ -19,7 +19,7 @@
 /* Expiry handlers, chosen by WeaponProjectileState.expireHandler. Declared without a prototype: each handler
    takes its own kind of object. */
 static void (*gProjectileExpireHandlers[])() = {
-    weapon_onProjectileExpire, func_150E4010, effect_spawnHitEffectsOnExpire, weapon_spawnHitEffectsNoFlash, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
+    weapon_onProjectileExpire, effect_runAttackOnExpire, effect_spawnHitEffectsOnExpire, weapon_spawnHitEffectsNoFlash, particle_spawnHitEffectsHideOwnerSparks, beam_spawnImpactEffects,
 };
 /* A fly-by sound of a projectile and the distance at which it plays. */
 typedef struct {

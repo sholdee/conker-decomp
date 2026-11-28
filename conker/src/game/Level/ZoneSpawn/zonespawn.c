@@ -468,7 +468,7 @@ s32 level_spawnAreaParticlesZone(TriggerZone *obj) {
     return 1;
 }
 
-/** Calls func_151BE850 at the object's position, with a count of data1 (at least 1). */
+/** Calls effect_spawnStatPickup at the object's position, with a count of data1 (at least 1). */
 s32 func_15013D38(TriggerZone *obj) {
     Vec3f pos;
     s32 count;
@@ -479,7 +479,7 @@ s32 func_15013D38(TriggerZone *obj) {
     pos.z = obj->z;
 
     count = obj->data1;
-    func_151BE850(&pos, obj->yaw, count ? count : 1, obj->data2, 1, 0xFF, 1);
+    effect_spawnStatPickup(&pos, obj->yaw, count ? count : 1, obj->data2, 1, 0xFF, 1);
     return 1;
 }
 

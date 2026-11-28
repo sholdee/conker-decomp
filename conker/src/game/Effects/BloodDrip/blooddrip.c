@@ -58,45 +58,45 @@ void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *emitte
         return;
     }
     if (roll < 0.25f) {
-        u8 flag;
+        u8 hitsFloor;
 
         roll = math_randomFloat();
-        flag = (roll > 0.0f) ? 1 : 0; // matching: a plain `roll > 0.0f` compiles differently
-        func_151AEAB4(&pos, flag, emitter[0xC]);
+        hitsFloor = (roll > 0.0f) ? 1 : 0; // matching: a plain `roll > 0.0f` compiles differently
+        func_151AEAB4(&pos, hitsFloor, emitter[0xC]);
     } else {
-        s32 flag;
+        s32 hitsFloor;
 
         roll = math_randomFloat();
-        flag = (roll > 0.8050000668f) ? 1 : 0;
-        func_151AE984(&pos, dirX, dirY, dirZ, flag, emitter[0xC]);
+        hitsFloor = (roll > 0.8050000668f) ? 1 : 0;
+        func_151AE984(&pos, dirX, dirY, dirZ, hitsFloor, emitter[0xC]);
     }
 }
 
 /* Spawns a particle at pos moving against (dirX, dirY, dirZ), with randomized parameters. */
-void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 owner) {
-    f32 scale;
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 hitsFloor, u8 owner) {
+    f32 factor;
     Vec3f velocity;
-    f32 shade;
+    f32 size;
     u32 rand2;
     u32 rand1;
     f32 rand0;
 
-    scale = 0.1030000076f;
-    velocity.x = -dirX * scale;
-    velocity.y = -dirY * scale;
-    velocity.z = -dirZ * scale;
+    factor = 0.1030000076f;
+    velocity.x = -dirX * factor;
+    velocity.y = -dirY * factor;
+    velocity.z = -dirZ * factor;
     rand0 = math_randomFloat();
     rand1 = math_random();
     rand2 = math_random();
-    shade = math_randomFloat() * 219.0f + 77.0f;
+    size = math_randomFloat() * 219.0f + 77.0f;
     // matching: the rodata holds -1.045f, so this is an add of a negative literal, not a sub
     particle_spawnSteamParticle(pos, &velocity, 0, rand0 * 0.6020000577f + -1.045000076f, rand1 % 31 + 60, rand2 % 101 + 155,
-                  shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, owner, 1);
+                  size, (u8)hitsFloor, 1.0f, 1.0f, 0, 0, 1, 0, owner, 1);
 }
 
 /* Spawns a particle at pos moving in a random direction at a random speed, with randomized parameters.
  * math_cosBinAngleMasked is cos() over a 256-step circle, so cos(a - 0x40) is sin(a). */
-void func_151AEAB4(Vec3f *pos, u8 flag, u8 owner) {
+void func_151AEAB4(Vec3f *pos, u8 hitsFloor, u8 owner) {
     u32 phase; // matching: passing yaw - 0x40 through a u32 temp is needed for identical bytes
     Vec3f velocity;
     u8 yaw;
@@ -131,7 +131,7 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 owner) {
         rand2 = math_random();
         rand3 = math_randomFloat();
         particle_spawnSplash(pos, &velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
-                      rand3 * 4.0f + 3.100000143f, math_random() % 5 + 3, flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
+                      rand3 * 4.0f + 3.100000143f, math_random() % 5 + 3, hitsFloor, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
                       owner, 1);
     }
 }
@@ -265,30 +265,30 @@ void *func_151AF270(Actor *actor, u8 owner, s32 list) {
 
 /* Emitter callback 10 (gBloodDripEmitters): spawns one particle at (x, y, z) pushed against the
  * emitter's movement (dx, dy, dz). */
-void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
+void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
     Vec3f position;
 
     position.x = x;
     position.y = y;
     position.z = z;
-    func_151AF388(&position, dx, dy, dz, effect->owner);
+    func_151AF388(&position, dx, dy, dz, emitter->owner);
 }
 
 /* Spawns one randomised particle_spawnSteamParticle particle at `position`, moving at -0.13 * (dx, dy, dz). */
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner) {
     f32 factor = 0.13000001f;
     Vec3f velocity;
-    u8 flag;
+    u8 hitsFloor;
 
     velocity.x = -dx * factor;
     velocity.y = -dy * factor;
     velocity.z = -dz * factor;
-    flag = (math_random() & 1) ? 1 : 0;
+    hitsFloor = (math_random() & 1) ? 1 : 0;
     particle_spawnSteamParticle(position, &velocity, 0,
                   math_randomFloat() * 0.126f + -0.702f,
                   (math_random() & 0xF) + 10,
                   math_random() % 45 + 137,
                   math_randomFloat() * 202.0f + 142.0f,
-                  flag, 1.7f, 1.7f, 0, 0, 1, 0,
+                  hitsFloor, 1.7f, 1.7f, 0, 0, 1, 0,
                   owner, 1);
 }

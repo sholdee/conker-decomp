@@ -129,7 +129,7 @@ void effect_levelHook26(Camera *actor) {
 
     state = actor->CharPtr;
     if (state->unk102 != 0 && state->stunned == 0) {
-        func_150F2994(actor, TRUE);
+        effect_setTransportZonesDisabled(actor, TRUE);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
             if (camera_pushMode(actor, 0x80, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
                 actor->AvailableModes |= 0x300400;
@@ -152,7 +152,7 @@ void effect_levelHook26(Camera *actor) {
     } else {
         state->alpha = 0xFF;
         if (actor->CharContext == 59) {
-            func_150F2994(actor, TRUE);
+            effect_setTransportZonesDisabled(actor, TRUE);
             if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
                 if (camera_pushMode(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
                     actor->AvailableModes |= 0x300000;
@@ -175,7 +175,7 @@ void effect_levelHook26(Camera *actor) {
                 actor->DistIndex = 2;
                 camera_loadDistancePreset(actor);
             }
-            func_150F2994(actor, FALSE);
+            effect_setTransportZonesDisabled(actor, FALSE);
         }
     }
     if (script_query(1, 0x405A, 6, 0x9000) != 0) {
@@ -195,18 +195,18 @@ void effect_levelHook26(Camera *actor) {
     }
 }
 
-/* Calls script_command(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
-void func_150F2994(Camera *actor, s32 flag) {
+/* Calls script_command(0, id, disabled) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
+void effect_setTransportZonesDisabled(Camera *camera, s32 disabled) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        script_command(0, 0x4016 + i, flag);
+        script_command(0, 0x4016 + i, disabled);
     }
-    script_command(0, 0x405D, flag);
-    script_command(0, 0x405F, flag);
+    script_command(0, 0x405D, disabled);
+    script_command(0, 0x405F, disabled);
     if (gTaskDoneBits[0x15] & 8) {
-        script_command(0, 0x4063, flag);
-        script_command(0, 0x4064, flag);
-        script_command(0, 0x4065, flag);
+        script_command(0, 0x4063, disabled);
+        script_command(0, 0x4064, disabled);
+        script_command(0, 0x4065, disabled);
     }
 }

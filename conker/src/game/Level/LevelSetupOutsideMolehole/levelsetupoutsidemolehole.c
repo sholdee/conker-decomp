@@ -6,5 +6,5 @@
 
 
 void level_setupOutsideMolehole(void) {
-    gProjectileHitCallback = func_150EA904;
+    gProjectileHitCallback = effect_onProjectileHitObject;
 }

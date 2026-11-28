@@ -284,7 +284,8 @@ void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, SourceEm
     emission->stream.speedY = math_randomFloat() * 0.150000006f;
 }
 
-/* Occasionally spawns one of the two sprite_newScreenSprite effects, plus a sound and an event. */
+/* With chance 0.0042 per call, spawns a screen sprite (particle_spawnScreenSprite, or particle_spawnScreenEdgeSprite one time in
+ * four) of texture ids {4, 5}, plays sound 0x360, wobbles camera `playerIndex` (preset 1) and starts a rumble. */
 void func_150E7290(playerIndex, owner, list)
     u8 playerIndex;
     u8 owner;

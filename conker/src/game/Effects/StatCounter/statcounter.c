@@ -13,14 +13,14 @@
 #include "conker/sound.h"
 #include "conker/sprite.h"
 
-/* Extension block of the model effect func_151BE850 spawns, at 0x120 (StatPickupEffect.params). */
+/* Extension block of the model effect effect_spawnStatPickup spawns, at 0x120 (StatPickupEffect.params). */
 typedef struct {
     /* 0x00 */ f32 angle;   /* func_151BEEE0's angle; the y rotation of effect_buildStatPickupMatrix */
     /* 0x04 */ Vec3f pos;
     /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
 } StatPickupData;
 
-/* The model effect func_151BE850 spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
+/* The model effect effect_spawnStatPickup spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
  * dispatch reads past gModelEffectUpdate2Funcs as gModelEffectUpdate2FuncsTail[0] (effect_buildStatPickupMatrix).
  * A view of ModelEffect with its 0x18-byte extension: unk11B is the low byte of attach.lightMask (an lbu). */
 struct StatPickupEffect {
@@ -46,7 +46,7 @@ struct StatPickupEffect {
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
  * The callers also pass the usual effect owner and list, which it does not use.
  */
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list) {
+void *effect_spawnStatPickup(Vec3f *pos, f32 angle, u8 count, u8 altObjectType, u8 variant, u8 owner, s32 list) {
     void *fx;
     ZoneNode *zone;
     EffectParams params;
@@ -78,7 +78,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         }
         params.unk38 = variantIds[variant];
         // matching: the (u8) narrowing of a separate local steers IDO's temp-register order
-        flag = arg3 ? 0x10 : 0;
+        flag = altObjectType ? 0x10 : 0;
         params.flags = (u8)flag | 0xE;
         params.updateFunc = 1;
         if (level == LEVEL_W1_DOG_FISH) {
@@ -115,7 +115,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
             memcpy((u8 *)fx + 0x120, &extra, 0x18);
         }
     } else {
-        fx = func_151BEEE0(angle, pos, 3, 0xFF, variant, arg3, zone, 0xFF, 1);
+        fx = func_151BEEE0(angle, pos, 3, 0xFF, variant, altObjectType, zone, 0xFF, 1);
     }
     return fx;
 }
@@ -228,7 +228,7 @@ s32 effect_isPlayerActor(Actor *obj) {
 
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 owner, s32 list) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 maxLights, u8 lightMask, u8 variant, u8 altObjectType, ZoneNode *zone, u8 owner, s32 list) {
     ModelParticle *particle;
     u8 variantIds[3] = { 4, 2, 3 };
 
@@ -257,7 +257,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.rotVel.y = 0.0f;
         spawn.rotVel.z = 0.0f;
         spawn.gravity = 0.0f;
-        spawn.flags = (arg5 ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
+        spawn.flags = (altObjectType ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
         spawn.lifetime = 300;
         spawn.model = 0x26;
         spawn.variant = variantIds[variant];
@@ -280,7 +280,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
-        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, owner, list);
+        particle = particle_newModelParticle(&spawn, maxLights, lightMask, 0, owner, list);
         if (particle != NULL) {
             for (i = 0; i < 2; i++) {
                 particle_buildUniformMatrix(&particle->mtx[i], particle);

@@ -3246,7 +3246,7 @@ typedef struct QuadFxData {
             /* 0x80 */ s32 timer;       /* ticks since the spawn */
             /* 0x84 */ s16 widthScale;  /* halfWidth = widthScale * 14 / 256 (gMaterialImpactScales[size][0]) */
             /* 0x86 */ s16 heightScale; /* halfHeight ramps up to 90/256 of it and back (gMaterialImpactScales[size][1]) */
-        } impact;                       /* callback 13, func_150E4CBC (game/Effects/MaterialImpact/materialimpact.c) */
+        } impact;                       /* callback 13, effect_updateMaterialImpactQuad (game/Effects/MaterialImpact/materialimpact.c) */
         struct {
             /* 0x80 */ u8 pad80[4];
             /* 0x84 */ s16 fallSpeed;

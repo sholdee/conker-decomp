@@ -22,7 +22,7 @@ ZoneNode *D_800D9A40;
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four gSetup33TexScrolls entries
  * by object 0xE's taskint[0]. */
-void func_150F2A60(s32 unused) {
+void particle_levelUpdateScrollingHazardProps(s32 unused) {
     s32 i;
     s32 scroll;
     Actor *obj;

@@ -18,7 +18,7 @@ static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           effect_attachBone6GlowAndBone5Trail, effect_attachNarrowBone6GlowAndBone5Trail, effect_attachBone12GlowAndLight, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     effect_attachRedBoneGlowsAndLight,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, effect_attachFixedPointStripToBone6, func_1514DA38,
-    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
+    effect_hidePart1AndAttachEmitterWatcher,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
@@ -27,8 +27,8 @@ static void (*gAttachSpawnFuncsById[])(Actor *) = {
     func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, effect_hidePart1, effect_spawnActorEmitter, func_1514DE2C,
     effect_hideParts4And8To10, effect_attachObjBurst, effect_attachBone2Light, effect_attachFrontendFireImpEffect, level_spawnBoltEmitter, effect_attachTrailToBone1,
-    effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, func_1514F590, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
-    particle_spawnBoneBurstEmitter, level_attachDripEmitter, effect_spawnFloorPointTracker, effect_attachTrailToBone4, func_1514D978,
+    effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, effect_attachModelBeamAndFlashBurst, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
+    particle_spawnBoneBurstEmitter, level_attachDripEmitter, effect_spawnFloorPointTracker, effect_attachTrailToBone4, effect_attachSurfaceTrailWatcher,
 };
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
@@ -657,8 +657,9 @@ void effect_attachRedBoneGlowsAndLight(Actor *obj) {
 void func_1514D96C(Actor *obj) {
 }
 
-/** Attaches a effect_newCharacterWatcher object (type 0x13) with a zeroed 0x20-byte payload. */
-void func_1514D978(Actor *obj) {
+/** Attaches a effect_newCharacterWatcher object (type 0x13) with a 0x20-byte payload: the TrailSet of
+    SurfaceTrailOwner, then the ActorTaskFx slots. All of it is zero except the trail side offset (12). */
+void effect_attachSurfaceTrailWatcher(Actor *obj) {
     struct {
         s32 unk0;
         s32 unk4;
@@ -690,7 +691,7 @@ void func_1514D978(Actor *obj) {
 void effect_attachWatcherAndRopeRider(Actor *obj) {
     void *handle;
 
-    func_1514D978(obj);
+    effect_attachSurfaceTrailWatcher(obj);
     handle = rope_createRider(obj, 20.0f, 0);
     effect_attach(handle, obj, 0x14);
 }
@@ -722,7 +723,7 @@ void func_1514DA38(Actor *obj) {
 }
 
 /** Sets bit 1 of obj->hiddenParts and attaches a effect_newCharacterWatcher object (type 0x13) with an 8-byte payload. */
-void func_1514DAA4(Actor *obj) {
+void effect_hidePart1AndAttachEmitterWatcher(Actor *obj) {
     void *handle;
 
     obj->hiddenParts |= 2;
@@ -1549,7 +1550,7 @@ void effect_attachPulseEffect(Actor *obj) {
     effect_spawnPulseEffect(obj, -1, 0xFF, 1);
 }
 
-void func_1514F590(Actor *obj) {
+void effect_attachModelBeamAndFlashBurst(Actor *obj) {
     level_spawnModelBeam(obj, 0xFF, 1);
     level_spawnFlashBurst(obj, 0xFF, 1);
 }

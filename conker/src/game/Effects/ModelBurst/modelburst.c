@@ -361,7 +361,7 @@ void func_15171BF4(Actor *obj, u8 owner) {
         sound_playActorSound2(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:
-        func_150BD740(obj, owner, 1);
+        effect_emitSquareEdgeSegmentTrails(obj, owner, 1);
         break;
     case 0x54:
         particle_spawnGroundEffects(obj, owner, 1);

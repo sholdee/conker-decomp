@@ -103,7 +103,7 @@ void effect_hitReactFireImp(Actor *self, Actor *other, u8 *result) {
 
 
 // Spawns a burst of effects from other when its id is 0-4.
-void func_15194408(Actor *self, Actor *other) {
+void effect_spawnSprayAndDrip(Actor *self, Actor *other) {
     SplashSpraySpec burst;
     CollisionHit ground;
 
@@ -149,9 +149,9 @@ void func_15194408(Actor *self, Actor *other) {
     particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
-void func_15194588(Actor *self, Actor *other, u8 *result) {
+void effect_hitReactStripsSprayAndDrip(Actor *self, Actor *other, u8 *result) {
     blood_attachMirroredStrips(self, 500, 0xFF, 1);
-    func_15194408(self, other);
+    effect_spawnSprayAndDrip(self, other);
 }
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
@@ -209,7 +209,7 @@ void effect_hitReactBloodSpray(Actor *self, Actor *other, u8 *result) {
     }
 }
 
-void func_15194794(Actor *self, Actor *other, u8 *result) {
+void effect_hitReactJointImpactAndDrip(Actor *self, Actor *other, u8 *result) {
     effect_spawnJointImpact(self, other);
     effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
     switch (other->character_type) {
@@ -294,26 +294,26 @@ void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *result) {
     effect_spawnHitScreenFade(0, self, other);
 }
 
-// Sets obj's hiddenBones flags and starts an id-specific animation for ids 0x75 and 0x80.
-void func_15194AB4(Actor *obj) {
-    s32 anim;
+// Collapses bones 1-15 (hiddenBones) and, for ids 0x75 and 0x80, creates an id-specific part set.
+void effect_collapseBones1To15(Actor *obj) {
+    s32 setId;
 
     obj->hiddenBones |= 0xFFFE;
-    anim = -1;
+    setId = -1;
     switch (obj->character_type) {
     case 0x75:
-        anim = 0x73;
+        setId = 0x73;
         break;
     case 0x80:
-        anim = 0x72;
+        setId = 0x72;
         break;
     }
-    if (anim != -1) {
-        collision_createPartSet(obj, anim, 1.0f, 0);
+    if (setId != -1) {
+        collision_createPartSet(obj, setId, 1.0f, 0);
     }
 }
 
-void func_15194B1C(Actor *obj) {
+void effect_bleedAndCollapseBones1To15(Actor *obj) {
     s32 kind;
 
     kind = blood_getProfile(obj);
@@ -321,7 +321,7 @@ void func_15194B1C(Actor *obj) {
         blood_startBleeding(obj, kind, 0);
     }
     blood_spawnHitEffects(obj, 1, 1, 1, 1, 1, 0xFF, 1);
-    func_15194AB4(obj);
+    effect_collapseBones1To15(obj);
 }
 
 void func_15194B94(Actor *self, Actor *other, u8 *result) {
@@ -329,7 +329,7 @@ void func_15194B94(Actor *self, Actor *other, u8 *result) {
         effect_hitReactSplash(self, other, result);
         return;
     }
-    func_15194B1C(other);
+    effect_bleedAndCollapseBones1To15(other);
     effect_spawnHitScreenFade(1, self, other);
 }
 
@@ -488,7 +488,7 @@ void effect_killAndSplitActor(Actor *obj) {
 
     obj->energy = 0;
     actor_kill(obj, 5);
-    func_15194AB4(obj);
+    effect_collapseBones1To15(obj);
     obj->type = 0x28;
     obj->speed = -3.0f;
     obj->unkBC = -10.0f - (math_random() % 5U);

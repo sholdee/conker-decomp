@@ -42,7 +42,7 @@ static const u32 D_800A51D0[10] = {
  * without a prototype (mixed signatures).
  */
 /* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
-static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, flare_hideGlow };
+static s32 (*gGlowVisibilityTests[])() = { particle_isBeamLineVisible, sight_isExtensionOn, flare_hideGlow };
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*gGlowDestroyHandlers[])() = {
     flare_destroyGlowDefault, particle_destroyBeamLine, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault,
@@ -59,7 +59,7 @@ static void (*gGlowFreeHandlers[])() = {
 typedef void (*GlowMsgFn)();
 static GlowMsgFn gGlowMsgHandlers[] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, effect_handleTintMessageRedFrom1,
-    effect_handleTintMessageRedFrom2, effect_handleTintMessageGreenOnly, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
+    effect_handleTintMessageRedFrom2, effect_handleTintMessageGreenOnly, effect_burstGlowMessage, effect_burstGlowMessage, effect_showHideGlowMessage,
 };
 static IdList2 gGlowEventTypes = { { 0x1C, 0x56 } }; /* effect-object kinds */
 

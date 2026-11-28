@@ -69,7 +69,7 @@ void sight_sendBeamCommand(s32 command, TriggerZone *source);
 void sight_explodeAtActor(Actor *actor, u8 owner, s32 list);
 void sight_spawnFloorImpact(Actor *actor, u8 owner, s32 list);
 s32 sight_updateStatusLight(LightEffect *obj);
-s32 func_151C9B64(struct BoneGlow *emitter, u8 *visible);
+s32 sight_hideBoneGlowWithExpression(struct BoneGlow *emitter, u8 *visible);
 extern const s32 gSightBeamBreakHits[];
 
 /* game/Effects/Sight/effects_sight.c */

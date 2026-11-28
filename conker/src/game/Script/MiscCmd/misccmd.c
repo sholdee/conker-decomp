@@ -146,7 +146,7 @@ s32 script_miscQuery(s32 cmdId, s32 opcode, ScriptCmd *cmd) {
 
     switch (opcode) {
     case 0:
-        return func_150CF040(cmd->a[0].w, cmd->a[1].w);
+        return effect_getAngleAroundRotatingZonePivot(cmd->a[0].w, cmd->a[1].w);
     case 1:
         x = cmd->a[0].w - cmd->a[2].w;
         z = cmd->a[1].w - cmd->a[3].w;

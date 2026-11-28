@@ -56,7 +56,7 @@ static s32 (*gModelParticleUpdateFuncs[])() = {
 };
 static s32 (*gModelParticleUpdate2Funcs[])() = {
     NULL, particle_updateKickable, particle_splashOnFloor, particle_dieBelowFloor,
-    particle_fadeInAboveFloor, blood_dropDebrisTrail, func_150C7670, particle_updateSpiralFadeSound,
+    particle_fadeInAboveFloor, blood_dropDebrisTrail, effect_setAlphaFromLightRadius, particle_updateSpiralFadeSound,
 };
 static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     NULL, particle_floorShatter, effect_bounceOnGround, effect_bounceOffTriangle,

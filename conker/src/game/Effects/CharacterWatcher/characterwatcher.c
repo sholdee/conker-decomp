@@ -219,7 +219,7 @@ static const s8 gWatcherMode4Actions[28] = {
 /* Character-watcher actions (indices of the action tables). Declared without a prototype: each takes
    its own task view of the watcher. */
 static void (*gWatcherActions[])() = {
-    effect_watcherStepIntoShallowWater, effect_watcherStepIntoDeepWater, effect_watcherFallIntoShallowWater, effect_watcherFallIntoDeepWater, func_151A9DC0, func_151A9EC0,
+    effect_watcherStepIntoShallowWater, effect_watcherStepIntoDeepWater, effect_watcherFallIntoShallowWater, effect_watcherFallIntoDeepWater, effect_watcherDiveIntoShallowWater, effect_watcherDiveIntoDeepWater,
     effect_watcherLeaveShallowWater, effect_watcherLeaveDeepWater, effect_watcherNoAction, effect_watcherStartSurfaceTrails1, effect_watcherReleaseSurfaceTrails1, effect_watcherReleaseSurfaceTrails2,
     effect_watcherStartSurfaceTrails2, effect_refreshTaskEffects, effect_keepTaskFlicker, effect_watcherSubmerge, effect_watcherStartFootSplashes, particle_keepFlickerSprite,
     particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, effect_watcherEnterWater,
