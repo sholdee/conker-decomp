@@ -195,7 +195,7 @@ void effect_levelHook26(Camera *actor) {
     }
 }
 
-/* Calls script_command(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
+/* Calls script_command(0, id, disabled) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
 void effect_setTransportZonesDisabled(Camera *camera, s32 disabled) {
     s32 i;
 

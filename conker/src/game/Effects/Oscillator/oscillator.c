@@ -262,7 +262,7 @@ void effect_onProjectileHitObject(Vec3f *pos, s32 index) {
     }
 }
 
-/* While task_flag bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
+/* While task_flag bits 0-1 are set: spins and moves the prop, applies gravity (param, y kept in 1/8
  * units in touch.i.a) and fades its alpha out, then marks it inactive. */
 void func_150EA944(WorldObject *prop) {
     f32 frames;
