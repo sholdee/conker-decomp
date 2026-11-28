@@ -657,7 +657,8 @@ void effect_attachRedBoneGlowsAndLight(Actor *obj) {
 void func_1514D96C(Actor *obj) {
 }
 
-/** Attaches a effect_newCharacterWatcher object (type 0x13) with a zeroed 0x20-byte payload. */
+/** Attaches a effect_newCharacterWatcher object (type 0x13) with a 0x20-byte payload: the TrailSet of
+    SurfaceTrailOwner, then the ActorTaskFx slots. All of it is zero except the trail side offset (12). */
 void effect_attachSurfaceTrailWatcher(Actor *obj) {
     struct {
         s32 unk0;
