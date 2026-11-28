@@ -84,7 +84,7 @@ void func_150B12FC(Actor *actor) {
 }
 
 /*
- * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (moveMode == 14)
+ * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (MOVE_MODE_CHASE_3D)
  * straight at its target object movement_obj[targetIndex]. A nonzero unk224 overrides the height: 10000 means its
  * current path waypoint, anything else is unk224 * 8 (plus unk180 for most ids). Stunned objects only recover.
  */
@@ -98,13 +98,13 @@ void func_150B1484(Actor *actor) {
 
         targetY = gSpawnRecords[actor->listpos].y + 210.0f;
         if (!(actor->unk22C & 8)) {
-            if (actor->moveMode != 3) {
+            if (actor->moveMode != MOVE_MODE_FOLLOW) {
                 actor->vtilt = actor->yspd * -0.5f;
             } else {
                 actor->vtilt = 0.0f;
             }
         }
-        if (actor->moveMode == 14) {
+        if (actor->moveMode == MOVE_MODE_CHASE_3D) {
             f32 time;
 
             time = actor_distanceXZ(&movement_obj[actor->targetIndex], actor) / actor->speed;
@@ -113,7 +113,7 @@ void func_150B1484(Actor *actor) {
         } else {
             s16 heightCode;
 
-            if (actor->moveMode == 1) {
+            if (actor->moveMode == MOVE_MODE_CHASE) {
                 targetY = movement_obj[0].ypos + 210.0f;
             }
             heightCode = actor->unk224;

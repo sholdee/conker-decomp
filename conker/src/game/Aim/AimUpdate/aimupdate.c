@@ -944,7 +944,7 @@ s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 ran
         dy = dy * dy;
         dist = dx + dz + dy;
         if (i == movement_obj[objIndex].targetIndex &&
-            (movement_obj[objIndex].moveMode == 1 || movement_obj[objIndex].moveMode == 12)) {
+            (movement_obj[objIndex].moveMode == MOVE_MODE_CHASE || movement_obj[objIndex].moveMode == 12)) {
             dist = 0.0f;
         }
         if ((dist < maxDist && dist < *bestDist) || preferId == movement_obj[i].character_type) {

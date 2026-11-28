@@ -957,6 +957,28 @@ typedef struct VtxMorphState {
     /* 0xA */ u8  hold;  // counts down once the blend has reached 1.0f
 } VtxMorphState; // size 0xC
 
+/*
+ * Actor.moveMode: how actor_updateChaseAi (game/Actor/ActorMotion/actormotion.c) moves the actor. The script
+ * move commands (game/Script/ObjScript/objscript.c) set it. The AI treats 14-16 as MOVE_MODE_CHASE and 17 as
+ * MOVE_MODE_WAYPOINT, plus their own differences. 6, 7, 8 and 12 have no name yet.
+ */
+enum MoveMode {
+    MOVE_MODE_WAYPOINT = 0,               // to the current waypoint; on arrival steps waypoint by waypointStep and ends the move
+    MOVE_MODE_CHASE = 1,                  // at movement_obj[targetIndex]; gives up beyond sightRange, sets the target's mv->chased
+    MOVE_MODE_FLEE = 2,                   // away from the target, weaving; sets the target's mv->chasing
+    MOVE_MODE_FOLLOW = 3,                 // at the target, without the chase give-up, chased flag or near trigger
+    MOVE_MODE_LEAP_TO_WAYPOINT = 4,       // aimed at the waypoint, no turn rate or acceleration (script_leapToWaypoint)
+    MOVE_MODE_ORBIT_WAYPOINT = 5,         // circles the waypoint: offset orbitRadius * 16 along unk86, which steps by orbitStep
+    MOVE_MODE_TO_TARGET = 9,              // straight at the target, without the target checks (leash, near trigger, give-up)
+    MOVE_MODE_WAYPOINT_WATCH_TARGET = 10, // as MOVE_MODE_WAYPOINT, and the near trigger and leash run against the target
+    MOVE_MODE_WAYPOINT_NO_ADVANCE = 11,   // to the waypoint; arrival neither steps the waypoint nor ends the move
+    MOVE_MODE_TURN_ANIM = 13,             // playing a turn animation (actor_startTurnAnim)
+    MOVE_MODE_CHASE_3D = 14,              // chase that also follows the target's height (flyers, path followers)
+    MOVE_MODE_CHASE_NO_LEASH = 15,        // chase that goes on when the target leaves the path area
+    MOVE_MODE_INTERCEPT = 16,             // chase at the target's position ahead by its speed (interceptSpeed)
+    MOVE_MODE_WAYPOINT_WEAVE = 17         // waypoint move that weaves from side to side by scriptTimer
+};
+
 /* The game actor: the 0x32C-byte entries of movement_obj (D_800CC2D0). original: movement_move (rom_debug_struct.c);
  * Oct 2000 had it 4 bytes shorter (the insertion is somewhere in 0x174-0x1C3). */
 struct Actor {
@@ -1212,7 +1234,7 @@ struct Actor {
     /* 0x220 */ u8  waypointStart;
     /* 0x221 */ s8  waypointStep;
     /* 0x222 */ u8  targetIndex;
-    /* 0x223 */ u8  moveMode;
+    /* 0x223 */ u8  moveMode; // enum MoveMode
     /* 0x224 */ s16 unk224;
     /* 0x226 */ u8  unk226;
     /* 0x227 */ u8  pad227;
