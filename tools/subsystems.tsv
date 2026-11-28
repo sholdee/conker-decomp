@@ -322,7 +322,6 @@ src/game/Effects/QuadEffect/quadeffect.c	effect	quad effect
 src/game/Effects/Rain/rain.c	effect	QuadFx objects
 src/game/Effects/RainHook/rainhook.c	effect	effect reset
 src/game/Effects/RaySpinner/rayspinner.c	effect	spinning ray-casting object moving its children to hit points
-src/game/Effects/RibbonChild/ribbonchild.c	effect	effect kind handlers
 src/game/Effects/RingEffect/ringeffect.c	effect	expanding ring effect: new, update, draw, emit and hit callbacks
 src/game/Effects/ImpactRing/impactring.c	effect	impact ring at an actor, ground circle, damped and tumbling particles
 src/game/Effects/RotatingZone/rotatingzone.c	effect	rotated slot positions driven by an object's angle
@@ -639,7 +638,7 @@ src/game/Effects/Trail/LevelStream/levelstream.c	trail	level-placed particle str
 src/game/Effects/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
 src/game/Effects/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
 src/game/Effects/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
-src/game/Effects/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
+src/game/Effects/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects and the destroy and free of their linked particle
 src/game/Effects/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
 src/game/Effects/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
 src/game/Effects/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor

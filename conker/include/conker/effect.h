@@ -110,7 +110,6 @@
  *   game/Effects/TaskGroundFx/taskgroundfx.c
  *   game/Effects/LandingBurst/landingburst.c
  *   game/Effects/SpawnEmitterHook/spawnemitterhook.c
- *   game/Effects/RibbonChild/ribbonchild.c
  *   game/Effects/FollowEffects/followeffects.c
  *   game/Effects/StatCounter/statcounter.c
  *   game/Effects/ActorSoundBurst/actorsoundburst.c
@@ -1637,7 +1636,7 @@ void effect_freeJointEmitterTask(JointEmitterTask *task);
 /* (Actor *spawner, Actor *spawned); declared without a prototype: game/Event/TimedEvent/timedevent.c also passes an angle */
 void func_151B5BA0();
 
-/* game/Effects/RibbonChild/ribbonchild.c */
+/* game/Effects/Trail/RibbonTrail/ribbontrail.c */
 void effect_destroyRibbonParticle(EffectObj *effect);
 void effect_destroyRibbon(EffectObj *effect);
 void effect_freeRibbon(EffectObj *effect);

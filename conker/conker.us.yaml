@@ -932,7 +932,6 @@ segments:
       - [0x1E30A0, c, game/Particle/SoundPulse/soundpulse]
       - [0x1E34C0, c, game/Particle/Pulse/pulse]
       - [0x1E37D0, c, game/Effects/Trail/RibbonTrail/ribbontrail]
-      - [0x1E5820, c, game/Effects/RibbonChild/ribbonchild]
       - [0x1E58B0, c, game/Weapon/BulletParticle/bulletparticle]
       - [0x1E5FF0, c, game/Particle/Bob/bob]
       - [0x1E6260, c, game/Effects/LampParticle/lampparticle]

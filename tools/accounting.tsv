@@ -5439,9 +5439,9 @@ trail_shapeRibbon	0x151B7998	672	game	c		build/src/game/Effects/Trail/RibbonTrai
 trail_drawRibbon	0x151B7C38	1684	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
 trail_onRibbonMessage	0x151B82CC	76	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
 trail_onActorRibbonMessage	0x151B8318	88	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
-effect_destroyRibbonParticle	0x151B8370	48	game	c		build/src/game/Effects/RibbonChild/ribbonchild.c.o
-effect_destroyRibbon	0x151B83A0	44	game	c		build/src/game/Effects/RibbonChild/ribbonchild.c.o
-effect_freeRibbon	0x151B83CC	52	game	c		build/src/game/Effects/RibbonChild/ribbonchild.c.o
+effect_destroyRibbonParticle	0x151B8370	48	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
+effect_destroyRibbon	0x151B83A0	44	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
+effect_freeRibbon	0x151B83CC	52	game	c		build/src/game/Effects/Trail/RibbonTrail/ribbontrail.c.o
 weapon_spawnBulletParticle	0x151B8400	428	game	c		build/src/game/Weapon/BulletParticle/bulletparticle.c.o
 weapon_updateBulletParticle	0x151B85AC	144	game	c		build/src/game/Weapon/BulletParticle/bulletparticle.c.o
 weapon_drawBulletParticle	0x151B863C	44	game	c		build/src/game/Weapon/BulletParticle/bulletparticle.c.o
