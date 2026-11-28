@@ -3,10 +3,10 @@ boot_romEntry	0x10001000	80	init	hasm	b	build/src/init/Boot/EntryPoint/entrypoin
 boot_entry	0x10001050	168	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_idleThread	0x100010F8	156	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 boot_mainThread	0x10001194	652	init	c		build/src/init/Boot/BootMain/bootmain.c.o
-libc_clearPageSlots	0x10001420	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_resetPaging	0x10001444	92	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_stopMainThread	0x100014A0	36	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-libc_reinitPaging	0x100014C4	140	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
+libc_clearPageSlots	0x10001420	36	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+libc_resetPaging	0x10001444	92	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+libc_stopMainThread	0x100014A0	36	init	c		build/src/init/Boot/BootMain/bootmain.c.o
+libc_reinitPaging	0x100014C4	140	init	c		build/src/init/Boot/BootMain/bootmain.c.o
 _Ldtob	0x10001550	1184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldunscale	0x100019F0	184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Genld	0x10001AA8	1480	init	c		build/src/init/Libc/Xldtob/xldtob.c.o

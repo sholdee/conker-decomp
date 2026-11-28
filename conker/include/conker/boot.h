@@ -26,6 +26,10 @@
 void boot_entry(void);
 void boot_idleThread(void *arg);
 void boot_mainThread(void *arg);
+void libc_clearPageSlots(void);
+void libc_resetPaging(void);
+void libc_stopMainThread(void);
+void libc_reinitPaging(s32 arg0);
 extern RomFile gRomFiles[2];
 extern u8 gPageFaultsDisabled;
 extern u8 gPadInitDone;
@@ -83,6 +87,9 @@ extern u32 gFaultTlbEntry[4]; // TLB entry 15 as it was when the exception hit: 
 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);
+
+/* in the rspboot data (undefined_syms.us.txt) */
+extern s32 *D_1002AAD0;
 
 /* past the end of the init .bss (undefined_syms.us.txt) */
 extern s32  gPageSlots[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
