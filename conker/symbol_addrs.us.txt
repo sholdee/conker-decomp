@@ -3129,7 +3129,6 @@ effect_setZoneFlag = 0x150F51A0; // type:func
 gSurfaceSoundTimer = 0x80088B44;
 effect_updateSurfaceSound = 0x150F51E8; // type:func
 gAttachSpawnFuncs = 0x8008AA70;
-gAttachSpawnFuncsById = 0x8008AACC;
 gAttachDestroyFuncs = 0x8008AB58;
 gAttachMessageFuncs = 0x8008AB64;
 gAttachSpawnSlotsByLevel = 0x800A5EC0;

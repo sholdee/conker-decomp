@@ -13,16 +13,14 @@
 #include "conker/trail.h"
 #include "libc/string.h"
 
-/* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
+/* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. One table: the slot lists of
+ * game/Effects/AttachmentTables/attachmenttables.c and gAttachSpawnSlotsById index it up to 57. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           effect_attachBone6GlowAndBone5Trail, effect_attachNarrowBone6GlowAndBone5Trail, effect_attachBone12GlowAndLight, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     effect_attachRedBoneGlowsAndLight,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, effect_attachFixedPointStripToBone6, func_1514DA38,
     effect_hidePart1AndAttachEmitterWatcher,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
-};
-
-/* Spawn callbacks by object id; entry 0 runs for every object first. */
-static void (*gAttachSpawnFuncsById[])(Actor *) = {
+    /* 23: runs for every object first */
     effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, effect_attachBone1RedLightAndGlow,
     func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, effect_hidePart1, effect_spawnActorEmitter, func_1514DE2C,
@@ -436,7 +434,7 @@ s32 effect_spawnAttachments(Actor *obj) {
         effect_newPlayerMarker(slot, 0xFF);
     }
 
-    gAttachSpawnFuncsById[0](obj);
+    gAttachSpawnFuncs[23](obj);
     // matching: the zero test must be on the s32 result, not on the u8 copy
     found = effect_findAttachSpawnSlots(obj, &uniqueSlot, &globalSlot, &idSlot);
     flags = found;
