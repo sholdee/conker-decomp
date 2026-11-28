@@ -20,7 +20,8 @@
  *   game/Camera/LevelCamSetup09/levelcamsetup09.c
  *   game/Camera/LevelCamSetup10/levelcamsetup10.c
  *   game/Camera/LevelCamSetup12/levelcamsetup12.c
- *   game/Camera/LevelCamSetup13/levelcamsetup13.c
+ *   game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin.c
+ *   game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss.c
  *   game/Camera/LevelCamSetupArena/levelcamsetuparena.c
  *   game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c
  *   game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c
@@ -189,8 +190,10 @@ void camera_emptyLevelSetupCanyon(Camera *camera);
 /* game/Camera/LevelCamSetup12/levelcamsetup12.c */
 void camera_levelSetup12(Camera *camera);
 
-/* game/Camera/LevelCamSetup13/levelcamsetup13.c */
+/* game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin.c */
 void camera_levelSetupPooCabin(Camera *camera);
+
+/* game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss.c */
 void camera_emptyLevelSetupWarboss(Camera *camera);
 
 /* game/Camera/LevelCamSetupArena/levelcamsetuparena.c */

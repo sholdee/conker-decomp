@@ -25,7 +25,8 @@ src/game/Camera/LevelCamSetupHeist/levelcamsetupheist.c	camera	per-level camera 
 src/game/Camera/LevelCamSetup09/levelcamsetup09.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup10/levelcamsetup10.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup12/levelcamsetup12.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup13/levelcamsetup13.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss.c	camera	per-level camera hook (empty)
 src/game/Camera/LevelCamSetupArena/levelcamsetuparena.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c	camera	per-level camera preset hooks

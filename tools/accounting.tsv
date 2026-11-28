@@ -623,8 +623,8 @@ camera_levelSetup09	0x15005C30	80	game	c		build/src/game/Camera/LevelCamSetup09/
 camera_levelSetupTank	0x15005C80	112	game	c		build/src/game/Camera/LevelCamSetup10/levelcamsetup10.c.o
 camera_emptyLevelSetupCanyon	0x15005CF0	16	game	c		build/src/game/Camera/LevelCamSetup10/levelcamsetup10.c.o
 camera_levelSetup12	0x15005D00	96	game	c		build/src/game/Camera/LevelCamSetup12/levelcamsetup12.c.o
-camera_levelSetupPooCabin	0x15005D60	64	game	c		build/src/game/Camera/LevelCamSetup13/levelcamsetup13.c.o
-camera_emptyLevelSetupWarboss	0x15005DA0	16	game	c		build/src/game/Camera/LevelCamSetup13/levelcamsetup13.c.o
+camera_levelSetupPooCabin	0x15005D60	64	game	c		build/src/game/Camera/LevelCamSetupPooCabin/levelcamsetuppoocabin.c.o
+camera_emptyLevelSetupWarboss	0x15005DA0	16	game	c		build/src/game/Camera/LevelCamSetupWarboss/levelcamsetupwarboss.c.o
 camera_levelSetupArena	0x15005DB0	128	game	c		build/src/game/Camera/LevelCamSetupArena/levelcamsetuparena.c.o
 camera_levelSetupVolcanoRace	0x15005E30	64	game	c		build/src/game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c.o
 camera_levelSetupTraining	0x15005E70	48	game	c		build/src/game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c.o

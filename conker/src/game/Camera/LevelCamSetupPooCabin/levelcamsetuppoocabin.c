@@ -10,6 +10,3 @@ void camera_levelSetupPooCabin(Camera *camera) {
     camera->Tightness = 0;
     camera->AvailableModes |= 0x4000;
 }
-
-void camera_emptyLevelSetupWarboss(Camera *camera) {
-}
