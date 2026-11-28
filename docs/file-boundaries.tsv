@@ -4,7 +4,7 @@
 # Addresses are US vram. No ROM bytes. See ACCOUNTING.md, "File boundaries".
 us_address	left_object	right_object	grade	evidence	note
 0x10001050	init/Boot/EntryPoint/entrypoint	init/Boot/BootMain/bootmain	proven	padding-us,padding-ects,padding-debug,flags-change	us gap 24 bytes; flags asm | -O2 -g3 -mips2 -o32 game; ects: 28 zero bytes before 0x10001050; debug: 28 zero bytes before 0x10001050; padding next to hand-written asm is not a proof (asm can hold .align, data and nops)
-0x10001420	init/Boot/BootMain/bootmain	init/Libc/Xldtob/xldtob	unproven	none	against: debug: one object (libc_clearPageSlots joins boot_mainThread)
+0x10001550	init/Boot/BootMain/bootmain	init/Libc/Xldtob/xldtob	proven	padding-debug	debug: 4 zero bytes before 0x10001460
 0x10002070	init/Libc/Xldtob/xldtob	init/Libc/Xprintf/xprintf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x10001E20; debug: 4 zero bytes before 0x10001F80; rodata at 0x8002BF80
 0x10002DB0	init/Libc/Xprintf/xprintf	libultra/io/aisetnextbuf	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x10002CC0; data at 0x8002AB40
 0x10002E50	libultra/io/aisetnextbuf	init/Os/DevMgr/devmgr	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x10002D60
@@ -18,8 +18,7 @@ us_address	left_object	right_object	grade	evidence	note
 0x10003930	init/Heap/ExpansionPak/expansionpak	init/Heap/MemoryLayout/memorylayout	proven	padding-us,flags-change	flags -O2 -mips2 -o32 game | -O2 -g3 -mips2 -o32 game
 0x100039B0	init/Heap/MemoryLayout/memorylayout	init/Boot/VoidStub/voidstub	proven	padding-us	
 0x100039C0	init/Boot/VoidStub/voidstub	init/Boot/ScreenInit/screeninit	proven	padding-us	
-0x10003BD0	init/Boot/ScreenInit/screeninit	init/Heap/HeapInit/heapinit	proven	padding-us	
-0x10003C40	init/Heap/HeapInit/heapinit	init/Heap/Allocator/allocator	unproven	none	against: ects: one object (allocate_memory joins heap_init)
+0x10003BD0	init/Boot/ScreenInit/screeninit	init/Heap/Allocator/allocator	proven	padding-us,data-edge	data at 0x8002AC30
 0x10004470	init/Heap/Allocator/allocator	init/Rom/RomDma/romdma	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x10003EF0
 0x100049E0	init/Rom/RomDma/romdma	init/Sched/Scheduler/scheduler	proven	padding-us	ects: order differs; debug: order differs
 0x100050A0	init/Sched/Scheduler/scheduler	init/Sched/SchedInit/schedinit	proven	padding-us	debug: order differs
