@@ -81,7 +81,6 @@
  *   game/Particle/FastSpark/fastspark.c
  *   game/Particle/SphereEmitter/sphereemitter.c
  *   game/Particle/RegionEmitter/regionemitter.c
- *   game/Particle/EmitterQuads/emitterquads.c
  *   game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope)
  *   game/Particle/SideSpray/sidespray.c
  *   game/Particle/OwnerSideEmitter/ownersideemitter.c
@@ -2579,7 +2578,7 @@ typedef struct ZoneEmitter {
 s32 particle_updateZoneEmitter(ZoneEmitter *obj);
 void particle_shutZoneEmitter(ZoneEmitter *obj);
 
-/* game/Particle/EmitterQuads/emitterquads.c */
+/* game/Effects/ImpactSets/impactsets.c */
 s32 particle_spawnSampleKindMark(MotionTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 typedef struct FxSpawnPayload FxSpawnPayload; /* defined in conker/effect.h */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,

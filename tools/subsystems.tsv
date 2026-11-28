@@ -294,7 +294,7 @@ src/game/Effects/HoltenRope/holtenrope.c	rope	Holten rope effect
 src/game/Effects/HomingEffect/homingeffect.c	effect	homing effects (object type 0x27)
 src/game/Effects/HomingReset/homingreset.c	effect	clears the homing-effect slot table
 src/game/Effects/HopSprite/hopsprite.c	effect	split from game_FC5F0.c; same subsystem
-src/game/Effects/ImpactSets/impactsets.c	effect	impact effect sets
+src/game/Effects/ImpactSets/impactsets.c	effect	impact effect sets; the impact emitter's steam and quad particles, MotionTrail hit callbacks
 src/game/Effects/ImpactSplash/impactsplash.c	effect	impact burst with ground splash
 src/game/Effects/JointDecal/jointdecal.c	effect	joint effects: sound, particle bursts, ground effect
 src/game/Effects/LampParticle/lampparticle.c	light	swinging lamp light particle
@@ -489,7 +489,6 @@ src/game/Particle/Drips/drips.c	particle	drips hanging on bones
 src/game/Particle/Droplets/droplets.c	particle	droplets and splashes
 src/game/Particle/DustEmitter/dustemitter.c	particle	dust particles and emitters
 src/game/Particle/EmissionSource/emissionsource.c	particle	emission sources: sine-wobbled particle streams
-src/game/Particle/EmitterQuads/emitterquads.c	particle	quad particles from emitter callbacks
 src/game/Particle/FallingParticle/fallingparticle.c	particle	falling particles
 src/game/Particle/FastSpark/fastspark.c	particle	spark emitter
 src/game/Particle/FlickerParticle/flickerparticle.c	particle	flickering billboard particles

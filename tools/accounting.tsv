@@ -5322,11 +5322,11 @@ effect_spawnImpact	0x151ABE40	568	game	c		build/src/game/Effects/ImpactSets/impa
 effect_spawnImpactSprayParticle	0x151AC078	852	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
 effect_fadeImpactTrailByLife	0x151AC3CC	60	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
 effect_spawnImpactTrailBurst	0x151AC408	328	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
-particle_spawnSampleKindMark	0x151AC550	204	game	c		build/src/game/Particle/EmitterQuads/emitterquads.c.o
-particle_spawnYawSteam	0x151AC61C	500	game	c		build/src/game/Particle/EmitterQuads/emitterquads.c.o
-particle_buildQuadParticleBillboard	0x151AC810	476	game	c		build/src/game/Particle/EmitterQuads/emitterquads.c.o
-particle_growQuadParticle	0x151AC9EC	52	game	c		build/src/game/Particle/EmitterQuads/emitterquads.c.o
-particle_fadeQuadParticleByLife	0x151ACA20	64	game	c		build/src/game/Particle/EmitterQuads/emitterquads.c.o
+particle_spawnSampleKindMark	0x151AC550	204	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
+particle_spawnYawSteam	0x151AC61C	500	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
+particle_buildQuadParticleBillboard	0x151AC810	476	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
+particle_growQuadParticle	0x151AC9EC	52	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
+particle_fadeQuadParticleByLife	0x151ACA20	64	game	c		build/src/game/Effects/ImpactSets/impactsets.c.o
 rope_createRider	0x151ACA60	216	game	c		build/src/game/Rope/SwingRope/swingrope.c.o
 rope_canRide	0x151ACB38	40	game	c		build/src/game/Rope/SwingRope/swingrope.c.o
 rope_updateRider	0x151ACB60	52	game	c		build/src/game/Rope/SwingRope/swingrope.c.o

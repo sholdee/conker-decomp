@@ -920,7 +920,6 @@ segments:
       - [0x1D5FD0, c, game/Beam/AreaEmitter/areaemitter]
       - [0x1D6E80, c, game/Effects/ActorTasks/actortasks]
       - [0x1D92F0, c, game/Effects/ImpactSets/impactsets]
-      - [0x1D9A00, c, game/Particle/EmitterQuads/emitterquads]
       - [0x1D9F10, c, game/Rope/SwingRope/swingrope]
       - [0x1DBB60, c, game/Effects/TaskGroundFx/taskgroundfx]
       - [0x1DBC60, c, game/Effects/BloodDrip/blooddrip]

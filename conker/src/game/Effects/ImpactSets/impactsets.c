@@ -1,8 +1,10 @@
 #include <ultra64.h>
 #include "conker/collision.h"
 #include "conker/effect.h"
+#include "conker/game.h"
 #include "conker/particle.h"
 #include "conker/trail.h"
+#include "libc/string.h"
 
 typedef struct {
     /* 0x00 */ f32 radius;   /* particle_emitOnRandomCircle's radius */
@@ -74,7 +76,7 @@ static const FxSpawnRange gImpactSecondEffects[] = {
     { 5.0f, 15, 10 },
 };
 
-/* The particle parameters of the impact emitters (FxImpactSet.emitter, particle_spawnYawSteam in game/Particle/EmitterQuads/emitterquads.c). */
+/* The particle parameters of the impact emitters (FxImpactSet.emitter, particle_spawnYawSteam below). */
 const EmitterConfig gImpactEmitterConfigs[] = {
     { 10, 25, -63, 50, 5.19f, 9.849999f, 40, 30, 100, 155, 49.0f, 105.5f, -1.0780001f, 0.49400002f, 1.0f },
     { 10, 25, -48, 4, 7.0699997f, 3.9099998f, 50, 20, 100, 100, 39.5f, 65.0f, -0.57000005f, 0.07f, 0.4f },
@@ -274,5 +276,125 @@ s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 he
         particle_spawnSquash(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
     }
     data->state = 4;
+    return 1;
+}
+
+/* matching: no header declares particle_spawnSteamParticle (steam.c): modelbeam.c and blood.c were compiled with other views */
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 alpha, f32 size, s32 hitsFloor,
+                             f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 owner, s32 list);
+
+/* Calls particle_spawnKindMark at the trail's oldest point's (x, z) at the given height, then sets the trail's
+ * params.state to 4. */
+s32 particle_spawnSampleKindMark(MotionTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+    TrailParams *payload = state->params;
+    MotionTrailPoint *samples = state->points;
+    Vec3f position;
+
+    position.x = samples[state->head.start].pos.x;
+    position.y = height;
+    position.z = samples[state->head.start].pos.z;
+    particle_spawnKindMark(particle_getContextEffectKind(), payload->motion.halfWidth * 7.0f, payload->motion.alpha, surface, &position,
+                  state->head.header.owner, state->head.header.kind);
+    payload->state = 4;
+    return 1;
+}
+
+/*
+ * Emitter callback (see gParticleKindCallbacks): spawns one particle_spawnSteamParticle particle at (x, y, z) moving
+ * along `yaw` with a random pitch and speed, using the randomized parameters of `kind`.
+ */
+s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
+                  f32 originZ, s32 yaw, s32 baseYaw, f32 radius, s32 kind, f32 arg12,
+                  FxSpawnPayload *payload, u8 fxOwner) {
+    FxSpawnPayload *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
+    f32 scale;
+    const s8 *entry;
+    Vec3f position;
+    Vec3f velocity;
+    const EmitterConfig *config;
+
+    emitter = payload;
+    scale = 1.0f;
+    entry = &gImpactSets[kind].emitter;
+    config = &gImpactEmitterConfigs[*entry];
+    position.x = x;
+    position.y = y;
+    position.z = z;
+    math_dirFromBinAngles(yaw, (math_random() % (config->pitchRange + 1)) + config->pitch,
+                  math_randomFloat() * config->speedRange + config->speed, &velocity);
+    particle_spawnSteamParticle(&position, &velocity, emitter->kind,
+                  math_randomFloat() * config->gravityRange + config->gravity,
+                  (math_random() % (config->lifetimeRange + 1)) + config->lifetime,
+                  (math_random() % (config->alphaRange + 1)) + config->alpha,
+                  math_randomFloat() * config->sizeRange + config->size,
+                  math_randomFloat() < config->floorHitChance, scale, scale, 1, emitter->hit, 1, 0, fxOwner,
+                  emitter->list);
+    return 1;
+}
+
+/*
+ * Returns this view's 4 vertices for the quad (initializing both buffers from the template
+ * when freshly allocated), placed at the particle's position and rotated by the view's
+ * gCameraAngleSines/gCameraAngleCosines factors; NULL if no buffer is available.
+ */
+Vtx *particle_buildQuadParticleBillboard(DefParticleHead *particle, s16 view) {
+    Vtx *vtx;
+    Vtx *result;
+    f32 width;
+    f32 height;
+    f32 offsetZ;
+    f32 offsetX;
+    u8 fresh;
+
+    particle_getViewBuffer(particle->vtxBuffers, view, 0x40, &vtx, &fresh);
+    result = vtx;
+    if (vtx != NULL) {
+        if (fresh) {
+            memcpy(particle->vtxBuffers[view], particle->vtxTemplate, 0x40);
+            memcpy(particle->vtxBuffers[view] + 4, particle->vtxTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+
+    width = particle->def.width * particle->def.scale.x;
+    height = particle->def.height * particle->def.scale.y;
+    offsetZ = gCameraAngleSines[view] * width;
+    offsetX = gCameraAngleCosines[view] * width;
+
+    vtx[0].v.flag = 0;
+    vtx[1].v.flag = 0;
+    vtx[2].v.flag = 0;
+    vtx[3].v.flag = 0;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->def.pos.x + offsetX;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->def.pos.z - offsetZ;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->def.pos.x - offsetX;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->def.pos.z + offsetZ;
+
+    return result;
+}
+
+/* Grows the quad's width and height by def.scale.x per second (gFrameDelta = frame time). */
+s32 particle_growQuadParticle(DefParticleHead *particle) {
+    f32 growth = particle->def.scale.x * gFrameDelta;
+
+    particle->def.width += growth;
+    particle->def.height += growth;
+    return 1;
+}
+
+/* Caps def.alpha at def.lifetime * 16 once the lifetime drops below 16. */
+s32 particle_fadeQuadParticleByLife(DefParticleHead *particle) {
+    s16 limit = 255;
+
+    if (particle->def.lifetime < 16) {
+        limit = particle->def.lifetime * 16;
+    }
+    if (limit < particle->def.alpha) {
+        particle->def.alpha = limit;
+    }
     return 1;
 }

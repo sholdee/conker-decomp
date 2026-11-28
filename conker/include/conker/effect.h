@@ -1573,7 +1573,7 @@ typedef struct FxImpactSet {
     /* 0x00 */ s8 first;      /* gImpactFirstEffects index */
     /* 0x01 */ s8 firstStyle; /* gImpactSprays index (read by effect_spawnImpactSprayParticle) */
     /* 0x02 */ s8 second;     /* gImpactSecondEffects index */
-    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam, game/Particle/EmitterQuads/emitterquads.c) */
+    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam in the same file) */
     /* 0x04 */ s8 impact;     /* gImpactGroundEffects index */
 } FxImpactSet; // size 0x5
 
