@@ -71,7 +71,6 @@
  *   game/Particle/GrowingBillboard/growingbillboard.c
  *   game/Particle/PlacementRing/placementring.c
  *   game/Particle/ActorEmitter/actoremitter.c
- *   game/Particle/ActorEmitterHandlers/actoremitterhandlers.c
  *   game/Particle/AnchorEmitter/anchoremitter.c
  *   game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c
  *   game/Particle/ActorEmitterData/actoremitterdata.c (data only, linked after the game/Particle/ActorEmitter/actoremitter..game/Effects/BurnDamage/burndamage unit)
@@ -2199,8 +2198,6 @@ s32 particle_followEmitterSound(SoundRecord *record, s32 *active, u32 *volume, s
 void particle_freeActorEmitterParticles(ActorEmitterProcess *emitter);
 void particle_setActorEmitterTable(ActorEmitterProcess *emitter, u8 table);
 ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 owner);
-
-/* game/Particle/ActorEmitterHandlers/actoremitterhandlers.c */
 void particle_detachActorEmitter(ActorEmitterProcess *emitter);
 void particle_destroyActorEmitter(ActorEmitterProcess *emitter);
 void particle_freeActorEmitter(ActorEmitterProcess *emitter);

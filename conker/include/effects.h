@@ -2739,11 +2739,11 @@ typedef struct ActorEmitterParticleData {
     /* 0x48 */ s16 fadeStart;
     /* 0x4A */ s16 fadeRate;
     /* 0x4C */ f32 blend;
-    /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (particle_buildActorEmitterQuad, game/Particle/ActorEmitterHandlers/actoremitterhandlers.c) */
+    /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (particle_buildActorEmitterQuad, game/Particle/ActorEmitter/actoremitter.c) */
     /* 0x54 */ struct ParticleTemplate *tmpl;
 } ActorEmitterParticleData; /* size 0x58 */
 
-/* A particle of an actor emitter (game/Particle/ActorEmitter/actoremitter.c, its callbacks in game/Particle/ActorEmitterHandlers/actoremitterhandlers.c), made by particle_newQuadParticleWhite. */
+/* A particle of an actor emitter (game/Particle/ActorEmitter/actoremitter.c, with its callbacks), made by particle_newQuadParticleWhite. */
 typedef struct ActorEmitterParticle {
     /* 0x000 */ DefParticleHead head; /* head.def.rot: the previous position */
     /* 0x110 */ ActorEmitterParticleData data;
@@ -2763,8 +2763,8 @@ typedef struct ActorEmitterSlot {
     /* 0x14 */ struct ActorEmitterSlot *next; // ring of free slots while emitting
 } ActorEmitterSlot; /* 0x18 */
 
-/* Process of type 0x21: emits particles around (or from the bones of) its owner (game/Particle/ActorEmitter/actoremitter.c; its particle
- * callbacks are in game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
+/* Process of type 0x21: emits particles around (or from the bones of) its owner (game/Particle/ActorEmitter/actoremitter.c, with its
+ * particle callbacks). */
 typedef struct ActorEmitterProcess {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;

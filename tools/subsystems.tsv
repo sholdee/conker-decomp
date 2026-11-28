@@ -468,9 +468,8 @@ src/game/Os/EepromWrite/eepromwrite.c	os	osEepromWrite copy
 src/game/Os/MtxCatF/mtxcatf.c	os	guMtxCatF copy
 src/game/Os/PiReadIo/pireadio.c	os	osPiReadIo copy
 src/game/Os/ViSetSpecial/visetspecial.c	os	osViSetSpecialFeatures copy
-src/game/Particle/ActorEmitter/actoremitter.c	particle	bone emission points
+src/game/Particle/ActorEmitter/actoremitter.c	particle	actor emitter process: bone emission points, its handlers and particle quads
 src/game/Particle/ActorEmitterData/actoremitterdata.c	particle	data-only unit (wave 5)
-src/game/Particle/ActorEmitterHandlers/actoremitterhandlers.c	particle	actor emitter process
 src/game/Particle/AnchorEmitter/anchoremitter.c	particle	anchored emitters and sprite particles
 src/game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c	particle	anchor emitter destroy
 src/game/Particle/AreaFlash/areaflash.c	particle	flash particle emitter
