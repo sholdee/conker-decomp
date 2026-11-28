@@ -5559,9 +5559,9 @@ weapon_traceProjectile	0x151C43E0	304	game	c		build/src/game/Weapon/Projectile/p
 weapon_moveProjectile	0x151C4510	76	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_countdownProjectileRange	0x151C455C	232	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_updateStreamEmitter	0x151C4644	476	game	c		build/src/game/Weapon/Projectile/projectile.c.o
-particle_updateWobbleStream	0x151C4820	656	game	c		build/src/game/Particle/WobbleStream/wobblestream.c.o
-weapon_projectileMessage	0x151C4AB0	92	game	c		build/src/game/Weapon/ProjectileRay/projectileray.c.o
-weapon_setupProjectileRay	0x151C4B0C	1908	game	c		build/src/game/Weapon/ProjectileRay/projectileray.c.o
+particle_updateWobbleStream	0x151C4820	656	game	c		build/src/game/Weapon/Projectile/projectile.c.o
+weapon_projectileMessage	0x151C4AB0	92	game	c		build/src/game/Weapon/Projectile/projectile.c.o
+weapon_setupProjectileRay	0x151C4B0C	1908	game	c		build/src/game/Weapon/Projectile/projectile.c.o
 weapon_fireSegmentShot	0x151C5280	776	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_spawnSegmentBeam	0x151C5588	284	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o
 weapon_spawnLightAt	0x151C56A4	216	game	c		build/src/game/Weapon/SegmentShot/segmentshot.c.o

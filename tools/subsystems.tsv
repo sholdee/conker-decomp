@@ -541,7 +541,6 @@ src/game/Particle/StyleTimerReset/styletimerreset.c	particle	resets the sprite-p
 src/game/Particle/TwoSidedEmitter/twosidedemitter.c	particle	two-sided emitter effects, their destroy and free callbacks (set 37), a target filter
 src/game/Particle/WakePuff/wakepuff.c	particle	puff particles behind objects
 src/game/Particle/WatcherEmitter/watcheremitter.c	particle	randomised particles and watcher emitters
-src/game/Particle/WobbleStream/wobblestream.c	particle	projectile stream particles
 src/game/Particle/YawLaunch/yawlaunch.c	particle	random coloured particles launched along a yaw
 src/game/Particle/YawStreak/yawstreak.c	particle	streak particle spawns and object effect burst
 src/game/Path/PathGraph/pathgraph.c	path	path graph: nodes, layers, nearest node, search
@@ -662,8 +661,7 @@ src/game/Weapon/ForwardShot/forwardshot.c	weapon	projectile spawn along actor di
 src/game/Weapon/GunShot/gunshot.c	weapon	split from game_12C1E0.c; same subsystem
 src/game/Weapon/JointShot/jointshot.c	weapon	shots from joint points
 src/game/Weapon/Launcher/launcher.c	weapon	projectile fire from muzzle
-src/game/Weapon/Projectile/projectile.c	weapon	projectiles with flyby sounds
-src/game/Weapon/ProjectileRay/projectileray.c	weapon	projectile ray setup
+src/game/Weapon/Projectile/projectile.c	weapon	projectiles with flyby sounds; projectile streams, the projectile message handler and ray setup
 src/game/Weapon/SecondGun/secondgun.c	weapon	data-only unit: the second gun muzzle point and bone, between game_120950 and game_121A20
 src/game/Weapon/SegmentShot/segmentshot.c	weapon	projectile along a segment
 src/game/Weapon/Tank/tank.c	weapon	ballistic aim error for shells

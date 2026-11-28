@@ -88,7 +88,6 @@
  *   game/Particle/Pulse/pulse.c
  *   game/Particle/Bob/bob.c
  *   game/Particle/FallingParticle/fallingparticle.c
- *   game/Particle/WobbleStream/wobblestream.c
  *   game/Particle/HitImpact/hitimpact.c
  *   game/Particle/Steam/steam.c
  *   game/Particle/ColorEmitter/coloremitter.c
@@ -2792,7 +2791,7 @@ void particle_newFallingEmitter(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s1
                    s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner, s32 list);
 void particle_updateFallingEmitter(FallingEmitter *emitter);
 
-/* game/Particle/WobbleStream/wobblestream.c */
+/* game/Weapon/Projectile/projectile.c */
 typedef struct ProjectileStreamEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ProjectileStream emission;

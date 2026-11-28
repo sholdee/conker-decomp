@@ -2376,7 +2376,7 @@ typedef struct WaveTrail {
 } WaveTrail;
 
 /* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
- * position, aimed along math_dirFromAngles angles that wobble as sines (particle_updateWobbleStream, game/Particle/WobbleStream/wobblestream.c;
+ * position, aimed along math_dirFromAngles angles that wobble as sines (particle_updateWobbleStream, game/Weapon/Projectile/projectile.c;
  * particle_updateSourceEmission, game/Particle/EmissionSource/emissionsource.c). */
 typedef struct ParticleStream {
     /* 0x00 */ f32 angleX;        /* centre direction */
@@ -2393,7 +2393,7 @@ typedef struct ParticleStream {
     /* 0x2C */ Vec3f position;
 } ParticleStream; /* size 0x38 */
 
-/* A stream of weapon_spawnProjectile projectiles (TimedEffect tick callback 0x2B, particle_updateWobbleStream, game/Particle/WobbleStream/wobblestream.c). */
+/* A stream of weapon_spawnProjectile projectiles (TimedEffect tick callback 0x2B, particle_updateWobbleStream, game/Weapon/Projectile/projectile.c). */
 typedef struct ProjectileStream {
     /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 speed;         /* weapon_spawnProjectile's speed */

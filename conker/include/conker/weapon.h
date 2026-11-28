@@ -18,7 +18,6 @@
  *   game/Weapon/BulletParticle/bulletparticle.c
  *   game/Weapon/Bullet/bullet.c
  *   game/Weapon/Projectile/projectile.c
- *   game/Weapon/ProjectileRay/projectileray.c
  *   game/Weapon/SegmentShot/segmentshot.c
  *   game/Weapon/JointShot/jointshot.c
  *   game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil)
@@ -198,9 +197,6 @@ u8 weapon_traceProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f
 void weapon_moveProjectile(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt);
 s32 weapon_countdownProjectileRange(WeaponProjectile *trail, WeaponProjectileState *ext, f32 dt);
 void weapon_updateStreamEmitter(StreamEmitterEffect *owner);
-
-
-/* game/Weapon/ProjectileRay/projectileray.c */
 void weapon_projectileMessage(WeaponProjectile *obj, ActorSwapMsg *swap, u8 event);
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
