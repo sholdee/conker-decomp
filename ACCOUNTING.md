@@ -141,6 +141,69 @@ The sweep scripts and raw results are not part of the repository; the text above
 for three source styles: a plain `.s` file, and the compiler's own output style with one source line for each
 instruction or one line for all.
 
+## File boundaries
+
+A byte match does not show that our source files have Rare's boundaries. `tools/boundaries.py` grades
+the evidence for each boundary between two objects in the code segments. It only reports. It does not
+change the layout. It writes two tables, which hold addresses, names and grades only:
+
+- `docs/file-boundaries.tsv`: one row for each boundary. The columns are the US address where the right
+  object starts, the left and right objects, the grade, the evidence kinds and a note.
+- `docs/file-boundary-candidates.tsv`: places where the evidence says that one of our files was two
+  files (split), or that two of our files were one file (merge), with the conditions that hold.
+
+The tool uses these facts:
+
+- IDO pads the code of each object to 16 bytes. It puts no padding between the functions of one object.
+  So zero words between two functions show a file boundary. A function that starts on an address that is
+  not 16-aligned, directly after the previous function, is in the same object. A function on a 16-aligned
+  address with no zero words before it shows nothing.
+- The `.data`, `.rodata` and `.bss` of one object are each one block, in link order. Each block starts on
+  a 16-aligned address.
+- One object is compiled once, with one set of flags. C and hand-written asm are never one object.
+- Two older builds have almost the same link order: the ECTS build (August 2000) and the debug build
+  (October 2000). The padding in them is evidence too. But a file can change between builds.
+
+| Evidence | Meaning |
+|----------|---------|
+| `padding-us` | Zero words between the last function of the left object and the first function of the right object, in US |
+| `padding-ects`, `padding-debug` | In that build, the partners of the functions next to the boundary are in two objects: there is padding between them. The build has them in the US order, with no other paired function between them |
+| `data-edge` | The block of the right object directly follows the block of the left object, in `.data`, `.rodata` or `.bss`. It starts on a 16-aligned address |
+| `flags-change` | The two objects have different `-O` or `-mips` flags in `conker/Makefile`, or one is C and the other hand-written asm |
+| `rare-name` | Functions of the two objects use two different source file paths (the path strings of the debug tunables) |
+
+The grades:
+
+- **proven**: `padding-us`, `flags-change`, `rare-name` that is pinned, or `padding-ects` or
+  `padding-debug` that is pinned and that the other old build does not contradict. Pinned means that the
+  paired functions are the two functions next to the boundary. US joins (starts that are not 16-aligned)
+  can also tie them to those functions. If the evidence is not pinned, the boundary can be one function
+  away.
+- **likely**: other evidence. `data-edge` alone is weak, because a block can start on a 16-aligned
+  address by chance.
+- **unproven**: no evidence. Sometimes the US code shows that the two sides are one object: the right
+  object starts on an address that is not 16-aligned. Such a boundary is also unproven. The note gives
+  the evidence against the boundary.
+
+In the candidates table, `order_agrees` says that the old build has the two functions in the US order,
+with no other paired function between them. `us_16_aligned` says whether the US address is 16-aligned.
+A split needs this, because IDO starts each object on a 16-aligned address. `other_old_build` says what
+the other old build shows: it agrees, it contradicts, or it is silent. `us_code` says what the US code
+shows at the address: padding, a join or neither (flush). A candidate is not a decision. Read the code
+before you change the layout.
+
+To make the tables again, you need `conker/conker.us.bin` (from `make -C conker extract`). For the
+evidence of the old builds, you also need the two prerelease ROMs and the files that pair their functions
+with the US functions. They stay outside the repository.
+
+```
+python3 tools/boundaries.py --ects <ECTS ROM> --ects-pairs <ects_pairs.json> \
+    --debug <debug ROM> --debug-pairs <function_pairs.tsv> --debug-functions <debug_functions.tsv>
+```
+
+If a build is missing, the tool says which evidence it cannot check, and the header of each table names
+the missing build. The same inputs always give the same tables.
+
 ## Other ROM contents (not CPU code)
 
 | ROM range | Contents | Status |

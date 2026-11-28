@@ -1,0 +1,852 @@
+# File boundaries of the US code: one row for each boundary between two objects. Made by tools/boundaries.py; do not edit by hand.
+# Command: python3 tools/boundaries.py --ects <ECTS ROM> --ects-pairs <ects_pairs.json> --debug <debug ROM> --debug-pairs <function_pairs.tsv> --debug-functions <debug_functions.tsv>
+# Builds used: ECTS ROM, debug ROM. Missing: none.
+# Addresses are US vram. No ROM bytes. See ACCOUNTING.md, "File boundaries".
+us_address	left_object	right_object	grade	evidence	note
+0x10001050	init/Boot/EntryPoint/entrypoint	init/Boot/BootMain/bootmain	proven	padding-us,padding-ects,padding-debug,flags-change	us gap 24 bytes; flags asm | -O2 -g3 -mips2 -o32 game; ects: 28 zero bytes before 0x10001050; debug: 28 zero bytes before 0x10001050
+0x10001420	init/Boot/BootMain/bootmain	init/Libc/Xldtob/xldtob	unproven	none	against: debug: one object (libc_clearPageSlots joins boot_mainThread)
+0x10002070	init/Libc/Xldtob/xldtob	init/Libc/Xprintf/xprintf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x10001E20; debug: 4 zero bytes before 0x10001F80; rodata at 0x8002BF80
+0x10002DB0	init/Libc/Xprintf/xprintf	libultra/io/aisetnextbuf	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x10002CC0; data at 0x8002AB40
+0x10002E50	libultra/io/aisetnextbuf	init/Os/DevMgr/devmgr	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x10002D60
+0x100030A0	init/Os/DevMgr/devmgr	libultra/io/pimgr	unproven	none	
+0x10003220	libultra/io/pimgr	libultra/io/sptask	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x10002F30; debug: 12 zero bytes before 0x10003130; bss at 0x80036B60
+0x100034E0	libultra/io/sptask	libultra/io/vimgr	likely	data-edge	CFLAGS differ (game | ultralib), the -O and -mips flags do not; bss at 0x80036BA0
+0x100037F0	libultra/io/vimgr	libultra/os/createthread	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (ultralib | game), the -O and -mips flags do not; ects: 4 zero bytes before 0x10003500; debug: 4 zero bytes before 0x10003700
+0x100038C0	libultra/os/createthread	init/Boot/ArgStub/argstub	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x100035D0; debug: 8 zero bytes before 0x100037D0
+0x100038E0	init/Boot/ArgStub/argstub	init/Boot/HardwareCheck/hardwarecheck	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x100035F0; debug: 4 zero bytes before 0x100037F0
+0x10003920	init/Boot/HardwareCheck/hardwarecheck	init/Heap/ExpansionPak/expansionpak	proven	padding-us,data-edge,flags-change	flags -O2 -g3 -mips2 -o32 game | -O2 -mips2 -o32 game; bss at 0x80038080
+0x10003930	init/Heap/ExpansionPak/expansionpak	init/Heap/MemoryLayout/memorylayout	proven	padding-us,data-edge,flags-change	flags -O2 -mips2 -o32 game | -O2 -g3 -mips2 -o32 game; bss at 0x80038090
+0x100039B0	init/Heap/MemoryLayout/memorylayout	init/Boot/VoidStub/voidstub	proven	padding-us	
+0x100039C0	init/Boot/VoidStub/voidstub	init/Boot/ScreenInit/screeninit	proven	padding-us	
+0x10003BD0	init/Boot/ScreenInit/screeninit	init/Heap/HeapInit/heapinit	proven	padding-us	
+0x10003C40	init/Heap/HeapInit/heapinit	init/Heap/Allocator/allocator	unproven	none	against: ects: one object (allocate_memory joins heap_init)
+0x10004470	init/Heap/Allocator/allocator	init/Rom/RomDma/romdma	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x10003EF0; bss at 0x800380E0
+0x100049E0	init/Rom/RomDma/romdma	init/Sched/Scheduler/scheduler	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x8003A580
+0x100050A0	init/Sched/Scheduler/scheduler	init/Sched/SchedInit/schedinit	proven	padding-us	debug: order differs; against: bss: R's block starts at 0x8003B1E8, not 16-aligned
+0x10005570	init/Sched/SchedInit/schedinit	init/Cont/Motor/motor	proven	padding-us	debug: order differs
+0x100057E0	init/Cont/Motor/motor	init/Cont/MotorInit/motorinit	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x8003BE30
+0x10005AB0	init/Cont/MotorInit/motorinit	init/Boot/Paging/pagesetup	proven	padding-us,data-edge,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; ects: order differs; debug: order differs; bss at 0x8003BE70
+0x10005BE0	init/Boot/Paging/pagesetup	init/Boot/Paging/pagebitmap	unproven	none	against: ects: one object (boot_resetPageBitmap joins boot_allocPagePool); debug: one object (boot_resetPageBitmap joins boot_allocPagePool)
+0x10005C2C	init/Boot/Paging/pagebitmap	init/Boot/Paging/pagefault	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_invalidateTlbEntries joins boot_resetPageBitmap)
+0x10006240	init/Boot/Paging/pagefault	init/Boot/Inflate/decompress	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x100048D0
+0x1000625C	init/Boot/Inflate/decompress	init/Boot/Inflate/inflatestream	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_inflateStream joins boot_decompress); debug: one object (boot_inflateStream joins boot_decompress)
+0x1000632C	init/Boot/Inflate/inflatestream	init/Boot/Inflate/inflate	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_inflate joins boot_inflateStream); debug: one object (boot_inflate joins func_100062F0)
+0x10006380	init/Boot/Inflate/inflate	init/Boot/Inflate/inflateblock	unproven	none	against: ects: one object (boot_inflateBlock joins boot_inflate); debug: one object (boot_inflateBlock joins boot_inflate)
+0x1000692C	init/Boot/Inflate/inflateblock	init/Boot/Inflate/inflatefixed	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_inflateFixed joins boot_inflateStored); debug: one object (boot_inflateFixed joins boot_inflateStored)
+0x1000696C	init/Boot/Inflate/inflatefixed	init/Boot/Inflate/huftbuild	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_huftBuild joins boot_inflateFixed); debug: one object (boot_huftBuild joins boot_inflateFixed)
+0x1000709C	init/Boot/Inflate/huftbuild	init/Boot/Inflate/inflatetables	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_initInflateFixedTables joins func_10006E30); debug: one object (boot_initInflateFixedTables joins func_10006E30)
+0x100071D0	init/Boot/Inflate/inflatetables	init/Boot/Exception/exceptasm	proven	padding-us	
+0x10007DA0	init/Boot/Exception/exceptasm	init/Boot/DebugTrap/debugtrap	unproven	none	against: debug: one object (boot_debugTrap joins boot_drawGlyph)
+0x10007DAC	init/Boot/DebugTrap/debugtrap	init/Boot/FaultDebugger/faultdebugger	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (boot_runFaultDebugger joins boot_debugTrap); debug: one object (boot_runFaultDebugger joins boot_debugTrap)
+0x10008120	init/Boot/FaultDebugger/faultdebugger	libultra/os/maptlbrdb	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x10006ED0 (not pinned: boot_runFaultDebugger..osMapTLBRdb)
+0x10008180	libultra/os/maptlbrdb	init/Audio/SeqPlayer/seqplayer	proven	padding-us,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; ects: order differs; debug: order differs
+0x10008F90	init/Audio/SeqPlayer/seqplayer	init/Audio/AudioMgr/audiomgr	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x150F0760; bss at 0x8003E380
+0x1000A420	init/Audio/AudioMgr/audiomgr	init/Audio/SoundPan/soundpan	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15109710
+0x1000B1B0	init/Audio/SoundPan/soundpan	init/Audio/Tune/tune	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150F1E90; debug: 4 zero bytes before 0x1510A4A0; rodata at 0x8002C220
+0x1000EB00	init/Audio/Tune/tune	init/Audio/DynamicSound/dynamicsound	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150F5720; debug: 12 zero bytes before 0x1510DE20; bss at 0x80041F10; rodata at 0x8002C240
+0x10011FA0	init/Audio/DynamicSound/dynamicsound	init/Audio/MixSelector/mixselector	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x150F84E0; bss at 0x80042770; rodata at 0x8002C410
+0x10012560	init/Audio/MixSelector/mixselector	init/Audio/Mp3Stream/mp3stream	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150F8A40; debug: 12 zero bytes before 0x15111410; bss at 0x800427A0
+0x10012820	init/Audio/Mp3Stream/mp3stream	libultra/audio/heap	proven	padding-us,flags-change	flags -O2 -g3 -mips2 -o32 game | -g -mips2 -o32 game; ects: order differs; debug: order differs
+0x100128D0	libultra/audio/heap	libultra/audio/bnkf	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D5720; debug: 8 zero bytes before 0x151F80E0
+0x10012D80	libultra/audio/bnkf	libultra/audio/osc	unproven	none	
+0x10013320	libultra/audio/osc	libultra/audio/n_csplayer	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x151D61A0 (not pinned: audio_initOscStates..__n_CSPRepostEvent); debug: 4 zero bytes before 0x151F8B60; bss at 0x80042810; rodata at 0x8002C460
+0x10015550	libultra/audio/n_csplayer	libultra/audio/n_cspsetbank	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151D8370; debug: 4 zero bytes before 0x151FAD40
+0x100155A0	libultra/audio/n_cspsetbank	libultra/audio/n_sndplayer	unproven	none	ects: order differs; debug: order differs
+0x10017870	libultra/audio/n_sndplayer	init/Audio/OutputMode/outputmode	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800428C0
+0x10017A80	init/Audio/OutputMode/outputmode	libultra/audio/n_cspgetstate	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x151D85D0; debug: order differs
+0x10017AA0	libultra/audio/n_cspgetstate	libultra/audio/n_cspplay	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D85F0; debug: 8 zero bytes before 0x151FADB0
+0x10017AF0	libultra/audio/n_cspplay	init/Audio/SeqChannel/seqchannel	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151D8640; debug: 12 zero bytes before 0x151FAE00
+0x10017D80	init/Audio/SeqChannel/seqchannel	libultra/audio/n_cspsetpan	unproven	none	
+0x10017DF0	libultra/audio/n_cspsetpan	init/Audio/SeqFxMix/seqfxmix	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151D8940; debug: 4 zero bytes before 0x151FB100
+0x10017EC0	init/Audio/SeqFxMix/seqfxmix	libultra/audio/n_cspgettempo	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D8A10; debug: 8 zero bytes before 0x151FB1D0
+0x10017F10	libultra/audio/n_cspgettempo	init/Audio/SeqFxParam/seqfxparam	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151D8AF0; debug: 4 zero bytes before 0x151FB2B0
+0x10017F80	init/Audio/SeqFxParam/seqfxparam	libultra/audio/n_csq	unproven	none	
+0x10018C60	libultra/audio/n_csq	libultra/audio/n_cspstop	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D9840; debug: 8 zero bytes before 0x151FC000
+0x10018CB0	libultra/audio/n_cspstop	libultra/audio/n_cspsetseq	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151D9890; debug: 12 zero bytes before 0x151FC050
+0x10018D00	libultra/audio/n_cspsetseq	libultra/audio/n_cspsetvol	unproven	none	
+0x10018D50	libultra/audio/n_cspsetvol	init/Audio/SeqPause/seqpause	unproven	none	
+0x10018DA0	init/Audio/SeqPause/seqpause	libultra/audio/n_sl	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x151FC140
+0x10018E60	libultra/audio/n_sl	libultra/audio/n_synthesizer	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D9A70; debug: 8 zero bytes before 0x151FC200
+0x10019AB0	libultra/audio/n_synthesizer	libultra/audio/cents2ratio	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151DA6C0; debug: 4 zero bytes before 0x151FCEC0; rodata at 0x8002C760
+0x10019B50	libultra/audio/cents2ratio	init/Audio/SeqCtrl/seqctrl	proven	padding-us	ects: order differs; debug: order differs
+0x1001AAE0	init/Audio/SeqCtrl/seqctrl	libultra/audio/n_seqplayer	proven	padding-us	ects: order differs; debug: order differs
+0x1001C060	libultra/audio/n_seqplayer	libultra/audio/n_event	proven	padding-us	ects: order differs; debug: order differs
+0x1001C690	libultra/audio/n_event	libultra/audio/n_synaddplayer	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15203D80
+0x1001C770	libultra/audio/n_synaddplayer	libultra/audio/n_synstopvoice	unproven	none	debug: order differs
+0x1001C810	libultra/audio/n_synstopvoice	libultra/audio/n_synfreevoice	unproven	none	
+0x1001C910	libultra/audio/n_synfreevoice	libultra/audio/n_synsetvol	unproven	none	
+0x1001C9E0	libultra/audio/n_synsetvol	libultra/audio/n_synsetpitch	proven	padding-us	ects: order differs; debug: order differs
+0x1001CA90	libultra/audio/n_synsetpitch	init/Audio/SynLowPassCutoff/synlowpasscutoff	unproven	none	ects: order differs; debug: order differs
+0x1001CB40	init/Audio/SynLowPassCutoff/synlowpasscutoff	init/Audio/SynLowPassGain/synlowpassgain	unproven	none	
+0x1001CBF0	init/Audio/SynLowPassGain/synlowpassgain	libultra/audio/n_drvrNew	unproven	none	ects: order differs; debug: order differs
+0x1001D900	libultra/audio/n_drvrNew	libultra/audio/n_synsetfxmix	proven	padding-us	ects: order differs; debug: order differs
+0x1001D9B0	libultra/audio/n_synsetfxmix	libultra/audio/n_syngetfxref	unproven	none	ects: order differs; debug: order differs
+0x1001DAA0	libultra/audio/n_syngetfxref	libultra/audio/n_synsetfxparam	unproven	none	against: ects: one object (audio_setBusLowPassParam joins audio_getBusLowPass)
+0x1001DBA0	libultra/audio/n_synsetfxparam	libultra/audio/n_cseqnextdelta	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151E4DD0; debug: 4 zero bytes before 0x15207200
+0x1001DC80	libultra/audio/n_cseqnextdelta	libultra/audio/n_synallocvoice	proven	padding-us	ects: order differs; debug: order differs
+0x1001E170	libultra/audio/n_synallocvoice	libultra/audio/n_synstartvoiceparam	proven	padding-us	ects: order differs; debug: order differs
+0x1001E2A0	libultra/audio/n_synstartvoiceparam	libultra/audio/n_synsetpan	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151E36A0; debug: 4 zero bytes before 0x15205AD0
+0x1001E350	libultra/audio/n_synsetpan	init/Audio/SynLowPassCount/synlowpasscount	unproven	none	ects: order differs; debug: order differs
+0x1001E400	init/Audio/SynLowPassCount/synlowpasscount	libultra/audio/n_cspsendmidi	unproven	none	ects: order differs; debug: order differs
+0x1001E480	libultra/audio/n_cspsendmidi	libultra/audio/n_syndelete	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15207360
+0x1001E4A0	libultra/audio/n_syndelete	libultra/audio/n_synallocfx	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15207380
+0x1001E530	libultra/audio/n_synallocfx	libultra/audio/n_reverb	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151E50B0; debug: 8 zero bytes before 0x15207410
+0x1001FB40	libultra/audio/n_reverb	libultra/audio/n_mainbus	proven	padding-us	
+0x1001FFE0	libultra/audio/n_mainbus	libultra/audio/n_synsetpriority	unproven	none	
+0x10020000	libultra/audio/n_synsetpriority	libultra/audio/n_env	proven	padding-us	
+0x100210C0	libultra/audio/n_env	libultra/audio/n_auxbus	proven	padding-us,data-edge	ects: order differs; debug: order differs; rodata at 0x8002C820
+0x100214F0	libultra/audio/n_auxbus	init/Audio/AdpcmLoad/adpcmload	proven	padding-us	
+0x10022040	init/Audio/AdpcmLoad/adpcmload	init/Audio/VoiceLowPass/voicelowpass	proven	padding-us	
+0x10022460	init/Audio/VoiceLowPass/voicelowpass	libultra/audio/n_resample	proven	padding-us,data-edge	rodata at 0x8002C840
+0x100226F0	libultra/audio/n_resample	libultra/libc/bzero	proven	padding-us,flags-change	us gap 76 bytes; flags -g -mips2 -o32 game | asm
+0x10022790	libultra/libc/bzero	libultra/os/initialize	proven	padding-us,padding-ects,padding-debug,flags-change	flags asm | -O1 -mips2 -o32 game; ects: 4 zero bytes before 0x10006910; debug: 4 zero bytes before 0x10007010
+0x10022A30	libultra/os/initialize	libultra/os/setsr	proven	flags-change	flags -O1 -mips2 -o32 game | asm
+0x10022A40	libultra/os/setsr	libultra/os/getsr	unproven	none	
+0x10022A50	libultra/os/getsr	libultra/os/setfpccsr	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10006BD0; debug: 4 zero bytes before 0x100072D0
+0x10022A60	libultra/os/setfpccsr	libultra/os/startthread	proven	flags-change	flags asm | -O1 -mips2 -o32 ultralib
+0x10022BB0	libultra/os/startthread	libultra/os/setthreadpri	unproven	none	
+0x10022C90	libultra/os/setthreadpri	libultra/os/invalicache	proven	flags-change	flags -O1 -mips2 -o32 ultralib | asm
+0x10022D10	libultra/os/invalicache	libultra/os/invaldcache	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x10006E90; debug: 12 zero bytes before 0x10007590
+0x10022DC0	libultra/os/invaldcache	libultra/os/interrupt	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10006F40; debug: 4 zero bytes before 0x10007640
+0x10022E00	libultra/os/interrupt	libultra/os/stopthread	proven	padding-us,padding-debug,flags-change	flags asm | -O1 -mips2 -o32 ultralib; ects: order differs; debug: 4 zero bytes before 0x10007680
+0x10022EC0	libultra/os/stopthread	libultra/libc/string	proven	flags-change	flags -O1 -mips2 -o32 ultralib | -O3 -mips2 -o32 ultralib; ects: order differs
+0x10022F60	libultra/libc/string	libultra/libc/ldiv	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x10007020; debug: 12 zero bytes before 0x100077E0
+0x100230F0	libultra/libc/ldiv	libultra/libc/xlitob	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x100071B0; debug: 12 zero bytes before 0x10007970
+0x10023390	libultra/libc/xlitob	libultra/io/ai	proven	padding-us,padding-debug,flags-change	flags -O3 -mips2 -o32 ultralib | -O1 -mips2 -o32 game; ects: order differs; debug: 8 zero bytes before 0x10007C10
+0x100233C0	libultra/io/ai	libultra/os/virtualtophysical	unproven	none	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: order differs
+0x10023440	libultra/os/virtualtophysical	libultra/os/recvmesg	proven	padding-us,padding-debug	ects: order differs; debug: 4 zero bytes before 0x10007CC0
+0x10023580	libultra/os/recvmesg	libultra/os/sendmesg	proven	padding-us,padding-debug	ects: order differs; debug: 8 zero bytes before 0x10007E00
+0x100236D0	libultra/os/sendmesg	libultra/os/piacs	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x100077A0; debug: 4 zero bytes before 0x10007F50
+0x10023790	libultra/os/piacs	libultra/os/createmesgqueue	unproven	none	
+0x100237C0	libultra/os/createmesgqueue	libultra/os/seteventmesg	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10007890; debug: 4 zero bytes before 0x10008040
+0x10023830	libultra/os/seteventmesg	libultra/os/getthreadpri	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (ultralib | game), the -O and -mips flags do not; ects: 8 zero bytes before 0x10007900; debug: 8 zero bytes before 0x100080B0
+0x10023850	libultra/os/getthreadpri	libultra/io/pirawdma	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: 8 zero bytes before 0x10007920; debug: 8 zero bytes before 0x100080D0
+0x10023930	libultra/io/pirawdma	libultra/io/epirawdma	unproven	none	
+0x10023A10	libultra/io/epirawdma	libultra/libc/bcopy	proven	flags-change	flags -O1 -mips2 -o32 ultralib | asm
+0x10023D20	libultra/libc/bcopy	libultra/os/writebackdcache	proven	padding-us,padding-debug	ects: order differs; debug: 12 zero bytes before 0x100085A0
+0x10023DA0	libultra/os/writebackdcache	libultra/io/spsetstat	proven	padding-us,padding-ects,padding-debug,flags-change	flags asm | -O1 -mips2 -o32 ultralib; ects: 12 zero bytes before 0x10007EF0; debug: 12 zero bytes before 0x10008620
+0x10023DB0	libultra/io/spsetstat	libultra/io/spsetpc	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10007F00; debug: 4 zero bytes before 0x10008630
+0x10023DF0	libultra/io/spsetpc	libultra/io/sprawdma	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x10007F40; debug: 12 zero bytes before 0x10008670
+0x10023E80	libultra/io/sprawdma	libultra/io/sp	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10007FD0; debug: 4 zero bytes before 0x10008700
+0x10023EB0	libultra/io/sp	libultra/os/timerintr	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10008000; debug: 4 zero bytes before 0x10008730
+0x100242B0	libultra/os/timerintr	libultra/io/vi	likely	data-edge	data at 0x8002BD80
+0x10024400	libultra/io/vi	libultra/io/vigetcurrcontext	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10008550; debug: 4 zero bytes before 0x10008C80
+0x10024410	libultra/io/vigetcurrcontext	libultra/io/viswapcontext	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10008560; debug: 4 zero bytes before 0x10008C90
+0x10024770	libultra/io/viswapcontext	libultra/os/getcount	proven	padding-us,padding-ects,padding-debug,flags-change	flags -O1 -mips2 -o32 ultralib | asm; ects: 4 zero bytes before 0x100088C0; debug: 4 zero bytes before 0x10008FF0
+0x10024780	libultra/os/getcount	libultra/os/thread	proven	padding-us,padding-ects,padding-debug,flags-change	flags asm | -O1 -mips2 -o32 ultralib; ects: 4 zero bytes before 0x100088D0; debug: 4 zero bytes before 0x10009000
+0x100247C0	libultra/os/thread	libultra/io/visetmode	unproven	none	ects: order differs; debug: order differs
+0x10024830	libultra/io/visetmode	libultra/io/viswapbuf	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151CF9C0; debug: 8 zero bytes before 0x151F2390
+0x10024880	libultra/io/viswapbuf	libultra/os/setintmask	proven	flags-change	flags -O1 -mips2 -o32 ultralib | asm; ects: order differs; debug: order differs
+0x10024920	libultra/os/setintmask	libultra/io/pidma	proven	flags-change	flags asm | -O1 -mips2 -o32 ultralib
+0x10024A30	libultra/io/pidma	libultra/io/aigetstat	proven	padding-us	CFLAGS differ (ultralib | game), the -O and -mips flags do not
+0x10024A40	libultra/io/aigetstat	libultra/os/settimer	proven	padding-us	CFLAGS differ (game | ultralib), the -O and -mips flags do not
+0x10024B20	libultra/os/settimer	libultra/io/sptaskyielded	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151D0070; debug: 12 zero bytes before 0x151F2840
+0x10024BA0	libultra/io/sptaskyielded	libultra/io/sptaskyield	unproven	none	
+0x10024BC0	libultra/io/sptaskyield	libultra/io/contreaddata	unproven	none	
+0x10024E20	libultra/io/contreaddata	libultra/io/vigetcurrframebuf	proven	padding-us	ects: order differs; debug: order differs
+0x10024E60	libultra/io/vigetcurrframebuf	libultra/io/vigetnextframebuf	unproven	none	
+0x10024EA0	libultra/io/vigetnextframebuf	libultra/io/visetevent	unproven	none	ects: order differs; debug: order differs
+0x10024F10	libultra/io/visetevent	libultra/os/writebackdcacheall	proven	padding-us,flags-change	flags -O1 -mips2 -o32 ultralib | asm; ects: order differs; debug: order differs
+0x10024F40	libultra/os/writebackdcacheall	libultra/os/gettime	proven	padding-us,flags-change	flags asm | -O1 -mips2 -o32 ultralib; ects: order differs; debug: order differs
+0x10024FD0	libultra/os/gettime	libultra/io/pfsisplug	proven	padding-us	ects: order differs; debug: order differs
+0x10025340	libultra/io/pfsisplug	libultra/io/controller	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x80042A10
+0x10025700	libultra/io/controller	libultra/io/siacs	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x80042AA0; data at 0x8002BE20
+0x100257C0	libultra/io/siacs	libultra/io/sirawdma	unproven	none	debug: order differs
+0x10025870	libultra/io/sirawdma	libultra/io/contramwrite	proven	padding-us	debug: order differs
+0x10025C20	libultra/io/contramwrite	libultra/io/contramread	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151CEA80; debug: 4 zero bytes before 0x151F1220
+0x10025FD0	libultra/io/contramread	libultra/io/crc	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (ultralib | game), the -O and -mips flags do not; ects: 4 zero bytes before 0x151CEE30; debug: 4 zero bytes before 0x151F15D0
+0x10026150	libultra/io/crc	libultra/os/destroythread	unproven	none	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: order differs; debug: order differs
+0x10026250	libultra/os/destroythread	libultra/io/viblack	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x10008BC0; debug: 8 zero bytes before 0x100092F0
+0x100262C0	libultra/io/viblack	libultra/io/pigetstat	unproven	none	ects: order differs; debug: order differs
+0x100262D0	libultra/io/pigetstat	libultra/os/unmaptlb	proven	padding-us,padding-ects,padding-debug,flags-change	flags -O1 -mips2 -o32 ultralib | asm; ects: 4 zero bytes before 0x10008C70; debug: 4 zero bytes before 0x100093A0
+0x10026310	libultra/os/unmaptlb	libultra/os/maptlb	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10008CB0; debug: 4 zero bytes before 0x100093E0
+0x100263D0	libultra/os/maptlb	libultra/io/aisetfreq	proven	padding-us,flags-change	flags asm | -O1 -mips2 -o32 game; ects: order differs; debug: order differs
+0x10026530	libultra/io/aisetfreq	libultra/gu/sqrtf	proven	flags-change	flags -O1 -mips2 -o32 game | asm
+0x10026540	libultra/gu/sqrtf	libultra/gu/sinf_init	proven	padding-us,flags-change	flags asm | -O3 -mips2 -o32 ultralib
+0x10026700	libultra/gu/sinf_init	libultra/io/sirawread	proven	flags-change	flags -O3 -mips2 -o32 ultralib | -O1 -mips2 -o32 ultralib
+0x10026750	libultra/io/sirawread	libultra/io/sirawwrite	unproven	none	
+0x100267A0	libultra/io/sirawwrite	libultra/io/pirawread	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x10008E10; debug: 4 zero bytes before 0x10009540
+0x10026800	libultra/io/pirawread	libultra/libc/ll	proven	padding-us,padding-ects,padding-debug,flags-change	flags -O1 -mips2 -o32 ultralib | -O1 -mips3 -32 ultralib; ects: 12 zero bytes before 0x10008E70; debug: 12 zero bytes before 0x100095A0
+0x10026AC0	libultra/libc/ll	libultra/os/sethwinterrupt	proven	flags-change	flags -O1 -mips3 -32 ultralib | -O1 -mips2 -o32 ultralib
+0x10026B10	libultra/os/sethwinterrupt	libultra/io/leointerrupt	unproven	none	
+0x100273D0	libultra/io/leointerrupt	libultra/os/probetlb	proven	padding-us,padding-ects,padding-debug,flags-change	flags -O1 -mips2 -o32 ultralib | asm; ects: 8 zero bytes before 0x10009A40; debug: 8 zero bytes before 0x1000A170
+0x10027490	libultra/os/probetlb	libultra/os/setcompare	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x10009B00; debug: 8 zero bytes before 0x1000A230
+0x100274A0	libultra/os/setcompare	libultra/os/jammesg	proven	padding-us,padding-ects,padding-debug,flags-change	flags asm | -O1 -mips2 -o32 ultralib; ects: 4 zero bytes before 0x10009B10; debug: 4 zero bytes before 0x1000A240
+0x100275F0	libultra/os/jammesg	libultra/io/pigetcmdq	unproven	none	
+0x10027620	libultra/io/pigetcmdq	libultra/io/spgetstat	proven	padding-us	
+0x10027630	libultra/io/spgetstat	libultra/io/si	proven	padding-us	
+0x10027660	libultra/io/si	libultra/io/pfsinit	proven	padding-us	ects: order differs; debug: order differs
+0x10027820	libultra/io/pfsinit	libultra/io/leodiskinit	unproven	none	ects: order differs; debug: order differs
+0x10027910	libultra/io/leodiskinit	libultra/io/contpfs	proven	padding-us	ects: order differs; debug: order differs
+0x10028670	libultra/io/contpfs	libultra/io/pfschecker	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151D1270; debug: 8 zero bytes before 0x151F3980
+0x15000940	game/Audio/LevelMusic/levelmusic	game/Level/LevelTints/leveltints	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150008D0
+0x15000AC0	game/Level/LevelTints/leveltints	game/Collision/MapBackground/mapbackground	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15000A50
+0x15001460	game/Collision/MapBackground/mapbackground	game/Collision/QuadTree/quadtree	proven	padding-debug,data-edge	debug: 12 zero bytes before 0x15001420; rodata at 0x80091AF0
+0x15003120	game/Collision/QuadTree/quadtree	game/Level/LevelModels/levelmodels	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x15003130; rodata at 0x80091D20
+0x150039E0	game/Level/LevelModels/levelmodels	game/Level/LevelObjects/levelobjects	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150039F0; bss at 0x800BE2A0; rodata at 0x800959D0
+0x15004D50	game/Level/LevelObjects/levelobjects	game/Model/ActorQuadAlloc/actorquadalloc	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15004D40
+0x15004E00	game/Model/ActorQuadAlloc/actorquadalloc	game/Model/PartsReset/partsreset	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15004DF0
+0x15004F00	game/Model/PartsReset/partsreset	game/Model/AttachReset/attachreset	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15004EF0
+0x15004F30	game/Model/AttachReset/attachreset	game/Actor/ClearModelTables/clearmodeltables	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15004F20
+0x15004FE0	game/Actor/ClearModelTables/clearmodeltables	game/Aim/AimPoints/aimpoints	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15004FD0
+0x15005270	game/Aim/AimPoints/aimpoints	game/Zone/ZoneCursor/zonecursor	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15005260
+0x15005290	game/Zone/ZoneCursor/zonecursor	game/Camera/CameraViews/cameraviews	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005280
+0x15005A60	game/Camera/CameraViews/cameraviews	game/Camera/LevelCamSetup/levelcamsetup	proven	padding-us	
+0x15005AB0	game/Camera/LevelCamSetup/levelcamsetup	game/Camera/LevelCamSetup01/levelcamsetup01	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15005A30
+0x15005B00	game/Camera/LevelCamSetup01/levelcamsetup01	game/Camera/LevelCamSetupDogFish/levelcamsetupdogfish	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15005A80
+0x15005B10	game/Camera/LevelCamSetupDogFish/levelcamsetupdogfish	game/Camera/LevelCamSetupTankFactory/levelcamsetuptankfactory	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15005A90
+0x15005B50	game/Camera/LevelCamSetupTankFactory/levelcamsetuptankfactory	game/Camera/LevelCamSetupBarnOutside/levelcamsetupbarnoutside	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15005AD0
+0x15005B60	game/Camera/LevelCamSetupBarnOutside/levelcamsetupbarnoutside	game/Camera/LevelCamSetupDinoArena/levelcamsetupdinoarena	proven	padding-us	
+0x15005B70	game/Camera/LevelCamSetupDinoArena/levelcamsetupdinoarena	game/Camera/LevelCamSetupBarnInside/levelcamsetupbarninside	proven	padding-us	
+0x15005BD0	game/Camera/LevelCamSetupBarnInside/levelcamsetupbarninside	game/Camera/LevelCamSetupHeist/levelcamsetupheist	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000C70; debug: 4 zero bytes before 0x15005B70
+0x15005C30	game/Camera/LevelCamSetupHeist/levelcamsetupheist	game/Camera/LevelCamSetup09/levelcamsetup09	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005BD0
+0x15005C80	game/Camera/LevelCamSetup09/levelcamsetup09	game/Camera/LevelCamSetup10/levelcamsetup10	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005C20
+0x15005D00	game/Camera/LevelCamSetup10/levelcamsetup10	game/Camera/LevelCamSetup12/levelcamsetup12	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000DB0 (not pinned: camera_levelSetupTank..camera_levelSetup12); debug: 4 zero bytes before 0x15005CA0
+0x15005D60	game/Camera/LevelCamSetup12/levelcamsetup12	game/Camera/LevelCamSetup13/levelcamsetup13	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000E10; debug: 8 zero bytes before 0x15005D00
+0x15005DB0	game/Camera/LevelCamSetup13/levelcamsetup13	game/Camera/LevelCamSetupArena/levelcamsetuparena	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15000E50; debug: 4 zero bytes before 0x15005D50
+0x15005E30	game/Camera/LevelCamSetupArena/levelcamsetuparena	game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace	proven	padding-us	
+0x15005E70	game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace	game/Camera/LevelCamSetupTraining/levelcamsetuptraining	proven	padding-us	
+0x15005EE0	game/Camera/LevelCamSetupTraining/levelcamsetuptraining	game/Camera/LevelCamSetup19/levelcamsetup19	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000F60; debug: 8 zero bytes before 0x15005E60
+0x15005F20	game/Camera/LevelCamSetup19/levelcamsetup19	game/Camera/LevelCamSetup20/levelcamsetup20	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000FA0; debug: 8 zero bytes before 0x15005EA0
+0x15005F60	game/Camera/LevelCamSetup20/levelcamsetup20	game/Camera/LevelCamSetupUBend/levelcamsetupubend	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15000FE0; debug: 8 zero bytes before 0x15005EE0
+0x15005FA0	game/Camera/LevelCamSetupUBend/levelcamsetupubend	game/Camera/LevelCamSetupHorrorIntro/levelcamsetuphorrorintro	proven	padding-us	
+0x15005FB0	game/Camera/LevelCamSetupHorrorIntro/levelcamsetuphorrorintro	game/Camera/LevelCamSetupRaptor/levelcamsetupraptor	proven	padding-us	
+0x15006010	game/Camera/LevelCamSetupRaptor/levelcamsetupraptor	game/Camera/LevelCamSetup24/levelcamsetup24	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15005FA0
+0x15006170	game/Camera/LevelCamSetup24/levelcamsetup24	game/Camera/LevelCamSetup26/levelcamsetup26	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15006100
+0x150061B0	game/Camera/LevelCamSetup26/levelcamsetup26	game/Cont/PadInit/padinit	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15006140
+0x150064E0	game/Cont/PadInit/padinit	game/Save/SaveData/savedata	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800BE2F0
+0x15007830	game/Save/SaveData/savedata	game/Boot/GameMain/gamemain	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150022D0; debug: 8 zero bytes before 0x150078B0; rodata at 0x80095A30
+0x15007A20	game/Boot/GameMain/gamemain	game/Game/ClearBss/clearbss	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15007AC0
+0x15007A70	game/Game/ClearBss/clearbss	game/Game/LevelStart/levelstart	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15007B10
+0x15008340	game/Game/LevelStart/levelstart	game/Zone/RandomPoint/randompoint	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x150082F0; rodata at 0x80095B10
+0x15008840	game/Zone/RandomPoint/randompoint	game/Effects/HomingReset/homingreset	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15003160; debug: 8 zero bytes before 0x150087F0
+0x15008870	game/Effects/HomingReset/homingreset	game/Effects/ObjectReset/objectreset	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15008820
+0x150089D0	game/Effects/ObjectReset/objectreset	game/Particle/StyleTimerReset/styletimerreset	proven	padding-us	
+0x15008A10	game/Particle/StyleTimerReset/styletimerreset	game/Screen/ResetEffects/reseteffects	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150089C0
+0x15008B90	game/Screen/ResetEffects/reseteffects	game/Effects/EffectQueueInit/effectqueueinit	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150034B0; debug: 4 zero bytes before 0x15008B40
+0x15008BF0	game/Effects/EffectQueueInit/effectqueueinit	game/Level/ZoneSpray/zonespray	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15008BA0
+0x15008DD0	game/Level/ZoneSpray/zonespray	game/Anim/MorphReset/morphreset	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15008D90
+0x15008E00	game/Anim/MorphReset/morphreset	game/Prop/WaveChainStart/wavechainstart	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15008DE0
+0x15009150	game/Prop/WaveChainStart/wavechainstart	game/Flare/FlareReset/flarereset	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15009130
+0x150091D0	game/Flare/FlareReset/flarereset	game/Lighting/LevelLights/levellights	proven	padding-us,padding-ects	ects: 12 zero bytes before 0x15003930
+0x1500ABA0	game/Lighting/LevelLights/levellights	game/Sprite/LevelSpriteSetup/levelspritesetup	likely	padding-ects,data-edge	ects: 8 zero bytes before 0x15005290 (not pinned: light_cbSwingOnObject..sprite_loadParticleTextures); data at 0x80082D80; rodata at 0x80095BE0
+0x1500C1E0	game/Sprite/LevelSpriteSetup/levelspritesetup	game/Swarm/SwarmReset/swarmreset	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150068D0 (not pinned: sprite_resetParticles..swarm_resetModelSlots); debug: 8 zero bytes before 0x1500C1B0; rodata at 0x80095CE0
+0x1500C2A0	game/Swarm/SwarmReset/swarmreset	game/Particle/AreaParticles/areaparticles	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15006970; debug: 8 zero bytes before 0x1500C250; rodata at 0x80095FA0
+0x1500E470	game/Particle/AreaParticles/areaparticles	game/Game/LevelInit/levelinit	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x1500E450
+0x1500E5C0	game/Game/LevelInit/levelinit	game/Level/LevelSetupReset/levelsetupreset	unproven	none	
+0x1500EB20	game/Level/LevelSetupReset/levelsetupreset	game/Level/LevelSetupBarnInside/levelsetupbarninside	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x1500EA10
+0x1500EB30	game/Level/LevelSetupBarnInside/levelsetupbarninside	game/Level/LevelSetupBarnOutside/levelsetupbarnoutside	proven	padding-us	
+0x1500ED80	game/Level/LevelSetupBarnOutside/levelsetupbarnoutside	game/Level/LevelSetupBarnArena/levelsetupbarnarena	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150093A0; debug: 4 zero bytes before 0x1500EC70
+0x1500EF20	game/Level/LevelSetupBarnArena/levelsetupbarnarena	game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15009530; debug: 12 zero bytes before 0x1500EE10
+0x1500F210	game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern	game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15009820; debug: 4 zero bytes before 0x1500F100
+0x1500F290	game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat	game/Level/LevelSetupDogFish/levelsetupdogfish	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150098A0; debug: 4 zero bytes before 0x1500F180
+0x1500F9D0	game/Level/LevelSetupDogFish/levelsetupdogfish	game/Level/LevelSetupCogLand/levelsetupcogland	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15009FF0; debug: 12 zero bytes before 0x1500F8C0; rodata at 0x80096320
+0x1500FE30	game/Level/LevelSetupCogLand/levelsetupcogland	game/Level/LevelSetupDinoArena/levelsetupdinoarena	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500A450; debug: 4 zero bytes before 0x1500FD20
+0x15010110	game/Level/LevelSetupDinoArena/levelsetupdinoarena	game/Level/LevelSetupPooCabin/levelsetuppoocabin	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1500A710; debug: 8 zero bytes before 0x1500FFE0
+0x15010240	game/Level/LevelSetupPooCabin/levelsetuppoocabin	game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500A840; debug: 8 zero bytes before 0x15010110
+0x150102C0	game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace	game/Level/LevelSetupRockSolid/levelsetuprocksolid	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500A8C0; debug: 4 zero bytes before 0x15010190
+0x150102D0	game/Level/LevelSetupRockSolid/levelsetuprocksolid	game/Level/LevelSetup30/levelsetup30	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500A8D0; debug: 8 zero bytes before 0x150101A0
+0x150104F0	game/Level/LevelSetup30/levelsetup30	game/Level/LevelSetupHarbour/levelsetupharbour	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500AAF0; debug: 8 zero bytes before 0x150103C0
+0x15010600	game/Level/LevelSetupHarbour/levelsetupharbour	game/Level/LevelSetupBoilerRoom/levelsetupboilerroom	proven	padding-ects	ects: 8 zero bytes before 0x1500AB40
+0x15010680	game/Level/LevelSetupBoilerRoom/levelsetupboilerroom	game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500ABC0; debug: 4 zero bytes before 0x15010550
+0x150106A0	game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole	game/Level/LevelSetup07/levelsetup07	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500ABE0; debug: 8 zero bytes before 0x15010570
+0x150106B0	game/Level/LevelSetup07/levelsetup07	game/Level/LevelSetupTankFactory/levelsetuptankfactory	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500ABF0; debug: 8 zero bytes before 0x15010580
+0x150106D0	game/Level/LevelSetupTankFactory/levelsetuptankfactory	game/Level/ZoneShapeEmitter/zoneshapeemitter	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150105A0
+0x15010780	game/Level/ZoneShapeEmitter/zoneshapeemitter	game/Level/LevelSetup18/levelsetup18	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15010650
+0x15010A60	game/Level/LevelSetup18/levelsetup18	game/Level/LevelSetupLab/levelsetuplab	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1500AE50; debug: 8 zero bytes before 0x15010930; rodata at 0x80096450
+0x15010FB0	game/Level/LevelSetupLab/levelsetuplab	game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500B3A0; debug: 8 zero bytes before 0x15010E80
+0x150110F0	game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse	game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15010FA0
+0x15011170	game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse	game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15011020
+0x15011330	game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro	game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150111E0
+0x15011360	game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel	game/Level/LevelSetupBankEntrance/levelsetupbankentrance	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500B560; debug: 4 zero bytes before 0x15011210
+0x150113E0	game/Level/LevelSetupBankEntrance/levelsetupbankentrance	game/Level/LevelSetupThroneRoom/levelsetupthroneroom	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1500B5E0; debug: 12 zero bytes before 0x15011290
+0x15011B00	game/Level/LevelSetupThroneRoom/levelsetupthroneroom	game/Level/LevelSetupFrontEnd/levelsetupfrontend	proven	padding-us	
+0x15011C40	game/Level/LevelSetupFrontEnd/levelsetupfrontend	game/Level/LevelSetupHeist/levelsetupheist	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15011AA0
+0x15011C70	game/Level/LevelSetupHeist/levelsetupheist	game/Level/LevelSetup25/levelsetup25	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1500BA70 (not pinned: level_setupHeist..level_setupWmpVolcanoRace); debug: 8 zero bytes before 0x15011AD0
+0x15011D40	game/Level/LevelSetup25/levelsetup25	game/Level/LevelSetupMainWar/levelsetupmainwar	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500BB40 (not pinned: level_setupWmpVolcanoRace..level_spawnStageZone); debug: 4 zero bytes before 0x15011BA0
+0x15011F20	game/Level/LevelSetupMainWar/levelsetupmainwar	game/Level/AmbientAction3/ambientaction3	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15011D80
+0x15011FA0	game/Level/AmbientAction3/ambientaction3	game/Level/AmbientAction5/ambientaction5	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15011E00
+0x15012020	game/Level/AmbientAction5/ambientaction5	game/Level/ZoneAreaEmitter/zoneareaemitter	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500BDA0; debug: 4 zero bytes before 0x15011E80
+0x150120B0	game/Level/ZoneAreaEmitter/zoneareaemitter	game/Level/AmbientColourCycle/ambientcolourcycle	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x15011F10; rodata at 0x80096540
+0x150121C0	game/Level/AmbientColourCycle/ambientcolourcycle	game/Level/GroundParticles/groundparticles	proven	padding-us,data-edge	rodata at 0x80096550
+0x15012370	game/Level/GroundParticles/groundparticles	game/View/ViewOrtho/viewortho	proven	padding-us,data-edge	rodata at 0x80096560
+0x150124A0	game/View/ViewOrtho/viewortho	game/Level/PipeBurstSetup/pipeburstsetup	likely	data-edge	rodata at 0x80096570
+0x15012720	game/Level/PipeBurstSetup/pipeburstsetup	game/Level/EffectKind/effectkind	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150123D0
+0x15012770	game/Level/EffectKind/effectkind	game/Level/SetupResetStub/setupresetstub	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15012420
+0x15012780	game/Level/SetupResetStub/setupresetstub	game/Level/WaveReset/wavereset	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15012430
+0x150127B0	game/Level/WaveReset/wavereset	game/Env/VtxColourSetup/vtxcoloursetup	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500C110; debug: 4 zero bytes before 0x15012460
+0x15012FE0	game/Env/VtxColourSetup/vtxcoloursetup	game/Level/ZoneSpawn/zonespawn	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1500C940 (not pinned: env_clearAttachModelRefs..level_spawnZones); debug: 8 zero bytes before 0x15012C80; bss at 0x800BE570
+0x15015910	game/Level/ZoneSpawn/zonespawn	game/Text/FontLoad/fontload	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1500EFB0 (not pinned: level_spawnRopeZone..text_loadFont); debug: 4 zero bytes before 0x15015490; data at 0x80082F80
+0x15015E80	game/Text/FontLoad/fontload	game/Gfx/DisplayListAlloc/displaylistalloc	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15015A00
+0x15015F40	game/Gfx/DisplayListAlloc/displaylistalloc	game/View/ViewLayout/viewlayout	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15015AC0
+0x15016170	game/View/ViewLayout/viewlayout	game/Audio/Mp3Voice/mp3voice	proven	padding-us	
+0x150162B0	game/Audio/Mp3Voice/mp3voice	game/Actor/ClearActors/clearactors	proven	padding-us	
+0x15016370	game/Actor/ClearActors/clearactors	game/Actor/DefaultSize/defaultsize	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15015DB0
+0x150163D0	game/Actor/DefaultSize/defaultsize	game/Collision/CylinderSets/cylindersets	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500F8D0; debug: 4 zero bytes before 0x15015E10
+0x15016500	game/Collision/CylinderSets/cylindersets	game/Text/TextInit/textinit	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1500FA00; debug: 4 zero bytes before 0x15015F40
+0x15016670	game/Text/TextInit/textinit	game/Player/SpawnLoad/spawnload	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15016040
+0x15016850	game/Player/SpawnLoad/spawnload	game/Level/SpawnTable/spawntable	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x15016220
+0x15017300	game/Level/SpawnTable/spawntable	game/Player/StatsInit/statsinit	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15010780; debug: 4 zero bytes before 0x15016C90
+0x150175E0	game/Player/StatsInit/statsinit	game/Player/HudBlockInit/hudblockinit	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15010C90 (not pinned: player_offsetLinkGroupObjects..player_resetHudBlocks); debug: order differs
+0x15017790	game/Player/HudBlockInit/hudblockinit	game/Zone/ZoneBounds/zonebounds	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x15010F80; debug: order differs; rodata at 0x800968C0
+0x150183D0	game/Zone/ZoneBounds/zonebounds	game/Zone/CodeTree/codetree	proven	padding-us,padding-debug,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; debug: 8 zero bytes before 0x150180D0
+0x150186D0	game/Zone/CodeTree/codetree	game/Game/MainLoop/mainloop	proven	padding-us,padding-debug,data-edge,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; debug: 8 zero bytes before 0x150183D0; bss at 0x800BE5E0
+0x1501A220	game/Game/MainLoop/mainloop	game/View/Views/views	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x150137C0; bss at 0x800BE620; data at 0x80082FA0; rodata at 0x800968E0
+0x1501B320	game/View/Views/views	game/Lighting/PlayerLight/playerlight	proven	padding-us,data-edge	bss at 0x800BE6C0; rodata at 0x80096910
+0x1501B660	game/Lighting/PlayerLight/playerlight	game/Model/VertexColour/vertexcolour	likely	data-edge	rodata at 0x80096920
+0x1501BB20	game/Model/VertexColour/vertexcolour	game/Cont/PadRead/padread	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150150D0 (not pinned: model_rampVertexGroupColours..cont_startRumble); debug: 12 zero bytes before 0x1501B6E0; data at 0x80084060; rodata at 0x80096960
+0x1501C730	game/Cont/PadRead/padread	game/Game/LevelChange/levelchange	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800BE9A0; rodata at 0x800969A0
+0x1501C860	game/Game/LevelChange/levelchange	game/Game/FrameStub/framestub	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15015F90; debug: 8 zero bytes before 0x1501C780
+0x1501C870	game/Game/FrameStub/framestub	game/Game/UpdateStub/updatestub	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x15015FA0
+0x1501C880	game/Game/UpdateStub/updatestub	game/Cutscene/Sequence/sequence	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x15015FB0 (not pinned: func_1501C870..cutscene_clearActiveEvents)
+0x15023870	game/Cutscene/Sequence/sequence	game/Cutscene/StartCallback/startcallback	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1501CBD0; debug: 12 zero bytes before 0x15023850
+0x150238D0	game/Cutscene/StartCallback/startcallback	game/Cutscene/SeqEvents/seqevents	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1501CC30; debug: 8 zero bytes before 0x150238B0
+0x1502AAF0	game/Cutscene/SeqEvents/seqevents	game/Rom/RomTable/romtable	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x1502A860
+0x1502BAD0	game/Rom/RomTable/romtable	game/Actor/ObjectUpdate/objectupdate	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15023FD0; debug: 12 zero bytes before 0x1502B890; bss at 0x800C3E70
+0x1502FE10	game/Actor/ObjectUpdate/objectupdate	game/Attach/Attachment/attachment	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15028000; debug: 4 zero bytes before 0x1502F9E0; bss at 0x800C3EE0; data at 0x800841C0; rodata at 0x80096F40
+0x15033FE0	game/Attach/Attachment/attachment	game/Bone/BoneCommands/bonecommands	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150338F0 (not pinned: attach_swapOwners..bone_buildCommands)
+0x15034860	game/Bone/BoneCommands/bonecommands	game/Bone/BoneChannels/bonechannels	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x15034120; rodata at 0x80097D40
+0x15034F20	game/Bone/BoneChannels/bonechannels	game/Model/Reflection/reflection	likely	data-edge	bss at 0x800C3F00; rodata at 0x80097D70
+0x15036310	game/Model/Reflection/reflection	game/Bone/BoneLookAt/bonelookat	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1502DCB0; debug: 12 zero bytes before 0x15035B70
+0x15036570	game/Bone/BoneLookAt/bonelookat	game/Model/ActorQuad/actorquad	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1502DF00; debug: 4 zero bytes before 0x15035DC0
+0x15036C70	game/Model/ActorQuad/actorquad	game/Aim/AimUpdate/aimupdate	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1502E5E0; debug: 12 zero bytes before 0x150364B0; bss at 0x800C3FD0; data at 0x80084380; rodata at 0x80097D90
+0x1503B7C0	game/Aim/AimUpdate/aimupdate	game/Bone/BoneChain/bonechain	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x15032FA0; bss at 0x800C4000; rodata at 0x800986F0
+0x1503CF20	game/Bone/BoneChain/bonechain	game/Model/ModelLoad/modelload	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15034610; debug: 4 zero bytes before 0x1503C590; bss at 0x800C4020; rodata at 0x80098860
+0x1503DDD0	game/Model/ModelLoad/modelload	game/Aim/AimRemove/aimremove	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150351E0; debug: 4 zero bytes before 0x1503D3D0; bss at 0x800C6650
+0x1503DE70	game/Aim/AimRemove/aimremove	game/Model/ObjParts/objparts	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15035280; debug: 12 zero bytes before 0x1503D470; bss at 0x800C6660
+0x1503F4B0	game/Model/ObjParts/objparts	game/Anim/AnimInstance/animinstance	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x1503EA50
+0x1503F800	game/Anim/AnimInstance/animinstance	game/Zone/ZoneTree/zonetree	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x1503ED40
+0x1503F9F0	game/Zone/ZoneTree/zonetree	game/Debug/TaskMenu/taskmenu	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15036D00; debug: 4 zero bytes before 0x1503EF30; bss at 0x800C6800
+0x15040350	game/Debug/TaskMenu/taskmenu	game/Debug/DlCheck/dlcheck	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15037660; debug: 4 zero bytes before 0x1503FD50; bss at 0x800C6860; data at 0x800844B0; rodata at 0x80098960
+0x15040D90	game/Debug/DlCheck/dlcheck	game/Debug/PixelMarker/pixelmarker	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150385E0; debug: 12 zero bytes before 0x15040C10; data at 0x800848C0
+0x150412C0	game/Debug/PixelMarker/pixelmarker	game/Text/FixedFont/fixedfont	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15038B10; debug: 8 zero bytes before 0x15041140; data at 0x800848D0
+0x150415E0	game/Text/FixedFont/fixedfont	game/Text/FontDraw/fontdraw	unproven	none	
+0x15042D50	game/Text/FontDraw/fontdraw	game/Text/TextQueue/textqueue	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150434E0; bss at 0x800CBD60; data at 0x800859A0; rodata at 0x80098B90
+0x15043D90	game/Text/TextQueue/textqueue	game/Math/MtxBuild/mtxbuild	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1503B7E0; debug: 4 zero bytes before 0x150444A0
+0x150442C0	game/Math/MtxBuild/mtxbuild	game/Math/MtxTranslate/mtxtranslate	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1503BD10; debug: 4 zero bytes before 0x150449D0
+0x15044370	game/Math/MtxTranslate/mtxtranslate	game/Collision/Probe/probe	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1503BDC0; debug: 12 zero bytes before 0x15044A80
+0x15047C00	game/Collision/Probe/probe	libultra/gu/cosf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15040670; debug: 8 zero bytes before 0x150487A0; data at 0x80085EA0; rodata at 0x80098D70
+0x15047D60	libultra/gu/cosf	libultra/gu/sinf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150407D0; debug: 12 zero bytes before 0x15048900; data at 0x80085EB0; rodata at 0x80098D90
+0x15047F00	libultra/gu/sinf	libultra/gu/guPerspectiveF	likely	data-edge	rodata at 0x80098DB0
+0x15048190	libultra/gu/guPerspectiveF	libultra/gu/guRotateF	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15040C00; debug: 4 zero bytes before 0x15048D30; rodata at 0x80098DC0
+0x15048360	libultra/gu/guRotateF	game/Math/AcosLookup/acoslookup	likely	data-edge	rodata at 0x80098DD0
+0x150484A0	game/Math/AcosLookup/acoslookup	game/Math/Atan2/atan2	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15040F10; debug: 4 zero bytes before 0x15049040; rodata at 0x80098DE0
+0x150485E0	game/Math/Atan2/atan2	game/Math/AcosTable/acostable	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15041050; debug: 4 zero bytes before 0x15049180
+0x15048720	game/Math/AcosTable/acostable	game/Math/AngleLerp/anglelerp	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15041190; debug: 4 zero bytes before 0x150492C0
+0x150487E0	game/Math/AngleLerp/anglelerp	game/Math/AsinTable/asintable	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15041250; debug: 8 zero bytes before 0x15049380
+0x150489B0	game/Math/AsinTable/asintable	game/Math/BinAngle/binangle	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15041420; debug: 12 zero bytes before 0x15049550
+0x15048B10	game/Math/BinAngle/binangle	game/Math/VectorOps/vectorops	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15041580; debug: 12 zero bytes before 0x150496B0
+0x15049260	game/Math/VectorOps/vectorops	game/Math/TriBox/tribox	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15041CD0; debug: 12 zero bytes before 0x15049E00; rodata at 0x80099080
+0x15049440	game/Math/TriBox/tribox	game/Math/BoxInView/boxinview	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15041EB0; debug: 12 zero bytes before 0x15049FE0
+0x150495B0	game/Math/BoxInView/boxinview	game/Math/Spring/spring	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15042020; debug: 4 zero bytes before 0x1504A150
+0x150497E0	game/Math/Spring/spring	game/Math/CatmullRom/catmullrom	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15042250; debug: 4 zero bytes before 0x1504A380
+0x150499A0	game/Math/CatmullRom/catmullrom	game/Math/MtxInverse/mtxinverse	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15042410; debug: 4 zero bytes before 0x1504A540
+0x15049C40	game/Math/MtxInverse/mtxinverse	game/Math/Quaternion/quaternion	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150426B0; debug: 8 zero bytes before 0x1504A7E0
+0x1504A2B0	game/Math/Quaternion/quaternion	game/Math/Expf/expf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15042D20; debug: 12 zero bytes before 0x1504AE50; rodata at 0x800990A0
+0x1504A400	game/Math/Expf/expf	game/Math/Powf/powf	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15042E70; debug: 12 zero bytes before 0x1504AFA0
+0x1504A5E0	game/Math/Powf/powf	game/Math/Tanf/tanf	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15043050; debug: 12 zero bytes before 0x1504B180
+0x1504A620	game/Math/Tanf/tanf	game/Math/Logf/logf	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15043090; debug: 12 zero bytes before 0x1504B1C0
+0x1504A730	game/Math/Logf/logf	game/Actor/Movement/movement	likely	data-edge	rodata at 0x800990C0
+0x15055E50	game/Actor/Movement/movement	game/Actor/ActorMotion/actormotion	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15050970; debug: 4 zero bytes before 0x150566B0; data at 0x800860C0; rodata at 0x80099420
+0x15063390	game/Actor/ActorMotion/actormotion	game/Actor/ActorActions/actoractions	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1505D2B0; debug: 8 zero bytes before 0x15063980; data at 0x80086100; rodata at 0x800996A0
+0x1506A5F0	game/Actor/ActorActions/actoractions	game/Actor/MovementHit/movementhit	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x15062160; data at 0x80086110; rodata at 0x80099A10
+0x1506AD30	game/Actor/MovementHit/movementhit	game/Event/TimedEvent/timedevent	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15062900; debug: 8 zero bytes before 0x1506ABF0; bss at 0x800D1580; data at 0x80086150; rodata at 0x80099A30
+0x15075400	game/Event/TimedEvent/timedevent	game/Script/ObjScript/objscript	proven	padding-us,data-edge	bss at 0x800D1890; data at 0x80086730; rodata at 0x8009A120
+0x1507BDB0	game/Script/ObjScript/objscript	game/Anim/AnimPlayback/animplayback	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15072DB0; debug: 12 zero bytes before 0x1507B7E0; data at 0x80086AA0; rodata at 0x8009A210
+0x1507C370	game/Anim/AnimPlayback/animplayback	game/Actor/ObjectSize/objectsize	proven	padding-ects,data-edge	ects: 4 zero bytes before 0x15073380; rodata at 0x8009B4A0
+0x1507C8E0	game/Actor/ObjectSize/objectsize	game/Actor/KillRespawn/killrespawn	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15073800; debug: 4 zero bytes before 0x1507C350; rodata at 0x8009B690
+0x1507E2B0	game/Actor/KillRespawn/killrespawn	game/Face/Expression/expression	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15074D20 (not pinned: actor_resumeAtCheckpoint..face_updateBlink); debug: 4 zero bytes before 0x1507DB80 (not pinned: actor_resumeAtCheckpoint..face_updateBlink); bss at 0x800D18B0; rodata at 0x8009B8A0
+0x1507EB80	game/Face/Expression/expression	game/Anim/IdleAnim/idleanim	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150755D0; debug: 4 zero bytes before 0x1507E430; bss at 0x800D18C0; rodata at 0x8009B8B0
+0x15080200	game/Anim/IdleAnim/idleanim	game/Face/ScriptedExpression/scriptedexpression	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800D18D0; rodata at 0x8009BD10
+0x15080500	game/Face/ScriptedExpression/scriptedexpression	game/Text/ContextText/contexttext	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15076F90; debug: 4 zero bytes before 0x1507FDF0; bss at 0x800D1940
+0x15080D20	game/Text/ContextText/contexttext	game/Collision/HitSphere/hitsphere	proven	padding-us,padding-ects	ects: 12 zero bytes before 0x15077730
+0x15081690	game/Collision/HitSphere/hitsphere	game/Collision/RayCast/raycast	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150780A0; debug: 12 zero bytes before 0x15080F10; rodata at 0x8009CBE0
+0x150825C0	game/Collision/RayCast/raycast	game/Collision/Spawn/spawn	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15078E30; debug: 4 zero bytes before 0x15081E20; rodata at 0x8009CC30
+0x15084D00	game/Collision/Spawn/spawn	game/Player/SpawnPoint/spawnpoint	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1507B3D0; debug: 4 zero bytes before 0x150844A0; bss at 0x800D2120
+0x15085710	game/Player/SpawnPoint/spawnpoint	game/Player/PlayerStats/playerstats	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1507BC20; debug: 8 zero bytes before 0x15084E20; bss at 0x800D2130; data at 0x80087260; rodata at 0x8009D970
+0x15085B70	game/Player/PlayerStats/playerstats	game/Path/PathGraph/pathgraph	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1507C060; debug: 4 zero bytes before 0x15085280; bss at 0x800D2350; data at 0x80087290; rodata at 0x8009D9C0
+0x15086BD0	game/Path/PathGraph/pathgraph	game/Mp/Race/race	likely	data-edge	bss at 0x800D2390; data at 0x800872A0; rodata at 0x8009D9E0
+0x15089BB0	game/Mp/Race/race	game/Mp/MpGame/mpgame	proven	padding-ects,data-edge	ects: 4 zero bytes before 0x1507FDC0; bss at 0x800D23B0; data at 0x800872B0; rodata at 0x8009DA20
+0x1508EF80	game/Mp/MpGame/mpgame	game/Math/RotateAroundY/rotatearoundy	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15085A20; debug: 8 zero bytes before 0x1508E140; bss at 0x800D23C0; data at 0x80087350; rodata at 0x8009DC80
+0x1508F060	game/Math/RotateAroundY/rotatearoundy	game/Hud/PlayerOverlay/playeroverlay	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800D23D0; data at 0x80087390; rodata at 0x8009DC90
+0x150948C0	game/Hud/PlayerOverlay/playeroverlay	game/Sprite/PointGroup/pointgroup	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1508C130; debug: 4 zero bytes before 0x15094340; bss at 0x800D2C20; rodata at 0x8009DEA0
+0x15094EA0	game/Sprite/PointGroup/pointgroup	game/Sprite/SpriteDraw/spritedraw	likely	data-edge	bss at 0x800D2C70; rodata at 0x8009DEB0
+0x15096970	game/Sprite/SpriteDraw/spritedraw	game/Script/CameraCmd/cameracmd	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x15096410; bss at 0x800D2DB0; rodata at 0x8009DED0
+0x15097910	game/Script/CameraCmd/cameracmd	game/Script/ActorCmd/actorcmd	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x1508F1E0; rodata at 0x8009DF50
+0x1509B4A0	game/Script/ActorCmd/actorcmd	game/Script/TaskSet/taskset	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x15092600
+0x1509C440	game/Script/TaskSet/taskset	game/Script/CutsceneCmd/cutscenecmd	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150933E0 (not pinned: script_reallocTaskDoneBits..script_cutsceneCommand); debug: 4 zero bytes before 0x1509BB70
+0x1509CA10	game/Script/CutsceneCmd/cutscenecmd	game/Script/EffectCmd/effectcmd	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150938C0; debug: 12 zero bytes before 0x1509C120
+0x1509DD10	game/Script/EffectCmd/effectcmd	game/Script/SwarmCmd/swarmcmd	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15094B20; debug: 4 zero bytes before 0x1509D4F0
+0x1509DF20	game/Script/SwarmCmd/swarmcmd	game/Script/MiscCmd/misccmd	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15094D20
+0x1509E640	game/Script/MiscCmd/misccmd	game/Script/MusicCmd/musiccmd	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150953A0; debug: 4 zero bytes before 0x1509DD80; rodata at 0x8009F3D0
+0x1509E900	game/Script/MusicCmd/musiccmd	game/Script/ObjectCmd/objectcmd	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15095620; debug: 8 zero bytes before 0x1509E040; rodata at 0x8009F3F0
+0x1509F850	game/Script/ObjectCmd/objectcmd	game/Script/TaskCmd/taskcmd	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15096540; debug: 8 zero bytes before 0x1509EF90; rodata at 0x8009F4A0
+0x150A00F0	game/Script/TaskCmd/taskcmd	game/Script/TimerCmd/timercmd	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15096C60; debug: 8 zero bytes before 0x1509F840; bss at 0x800D3010
+0x150A03B0	game/Script/TimerCmd/timercmd	game/Script/ZoneCmd/zonecmd	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15096F20; debug: 8 zero bytes before 0x1509FB00
+0x150A09D0	game/Script/ZoneCmd/zonecmd	game/Zone/ZoneState/zonestate	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x15097470; rodata at 0x8009F5A0
+0x150A3A70	game/Zone/ZoneState/zonestate	game/Collision/GroundQuery/groundquery	proven	padding-us,padding-ects,data-edge,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; ects: 8 zero bytes before 0x1509A0C0; bss at 0x800D3300
+0x150A43E0	game/Collision/GroundQuery/groundquery	game/Collision/PropGround/propground	unproven	none	against: debug: one object (collision_gatherPropGroundTris joins func_150A40A8)
+0x150A44F0	game/Collision/PropGround/propground	game/Collision/PropTris/proptris	unproven	none	against: debug: one object (collision_transformPropTris joins D_150A44DC)
+0x150A4B04	game/Collision/PropTris/proptris	game/Collision/ActorHitMesh/actorhitmesh	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (collision_updateActorHitMesh joins collision_setCurMap)
+0x150A4FA0	game/Collision/ActorHitMesh/actorhitmesh	game/Collision/ActorGround/actorground	unproven	none	ects: order differs; against: debug: one object (collision_gatherActorGroundTris joins func_150A4EF4)
+0x150A50C0	game/Collision/ActorGround/actorground	game/Gfx/CullDl/culldl	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x1509B610
+0x150A515C	game/Gfx/CullDl/culldl	game/Gfx/CullLevelDl/cullleveldl	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (func_150A515C joins gfx_copyDlCulled); debug: one object (func_150A515C joins gfx_copyDlCulled)
+0x150A5B90	game/Gfx/CullLevelDl/cullleveldl	game/Shadow/ShadowFaces/shadowfaces	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1509C0E0; debug: 12 zero bytes before 0x150A50F0
+0x150A6210	game/Shadow/ShadowFaces/shadowfaces	game/View/QuadInView/quadinview	unproven	none	
+0x150A6360	game/View/QuadInView/quadinview	game/View/CylinderInView/cylinderinview	unproven	none	
+0x150A6500	game/View/CylinderInView/cylinderinview	game/Collision/PropQuery/propquery	unproven	none	
+0x150A6568	game/Collision/PropQuery/propquery	game/Collision/PropBoxQuery/propboxquery	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (collision_findPropsInBox joins func_150A6538); debug: one object (collision_findPropsInBox joins func_150A6538)
+0x150A6860	game/Collision/PropBoxQuery/propboxquery	game/Effects/ObjectList/quadfxdraw	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1509CDB0 (not pinned: func_150A6760..effect_drawQuadFxVertices); debug: 8 zero bytes before 0x150A5DC0
+0x150A6FA0	game/Effects/ObjectList/quadfxdraw	game/Prop/WaveVertices/wavevertices	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1509D4F0; debug: 8 zero bytes before 0x150A6500
+0x150A7770	game/Prop/WaveVertices/wavevertices	game/Libc/FillBytes/fillbytes	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1509DCC0; debug: 12 zero bytes before 0x150A6D30
+0x150A7790	game/Libc/FillBytes/fillbytes	libultra/gu/guMtxF2L	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509DCE0; debug: 4 zero bytes before 0x150A6D50
+0x150A7960	libultra/gu/guMtxF2L	game/Math/TransformPoint/transformpoint	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509DEB0; debug: 4 zero bytes before 0x150A6F20
+0x150A7A00	game/Math/TransformPoint/transformpoint	game/Math/TransformPointW/transformpointw	unproven	none	
+0x150A7A14	game/Math/TransformPointW/transformpointw	game/Math/TransformW/transformw	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (math_storeTransformW joins math_transformPointW); debug: one object (math_storeTransformW joins math_transformPointW)
+0x150A7A48	game/Math/TransformW/transformw	game/Math/MtxMulF/mtxmulf	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); debug: one object (math_mtxMulF joins math_storeTransformW)
+0x150A7B80	game/Math/MtxMulF/mtxmulf	game/Math/MtxIdentity/mtxidentity	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1509E0D0; debug: 8 zero bytes before 0x150A7140
+0x150A7BC0	game/Math/MtxIdentity/mtxidentity	libultra/gu/guMtxIdentF	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1509E110; debug: 8 zero bytes before 0x150A7180
+0x150A7C10	libultra/gu/guMtxIdentF	game/Math/MtxScale/mtxscale	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509E160; debug: 4 zero bytes before 0x150A71D0
+0x150A7CB0	game/Math/MtxScale/mtxscale	game/Math/MtxScaleF/mtxscalef	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1509E200; debug: 12 zero bytes before 0x150A7270
+0x150A7D00	game/Math/MtxScaleF/mtxscalef	game/Math/TranslateMtx/translatemtx	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509E250; debug: 4 zero bytes before 0x150A72C0
+0x150A7DA0	game/Math/TranslateMtx/translatemtx	game/Math/MtxTranslateF/mtxtranslatef	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1509E2F0; debug: 12 zero bytes before 0x150A7360
+0x150A7DF0	game/Math/MtxTranslateF/mtxtranslatef	game/Math/MtxRotateRPY/mtxrotaterpy	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509E340; debug: 4 zero bytes before 0x150A73B0
+0x150A8050	game/Math/MtxRotateRPY/mtxrotaterpy	game/Math/MtxRotateRPYF/mtxrotaterpyf	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1509E5A0; debug: 8 zero bytes before 0x150A7610; rodata at 0x8009F6C0
+0x150A81A0	game/Math/MtxRotateRPYF/mtxrotaterpyf	game/Anim/BoneMtxState/bonemtxstate	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1509E6F0; debug: 4 zero bytes before 0x150A7760
+0x150A81D0	game/Anim/BoneMtxState/bonemtxstate	game/Anim/BoneMatrices/bonematrices	likely	data-edge	data at 0x80088580
+0x150A8918	game/Anim/BoneMatrices/bonematrices	game/Anim/BoneMtxEval/bonemtxeval	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (func_150A8918 joins func_150A8808); debug: one object (func_150A8918 joins func_150A8808)
+0x150A9984	game/Anim/BoneMtxEval/bonemtxeval	game/Math/MtxFToL/mtxftol	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (math_mtxFToLInPlace joins func_150A96DC); debug: one object (math_mtxFToLInPlace joins func_150A96DC)
+0x150A9B0C	game/Math/MtxFToL/mtxftol	game/Math/MtxRotScaleF/mtxrotscalef	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (math_mtxRotScaleF joins math_mtxFToLInPlace); debug: one object (math_mtxRotScaleF joins math_mtxFToLInPlace)
+0x150A9C40	game/Math/MtxRotScaleF/mtxrotscalef	game/Math/TriBoxFace/triboxface	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150A9200
+0x150AA4D0	game/Math/TriBoxFace/triboxface	game/Math/TriBoxBevel/triboxbevel	unproven	none	
+0x150AA814	game/Math/TriBoxBevel/triboxbevel	game/Math/TriBoxPointInTri/triboxpointintri	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); ects: one object (math_triBoxPointInTri joins math_triBoxSign3); debug: one object (math_triBoxPointInTri joins math_triBoxSign3)
+0x150AA9A0	game/Math/TriBoxPointInTri/triboxpointintri	game/Math/TriCube/tricube	proven	padding-us	
+0x150AAD98	game/Math/TriCube/tricube	game/Math/TriBoxOverlap/triboxoverlap	unproven	none	against: us: R starts at a non-16-aligned address after L (asm on both sides); debug: one object (math_triBoxOverlap joins func_150AAD84)
+0x150AB1F0	game/Math/TriBoxOverlap/triboxoverlap	game/Collision/WallCollide/wallcollide	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150AA7B0
+0x150AC9C0	game/Collision/WallCollide/wallcollide	game/Collision/RayWorld/rayworld	proven	padding-us	
+0x150AD770	game/Collision/RayWorld/rayworld	game/Debug/FatalTrap/fataltrap	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150ACBC0
+0x150AD780	game/Debug/FatalTrap/fataltrap	game/Math/SinCos/sincos	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150ACBD0
+0x150AD8B0	game/Math/SinCos/sincos	game/Math/Cross3/cross3	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150A3C60; debug: 12 zero bytes before 0x150ACD00
+0x150AD900	game/Math/Cross3/cross3	game/Math/DotLength/dotlength	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150A3CB0; debug: 4 zero bytes before 0x150ACD50
+0x150AD960	game/Math/DotLength/dotlength	game/Math/Distance2D/distance2d	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150A3D10; debug: 4 zero bytes before 0x150ACDB0
+0x150AD9A0	game/Math/Distance2D/distance2d	game/Math/Rand64/rand64	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150A3D50 (not pinned: math_distance2D..math_distance3D); debug: 8 zero bytes before 0x150ACDF0
+0x150ADAF0	game/Math/Rand64/rand64	game/Script/ScriptInterp/scriptinterp	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150A3EA0; debug: 12 zero bytes before 0x150ACF40; data at 0x800885C0
+0x150AE280	game/Script/ScriptInterp/scriptinterp	game/Script/TaskExit/taskexit	unproven	none	
+0x150AE2A0	game/Script/TaskExit/taskexit	game/Collision/WobbleQuad/wobblequad	proven	padding-us,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; debug: order differs
+0x150AE5B0	game/Collision/WobbleQuad/wobblequad	game/Effects/AttachedBurst/attachedburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150A48E0; debug: 4 zero bytes before 0x150ADA00; rodata at 0x8009F760
+0x150AEEB0	game/Effects/AttachedBurst/attachedburst	game/Effects/Trail/TrailSpray/trailspray	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150AE280
+0x150AF200	game/Effects/Trail/TrailSpray/trailspray	game/Particle/SmokeEmitter/smokeemitter	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150A5660 (not pinned: trail_fadeMotionTrail..particle_spawnZoneGroundFxNearCamera); debug: 8 zero bytes before 0x150AE5D0 (not pinned: trail_fadeMotionTrail..particle_spawnZoneGroundFxNearCamera)
+0x150B06B0	game/Particle/SmokeEmitter/smokeemitter	game/Effects/ActorImpact/actorimpact	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150AF9A0; rodata at 0x8009F810
+0x150B0A60	game/Effects/ActorImpact/actorimpact	game/Effects/PerimeterEmitter/perimeteremitter	proven	padding-debug,data-edge	debug: 8 zero bytes before 0x150AFD50; rodata at 0x8009F860
+0x150B10F0	game/Effects/PerimeterEmitter/perimeteremitter	game/Actor/HoverUpdates/hoverupdates	proven	padding-us,data-edge	rodata at 0x8009F8A0
+0x150B1DB0	game/Actor/HoverUpdates/hoverupdates	game/Effects/Greyscale/greyscale	proven	padding-us,data-edge,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; rodata at 0x8009F8D0
+0x150B1E20	game/Effects/Greyscale/greyscale	game/Particle/PointEmitter/pointemitter	proven	data-edge,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; rodata at 0x8009F8E0
+0x150B2480	game/Particle/PointEmitter/pointemitter	game/Particle/YawStreak/yawstreak	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150A7870; debug: 4 zero bytes before 0x150B15C0; rodata at 0x8009F900
+0x150B2740	game/Particle/YawStreak/yawstreak	game/Effects/PipeExplode/pipeexplode	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150A7B30; debug: 4 zero bytes before 0x150B1880; rodata at 0x8009F920
+0x150B3AB0	game/Effects/PipeExplode/pipeexplode	game/Effects/BoneStreak/bonestreak	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150A8EA0; debug: 12 zero bytes before 0x150B2BF0; rodata at 0x8009FBC0
+0x150B3DD0	game/Effects/BoneStreak/bonestreak	game/Effects/Trail/ScatterTrail/scattertrail	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150A91D0; debug: 4 zero bytes before 0x150B2F10; rodata at 0x8009FBF0
+0x150B53D0	game/Effects/Trail/ScatterTrail/scattertrail	game/Effects/OwnerSpark/ownerspark	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150AA710; debug: 12 zero bytes before 0x150B4530; rodata at 0x8009FC20
+0x150B58F0	game/Effects/OwnerSpark/ownerspark	game/Effects/ObjBurst/objburst	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150B4A50; rodata at 0x8009FC30
+0x150B67E0	game/Effects/ObjBurst/objburst	game/Camera/LevelHookBarnInside/levelhookbarninside	proven	padding-us,data-edge	rodata at 0x8009FCF0
+0x150B6BC0	game/Camera/LevelHookBarnInside/levelhookbarninside	game/Sprite/SpriteRoutines/spriteroutines	proven	padding-us,data-edge	rodata at 0x8009FD00
+0x150B7B40	game/Sprite/SpriteRoutines/spriteroutines	game/Effects/BreakUp/breakup	likely	data-edge	rodata at 0x8009FD30
+0x150B89E0	game/Effects/BreakUp/breakup	game/Particle/ShatterPieces/shatterpieces	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150ADBA0; debug: 12 zero bytes before 0x150B7B20; rodata at 0x8009FDB0
+0x150B9ED0	game/Particle/ShatterPieces/shatterpieces	game/Particle/MoveHitBurst/movehitburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150AF0A0; debug: 8 zero bytes before 0x150B9010; rodata at 0x8009FE10
+0x150BA4C0	game/Particle/MoveHitBurst/movehitburst	game/Particle/OwnerEmitter/owneremitter	proven	padding-us,data-edge	rodata at 0x8009FE30
+0x150BA930	game/Particle/OwnerEmitter/owneremitter	game/Particle/ObjGroundEffects/objgroundeffects	likely	data-edge	rodata at 0x8009FE60
+0x150BABE0	game/Particle/ObjGroundEffects/objgroundeffects	game/Effects/JointDecal/jointdecal	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150B9CD0; rodata at 0x8009FE70
+0x150BB700	game/Effects/JointDecal/jointdecal	game/Camera/LevelHookBarnOutside/levelhookbarnoutside	proven	padding-us	
+0x150BB760	game/Camera/LevelHookBarnOutside/levelhookbarnoutside	game/Effects/ParticleBursts/particlebursts	proven	padding-us	
+0x150BD740	game/Effects/ParticleBursts/particlebursts	game/Effects/SegmentTrail/segmenttrail	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150B1E00 (not pinned: effect_bounceOnGround..effect_emitSquareEdgeSegmentTrails); debug: 12 zero bytes before 0x150BC7E0; rodata at 0x8009FF40
+0x150BDB70	game/Effects/SegmentTrail/segmenttrail	game/Actor/Follower/follower	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B2230; debug: 12 zero bytes before 0x150BCC10; rodata at 0x8009FFF0
+0x150BDE90	game/Actor/Follower/follower	game/Effects/Sfx/effects_sfx_w1_bee_cavern	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150B2590; debug: 4 zero bytes before 0x150BCF30; rodata at 0x800A0000
+0x150BE210	game/Effects/Sfx/effects_sfx_w1_bee_cavern	game/Effects/DebrisSplash/debrissplash	likely	data-edge	rodata at 0x800A0010
+0x150BE850	game/Effects/DebrisSplash/debrissplash	game/Camera/LevelHookBullPaddock/levelhookbullpaddock	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B2F10; debug: 4 zero bytes before 0x150BD8E0; rodata at 0x800A00B0
+0x150BE9B0	game/Camera/LevelHookBullPaddock/levelhookbullpaddock	game/Effects/BoneGroundFx/bonegroundfx	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150BDA40; rodata at 0x800A00C0
+0x150BEF70	game/Effects/BoneGroundFx/bonegroundfx	game/Prop/Scenery/scenery	proven	padding-us,data-edge	rodata at 0x800A00E0
+0x150C09B0	game/Prop/Scenery/scenery	game/Particle/PoolEmitter/poolemitter	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x150B3B60 (not pinned: func_150BF760..particle_destroyPoolEmitter); rodata at 0x800A01C0
+0x150C1260	game/Particle/PoolEmitter/poolemitter	game/Particle/FootDust/footdust	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x150B4410; rodata at 0x800A01D0
+0x150C1660	game/Particle/FootDust/footdust	game/Effects/Trail/TrailRing/trailring	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150B4810; debug: 8 zero bytes before 0x150C05C0; rodata at 0x800A01F0
+0x150C19C0	game/Effects/Trail/TrailRing/trailring	game/Effects/BoneRing/bonering	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B4B80; debug: 12 zero bytes before 0x150C0930; rodata at 0x800A0210
+0x150C1F60	game/Effects/BoneRing/bonering	game/Particle/PuffSprays/puffsprays	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B5120; debug: 12 zero bytes before 0x150C0ED0; rodata at 0x800A0230
+0x150C29F0	game/Particle/PuffSprays/puffsprays	game/Particle/DiscEmitter/discemitter	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x150B5BA0; rodata at 0x800A02A0
+0x150C3160	game/Particle/DiscEmitter/discemitter	game/Particle/SprayObjects/sprayobjects	likely	data-edge	rodata at 0x800A0320
+0x150C4120	game/Particle/SprayObjects/sprayobjects	game/Effects/PulseEffect/pulseeffect	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 8 zero bytes before 0x150C2EA0; rodata at 0x800A0340
+0x150C4BF0	game/Effects/PulseEffect/pulseeffect	game/Camera/LevelHookDogFish/levelhookdogfish	proven	padding-us,padding-debug	ects: order differs; debug: 12 zero bytes before 0x150C3930
+0x150C4D20	game/Camera/LevelHookDogFish/levelhookdogfish	game/Prop/Pendulum/pendulum	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150C3A30
+0x150C5370	game/Prop/Pendulum/pendulum	game/Beam/Strip/strip	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x150B7660 (not pinned: prop_destroyLevelSprays..beam_newStrip); rodata at 0x800A0400
+0x150C5DC0	game/Beam/Strip/strip	game/Particle/WatcherEmitter/watcheremitter	proven	padding-us,data-edge	data at 0x800887D0; rodata at 0x800A0410
+0x150C66F0	game/Particle/WatcherEmitter/watcheremitter	game/Effects/WatcherEffects/watchereffects	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B89A0; debug: 4 zero bytes before 0x150C5300; data at 0x800887E0; rodata at 0x800A0450
+0x150C7020	game/Effects/WatcherEffects/watchereffects	game/Effects/BloodStrips/bloodstrips	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150B92A0; debug: 4 zero bytes before 0x150C5C30; rodata at 0x800A0490
+0x150C7350	game/Effects/BloodStrips/bloodstrips	game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150B95D0; debug: 4 zero bytes before 0x150C5F60
+0x150C73E0	game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1	game/Attach/FlashingLight/flashinglight	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150C5FF0
+0x150C7670	game/Attach/FlashingLight/flashinglight	game/Effects/ParticleCallbacks/particlecallbacks	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150C6240; rodata at 0x800A04C0
+0x150C7770	game/Effects/ParticleCallbacks/particlecallbacks	game/Camera/LevelHookCogLand/levelhookcogland	proven	padding-us	
+0x150C7870	game/Camera/LevelHookCogLand/levelhookcogland	game/Prop/LinkedSpinners/linkedspinners	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150C65B0
+0x150C7E00	game/Prop/LinkedSpinners/linkedspinners	game/Camera/LevelHookDinoArena/levelhookdinoarena	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150C6AC0; data at 0x80088800; rodata at 0x800A04E0
+0x150C8350	game/Camera/LevelHookDinoArena/levelhookdinoarena	game/Effects/BounceRecords/bouncerecords	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150C6FE0; data at 0x80088810
+0x150C8730	game/Effects/BounceRecords/bouncerecords	game/Attach/AttachProjectile/attachprojectile	unproven	none	against: ects: one object (attach_hookSpawnProjectile joins effect_bindBounceRecordFrames)
+0x150C88D0	game/Attach/AttachProjectile/attachprojectile	game/Effects/RingEffect/ringeffect	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x150BA930; rodata at 0x800A0500
+0x150CB0E0	game/Effects/RingEffect/ringeffect	game/Particle/SideDust/sidedust	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BD170; debug: 8 zero bytes before 0x150C9CF0; rodata at 0x800A05E0
+0x150CBF80	game/Particle/SideDust/sidedust	game/Particle/BoneGroundBurst/bonegroundburst	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x150BDFF0; rodata at 0x800A0640
+0x150CCD90	game/Particle/BoneGroundBurst/bonegroundburst	game/Particle/DepthTint/depthtint	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BEEA0; debug: 8 zero bytes before 0x150CB970; rodata at 0x800A0700
+0x150CCEB0	game/Particle/DepthTint/depthtint	game/Particle/DriftQuad/driftquad	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150BEFC0; debug: 4 zero bytes before 0x150CBA90; rodata at 0x800A0710
+0x150CDBB0	game/Particle/DriftQuad/driftquad	game/Particle/YawLaunch/yawlaunch	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150BFC60; debug: 4 zero bytes before 0x150CC790; rodata at 0x800A07B0
+0x150CE150	game/Particle/YawLaunch/yawlaunch	game/Screen/Mosaic/mosaic	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150C0280; debug: 8 zero bytes before 0x150CCD30; rodata at 0x800A07F0
+0x150CE740	game/Screen/Mosaic/mosaic	game/Actor/MountControl/mountcontrol	likely	data-edge	rodata at 0x800A0810
+0x150CEF10	game/Actor/MountControl/mountcontrol	game/Camera/LevelHookInsideSafe/levelhookinsidesafe	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150CDA90
+0x150CEF60	game/Camera/LevelHookInsideSafe/levelhookinsidesafe	game/Effects/RotatingZone/rotatingzone	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150CDAD0
+0x150CF0A0	game/Effects/RotatingZone/rotatingzone	game/Prop/LinkedToggle/linkedtoggle	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150C10E0; debug: 12 zero bytes before 0x150CDC10
+0x150CF140	game/Prop/LinkedToggle/linkedtoggle	game/Effects/ActorEmitterTick/actoremittertick	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150C1180; debug: 12 zero bytes before 0x150CDCB0
+0x150CF530	game/Effects/ActorEmitterTick/actoremittertick	game/Effects/HopSprite/hopsprite	likely	data-edge	rodata at 0x800A0860
+0x150CFD20	game/Effects/HopSprite/hopsprite	game/Effects/TextLines/textlines	likely	data-edge	data at 0x800888A0; rodata at 0x800A0880
+0x150D0650	game/Effects/TextLines/textlines	game/Camera/LevelHookTraining/levelhooktraining	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150CF1C0
+0x150D0730	game/Camera/LevelHookTraining/levelhooktraining	game/Effects/ZoneSounds/zonesounds	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150CF2A0
+0x150D08C0	game/Effects/ZoneSounds/zonesounds	game/Level/LevelHookUBend/levelhookubend	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150C1910 (not pinned: effect_playRandomZoneSounds..level_updateHazardProps); debug: 12 zero bytes before 0x150CF430 (not pinned: effect_playRandomZoneSounds..level_updateHazardProps)
+0x150D13A0	game/Level/LevelHookUBend/levelhookubend	game/Actor/SpinDown/spindown	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150C1DF0; debug: 4 zero bytes before 0x150CF940; rodata at 0x800A08B0
+0x150D1410	game/Actor/SpinDown/spindown	game/Effects/LevelActorHooks/levelactorhooks	likely	data-edge	rodata at 0x800A08C0
+0x150D1530	game/Effects/LevelActorHooks/levelactorhooks	game/Camera/SpeedDistance/speeddistance	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150CFAD0; rodata at 0x800A08D0
+0x150D1810	game/Camera/SpeedDistance/speeddistance	game/Env/SkyGradient/skygradient	proven	padding-us	
+0x150D1B40	game/Env/SkyGradient/skygradient	game/Effects/AmbientPulse/ambientpulse	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150D0070
+0x150D1C30	game/Effects/AmbientPulse/ambientpulse	game/Effects/RaySpinner/rayspinner	proven	padding-us,data-edge	rodata at 0x800A08F0
+0x150D2110	game/Effects/RaySpinner/rayspinner	game/Screen/Strobe/strobe	proven	padding-us,padding-debug	ects: order differs; debug: 8 zero bytes before 0x150D05E0
+0x150D2450	game/Screen/Strobe/strobe	game/Effects/ColourWave/colourwave	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150C2A80; debug: 8 zero bytes before 0x150D0920
+0x150D26F0	game/Effects/ColourWave/colourwave	game/Particle/SparkEmitter/sparkemitter	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150C2D20; debug: 12 zero bytes before 0x150D0BC0
+0x150D3360	game/Particle/SparkEmitter/sparkemitter	game/Effects/Trail/CharacterTrail/charactertrail	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150C38F0; debug: 8 zero bytes before 0x150D1830; rodata at 0x800A09C0
+0x150D5440	game/Effects/Trail/CharacterTrail/charactertrail	game/Particle/FollowEffect/followeffect	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150C5810; debug: 8 zero bytes before 0x150D3840; rodata at 0x800A0A30
+0x150D7120	game/Particle/FollowEffect/followeffect	game/Effects/HitSpray/hitspray	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x150D5500; rodata at 0x800A0AE0
+0x150D7420	game/Effects/HitSpray/hitspray	game/Effects/TintedObject/tintedobject	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150C78D0; debug: 12 zero bytes before 0x150D5800; rodata at 0x800A0AF0
+0x150D82B0	game/Effects/TintedObject/tintedobject	game/Attach/TextureScroll/texturescroll	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150C7C50; debug: 8 zero bytes before 0x150D6670; rodata at 0x800A0B10
+0x150D88E0	game/Attach/TextureScroll/texturescroll	game/Attach/BonePoint/bonepoint	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x150C7FB0; rodata at 0x800A0B30
+0x150D8B10	game/Attach/BonePoint/bonepoint	game/Effects/Trail/PissTrail/pisstrail	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150C81E0; debug: 4 zero bytes before 0x150D6ED0; rodata at 0x800A0B40
+0x150DAE70	game/Effects/Trail/PissTrail/pisstrail	game/Beam/BeamQuad/beamquad	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150CA3C0; debug: 12 zero bytes before 0x150D9250; rodata at 0x800A0BE0
+0x150DB9E0	game/Beam/BeamQuad/beamquad	game/Effects/PuffTimer/pufftimer	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150D9DC0; rodata at 0x800A0C00
+0x150DBD70	game/Effects/PuffTimer/pufftimer	game/Effects/FallingStream/fallingstream	likely	data-edge	rodata at 0x800A0C40
+0x150DDED0	game/Effects/FallingStream/fallingstream	game/Effects/TrapEffect/trapeffect	unproven	none	against: ects: one object (effect_onTrapTriggered joins effect_drawFallingStream); debug: one object (effect_onTrapTriggered joins effect_drawFallingStream)
+0x150DE310	game/Effects/TrapEffect/trapeffect	game/Effects/LevelHookCanyon/levelhookcanyon	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150CD650; debug: 4 zero bytes before 0x150DC700
+0x150DE320	game/Effects/LevelHookCanyon/levelhookcanyon	game/Effects/ZonePairEmitter/zonepairemitter	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150CD660; debug: 4 zero bytes before 0x150DC710
+0x150DEC90	game/Effects/ZonePairEmitter/zonepairemitter	game/Effects/RainHook/rainhook	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150CDBB0 (not pinned: effect_bobAndRockProp..effect_levelUpdateRain); debug: 12 zero bytes before 0x150DD080
+0x150DECC0	game/Effects/RainHook/rainhook	game/Effects/Explosion/explosion	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150CDBE0; debug: 4 zero bytes before 0x150DD0B0
+0x150DF820	game/Effects/Explosion/explosion	game/Camera/LevelHookHarbour/levelhookharbour	proven	padding-us,data-edge	rodata at 0x800A0F60
+0x150DF8C0	game/Camera/LevelHookHarbour/levelhookharbour	game/Effects/MaterialScroll/materialscroll	proven	padding-us,data-edge	rodata at 0x800A0F70
+0x150E0870	game/Effects/MaterialScroll/materialscroll	game/Effects/SplashBurst/splashburst	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150CED40 (not pinned: func_150DFDD0..effect_spawnScorchExplosion); debug: 8 zero bytes before 0x150DEC60
+0x150E0D90	game/Effects/SplashBurst/splashburst	game/Effects/PropEmitter/propemitter	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150CF200 (not pinned: func_150E0BE0..effect_spawnPropEmitter); debug: 8 zero bytes before 0x150DF180
+0x150E1570	game/Effects/PropEmitter/propemitter	game/Collision/ObjectRay/objectray	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150CF770; debug: 8 zero bytes before 0x150DF7D0
+0x150E1800	game/Collision/ObjectRay/objectray	game/Camera/LevelHookMachineGunNest/levelhookmachinegunnest	proven	padding-us	
+0x150E1860	game/Camera/LevelHookMachineGunNest/levelhookmachinegunnest	game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole	proven	padding-us	
+0x150E1AB0	game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole	game/Beam/Tracer/tracer	proven	padding-us,data-edge	data at 0x800889E0
+0x150E3020	game/Beam/Tracer/tracer	game/Effects/HomingEffect/homingeffect	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150E0FC0; bss at 0x800D99D0
+0x150E41C0	game/Effects/HomingEffect/homingeffect	game/Effects/GroundHits/groundhits	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150E1FD0; bss at 0x800D99F0; rodata at 0x800A1060
+0x150E4550	game/Effects/GroundHits/groundhits	game/Effects/MaterialImpact/materialimpact	likely	data-edge	rodata at 0x800A1070
+0x150E5AE0	game/Effects/MaterialImpact/materialimpact	game/Effects/DistantBolts/distantbolts	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150D3A00; debug: 8 zero bytes before 0x150E38F0; rodata at 0x800A1170
+0x150E5FD0	game/Effects/DistantBolts/distantbolts	game/Particle/ImpactStreak/impactstreak	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150D3EF0; debug: 12 zero bytes before 0x150E3DE0; data at 0x80088A10
+0x150E68B0	game/Particle/ImpactStreak/impactstreak	game/Particle/EmissionSource/emissionsource	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150D4730; debug: 8 zero bytes before 0x150E46C0; data at 0x80088A20
+0x150E9890	game/Particle/EmissionSource/emissionsource	game/Particle/ImpactBurst/impactburst	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150E76A0; rodata at 0x800A13F0
+0x150E9FE0	game/Particle/ImpactBurst/impactburst	game/Effects/Oscillator/oscillator	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150D7E70; debug: 12 zero bytes before 0x150E7DF0; rodata at 0x800A1410
+0x150EAB10	game/Effects/Oscillator/oscillator	game/Effects/GroundFlash/groundflash	likely	data-edge	rodata at 0x800A1460
+0x150EAF50	game/Effects/GroundFlash/groundflash	game/Effects/BoneGroundHit/bonegroundhit	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150D8DE0; debug: 4 zero bytes before 0x150E8D60; rodata at 0x800A1470
+0x150EB1C0	game/Effects/BoneGroundHit/bonegroundhit	game/Camera/LevelHookTankFactory/levelhooktankfactory	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150D9050; debug: 12 zero bytes before 0x150E8FD0; rodata at 0x800A1480
+0x150EB430	game/Camera/LevelHookTankFactory/levelhooktankfactory	game/Prop/MoverSwing/moverswing	proven	padding-us,data-edge	data at 0x80088AA0; rodata at 0x800A1490
+0x150EBEC0	game/Prop/MoverSwing/moverswing	game/Weapon/TwinMuzzle/twinmuzzle	proven	padding-us,data-edge	rodata at 0x800A1500
+0x150EC4B0	game/Weapon/TwinMuzzle/twinmuzzle	game/Camera/LevelHookTankTunnel/levelhooktanktunnel	proven	padding-us	
+0x150EC520	game/Camera/LevelHookTankTunnel/levelhooktanktunnel	game/Particle/FogFlash/fogflash	proven	padding-us	
+0x150ED1D0	game/Particle/FogFlash/fogflash	game/Weapon/Tank/tank	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150EABF0; rodata at 0x800A1590
+0x150EEE00	game/Weapon/Tank/tank	game/Beam/AimedBeam/aimedbeam	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 4 zero bytes before 0x150EC770; rodata at 0x800A15F0
+0x150F1A00	game/Beam/AimedBeam/aimedbeam	game/Effects/ActorExplosion/actorexplosion	proven	padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150DCBC0; debug: 12 zero bytes before 0x150EF2F0; rodata at 0x800A18C0
+0x150F22D0	game/Effects/ActorExplosion/actorexplosion	game/Effects/SwayObject/swayobject	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150DD210 (not pinned: effect_spawnActorExplosion..effect_getLegBonePoint); debug: 12 zero bytes before 0x150EFAB0 (not pinned: effect_levelUpdateRandomSounds..effect_getLegBonePoint); rodata at 0x800A1920
+0x150F2A60	game/Effects/SwayObject/swayobject	game/Particle/BoneBurst/boneburst	proven	padding-us,data-edge	rodata at 0x800A1950
+0x150F34A0	game/Particle/BoneBurst/boneburst	game/Player/FlyControl/flycontrol	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150DD720 (not pinned: particle_levelUpdateScrollingHazardProps..player_getFlyingAnimSpeed); debug: 4 zero bytes before 0x150F0920; rodata at 0x800A1980
+0x150F4570	game/Player/FlyControl/flycontrol	game/Particle/Spiral/spiral	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F1830
+0x150F51A0	game/Particle/Spiral/spiral	game/Effects/SurfaceSound/surfacesound	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x150F2480; data at 0x80088B40
+0x150F52B0	game/Effects/SurfaceSound/surfacesound	game/Camera/LevelHookBankEntrance/levelhookbankentrance	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F2590 (not pinned: effect_updateSurfaceSound..camera_levelUpdateWaveChains)
+0x150F5340	game/Camera/LevelHookBankEntrance/levelhookbankentrance	game/Effects/BeamZones/beamzones	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150F25C0
+0x150F5420	game/Effects/BeamZones/beamzones	game/Beam/ModelBeam/modelbeam	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x150F26A0; rodata at 0x800A1B00
+0x150F6B00	game/Beam/ModelBeam/modelbeam	game/Camera/SegmentProgress/segmentprogress	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 8 zero bytes before 0x150F3D80; rodata at 0x800A1B80
+0x150F6DB0	game/Camera/SegmentProgress/segmentprogress	game/Beam/CastBeam/castbeam	proven	padding-us,data-edge	ects: order differs; debug: order differs; rodata at 0x800A1BB0
+0x150F7470	game/Beam/CastBeam/castbeam	game/Effects/ProjectilePuffs/projectilepuffs	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 4 zero bytes before 0x150F45E0; rodata at 0x800A1BC0
+0x150F85A0	game/Effects/ProjectilePuffs/projectilepuffs	game/Effects/StageEffect/stageeffect	proven	padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150E0300; debug: 8 zero bytes before 0x150F5580; rodata at 0x800A1C00
+0x150F9A20	game/Effects/StageEffect/stageeffect	game/Camera/LevelHookEndArena/levelhookendarena	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x150F67D0 (not pinned: effect_freeStage..camera_levelHookEndArena)
+0x150F9AB0	game/Camera/LevelHookEndArena/levelhookendarena	game/Screen/StarSky/starsky	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x150F6860
+0x150F9BB0	game/Screen/StarSky/starsky	game/Effects/DelayedBurst/delayedburst	unproven	none	
+0x150FB4C0	game/Effects/DelayedBurst/delayedburst	game/Effects/StarField/starfield	proven	padding-us,padding-debug,flags-change	flags -O2 -g3 -mips2 -o32 game | asm; debug: 4 zero bytes before 0x150F8220
+0x150FB8C0	game/Effects/StarField/starfield	game/Particle/TwoSidedEmitter/twosidedemitter	proven	padding-us,padding-ects,padding-debug,flags-change	flags asm | -O2 -g3 -mips2 -o32 game; ects: 12 zero bytes before 0x150E21E0; debug: 12 zero bytes before 0x150F8620
+0x150FC930	game/Particle/TwoSidedEmitter/twosidedemitter	game/Effects/ChildEffect/childeffect	unproven	none	against: ects: one object (effect_filterExcludedTargets joins particle_onTwoSidedEmitterMsg); debug: one object (effect_filterExcludedTargets joins particle_onTwoSidedEmitterMsg)
+0x150FC9D0	game/Effects/ChildEffect/childeffect	game/Effects/ChildEffectFree/childeffectfree	unproven	none	against: ects: one object (effect_freeWithChild joins effect_destroyWithChild); debug: one object (effect_freeWithChild joins effect_destroyWithChild)
+0x150FCA00	game/Effects/ChildEffectFree/childeffectfree	game/Camera/LevelHookArena/levelhookarena	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150E3250; debug: 8 zero bytes before 0x150F9700
+0x150FCA30	game/Camera/LevelHookArena/levelhookarena	game/Effects/AreaSpray/areaspray	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150E3280; debug: 12 zero bytes before 0x150F9730
+0x150FDD10	game/Effects/AreaSpray/areaspray	game/Effects/TreadScroll/treadscroll	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150FAA00
+0x150FDDA0	game/Effects/TreadScroll/treadscroll	game/Weapon/Launcher/launcher	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x150FAA90
+0x150FE320	game/Weapon/Launcher/launcher	game/Effects/BonePointFx/bonepointfx	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150E3C40; debug: 8 zero bytes before 0x150FAF40; data at 0x80088B90; rodata at 0x800A1FB0
+0x150FE860	game/Effects/BonePointFx/bonepointfx	game/Weapon/ForwardShot/forwardshot	proven	padding-us,data-edge	data at 0x80088BA0; rodata at 0x800A2000
+0x150FED30	game/Weapon/ForwardShot/forwardshot	game/Weapon/AttachedGun/attachedgun	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 4 zero bytes before 0x150FB850; rodata at 0x800A2050
+0x150FF840	game/Weapon/AttachedGun/attachedgun	game/Weapon/GunShot/gunshot	likely	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150E4ED0 (not pinned: func_150FF6B4..weapon_spawnShotEffects); debug: 12 zero bytes before 0x150FC1F0 (not pinned: func_150FF6B4..weapon_spawnShotEffects); rodata at 0x800A2130
+0x15100180	game/Weapon/GunShot/gunshot	game/Effects/OwnerEffect/ownereffect	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150E5540; debug: 4 zero bytes before 0x150FCB30
+0x15100330	game/Effects/OwnerEffect/ownereffect	game/Effects/LevelHookHeist/levelhookheist	proven	padding-us,padding-ects	ects: 8 zero bytes before 0x150E5790
+0x15100340	game/Effects/LevelHookHeist/levelhookheist	game/Effects/FlagLights/flaglights	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150E57A0; debug: 4 zero bytes before 0x150FCDA0
+0x15100600	game/Effects/FlagLights/flaglights	game/Particle/RayBeam/raybeam	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150E5A60; debug: 12 zero bytes before 0x150FD060
+0x15102920	game/Particle/RayBeam/raybeam	game/Effects/BoneBeamParticle/bonebeamparticle	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150E7B80; debug: 12 zero bytes before 0x150FF350; rodata at 0x800A2340
+0x15103430	game/Effects/BoneBeamParticle/bonebeamparticle	game/Camera/LevelHook15/levelhook15	proven	padding-us	
+0x15103690	game/Camera/LevelHook15/levelhook15	game/Effects/DebrisThrow/debristhrow	proven	padding-us	
+0x15103800	game/Effects/DebrisThrow/debristhrow	game/Audio/ObjectSound/objectsound	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150E85C0; debug: 12 zero bytes before 0x150FFFC0
+0x15103E40	game/Audio/ObjectSound/objectsound	game/Effects/ImpactSplash/impactsplash	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x150E8C00; debug: 8 zero bytes before 0x15100600
+0x15104170	game/Effects/ImpactSplash/impactsplash	game/Screen/Fade/fade	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15100910
+0x15104520	game/Screen/Fade/fade	game/Camera/DistanceReset/distancereset	proven	padding-us	
+0x151045E0	game/Camera/DistanceReset/distancereset	game/Collision/GroundHeight/groundheight	proven	padding-us	
+0x15104A80	game/Collision/GroundHeight/groundheight	game/Beam/BoltRain/boltrain	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x151011A0; rodata at 0x800A2380
+0x15105CE0	game/Beam/BoltRain/boltrain	game/Beam/BoltChain/boltchain	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x150EB780; rodata at 0x800A2410
+0x15107FE0	game/Beam/BoltChain/boltchain	game/Camera/LevelHookRaptor/levelhookraptor	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15104630
+0x15108120	game/Camera/LevelHookRaptor/levelhookraptor	game/Effects/DebrisEffect/debriseffect	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15104710
+0x151082D0	game/Effects/DebrisEffect/debriseffect	game/Particle/AreaFlash/areaflash	proven	padding-us,data-edge	rodata at 0x800A2450
+0x15108850	game/Particle/AreaFlash/areaflash	game/Effects/SwingingLamp/swinginglamp	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150ED2C0; debug: 4 zero bytes before 0x15104E30; rodata at 0x800A2470
+0x15109410	game/Effects/SwingingLamp/swinginglamp	game/Particle/SegmentEmitter/segmentemitter	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150EDE70; debug: 4 zero bytes before 0x151059E0; data at 0x80088C60; rodata at 0x800A24B0
+0x1510A930	game/Particle/SegmentEmitter/segmentemitter	game/Sprite/FadeSprite/fadesprite	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150EF390; debug: 8 zero bytes before 0x15106F00; rodata at 0x800A26A0
+0x1510AA20	game/Sprite/FadeSprite/fadesprite	game/Prop/Clock/clock	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150EF480; debug: 12 zero bytes before 0x15106FF0; rodata at 0x800A26B0
+0x1510B070	game/Prop/Clock/clock	game/View/Projection/projection	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x150F8E80; debug: 12 zero bytes before 0x151118A0
+0x1510BF60	game/View/Projection/projection	game/Texture/UvWobble/uvwobble	proven	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150F9D40; debug: 8 zero bytes before 0x15112760; bss at 0x800D9E60; rodata at 0x800A2CC0
+0x1510CB10	game/Texture/UvWobble/uvwobble	game/Texture/TextureLoad/textureload	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x150FA8E0; debug: 12 zero bytes before 0x15113310; bss at 0x800D9E70; rodata at 0x800A2CD0
+0x1510D630	game/Texture/TextureLoad/textureload	game/Texture/TextureRelease/texturerelease	unproven	none	against: ects: one object (texture_releaseList joins texture_setLifetime); debug: one object (texture_releaseList joins texture_setLifetime)
+0x1510D720	game/Texture/TextureRelease/texturerelease	game/Texture/TextureUse/textureuse	unproven	none	against: ects: one object (texture_clearBindings joins texture_releaseList); debug: one object (texture_dropUse joins texture_releaseId)
+0x1510D970	game/Texture/TextureUse/textureuse	game/Shadow/BlobShadow/blobshadow	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x150FB4A0; debug: 12 zero bytes before 0x151140B0
+0x1510E670	game/Shadow/BlobShadow/blobshadow	game/Collision/Floor/floor	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x150FC2A0; debug: 8 zero bytes before 0x15114EB0; data at 0x80089120; rodata at 0x800A2D50
+0x1510FEA0	game/Collision/Floor/floor	game/Env/Sky/sky	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150FDEB0; debug: 12 zero bytes before 0x15116760; bss at 0x800DBE80; data at 0x80089130; rodata at 0x800A2DA0
+0x15112520	game/Env/Sky/sky	game/Gfx/Turret/turret	proven	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x150FFC30; debug: 8 zero bytes before 0x15118CD0; bss at 0x800DBEC0; data at 0x80089200; rodata at 0x800A2F50
+0x15112A80	game/Gfx/Turret/turret	game/Gfx/WorldObject/worldobject	likely	data-edge	bss at 0x800DBED0; data at 0x80089240; rodata at 0x800A2F60
+0x151150B0	game/Gfx/WorldObject/worldobject	game/Prop/ShakeSink/shakesink	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15102540; debug: 4 zero bytes before 0x1511B6E0; rodata at 0x800A2F70
+0x151155C0	game/Prop/ShakeSink/shakesink	game/Prop/Seesaw/seesaw	unproven	none	against: rodata: R's block starts at 0x800A2F98, not 16-aligned
+0x15116110	game/Prop/Seesaw/seesaw	game/Prop/ScrollBob/scrollbob	unproven	none	against: rodata: R's block starts at 0x800A2FA8, not 16-aligned
+0x151163C0	game/Prop/ScrollBob/scrollbob	game/Prop/PushBob/pushbob	likely	data-edge	rodata at 0x800A2FB0
+0x15116930	game/Prop/PushBob/pushbob	game/Prop/PropMover/propmover	unproven	none	against: rodata: R's block starts at 0x800A2FD4, not 16-aligned
+0x151174A0	game/Prop/PropMover/propmover	game/Prop/SwingSpring/swingspring	unproven	none	
+0x151174F0	game/Prop/SwingSpring/swingspring	game/Prop/SwingBounce/swingbounce	unproven	none	ects: order differs
+0x151177C0	game/Prop/SwingBounce/swingbounce	game/Prop/DoorsLifts/doorslifts	unproven	none	ects: order differs
+0x15119FC0	game/Prop/DoorsLifts/doorslifts	game/Prop/Pickup/pickup	likely	data-edge	rodata at 0x800A3170; against: debug: one object (prop_updatePickup joins prop_swayVertexGroups)
+0x1511A410	game/Prop/Pickup/pickup	game/Prop/TextureAnim/textureanim	unproven	none	against: debug: one object (prop_findSetTimg joins prop_updatePickup)
+0x1511A7C0	game/Prop/TextureAnim/textureanim	game/Prop/RippleMesh/ripplemesh	unproven	none	against: ects: one object (prop_startRipple joins prop_scrollAndAnimateTexture); debug: one object (prop_startRipple joins prop_bobAndAnimateTexture)
+0x1511AF30	game/Prop/RippleMesh/ripplemesh	game/Prop/PropUpdates/propupdates	unproven	none	against: debug: one object (prop_wobbleTilt joins prop_updateRippleMesh); rodata: R's block starts at 0x800A3188, not 16-aligned
+0x1511EF40	game/Prop/PropUpdates/propupdates	game/Prop/PropMotions/propmotions	unproven	none	against: rodata: R's block starts at 0x800A3378, not 16-aligned
+0x1511F980	game/Prop/PropMotions/propmotions	game/Prop/PropLinks/proplinks	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1510D770; debug: 4 zero bytes before 0x15125DA0
+0x1511FC20	game/Prop/PropLinks/proplinks	game/Prop/DrawHooks/drawhooks	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1510DA10; debug: 8 zero bytes before 0x15126040
+0x1511FC60	game/Prop/DrawHooks/drawhooks	game/Camera/AimCamera/aimcamera	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1510DA50; debug: 4 zero bytes before 0x15126080
+0x151219D0	game/Camera/AimCamera/aimcamera	game/Camera/GroupFraming/groupframing	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x15127B20; rodata at 0x800A3420
+0x15121C00	game/Camera/GroupFraming/groupframing	game/Camera/YawSpring/yawspring	likely	data-edge	rodata at 0x800A3430
+0x15121C80	game/Camera/YawSpring/yawspring	game/Camera/YawBehind/yawbehind	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1510F2F0; debug: 4 zero bytes before 0x15127DC0; rodata at 0x800A3440
+0x151220D0	game/Camera/YawBehind/yawbehind	game/Camera/Heading/heading	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1510F660; debug: 12 zero bytes before 0x15128150; rodata at 0x800A3460
+0x15122170	game/Camera/Heading/heading	game/Camera/HeadingToPoint/headingtopoint	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x1510F6F0; rodata at 0x800A3470
+0x15122440	game/Camera/HeadingToPoint/headingtopoint	game/Camera/OrbitEye/orbiteye	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x151284C0; rodata at 0x800A3480
+0x15122980	game/Camera/OrbitEye/orbiteye	game/Camera/YawFollow/yawfollow	likely	data-edge	rodata at 0x800A34A0
+0x15122AE0	game/Camera/YawFollow/yawfollow	game/Camera/camera_camera	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15110010; debug: 4 zero bytes before 0x15128AF0; rodata at 0x800A34B0
+0x151287E0	game/Camera/camera_camera	game/Camera/TiltPresets/tiltpresets	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x15114A90 (not pinned: camera_runSpecialModes..camera_updateAngleOffsets); data at 0x800894F0; rodata at 0x800A35B0
+0x15128CB0	game/Camera/TiltPresets/tiltpresets	game/Camera/CameraMessages/cameramessages	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15114F50; debug: 4 zero bytes before 0x1512E210; data at 0x80089520; rodata at 0x800A35D0
+0x151298C0	game/Camera/CameraMessages/cameramessages	game/Camera/CameraPoses/cameraposes	proven	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15115830; debug: 12 zero bytes before 0x1512EC60; bss at 0x800DC020; data at 0x80089550; rodata at 0x800A3610
+0x15129C30	game/Camera/CameraPoses/cameraposes	game/Camera/FreeFlyCamera/freeflycamera	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15115B50; debug: 12 zero bytes before 0x1512EF90; data at 0x80089560; rodata at 0x800A3620
+0x1512A390	game/Camera/FreeFlyCamera/freeflycamera	game/Camera/CameraOcclusion/cameraocclusion	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151162B0; debug: 12 zero bytes before 0x1512F6F0; data at 0x80089590; rodata at 0x800A3650
+0x1512C490	game/Camera/CameraOcclusion/cameraocclusion	game/Camera/ViewMatrix/viewmatrix	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15117E70; debug: 8 zero bytes before 0x15131300; bss at 0x800DC280; rodata at 0x800A36A0
+0x1512D380	game/Camera/ViewMatrix/viewmatrix	game/Camera/CameraStub/camerastub	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x15132280
+0x1512D390	game/Camera/CameraStub/camerastub	game/Camera/ManualOrbit/manualorbit	proven	padding-us,padding-debug	debug: 4 zero bytes before 0x15132290
+0x1512D560	game/Camera/ManualOrbit/manualorbit	game/Camera/MessageQueue/messagequeue	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15118EC0; debug: 4 zero bytes before 0x15132460
+0x1512D6F0	game/Camera/MessageQueue/messagequeue	game/Camera/ViewEnvelope/viewenvelope	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15119050; debug: 4 zero bytes before 0x151325F0; bss at 0x800DC2C0
+0x1512DD50	game/Camera/ViewEnvelope/viewenvelope	game/Camera/RailCamera/railcamera	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151196C0; debug: 8 zero bytes before 0x15132C50; rodata at 0x800A3710
+0x1512E140	game/Camera/RailCamera/railcamera	game/Camera/HeightEasing/heighteasing	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15119AB0; debug: 4 zero bytes before 0x15133040; rodata at 0x800A3720
+0x1512E4B0	game/Camera/HeightEasing/heighteasing	game/Camera/AimAtObject/aimatobject	proven	padding-us,data-edge	rodata at 0x800A3730
+0x1512E5F0	game/Camera/AimAtObject/aimatobject	game/Camera/ZRowCopy/zrowcopy	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x15119D70; debug: 4 zero bytes before 0x15133410
+0x1512E8E0	game/Camera/ZRowCopy/zrowcopy	game/Camera/CameraCommands/cameracommands	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1511A060; debug: 8 zero bytes before 0x15133700
+0x15130230	game/Camera/CameraCommands/cameracommands	game/Level/LevelHooks/levelhooks	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1511B2C0; debug: 8 zero bytes before 0x15134F30
+0x15130280	game/Level/LevelHooks/levelhooks	game/Particle/SpriteParticle/spriteparticle	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1511B310; debug: 12 zero bytes before 0x15134F80; data at 0x80089700
+0x151321D0	game/Particle/SpriteParticle/spriteparticle	game/Particle/ModelParticle/modelparticle	proven	padding-us,data-edge	ects: order differs; data at 0x800898B0; rodata at 0x800A3860
+0x15134070	game/Particle/ModelParticle/modelparticle	game/Effects/Blood/blood	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x15138BF0; data at 0x80089A20
+0x1513B5E0	game/Effects/Blood/blood	game/Effects/DynModel/dynmodel	proven	padding-us,data-edge	data at 0x80089BC0; rodata at 0x800A49C0
+0x1513C060	game/Effects/DynModel/dynmodel	game/Particle/QuadParticle/quadparticle	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15126FD0; debug: 12 zero bytes before 0x15140B80; data at 0x80089C70; rodata at 0x800A4AA0
+0x151407D0	game/Particle/QuadParticle/quadparticle	game/Flare/Glow/glow	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x1512B100; data at 0x80089F90; rodata at 0x800A51D0
+0x15141970	game/Flare/Glow/glow	game/Effects/ActorEffects/actoreffects	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1512C050; debug: 8 zero bytes before 0x151462A0; data at 0x8008A080; rodata at 0x800A5200
+0x151422C0	game/Effects/ActorEffects/actoreffects	game/Math/MathUtil/mathutil	likely	padding-ects,data-edge	ects: 8 zero bytes before 0x1512C860 (not pinned: func_151420F8..math_debugTunableRange); data at 0x8008A160; rodata at 0x800A5480
+0x15146890	game/Math/MathUtil/mathutil	game/Effects/ActorDamageFx/actordamagefx	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151334C0; debug: 12 zero bytes before 0x1514B120; rodata at 0x800A56D0
+0x15147740	game/Effects/ActorDamageFx/actordamagefx	game/Effects/EffectObj/effectobj	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151344A0; debug: 8 zero bytes before 0x1514BFD0; rodata at 0x800A5760
+0x15147DA0	game/Effects/EffectObj/effectobj	game/Effects/Trail/MotionTrail/motiontrail	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x1514C540; data at 0x8008A3E0
+0x15149130	game/Effects/Trail/MotionTrail/motiontrail	game/Effects/TimedEffect/timedeffect	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15135BE0; debug: 12 zero bytes before 0x1514D8E0; data at 0x8008A470
+0x15149550	game/Effects/TimedEffect/timedeffect	game/Particle/ChannelParticle/channelparticle	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 4 zero bytes before 0x1514DCF0; rodata at 0x800A5780
+0x15149FD0	game/Particle/ChannelParticle/channelparticle	game/Particle/FlickerParticle/flickerparticle	unproven	none	against: rodata: R's block starts at 0x800A5794, not 16-aligned
+0x1514A6A0	game/Particle/FlickerParticle/flickerparticle	game/Particle/GroundCluster/groundcluster	likely	data-edge	rodata at 0x800A57B0
+0x1514BE00	game/Particle/GroundCluster/groundcluster	game/Particle/JitterUpdate/jitterupdate	unproven	none	against: ects: one object (particle_updateJitterParticle joins particle_updateJitter)
+0x1514BE20	game/Particle/JitterUpdate/jitterupdate	game/Particle/BendTarget/bendtarget	unproven	none	against: ects: one object (particle_easeBendTarget joins particle_updateJitterParticle)
+0x1514BF50	game/Particle/BendTarget/bendtarget	game/Particle/JitterBallistic/jitterballistic	unproven	none	against: ects: one object (particle_resetBendTarget joins particle_easeBendTarget)
+0x1514C2F0	game/Particle/JitterBallistic/jitterballistic	game/Particle/SpawnShapes/spawnshapes	proven	padding-ects	ects: 8 zero bytes before 0x15138C50
+0x1514CA80	game/Particle/SpawnShapes/spawnshapes	game/Effects/ActorAttachments/actorattachments	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151393E0; debug: 12 zero bytes before 0x15151220; data at 0x8008AA70
+0x1514F640	game/Effects/ActorAttachments/actorattachments	game/Particle/BurstConfigs/burstconfigs	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x1513BB50 (not pinned: effect_attachFrontendFireImpEffect..particle_spawnJetSpray)
+0x15154C90	game/Particle/BurstConfigs/burstconfigs	game/Sprite/ScreenSprite/screensprite	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15140910; debug: 4 zero bytes before 0x15159380; data at 0x8008AC70; rodata at 0x800A6030
+0x15155780	game/Sprite/ScreenSprite/screensprite	game/Effects/PlayerMarker/playermarker	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15141390; debug: 4 zero bytes before 0x15159E10; data at 0x8008AD30
+0x15156190	game/Effects/PlayerMarker/playermarker	game/Particle/StreakParticle/streakparticle	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 8 zero bytes before 0x1515A5D0; data at 0x8008AD40
+0x15157010	game/Particle/StreakParticle/streakparticle	game/Effects/ModelEffect/modeleffect	proven	padding-debug,data-edge	ects: order differs; debug: 8 zero bytes before 0x1515B450; bss at 0x800DCC10; data at 0x8008AD60; rodata at 0x800A6060
+0x151580B0	game/Effects/ModelEffect/modeleffect	game/Effects/EffectActor/effectactor	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 12 zero bytes before 0x1515C410; data at 0x8008ADD0; rodata at 0x800A6070
+0x15158BD0	game/Effects/EffectActor/effectactor	game/Effects/CharacterWatcher/characterwatcher	likely	data-edge	ects: order differs; debug: order differs; data at 0x8008AE60; rodata at 0x800A6080
+0x1515AF90	game/Effects/CharacterWatcher/characterwatcher	game/Particle/SlidingSprite/slidingsprite	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15146340; debug: 4 zero bytes before 0x1515F230; rodata at 0x800A6420
+0x1515BAE0	game/Particle/SlidingSprite/slidingsprite	game/Sprite/TexQuad/texquad	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15146EF0; debug: 8 zero bytes before 0x1515FD80; rodata at 0x800A6470
+0x1515C2F0	game/Sprite/TexQuad/texquad	game/Effects/Trail/FallingTrail/fallingtrail	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15147760; debug: 12 zero bytes before 0x15160590; data at 0x8008B080; rodata at 0x800A64A0
+0x1515D440	game/Effects/Trail/FallingTrail/fallingtrail	game/Lighting/PointLight/pointlight	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151487E0; debug: 12 zero bytes before 0x151616F0; rodata at 0x800A6520
+0x1515F1B0	game/Lighting/PointLight/pointlight	game/Lighting/AmbientZone/ambientzone	proven	padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1514A500; debug: 4 zero bytes before 0x15163410; bss at 0x800DCD90; rodata at 0x800A6530
+0x1515FDA0	game/Lighting/AmbientZone/ambientzone	game/Effects/ColourFrameBuffer/colourframebuffer	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x15164000; data at 0x8008B0D0; rodata at 0x800A6540
+0x151602C0	game/Effects/ColourFrameBuffer/colourframebuffer	game/Effects/Light/light	proven	padding-us,data-edge,rare-name	data at 0x8008B0F0; rodata at 0x800A6690; names Effects/ColourFrameBuffer/colourframebuffer.c (debug) | Effects/Light/light.c (debug) (not pinned)
+0x15164780	game/Effects/Light/light	game/Camera/CameraWobble/camerawobble	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1514FC10; debug: 12 zero bytes before 0x15168D40; bss at 0x800DCDE0; data at 0x8008B390; rodata at 0x800A6B20
+0x15165C80	game/Camera/CameraWobble/camerawobble	game/Effects/VertexSwing/vertexswing	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15150EA0; debug: 8 zero bytes before 0x15169FD0; rodata at 0x800A6C70
+0x15165F70	game/Effects/VertexSwing/vertexswing	game/Effects/LevelUpdateStub/levelupdatestub	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15151190; debug: 8 zero bytes before 0x1516A2C0
+0x15165F80	game/Effects/LevelUpdateStub/levelupdatestub	game/Effects/QuadEffect/quadeffect	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151511A0; debug: 8 zero bytes before 0x1516A2D0
+0x151669A0	game/Effects/QuadEffect/quadeffect	game/Particle/PuffQuad/puffquad	proven	padding-us,padding-debug,data-edge	debug: 8 zero bytes before 0x1516ACE0; data at 0x8008B3E0
+0x15167010	game/Particle/PuffQuad/puffquad	game/Effects/ObjectList/objectlist	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15152200; debug: 12 zero bytes before 0x1516B350; data at 0x8008B480
+0x15169900	game/Effects/ObjectList/objectlist	game/Sprite/Sprite2D/sprite2d	proven	padding-us,padding-debug	ects: order differs; debug: 12 zero bytes before 0x1516D7C0
+0x15169C70	game/Sprite/Sprite2D/sprite2d	game/Particle/BounceDebris/bouncedebris	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15154800; debug: 4 zero bytes before 0x1516DB20
+0x1516A770	game/Particle/BounceDebris/bouncedebris	game/Text/TextBoxCreate/textboxcreate	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15155300; debug: 4 zero bytes before 0x1516E620; rodata at 0x800A6CD0
+0x1516AA70	game/Text/TextBoxCreate/textboxcreate	game/Text/TextBox/textbox	unproven	none	against: rodata: R's block starts at 0x800A6CD8, not 16-aligned
+0x1516D400	game/Text/TextBox/textbox	game/Particle/StyleParticle/styleparticle	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15157D90; debug: 4 zero bytes before 0x15171290; rodata at 0x800A6DF0
+0x15170B90	game/Particle/StyleParticle/styleparticle	game/Effects/ModelBurst/modelburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1515B550; debug: 12 zero bytes before 0x15174A00; data at 0x8008CC20; rodata at 0x800A6E90
+0x15171CA0	game/Effects/ModelBurst/modelburst	game/Particle/FloorSprite/floorsprite	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1515C640; debug: 4 zero bytes before 0x15175B10; data at 0x8008CC30; rodata at 0x800A6FD0
+0x15172C50	game/Particle/FloorSprite/floorsprite	game/Player/PlayerWarp/playerwarp	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1515D5C0; debug: 4 zero bytes before 0x15176A90
+0x15172F70	game/Player/PlayerWarp/playerwarp	game/Flare/ScreenFlash/screenflash	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1515D8A0; debug: 12 zero bytes before 0x15176D70; bss at 0x800DD2D0
+0x151732E0	game/Flare/ScreenFlash/screenflash	game/Env/Fog/fog	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1515DC10; debug: 4 zero bytes before 0x151770E0; bss at 0x800DD2E0
+0x151739B0	game/Env/Fog/fog	game/Env/VtxColourFade/vtxcolourfade	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1515E2E0; debug: 4 zero bytes before 0x151777B0
+0x15173D00	game/Env/VtxColourFade/vtxcolourfade	game/Flare/VisProbe/visprobe	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1515E630; debug: 4 zero bytes before 0x15177B00
+0x15174690	game/Flare/VisProbe/visprobe	game/Particle/WakePuff/wakepuff	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1515EFC0; debug: 4 zero bytes before 0x15178490
+0x151749A0	game/Particle/WakePuff/wakepuff	game/Effects/LevelUpdate/levelupdate	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1515F2C0; debug: 4 zero bytes before 0x15178790
+0x15174BF0	game/Effects/LevelUpdate/levelupdate	game/Swarm/SwarmActor/swarmactor	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1515F530; debug: 4 zero bytes before 0x151789E0
+0x15177410	game/Swarm/SwarmActor/swarmactor	game/Prop/WaveDeformer/wavedeformer	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x151619A0; rodata at 0x800A71C0
+0x15177F90	game/Prop/WaveDeformer/wavedeformer	game/Swarm/SwarmCentre/swarmcentre	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15162510; debug: 12 zero bytes before 0x1517BC60; bss at 0x800DD420; rodata at 0x800A71E0
+0x15178E50	game/Swarm/SwarmCentre/swarmcentre	game/Level/HeightCheck/heightcheck	proven	padding-us,padding-ects	ects: 12 zero bytes before 0x151633A0
+0x15178EB0	game/Level/HeightCheck/heightcheck	game/Effects/Rain/rain	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15163400; debug: 8 zero bytes before 0x1517CB20
+0x15179DB0	game/Effects/Rain/rain	game/Swarm/WaveBob/wavebob	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x151642F0; rodata at 0x800A7210
+0x15179FE0	game/Swarm/WaveBob/wavebob	game/Particle/SpinDebris/spindebris	likely	data-edge	rodata at 0x800A7220
+0x1517ABB0	game/Particle/SpinDebris/spindebris	game/Anim/VertexMorph/vertexmorph	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x151650E0; bss at 0x800DD460; rodata at 0x800A7230
+0x1517B500	game/Anim/VertexMorph/vertexmorph	game/Sprite/LevelSprites/levelsprites	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15165920; debug: 8 zero bytes before 0x1517F040; bss at 0x800DD470; rodata at 0x800A7240
+0x1517E080	game/Sprite/LevelSprites/levelsprites	game/Flare/LensFlare/lensflare	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151684D0; debug: 8 zero bytes before 0x15181BC0; bss at 0x800DDD60; data at 0x8008CFF0; rodata at 0x800A7250
+0x1517EE40	game/Flare/LensFlare/lensflare	game/Screen/ViewEffects/vieweffects	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15169260; debug: 4 zero bytes before 0x15182960; bss at 0x800DDD70; data at 0x8008D010; rodata at 0x800A7260
+0x151827D0	game/Screen/ViewEffects/vieweffects	game/Prop/WaveChain/wavechain	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1516CB30; debug: 4 zero bytes before 0x151862E0; bss at 0x800DDE50; data at 0x8008D050
+0x15183290	game/Prop/WaveChain/wavechain	game/Swarm/ModelSlots/modelslots	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1516D540; debug: 8 zero bytes before 0x15186CF0; bss at 0x800DDE80; data at 0x8008D0B0
+0x15184150	game/Swarm/ModelSlots/modelslots	game/Shadow/RealTimeShadow/realtimeshadow	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1516E2E0; debug: 12 zero bytes before 0x15187A90; bss at 0x800DDFB0; data at 0x8008D3E0; rodata at 0x800A7350
+0x151875E0	game/Shadow/RealTimeShadow/realtimeshadow	game/Effects/FadeBurst/fadeburst	proven	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151712C0; debug: 4 zero bytes before 0x1518AE70; data at 0x8008D4F0
+0x15187EC0	game/Effects/FadeBurst/fadeburst	game/Effects/ColorAnim/coloranim	proven	padding-us,padding-ects	ects: 4 zero bytes before 0x15171B90
+0x15188810	game/Effects/ColorAnim/coloranim	game/Effects/Trail/Afterimage/afterimage	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151724E0; debug: 8 zero bytes before 0x1518C090; bss at 0x800DF7C0
+0x15189900	game/Effects/Trail/Afterimage/afterimage	game/Effects/Trail/SprayEmitter/sprayemitter	proven	padding-us,padding-debug	debug: 8 zero bytes before 0x1518D180
+0x15189FF0	game/Effects/Trail/SprayEmitter/sprayemitter	game/Particle/BoneGlow/boneglow	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15173DC0; debug: 12 zero bytes before 0x1518D870; rodata at 0x800A73C0
+0x1518A3C0	game/Particle/BoneGlow/boneglow	game/Effects/TumblingPiece/tumblingpiece	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15174190; debug: 4 zero bytes before 0x1518DC40; data at 0x8008D5B0
+0x1518AA10	game/Effects/TumblingPiece/tumblingpiece	game/Effects/EffectQueue/effectqueue	proven	padding-us,data-edge	ects: order differs; debug: order differs; data at 0x8008D5C0
+0x1518AD20	game/Effects/EffectQueue/effectqueue	game/Particle/Droplets/droplets	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x15174AE0; debug: 8 zero bytes before 0x1518E590
+0x1518B6B0	game/Particle/Droplets/droplets	game/Particle/BillboardBurst/billboardburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15175470; debug: 4 zero bytes before 0x1518EF20; rodata at 0x800A7400
+0x1518BA90	game/Particle/BillboardBurst/billboardburst	game/Effects/Trail/TrailEmitter/trailemitter	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15175850; debug: 8 zero bytes before 0x1518F300; rodata at 0x800A7410
+0x1518C900	game/Effects/Trail/TrailEmitter/trailemitter	game/Attach/AttachModel/attachmodel	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151766E0; debug: 4 zero bytes before 0x15190100
+0x1518CA80	game/Attach/AttachModel/attachmodel	game/Particle/GrowingBillboard/growingbillboard	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15176840; debug: 4 zero bytes before 0x15190280
+0x1518CD20	game/Particle/GrowingBillboard/growingbillboard	game/Particle/PlacementRing/placementring	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15176AE0; debug: 12 zero bytes before 0x15190520
+0x1518D1C0	game/Particle/PlacementRing/placementring	game/Particle/ActorEmitter/actoremitter	proven	padding-ects,data-edge	ects: 4 zero bytes before 0x15176F70; rodata at 0x800A7460
+0x1518E4A0	game/Particle/ActorEmitter/actoremitter	game/Particle/ActorEmitterHandlers/actoremitterhandlers	likely	data-edge	rodata at 0x800A7B60; against: ects: one object (particle_detachActorEmitter joins particle_newActorEmitter); debug: one object (particle_detachActorEmitter joins particle_newActorEmitter)
+0x1518EB10	game/Particle/ActorEmitterHandlers/actoremitterhandlers	game/Beam/BeamMotion/beammotion	unproven	none	against: ects: one object (beam_fillMotionVerts joins particle_buildActorEmitterQuad); debug: one object (beam_fillMotionVerts joins particle_buildActorEmitterQuad)
+0x1518F1A0	game/Beam/BeamMotion/beammotion	game/Particle/AnchorEmitter/anchoremitter	unproven	none	against: ects: one object (particle_wobbleSpriteSize joins beam_shrinkMotionProgress); debug: one object (particle_wobbleSpriteSize joins beam_shrinkMotionProgress)
+0x151903D0	game/Particle/AnchorEmitter/anchoremitter	game/Effects/ActorFlicker/actorflicker	unproven	none	against: ects: one object (light_updateActorFlicker joins particle_spawnAnchorEmitterSprite); debug: one object (light_updateActorFlicker joins particle_spawnAnchorEmitterSprite)
+0x15190400	game/Effects/ActorFlicker/actorflicker	game/Effects/AnchorLight/anchorlight	unproven	none	against: ects: one object (effect_handleAnchorLightEvent joins light_updateActorFlicker); debug: one object (effect_handleAnchorLightEvent joins light_updateActorFlicker)
+0x15190490	game/Effects/AnchorLight/anchorlight	game/Particle/AnchorEmitterDestroy/anchoremitterdestroy	unproven	none	against: ects: one object (particle_freeAnchorEmitterSprite joins effect_destroyAnchorLight); debug: one object (particle_freeAnchorEmitterSprite joins effect_destroyAnchorLight)
+0x15190550	game/Particle/AnchorEmitterDestroy/anchoremitterdestroy	game/Effects/BurnDamage/burndamage	unproven	none	
+0x151906E0	game/Effects/BurnDamage/burndamage	game/Effects/TriggerSwap/triggerswap	unproven	none	
+0x15190770	game/Effects/TriggerSwap/triggerswap	game/Particle/Drips/drips	unproven	none	
+0x15191BE0	game/Particle/Drips/drips	game/Particle/DustEmitter/dustemitter	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1517B560; debug: 8 zero bytes before 0x15195230; rodata at 0x800A8030
+0x151927C0	game/Particle/DustEmitter/dustemitter	game/Particle/BillboardRenew/billboardrenew	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x1517C1A0; debug: 4 zero bytes before 0x15195E10
+0x15192800	game/Particle/BillboardRenew/billboardrenew	game/Effects/SurfaceHandlers/surfacehandlers	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1517C1E0; debug: 4 zero bytes before 0x15195E50
+0x15192920	game/Effects/SurfaceHandlers/surfacehandlers	game/Particle/SideEmitter/sideemitter	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1517C300; debug: 8 zero bytes before 0x15195F70; rodata at 0x800A8180
+0x15193390	game/Particle/SideEmitter/sideemitter	game/Effects/FallingObject/fallingobject	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x1517CD70; debug: 4 zero bytes before 0x151969E0; rodata at 0x800A81B0
+0x15193660	game/Effects/FallingObject/fallingobject	game/Particle/SegmentBurst/segmentburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1517D0A0; debug: 4 zero bytes before 0x15196CB0; rodata at 0x800A81C0
+0x15193CA0	game/Particle/SegmentBurst/segmentburst	game/Effects/ContactEffects/contacteffects	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1517D6E0 (not pinned: particle_emitOnSegment..effect_hitReactLavaBoulder); debug: 4 zero bytes before 0x151972F0; rodata at 0x800A8210
+0x151957B0	game/Effects/ContactEffects/contacteffects	game/Effects/CharacterFlameThrower/characterflamethrower	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x15198BE0; rodata at 0x800A8710
+0x1519CF70	game/Effects/CharacterFlameThrower/characterflamethrower	game/Effects/Trail/MatrixTrail/matrixtrail	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x151A02D0; bss at 0x800E0920; rodata at 0x800A8B80
+0x1519E970	game/Effects/Trail/MatrixTrail/matrixtrail	game/Cutscene/EventEffects/eventeffects	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x151A1CF0; rodata at 0x800A8CC0
+0x1519EF70	game/Cutscene/EventEffects/eventeffects	game/Effects/ActorEventStub/actoreventstub	proven	padding-us	
+0x1519EF90	game/Effects/ActorEventStub/actoreventstub	game/Effects/Trail/SurfaceTrail/surfacetrail	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x15187870; debug: 12 zero bytes before 0x151A2300
+0x151A0A10	game/Effects/Trail/SurfaceTrail/surfacetrail	game/Particle/FastSpark/fastspark	proven	padding-debug,data-edge	debug: 8 zero bytes before 0x151A3D40; rodata at 0x800A8D10
+0x151A0E40	game/Particle/FastSpark/fastspark	game/Particle/SphereEmitter/sphereemitter	proven	padding-ects,data-edge	ects: 4 zero bytes before 0x15189560; data at 0x8008F8E0; rodata at 0x800A8D20
+0x151A3390	game/Particle/SphereEmitter/sphereemitter	game/Effects/Trail/BoneTrail/bonetrail	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x1518BAA0; rodata at 0x800A8D50
+0x151A4FD0	game/Effects/Trail/BoneTrail/bonetrail	game/Screen/Tint/tint	likely	data-edge	rodata at 0x800A8D70
+0x151A5660	game/Screen/Tint/tint	game/Particle/RegionEmitter/regionemitter	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1518DC60; debug: 12 zero bytes before 0x151A8950; rodata at 0x800A8D80
+0x151A6600	game/Particle/RegionEmitter/regionemitter	game/Particle/ZoneEmitter/zoneemitter	likely	data-edge	rodata at 0x800A8DA0; against: ects: one object (particle_updateZoneEmitter joins particle_buildYawedVerticalQuad); debug: one object (particle_updateZoneEmitter joins particle_buildYawedVerticalQuad)
+0x151A6B10	game/Particle/ZoneEmitter/zoneemitter	game/Effects/ZoneEffect/zoneeffect	unproven	none	against: ects: one object (effect_destroyZoneEmitter joins particle_shutZoneEmitter)
+0x151A6C90	game/Effects/ZoneEffect/zoneeffect	game/Effects/DebrisBurst/debrisburst	proven	padding-ects,padding-debug	ects: 12 zero bytes before 0x1518F150; debug: 4 zero bytes before 0x151A9F10
+0x151A6F00	game/Effects/DebrisBurst/debrisburst	game/Effects/BloodDebris/blooddebris	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1518F3C0; debug: 8 zero bytes before 0x151AA180; rodata at 0x800A8DC0
+0x151A7950	game/Effects/BloodDebris/blooddebris	game/Beam/Lightning/lightning	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x1518FE00; debug: 8 zero bytes before 0x151AABD0; rodata at 0x800A8DE0
+0x151A8B20	game/Beam/Lightning/lightning	game/Beam/AreaEmitter/areaemitter	proven	padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x15190E90; debug: 8 zero bytes before 0x151ABD80; data at 0x8008F970; rodata at 0x800A8DF0
+0x151A99D0	game/Beam/AreaEmitter/areaemitter	game/Effects/ActorTasks/actortasks	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x15191D40; debug: 4 zero bytes before 0x151ACC30; rodata at 0x800A8F70
+0x151ABE40	game/Effects/ActorTasks/actortasks	game/Effects/ImpactSets/impactsets	proven	padding-us,padding-ects,data-edge	ects: 12 zero bytes before 0x15193FB0; rodata at 0x800A9020
+0x151AC550	game/Effects/ImpactSets/impactsets	game/Particle/EmitterQuads/emitterquads	unproven	none	against: ects: one object (particle_spawnSampleKindMark joins effect_spawnImpactTrailBurst); debug: one object (particle_spawnSampleKindMark joins effect_spawnImpactTrailBurst)
+0x151ACA60	game/Particle/EmitterQuads/emitterquads	game/Rope/SwingRope/swingrope	proven	padding-ects,padding-debug	ects: 4 zero bytes before 0x15195100; debug: 4 zero bytes before 0x151AFCA0
+0x151AE6B0	game/Rope/SwingRope/swingrope	game/Effects/TaskGroundFx/taskgroundfx	proven	padding-ects,padding-debug	ects: 8 zero bytes before 0x15196B60; debug: 8 zero bytes before 0x151B1830
+0x151AE7B0	game/Effects/TaskGroundFx/taskgroundfx	game/Effects/BloodDrip/blooddrip	proven	padding-ects,data-edge	ects: 12 zero bytes before 0x15196C30; rodata at 0x800A9D80
+0x151AF4D0	game/Effects/BloodDrip/blooddrip	game/Effects/BloodSpray/bloodspray	proven	padding-ects,data-edge	ects: 8 zero bytes before 0x15198000; rodata at 0x800A9DF0
+0x151AF5C0	game/Effects/BloodSpray/bloodspray	game/Particle/SideSpray/sidespray	proven	padding-us,data-edge	rodata at 0x800AA0F0
+0x151B0050	game/Particle/SideSpray/sidespray	game/Effects/LandingBurst/landingburst	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x15198B10; debug: 8 zero bytes before 0x151B3730; rodata at 0x800AA120
+0x151B1AB0	game/Effects/LandingBurst/landingburst	game/Particle/OwnerSideEmitter/ownersideemitter	proven	padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x1519A380; debug: 4 zero bytes before 0x151B5030; rodata at 0x800AA300
+0x151B2060	game/Particle/OwnerSideEmitter/ownersideemitter	game/Rope/RopeTie/ropetie	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 8 zero bytes before 0x151B55E0; rodata at 0x800AA320
+0x151B30B0	game/Rope/RopeTie/ropetie	game/Effects/HoltenRope/holtenrope	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 12 zero bytes before 0x151B6630; rodata at 0x800AA390
+0x151B4CD0	game/Effects/HoltenRope/holtenrope	game/Effects/BloodEmitters/bloodemitters	proven	padding-us,data-edge	ects: order differs; rodata at 0x800AA3D0
+0x151B5240	game/Effects/BloodEmitters/bloodemitters	game/Beam/WavyBeam/wavybeam	proven	padding-us,data-edge	rodata at 0x800AA400
+0x151B5BA0	game/Beam/WavyBeam/wavybeam	game/Effects/SpawnEmitterHook/spawnemitterhook	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x1519E1E0; debug: 4 zero bytes before 0x151B9050
+0x151B5BF0	game/Effects/SpawnEmitterHook/spawnemitterhook	game/Particle/SoundPulse/soundpulse	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x1519E230; debug: 8 zero bytes before 0x151B90A0
+0x151B6010	game/Particle/SoundPulse/soundpulse	game/Particle/Pulse/pulse	proven	padding-us,padding-ects,data-edge	ects: 8 zero bytes before 0x1519E5F0; rodata at 0x800AA450
+0x151B6320	game/Particle/Pulse/pulse	game/Effects/Trail/RibbonTrail/ribbontrail	proven	padding-us,padding-debug,data-edge	ects: order differs; debug: 12 zero bytes before 0x151B9770; rodata at 0x800AA460
+0x151B8370	game/Effects/Trail/RibbonTrail/ribbontrail	game/Effects/RibbonChild/ribbonchild	unproven	none	against: ects: one object (effect_destroyRibbonParticle joins trail_onActorRibbonMessage)
+0x151B8400	game/Effects/RibbonChild/ribbonchild	game/Weapon/BulletParticle/bulletparticle	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151A1180; debug: 8 zero bytes before 0x151BB890
+0x151B8B40	game/Weapon/BulletParticle/bulletparticle	game/Particle/Bob/bob	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151A18C0; debug: 12 zero bytes before 0x151BBFD0
+0x151B8DB0	game/Particle/Bob/bob	game/Effects/LampParticle/lampparticle	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151A1B30; debug: 8 zero bytes before 0x151BC240
+0x151B9690	game/Effects/LampParticle/lampparticle	game/Particle/FallingParticle/fallingparticle	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x151A2400; debug: 4 zero bytes before 0x151BCB10; rodata at 0x800AA580
+0x151B9F00	game/Particle/FallingParticle/fallingparticle	game/Effects/FollowEffects/followeffects	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151A2C70; debug: 12 zero bytes before 0x151BD380; rodata at 0x800AA590
+0x151BE850	game/Effects/FollowEffects/followeffects	game/Effects/StatCounter/statcounter	proven	padding-debug,data-edge	debug: 12 zero bytes before 0x151C1BF0; data at 0x8008FBC0; rodata at 0x800AA8B0
+0x151BFBD0	game/Effects/StatCounter/statcounter	game/Hud/CounterFree/counterfree	unproven	none	against: debug: one object (hud_freeCounter joins effect_destroyStatCounter)
+0x151BFC40	game/Hud/CounterFree/counterfree	game/Weapon/Bullet/bullet	proven	padding-us	debug: order differs
+0x151C2050	game/Weapon/Bullet/bullet	game/Weapon/Projectile/projectile	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151AA200; debug: 8 zero bytes before 0x151C5100; bss at 0x800E0940; rodata at 0x800AA9D0
+0x151C4820	game/Weapon/Projectile/projectile	game/Particle/WobbleStream/wobblestream	unproven	none	against: debug: one object (particle_updateWobbleStream joins weapon_updateStreamEmitter)
+0x151C4AB0	game/Particle/WobbleStream/wobblestream	game/Weapon/ProjectileRay/projectileray	unproven	none	against: ects: one object (weapon_projectileMessage joins particle_updateWobbleStream); debug: one object (weapon_projectileMessage joins particle_updateWobbleStream)
+0x151C5280	game/Weapon/ProjectileRay/projectileray	game/Weapon/SegmentShot/segmentshot	proven	padding-us,padding-ects	ects: 12 zero bytes before 0x151ACBC0
+0x151C62D0	game/Weapon/SegmentShot/segmentshot	game/Weapon/JointShot/jointshot	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151ADB40; debug: 12 zero bytes before 0x151C8F20; rodata at 0x800AAB00
+0x151C71A0	game/Weapon/JointShot/jointshot	game/Effects/Sight/SightBeam/sightbeam	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151AE680 (not pinned: weapon_spawnJointBeam..sight_placeBeam); debug: 12 zero bytes before 0x151C9DC0; rodata at 0x800AAC30
+0x151C9BA0	game/Effects/Sight/SightBeam/sightbeam	game/Effects/Sight/effects_sight	likely	data-edge	ects: order differs; rodata at 0x800AAC80
+0x151CD2C0	game/Effects/Sight/effects_sight	game/Effects/Trail/LevelStream/levelstream	proven	padding-us,data-edge	data at 0x8008FC30; rodata at 0x800AAEE0
+0x151D15D0	game/Effects/Trail/LevelStream/levelstream	game/Effects/Trail/TrackerTrail/trackertrail	unproven	none	ects: order differs; against: debug: one object (trail_sampleTrackerTrail joins trail_spawnTrackerTrail); rodata: R's block starts at 0x800AB0A8, not 16-aligned
+0x151D22B0	game/Effects/Trail/TrackerTrail/trackertrail	game/Effects/ActorSoundBurst/actorsoundburst	proven	padding-debug,data-edge	ects: order differs; debug: 4 zero bytes before 0x151D4DF0; rodata at 0x800AB0B0
+0x151D26C0	game/Effects/ActorSoundBurst/actorsoundburst	game/Screen/Overlay/overlay	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x151D5200
+0x151D2AB0	game/Screen/Overlay/overlay	game/Effects/BoneFollower/bonefollower	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151B7A60; debug: 12 zero bytes before 0x151D55F0
+0x151D3480	game/Effects/BoneFollower/bonefollower	game/Particle/HitImpact/hitimpact	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151B83F0; debug: 12 zero bytes before 0x151D5F90; data at 0x8008FC70; rodata at 0x800AB170
+0x151D5E90	game/Particle/HitImpact/hitimpact	game/Screen/FrameImage/frameimage	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151BA680 (not pinned: particle_spawnBlast..screen_drawImageAlpha); debug: 4 zero bytes before 0x151D87B0
+0x151D6970	game/Screen/FrameImage/frameimage	game/Text/AmountText/amounttext	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151BB020; debug: 4 zero bytes before 0x151D9290
+0x151D71B0	game/Text/AmountText/amounttext	game/Effects/Trail/AnchoredTrail/anchoredtrail	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 12 zero bytes before 0x151BB290 (not pinned: text_spawnVolcanoRaceTouchDrift..trail_updateAnchoredEmitter); debug: 4 zero bytes before 0x151D9AD0; rodata at 0x800AB280
+0x151D87E0	game/Effects/Trail/AnchoredTrail/anchoredtrail	game/Cont/Rumble/rumble	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x151DB0F0; data at 0x8008FCC0; rodata at 0x800AB300
+0x151D8E20	game/Cont/Rumble/rumble	game/Particle/Steam/steam	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 8 zero bytes before 0x151BBC90; debug: 8 zero bytes before 0x151DB5D0; bss at 0x800E0A10; data at 0x8008FCD0; rodata at 0x800AB310
+0x151DC6A0	game/Particle/Steam/steam	game/Particle/ColorEmitter/coloremitter	proven	padding-us,padding-debug,data-edge	debug: 12 zero bytes before 0x151DEC30; rodata at 0x800AB500
+0x151DCDE0	game/Particle/ColorEmitter/coloremitter	game/Particle/SmallDebris/smalldebris	proven	padding-us,padding-debug,data-edge	debug: 4 zero bytes before 0x151DF310; rodata at 0x800AB550
+0x151DCEF0	game/Particle/SmallDebris/smalldebris	game/Save/EepromTimedWrite/eepromtimedwrite	proven	padding-us,padding-debug	debug: 12 zero bytes before 0x151DF420
+0x151DD140	game/Save/EepromTimedWrite/eepromtimedwrite	game/Os/EepromRead/eepromread	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151BE9E0; debug: 12 zero bytes before 0x151DF670
+0x151DD3A0	game/Os/EepromRead/eepromread	game/Os/EepromLongRead/eepromlongread	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151BEC40; debug: 8 zero bytes before 0x151DF8D0
+0x151DD460	game/Os/EepromLongRead/eepromlongread	game/Os/EepromProbe/eepromprobe	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151BED00; debug: 12 zero bytes before 0x151DF990
+0x151DD4E0	game/Os/EepromProbe/eepromprobe	game/Os/EepromWrite/eepromwrite	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151BED80; debug: 12 zero bytes before 0x151DFA10
+0x151DD970	game/Os/EepromWrite/eepromwrite	game/Save/FrontEnd/frontend	proven	padding-us,padding-ects,padding-debug,data-edge	ects: 4 zero bytes before 0x151BF210; debug: 4 zero bytes before 0x151DFEA0; bss at 0x800E0A80
+0x151E84B0	game/Save/FrontEnd/frontend	game/Hud/HudOverlay/hudoverlay	proven	padding-us,padding-ects,data-edge	ects: 4 zero bytes before 0x151C8E80 (not pinned: save_clearMenuCharacters..hud_texRectScaled); bss at 0x800E0C30; data at 0x8008FFC0; rodata at 0x800ABA90
+0x151EF040	game/Hud/HudOverlay/hudoverlay	game/Os/PiReadIo/pireadio	proven	padding-us,padding-debug,flags-change	us gap 64 bytes; flags -O2 -g3 -mips2 -o32 game | -O1 -mips2 -o32 game; debug: 64 zero bytes before 0x151F08E0 (not pinned: hud_clearCodeFlags..func_151EF080)
+0x151EF090	game/Os/PiReadIo/pireadio	game/Os/ContInit/continit	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151CE150; debug: 8 zero bytes before 0x151F08F0
+0x151EF450	game/Os/ContInit/continit	libultra/io/pfsinit2	proven	padding-us,padding-ects,padding-debug	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: 4 zero bytes before 0x151CE510; debug: 4 zero bytes before 0x151F0CB0
+0x151EF610	libultra/io/pfsinit2	game/Math/Random/random	proven	flags-change	flags -O1 -mips2 -o32 ultralib | -O2 -g3 -mips2 -o32 game; ects: order differs; debug: order differs
+0x151EF640	game/Math/Random/random	game/Os/ViSetSpecial/visetspecial	proven	padding-us,padding-ects,padding-debug,flags-change	flags -O2 -g3 -mips2 -o32 game | -O1 -mips2 -o32 game; ects: 4 zero bytes before 0x151CEFE0; debug: 4 zero bytes before 0x151F17F0
+0x151EF800	game/Os/ViSetSpecial/visetspecial	libultra/gu/ortho	proven	padding-us,padding-debug,flags-change	flags -O1 -mips2 -o32 game | -O3 -mips2 -o32 ultralib; ects: order differs; debug: 8 zero bytes before 0x151F19B0
+0x151EF9C0	libultra/gu/ortho	libultra/os/settimer2	proven	padding-us,flags-change	flags -O3 -mips2 -o32 ultralib | -O1 -mips2 -o32 ultralib; ects: order differs; debug: order differs
+0x151EFAA0	libultra/os/settimer2	libultra/io/contreaddata2	proven	padding-us	debug: order differs
+0x151EFD00	libultra/io/contreaddata2	libultra/gu/mtxutil	proven	padding-us,flags-change	flags -O1 -mips2 -o32 ultralib | -O3 -mips2 -o32 ultralib; debug: order differs
+0x151EFF70	libultra/gu/mtxutil	game/Libc/Sprintf/sprintf	proven	padding-us,padding-debug,flags-change	flags -O3 -mips2 -o32 ultralib | -O2 -mips2 -o32 game; ects: order differs; debug: 4 zero bytes before 0x151F2650
+0x151EFFF0	game/Libc/Sprintf/sprintf	libultra/gu/guNormalize	proven	padding-us,padding-ects,padding-debug	ects: 4 zero bytes before 0x151CFF00; debug: 4 zero bytes before 0x151F26D0
+0x151F0080	libultra/gu/guNormalize	libultra/gu/mtxcatl	proven	padding-us,flags-change	flags -O2 -mips2 -o32 game | -O2 -g3 -mips2 -o32 game; ects: order differs; debug: order differs
+0x151F0140	libultra/gu/mtxcatl	game/Os/MtxCatF/mtxcatf	proven	padding-us,flags-change	flags -O2 -g3 -mips2 -o32 game | -O3 -mips2 -o32 game; ects: order differs; debug: order differs
+0x151F0350	game/Os/MtxCatF/mtxcatf	libultra/io/siacs2	proven	padding-us,flags-change	flags -O3 -mips2 -o32 game | -O1 -mips2 -o32 ultralib; debug: order differs
+0x151F0410	libultra/io/siacs2	libultra/io/sirawdma2	unproven	none	debug: order differs
+0x151F04C0	libultra/io/sirawdma2	libultra/os/gettime2	proven	padding-us	ects: order differs; debug: order differs
+0x151F0550	libultra/os/gettime2	libultra/io/contpfs2	proven	padding-us,padding-ects,padding-debug	ects: 12 zero bytes before 0x151D0510; debug: 12 zero bytes before 0x151F2C20
+0x151F12B0	libultra/io/contpfs2	libultra/io/pfschecker2	proven	padding-us	CFLAGS differ (ultralib | game), the -O and -mips flags do not; ects: order differs; debug: order differs
+0x151F1D10	libultra/io/pfschecker2	libultra/io/pfsisplug2	unproven	none	ects: order differs; debug: order differs
+0x151F2080	libultra/io/pfsisplug2	libultra/io/contramread2	proven	padding-us	CFLAGS differ (game | ultralib), the -O and -mips flags do not; ects: order differs; debug: order differs
+0x151F2430	libultra/io/contramread2	libultra/io/contramwrite2	proven	padding-us	ects: order differs; debug: order differs
+0x151F27E0	libultra/io/contramwrite2	libultra/io/crc2	proven	padding-us	CFLAGS differ (ultralib | game), the -O and -mips flags do not; ects: order differs; debug: order differs
+0x151F2960	libultra/io/crc2	game/Audio/Mp3Player/mp3player	proven	flags-change	flags -O1 -mips2 -o32 game | -g -mips2 -o32 game; ects: order differs; debug: order differs
+0x151F3DE0	game/Audio/Mp3Player/mp3player	game/Audio/Mp3Decoder/mp3decoder	proven	padding-us,data-edge	ects: order differs; debug: order differs; bss at 0x800E0E30
+0x151F8870	game/Audio/Mp3Decoder/mp3decoder	game/Audio/Mp3Decoder/mp3huffman	proven	padding-us,flags-change	flags -g -mips2 -o32 game | asm; ects: order differs; debug: order differs
+0x151F8CF0	game/Audio/Mp3Decoder/mp3huffman	game/Audio/Mp3Decoder/mp3imdctlong	proven	padding-ects,padding-debug	ects: 4 zero bytes before 0x151E7F30; debug: 8 zero bytes before 0x1520A290
+0x151F9BF0	game/Audio/Mp3Decoder/mp3imdctlong	game/Audio/Mp3Decoder/mp3imdctshort	proven	padding-us,padding-ects,padding-debug	ects: 8 zero bytes before 0x151E8E30; debug: 8 zero bytes before 0x1520B190; against: rodata: R's block starts at 0x800B0D5C, not 16-aligned
+0x16001700	debugger/Debugger/CrashScreen/crashscreen	debugger/Debugger/DebuggerCont/debuggercont	unproven	none	against: debug: one object (debugger_contStartReadData joins debugger_returnArg)
+0x16001AB0	debugger/Debugger/DebuggerCont/debuggercont	debugger/Debugger/DebuggerStub/debuggerstub	unproven	none	
+0x16001AD0	debugger/Debugger/DebuggerStub/debuggerstub	debugger/Debugger/DebuggerPrintf/debuggerprintf	proven	padding-us	
+0x16003650	debugger/Debugger/DebuggerPrintf/debuggerprintf	debugger/Debugger/TlbSnapshot/tlbsnapshot	proven	padding-us,flags-change	flags -O2 -g3 -mips2 -o32 game | asm
