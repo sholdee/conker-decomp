@@ -9,7 +9,6 @@
  * that these files define, grouped by file in address order:
  *   game/Texture/UvWobble/uvwobble.c
  *   game/Texture/TextureLoad/textureload.c
- *   game/Texture/TextureRelease/texturerelease.c
  *   game/Texture/TextureUse/textureuse.c
  *   game/Texture/TextureTables/texturetables.c
  */
@@ -54,8 +53,6 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse); /* 
 s32 texture_getRomAddress(s32 index);
 void texture_updateAging(void);
 void texture_setLifetime(s32 index, s32 lifetime);
-
-/* game/Texture/TextureRelease/texturerelease.c */
 /* list: a count-prefixed array of s16 texture ids (built by texture_resolveDl), freed after it is released. */
 void texture_releaseList(s16 *list);
 void texture_releaseId(s32 id);
