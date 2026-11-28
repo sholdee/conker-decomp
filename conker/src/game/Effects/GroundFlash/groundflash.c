@@ -5,14 +5,13 @@
 #include "conker/light.h"
 #include "libc/math.h"
 
-struct struct_EAB10 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8  pad10[0x18];
+struct FlashSpawnerEffect {
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashSpawner spawner;
 };
 
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
-void effect_spawnGroundFlashes(struct_EAB10 *actor) {
+void effect_spawnGroundFlashes(FlashSpawnerEffect *effect) {
     s32 pad; // matching: unused stack slots that keep the frame layout
     struct GroundFlash flash;
     LightEffectHeader header;
@@ -26,7 +25,7 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
     LightEffect *obj;
     FlashSpawner *spawner;
 
-    spawner = &actor->spawner;
+    spawner = &effect->spawner;
     spawner->accumulator += (spawner->rate + math_randomFloat() * spawner->rateRange) * gFrameDelta;
     if (spawner->accumulator > 1.0f) {
         flash.ground.material = 0;
@@ -70,8 +69,8 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
                     origin.y = spawner->height;
                     origin.z = flash.position.z;
                     obj = light_createWithEffect(&header, &origin, spawner->colour[3], spawner->colour[0],
-                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->header.owner,
-                                        actor->header.kind);
+                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, effect->base.header.owner,
+                                        effect->base.header.kind);
                     if (obj != NULL) {
                         memcpy(&obj->data.groundFlash, &flash, sizeof(flash));
                     }

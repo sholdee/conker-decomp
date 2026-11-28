@@ -164,9 +164,9 @@ s32 level_spawnZoneSpray(TriggerZone *zone);
 void level_resetSetupState(void);
 void func_1500E70C(s32 id);
 void level_setEffectDetail(void);
-void level_setup21(void);
+void level_setupTraining(void);
 void level_setup01(void);
-void level_setup36(void);
+void level_setupBeeCavern(void);
 
 /* game/Level/LevelSetupBarnInside/levelsetupbarninside.c */
 void level_emptySetupBarnInside(void);
@@ -242,7 +242,7 @@ void level_setupMachineGunNest(void);
 void level_setupLab(void);
 
 /* game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse.c */
-extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
+extern struct TexScroll **gW3HauntedHouseTexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
 void level_setupW3HauntedHouse(void);
 
 /* game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse.c */

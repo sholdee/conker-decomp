@@ -42,7 +42,7 @@ Gfx gScreenSpriteTeardownDl[] = {
 s32 (*gScreenSpriteUpdates[15])() = {
     NULL,          blood_updateFallingScreenSprite, particle_updateSlidingSprite, blood_updateSplat, sight_updateZTriggerFade,
     sight_updateSidePanel, particle_updateSineOscillator, sight_updateCircleDot, sight_updateRingGauge, sight_updateCrossBar,
-    effect_updateRisingScreenSprite, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
+    effect_updateFallingScreenSprite, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };
 void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
     NULL, particle_handleSlidingSpriteMessage, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, effect_hopSpriteMessage, NULL, NULL,

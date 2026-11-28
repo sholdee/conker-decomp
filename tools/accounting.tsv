@@ -774,9 +774,9 @@ game_initLevelSubsystems	0x1500E470	336	game	c		build/src/game/Game/LevelInit/le
 level_resetSetupState	0x1500E5C0	332	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 func_1500E70C	0x1500E70C	44	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_setEffectDetail	0x1500E738	344	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
-level_setup21	0x1500E890	48	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
+level_setupTraining	0x1500E890	48	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_setup01	0x1500E8C0	480	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
-level_setup36	0x1500EAA0	128	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
+level_setupBeeCavern	0x1500EAA0	128	game	c		build/src/game/Level/LevelSetupReset/levelsetupreset.c.o
 level_emptySetupBarnInside	0x1500EB20	16	game	c		build/src/game/Level/LevelSetupBarnInside/levelsetupbarninside.c.o
 level_queueObjectDropBarnOutside	0x1500EB30	148	game	c		build/src/game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c.o
 level_setupBarnOutside	0x1500EBC4	444	game	c		build/src/game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c.o
@@ -1987,7 +1987,7 @@ script_breakIntoParts	0x150772E8	48	game	c		build/src/game/Script/ObjScript/objs
 script_setHidden	0x15077318	68	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_doNothing	0x1507735C	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setAnimSpeedAndAccel	0x15077364	160	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15077404	0x15077404	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_setOrStepAnimSpeed	0x15077404	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfAtDestination	0x150774B4	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_stepPathGraph	0x15077508	1000	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_advanceWaypoint	0x150778F0	184	game	c		build/src/game/Script/ObjScript/objscript.c.o
@@ -2676,7 +2676,7 @@ script_exitTask	0x150AE280	32	game	hasm	d,g	build/src/game/Script/TaskExit/taske
 collision_updateWobble	0x150AE2A0	188	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 func_150AE35C	0x150AE35C	16	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 collision_buildTransformedUprightQuad	0x150AE36C	580	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
-effect_levelHook02	0x150AE5B0	480	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
+effect_levelHookTheWindmill	0x150AE5B0	480	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 effect_updateAttachedBurst	0x150AE790	1036	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 effect_spawnAttachedBursts	0x150AEB9C	304	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 func_150AECCC	0x150AECCC	128	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
@@ -2716,10 +2716,10 @@ func_150B1484	0x150B1484	856	game	c		build/src/game/Actor/HoverUpdates/hoverupda
 func_150B17DC	0x150B17DC	516	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
 func_150B19E0	0x150B19E0	976	game	c		build/src/game/Actor/HoverUpdates/hoverupdates.c.o
 colourfb_toGreyscale	0x150B1DB0	112	game	hasm	b	build/src/game/Effects/Greyscale/greyscale.s.o
-particle_levelHook29	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
+particle_levelHookWindmillExploded	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_spawnPointEmitter	0x150B1EE0	176	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_updatePointEmitter	0x150B1F90	944	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
-particle_levelHook21	0x150B2340	320	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
+particle_levelHookBarnArena	0x150B2340	320	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_selectObjGroundBurst	0x150B2480	20	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
 particle_spawnObjGroundBurst	0x150B2494	220	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
 particle_spawnYawStreak	0x150B2570	464	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
@@ -2819,7 +2819,7 @@ actor_updateFollower	0x150BDB70	800	game	c		build/src/game/Actor/Follower/follow
 effect_newEmitterSpawner	0x150BDE90	124	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
 effect_updateEmitterSpawner	0x150BDF0C	580	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
 effect_emitterSpawnerMessage	0x150BE150	116	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
-effect_updateRisingScreenSprite	0x150BE1C4	76	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
+effect_updateFallingScreenSprite	0x150BE1C4	76	game	c		build/src/game/Effects/Sfx/effects_sfx_w1_bee_cavern.c.o
 effect_turnWhilePushed	0x150BE210	216	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
 effect_updatePathMover	0x150BE2E8	336	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
 func_150BE438	0x150BE438	92	game	c		build/src/game/Effects/DebrisSplash/debrissplash.c.o
@@ -2831,8 +2831,8 @@ effect_spawnQuadrupedFootprint	0x150BEACC	356	game	c		build/src/game/Effects/Bon
 effect_getQuadrupedFootPosAlt	0x150BEC30	248	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 effect_selectQuadrupedFootEffectAlt	0x150BED28	36	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
 effect_spawnQuadrupedFootprintAlt	0x150BED4C	356	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
-effect_levelHook27	0x150BEEB0	192	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
-prop_emptyLevelUpdateHook2	0x150BEF70	12	game	c		build/src/game/Prop/Scenery/scenery.c.o
+effect_levelHookBrontoCavern	0x150BEEB0	192	game	c		build/src/game/Effects/BoneGroundFx/bonegroundfx.c.o
+prop_emptyLevelUpdateHookBrontoCavern	0x150BEF70	12	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_startMirroredEmitters	0x150BEF7C	376	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_updateStyleFadeGrow	0x150BF0F4	296	game	c		build/src/game/Prop/Scenery/scenery.c.o
 prop_moveToHeightAndBob	0x150BF21C	1348	game	c		build/src/game/Prop/Scenery/scenery.c.o
@@ -2990,7 +2990,7 @@ actor_updateMount	0x150CE740	2000	game	c		build/src/game/Actor/MountControl/moun
 camera_levelHookInsideSafe	0x150CEF10	80	game	c		build/src/game/Camera/LevelHookInsideSafe/levelhookinsidesafe.c.o
 effect_levelUpdateRotatingZone	0x150CEF60	224	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
 effect_getAngleAroundRotatingZonePivot	0x150CF040	64	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
-effect_levelHook16	0x150CF080	32	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
+effect_levelHookPooCabin	0x150CF080	32	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
 func_150CF0A0	0x150CF0A0	160	game	c		build/src/game/Prop/LinkedToggle/linkedtoggle.c.o
 effect_updateActorEmitter	0x150CF140	836	game	c		build/src/game/Effects/ActorEmitterTick/actoremittertick.c.o
 effect_actorEmitterMessage	0x150CF484	172	game	c		build/src/game/Effects/ActorEmitterTick/actoremittertick.c.o
@@ -3031,7 +3031,7 @@ effect_updateAmbientPulse	0x150D149C	148	game	c		build/src/game/Effects/LevelAct
 camera_scaleBySpeed	0x150D1530	736	game	c		build/src/game/Camera/SpeedDistance/speeddistance.c.o
 env_drawSkyGradient	0x150D1810	816	game	c		build/src/game/Env/SkyGradient/skygradient.c.o
 light_updateAmbientRedDrift	0x150D1B40	144	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
-light_levelHook31	0x150D1BD0	96	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
+light_levelHookRockSolid	0x150D1BD0	96	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o
 effect_updateRaySpinner	0x150D1C30	828	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
 effect_raySpinnerMessage	0x150D1F6C	232	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
 effect_destroyRaySpinnerChildren	0x150D2054	92	game	c		build/src/game/Effects/RaySpinner/rayspinner.c.o
@@ -3089,7 +3089,7 @@ effect_advanceTexAnimClock	0x150D7630	44	game	c		build/src/game/Effects/TintedOb
 effect_bindAnimatedTextures	0x150D765C	308	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 effect_useHeldItem	0x150D7790	408	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
 func_150D7928	0x150D7928	2440	game	c		build/src/game/Effects/TintedObject/tintedobject.c.o
-attach_emptyLevelUpdateHook1	0x150D82B0	12	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
+attach_emptyLevelUpdateHookBoilerRoom	0x150D82B0	12	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_hookScrollTexH	0x150D82BC	284	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 attach_hookScrollTexV	0x150D83D8	440	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
 func_150D8590	0x150D8590	28	game	c		build/src/game/Attach/TextureScroll/texturescroll.c.o
@@ -3265,7 +3265,7 @@ particle_attachFogFlash	0x150ECA68	228	game	c		build/src/game/Particle/FogFlash/
 particle_onFogFlashEvent	0x150ECB4C	64	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 particle_updateFogFlash	0x150ECB8C	116	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 particle_spawnFloorImpactGreenFlash	0x150ECC00	112	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
-particle_levelHook17	0x150ECC70	1376	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
+particle_levelHookWarboss	0x150ECC70	1376	game	c		build/src/game/Particle/FogFlash/fogflash.c.o
 weapon_getAngleDelta	0x150ED1D0	100	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_getAngleToTarget	0x150ED234	100	game	c		build/src/game/Weapon/Tank/tank.c.o
 weapon_getShellAimError	0x150ED298	736	game	c		build/src/game/Weapon/Tank/tank.c.o
@@ -3325,8 +3325,8 @@ effect_updateSway	0x150F23E0	160	game	c		build/src/game/Effects/SwayObject/swayo
 effect_updateModelSway	0x150F2480	152	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_buildSwayMatrix	0x150F2518	136	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 effect_placeSwayLight	0x150F25A0	256	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
-effect_levelHook26	0x150F26A0	756	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
-effect_setTransportZonesDisabled	0x150F2994	204	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
+effect_levelHookW3HauntedHouse	0x150F26A0	756	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
+effect_setZonesDisabledForTransport	0x150F2994	204	game	c		build/src/game/Effects/SwayObject/swayobject.c.o
 particle_levelUpdateScrollingHazardProps	0x150F2A60	556	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_spawnBoneBurstEmitter	0x150F2C8C	136	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 particle_updateBoneBurstEmitter	0x150F2D14	1152	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
@@ -3338,7 +3338,7 @@ particle_cullObjectByCameraZ	0x150F33B0	72	game	c		build/src/game/Particle/BoneB
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
-player_levelHook24	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
+player_levelHookHorrorIntro	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 particle_spawnSpiral	0x150F4570	864	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_moveSpiral	0x150F48D0	360	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_updateSpiralFadeSound	0x150F4A38	708	game	c		build/src/game/Particle/Spiral/spiral.c.o
@@ -3375,7 +3375,7 @@ beam_updateFlashBurst	0x150F64DC	884	game	c		build/src/game/Beam/ModelBeam/model
 beam_flashBurstMessage	0x150F6850	64	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
 beam_spawnBoneBloodStrip	0x150F6890	204	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
 beam_emitBloodParticle	0x150F695C	420	game	c		build/src/game/Beam/ModelBeam/modelbeam.c.o
-camera_levelHook23	0x150F6B00	688	game	c		build/src/game/Camera/SegmentProgress/segmentprogress.c.o
+camera_levelHookBank	0x150F6B00	688	game	c		build/src/game/Camera/SegmentProgress/segmentprogress.c.o
 beam_sendOwnerGone	0x150F6DB0	52	game	c		build/src/game/Beam/CastBeam/castbeam.c.o
 beam_spawnCastBeam	0x150F6DE4	648	game	c		build/src/game/Beam/CastBeam/castbeam.c.o
 beam_updateCastBeam	0x150F706C	676	game	c		build/src/game/Beam/CastBeam/castbeam.c.o
@@ -3499,7 +3499,7 @@ particle_updateWobbleOffset	0x151025F4	200	game	c		build/src/game/Particle/RayBe
 particle_startObjRayBeam	0x151026BC	300	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 particle_stopObjEffect	0x151027E8	52	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 particle_isBeamStartFxVisible	0x1510281C	104	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
-particle_isBeamEndFxOn	0x15102884	40	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
+particle_isBeamEndFxVisible	0x15102884	40	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 particle_isBeamLineVisible	0x151028AC	116	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
 effect_spawnSurfaceSprite	0x15102920	536	game	c		build/src/game/Effects/BoneBeamParticle/bonebeamparticle.c.o
 effect_spawnBoneBeamParticle	0x15102B38	536	game	c		build/src/game/Effects/BoneBeamParticle/bonebeamparticle.c.o
@@ -3537,7 +3537,7 @@ beam_spawnImpactEffects	0x1510558C	700	game	c		build/src/game/Beam/BoltRain/bolt
 beam_sparkRegionMessage	0x15105848	108	game	c		build/src/game/Beam/BoltRain/boltrain.c.o
 beam_updateSparkRegion	0x151058B4	788	game	c		build/src/game/Beam/BoltRain/boltrain.c.o
 beam_updateSparkZone	0x15105BC8	92	game	c		build/src/game/Beam/BoltRain/boltrain.c.o
-beam_findZoneRectEffect	0x15105C24	188	game	c		build/src/game/Beam/BoltRain/boltrain.c.o
+beam_findBoltArcEffect	0x15105C24	188	game	c		build/src/game/Beam/BoltRain/boltrain.c.o
 beam_newBolt	0x15105CE0	940	game	c		build/src/game/Beam/BoltChain/boltchain.c.o
 beam_updateBolt	0x1510608C	340	game	c		build/src/game/Beam/BoltChain/boltchain.c.o
 beam_getBoltSamples	0x151061E0	12	game	c		build/src/game/Beam/BoltChain/boltchain.c.o
@@ -5237,7 +5237,7 @@ particle_destroyRegionEmitter	0x151A5CAC	64	game	c		build/src/game/Particle/Regi
 particle_freeRegionEmitter	0x151A5CEC	64	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
 particle_stopEffectSound	0x151A5D2C	44	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
 particle_spawnSurfaceMark	0x151A5D58	536	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
-particle_handleRegionEmitterMessage	0x151A5F70	248	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
+particle_handleZoneEffectMessage	0x151A5F70	248	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
 particle_fireRegionEmitter	0x151A6068	744	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
 particle_buildYawedVerticalQuad	0x151A6350	688	game	c		build/src/game/Particle/RegionEmitter/regionemitter.c.o
 particle_updateZoneEmitter	0x151A6600	1208	game	c		build/src/game/Particle/ZoneEmitter/zoneemitter.c.o

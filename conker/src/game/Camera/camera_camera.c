@@ -1453,13 +1453,13 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         actor_onAnimChanged(camera->CharPtr);
         gCameraSnapTimers[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
-            sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
+            sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, camera_onZoomSound, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f), 0, 0);
         } else if ((zone == 0x1B) || (zone == 0x1F) || (zone == 0x29)) {
             aimKey = ext->aimYawTarget * ext->aimPitchTarget;
-            sound_addDynamicSound(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x6590, 300, 299, camera_onZoomSound, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f) | 0x80000000, 0x100, 0);
-            sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)camera_onLookSound, camera, *(s32 *)&aimKey, 0x100, 0);
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, camera_onLookSound, camera, *(s32 *)&aimKey, 0x100, 0);
         }
         viewer->forcedCullMask |= 1 << camera->CNumber;
         viewer->cullMask |= 1 << camera->CNumber;
@@ -1579,7 +1579,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
 
 /* Sound callback while aiming (zoom): follows the player and switches between the gAimZoomSounds[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
-s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
+s32 camera_onZoomSound(SoundRecord *sound, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *soundId) {
     Camera *camera;
     u32 index;
     u32 oldZoom;
@@ -1638,7 +1638,7 @@ s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 
 }
 /* Sound callback while aiming (look): plays sound 0x61C while the aim angles keep changing, 0x61D
    once they settle. Returns 1 when the aim ended. */
-s32 camera_onLookSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId) {
+s32 camera_onLookSound(SoundRecord *sound, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *soundId) {
     Camera *camera;
     u32 count;
     u32 oldKey;

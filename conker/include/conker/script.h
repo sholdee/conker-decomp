@@ -128,7 +128,7 @@ void script_breakIntoParts(void);
 void script_setHidden(void);
 void script_doNothing(void);
 void script_setAnimSpeedAndAccel(void);
-void func_15077404(void);
+void script_setOrStepAnimSpeed(void);
 void script_jumpIfAtDestination(void);
 void script_stepPathGraph(void);
 void script_advanceWaypoint(void);

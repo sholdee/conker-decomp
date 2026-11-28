@@ -92,7 +92,7 @@ void collision_setFloorReach(s32 map);
 s32 collision_xorScramble(s32 value);
 void collision_loadMapSettings(s32 map);
 void collision_loadMapSettingsChecksumEnd(void);
-extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
+extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game/Game/ClearBss/clearbss.c clears the game .bss from here */
 
 /* game/Collision/CylinderSets/cylindersets.c */
 void collision_loadCylinderSets(s32 levelId);

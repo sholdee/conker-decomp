@@ -1544,8 +1544,8 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
 }
 
 /* particle_spawnSoundPulse or particle_spawnPulse */
-typedef PulseParticle *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s16, u8, s32, f32, u8, u8,
-                                          u8, s32);
+typedef PulseParticle *(*PulseSpawnFunc)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s16, u8, s32, f32, u8, u8,
+                                         u8, s32);
 
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
 void blood_spawnDeathEffects(Actor *actor, u8 owner, s32 list) {
@@ -1561,7 +1561,7 @@ void blood_spawnDeathEffects(Actor *actor, u8 owner, s32 list) {
     Vec3f velocity;
     Vec3f rotation;
     Vec3f spin;
-    Blood3783CSpawn spawn;
+    PulseSpawnFunc spawn;
 
     if (actor == NULL) {
         return;
@@ -2046,7 +2046,8 @@ const Vec3f D_800A4188[4] = {
 };
 const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
 
-/* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
+/* Gore for blood profile 3 (MODEL_SHC_SOLDIER, MODEL_SHC_SOLDIER_VARIANT, MODEL_RODENT), 5 and 6 (MODEL_VILLAGER_BROWN_HAT,
+ * MODEL_VILLAGER_STRIPED_BONNET) actors: a random chunk set from D_800A4160 and, with extraSpray (profile 3), chunk model 0x48. */
 void blood_spawnSoldierAndVillagerGore(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list) {
     u8 index;
     Vec3f boneRot;

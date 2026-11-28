@@ -23,7 +23,7 @@ const s16 D_800A00E0[4][4] = {
     { -479, 1035, 0, 200 },
 };
 
-void prop_emptyLevelUpdateHook2(s32 unused) {
+void prop_emptyLevelUpdateHookBrontoCavern(s32 unused) {
 }
 
 /* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of duration. */

@@ -121,7 +121,7 @@ void effect_spawnQuadrupedFootprintAlt(s32 actor, s32 side, s32 strength) {
 }
 
 /* Sets or clears flag bits in unk84 from script_query queries. */
-void effect_levelHook27(Camera *arg0) {
+void effect_levelHookBrontoCavern(Camera *arg0) {
     if (script_query(1, 0x4063, 6, 0x2000) || script_query(1, 0x4001, 6, 0x9000)) {
         arg0->AvailableModes |= 0x1010;
     } else {

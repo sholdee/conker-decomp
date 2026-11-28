@@ -6,7 +6,7 @@
 #include "conker/texture.h"
 
 /* The six ropes of the level (higher end first). */
-static const RopeEnds gSetup19RopeEnds[6] = {
+static const RopeEnds gPooCabinRopeEnds[6] = {
     { { 17.0f, 96.0f, -1183.0f }, { 17.0f, -983.0f, -1183.0f } },
     { { 321.0f, 530.0f, -1506.0f }, { 321.0f, -8.0f, -1506.0f } },
     { { 585.0f, 642.0f, -1579.0f }, { 585.0f, -369.0f, -1579.0f } },
@@ -24,7 +24,7 @@ void level_setupPooCabin(void) {
 
     tmp.unk20 = 0;
     for (i = 0; i < 6; i++) {
-        tmp.ends = gSetup19RopeEnds[i];
+        tmp.ends = gPooCabinRopeEnds[i];
         tmp.id = i + 1;
         tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
         rope_create(&tmp, 0);

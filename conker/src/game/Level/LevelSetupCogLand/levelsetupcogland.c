@@ -7,11 +7,11 @@
 #include "conker/rope.h"
 
 /* The five ropes of the level (higher end first). */
-static const RopeEnds gSetup11Rope1Ends = { { -2544.0f, 2426.0f, 2213.0f }, { -2544.0f, 1144.0f, 2213.0f } };
-static const RopeEnds gSetup11Rope2Ends = { { -1987.0f, 1380.0f, 1904.0f }, { -1987.0f, 249.0f, 1904.0f } };
-static const RopeEnds gSetup11Rope3Ends = { { -2162.0f, 534.0f, 1344.0f }, { -2162.0f, -645.0f, 1344.0f } };
-static const RopeEnds gSetup11Rope4Ends = { { -2128.0f, -701.0f, 2129.0f }, { -2128.0f, -1545.0f, 2129.0f } };
-static const RopeEnds gSetup11Rope5Ends = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f, 2111.0f, 2174.0f } };
+static const RopeEnds gCogLandRope1Ends = { { -2544.0f, 2426.0f, 2213.0f }, { -2544.0f, 1144.0f, 2213.0f } };
+static const RopeEnds gCogLandRope2Ends = { { -1987.0f, 1380.0f, 1904.0f }, { -1987.0f, 249.0f, 1904.0f } };
+static const RopeEnds gCogLandRope3Ends = { { -2162.0f, 534.0f, 1344.0f }, { -2162.0f, -645.0f, 1344.0f } };
+static const RopeEnds gCogLandRope4Ends = { { -2128.0f, -701.0f, 2129.0f }, { -2128.0f, -1545.0f, 2129.0f } };
+static const RopeEnds gCogLandRope5Ends = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f, 2111.0f, 2174.0f } };
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */
 void level_queueObjectDropCogLand(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding) {
@@ -32,25 +32,25 @@ void level_setupCogLand(void) {
 
     tmp.unk20 = 0;
 
-    tmp.ends = gSetup11Rope1Ends;
+    tmp.ends = gCogLandRope1Ends;
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
     rope_create(&tmp, 0);
 
-    tmp.ends = gSetup11Rope2Ends;
+    tmp.ends = gCogLandRope2Ends;
     tmp.id = 2;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
     rope_create(&tmp, 0);
 
-    tmp.ends = gSetup11Rope3Ends;
+    tmp.ends = gCogLandRope3Ends;
     tmp.id = 3;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
     rope_create(&tmp, 0);
 
-    tmp.ends = gSetup11Rope4Ends;
+    tmp.ends = gCogLandRope4Ends;
     tmp.id = 4;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
-    tmp.ends = gSetup11Rope5Ends;
+    tmp.ends = gCogLandRope5Ends;
     tmp.id = 5;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
     rope_create(&tmp, 0);

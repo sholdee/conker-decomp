@@ -95,7 +95,7 @@ s32 particle_sampleSegmentPower(BloodStrip *emitter) {
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->power. Skipped while the owner is in water or moving slower than 8.1.
  */
-void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *emitter) {
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *emitter) {
     EffectParams params;
     EffectMotion motion;
     const Vec3f *ownerMotion;

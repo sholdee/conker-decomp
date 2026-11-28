@@ -211,7 +211,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface,
 /* Message handler of the zone effects (gTimedEffectMessageFuncs[0x2C]): on message 0x35 whose id list contains the
  * effect's id, fires the effect's zone once (while its inactive is 1) and records the message's player. Bit 0 of
  * flags plays sounds, bit 1 is copied into the zone emitter's hasZone; node is the spawn zone (ParticleDef.zone). */
-void particle_handleRegionEmitterMessage(ZoneEffect *listener, void *data, u8 type) {
+void particle_handleZoneEffectMessage(ZoneEffect *listener, void *data, u8 type) {
     ZoneTriggerMsg *msg = data;
     s32 i;
     s32 found;

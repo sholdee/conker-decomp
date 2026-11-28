@@ -409,7 +409,7 @@ void actor_startTurnAnim(Actor *actor, u8 turn, u8 row) {
     if (*entry != 0xFF) {
         actor->scriptCmd--;
         actor->scriptTimer = 20000;
-        actor->moveMode = 0xD;
+        actor->moveMode = MOVE_MODE_TURN_ANIM;
         actor->stickspeed = 0.0f;
         actor->intel_animseq = *entry;
         actor->mvmt_control &= ~0xE;
@@ -463,11 +463,11 @@ void actor_updateChaseAi(Actor *actor) {
     }
     script_runActor(actor);
     mode = actor->moveMode;
-    if ((mode == 0xE) || (mode == 0xF) || (mode == 0x10)) {
-        mode = 1;
+    if ((mode == MOVE_MODE_CHASE_3D) || (mode == MOVE_MODE_CHASE_NO_LEASH) || (mode == MOVE_MODE_INTERCEPT)) {
+        mode = MOVE_MODE_CHASE;
     }
-    if (mode == 0x11) {
-        mode = 0;
+    if (mode == MOVE_MODE_WAYPOINT_WEAVE) {
+        mode = MOVE_MODE_WAYPOINT;
     }
     if (actor->stunned != 0) {
         return;
@@ -491,10 +491,10 @@ void actor_updateChaseAi(Actor *actor) {
         tx = gSpawnPaths[actor->listpos]->x - actor->xpos;
         tz = gSpawnPaths[actor->listpos]->z - actor->zpos;
     }
-    if ((actor->task_attrib & 4) && !(actor->task_attrib & 1) && ((state == 1) || (state == 3))) {
+    if ((actor->task_attrib & 4) && !(actor->task_attrib & 1) && ((state == MOVE_MODE_CHASE) || (state == MOVE_MODE_FOLLOW))) {
         actor->scriptTimer = 0;
     }
-    if ((actor->task_attrib & 1) && ((state == 0) || (state == 5))) {
+    if ((actor->task_attrib & 1) && ((state == MOVE_MODE_WAYPOINT) || (state == MOVE_MODE_ORBIT_WAYPOINT))) {
         if (actor_isTargetInPathArea(actor, actor->unk259[2]) != 0) {
             actor->scriptCmd = script_getScript(1, actor->spotScript);
             actor->scriptTimer = 0;
@@ -505,14 +505,15 @@ void actor_updateChaseAi(Actor *actor) {
     if (actor->unk259[1] != 0) {
         actor->stickspeed = actor->unk259[1];
     }
-    if ((state == 1) || (state == 0xC) || (state == 2) || (state == 3) || (state == 9) || (state == 0xA) ||
+    if ((state == MOVE_MODE_CHASE) || (state == 0xC) || (state == MOVE_MODE_FLEE) || (state == MOVE_MODE_FOLLOW) ||
+        (state == MOVE_MODE_TO_TARGET) || (state == MOVE_MODE_WAYPOINT_WATCH_TARGET) ||
         ((state == 6) && !(actor->unk22C & 1))) {
         targetIdx = actor->targetIndex;
         target = &movement_obj[targetIdx];
         tx = target->xpos;
         tz = target->zpos;
         ty = target->ypos;
-        if (actor->moveMode == 0x10) {
+        if (actor->moveMode == MOVE_MODE_INTERCEPT) {
             f32 leadX;
             f32 leadZ;
             f32 leadY;
@@ -526,35 +527,35 @@ void actor_updateChaseAi(Actor *actor) {
         dx = tx - actor->xpos;
         dz = tz - actor->zpos;
         dist = sqrtf((dx * dx) + (dz * dz));
-        if ((state == 1) && (actor->stickspeed > 1.0f) && (sqrtf(rangeSq) < (dist * 0.8000000119f))) {
+        if ((state == MOVE_MODE_CHASE) && (actor->stickspeed > 1.0f) && (sqrtf(rangeSq) < (dist * 0.8000000119f))) {
             actor->scriptTimer = 0;
         }
         if (actor->character_type != 0x16) {
-            if ((state == 1) && (actor->nearScript != 0) && ((dist < 370.0f) || (actor->character_type == 0x21)) && (targetIdx < 4) &&
+            if ((state == MOVE_MODE_CHASE) && (actor->nearScript != 0) && ((dist < 370.0f) || (actor->character_type == 0x21)) && (targetIdx < 4) &&
                 ((actor->speed > 15.0f) || (actor->character_type == 0x53))) {
                 if (target->mv != NULL) {
                     target->mv->chased = 10;
                 }
             }
-            if ((state == 2) && (dist < 470.0f) && (targetIdx < 4) && (((actor->angle - target->angle) - 0x4000) & 0x8000)) {
+            if ((state == MOVE_MODE_FLEE) && (dist < 470.0f) && (targetIdx < 4) && (((actor->angle - target->angle) - 0x4000) & 0x8000)) {
                 if (target->mv != NULL) {
                     target->mv->chasing = 6;
                 }
             }
         }
-        if (state != 9) {
+        if (state != MOVE_MODE_TO_TARGET) {
             f32 range;
             s32 ok;
             u16 angle;
 
-            if ((state != 0xA) && (state != 0xC)) {
+            if ((state != MOVE_MODE_WAYPOINT_WATCH_TARGET) && (state != 0xC)) {
                 scanForTargets = 0;
             }
             if ((actor->unk22C & 0x80) &&
                 (fabsf((actor->ypos - actor->shad) - (target->ypos - target->shad)) > 30.0f)) {
                 actor->scriptTimer = 0;
             }
-            if (actor->moveMode != 0xF) {
+            if (actor->moveMode != MOVE_MODE_CHASE_NO_LEASH) {
                 if (actor_isTargetInPathArea(actor, actor->targetIndex) == 0) {
                     actor->scriptTimer = 0;
                 }
@@ -566,7 +567,7 @@ void actor_updateChaseAi(Actor *actor) {
             } else {
                 range = (actor->nearRange == 0xFF) ? 3000000.0f : actor->nearRange * 8;
             }
-            if (((state == 1) || (state == 6) || (state == 0xA)) && (actor->nearScript != 0) && (dist < range)) {
+            if (((state == MOVE_MODE_CHASE) || (state == 6) || (state == MOVE_MODE_WAYPOINT_WATCH_TARGET)) && (actor->nearScript != 0) && (dist < range)) {
                 ok = 1;
                 if ((actor->character_type == 8) && (range < fabsf(actor->ypos - target->ypos))) {
                     ok = 0;
@@ -648,7 +649,7 @@ void actor_updateChaseAi(Actor *actor) {
                 }
             }
         }
-        if ((actor->alertCooldown == 0) && (state != 4) && (state != 7) &&
+        if ((actor->alertCooldown == 0) && (state != MOVE_MODE_LEAP_TO_WAYPOINT) && (state != 7) &&
             (((alertKind == 0) && (actor->spotWideScript != 0)) ||
              ((alertKind == 1) && (actor->spotScript != 0) && !(actor->task_attrib & 4)))) {
             u8 spotted;
@@ -719,7 +720,7 @@ void actor_updateChaseAi(Actor *actor) {
                 }
             }
         }
-        if (state != 9) {
+        if (state != MOVE_MODE_TO_TARGET) {
             if ((state == 6) || (state == 0xC)) {
                 tx = movement_obj[actor->targetIndex].xpos;
                 tz = movement_obj[actor->targetIndex].zpos;
@@ -729,7 +730,7 @@ void actor_updateChaseAi(Actor *actor) {
                 tz = gSpawnPaths[actor->listpos][actor->waypoint + 1].z;
                 ty = gSpawnPaths[actor->listpos][actor->waypoint + 1].y;
             }
-            if ((state == 5) || (state == 6)) {
+            if ((state == MOVE_MODE_ORBIT_WAYPOINT) || (state == 6)) {
                 f32 orbitX;
                 f32 orbitZ;
                 f32 orbitY;
@@ -766,7 +767,7 @@ void actor_updateChaseAi(Actor *actor) {
         targetDist += ty * ty;
     }
     targetDist = sqrtf(targetDist);
-    if ((state != 4) && (state != 7) && (state != 8)) {
+    if ((state != MOVE_MODE_LEAP_TO_WAYPOINT) && (state != 7) && (state != 8)) {
         u8 k;
         u8 n;
         u16 prevMoveAngle;
@@ -774,13 +775,13 @@ void actor_updateChaseAi(Actor *actor) {
         s32 flags;
 
         prevMoveAngle = actor->angle;
-        if (state == 2) {
+        if (state == MOVE_MODE_FLEE) {
             actor->fangle ^= 0x8000;
             if (!(actor->mvmt_control & 0x4000)) {
                 actor->fangle += (((actor->scriptTimer / 100) & 0x20) - 0x10) << 8;
             }
         }
-        if (actor->moveMode == 0x11) {
+        if (actor->moveMode == MOVE_MODE_WAYPOINT_WEAVE) {
             actor->fangle += (((actor->scriptTimer / 100) & 0x10) - 8) << 9;
         }
         if ((actor->mvmt_control & 0x200) && (actor->unk1F4 < 3.0f)) {
@@ -789,8 +790,8 @@ void actor_updateChaseAi(Actor *actor) {
         }
         arriveDist = actor->arriveRange * 8;
         turnDiff = actor_turnMoving(actor, moveTurnSpeed);
-        if (state != 0xD) {
-            if (((u8)actor->turnAnimRow != 0) && ((state != 0) || (arriveDist < targetDist))) {
+        if (state != MOVE_MODE_TURN_ANIM) {
+            if (((u8)actor->turnAnimRow != 0) && ((state != MOVE_MODE_WAYPOINT) || (arriveDist < targetDist))) {
                 k = (u8)actor->turnAnimRow - 1;
                 if (gTurnAnimTable[k][0] < turnDiff) {
                     actor->angle = prevMoveAngle;
@@ -798,11 +799,11 @@ void actor_updateChaseAi(Actor *actor) {
                 }
             }
         }
-        if (state == 0xD) {
+        if (state == MOVE_MODE_TURN_ANIM) {
             moveTurnSpeed = 0;
             faceTurnRate = 0;
         }
-        if ((info->unk19 < turnDiff) && (state != 2)) {
+        if ((info->unk19 < turnDiff) && (state != MOVE_MODE_FLEE)) {
             speed = 0.0f;
             if (actor->turnStopScript && (actor->speed > 15.0f)) {
                 actor->scriptCmd = script_getScript(6, actor->turnStopScript);
@@ -810,7 +811,7 @@ void actor_updateChaseAi(Actor *actor) {
                 actor->targetIndex = 0;
             }
         }
-        if (((state == 0) || (state == 0xA)) && (targetDist < arriveDist)) {
+        if (((state == MOVE_MODE_WAYPOINT) || (state == MOVE_MODE_WAYPOINT_WATCH_TARGET)) && (targetDist < arriveDist)) {
             n = gSpawnPathCounts[actor->listpos] - 1;
             if (actor->waypointEnd != 0) {
                 n = actor->waypointEnd;
@@ -938,7 +939,7 @@ void actor_playMoveAnim(Actor *actor, f32 idleRate) {
             }
         }
     }
-    if (actor->moveMode == 0xD) {
+    if (actor->moveMode == MOVE_MODE_TURN_ANIM) {
         rate = (actor->turnAnimSpeed & 0x7F) * 0.1000000015f;
     }
     if (flags == 0xFF) {

@@ -11,7 +11,7 @@
 #include "conker/zone.h"
 
 /* The level's rope (higher end first). */
-static const RopeEnds gSetup22RopeEnds = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
+static const RopeEnds gMachineGunNestRopeEnds = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
 
 void level_setupWarboss(void) {
     prop_createWaveDeformer(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
@@ -65,7 +65,7 @@ void level_setupMachineGunNest(void) {
     RopeSpawn tmp;
 
     tmp.unk20 = 0;  
-    tmp.ends = gSetup22RopeEnds;
+    tmp.ends = gMachineGunNestRopeEnds;
 
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 

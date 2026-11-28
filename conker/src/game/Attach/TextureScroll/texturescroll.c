@@ -11,7 +11,7 @@ void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *
                    u8 b, u8 owner, s32 list);
 
 
-void attach_emptyLevelUpdateHook1(s32 unused) {
+void attach_emptyLevelUpdateHookBoilerRoom(s32 unused) {
 }
 
 

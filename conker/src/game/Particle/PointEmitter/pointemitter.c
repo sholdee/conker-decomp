@@ -8,7 +8,7 @@
 
 /* Mirrors game flag 0x4054 into camera->AvailableModes bit 0x10000; when 0x405B is set but 0x405C is not (and
  * camera->Mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
-void particle_levelHook29(Camera *camera) {
+void particle_levelHookWindmillExploded(Camera *camera) {
     Actor *target;
 
     if (script_query(1, 0x4054, 6, 0x9000)) {
@@ -107,7 +107,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
 }
 
 /* Sets camera distances (YOffsetTget, height/idealHeight/IdealTripodMagnitude) and flag bits in AvailableModes/SpecialFlags from game flags. */
-void particle_levelHook21(Camera *camera) {
+void particle_levelHookBarnArena(Camera *camera) {
     s32 flagBC;
     s32 flagBB;
 

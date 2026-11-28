@@ -275,7 +275,7 @@ void camera_levelHookBankEntrance(Camera *camera);
 void camera_levelUpdateWaveChains(s32 unused);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
-void camera_levelHook23(Camera *camera);
+void camera_levelHookBank(Camera *camera);
 
 /* game/Camera/LevelHookEndArena/levelhookendarena.c */
 void camera_levelHookEndArena(Camera *camera);
@@ -362,8 +362,8 @@ void camera_filterButtons(Camera *camera);
 void camera_moveFocus(Camera *camera);
 void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView);
 s32 camera_updateFirstPersonAim(Camera *camera);
-s32 camera_onZoomSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
-s32 camera_onLookSound(SoundRecord *sound, s32 active, s32 volume, s32 pan, s32 cents, s32 mix, u16 *soundId);
+s32 camera_onZoomSound(SoundRecord *sound, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *soundId);
+s32 camera_onLookSound(SoundRecord *sound, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *soundId);
 s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad);
 void camera_leaveFirstPersonAim(Camera *camera);
 void camera_startTransition(Camera *camera, s32 duration, s32 yaw);

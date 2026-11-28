@@ -401,7 +401,7 @@ s32 effect_restartTaskPulse(PulseFx *fx) {
 }
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *obj) {
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, Vec3f *velocityA, Vec3f *velocityB, f32 t, BloodStrip *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;

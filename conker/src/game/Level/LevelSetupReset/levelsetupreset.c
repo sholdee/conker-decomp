@@ -50,7 +50,7 @@ void level_resetSetupState(void) {
     gSprayAreas[0] = NULL;
     gSprayAreas[1] = NULL;
     gSprayAreas[2] = NULL;
-    gSetup33TexScrolls = NULL;
+    gW3HauntedHouseTexScrolls = NULL;
     gZoneFlag = 0;
 }
 
@@ -115,7 +115,7 @@ void level_setEffectDetail(void) {
     }
 }
 
-void level_setup21(void) {
+void level_setupTraining(void) {
     prop_clearWaveChains();
     prop_startWaveChain(0);
     prop_startWaveChain(1);
@@ -157,7 +157,7 @@ void level_setup01(void) {
     sound_addDynamicSound(1567, (level == LEVEL_THE_WINDMILL) ? 52 : 7, 0, 0, 12000, 1000, 400, sound_stopWhenSilentCallback, 0, 0, 72, 0);
 }
 
-void level_setup36(void) {
+void level_setupBeeCavern(void) {
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_80090320, 0, -1, 0, 0, 0, -8);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

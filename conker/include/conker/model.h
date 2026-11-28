@@ -37,11 +37,11 @@ typedef struct OffsetEntry {
 /* game/Model/ActorQuadAlloc/actorquadalloc.c */
 void model_allocActorQuadVtx(void);
 
-/* game_322B0.c */
+/* game/Model/PartsReset/partsreset.c */
 void model_resetParts(void);
 void model_allocBonePools(void);
 
-/* game_323B0.c */
+/* game/Model/AttachReset/attachreset.c */
 void model_resetAttachments(void);
 void model_resetBoneChains(void);
 

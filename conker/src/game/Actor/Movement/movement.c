@@ -2928,7 +2928,7 @@ void actor_updatePathFollower(Actor *obj) {
     if (obj->unk224 != 0) {
         targetY = obj->unk224;
     }
-    if ((obj->moveMode == 14) || (obj->moveMode == 3)) {
+    if ((obj->moveMode == MOVE_MODE_CHASE_3D) || (obj->moveMode == MOVE_MODE_FOLLOW)) {
         targetY = movement_obj[obj->targetIndex].ypos - 40.0f;
     }
     if ((obj->character_type == 0x4F) || (obj->character_type == 0x83)) {
@@ -2951,7 +2951,7 @@ void actor_updatePathFollower(Actor *obj) {
         if ((floorY < obj->ypos) && (obj->yspd > 0.0f)) {
             obj->yspd *= 0.8000000119f;
         }
-        if (obj->moveMode != 3) {
+        if (obj->moveMode != MOVE_MODE_FOLLOW) {
             heightMode = 1;
         }
     }

@@ -174,7 +174,7 @@ void light_updatePlayerLight(s32 player);
 
 /* game/Effects/AmbientPulse/ambientpulse.c */
 void light_updateAmbientRedDrift(AmbientPulse *arg0); /* AmbientPulse: conker/effect.h */
-void light_levelHook31(s32 *arg0);
+void light_levelHookRockSolid(s32 *arg0);
 
 /* game/Effects/ColourWave/colourwave.c */
 void light_updateColourWave(ColourWaveEffect *object);

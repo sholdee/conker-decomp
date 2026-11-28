@@ -13,16 +13,14 @@
 #include "conker/trail.h"
 #include "libc/string.h"
 
-/* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
+/* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. One table: the slot lists of
+ * game/Effects/AttachmentTables/attachmenttables.c and gAttachSpawnSlotsById index it up to 57. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           effect_attachBone6GlowAndBone5Trail, effect_attachNarrowBone6GlowAndBone5Trail, effect_attachBone12GlowAndLight, effect_attachCharacterEffectMinus1, effect_attachCharacterEffect1,
     effect_attachCharacterEffect0,  effect_attachCharacterEffect2, effect_attachCharacterEffect3, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
     effect_attachRedBoneGlowsAndLight,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, effect_attachFixedPointStripToBone6, func_1514DA38,
     effect_hidePart1AndAttachEmitterWatcher,  effect_attachCharacterWatcher, effect_spawnRopeTieInDinoArena, func_1514DE88, func_1514DB98,
-};
-
-/* Spawn callbacks by object id; entry 0 runs for every object first. */
-static void (*gAttachSpawnFuncsById[])(Actor *) = {
+    /* 23: runs for every object first */
     effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, effect_attachBone1RedLightAndGlow,
     func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, effect_attachBone5LightBeam, func_1514DE0C, effect_hidePart1, effect_spawnActorEmitter, func_1514DE2C,
@@ -41,9 +39,9 @@ static s32 (*gAttachMessageFuncs[])() = {
 
 /* Emitter offsets. */
 static const Vec3f gBone2LightOffset = { 0.0f, 75.0f, 96.0f };
-static const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
-static const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
-static const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
+static const Vec3f gBone12BeamStart = { 0.0f, 66.0f, 50.0f };
+static const Vec3f gBone12BeamEnd = { 0.0f, 66.0f, 274.0f };
+static const Vec3f gBone0LightOffset = { 0.0f, 31.0f, 73.0f };
 
 /**
  * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
@@ -436,7 +434,7 @@ s32 effect_spawnAttachments(Actor *obj) {
         effect_newPlayerMarker(slot, 0xFF);
     }
 
-    gAttachSpawnFuncsById[0](obj);
+    gAttachSpawnFuncs[23](obj);
     // matching: the zero test must be on the s32 result, not on the u8 copy
     found = effect_findAttachSpawnSlots(obj, &uniqueSlot, &globalSlot, &idSlot);
     flags = found;
@@ -661,25 +659,21 @@ void func_1514D96C(Actor *obj) {
     SurfaceTrailOwner, then the ActorTaskFx slots. All of it is zero except the trail side offset (12). */
 void effect_attachSurfaceTrailWatcher(Actor *obj) {
     struct {
-        s32 unk0;
-        s32 unk4;
-        s32 unk8;
-        s32 unkC;
-        f32 unk10;
+        TrailSet trails;
         s32 unk14;
         s32 unk18;
         s32 unk1C;
     } payload;
     void *handle;
 
-    payload.unk0 = 0;
-    payload.unk4 = 0;
-    payload.unk8 = 0;
-    payload.unkC = 0;
+    payload.trails.sides[0].trail = NULL;
+    payload.trails.sides[0].spawner = NULL;
+    payload.trails.sides[1].trail = NULL;
+    payload.trails.sides[1].spawner = NULL;
     payload.unk14 = 0;
     payload.unk18 = 0;
     payload.unk1C = 0;
-    payload.unk10 = 12.0f;
+    payload.trails.sideOffset = 12.0f;
 
     handle = effect_newCharacterWatcher(obj, 1, sizeof(payload));
     if (handle != NULL) {
@@ -849,13 +843,13 @@ void func_1514DE88(Actor *obj) {
 void func_1514DE94(Actor *obj) {
     ModelAttachment *part;
 
-    light_createBeam(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
+    light_createBeam(obj, 12, &gBone12BeamStart, &gBone12BeamEnd, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
     if (gLevelLoadState == 0) {
         part->hookState = 2400;
     }
-    effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
+    effect_attach(light_createAttached(obj, 0, &gBone0LightOffset, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
@@ -1087,9 +1081,9 @@ void effect_attachCharacterEffect3(Actor *obj) {
 }
 
 /* Emitter offsets of effect_attachBone1RedLightAndGlow and effect_attachTankEffects. */
-static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
-static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
-static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
+static const Vec3f gBone1LightOffset = { 0.0f, 90.0f, 0.0f };
+static const Vec3f gBone1GlowP0 = { 0.0f, 70.0f, 0.0f };
+static const Vec3f gBone1GlowP1 = { 0.0f, 120.0f, 0.0f };
 static const Vec3f gTankFrontLightOffset = { 0.0f, 112.0f, 151.0f };
 static const Vec3f gTankRearLightOffset = { 0.0f, 74.0f, -161.0f };
 
@@ -1394,7 +1388,7 @@ void effect_attachActorTracker(Actor *obj) {
 void effect_attachBone1RedLightAndGlow(Actor *obj) {
     void *handle;
 
-    handle = light_createAttached(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
+    handle = light_createAttached(obj, 1, &gBone1LightOffset, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     effect_attach(handle, obj, 0x19);
     {
         ParticleDef spawn;
@@ -1445,8 +1439,8 @@ void effect_attachBone1RedLightAndGlow(Actor *obj) {
 
         attach.targetId = obj->unique_id;
         attach.target = obj;
-        attach.p0 = D_800A5940;
-        attach.p1 = D_800A594C;
+        attach.p0 = gBone1GlowP0;
+        attach.p1 = gBone1GlowP1;
         attach.bone = 1;
         emitter.visibility[0] = 0;
         emitter.visibility[1] = 0;

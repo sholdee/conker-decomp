@@ -85,12 +85,12 @@ void script_applyMoveFlags(void) {
     }
 }
 
-/* Starts a move: mode 0, duration arg0 * 100, speed arg2 (0xFF keeps the current speed). */
+/* Starts a move: MOVE_MODE_WAYPOINT, duration arg0 * 100, speed arg2 (0xFF keeps the current speed). */
 void script_startMove(void) {
     f32 speed;
     u8 speedArg;
 
-    gCurrentActor->moveMode = 0;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT;
     gCurrentActor->scriptTimer = gScriptArg0 * 100;
     speedArg = gScriptArg2;
     if (speedArg != 0xFF) {
@@ -121,11 +121,11 @@ void script_pickWaypoint(void) {
     }
     range = index - gCurrentActor->waypointStart;
     if (gScriptArg1 == 0xFF) {
-        if (gCurrentActor->moveMode != 13) {
+        if (gCurrentActor->moveMode != MOVE_MODE_TURN_ANIM) {
             gCurrentActor->waypoint = (math_randomU8() % (u32)range) + gCurrentActor->waypointStart;
         }
     } else if (gScriptArg1 == 0xFE) {
-        if (gCurrentActor->moveMode != 13) {
+        if (gCurrentActor->moveMode != MOVE_MODE_TURN_ANIM) {
             previous = gCurrentActor->waypoint - 1;
             if (gCurrentActor->waypoint <= gCurrentActor->waypointStart) {
                 previous = index - 1;
@@ -144,7 +144,7 @@ void script_pickWaypoint(void) {
     } else {
         gCurrentActor->waypoint = gScriptArg1;
     }
-    gCurrentActor->moveMode = 0;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT;
 set_timer:
     gCurrentActor->scriptTimer = gScriptArg0 * 100;
 
@@ -240,12 +240,12 @@ void script_startMoveUnlessNear(void) {
 
 void script_startMoveWatchingTarget(void) {
     script_startMove();
-    gCurrentActor->moveMode = 10;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT_WATCH_TARGET;
 }
 
 void script_pickWaypointWatchingTarget(void) {
     script_pickWaypoint();
-    gCurrentActor->moveMode = 10;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT_WATCH_TARGET;
 }
 
 void func_15075BB8(void) {
@@ -272,23 +272,23 @@ void script_setYSpeedAndGravity(void) {
 
 void script_startChase(void) {
     script_startMove();
-    gCurrentActor->moveMode = 1;
+    gCurrentActor->moveMode = MOVE_MODE_CHASE;
 }
 
 void script_startIntercept(void) {
     script_startMove();
-    gCurrentActor->moveMode = 16;
+    gCurrentActor->moveMode = MOVE_MODE_INTERCEPT;
     gCurrentActor->interceptSpeed = gScriptArg1;
 }
 
 void script_startChaseNoLeash(void) {
     script_startMove();
-    gCurrentActor->moveMode = 15;
+    gCurrentActor->moveMode = MOVE_MODE_CHASE_NO_LEASH;
 }
 
 void script_startChase3D(void) {
     script_startChase();
-    gCurrentActor->moveMode = 14;
+    gCurrentActor->moveMode = MOVE_MODE_CHASE_3D;
 }
 
 void script_startChasePlayer(void) {
@@ -299,7 +299,7 @@ void script_startChasePlayer(void) {
 
 void script_startMoveToTarget(void) {
     script_startMove();
-    gCurrentActor->moveMode = 9;
+    gCurrentActor->moveMode = MOVE_MODE_TO_TARGET;
 }
 
 void script_startChaseAlt(void) {
@@ -321,7 +321,7 @@ void script_switchScript(void) {
 
 void script_startFlee(void) {
     script_startMove();
-    gCurrentActor->moveMode = 2;
+    gCurrentActor->moveMode = MOVE_MODE_FLEE;
 }
 
 void script_setSpotWideScript(void) {
@@ -343,7 +343,7 @@ void script_setNearScript(void) {
 
 void script_startFollowTarget(void) {
     script_startMove();
-    gCurrentActor->moveMode = 3;
+    gCurrentActor->moveMode = MOVE_MODE_FOLLOW;
 }
 
 /* Sets the vertical velocity (arg0, downwards if arg2), the gravity (arg1) and hopSpeed (arg3). */
@@ -378,12 +378,12 @@ void script_leapToWaypoint(void) {
     }
     gCurrentActor->scriptTimer = (u32)(time * 100.0f);
     gCurrentActor->yspd = gCurrentActor->ygrav * time * 0.5f;
-    gCurrentActor->moveMode = 4;
+    gCurrentActor->moveMode = MOVE_MODE_LEAP_TO_WAYPOINT;
 }
 
 void script_startOrbitWaypoint(void) {
     script_pickWaypoint();
-    gCurrentActor->moveMode = 5;
+    gCurrentActor->moveMode = MOVE_MODE_ORBIT_WAYPOINT;
 }
 
 void func_150761F4(void) {
@@ -612,7 +612,7 @@ void script_setDrawType(void) {
     gCurrentActor->drawtype = gScriptArg0;
 }
 
-/* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts mode 9. */
+/* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts MOVE_MODE_TO_TARGET. */
 void script_moveToLastOfType(void) {
     s32 i = gCurrentActor - movement_obj;
 
@@ -622,7 +622,7 @@ void script_moveToLastOfType(void) {
     while (i != 0) {
         if ((gScriptArg0 == movement_obj[i - 1].character_type) && (movement_obj[i - 1].energy != 0)) {
             script_startMove();
-            gCurrentActor->moveMode = 9;
+            gCurrentActor->moveMode = MOVE_MODE_TO_TARGET;
             gCurrentActor->targetIndex = i - 1;
             gCurrentActor->scriptTimer = 1000;
             return;
@@ -796,7 +796,7 @@ void script_setAnimSpeedAndAccel(void) {
  * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in intel_animspd (high bits) and
  * animSpeedFrac (low byte), clamping at 0 and setting bit 7 of intel_animspd; otherwise sets intel_animspd to arg0.
  */
-void func_15077404(void) {
+void script_setOrStepAnimSpeed(void) {
     if (gScriptArg3 != 0) {
         s16 value;
         s16 delta;
@@ -953,7 +953,7 @@ void script_advanceWaypoint(void) {
 
 void script_pickWaypointNoAdvance(void) {
     script_pickWaypoint();
-    gCurrentActor->moveMode = 11;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT_NO_ADVANCE;
 }
 
 /* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
@@ -1829,7 +1829,7 @@ void script_setSpeedFromPlayer(void) {
 }
 
 void script_startMoveKeepSpeed(void) {
-    gCurrentActor->moveMode = 0;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT;
     gCurrentActor->scriptTimer = gScriptArg0 * 100;
     gCurrentActor->unk22C &= 0xFD;
     script_applyMoveFlags();
@@ -2331,7 +2331,7 @@ void script_pressButtons(void) {
 
 void script_startWeavingMove(void) {
     script_startMove();
-    gCurrentActor->moveMode = 17;
+    gCurrentActor->moveMode = MOVE_MODE_WAYPOINT_WEAVE;
 }
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
@@ -2439,7 +2439,7 @@ static void (*gObjScriptHandlers[214])(void) = {
     script_setHitCylinder, script_removePartSet, script_jumpIfEnergy, script_startViewEnvelope,
     script_playPlayerSound, script_fadeFirstTwoChannels, script_jumpIfPlayerAttachedOrMultiplayer, script_setFacing,
     script_setWaypointRange, script_setTurnRatesWithFrac, script_jumpIfAngleInRange, script_setHitOffsetY,
-    script_startHoldTargetOffset, script_jumpIfNotHit, func_15077404, script_startIntercept,
+    script_startHoldTargetOffset, script_jumpIfNotHit, script_setOrStepAnimSpeed, script_startIntercept,
     func_15075BB8, NULL, script_startChaseAlt, script_spawnPuff,
     script_setFallScript, script_setFamily, script_jumpIfTargetType, script_setFaceTurnTime,
     script_setNearRange, script_setStunEndScript, script_setSpotHeightAlt, script_setHitRoute,
