@@ -9,7 +9,6 @@
  * that these files define, grouped by file in address order:
  *   init/Heap/ExpansionPak/expansionpak.c
  *   init/Heap/MemoryLayout/memorylayout.c
- *   init/Heap/HeapInit/heapinit.c
  *   init/Heap/Allocator/allocator.c
  */
 
@@ -24,10 +23,8 @@ extern u32 gRdpOutputBufferEnd; // its end address
 extern u32 gHeapEnd;
 extern u32 gDecompressWork;
 
-/* init/Heap/HeapInit/heapinit.c */
-void heap_init(void);
-
 /* init/Heap/Allocator/allocator.c */
+void heap_init(void);
 void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode);
 void *heap_alloc(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode);
 void heap_free(void *ptr);

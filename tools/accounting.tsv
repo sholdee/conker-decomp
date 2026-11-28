@@ -30,7 +30,7 @@ heap_initMemoryLayout	0x10003930	128	init	c		build/src/init/Heap/MemoryLayout/me
 func_100039B0	0x100039B0	16	init	c		build/src/init/Boot/VoidStub/voidstub.c.o
 boot_initScreen	0x100039C0	268	init	c		build/src/init/Boot/ScreenInit/screeninit.c.o
 boot_clearFramebuffers	0x10003ACC	260	init	c		build/src/init/Boot/ScreenInit/screeninit.c.o
-heap_init	0x10003BD0	112	init	c		build/src/init/Heap/HeapInit/heapinit.c.o
+heap_init	0x10003BD0	112	init	c		build/src/init/Heap/Allocator/allocator.c.o
 allocate_memory	0x10003C40	44	init	c		build/src/init/Heap/Allocator/allocator.c.o
 heap_alloc	0x10003C6C	1032	init	c		build/src/init/Heap/Allocator/allocator.c.o
 heap_free	0x10004074	476	init	c		build/src/init/Heap/Allocator/allocator.c.o
