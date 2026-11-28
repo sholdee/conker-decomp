@@ -396,6 +396,7 @@ STATIC_ASSERT(sizeof(EmitterTrigger) == 0x54, EmitterTrigger_size);
 STATIC_ASSERT(sizeof(BurstSpawner) == 0x18, BurstSpawner_size);
 STATIC_ASSERT(sizeof(AreaEmitterData) == 0xC, AreaEmitterData_size);
 STATIC_ASSERT(sizeof(StyleParticle) == 0x34, StyleParticle_size);
+STATIC_ASSERT(sizeof(BallisticMotion) == 0x20, BallisticMotion_size);
 
 /* conker/rope.h */
 STATIC_ASSERT(sizeof(HoltenRopeDesc) == 0x38, HoltenRopeDesc_size);

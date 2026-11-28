@@ -846,12 +846,11 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport);
 s32 effect_updateWarpModel(DynModel *obj);
 
 /* game/Effects/ActorEffects/actoreffects.c */
-typedef struct Msg151419D0 Msg151419D0;
-typedef struct LinkedObject151419D0 LinkedObject151419D0;
-void effect_detachTimedHandler(LinkedObject151419D0 *obj);
+struct TimedHandlerEffect; /* defined in game/Effects/ActorEffects/actoreffects.c */
+void effect_detachTimedHandler(struct TimedHandlerEffect *obj);
 void effect_destroyTimedHandler(void *arg0);
 void effect_freeTimedHandler(void *arg0);
-void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType);
+void effect_timedHandlerMessage(struct TimedHandlerEffect *obj, ActorMsg *msg, u8 msgType);
 void effect_runActorEffects(Actor *actor, s32 arg1);
 s32 effect_getActorEffectSelector(Actor *actor);
 s32 effect_getSurfaceEffectVariant(u32 type);

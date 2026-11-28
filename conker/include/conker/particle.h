@@ -638,15 +638,10 @@ typedef struct RingSparkParticle {
     /* 0x110 */ SparkMotion motion;
 } RingSparkParticle;
 
-typedef struct GameFFBA0Beam {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ f32 texture[2];
-} GameFFBA0Beam;
-
 void particle_updateSparkSpawner(SparkEffect *obj);
 void particle_spawnSparkEmitter(TriggerZone *record, MtxF matrix, u8 owner, s32 list);
 void particle_updateSparkEmitter(SparkEffect *obj);
-Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index);
+Vtx *particle_buildSparkBeamQuad(RingSparkParticle *beam, s16 index);
 s32 particle_swaySpark(RingSparkParticle *particle);
 void particle_onSparkTrigger(SparkEffect *obj, u8 *msg, u8 event);
 
@@ -1298,6 +1293,14 @@ extern const s32 gParticleModelIds[233]; /* the model ids by particle model (ban
 /* game/Particle/QuadParticle/quadparticle.c */
 extern Gfx gQuadParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
 extern Gfx gQuadParticleEndDl[]; /* render teardown (object type table gObjectTypes) */
+/* Motion state at 0x110 of a quad particle with update func 25, particle_updateBallisticMotion (DefParticleMotion.ballistic). */
+typedef struct BallisticMotion {
+    /* 0x00 */ Vec3f vel;
+    /* 0x0C */ f32 gravity; /* vel.y += gravity * gFrameDelta */
+    /* 0x10 */ f32 drag;    /* vel is scaled by it once per tick */
+    /* 0x14 */ Vec3f rotVel; /* def.rot += rotVel * gFrameDelta */
+} BallisticMotion; /* size 0x20 */
+
 /* Source of the four vertex colours given to particle_setQuadColors. */
 typedef struct {
     s16 r, g, b, a;

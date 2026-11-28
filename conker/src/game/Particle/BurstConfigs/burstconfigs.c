@@ -448,14 +448,6 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 altDisplayList, u8 owner, s
     }
 }
 
-/* Copied into the spawned object at +0x110. */
-typedef struct {
-    Vec3f velocity;
-    f32 gravity;
-    f32 drag;
-    Vec3f spin;
-} Local151511FCExtra;
-
 /* Spawns a random number of objects off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal. */
 void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
@@ -470,7 +462,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
     f32 normalLength;
     f32 normalInverse;
     ParticleDef desc;
-    Local151511FCExtra extra;
+    BallisticMotion extra; /* copied into the particle at +0x110 (update func 25) */
     f32 speed;
     f32 second;
     f32 first;
@@ -505,7 +497,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
             normal.y = -normal.y;
             normal.z = -normal.z;
         }
-        extra.spin.y = 0.0f;
+        extra.rotVel.y = 0.0f;
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
@@ -519,12 +511,12 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 owner, s32 list) {
             desc.rot.y = math_randomFloat() * 360.0f;
             desc.rot.z = math_randomFloat() * 360.0f;
             desc.alpha = (math_random() % (config->alphaRange + 1)) + config->alphaBase;
-            extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
-            extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
-            extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
+            extra.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
+            extra.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
+            extra.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
             extra.gravity = (math_randomFloat() * config->gravityRange) + config->gravityBase;
-            extra.spin.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
-            extra.spin.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
+            extra.rotVel.x = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
+            extra.rotVel.z = (math_randomFloat() * (config->spin + config->spin)) - config->spin;
             // matching: the comma expression makes IDO load &gWhiteVtxColors inside the loop's register plan
             object = particle_newQuadParticle(&desc, (0, &gWhiteVtxColors), 25, 0, 0, 23, ((math_random() & 1) * 2) + (math_random() & 1),
                                    config->maxLights, config->lightMask, 32, owner, list);
