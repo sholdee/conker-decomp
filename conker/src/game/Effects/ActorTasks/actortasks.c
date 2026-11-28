@@ -906,7 +906,7 @@ void effect_startPlayerDripEmitter(ActorTask *task) {
 }
 
 /* Empty callback. */
-void func_151AB920(Actor *actor, s32 arg1) {
+void func_151AB920(Actor *actor, s32 unused) {
 }
 
 /* Payload at +0x28 of the spark emitter task spawned by effect_spawnSparkEmitterTask. */

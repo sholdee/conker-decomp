@@ -182,7 +182,7 @@ void blood_scatterDecals(Actor *actor, f32 radius, u8 owner, s32 list);
 GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
                                     Vec3f *position, u8 arg7, u8 arg8, u8 owner, s32 list);
 s32 blood_updateGrowingParticle(GrowingBloodParticle *particle);
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
+void func_15136918(f32 size, u8 alpha, u8 colorLevel, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
                    s32 list);
 s32 blood_capQuadSpriteAlphaByLife(DefParticleHead *particle);
 void blood_startShortTrail(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 owner, s32 list);

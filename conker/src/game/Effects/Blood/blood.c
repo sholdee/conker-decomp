@@ -1199,7 +1199,7 @@ s32 blood_updateGrowingParticle(GrowingBloodParticle *particle) {
 }
 
 /* Spawns a particle_spawnSurfaceQuadSpriteNoModel particle (type 0xD) of the given size at position. */
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
+void func_15136918(f32 size, u8 alpha, u8 colorLevel, s16 lifetime, s16 angle, CollisionTri *surface, f32 *position, u8 owner,
                    s32 list) {
     SpriteDef desc;
     f64 pad; // matching: an unused 8-byte stack slot
@@ -1209,8 +1209,8 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 angle, Collisio
     desc.flags = 0x300;
     desc.frame = 0;
     desc.frameSpeed = 0;
-    desc.alpha = arg1;
-    desc.colorLevel = arg2;
+    desc.alpha = alpha;
+    desc.colorLevel = colorLevel;
     desc.rgba[0] = 0;
     desc.rgba[1] = 0;
     desc.rgba[2] = 0;

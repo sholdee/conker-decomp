@@ -10,14 +10,14 @@ struct LightAlphaParticle {
 };
 
 s32 func_150C7670(LightAlphaParticle *particle) {
-    f32 temp;
+    f32 radius;
 
-    temp = particle->lightEffect->light->radius;
+    radius = particle->lightEffect->light->radius;
     {
         // matching: a block-scope local for the factor lets IDO hoist the `return 1` (li v0) to the top
         f32 scale = 2.2970001f;
 
-        particle->head.alpha = temp * scale;
+        particle->head.alpha = radius * scale;
     }
     return 1;
 }

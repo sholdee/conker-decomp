@@ -269,8 +269,8 @@ void effect_flashViewLightBlue(u8 owner, s32 kind);
 void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2);
 void effect_spawnBreakUpPieces(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5);
 void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4);
-s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9, s32 argA,
-                  s32 argB, s32 argC, s32 argD, u8 argE);
+s32 func_150B879C(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 angle, s32 baseAngle, s32 radius,
+                  s32 arg11, s32 arg12, s32 data, u8 owner);
 
 /* game/Effects/JointDecal/jointdecal.c */
 /* A QuadSprite run by effect_startDecalFade / effect_updateFadeQuadSprite, with its fade as extra data. */
@@ -317,7 +317,7 @@ s32 effect_updateRisingScreenSprite(BeeCavernSprite *sprite);
 void func_150BE210(WorldObject *obj);
 void effect_updatePathMover(WorldObject *mover);
 GameCommand *func_150BE438(GameCommand *cmd, s32 id);
-void func_150BE494(Actor *obj, u8 arg1, s32 arg2);
+void func_150BE494(Actor *obj, u8 owner, s32 list);
 extern const s32 D_800A0010[10];
 extern const f32 D_800A0038[10];
 extern const s32 D_800A0060[1];
@@ -404,7 +404,7 @@ s32 effect_moveTumblingBurst(BurstParticle *particle);
 
 /* game/Effects/RotatingZone/rotatingzone.c */
 void effect_levelUpdateRotatingZone(s32 unused);
-f32 func_150CF040(s32 arg0, s32 arg1);
+f32 func_150CF040(s32 x, s32 y);
 void effect_levelHook16(s32 *arg0);
 
 /* game/Effects/ActorEmitterTick/actoremittertick.c */
@@ -456,8 +456,8 @@ typedef struct {
     /* 0x2C */ f32 target;
     /* 0x30 */ f32 timer;  /* frames until target is re-rolled */
 } AmbientPulse;
-void func_150D1410(Actor *arg0);
-void func_150D146C(Actor *arg0);
+void func_150D1410(Actor *actor);
+void func_150D146C(Actor *actor);
 void effect_updateAmbientPulse(AmbientPulse *arg0);
 
 /* game/Effects/RaySpinner/rayspinner.c */
@@ -624,7 +624,7 @@ void *effect_attachDriftEmitter(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxLi
 void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
 void effect_levelUpdateDistantTracers(s32 unused);
 void func_150EA904(Vec3f *pos, s32 index);
-void func_150EA944(WorldObject *entry);
+void func_150EA944(WorldObject *prop);
 
 /* game/Effects/GroundFlash/groundflash.c */
 /* Spawner state (spawned by level_spawnMissileZone, game/Level/ZoneSpawn/zonespawn.c): flashes run between a
@@ -686,7 +686,7 @@ s32 effect_updateModelSway(DynModel *model);
 s32 effect_buildSwayMatrix(DynModel *model, s32 viewport);
 s32 effect_placeSwayLight(LightEffect *effect);
 void effect_levelHook26(Camera *actor);
-void func_150F2994(Camera *actor, s32 flag);
+void func_150F2994(Camera *camera, s32 disabled);
 
 /* game/Effects/SurfaceSound/surfacesound.c */
 void effect_setZoneFlag(Actor *obj, TriggerZone *zone);
@@ -736,17 +736,17 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind);
 void effect_startLineEmitter(u8 owner, s32 kind);
 extern u8 gLineEmitterStarted; // set once effect_startLineEmitter's emitter runs; game/Game/LevelInit/levelinit clears it
 void effect_updateLineEmitter(LineEmitter *effect);
-void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
+void func_150FACE4(EffectHeader *obj, s32 unused, u8 event);
 void effect_turnLightsOn(void);
 void effect_turnLightsOff(void);
-void func_150FADC8(DefParticleHead *obj, s32 arg1, u8 event);
+void func_150FADC8(DefParticleHead *obj, s32 unused, u8 event);
 void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind);
 s32 effect_placeScreenCashModel(ModelEffect *fx);
 Gfx *effect_preDrawScreenCashModel(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void effect_fadeInAlpha(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 effect_updateFadeInEffect(FadeInEffect *effect);
 s32 effect_updateFadeInSprite(FadeInSprite *sprite);
-void func_150FB324(Actor *actor, u8 arg1, s32 arg2);
+void func_150FB324(Actor *actor, u8 owner, s32 list);
 
 /* game/Effects/StarField/starfield.s */
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
@@ -1564,7 +1564,7 @@ void effect_destroyLoopSound(LoopSoundFx *fx);
 void effect_freeLoopSound(LoopSoundFx *fx);
 void effect_watcherStartFootSplashes(ActorTask *task);
 void effect_startPlayerDripEmitter(ActorTask *task);
-void func_151AB920(Actor *actor, s32 arg1);
+void func_151AB920(Actor *actor, s32 unused);
 void effect_spawnSparkEmitterTask(Actor *actor);
 void effect_updateSparkEmitterTask(EmitterTask *task);
 void effect_emitterTaskMessage(EmitterTask *task, ActorMsg *msg, u8 msgId);
@@ -1724,12 +1724,12 @@ typedef struct {
 } CounterEffect;
 
 typedef struct StatPickupEffect StatPickupEffect;
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
+void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 altObjectType, u8 variant, u8 owner, s32 list);
 s32 effect_buildStatPickupMatrix(StatPickupEffect *fx);
 Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 s32 effect_updateStatPickup(StatPickupEffect *fx);
 s32 effect_isPlayerActor(Actor *obj);
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 owner, s32 list);
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 maxLights, u8 lightMask, u8 variant, u8 altObjectType, ZoneNode *zone, u8 owner, s32 list);
 void effect_spawnStatPickupBurst(Vec3f *pos);
 void effect_showStatCounter(u8 owner, s32 kind);
 void effect_updateStatCounter(CounterEffect *effect);

@@ -87,10 +87,10 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 
 /* Spawns the burst of effects at `obj`'s centre: one particle_spawnDebrisSpray, one particle_spawnDebrisBurst
  * and three particle_spawnSplashSprayAtAngles particle sets (kinds 0, 2 and 10). */
-void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
+void func_150BE494(Actor *obj, u8 owner, s32 list) {
     Vec3f pos;
     f32 radius;
-    f32 unk2;
+    f32 height;
     f32 halfSize;
     CollisionHit ground; // the floor under obj
     DebrisSpray primary;
@@ -98,7 +98,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj != NULL) {
         halfSize = (obj->scale_xz + obj->scale_y) * 0.5f;
-        sprite_getActorBodyBounds(obj, &pos, &radius, &unk2);
+        sprite_getActorBodyBounds(obj, &pos, &radius, &height);
         collision_initHitFromObject(&ground, obj);
         primary.countBase = 10;
         primary.countRange = 0;
@@ -118,7 +118,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         primary.spin = 14.09800053f;
         primary.floorHitChance = 1.0f;
         primary.floorHitFn = 0xB;
-        particle_spawnDebrisSpray(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
+        particle_spawnDebrisSpray(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, owner, list);
         secondary.countBase = 0x11;
         secondary.countRange = 9;
         secondary.pos = pos;
@@ -135,7 +135,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         secondary.scaleBase = 0.151000008f;
         secondary.scaleRange = 0.1590000093f;
         secondary.spin = 29.78700066f;
-        particle_spawnDebrisBurst(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, owner, list);
         {
             SplashSpraySpec particles;
 
@@ -163,11 +163,11 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
             particles.spray.material = 0;
             particles.spray.burstChance = 0.5f;
             particles.spray.kind = 0;
-            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, owner, list);
             particles.spray.kind = 2;
-            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, owner, list);
             particles.spray.kind = 10;
-            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, owner, list);
         }
     }
 }

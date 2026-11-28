@@ -470,7 +470,7 @@ void effect_updateLineEmitter(LineEmitter *effect) {
 }
 
 /* Event handler: events 0x4E and 0x4F call effect_destroyObject on the object. */
-void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
+void func_150FACE4(EffectHeader *obj, s32 unused, u8 event) {
     if ((event == 0x4E) || (event == 0x4F)) {
         effect_destroyObject(obj);
     }
@@ -493,7 +493,7 @@ void effect_turnLightsOff(void) {
 }
 
 /* Glow message handler (gGlowMsgHandlers[17]): event 0x53 sets flag 2 of the glow's def.flags, event 0x54 clears it. */
-void func_150FADC8(DefParticleHead *obj, s32 arg1, u8 event) {
+void func_150FADC8(DefParticleHead *obj, s32 unused, u8 event) {
     if (event == 0x53) {
         obj->def.flags |= 2;
     } else if (event == 0x54) {
@@ -682,7 +682,7 @@ s32 effect_updateFadeInSprite(FadeInSprite *sprite) {
 
 /* Spawns the weapon_spawnBoneBeam / particle_spawnBoneDirParticle effects on bone 14 of `actor`: point0 goes to `position`,
  * point2 to `origin` and point3 to `origin + delta`, all in world space. */
-void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
+void func_150FB324(Actor *actor, u8 owner, s32 list) {
     Vec3f position;
     Vec3f origin;
     Vec3f delta;
@@ -712,7 +712,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     {
         u8 bone = 14;
 
-        weapon_spawnBoneBeam(actor, bone, &point0, &point1, &position, arg1, arg2);
+        weapon_spawnBoneBeam(actor, bone, &point0, &point1, &position, owner, list);
     }
-    particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
+    particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, owner, list);
 }

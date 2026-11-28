@@ -255,59 +255,59 @@ void effect_levelUpdateDistantTracers(s32 unused) {
 /* Level hook gProjectileHitCallback: sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
 void func_150EA904(Vec3f *pos, s32 index) {
     // matching: the no-op cast makes IDO load the array base before scaling index
-    WorldObject *entry = (WorldObject *)db_Object_array + index;
+    WorldObject *prop = (WorldObject *)db_Object_array + index;
 
-    if (entry->unique_id == 0xE0) {
-        entry->task_flag = (entry->task_flag & 0xFF) | TASK_FLAG_ON; // matching: the no-op mask costs IDO one extra temp register
+    if (prop->unique_id == 0xE0) {
+        prop->task_flag = (prop->task_flag & 0xFF) | TASK_FLAG_ON; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
 /* While task_flag bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
  * units in touch.i.a) and fades its alpha out, then marks it inactive. */
-void func_150EA944(WorldObject *entry) {
+void func_150EA944(WorldObject *prop) {
     f32 frames;
     f32 angle;
     s32 timer;
 
-    if ((entry->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
+    if ((prop->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         frames = gFrameTicks;
 
-        entry->t += entry->spinX * frames;
-        angle = entry->t;
+        prop->t += prop->spinX * frames;
+        angle = prop->t;
         if (angle < 0.0f) {
-            entry->t = angle + 360.0f;
+            prop->t = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->t = angle - 360.0f;
+            prop->t = angle - 360.0f;
         }
 
-        entry->u += entry->spinY * frames;
-        angle = entry->u;
+        prop->u += prop->spinY * frames;
+        angle = prop->u;
         if (angle < 0.0f) {
-            entry->u = angle + 360.0f;
+            prop->u = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->u = angle - 360.0f;
+            prop->u = angle - 360.0f;
         }
 
-        entry->v += entry->spinZ * frames;
-        angle = entry->v;
+        prop->v += prop->spinZ * frames;
+        angle = prop->v;
         if (angle < 0.0f) {
-            entry->v = angle + 360.0f;
+            prop->v = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->v = angle - 360.0f;
+            prop->v = angle - 360.0f;
         }
 
-        timer = entry->alpha;
-        entry->moveY -= entry->moveData.word * gFrameTicks;
-        entry->x += entry->moveX * gFrameTicks;
-        entry->touch.i.a += entry->moveY * gFrameTicks;
-        entry->y = entry->touch.i.a >> 3;
-        entry->z += entry->moveZ * gFrameTicks;
+        timer = prop->alpha;
+        prop->moveY -= prop->moveData.word * gFrameTicks;
+        prop->x += prop->moveX * gFrameTicks;
+        prop->touch.i.a += prop->moveY * gFrameTicks;
+        prop->y = prop->touch.i.a >> 3;
+        prop->z += prop->moveZ * gFrameTicks;
 
         timer -= gFrameTicks * 4;
         if (timer > 0) {
-            entry->alpha = timer;
+            prop->alpha = timer;
         } else {
-            entry->inactive = 1;
+            prop->inactive = 1;
         }
     }
 }
