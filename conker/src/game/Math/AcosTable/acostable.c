@@ -44,7 +44,7 @@ static u16 gAcosTableFine[4] = { 922, 798, 652, 461 };
 
 /*
  * Fixed-point arc cosine / arc sine. Inputs are s16 with 0x7FFF ~ 1.0; angles use 0x10000 = 2*pi,
- * so acos(0) = 0x8000. The float wrappers are math_acosLookup / math_asinLookup in game_75810.c.
+ * so acos(0) = 0x8000. The float wrappers are math_acosLookup / math_asinLookup in game/Math/AcosLookup/acoslookup.c.
  */
 
 /**

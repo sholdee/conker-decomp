@@ -15,7 +15,7 @@
  *   game/Player/PlayerWarp/playerwarp.c
  */
 
-/* game_43B20.c */
+/* game/Player/SpawnLoad/spawnload.c */
 void player_clearIdleRequests(void);
 void player_clearSpawnPoints(void);
 void player_loadSpawnPoints(s32 levelId);

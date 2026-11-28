@@ -27,7 +27,7 @@ void dbgu();
 extern f32 dbgx[];
 
 /* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
- * special states and object ids, otherwise its unkE6/unkE4, scaled by scale_y/scale_xz. */
+ * special states and object ids, otherwise its bodyHeight/bodyRadius, scaled by scale_y/scale_xz. */
 void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
     f32 height;
     f32 width;

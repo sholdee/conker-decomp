@@ -12,7 +12,7 @@
 #include "conker/view.h"
 #include "conker/weapon.h"
 
-/* Level hooks, installed by the per-level setup (game_3DB60.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
+/* Level hooks, installed by the per-level setup (game/Level/LevelSetupTankFactory/levelsetuptankfactory.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
 s32 (*gBulletHitTest)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*gBulletImpactHook)(s32 x, s32 y, s32 z);
 

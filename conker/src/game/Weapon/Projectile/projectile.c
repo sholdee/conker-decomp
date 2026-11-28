@@ -68,7 +68,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
 
-/* Level hook (installed by game_3DB30.c): called when a projectile with TRAIL_HIT_CALLBACK expires. */
+/* Level hook (installed by game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c): called when a projectile with TRAIL_HIT_CALLBACK expires. */
 TrailHitCallback gProjectileHitCallback;
 
 /*

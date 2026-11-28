@@ -482,7 +482,7 @@ void zone_updateActor(Actor *actor) {
 
 /*
  * Returns 0 if the actor is inside the zone, 1 if not (or the zone is inactive).  withMargin widens the
- * zone by the actor's unkE4.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,
+ * zone by the actor's bodyRadius.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,
  * 3 rotated gate crossed by the move from the old to the current position.
  */
 s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {

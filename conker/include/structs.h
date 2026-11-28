@@ -190,7 +190,7 @@ typedef struct EffectHeader {
 } EffectHeader; /* size 0x10 */
 
 /* Timed effect object (type 35, or 95 with flag 2), allocated by effect_newTimedEffect with dataSize bytes of
- * per-effect data after it; game_1765E0.c runs its callbacks. */
+ * per-effect data after it; game/Effects/TimedEffect/timedeffect.c runs its callbacks. */
 typedef struct TimedEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s8 expireCallback; /* gTimedEffectExpireFuncs index, run once the timer goes negative; -1 = none */
@@ -425,7 +425,7 @@ typedef struct ModelDef {
     /* 0x17 */ u8  viewAngle;       // width of the spotting cone, in 1/256 turns
     /* 0x18 */ u8  unk18;
     /* 0x19 */ u8  unk19;
-    /* 0x1A */ s16 unk1A;           // body cylinder (Actor.unkE4/E6/E8)
+    /* 0x1A */ s16 unk1A;           // unscaled body cylinder, with unk1C/unk1E (actor_setScale: Actor.bodyRadius/bodyHeight/bodyOffsetY)
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
     /* 0x20 */ s16 hitRadius;       // unscaled hit cylinder (actor_setScale: Actor.hitRadius/hitHeight/hitOffsetY)
@@ -447,7 +447,8 @@ typedef struct ModelDef {
     /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
     /* 0x3B */ u8  eyeDefault[2];   // default Actor.swapTexture[0..1]
     /* 0x3D */ u8  pad3D;
-    /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by scale_xz
+    /* 0x3E */ u16 cullDistance;    // actor_updateCulling: out of the view, the actor still counts as in view while
+                                    // view_testCylinderInView's distance is at most this (0 = Actor.bodyRadius, 1 = 0, else this * scale_xz)
 } ModelDef;
 
 /* Idle animation state of an ActorCtl (ActorCtl.idle, 0x58). While an actor stands still it plays
@@ -1053,7 +1054,7 @@ struct Actor {
     /* 0x08B */ u8  pad8B;
     /* 0x08C */ u16 soundHandle1; /* sound handle of slot 1 (sound_playActorSound1) */
     /* 0x08E */ u16 soundHandle2; /* sound handle of slot 2 (sound_playActorSound2) */
-    /* 0x090 */ s16 unk90;    // saved unkE4
+    /* 0x090 */ s16 unk90;    // set from SpawnRecord.unk14 (collision_spawnObject); func_150D7928 saves bodyRadius here and restores it
     /* 0x092 */ u16 attachedObject;
     /* 0x094 */ s32 hiddenParts;
     /* 0x098 */ s32 unk98;     // blacked-out display-list mask

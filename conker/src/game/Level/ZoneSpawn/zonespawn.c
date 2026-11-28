@@ -281,7 +281,8 @@ s32 level_spawnTrailZone(TriggerZone *obj) {
     return 1;
 }
 
-/** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
+/** Spawns a disk emitter (DiskEmitter, tick 0x19 = effect_updateDiskEmitter): a column twice the zone's ySize, pointing
+ * along its rotation, with sound 0x67C. */
 s32 level_spawnZoneBeam(TriggerZone *obj) {
     TimedEffect *effect;
     DiskEmitter packet;

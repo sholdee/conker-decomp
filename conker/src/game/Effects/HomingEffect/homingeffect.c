@@ -413,7 +413,8 @@ struct Obj4174 {
     /* 0x54 */ f32 unk54;
 };
 
-/* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
+/* Quad particle update (gQuadParticleUpdate1Funcs[34]): grows the width (0x2C, def.width) by the rate at 0x4C (def.scale.x)
+ * and the height (0x30, def.height) by the rate at 0x54 (def.scale.z), times gFrameDelta. */
 s32 effect_growQuadAtRates(Obj4174 *obj) {
     obj->unk2C += obj->unk4C * gFrameDelta;
     obj->unk30 += obj->unk54 * gFrameDelta;

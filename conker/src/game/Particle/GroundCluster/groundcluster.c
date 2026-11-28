@@ -419,7 +419,8 @@ s32 particle_fadeTrailByLife(MotionTrail *trail) {
     return 1;
 }
 
-/* Grows unk2C and unk30 by unk4C, scaled by the frame delta gFrameDelta. */
+/* Quad particle update (gQuadParticleUpdate1Funcs[18]): grows def.width and def.height by the one rate def.scale.x, times
+ * gFrameDelta (effect_growQuadAtRates has a rate for each). */
 s32 particle_growQuadAtRate(Particle177B50 *p) {
     f32 growth = p->head.def.scale.x * gFrameDelta;
 

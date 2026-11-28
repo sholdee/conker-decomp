@@ -2046,7 +2046,8 @@ const Vec3f D_800A4188[4] = {
 };
 const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
 
-/* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
+/* Gore for blood profile 3 (MODEL_SHC_SOLDIER, MODEL_SHC_SOLDIER_VARIANT, MODEL_RODENT), 5 and 6 (MODEL_VILLAGER_BROWN_HAT,
+ * MODEL_VILLAGER_STRIPED_BONNET) actors: a random chunk set from D_800A4160 and, with extraSpray (profile 3), chunk model 0x48. */
 void blood_spawnSoldierAndVillagerGore(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 owner, s32 list) {
     u8 index;
     Vec3f boneRot;
