@@ -67,11 +67,8 @@ build/src/game/Sprite/TexQuad/texquad.c.o	.data	0xC	0x80008000	render flag const
 build/src/game/Texture/TextureTables/texturetables.c.o	.data	0xE7C	0x16000020	byte table / constant (high byte 0x15/0x16 is data)
 build/src/game/Effects/Trail/MatrixTrail/matrixtrail.c.o	.rodata	0x10	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
 build/src/init/Boot/Inflate/inflateblock.s.o	.rodata	0x90	0x10011801	byte table or packed constant
-build/src/game/Camera/LevelHook10/levelhook10.c.o	.text	0x14	0x80004000	flag constant built with lui/ori, not a pointer
 build/src/game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1.c.o	.text	0x14	0x80004000	flag constant built with lui/ori, not a pointer
-build/src/game/Camera/LevelHook35/levelhook35.c.o	.text	0x78	0x80021010	flag constant built with lui/ori, not a pointer
 build/src/game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole.c.o	.text	0x78	0x80021010	flag constant built with lui/ori, not a pointer
-build/src/game/Level/LevelHook30/levelhook30.c.o	.text	0x30	0x80021000	flag constant built with lui/ori, not a pointer
 build/src/game/Level/LevelHookUBend/levelhookubend.c.o	.text	0x30	0x80021000	flag constant built with lui/ori, not a pointer
 build/src/game/Particle/FogFlash/fogflash.c.o	.text	0x7B0	0x80021200	flag constant built with lui/ori, not a pointer
 build/src/init/Boot/FaultDebugger/faultdebugger.s.o	.text	0x318	0x80004000	cache loop bound (KSEG0 base + I-cache size), not a pointer

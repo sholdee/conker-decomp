@@ -168,22 +168,22 @@ void level_setup21(void);
 void level_setup01(void);
 void level_setup36(void);
 
-/* game_3BFD0.c */
+/* game/Level/LevelSetupBarnInside/levelsetupbarninside.c */
 void level_emptySetupBarnInside(void);
 
-/* game_3BFE0.c */
+/* game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c */
 void level_queueObjectDropBarnOutside(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
 void level_setupBarnOutside(void);
 
-/* game_3C230.c */
+/* game/Level/LevelSetupBarnArena/levelsetupbarnarena.c */
 void level_setupBarnArena(void);
 void level_spawnObjBurst(Actor *obj, s32 owner, s32 list);
 void level_spawnBoltRingZone(TriggerZone *zone);
 
-/* game_3C3D0.c */
+/* game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern.c */
 void level_setupBrontoCavern(void);
 
-/* game_3C6C0.c */
+/* game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat.c */
 void level_setupBrontoThroat(void);
 
 /* game/Level/LevelSetupDogFish/levelsetupdogfish.c */
@@ -204,13 +204,13 @@ void level_setupDinoArena(void);
 /* game/Level/LevelSetupPooCabin/levelsetuppoocabin.c */
 void level_setupPooCabin(void);
 
-/* game_3D6F0.c */
+/* game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace.c */
 void level_setupW1VolcanoRace(void);
 
-/* game_3D770.c */
+/* game/Level/LevelSetupRockSolid/levelsetuprocksolid.c */
 void level_emptySetupRockSolid(void);
 
-/* game_3D780.c */
+/* game/Level/LevelSetup30/levelsetup30.c */
 void level_setupPooBoss(void);
 void level_setupUBend(void);
 
@@ -221,16 +221,16 @@ void level_spawnBoltEmitter(Actor *obj);
 /* game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c */
 void level_setupBoilerRoom(void);
 
-/* game_3DB30.c */
+/* game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c */
 void level_setupOutsideMolehole(void);
 
-/* game_3DB50.c */
+/* game/Level/LevelSetup07/levelsetup07.c */
 void level_emptySetup07(void);
 
-/* game_3DB60.c */
+/* game/Level/LevelSetupTankFactory/levelsetuptankfactory.c */
 void level_setupTankFactory(void);
 
-/* game_3DB80.c */
+/* game/Level/ZoneShapeEmitter/zoneshapeemitter.c */
 s32 level_spawnShapeEmitterZone(TriggerZone *zone);
 
 /* game/Level/LevelSetup18/levelsetup18.c */
@@ -241,20 +241,20 @@ void level_setupMachineGunNest(void);
 /* game/Level/LevelSetupLab/levelsetuplab.c */
 void level_setupLab(void);
 
-/* game_3E460.c */
+/* game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse.c */
 extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
 void level_setupW3HauntedHouse(void);
 
-/* game_3E5A0.c */
+/* game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse.c */
 void level_setupHauntedOuthouse(void);
 
-/* game_3E620.c */
+/* game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro.c */
 void level_setupHorrorIntro(void);
 
-/* game_3E7E0.c */
+/* game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel.c */
 void level_setupLiftTunnel(void);
 
-/* game_3E810.c */
+/* game/Level/LevelSetupBankEntrance/levelsetupbankentrance.c */
 void level_setupBankEntrance(void);
 
 /* game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c */
@@ -262,15 +262,15 @@ void level_setupThroneRoom(void);
 void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list);
 void level_spawnFlashBurst(Actor *owner, u8 fxOwner, s32 list);
 
-/* game_3EFB0.c */
+/* game/Level/LevelSetupFrontEnd/levelsetupfrontend.c */
 void level_queueObjectDropFrontEnd(s32 x, s32 y, s32 z, s32 floorY);
 void level_setupFrontEnd(void);
 
-/* game_3F0F0.c */
+/* game/Level/LevelSetupHeist/levelsetupheist.c */
 extern u8 gFlagLightStates[5]; /* five level flags, cleared by level_setupHeist */
 void level_setupHeist(void);
 
-/* game_3F120.c */
+/* game/Level/LevelSetup25/levelsetup25.c */
 void level_setup28(void);
 void level_setup29(void);
 void level_setupWmpVolcanoRace(void);
@@ -279,29 +279,29 @@ void level_setupWmpVolcanoRace(void);
 void level_setupMainWar(void);
 s32 level_spawnStageZone(TriggerZone *zone);
 
-/* game_3F3D0.c */
+/* game/Level/AmbientAction3/ambientaction3.c */
 void level_startAmbientRedDrift(s32 unused);
 
-/* game_3F450.c */
+/* game/Level/AmbientAction5/ambientaction5.c */
 void level_startAmbientPulse(s32 unused);
 
-/* game_3F4D0.c */
+/* game/Level/ZoneAreaEmitter/zoneareaemitter.c */
 void level_spawnZoneAreaEmitter(s32 zone, s32 kind);
 
-/* game_3F560.c */
+/* game/Level/AmbientColourCycle/ambientcolourcycle.c */
 void level_startAmbientColourCycle(s32 unused);
 void level_attachDripEmitter(Actor *obj);
 
 /* game/Level/GroundParticles/groundparticles.c */
 void level_spawnLightAlphaModel(LightEffect *effect);
 
-/* game_3FBD0.c */
+/* game/Level/EffectKind/effectkind.c */
 u8 level_getEffectKind(void);
 
-/* game_3FC20.c */
+/* game/Level/SetupResetStub/setupresetstub.c */
 void func_15012770(void);
 
-/* game_3FC30.c */
+/* game/Level/WaveReset/wavereset.c */
 void level_resetWaveDeformers(void);
 
 /* game/Level/ZoneSpawn/zonespawn.c */
@@ -372,7 +372,7 @@ extern u8 D_800D9938[14];
 /* game/Level/LevelHooks/levelhooks.c */
 void level_runHook(void *camera, s32 levelId);
 
-/* game_1A6300.c */
+/* game/Level/HeightCheck/heightcheck.c */
 s32 level_isCameraAboveLimit(s32 levelId);
 
 /* game/Level/LevelHeader/levelheader.c */

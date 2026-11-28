@@ -6,7 +6,8 @@
 #include "conker/light.h"
 
 
-// ???
+/* Clears gMaterialGlowLevels and gWarpModelSetupDone of game/Effects/MaterialScroll (the level's update hook) and sets
+ * touch.f.a of object 0xF6 to 2. */
 void level_setupHarbour(void) {
     WorldObject *prop;
 
