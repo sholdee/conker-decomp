@@ -50,7 +50,7 @@ void level_resetSetupState(void) {
     gSprayAreas[0] = NULL;
     gSprayAreas[1] = NULL;
     gSprayAreas[2] = NULL;
-    gSetup33TexScrolls = NULL;
+    gW3HauntedHouseTexScrolls = NULL;
     gZoneFlag = 0;
 }
 

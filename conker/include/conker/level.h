@@ -242,7 +242,7 @@ void level_setupMachineGunNest(void);
 void level_setupLab(void);
 
 /* game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse.c */
-extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
+extern struct TexScroll **gW3HauntedHouseTexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
 void level_setupW3HauntedHouse(void);
 
 /* game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse.c */

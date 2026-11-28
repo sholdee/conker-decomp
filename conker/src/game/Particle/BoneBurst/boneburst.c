@@ -20,7 +20,7 @@ ZoneNode *D_800D9A40;
 
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
- * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four gSetup33TexScrolls entries
+ * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four gW3HauntedHouseTexScrolls entries
  * by object 0xE's taskint[0]. */
 void particle_levelUpdateScrollingHazardProps(s32 unused) {
     s32 i;
@@ -57,10 +57,10 @@ void particle_levelUpdateScrollingHazardProps(s32 unused) {
             } else {
                 scroll = 0;
             }
-            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[0], scroll, 0);
-            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[1], 0, -scroll);
-            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[2], scroll, 0);
-            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[3], -scroll, 0);
+            flamethrower_setTexScrollSpeed(gW3HauntedHouseTexScrolls[0], scroll, 0);
+            flamethrower_setTexScrollSpeed(gW3HauntedHouseTexScrolls[1], 0, -scroll);
+            flamethrower_setTexScrollSpeed(gW3HauntedHouseTexScrolls[2], scroll, 0);
+            flamethrower_setTexScrollSpeed(gW3HauntedHouseTexScrolls[3], -scroll, 0);
         }
     }
 }
