@@ -480,7 +480,8 @@ segments:
       - [0x70200, c, game/Text/TextQueue/textqueue]
       - [0x71240, c, game/Math/MtxBuild/mtxbuild]
       - [0x71770, c, game/Math/MtxTranslate/mtxtranslate]
-      - [0x71820, c, game/Collision/Probe/probe]
+      - [0x71820, c, game/Collision/ActorWalls/actorwalls]
+      - [0x71D80, c, game/Collision/Probe/probe]
       - [0x750B0, c, libultra/gu/cosf]
       - [0x75210, c, libultra/gu/sinf]
       - [0x753B0, c, libultra/gu/guPerspectiveF]
@@ -1041,7 +1042,8 @@ segments:
       - [0x2293F0, data]
       - [0x22A3F0, .data, game/Text/FontDraw/fontdraw]
       - [0x22A460, .data, game/Text/TextQueue/textqueue]
-      - [0x22A7A0, .data, game/Collision/Probe/probe]
+      - [0x22A7A0, .data, game/Collision/ActorWalls/actorwalls]
+      - [0x22A940, .data, game/Collision/Probe/probe]
       - [0x22A960, .data, libultra/gu/cosf]
       - [0x22A970, .data, libultra/gu/sinf]
       - [0x22A980, .data, game/Math/AcosTable/acostable]
@@ -1276,7 +1278,8 @@ segments:
       - [0x23D420, .rodata, game/Debug/DlCheck/dlcheck]
       - [0x23D570, .rodata, game/Text/FontDraw/fontdraw]
       - [0x23D650, .rodata, game/Text/TextQueue/textqueue]
-      - [0x23D730, .rodata, game/Collision/Probe/probe]
+      - [0x23D730, .rodata, game/Collision/ActorWalls/actorwalls]
+      - [0x23D800, .rodata, game/Collision/Probe/probe]
       - [0x23D830, .rodata, libultra/gu/cosf]
       - [0x23D850, .rodata, libultra/gu/sinf]
       - [0x23D870, .rodata, libultra/gu/guPerspectiveF]
@@ -1674,7 +1677,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C6860, name: game/Debug/DlCheck/dlcheck}
       - {start: 0x255880, type: .bss, vram: 0x800C68B0, name: game/Text/FontDraw/fontdraw}
       - {start: 0x255880, type: .bss, vram: 0x800CBD60, name: game/Text/TextQueue/textqueue}
-      - {start: 0x255880, type: .bss, vram: 0x800CBD90, name: game/Collision/Probe/probe}
+      - {start: 0x255880, type: .bss, vram: 0x800CBD90, name: game/Collision/ActorWalls/actorwalls}
+      - {start: 0x255880, type: .bss, vram: 0x800CBE00, name: game/Collision/Probe/probe}
       - {start: 0x255880, type: .bss, vram: 0x800CBE10, name: game_data_800CBE10}
       - {start: 0x255880, type: .bss, vram: 0x800CC210, name: game/Math/TriBox/tribox}
       - {start: 0x255880, type: .bss, vram: 0x800CC250, name: game/Actor/Movement/movement}

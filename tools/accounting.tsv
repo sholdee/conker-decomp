@@ -1310,11 +1310,11 @@ math_mtxFRotScaleTrans	0x15043F6C	132	game	c		build/src/game/Math/MtxBuild/mtxbu
 math_mtxGetTranslation	0x15043FF0	176	game	c		build/src/game/Math/MtxBuild/mtxbuild.c.o
 math_mtxLookAt	0x150440A0	544	game	c		build/src/game/Math/MtxBuild/mtxbuild.c.o
 math_mtxTranslateLocal	0x150442C0	176	game	c		build/src/game/Math/MtxTranslate/mtxtranslate.c.o
-func_15044370	0x15044370	16	game	c		build/src/game/Collision/Probe/probe.c.o
-collision_resolveActorWalls	0x15044380	428	game	c		build/src/game/Collision/Probe/probe.c.o
-collision_rotateTriVerts	0x1504452C	300	game	c		build/src/game/Collision/Probe/probe.c.o
-func_15044658	0x15044658	8	game	c		build/src/game/Collision/Probe/probe.c.o
-collision_setProbeHeights	0x15044660	624	game	c		build/src/game/Collision/Probe/probe.c.o
+func_15044370	0x15044370	16	game	c		build/src/game/Collision/ActorWalls/actorwalls.c.o
+collision_resolveActorWalls	0x15044380	428	game	c		build/src/game/Collision/ActorWalls/actorwalls.c.o
+collision_rotateTriVerts	0x1504452C	300	game	c		build/src/game/Collision/ActorWalls/actorwalls.c.o
+func_15044658	0x15044658	8	game	c		build/src/game/Collision/ActorWalls/actorwalls.c.o
+collision_setProbeHeights	0x15044660	624	game	c		build/src/game/Collision/ActorWalls/actorwalls.c.o
 collision_addTriggerVolume	0x150448D0	148	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_addTriggerNode	0x15044964	196	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_updateTriggers	0x15044A28	336	game	c		build/src/game/Collision/Probe/probe.c.o

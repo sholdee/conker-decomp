@@ -217,7 +217,8 @@ src/game/Collision/HitSphere/hitsphere.c	collision	hit-sphere point/ray tests
 src/game/Collision/MapBackground/mapbackground.c	collision	map background setup and triangle quadtree (collision triangle tables)
 src/game/Collision/ObjectRay/objectray.c	collision	ray cast against the first 25 objects
 src/game/Collision/PartSets/partsets.c	collision	data-only unit: model part sets, sub-model lists, object filters
-src/game/Collision/Probe/probe.c	collision	collision sets, floors/ceilings, trigger volumes and nodes
+src/game/Collision/ActorWalls/actorwalls.c	collision	actor wall resolution per collision set, probe heights
+src/game/Collision/Probe/probe.c	collision	trigger volumes and nodes, floor and ceiling probes, guLookAt
 src/game/Collision/QuadTree/quadtree.c	collision	split from game_2DF70.c (unit boundary in the ROM); collision-triangle code
 src/game/Collision/RayCast/raycast.c	collision	ray casts against world and objects, cylinders
 src/game/Collision/Spawn/spawn.c	collision	split from game_AEB40.c; same subsystem
