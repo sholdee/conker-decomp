@@ -116,6 +116,7 @@ gitignored and must never be committed.
 | `conker/include/conker/<subsystem>.h` | One header for each subsystem: the declarations of its functions and globals |
 | `conker/include/` | Shared types and macros (`structs.h`, `effects.h`, `macros.h`) and the SDK 2.0L headers, with small libc headers (`libc/`) and assembler macros (`macro.inc`) |
 | `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |
+| `docs/file-boundaries.tsv`, `docs/file-boundary-candidates.tsv` | The evidence for each file boundary, and the split and merge candidates (see [ACCOUNTING.md](ACCOUNTING.md), "File boundaries") |
 | `tools/` | Build tools, checks (`accounting.py`, `linkcheck.py`, `warncheck.py`) and contributor tooling |
 
 ## How it was made
