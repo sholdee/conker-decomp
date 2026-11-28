@@ -3033,8 +3033,8 @@ typedef struct ShapeEmitter {
 } ShapeEmitter;
 
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
- * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
- * 0x2C) and beam_findBoltArcEffect (game/Beam/BoltRain/boltrain.c) its BoltArcObj (callbackSet 0x2E, conker/beam.h). */
+ * with the zone first in their data. effect_findZoneEffect (game/Particle/RegionEmitter/regionemitter.c) finds the ZoneEffect of a
+ * zone (callbackSet 0x2C) and beam_findBoltArcEffect (game/Beam/BoltRain/boltrain.c) its BoltArcObj (callbackSet 0x2E, conker/beam.h). */
 typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 id;               /* the zone's data2 */

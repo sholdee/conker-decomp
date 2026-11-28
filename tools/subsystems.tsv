@@ -344,7 +344,6 @@ src/game/Effects/TriggerSwap/triggerswap.c	effect	timed sound trigger
 src/game/Effects/TumblingPiece/tumblingpiece.c	effect	tumbling pieces
 src/game/Effects/VertexSwing/vertexswing.c	effect	vertex swing helper
 src/game/Effects/WatcherEffects/watchereffects.c	effect	character watcher effects: flickering floor sprite and emitter
-src/game/Effects/ZoneEffect/zoneeffect.c	effect	owned-object lookup and messages
 src/game/Effects/ZonePairEmitter/zonepairemitter.c	effect	moving/spinning objects with particle emitters
 src/game/Effects/ZoneSounds/zonesounds.c	effect	timed level effect countdown
 src/game/Env/Fog/fog.c	env	fog presets and blending
@@ -518,7 +517,7 @@ src/game/Particle/PuffSprays/puffsprays.c	particle	particle emitters (puff spray
 src/game/Particle/Pulse/pulse.c	particle	pulsing particle
 src/game/Particle/QuadParticle/quadparticle.c	particle	particle behaviours: axes, drift, grow, ballistic; quad sprites
 src/game/Particle/RayBeam/raybeam.c	particle	effect with main particle and sub-particles
-src/game/Particle/RegionEmitter/regionemitter.c	particle	particle emitter effect with sound
+src/game/Particle/RegionEmitter/regionemitter.c	particle	particle emitter effect with sound; the zone emitter (fire, update, shut, destroy, free) and the zone effect lookup
 src/game/Particle/SegmentBurst/segmentburst.c	particle	segment emitters and model bursts
 src/game/Particle/SegmentEmitter/segmentemitter.c	particle	object-attached particle emitters (effects 0x1A-0x1C)
 src/game/Particle/ShatterPieces/shatterpieces.c	particle	collision handlers of pooled physics particles
@@ -546,7 +545,6 @@ src/game/Particle/WatcherEmitter/watcheremitter.c	particle	randomised particles 
 src/game/Particle/WobbleStream/wobblestream.c	particle	projectile stream particles
 src/game/Particle/YawLaunch/yawlaunch.c	particle	random coloured particles launched along a yaw
 src/game/Particle/YawStreak/yawstreak.c	particle	streak particle spawns and object effect burst
-src/game/Particle/ZoneEmitter/zoneemitter.c	particle	region emitter
 src/game/Path/PathGraph/pathgraph.c	path	path graph: nodes, layers, nearest node, search
 src/game/Player/PlayerStats/playerstats.c	player	split from game_B21B0.c; same subsystem
 src/game/Player/PlayerWarp/playerwarp.c	player	pending warps and respawn

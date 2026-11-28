@@ -104,7 +104,6 @@
  *   game/Effects/FallingObject/fallingobject.c
  *   game/Effects/ContactEffects/contacteffects.c
  *   game/Effects/ActorEventStub/actoreventstub.c
- *   game/Effects/ZoneEffect/zoneeffect.c
  *   game/Effects/DebrisBurst/debrisburst.c
  *   game/Effects/ActorTasks/actortasks.c
  *   game/Effects/ImpactSets/impactsets.c
@@ -1510,7 +1509,7 @@ void effect_hitReactRumble(Actor *self, Actor *other, u8 *result);
 /* game/Effects/ActorEventStub/actoreventstub.c */
 void effect_emptyActorEventHook(Actor *arg0, s32 arg1, s32 arg2);
 
-/* game/Effects/ZoneEffect/zoneeffect.c */
+/* game/Particle/RegionEmitter/regionemitter.c */
 struct ZoneEmitter; /* include/conker/particle.h */
 void effect_destroyZoneEmitter(struct ZoneEmitter *obj);
 void effect_freeZoneEmitter(struct ZoneEmitter *obj);

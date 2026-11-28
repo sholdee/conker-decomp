@@ -81,7 +81,6 @@
  *   game/Particle/FastSpark/fastspark.c
  *   game/Particle/SphereEmitter/sphereemitter.c
  *   game/Particle/RegionEmitter/regionemitter.c
- *   game/Particle/ZoneEmitter/zoneemitter.c
  *   game/Particle/EmitterQuads/emitterquads.c
  *   game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope)
  *   game/Particle/SideSpray/sidespray.c
@@ -2556,10 +2555,8 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface,
                           u8 owner, s32 list);
 void particle_handleZoneEffectMessage(ZoneEffect *listener, void *data, u8 type);
 void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
-struct ZoneEmitter; /* game/Particle/ZoneEmitter/zoneemitter.c, below */
+struct ZoneEmitter; /* below */
 Vtx *particle_buildYawedVerticalQuad(struct ZoneEmitter *owner, s16 index);
-
-/* game/Particle/ZoneEmitter/zoneemitter.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (particle_updateZoneEmitter, particle_shutZoneEmitter). */
 typedef struct ZoneEmitterState {
     /* 0x00 */ TriggerZone *region;

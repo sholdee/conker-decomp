@@ -13,7 +13,7 @@
 #include "conker/weapon.h"
 
 /* This file's .rodata: the two object types of the timed effects (effect_newTimedEffect), read by game/Beam/BoltRain/boltrain.c and
- * game/Effects/ZoneEffect/zoneeffect.c too. */
+ * game/Particle/RegionEmitter/regionemitter.c too. */
 const s32 gTimedEffectTypes[2] = { 0x23, 0x5F };
 
 /*
