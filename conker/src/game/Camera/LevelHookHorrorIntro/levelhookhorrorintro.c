@@ -3,7 +3,7 @@
 #include "conker/script.h"
 
 
-void player_levelHookHorrorIntro(Camera *actor) {
+void camera_levelHookHorrorIntro(Camera *actor) {
     if (actor->CharContext == 0x3B) {
         script_command(0, 0x405C, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {

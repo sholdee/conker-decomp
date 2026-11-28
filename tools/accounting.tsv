@@ -2676,7 +2676,7 @@ script_exitTask	0x150AE280	32	game	hasm	d,g	build/src/game/Script/TaskExit/taske
 collision_updateWobble	0x150AE2A0	188	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 func_150AE35C	0x150AE35C	16	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 collision_buildTransformedUprightQuad	0x150AE36C	580	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
-effect_levelHookTheWindmill	0x150AE5B0	480	game	c		build/src/game/Camera/LevelHookTheWindmill/levelhookthewindmill.c.o
+camera_levelHookTheWindmill	0x150AE5B0	480	game	c		build/src/game/Camera/LevelHookTheWindmill/levelhookthewindmill.c.o
 effect_updateAttachedBurst	0x150AE790	1036	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 effect_spawnAttachedBursts	0x150AEB9C	304	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
 func_150AECCC	0x150AECCC	128	game	c		build/src/game/Effects/AttachedBurst/attachedburst.c.o
@@ -3338,7 +3338,7 @@ particle_cullObjectByCameraZ	0x150F33B0	72	game	c		build/src/game/Particle/BoneB
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
-player_levelHookHorrorIntro	0x150F43F0	384	game	c		build/src/game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c.o
+camera_levelHookHorrorIntro	0x150F43F0	384	game	c		build/src/game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c.o
 particle_spawnSpiral	0x150F4570	864	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_moveSpiral	0x150F48D0	360	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_updateSpiralFadeSound	0x150F4A38	708	game	c		build/src/game/Particle/Spiral/spiral.c.o

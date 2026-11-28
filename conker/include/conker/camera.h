@@ -231,7 +231,7 @@ void camera_levelSetupDogFishNurseryPart1(Camera *camera);
 void camera_levelSetup26(Camera *camera);
 
 /* game/Camera/LevelHookTheWindmill/levelhookthewindmill.c */
-void effect_levelHookTheWindmill(Camera *camera);
+void camera_levelHookTheWindmill(Camera *camera);
 
 /* game/Camera/LevelHookBarnInside/levelhookbarninside.c */
 void camera_levelHookBarnInside(Camera *camera);
@@ -279,7 +279,7 @@ void camera_levelHookTankFactory(Camera *camera);
 void camera_levelHookTankTunnel(Camera *camera);
 
 /* game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c */
-void player_levelHookHorrorIntro(Camera *actor);
+void camera_levelHookHorrorIntro(Camera *actor);
 
 /* game/Camera/LevelHookBankEntrance/levelhookbankentrance.c */
 void camera_levelHookBankEntrance(Camera *camera);
