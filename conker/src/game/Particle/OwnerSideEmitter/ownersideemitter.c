@@ -6,8 +6,6 @@
 #include "conker/particle.h"
 #include "libc/string.h"
 
-/* Live particle returned by particle_newOwnedSpriteParticle; its extra data starts at 0xA8. */
-
 /* Spawns the task that particle_updateOwnerSideTask updates for this owner. */
 void particle_startOwnerSideTask(Actor *owner) {
     FixedEmitter *task;

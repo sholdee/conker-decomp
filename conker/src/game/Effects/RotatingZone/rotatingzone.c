@@ -6,6 +6,7 @@
 #include "conker/zone.h"
 
 
+// matching: the cosine local sits in a 0x1C-byte block, so the stack frame has the original size
 struct CPad150CEF60 {
     f32 c;
     f32 pad[6];
