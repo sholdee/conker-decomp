@@ -18,7 +18,6 @@
  *   game/Lighting/AmbientZone/ambientzone.c
  *   game/Effects/Light/light.c
  *   game_22D1B0.c (data only, owner unknown; linked after game/Effects/AttachedBurst/attachedburst)
- *   game/Effects/ActorFlicker/actorflicker.c
  *   game/Effects/LampParticle/lampparticle.c
  */
 
@@ -359,7 +358,7 @@ extern u8 gDaylightOnAmbient[3];
 extern u8 gDaylightOnBackground[3];
 extern u8 gDaylightOffAmbient[3];
 
-/* game/Effects/ActorFlicker/actorflicker.c */
+/* game/Particle/AnchorEmitter/anchoremitter.c */
 void light_updateActorFlicker(LightEffect *effect);
 
 /* game/Effects/LampParticle/lampparticle.c */

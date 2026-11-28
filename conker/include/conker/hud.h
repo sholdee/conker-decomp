@@ -9,7 +9,6 @@
  * Subsystem "hud": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game/Hud/PlayerOverlay/playeroverlay.c
- *   game/Hud/CounterFree/counterfree.c
  *   game/Hud/HudOverlay/hudoverlay.c
  *   game/Hud/CodeFlags/codeflags.c
  */
@@ -74,7 +73,7 @@ extern s32 gHudBubbleCooldown;
 extern WaterStage gHudWaterStage;
 extern Gfx *gHudBlockDl;         /* display list built by game/Hud/PlayerOverlay/playeroverlay */
 
-/* game/Hud/CounterFree/counterfree.c */
+/* game/Effects/StatCounter/statcounter.c */
 void hud_freeCounter(CounterEffect *effect);
 void hud_counterMessage(EffectHeader *obj, s32 unused, u8 msg);
 

@@ -44,7 +44,6 @@
  *   game/Effects/TintedObject/tintedobject.c
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
- *   game/Effects/TrapEffect/trapeffect.c
  *   game/Effects/LevelHookCanyon/levelhookcanyon.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
@@ -67,8 +66,6 @@
  *   game/Effects/StageEffect/stageeffect.c
  *   game/Effects/DelayedBurst/delayedburst.c
  *   game/Effects/StarField/starfield.s
- *   game/Effects/ChildEffect/childeffect.c
- *   game/Effects/ChildEffectFree/childeffectfree.c
  *   game/Effects/AreaSpray/areaspray.c
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
@@ -101,21 +98,18 @@
  *   game/Effects/ColorAnim/coloranim.c
  *   game/Effects/TumblingPiece/tumblingpiece.c
  *   game/Effects/EffectQueue/effectqueue.c
- *   game/Effects/AnchorLight/anchorlight.c
  *   game/Effects/BurnDamage/burndamage.c
  *   game/Effects/TriggerSwap/triggerswap.c
  *   game/Effects/SurfaceHandlers/surfacehandlers.c
  *   game/Effects/FallingObject/fallingobject.c
  *   game/Effects/ContactEffects/contacteffects.c
  *   game/Effects/ActorEventStub/actoreventstub.c
- *   game/Effects/ZoneEffect/zoneeffect.c
  *   game/Effects/DebrisBurst/debrisburst.c
  *   game/Effects/ActorTasks/actortasks.c
  *   game/Effects/ImpactSets/impactsets.c
  *   game/Effects/TaskGroundFx/taskgroundfx.c
  *   game/Effects/LandingBurst/landingburst.c
  *   game/Effects/SpawnEmitterHook/spawnemitterhook.c
- *   game/Effects/RibbonChild/ribbonchild.c
  *   game/Effects/FollowEffects/followeffects.c
  *   game/Effects/StatCounter/statcounter.c
  *   game/Effects/ActorSoundBurst/actorsoundburst.c
@@ -514,14 +508,12 @@ void effect_updatePuffTimer(PuffTimer *timer);
 
 /* game/Effects/FallingStream/fallingstream.c */
 typedef struct StreamActor StreamActor;
+typedef struct TrapEffect TrapEffect;
+typedef struct EffectSpawnSource EffectSpawnSource;
 s32 effect_createFallingStream(u8 kind);
 s32 effect_updateFallingStream(StreamActor *actor);
 s32 effect_updateFallingStreamTrail(StreamActor *actor);
 Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view);
-
-/* game/Effects/TrapEffect/trapeffect.c */
-typedef struct TrapEffect TrapEffect;
-typedef struct EffectSpawnSource EffectSpawnSource;
 void effect_onTrapTriggered(WorldObject *trap);
 s32 effect_startTrapStream(TrapEffect *obj);
 s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
@@ -757,12 +749,10 @@ void effect_spawnBoneBeamAndDirParticle(Actor *actor, u8 owner, s32 list);
 /* game/Effects/StarField/starfield.s */
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
 
-/* game/Effects/ChildEffect/childeffect.c */
+/* game/Particle/TwoSidedEmitter/twosidedemitter.c */
 s32 effect_filterExcludedTargets(Actor *obj, s32 arg1, s32 arg2);
 void effect_destroyChildEffect(TwoSidedEmitter *effect);
 void effect_destroyWithChild(TwoSidedEmitter *effect);
-
-/* game/Effects/ChildEffectFree/childeffectfree.c */
 void effect_freeWithChild(TwoSidedEmitter *obj);
 
 /* game/Effects/AreaSpray/areaspray.c */
@@ -1445,7 +1435,7 @@ Queue *effect_newQueue(s32 capacity, s16 lifetime, u8 flags);
 QueueNode *effect_newQueueNode(void *value, u8 releaseFunc);
 s32 effect_pushQueue(Queue *queue, void *value, u8 releaseFunc);
 
-/* game/Effects/AnchorLight/anchorlight.c */
+/* game/Particle/AnchorEmitter/anchoremitter.c */
 typedef struct BoundEffect BoundEffect;
 void effect_handleAnchorLightEvent(BoundEffect *effect, ActorRef *msg, u8 type);
 void effect_unlinkAnchorLight(LightEffect *obj);
@@ -1518,7 +1508,7 @@ void effect_hitReactRumble(Actor *self, Actor *other, u8 *result);
 /* game/Effects/ActorEventStub/actoreventstub.c */
 void effect_emptyActorEventHook(Actor *arg0, s32 arg1, s32 arg2);
 
-/* game/Effects/ZoneEffect/zoneeffect.c */
+/* game/Particle/RegionEmitter/regionemitter.c */
 struct ZoneEmitter; /* include/conker/particle.h */
 void effect_destroyZoneEmitter(struct ZoneEmitter *obj);
 void effect_freeZoneEmitter(struct ZoneEmitter *obj);
@@ -1582,7 +1572,7 @@ typedef struct FxImpactSet {
     /* 0x00 */ s8 first;      /* gImpactFirstEffects index */
     /* 0x01 */ s8 firstStyle; /* gImpactSprays index (read by effect_spawnImpactSprayParticle) */
     /* 0x02 */ s8 second;     /* gImpactSecondEffects index */
-    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam, game/Particle/EmitterQuads/emitterquads.c) */
+    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam in the same file) */
     /* 0x04 */ s8 impact;     /* gImpactGroundEffects index */
 } FxImpactSet; // size 0x5
 
@@ -1646,7 +1636,7 @@ void effect_freeJointEmitterTask(JointEmitterTask *task);
 /* (Actor *spawner, Actor *spawned); declared without a prototype: game/Event/TimedEvent/timedevent.c also passes an angle */
 void func_151B5BA0();
 
-/* game/Effects/RibbonChild/ribbonchild.c */
+/* game/Effects/Trail/RibbonTrail/ribbontrail.c */
 void effect_destroyRibbonParticle(EffectObj *effect);
 void effect_destroyRibbon(EffectObj *effect);
 void effect_freeRibbon(EffectObj *effect);
@@ -1700,7 +1690,7 @@ void effect_destroyBurstGlow(BurstGlow *glow);
 void effect_freeBurstGlow(BurstGlow *glow);
 
 /* game/Effects/StatCounter/statcounter.c */
-/* The two-digit counter of effect_showStatCounter (game/Hud/CounterFree/counterfree.c frees it). The block copied to its panel's +0x120. */
+/* The two-digit counter of effect_showStatCounter (hud_freeCounter frees it). The block copied to its panel's +0x120. */
 typedef struct {
     /* 0x00 */ Vec3f rot;     /* math_mtxRotateRPYF angles of the panel's root matrix */
     /* 0x0C */ f32 scaleXZ;   /* scale of its X and Z axes */

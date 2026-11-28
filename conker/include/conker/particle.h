@@ -51,9 +51,6 @@
  *   game/Particle/ChannelParticle/channelparticle.c
  *   game/Particle/FlickerParticle/flickerparticle.c
  *   game/Particle/GroundCluster/groundcluster.c
- *   game/Particle/JitterUpdate/jitterupdate.c
- *   game/Particle/BendTarget/bendtarget.c
- *   game/Particle/JitterBallistic/jitterballistic.c
  *   game/Particle/SpawnShapes/spawnshapes.c
  *   game/Particle/BurstConfigs/burstconfigs.c
  *   game/Particle/StreakParticle/streakparticle.c
@@ -71,9 +68,7 @@
  *   game/Particle/GrowingBillboard/growingbillboard.c
  *   game/Particle/PlacementRing/placementring.c
  *   game/Particle/ActorEmitter/actoremitter.c
- *   game/Particle/ActorEmitterHandlers/actoremitterhandlers.c
  *   game/Particle/AnchorEmitter/anchoremitter.c
- *   game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c
  *   game/Particle/ActorEmitterData/actoremitterdata.c (data only, linked after the game/Particle/ActorEmitter/actoremitter..game/Effects/BurnDamage/burndamage unit)
  *   game/Particle/Drips/drips.c
  *   game/Particle/DustEmitter/dustemitter.c
@@ -83,8 +78,6 @@
  *   game/Particle/FastSpark/fastspark.c
  *   game/Particle/SphereEmitter/sphereemitter.c
  *   game/Particle/RegionEmitter/regionemitter.c
- *   game/Particle/ZoneEmitter/zoneemitter.c
- *   game/Particle/EmitterQuads/emitterquads.c
  *   game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope)
  *   game/Particle/SideSpray/sidespray.c
  *   game/Particle/OwnerSideEmitter/ownersideemitter.c
@@ -92,7 +85,6 @@
  *   game/Particle/Pulse/pulse.c
  *   game/Particle/Bob/bob.c
  *   game/Particle/FallingParticle/fallingparticle.c
- *   game/Particle/WobbleStream/wobblestream.c
  *   game/Particle/HitImpact/hitimpact.c
  *   game/Particle/Steam/steam.c
  *   game/Particle/ColorEmitter/coloremitter.c
@@ -1422,14 +1414,8 @@ s32 particle_fadeTrailByLife(MotionTrail *trail);
 s32 particle_growQuadAtRate(Particle177B50 *p);
 s32 particle_capQuadAlphaByLife(Particle177B50 *p);
 s32 particle_updateJitter(JitterParticle *p, ParticleJitter *w);
-
-/* game/Particle/JitterUpdate/jitterupdate.c */
 void particle_updateJitterParticle(JitterParticle *p);
-
-/* game/Particle/BendTarget/bendtarget.c */
 void particle_easeBendTarget(void *arg);
-
-/* game/Particle/JitterBallistic/jitterballistic.c */
 void particle_resetBendTarget(JitterParticle *p);
 void particle_updateRelaunchedJitter(JitterParticle *p);
 void particle_moveJitterBallistic(JitterParticle *p);
@@ -2199,8 +2185,6 @@ s32 particle_followEmitterSound(SoundRecord *record, s32 *active, u32 *volume, s
 void particle_freeActorEmitterParticles(ActorEmitterProcess *emitter);
 void particle_setActorEmitterTable(ActorEmitterProcess *emitter, u8 table);
 ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 owner);
-
-/* game/Particle/ActorEmitterHandlers/actoremitterhandlers.c */
 void particle_detachActorEmitter(ActorEmitterProcess *emitter);
 void particle_destroyActorEmitter(ActorEmitterProcess *emitter);
 void particle_freeActorEmitter(ActorEmitterProcess *emitter);
@@ -2243,8 +2227,6 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest);
 s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant);
 const u8 *particle_getObjEmitterData(Actor *obj, s32 *found);
 LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 fxOwner, s32 fxList);
-
-/* game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c */
 void particle_freeAnchorEmitterSprite(LightEffect *obj);
 void particle_destroyAnchorEmitter(AnchorEmitter *emitter);
 void particle_sendActorGoneToEmitters(Actor *actor);
@@ -2562,10 +2544,8 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 alpha, CollisionTri *surface,
                           u8 owner, s32 list);
 void particle_handleZoneEffectMessage(ZoneEffect *listener, void *data, u8 type);
 void particle_fireRegionEmitter(TriggerZone *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 owner, s32 list);
-struct ZoneEmitter; /* game/Particle/ZoneEmitter/zoneemitter.c, below */
+struct ZoneEmitter; /* below */
 Vtx *particle_buildYawedVerticalQuad(struct ZoneEmitter *owner, s16 index);
-
-/* game/Particle/ZoneEmitter/zoneemitter.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (particle_updateZoneEmitter, particle_shutZoneEmitter). */
 typedef struct ZoneEmitterState {
     /* 0x00 */ TriggerZone *region;
@@ -2588,7 +2568,7 @@ typedef struct ZoneEmitter {
 s32 particle_updateZoneEmitter(ZoneEmitter *obj);
 void particle_shutZoneEmitter(ZoneEmitter *obj);
 
-/* game/Particle/EmitterQuads/emitterquads.c */
+/* game/Effects/ImpactSets/impactsets.c */
 s32 particle_spawnSampleKindMark(MotionTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 typedef struct FxSpawnPayload FxSpawnPayload; /* defined in conker/effect.h */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
@@ -2802,7 +2782,7 @@ void particle_newFallingEmitter(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s1
                    s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner, s32 list);
 void particle_updateFallingEmitter(FallingEmitter *emitter);
 
-/* game/Particle/WobbleStream/wobblestream.c */
+/* game/Weapon/Projectile/projectile.c */
 typedef struct ProjectileStreamEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ProjectileStream emission;

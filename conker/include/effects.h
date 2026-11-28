@@ -2376,7 +2376,7 @@ typedef struct WaveTrail {
 } WaveTrail;
 
 /* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
- * position, aimed along math_dirFromAngles angles that wobble as sines (particle_updateWobbleStream, game/Particle/WobbleStream/wobblestream.c;
+ * position, aimed along math_dirFromAngles angles that wobble as sines (particle_updateWobbleStream, game/Weapon/Projectile/projectile.c;
  * particle_updateSourceEmission, game/Particle/EmissionSource/emissionsource.c). */
 typedef struct ParticleStream {
     /* 0x00 */ f32 angleX;        /* centre direction */
@@ -2393,7 +2393,7 @@ typedef struct ParticleStream {
     /* 0x2C */ Vec3f position;
 } ParticleStream; /* size 0x38 */
 
-/* A stream of weapon_spawnProjectile projectiles (TimedEffect tick callback 0x2B, particle_updateWobbleStream, game/Particle/WobbleStream/wobblestream.c). */
+/* A stream of weapon_spawnProjectile projectiles (TimedEffect tick callback 0x2B, particle_updateWobbleStream, game/Weapon/Projectile/projectile.c). */
 typedef struct ProjectileStream {
     /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 speed;         /* weapon_spawnProjectile's speed */
@@ -2580,14 +2580,14 @@ typedef struct ParticleJitter {
     /* 0x2C */ f32 speedTarget;
     /* 0x30 */ f32 speedTimer;
     /* 0x34 */ f32 speed;          /* eased value copied to def.frameSpeed */
-    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see game/Particle/JitterBallistic/jitterballistic.c's update) */
+    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see particle_moveJitterBallistic, game/Particle/GroundCluster/groundcluster.c) */
     /* 0x44 */ f32 gravity;
     /* 0x48 */ f32 drag;           /* velocity scale per tick */
     /* 0x4C */ f32 easeFactor;     /* particle_easeBendTarget eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
 
 /* Caller data at 0x160 of a JitterParticle spawned by beam_launchJitterParticle (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
- * (game/Particle/JitterBallistic/jitterballistic.c) relaunches the particle with this life and gravity. */
+ * (game/Particle/GroundCluster/groundcluster.c) relaunches the particle with this life and gravity. */
 typedef struct JitterRelaunch {
     /* 0x0 */ f32 gravity;
     /* 0x4 */ s16 lifetime;
@@ -2739,11 +2739,11 @@ typedef struct ActorEmitterParticleData {
     /* 0x48 */ s16 fadeStart;
     /* 0x4A */ s16 fadeRate;
     /* 0x4C */ f32 blend;
-    /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (particle_buildActorEmitterQuad, game/Particle/ActorEmitterHandlers/actoremitterhandlers.c) */
+    /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (particle_buildActorEmitterQuad, game/Particle/ActorEmitter/actoremitter.c) */
     /* 0x54 */ struct ParticleTemplate *tmpl;
 } ActorEmitterParticleData; /* size 0x58 */
 
-/* A particle of an actor emitter (game/Particle/ActorEmitter/actoremitter.c, its callbacks in game/Particle/ActorEmitterHandlers/actoremitterhandlers.c), made by particle_newQuadParticleWhite. */
+/* A particle of an actor emitter (game/Particle/ActorEmitter/actoremitter.c, with its callbacks), made by particle_newQuadParticleWhite. */
 typedef struct ActorEmitterParticle {
     /* 0x000 */ DefParticleHead head; /* head.def.rot: the previous position */
     /* 0x110 */ ActorEmitterParticleData data;
@@ -2763,8 +2763,8 @@ typedef struct ActorEmitterSlot {
     /* 0x14 */ struct ActorEmitterSlot *next; // ring of free slots while emitting
 } ActorEmitterSlot; /* 0x18 */
 
-/* Process of type 0x21: emits particles around (or from the bones of) its owner (game/Particle/ActorEmitter/actoremitter.c; its particle
- * callbacks are in game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
+/* Process of type 0x21: emits particles around (or from the bones of) its owner (game/Particle/ActorEmitter/actoremitter.c, with its
+ * particle callbacks). */
 typedef struct ActorEmitterProcess {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;
@@ -3033,8 +3033,8 @@ typedef struct ShapeEmitter {
 } ShapeEmitter;
 
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
- * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
- * 0x2C) and beam_findBoltArcEffect (game/Beam/BoltRain/boltrain.c) its BoltArcObj (callbackSet 0x2E, conker/beam.h). */
+ * with the zone first in their data. effect_findZoneEffect (game/Particle/RegionEmitter/regionemitter.c) finds the ZoneEffect of a
+ * zone (callbackSet 0x2C) and beam_findBoltArcEffect (game/Beam/BoltRain/boltrain.c) its BoltArcObj (callbackSet 0x2E, conker/beam.h). */
 typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 id;               /* the zone's data2 */
