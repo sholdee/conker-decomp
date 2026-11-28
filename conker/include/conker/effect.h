@@ -965,8 +965,8 @@ void effect_spawnFootprintAndSplash(s32 actor, s32 side, s32 strength, u8 alt);
 void effect_spawnFootprintAtFoot(s32 actor, s32 side, s32 strength);
 void effect_spawnFootSplash(s32 actor, s32 side, s32 strength);
 void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength);
-s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw, s32 baseYaw, s32 argA,
-                  s32 argB, s32 argC, s32 argD, u8 owner);
+s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw, s32 baseYaw, s32 radius,
+                  s32 arg11, s32 arg12, s32 data, u8 owner);
 void func_15147318(s32 actor, s32 side, s32 strength);
 void func_15147478(s32 actor, s32 side, s32 strength);
 void func_151475D8(s32 actor, s32 side, s32 strength);

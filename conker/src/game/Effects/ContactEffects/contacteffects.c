@@ -294,22 +294,22 @@ void effect_hitReactHeadShot(Actor *self, Actor *other, u8 *result) {
     effect_spawnHitScreenFade(0, self, other);
 }
 
-// Sets obj's hiddenBones flags and starts an id-specific animation for ids 0x75 and 0x80.
+// Collapses bones 1-15 (hiddenBones) and, for ids 0x75 and 0x80, creates an id-specific part set.
 void func_15194AB4(Actor *obj) {
-    s32 anim;
+    s32 setId;
 
     obj->hiddenBones |= 0xFFFE;
-    anim = -1;
+    setId = -1;
     switch (obj->character_type) {
     case 0x75:
-        anim = 0x73;
+        setId = 0x73;
         break;
     case 0x80:
-        anim = 0x72;
+        setId = 0x72;
         break;
     }
-    if (anim != -1) {
-        collision_createPartSet(obj, anim, 1.0f, 0);
+    if (setId != -1) {
+        collision_createPartSet(obj, setId, 1.0f, 0);
     }
 }
 

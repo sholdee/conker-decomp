@@ -292,11 +292,11 @@ void blood_destroyDebris(BloodDebrisParticle *particle);
 /* game/Effects/BloodDrip/blooddrip.c */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 owner, s32 list);
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *emitter);
-void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 owner);
-void func_151AEAB4(Vec3f *pos, u8 flag, u8 owner);
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 hitsFloor, u8 owner);
+void func_151AEAB4(Vec3f *pos, u8 hitsFloor, u8 owner);
 void blood_spawnGroundBurst(Actor *obj, u8 owner, s32 list);
 void *func_151AF270(Actor *actor, u8 owner, s32 list);
-void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 
 /* game/Effects/BloodSpray/bloodspray.c */

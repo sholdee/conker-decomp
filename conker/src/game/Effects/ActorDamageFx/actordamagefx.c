@@ -195,10 +195,10 @@ void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength) {
 
 /* Spawn one particle_newOwnedSpriteParticle particle at (x, y, z), flying off at a random pitch along `yaw`. */
 s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 originY, s32 originZ, s16 yaw,
-                  s32 baseYaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 owner) {
+                  s32 baseYaw, s32 radius, s32 arg11, s32 arg12, s32 data, u8 owner) {
     ParticleDesc desc;
     TimedEffect *particle;
-    f32 extra;
+    f32 drag;
     f32 speed;
     u32 random;
 
@@ -241,7 +241,7 @@ s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 or
 
     desc.updateFunc = 10;
     desc.scaleRate = 1.02f;
-    extra = 0.94000006f;
+    drag = 0.94000006f;
     desc.deathFunc = -1;
     desc.fadeStart = 20;
     desc.fadeRate = 12;
@@ -249,7 +249,7 @@ s32 func_151470FC(s32 shape, s32 index, f32 x, f32 y, f32 z, s32 originX, s32 or
 
     particle = particle_newOwnedSpriteParticle(&desc, 1, 4, owner, 1);
     if (particle != NULL) {
-        memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
+        memcpy((u8 *)particle + 0xA8, &drag, sizeof(drag));
     }
     return 1;
 }
