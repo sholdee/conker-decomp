@@ -11,7 +11,7 @@
  * none of the code units after it (effectcmd .. game/Script/TaskCmd/taskcmd) defines them, so they are
  * taken as the tail of this unit.
  *
- * The manifest: one ResourceDescriptor for each task (game/Script/EffectCmd/effectcmd reads it). The names
+ * The manifest: one ResourceDescriptor for each task (game/Script/TaskTable/tasktable reads it). The names
  * are game text, so the .rodata of this unit stays data that the build extracts from the ROM; the
  * descriptors refer to its lists and names by their address names.
  *

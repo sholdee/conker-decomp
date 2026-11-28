@@ -12,6 +12,7 @@
  *   game/Script/ActorCmd/actorcmd.c
  *   game/Script/TaskSet/taskset.c
  *   game/Script/CutsceneCmd/cutscenecmd.c
+ *   game/Script/TaskTable/tasktable.c
  *   game/Script/EffectCmd/effectcmd.c
  *   game/Script/SwarmCmd/swarmcmd.c
  *   game/Script/MiscCmd/misccmd.c
@@ -356,7 +357,7 @@ extern s32 (*gScriptEndHandlers[15])();
 extern s32 (*gScriptQueryHandlers[15])();
 extern s32 (*gScriptCommandHandlers[15])();
 
-/* game/Script/EffectCmd/effectcmd.c */
+/* game/Script/TaskTable/tasktable.c */
 const char *script_getTaskName(s32 index);
 u16 script_getTaskLevel(s32 index);
 s32 script_getTaskSpawnPoint(s32 index);
@@ -372,6 +373,8 @@ void script_markTasksDone(const u16 *list, void (*callback)(s32));
 s32 script_loadResourceTable(s32 category, s32 *countOut);
 void script_freeResourceTable(void);
 s32 script_areResourceDepsLoaded(s32 category, s32 index, s32 *firstDepOut, s32 *unk0Out);
+
+/* game/Script/EffectCmd/effectcmd.c */
 s32 script_startEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_endEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd);

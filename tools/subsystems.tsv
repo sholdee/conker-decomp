@@ -597,7 +597,8 @@ src/game/Script/ActorCmd/actorcmd.c	script	script set commands for objects
 src/game/Script/CameraCmd/cameracmd.c	script	scripted actor moves to camera poses
 src/game/Script/CmdTables/cmdtables.c	script	data-only unit: script command handler tables by class (start, end, query, command)
 src/game/Script/CutsceneCmd/cutscenecmd.c	script	script event handler
-src/game/Script/EffectCmd/effectcmd.c	script	task resources: dependencies, loaded bits, script command start/end/poll
+src/game/Script/EffectCmd/effectcmd.c	script	script effect commands: start, end, advance, poll
+src/game/Script/TaskTable/tasktable.c	script	task resources: dependencies, loaded bits, resource table
 src/game/Script/MiscCmd/misccmd.c	script	script command/query handlers with integer params
 src/game/Script/MusicCmd/musiccmd.c	script	script handlers: music/sound start and stop
 src/game/Script/ObjScript/objscript.c	script	object byte-code script interpreter commands

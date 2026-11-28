@@ -532,7 +532,8 @@ segments:
       - [0xC4DC0, c, game/Script/ActorCmd/actorcmd]
       - [0xC8950, c, game/Script/TaskSet/taskset]
       - [0xC98F0, c, game/Script/CutsceneCmd/cutscenecmd]
-      - [0xC9EC0, c, game/Script/EffectCmd/effectcmd]
+      - [0xC9EC0, c, game/Script/TaskTable/tasktable]
+      - [0xCA630, c, game/Script/EffectCmd/effectcmd]
       - [0xCB1C0, c, game/Script/SwarmCmd/swarmcmd]
       - [0xCB3D0, c, game/Script/MiscCmd/misccmd]
       - [0xCBAF0, c, game/Script/MusicCmd/musiccmd]
@@ -1702,7 +1703,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D2C70, name: game/Sprite/SpriteDraw/spritedraw}
       - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game/Script/CameraCmd/cameracmd}
       - {start: 0x255880, type: .bss, vram: 0x800D2E40, name: game/Script/TaskSet/taskset}
-      - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game/Script/EffectCmd/effectcmd}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game/Script/TaskTable/tasktable}
       - {start: 0x255880, type: .bss, vram: 0x800D2FC0, name: game/Script/MiscCmd/misccmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game/Script/TaskCmd/taskcmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game/Script/TimerCmd/timercmd}
