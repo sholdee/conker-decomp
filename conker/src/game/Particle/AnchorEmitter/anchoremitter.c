@@ -619,3 +619,71 @@ LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *ow
     }
     return child;
 }
+
+/* Update for a flickering light tied to an actor (payload: actor reference, then jitter state). */
+void light_updateActorFlicker(LightEffect *effect) {
+    light_applyJitter(effect, &effect->data.actorJitter.jitter);
+    light_trackActorRef(effect, &effect->data.actorJitter.ref);
+}
+
+/* An effect bound to an actor. */
+struct BoundEffect {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
+    /* 0x18 */ ActorRef ref;
+};
+
+/* Message handler: type 0 removes the effect when the message names its actor. */
+void effect_handleAnchorLightEvent(BoundEffect *effect, ActorRef *msg, u8 type) {
+    Actor *actor;
+    Actor *msgActor;
+    u8 actorId;
+    u8 msgActorId;
+
+    if (type == 0) {
+        actor = effect->ref.actor;
+        msgActor = msg->actor;
+        actorId = effect->ref.uniqueId;
+        msgActorId = msg->uniqueId;
+        if (actor == msgActor || actorId == msgActorId) {
+            effect_destroyObject(&effect->header);
+        }
+    }
+}
+
+/* Detaches the light from the AnchorEmitter that owns it. */
+void effect_unlinkAnchorLight(LightEffect *obj) {
+    AnchorEmitter *emitter = obj->data.actorJitter.user;
+
+    emitter->params.child = NULL;
+}
+
+void effect_destroyAnchorLight(LightEffect *obj) {
+    effect_unlinkAnchorLight(obj);
+    light_defaultDestroy(obj);
+}
+
+void particle_freeAnchorEmitterSprite(LightEffect *obj) {
+    effect_unlinkAnchorLight(obj);
+    light_defaultFree(obj);
+}
+
+/* AnchorEmitter destroy: frees its child effect, unregisters it and releases its anchor set. */
+void particle_destroyAnchorEmitter(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params = &emitter->params;
+
+    if (params->child != NULL) {
+        effect_destroyObject(params->child);
+    }
+    sound_stopByCallback(particle_followEmitterSound, emitter, (s32)emitter->group.actor);
+    effect_releaseAnchorSet(params->tmpl.anchorSet);
+}
+
+/* Sends event 0x2A about `actor` to every object of type 0x3E. */
+void particle_sendActorGoneToEmitters(Actor *actor) {
+    ActorRef event;
+
+    event.actor = actor;
+    event.uniqueId = actor->unique_id;
+    effect_sendEventToType(0x3E, (s32)&event, 0x2A);
+}

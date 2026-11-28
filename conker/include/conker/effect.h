@@ -98,7 +98,6 @@
  *   game/Effects/ColorAnim/coloranim.c
  *   game/Effects/TumblingPiece/tumblingpiece.c
  *   game/Effects/EffectQueue/effectqueue.c
- *   game/Effects/AnchorLight/anchorlight.c
  *   game/Effects/BurnDamage/burndamage.c
  *   game/Effects/TriggerSwap/triggerswap.c
  *   game/Effects/SurfaceHandlers/surfacehandlers.c
@@ -1438,7 +1437,7 @@ Queue *effect_newQueue(s32 capacity, s16 lifetime, u8 flags);
 QueueNode *effect_newQueueNode(void *value, u8 releaseFunc);
 s32 effect_pushQueue(Queue *queue, void *value, u8 releaseFunc);
 
-/* game/Effects/AnchorLight/anchorlight.c */
+/* game/Particle/AnchorEmitter/anchoremitter.c */
 typedef struct BoundEffect BoundEffect;
 void effect_handleAnchorLightEvent(BoundEffect *effect, ActorRef *msg, u8 type);
 void effect_unlinkAnchorLight(LightEffect *obj);

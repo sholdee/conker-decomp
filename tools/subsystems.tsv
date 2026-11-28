@@ -240,12 +240,10 @@ src/game/Effects/ActorAttachments/actorattachments.c	effect	character effects: p
 src/game/Effects/ActorDamageFx/actordamagefx.c	effect	actor bone positions and damage effect kinds
 src/game/Effects/ActorEffects/actoreffects.c	effect	generic effect helpers: RDP state cache, attached effects, linked objects
 src/game/Effects/ActorEmitterTick/actoremittertick.c	effect	actor emitters, hop/bounce motions, text objects
-src/game/Effects/ActorFlicker/actorflicker.c	light	flickering light tied to an actor
 src/game/Effects/ActorImpact/actorimpact.c	effect	effects at an actor and perimeter spawn points
 src/game/Effects/ActorSoundBurst/actorsoundburst.c	effect	sound and particle effects at an actor
 src/game/Effects/ActorTasks/actortasks.c	effect	actor task effects: pulses, looping sounds, ground drops
 src/game/Effects/AmbientPulse/ambientpulse.c	light	ambient colour pulse
-src/game/Effects/AnchorLight/anchorlight.c	effect	effect bound to an actor
 src/game/Effects/AreaSpray/areaspray.c	effect	area effects with sounds and particle bursts
 src/game/Camera/LevelHookTheWindmill/levelhookthewindmill.c	camera	per-level camera hook
 src/game/Effects/AttachedBurst/attachedburst.c	effect	actor-attached effect lists; code checksum (anti-tamper)
@@ -470,8 +468,7 @@ src/game/Os/PiReadIo/pireadio.c	os	osPiReadIo copy
 src/game/Os/ViSetSpecial/visetspecial.c	os	osViSetSpecialFeatures copy
 src/game/Particle/ActorEmitter/actoremitter.c	particle	actor emitter process: bone emission points, its handlers and particle quads
 src/game/Particle/ActorEmitterData/actoremitterdata.c	particle	data-only unit (wave 5)
-src/game/Particle/AnchorEmitter/anchoremitter.c	particle	anchored emitters and sprite particles
-src/game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c	particle	anchor emitter destroy
+src/game/Particle/AnchorEmitter/anchoremitter.c	particle	anchored emitters and sprite particles; the emitter's light (flicker update, unlink, destroy, free) and its destroy
 src/game/Particle/AreaFlash/areaflash.c	particle	flash particle emitter
 src/game/Particle/AreaParticles/areaparticles.c	particle	ambient particles spawned over a region; random helpers
 src/game/Particle/BendTarget/bendtarget.c	particle	particle anchor easing

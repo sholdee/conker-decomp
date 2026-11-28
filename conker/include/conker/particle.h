@@ -72,7 +72,6 @@
  *   game/Particle/PlacementRing/placementring.c
  *   game/Particle/ActorEmitter/actoremitter.c
  *   game/Particle/AnchorEmitter/anchoremitter.c
- *   game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c
  *   game/Particle/ActorEmitterData/actoremitterdata.c (data only, linked after the game/Particle/ActorEmitter/actoremitter..game/Effects/BurnDamage/burndamage unit)
  *   game/Particle/Drips/drips.c
  *   game/Particle/DustEmitter/dustemitter.c
@@ -2240,8 +2239,6 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest);
 s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant);
 const u8 *particle_getObjEmitterData(Actor *obj, s32 *found);
 LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 fxOwner, s32 fxList);
-
-/* game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c */
 void particle_freeAnchorEmitterSprite(LightEffect *obj);
 void particle_destroyAnchorEmitter(AnchorEmitter *emitter);
 void particle_sendActorGoneToEmitters(Actor *actor);
