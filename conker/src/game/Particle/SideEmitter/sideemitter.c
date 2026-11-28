@@ -13,7 +13,7 @@
 
 /* Attaches effect 0x23 to the object. */
 void particle_attachSideEmitter(Actor *object) {
-    Effect1BFDD0 *effect;
+    FixedEmitter *effect;
     FixedEmitterData data;
 
     if (object == NULL) {
@@ -31,7 +31,7 @@ void particle_attachSideEmitter(Actor *object) {
 
 /* Effect 0x23 update: emits 0.31-0.91 particles per gFrameDelta tick, 20 units to either side of the object,
  * moving against the direction sprite_findActorMotion returns. */
-void particle_updateSideEmitter(Effect1BFDD0 *effect) {
+void particle_updateSideEmitter(FixedEmitter *effect) {
     FixedEmitterData *data;
     ParticleDesc desc;
     u8 side;
@@ -98,8 +98,8 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
 }
 
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
-Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list) {
-    Effect1BFDD0 *effect;
+FixedEmitter *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list) {
+    FixedEmitter *effect;
     FixedEmitterData data;
 
     if (object == NULL) {
@@ -119,7 +119,7 @@ Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, 
 
 /* Update of particle_attachBoneSideEmitter's effect: emits 0.79-1.99 particles per gFrameDelta tick from bone 1 of the
  * object, flung out to either side. */
-void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
+void particle_updateBoneSideEmitter(FixedEmitter *effect) {
     FixedEmitterData *data;
     ParticleDesc desc;
     s16 facing;
@@ -199,7 +199,7 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
 
 /* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
  * effect when it names the effect's object. */
-void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+void particle_onSideEmitterMsg(FixedEmitter *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;
@@ -224,7 +224,7 @@ void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 }
 
 /* Message handler of particle_attachBoneSideEmitter's effect: the same as particle_onSideEmitterMsg. */
-void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+void particle_onBoneSideEmitterMsg(FixedEmitter *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;

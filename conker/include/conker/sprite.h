@@ -205,7 +205,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 view);
  * One sprite placed on a level triangle (gLevelSprites holds gLevelSpriteCount of them, sorted by x or z; filled by
  * sprite_addLevelParticle when the level loads).
  */
-typedef struct Game1A89B0Position {
+typedef struct LevelSprite {
     s16 x;
     s16 y;
     s16 z;
@@ -217,7 +217,7 @@ typedef struct Game1A89B0Position {
     u8 disturbState; /* 0x21 or more: disturbed (shows the type's disturbed frame); counts down from 0x22 to 0x21 */
     s8 halfWidth;
     s8 height;
-} Game1A89B0Position; /* size 0xE */
+} LevelSprite; /* size 0xE */
 
 /*
  * A sprite kind (gSpriteKinds): emit places sprites of this kind on a level triangle when the level loads
@@ -226,7 +226,7 @@ typedef struct Game1A89B0Position {
  */
 typedef struct SpriteKind {
     s32 (*emit)(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-    s32 (*anim)(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+    s32 (*anim)(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha);
     s32 unk8;
 } SpriteKind;
 
@@ -263,13 +263,13 @@ extern u8 gSpriteTypeKindRows[15]; /* row of gSpriteKindChoices */
 extern s16 gSpriteTypePhases[60]; /* animation phases, 4 per type (frame << 8) */
 extern s32 gSpriteMaxPerFrame; /* most sprites built per frame */
 extern Vtx *gSpriteVtxBuffers[2]; /* this frame's sprite vertex buffer, one per frame buffer */
-extern Game1A89B0Position *gLevelSprites; /* the level's sprites */
+extern LevelSprite *gLevelSprites; /* the level's sprites */
 extern u8 gBillboardAnimCounter; /* billboard animation counter */
 extern s32 gLevelSpriteCount; /* number of sprites in gLevelSprites */
-s32 sprite_animJitterHeight(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 sprite_animFadeOffset(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 sprite_animHop(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 sprite_animJitterHeight(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 sprite_animFadeOffset(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 func_1517B7A8(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 sprite_animHop(LevelSprite *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 void sprite_sortLevelSprites(s32 first, s32 last);
 void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ);
 void sprite_freeTypeTextures(void);

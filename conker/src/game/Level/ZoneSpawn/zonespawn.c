@@ -789,7 +789,7 @@ s32 level_spawnMissileZone(TriggerZone *obj) {
 /** Creates six light_createWithEffect objects at the object's position, coloured from gRaySpinnerChildColors, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 level_spawnDiscoBallZone(TriggerZone *obj) {
-    FF0E0State packet;
+    RaySpinnerState packet;
     s32 i;
     TimedEffect *effect;
     Vec3i pos;

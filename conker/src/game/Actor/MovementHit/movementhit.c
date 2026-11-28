@@ -147,11 +147,11 @@ void actor_hitBloodImpacts(Actor *obj, s32 arg) {
     }
 }
 
-void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
+void func_1506AB7C(Actor *obj, ImpactBlastArgs *arg) {
     effect_spawnImpactBlast(obj, arg->source, &arg->pos, 1, arg->unk10, 0xFF, 1);
 }
 
-void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
+void func_1506ABC4(Actor *obj, ImpactBlastArgs *arg) {
     effect_spawnImpactBlast(obj, arg->source, &arg->pos, 2, arg->unk10, 0xFF, 1);
 }
 

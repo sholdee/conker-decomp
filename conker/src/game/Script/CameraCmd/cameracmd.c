@@ -13,13 +13,13 @@ typedef struct {
     /* 0x10 */ f32 scale; // copied (truncated) to gPoseCommandScales when the command starts
     /* 0x14 */ u8 pad14[0xC];
     /* 0x20 */ f32 savedCameraAngle; // actor->CameraAngle at setup, written to actor->CutbackAngle when done
-} C3E20Command; // size 0x24
+} PoseCommand; // size 0x24
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 f32 gPendingCutbackAngle;
 s32 gPoseCommandRunning; // a command is running
 f32 gPoseSavedTargetY; // actor->unk2C0 saved while a command runs
-C3E20Command gPoseCommands[3];
+PoseCommand gPoseCommands[3];
 s32 gPoseCommandScales[4]; // per actor: the running command's scale
 
 #include <math.h>

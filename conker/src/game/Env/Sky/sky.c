@@ -51,13 +51,13 @@ static SkyDrawFunc gSkyDrawFuncs[] = {
 };
 
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
-struct Game13D350U8x2 { u8 v[2]; };
-struct Game13D350S16x2 { s16 v[2]; };
-static struct Game13D350U8x2 gSkyFormatSizes = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
-static struct Game13D350U8x2 gSkyFormatShifts = { { 1, 2 } };          // load shifts
-static struct Game13D350S16x2 gSkyFormatPalOffsets = { { 0x800, 0x400 } }; // palette offsets
-static struct Game13D350U8x2 gSkyFormatTlutCounts = { { 255, 15 } };       // TLUT counts - 1
-static struct Game13D350U8x2 gSkyFormatTiles = { { 0, 1 } };          // render tiles
+struct SkyFormatBytes { u8 v[2]; };
+struct SkyFormatShorts { s16 v[2]; };
+static struct SkyFormatBytes gSkyFormatSizes = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
+static struct SkyFormatBytes gSkyFormatShifts = { { 1, 2 } };          // load shifts
+static struct SkyFormatShorts gSkyFormatPalOffsets = { { 0x800, 0x400 } }; // palette offsets
+static struct SkyFormatBytes gSkyFormatTlutCounts = { { 255, 15 } };       // TLUT counts - 1
+static struct SkyFormatBytes gSkyFormatTiles = { { 0, 1 } };          // render tiles
 
 /* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
 typedef struct SkyFace {
@@ -655,11 +655,11 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     s32 lastFormat;
     f32 fov;
     u8 color[3];
-    struct Game13D350U8x2 sizes;
-    struct Game13D350U8x2 shifts;
-    struct Game13D350S16x2 palOffsets;
-    struct Game13D350U8x2 tlutCounts;
-    struct Game13D350U8x2 tiles;
+    struct SkyFormatBytes sizes;
+    struct SkyFormatBytes shifts;
+    struct SkyFormatShorts palOffsets;
+    struct SkyFormatBytes tlutCounts;
+    struct SkyFormatBytes tiles;
 
     sizes = gSkyFormatSizes;
     shifts = gSkyFormatShifts;

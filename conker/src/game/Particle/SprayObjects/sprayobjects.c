@@ -110,7 +110,7 @@ void func_150C3230(Actor *obj) {
                 mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
         } else {
-            Arg1506AB7C eventData;
+            ImpactBlastArgs eventData;
 
             eventData.pos.x = obj->xpos;
             eventData.pos.y = obj->ypos;

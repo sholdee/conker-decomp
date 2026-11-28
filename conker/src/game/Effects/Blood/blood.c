@@ -852,25 +852,26 @@ const BloodProfile D_800A40F8[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [19] */
 };
 
+/* Two texture ids; the splat and its sparks each pick one at random. A struct so the pair copies whole. */
 typedef struct {
-    u8 value[2];
-} Blood356D4Kinds;
+    u8 textures[2];
+} BloodTexturePair;
 
 /* Spawns a blood splat particle at *position plus a ring of smaller spark particles around it. */
 void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 owner, s32 list) {
     BloodSplat *result;
     ScreenSpriteInfo particle;
-    Blood356D4Motion motion;
-    Blood356D4Kinds kinds = { { 0x3A, 0x3B } };
+    BloodSplatMotion motion;
+    BloodTexturePair kinds = { { 0x3A, 0x3B } };
     s32 spriteKinds[1] = { 2 };
     f32 scale;
     f32 count;
     ScreenSpriteInfo spark;
-    Blood356D4Kinds sparkKinds;
+    BloodTexturePair sparkKinds;
     s32 flip;
     // matching: the spark textures are copied from a static each iteration (an initializer in the loop moves
     // the stack slot)
-    static Blood356D4Kinds sparkTextures = { { 0x3C, 0x3D } };
+    static BloodTexturePair sparkTextures = { { 0x3C, 0x3D } };
 
     motion.timer = delay;
     motion.growth = (math_randomFloat() * 100.0f + 100.0f) * size * 0.001f;
@@ -882,7 +883,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
     *(Vec2f *)&particle.x = *position;
     particle.halfWidth = size;
     particle.halfHeight = size;
-    particle.texture = kinds.value[math_random() & 1];
+    particle.texture = kinds.textures[math_random() & 1];
     particle.timer = lifetime;
     flip = (math_random() & 1) ? 2 : 0;
     particle.flags = ((particle.texture == 58) ? ((math_random() & 1) ? 4 : 0) : 0) | 9 | flip;
@@ -952,7 +953,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
                 spark.x = position->x + distance * sine;
                 spark.y = position->y + distance * cosine;
             }
-            spark.texture = sparkKinds.value[math_random() & 1];
+            spark.texture = sparkKinds.textures[math_random() & 1];
             spark.flags &= ~6;
             if (math_random() & 1) {
                 spark.flags |= 2;
@@ -970,7 +971,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
 
 /* BloodSplat callback: grows the splat, then lets it fall; returns 0 once it leaves the area. */
 s32 blood_updateSplat(BloodSplat *splat) {
-    Blood356D4Motion *motion;
+    BloodSplatMotion *motion;
     s32 alive;
 
     motion = &splat->motion;

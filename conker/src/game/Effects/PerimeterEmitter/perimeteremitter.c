@@ -60,7 +60,7 @@ void effect_attachPerimeterEmitter(Actor *owner) {
 /* Attaches a timed effect (updated by effect_updatePerimeterEmitter) to owner. */
 void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
     FixedEmitterData data;
-    Effect1BFDD0 *effect;
+    FixedEmitter *effect;
 
     data.object = owner;
     data.objectId = owner->unique_id;
@@ -73,7 +73,7 @@ void effect_spawnPerimeterEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
 }
 
 /* Effect callback: hands effect_handleOwnerActorEvent the owner reference. */
-void effect_perimeterEmitterMessage(Effect1BFDD0 *effect, s32 event, u8 eventType) {
+void effect_perimeterEmitterMessage(FixedEmitter *effect, s32 event, u8 eventType) {
     effect_handleOwnerActorEvent(event, eventType, &effect->data.object, &effect->data.objectId, effect);
 }
 
@@ -85,7 +85,7 @@ static const f32 gPerimeterEmitRateRanges[] = { 0.0f, 1.078999996f };
  * Update of the effect_spawnPerimeterEmitter effect: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
-void effect_updatePerimeterEmitter(Effect1BFDD0 *effect) {
+void effect_updatePerimeterEmitter(FixedEmitter *effect) {
     FixedEmitterData *data;
     Actor *owner;
     s32 emit;

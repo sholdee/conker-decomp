@@ -42,8 +42,8 @@ static const Vec3f gPointPairTarget1 = { 81.0f, -24.0f, 43.0f };
 
 /* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
-static void (*gSegmentEmitterTickFuncs[])(Effect1368C0 *effect) = { NULL };
-static void (*gSegmentEmitFuncs[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
+static void (*gSegmentEmitterTickFuncs[])(SegmentEmitter *effect) = { NULL };
+static void (*gSegmentEmitFuncs[])(SegmentEmitter *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
     particle_emitAlongDir,
     particle_emitDebris,
     NULL,
@@ -60,7 +60,7 @@ static u32 D_80088C70[2][4] = {
  */
 TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 list) {
-    Effect1368C0 *effect;
+    SegmentEmitter *effect;
     ObjectEmitterData data;
     s16 lifetime;
     u8 timed;
@@ -96,7 +96,7 @@ TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFu
  * Effect 0x1A update: ends the effect when its object is gone, otherwise emits one particle per
  * whole unit of spawnAccum from a random point on the object's emission segments.
  */
-void particle_updateSegmentEmitter(Effect1368C0 *effect) {
+void particle_updateSegmentEmitter(SegmentEmitter *effect) {
     ObjectEmitterData *data;
     Actor *object;
     Vec3f point;
@@ -153,7 +153,7 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
 }
 
 /* Particle emitter: a particle flying along `dir` from `point`, plus a particle_spawnTrailBurst emitter there. */
-void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
+void particle_emitAlongDir(SegmentEmitter *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     ParticleDesc spawn;
     f32 speed;
     TrailBurst emitter;
@@ -258,7 +258,7 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
 }
 
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
-void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
+void particle_emitDebris(SegmentEmitter *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     s32 padA4; // matching: unused stack slots in the original frame
     Actor *object;
     f32 speed;
@@ -322,7 +322,7 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
  */
 TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 list) {
-    Effect1368C0 *effect;
+    SegmentEmitter *effect;
     MatrixEmitterData data;
     s16 lifetime;
     u8 timed;
@@ -357,7 +357,7 @@ TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 t
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
  * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.object.
  */
-void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
+void particle_updateMatrixSegmentEmitter(SegmentEmitter *effect) {
     MatrixEmitterData *data;
 
     data = &effect->data.matrix;
@@ -412,7 +412,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
 TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owner, s32 list) {
-    Effect1368C0 *effect;
+    SegmentEmitter *effect;
     PairEmitterData data;
 
     if (object == NULL) {
@@ -436,7 +436,7 @@ TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owne
  * Effect 0x1C update: ends the effect when its object is gone, otherwise emits particles from one
  * of the object's two emission points (picked at random), flying towards that point's target.
  */
-void particle_updatePointPairEmitter(Effect1368C0 *effect) {
+void particle_updatePointPairEmitter(SegmentEmitter *effect) {
     PairEmitterData *data;
     Actor *object;
     Vec3f points[2];
@@ -531,7 +531,7 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
 }
 
 /* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
-void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+void particle_onSegmentEmitterSwap(SegmentEmitter *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
@@ -546,7 +546,7 @@ void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 m
 }
 
 /* Message handler: the same as particle_onSegmentEmitterSwap. */
-void particle_onPointPairEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+void particle_onPointPairEmitterSwap(SegmentEmitter *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {

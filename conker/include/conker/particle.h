@@ -317,11 +317,11 @@ typedef struct {
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ FixedEmitterData data;
-} Effect1BFDD0;
+} FixedEmitter;
 
 void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList);
-void particle_updateOwnerEmitter(Effect1BFDD0 *effect);
-void particle_onOwnerEmitterEvent(Effect1BFDD0 *effect, s32 event, u8 eventType);
+void particle_updateOwnerEmitter(FixedEmitter *effect);
+void particle_onOwnerEmitterEvent(FixedEmitter *effect, s32 event, u8 eventType);
 
 /* game/Particle/ObjGroundEffects/objgroundeffects.c */
 s32 particle_getObjGroundPos(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3);
@@ -1169,20 +1169,20 @@ typedef struct {
         MatrixEmitterData matrix;
         PairEmitterData pair;
     } data;
-} Effect1368C0;
+} SegmentEmitter;
 
 TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                            u8 owner, s32 list);
-void particle_updateSegmentEmitter(Effect1368C0 *effect);
-void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
-void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
+void particle_updateSegmentEmitter(SegmentEmitter *effect);
+void particle_emitAlongDir(SegmentEmitter *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
+void particle_emitDebris(SegmentEmitter *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
 TimedEffect *particle_startMatrixSegmentEmitter(void *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize, u8 owner,
                            s32 list);
-void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect);
+void particle_updateMatrixSegmentEmitter(SegmentEmitter *effect);
 TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owner, s32 list);
-void particle_updatePointPairEmitter(Effect1368C0 *effect);
-void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
-void particle_onPointPairEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
+void particle_updatePointPairEmitter(SegmentEmitter *effect);
+void particle_onSegmentEmitterSwap(SegmentEmitter *effect, ActorSwapMsg *msg, u8 msgType);
+void particle_onPointPairEmitterSwap(SegmentEmitter *effect, ActorSwapMsg *msg, u8 msgType);
 
 /* game/Particle/SpriteParticle/spriteparticle.c */
 extern Gfx gSpriteParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -2412,11 +2412,11 @@ void particle_renewBillboard(BillboardParticle *p);
 
 /* game/Particle/SideEmitter/sideemitter.c */
 void particle_attachSideEmitter(Actor *object);
-void particle_updateSideEmitter(Effect1BFDD0 *effect);
-Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list);
-void particle_updateBoneSideEmitter(Effect1BFDD0 *effect);
-void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType);
-void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType);
+void particle_updateSideEmitter(FixedEmitter *effect);
+FixedEmitter *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 owner, s32 list);
+void particle_updateBoneSideEmitter(FixedEmitter *effect);
+void particle_onSideEmitterMsg(FixedEmitter *effect, void *msg, u8 msgType);
+void particle_onBoneSideEmitterMsg(FixedEmitter *effect, void *msg, u8 msgType);
 
 /* game/Particle/SegmentBurst/segmentburst.c */
 void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list);
@@ -2625,8 +2625,8 @@ s32 particle_dampSprayXZ(SparkParticle *spark, Vec3f *prevPos);
 
 /* game/Particle/OwnerSideEmitter/ownersideemitter.c */
 void particle_startOwnerSideTask(Actor *owner);
-void particle_updateOwnerSideTask(Effect1BFDD0 *task);
-void particle_onOwnerSideTaskMsg(Effect1BFDD0 *task, ActorMsg *msg, u8 kind);
+void particle_updateOwnerSideTask(FixedEmitter *task);
+void particle_onOwnerSideTaskMsg(FixedEmitter *task, ActorMsg *msg, u8 kind);
 
 /* game/Particle/SoundPulse/soundpulse.c */
 /* Object whose sound handle particle_stopPulseSound stops. */

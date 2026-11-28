@@ -10,7 +10,7 @@
 
 /* Spawns the task that particle_updateOwnerSideTask updates for this owner. */
 void particle_startOwnerSideTask(Actor *owner) {
-    Effect1BFDD0 *task;
+    FixedEmitter *task;
     FixedEmitterData data;
 
     // matching: an integer test (not != NULL) makes IDO reload owner from its arg slot for each use
@@ -27,7 +27,7 @@ void particle_startOwnerSideTask(Actor *owner) {
 }
 
 /* Per-frame update: emits particles from two points beside the owner at a randomised rate. */
-void particle_updateOwnerSideTask(Effect1BFDD0 *task) {
+void particle_updateOwnerSideTask(FixedEmitter *task) {
     FixedEmitterData *data;
     SpriteParticle *particle;
     Vec3f *origin;
@@ -119,7 +119,7 @@ void particle_updateOwnerSideTask(Effect1BFDD0 *task) {
 }
 
 /* Message handler for the task: follows an owner swap, or destroys itself when its owner goes away. */
-void particle_onOwnerSideTaskMsg(Effect1BFDD0 *task, ActorMsg *msg, u8 kind) {
+void particle_onOwnerSideTaskMsg(FixedEmitter *task, ActorMsg *msg, u8 kind) {
     FixedEmitterData *data = &task->data;
 
     if (kind == 0x2D) {

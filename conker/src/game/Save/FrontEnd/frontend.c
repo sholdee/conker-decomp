@@ -106,7 +106,7 @@ typedef struct {
     u8 spawnType;
     u8 character;
     u8 pad7;
-} Entry151E7F60;
+} MenuCharacterType;
 
 /* Team layout of a mode (gTeamSetups[ModeEntry.teamSetup]) */
 typedef struct {
@@ -130,7 +130,7 @@ struct Struct151E4314 {
 
 /* menu 1: maps the stop displayedStop to its menu 1 order (save_initMenu) */
 static const u8 D_800AB570[10] = { 0, 5, 3, 1, 4, 6, 2, 7, 8, 9 };
-static const Entry151E7F60 gMenuCharacterTypes[22] = {
+static const MenuCharacterType gMenuCharacterTypes[22] = {
     { 0.07f, 0, 128, 4 },
     { 0.08f, 0, 176, 37 },
     { 0.07f, 0, 117, 3 },
@@ -4300,9 +4300,9 @@ typedef struct {
     s16 z;
     u8 angle;
     u8 pad7;
-} Pos151E7F60;
+} MenuCharacterPos;
 
-static const Pos151E7F60 gMenuCharacterPositions[4] = {
+static const MenuCharacterPos gMenuCharacterPositions[4] = {
     { -30, -5, -52, 201 },
     { -9, -5, -52, 192 },
     { 11, -5, -52, 192 },

@@ -317,6 +317,7 @@ STATIC_ASSERT(sizeof(BoltRainState) == 0x48, BoltRainState_size);
 STATIC_ASSERT(sizeof(BoltArcState) == 0x74, BoltArcState_size);
 STATIC_ASSERT(sizeof(SparkState) == 0x10, SparkState_size);
 STATIC_ASSERT(sizeof(BeamPart) == 0x5C, BeamPart_size);
+STATIC_ASSERT(sizeof(Tracer) == 0x100, Tracer_size);
 
 /* conker/blood.h */
 STATIC_ASSERT(sizeof(Struct15134CEC) == 0x78, Struct15134CEC_size);
@@ -336,7 +337,7 @@ STATIC_ASSERT(sizeof(TextureFrameTables) == 0x8, TextureFrameTables_size);
 STATIC_ASSERT(sizeof(FxImpactSet) == 0x5, FxImpactSet_size);
 STATIC_ASSERT(sizeof(EmitterConfig) == 0x2C, EmitterConfig_size);
 STATIC_ASSERT(sizeof(FlashSpawner) == 0x40, FlashSpawner_size);
-STATIC_ASSERT(sizeof(FF0E0State) == 0x48, FF0E0State_size);
+STATIC_ASSERT(sizeof(RaySpinnerState) == 0x48, RaySpinnerState_size);
 STATIC_ASSERT(sizeof(DiskEmitter) == 0x34, DiskEmitter_size);
 STATIC_ASSERT(sizeof(Sway) == 0x18, Sway_size);
 STATIC_ASSERT(sizeof(SwayBlock) == 0x2C, SwayBlock_size);
@@ -412,7 +413,7 @@ STATIC_ASSERT(sizeof(ShadowVtx) == 0x14, ShadowVtx_size);
 
 /* conker/sprite.h */
 STATIC_ASSERT(sizeof(ScreenSprite) == 0x70, ScreenSprite_size);
-STATIC_ASSERT(sizeof(Game1A89B0Position) == 0xE, Game1A89B0Position_size);
+STATIC_ASSERT(sizeof(LevelSprite) == 0xE, LevelSprite_size);
 
 /* conker/swarm.h */
 STATIC_ASSERT(sizeof(SwarmFlight) == 0x38, SwarmFlight_size);

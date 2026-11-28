@@ -8,7 +8,7 @@
 /* Spawns an effect attached to `owner`. */
 void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
     FixedEmitterData data;
-    Effect1BFDD0 *effect;
+    FixedEmitter *effect;
 
     data.object = owner;
     data.objectId = owner->unique_id;
@@ -21,7 +21,7 @@ void particle_attachOwnerEmitter(Actor *owner, u8 fxOwner, s32 fxList) {
 }
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
-void particle_updateOwnerEmitter(Effect1BFDD0 *effect) {
+void particle_updateOwnerEmitter(FixedEmitter *effect) {
     Actor *owner;
     FixedEmitterData *data;
     s32 heading;
@@ -74,7 +74,7 @@ void particle_updateOwnerEmitter(Effect1BFDD0 *effect) {
     }
 }
 
-void particle_onOwnerEmitterEvent(Effect1BFDD0 *effect, s32 event, u8 eventType) {
+void particle_onOwnerEmitterEvent(FixedEmitter *effect, s32 event, u8 eventType) {
     effect_handleTimedEffectOwnerEvent(event, eventType, &effect->data.object, &effect->data.objectId, effect);
 }
 

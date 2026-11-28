@@ -10,7 +10,7 @@
  * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),
  * widened by width perpendicular to the view direction from the camera eye.
  */
-Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
+Vtx *beam_fillMotionVerts(MotionBeam *beam, s16 cam) {
     Vtx *vtx;
     Vtx *result;
     f32 progress;
@@ -105,8 +105,8 @@ Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
 }
 
 /* Moves the beam by its velocity (with drag and gravity), then pulls its end toward its start. */
-s32 beam_updateMotionPull(Game1BBFC0Beam *beam) {
-    Game1BBFC0Motion *motion = &beam->motion;
+s32 beam_updateMotionPull(MotionBeam *beam) {
+    MotionBeamState *motion = &beam->motion;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -130,8 +130,8 @@ s32 beam_updateMotionPull(Game1BBFC0Beam *beam) {
 }
 
 /* Moves the beam by its velocity, with drag and gravity. */
-s32 beam_updateMotion(Game1BBFC0Beam *beam) {
-    Game1BBFC0Motion *motion = &beam->motion;
+s32 beam_updateMotion(MotionBeam *beam) {
+    MotionBeamState *motion = &beam->motion;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -152,7 +152,7 @@ s32 beam_updateMotion(Game1BBFC0Beam *beam) {
 }
 
 /* Shrinks the beam's width and progress; sets alpha from lifetime while lifetime < motion.fadeStart. */
-s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
+s32 beam_shrinkMotion(MotionBeam *beam) {
     beam->head.def.height -= beam->head.def.height * beam->motion.shrinkRate;
     beam->head.def.width -= beam->head.def.width * beam->motion.shrinkRate;
     if (beam->head.def.lifetime < beam->motion.fadeStart) {
@@ -162,7 +162,7 @@ s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
 }
 
 /* Like beam_shrinkMotion, but shrinks only the beam's progress. */
-s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam) {
+s32 beam_shrinkMotionProgress(MotionBeam *beam) {
     beam->head.def.height -= beam->head.def.height * beam->motion.shrinkRate;
     if (beam->head.def.lifetime < beam->motion.fadeStart) {
         beam->head.def.alpha = beam->head.def.lifetime * beam->motion.fadeRate;

@@ -32,7 +32,7 @@ typedef struct {
     Vec2f velocity;
     f32 gravity;
     f32 spread;             /* growth per unit of horizontal speed while falling */
-} Blood356D4Motion;
+} BloodSplatMotion;
 
 /* A 2D blood splat particle spawned by blood_spawnSplat. */
 typedef struct {
@@ -41,7 +41,7 @@ typedef struct {
     f32 width;
     f32 height;
     u8 pad20[0x50];
-    Blood356D4Motion motion;
+    BloodSplatMotion motion;
 } BloodSplat;
 
 /* The particle blood_spawnGrowingParticle spawns; its desc is copied to +0x18 and `extra` to growth. */

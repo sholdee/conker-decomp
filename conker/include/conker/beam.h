@@ -116,7 +116,8 @@ typedef struct StripObj {
     /* 0xC8 */ StripTarget target;
 } StripObj;
 
-/* Self-propelled beam quad (beam_spawnBoneQuad / beam_updateQuad). */
+/* Self-propelled beam quad (beam_spawnBoneQuad / beam_updateQuad, game/Beam/BeamQuad/beamquad.c): the BeamQuad motion,
+ * not MotionBeam (game/Beam/BeamMotion/beammotion.c). */
 typedef struct {
     Vec3f vel;
     f32 size;
@@ -172,7 +173,7 @@ typedef struct {
     u8 ownerId;     // owner's unique_id when attached
     u8 drawn;
     Actor *owner;
-    s16 ownerTag;   // compared with owner->unk84.uh; -1 for none
+    s16 ownerTag;   // compared with owner->animseq.uh; -1 for none
     u8 bone;
     u8 attachDelay;
     f32 startOffset[3]; // in bone space
@@ -181,7 +182,7 @@ typedef struct {
     u8 fireCounter;
     u8 hitsObjects; // 1: collision_castRayAtObjects along each step
     u8 padFF;
-} Game10EF60Effect;
+} Tracer;
 
 /* Message 0x43 payload: an actor reference plus the actor's effect slot. */
 typedef struct {
@@ -526,7 +527,7 @@ typedef struct BoltChainObj {
     /* 0x70 */ Vec3f points[1];    /* chain.count points */
 } BoltChainObj;
 
-typedef struct Game1BBFC0Motion {
+typedef struct MotionBeamState {
     /* 0x00 */ u8 unknown0[0x30];
     /* 0x30 */ Vec3f velocity;
     /* 0x3C */ f32 gravity;
@@ -535,14 +536,17 @@ typedef struct Game1BBFC0Motion {
     /* 0x48 */ s16 fadeStart;
     /* 0x4A */ s16 fadeRate;
     /* 0x4C */ f32 blend;
-} Game1BBFC0Motion;
+} MotionBeamState;
 
 /* A quad particle drawn as a beam from head.def.pos (its start) toward head.def.rot (its end): head.def.width is its
- * width and head.def.height the fraction of the way to the end that is drawn (its progress). */
-typedef struct Game1BBFC0Beam {
+ * width and head.def.height the fraction of the way to the end that is drawn (its progress). Moved by
+ * gQuadParticleUpdate1Funcs[7]/[8] (beam_updateMotionPull / beam_updateMotion), shrunk by gQuadParticleUpdate2Funcs[7]
+ * (beam_shrinkMotion), drawn by gQuadParticleVertexFuncs[6] (beam_fillMotionVerts). Not BeamMotion, which is the
+ * motion of beamquad.c's BeamQuad. */
+typedef struct MotionBeam {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Game1BBFC0Motion motion;
-} Game1BBFC0Beam;
+    /* 0x110 */ MotionBeamState motion;
+} MotionBeam;
 
 typedef struct {
     s16 base;
@@ -654,8 +658,8 @@ void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1
                    f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime, Actor *owner, u8 ownerId,
                    u8 bone, s32 ownerTag, u8 impactEffect, u8 hitsObjects, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ);
-void beam_updateTracer(Game10EF60Effect *effect);
-Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view);
+void beam_updateTracer(Tracer *effect);
+Gfx *beam_drawTracer(Gfx *gfx, Tracer *effect, s16 view);
 s32 func_150E2DA4(s32 arg0, s32 arg1);
 void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 hitsObjects);
@@ -663,7 +667,7 @@ void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f
                    f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length, s32 hitsObjects,
                    f32 speed);
 s32 beam_endTracerDraw(s32 gfx, s32 type, s16 view);
-void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
+void beam_tracerSwapMessage(Tracer *effect, ActorSwapMsg *swap, u8 msg);
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
 extern AimImpact gAimImpacts[4];  /* aim-impact slots (effect_spawnMaterialImpact / effect_sprayDebris index them; 0xFF = none) */
 
@@ -803,11 +807,11 @@ void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f
 void beam_boneBoltMessage(BoltObj *bolt, s32 event, u8 eventType);
 
 /* game/Beam/BeamMotion/beammotion.c */
-Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam);
-s32 beam_updateMotionPull(Game1BBFC0Beam *beam);
-s32 beam_updateMotion(Game1BBFC0Beam *beam);
-s32 beam_shrinkMotion(Game1BBFC0Beam *beam);
-s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam);
+Vtx *beam_fillMotionVerts(MotionBeam *beam, s16 cam);
+s32 beam_updateMotionPull(MotionBeam *beam);
+s32 beam_updateMotion(MotionBeam *beam);
+s32 beam_shrinkMotion(MotionBeam *beam);
+s32 beam_shrinkMotionProgress(MotionBeam *beam);
 
 /* game/Beam/Lightning/lightning.c */
 extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table gObjectTypes) */

@@ -13,16 +13,17 @@
 #include "conker/sound.h"
 #include "conker/sprite.h"
 
-/* Extension block of the model effect func_151BE850 spawns, at 0x120 (S151BECB8.params). */
+/* Extension block of the model effect func_151BE850 spawns, at 0x120 (StatPickupEffect.params). */
 typedef struct {
     /* 0x00 */ f32 angle;   /* func_151BEEE0's angle; the y rotation of effect_buildStatPickupMatrix */
     /* 0x04 */ Vec3f pos;
     /* 0x10 */ u8 count;    /* the stat value given to the player (player_setStat stat 3) */
-} S151BECB8Params;
+} StatPickupData;
 
 /* The model effect func_151BE850 spawns: updateFunc 1 (effect_updateStatPickup) and updateFunc2 2, which the
- * dispatch reads past gModelEffectUpdate2Funcs as gModelEffectUpdate2FuncsTail[0] (effect_buildStatPickupMatrix). */
-struct S151BECB8 {
+ * dispatch reads past gModelEffectUpdate2Funcs as gModelEffectUpdate2FuncsTail[0] (effect_buildStatPickupMatrix).
+ * A view of ModelEffect with its 0x18-byte extension: unk11B is the low byte of attach.lightMask (an lbu). */
+struct StatPickupEffect {
     /* 0x000 */ EffectHeader header;
     /* 0x010 */ u8 flags;       /* EffectParams.flags */
     /* 0x011 */ u8 pad11[0x37];
@@ -36,7 +37,7 @@ struct S151BECB8 {
     /* 0x100 */ u8 pad100[0x1B];
     /* 0x11B */ u8 unk11B;
     /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ S151BECB8Params params;
+    /* 0x120 */ StatPickupData params;
 };
 
 
@@ -49,7 +50,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     void *fx;
     ZoneNode *zone;
     EffectParams params;
-    S151BECB8Params extra;
+    StatPickupData extra;
 
     collision_selectMap(0);
     zone = collision_findZoneLeaf(pos->x, pos->z);
@@ -110,7 +111,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         params.mask = zone;
         fx = effect_newModelEffect(&params, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
         if (fx != NULL) {
-            // copies the whole 0x18-byte extension (extraSize above); a 0x18-byte S151BECB8Params grows the frame
+            // copies the whole 0x18-byte extension (extraSize above); a 0x18-byte StatPickupData grows the frame
             memcpy((u8 *)fx + 0x120, &extra, 0x18);
         }
     } else {
@@ -120,7 +121,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
 }
 
 /* Rebuilds this frame's matrix: y rotation by `params.angle`, translation to `pos`, axes scaled by 0.923. */
-s32 effect_buildStatPickupMatrix(S151BECB8 *fx) {
+s32 effect_buildStatPickupMatrix(StatPickupEffect *fx) {
     f32 scale;
 
     math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, fx->params.angle, 0.0f);
@@ -155,12 +156,12 @@ Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *need
  * params.pos, plays sound 0x511 and runs effect_showStatCounter/effect_spawnStatPickupBurst/func_151BEEE0.
  * Returns 0 if any object was in range, else 1.
  */
-s32 effect_updateStatPickup(S151BECB8 *fx) {
+s32 effect_updateStatPickup(StatPickupEffect *fx) {
     s32 untouched = 1;
 
     {
         Actor *obj;
-        S151BECB8Params *params;
+        StatPickupData *params;
         f32 range = 43.0f; // matching: a local keeps 43.0f in $f20 across the loop
         f32 radius;
         f32 height;

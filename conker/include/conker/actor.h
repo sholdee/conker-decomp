@@ -42,7 +42,7 @@ typedef struct {
     /* 0x00 */ Actor *source; // the thrower (actor_throwGrenade) or the spray object's owner (sprayobjects.c)
     /* 0x04 */ Vec3f pos;     // where the blast happens
     /* 0x10 */ s32 unk10;
-} Arg1506AB7C;
+} ImpactBlastArgs;
 
 /* game/Actor/ClearModelTables/clearmodeltables.c */
 void actor_clearModelTables(void);
@@ -341,8 +341,8 @@ void func_1506A968(Actor *obj, s32 arg);
 void actor_hitSpawnTrails(Actor *obj, s32 arg);
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg);
 void actor_hitBloodImpacts(Actor *obj, s32 arg);
-void func_1506AB7C(Actor *obj, Arg1506AB7C *arg);
-void func_1506ABC4(Actor *obj, Arg1506AB7C *arg);
+void func_1506AB7C(Actor *obj, ImpactBlastArgs *arg);
+void func_1506ABC4(Actor *obj, ImpactBlastArgs *arg);
 void actor_hitSpawnRibbon(Actor *obj, s32 arg);
 void actor_hitSpawnWaveTrail(Actor *obj, s32 arg);
 void actor_runHitHandler(Actor *obj, s32 type, void *arg);
