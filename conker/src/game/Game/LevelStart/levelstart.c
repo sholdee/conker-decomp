@@ -110,7 +110,7 @@ void game_loadLevel(void) {
         value = gLevelHeader->unk11 + 0xEB;
         break;
     }
-    libc_reinitPaging(value);
+    boot_reinitPaging(value);
     gRumbleSuppressed = 0;
     level_setEffectDetail();
     particle_resetModelList();

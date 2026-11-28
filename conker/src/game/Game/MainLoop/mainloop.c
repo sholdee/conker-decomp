@@ -56,7 +56,7 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {
-    libc_resetPaging();
+    boot_resetPaging();
     view_initFrameDisplayLists();
     save_forgetTextBanks();
 

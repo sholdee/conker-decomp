@@ -26,10 +26,10 @@
 void boot_entry(void);
 void boot_idleThread(void *arg);
 void boot_mainThread(void *arg);
-void libc_clearPageSlots(void);
-void libc_resetPaging(void);
-void libc_stopMainThread(void);
-void libc_reinitPaging(s32 arg0);
+void boot_clearPageSlots(void);
+void boot_resetPaging(void);
+void boot_stopMainThread(void);
+void boot_reinitPaging(s32 arg0);
 extern RomFile gRomFiles[2];
 extern u8 gPageFaultsDisabled;
 extern u8 gPadInitDone;
