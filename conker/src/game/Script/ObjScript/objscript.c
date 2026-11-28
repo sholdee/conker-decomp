@@ -796,7 +796,7 @@ void script_setAnimSpeedAndAccel(void) {
  * arg3 != 0: adds (s16)(arg1:arg2) * gFrameTicks to the 13-bit counter kept in intel_animspd (high bits) and
  * animSpeedFrac (low byte), clamping at 0 and setting bit 7 of intel_animspd; otherwise sets intel_animspd to arg0.
  */
-void func_15077404(void) {
+void script_setOrStepAnimSpeed(void) {
     if (gScriptArg3 != 0) {
         s16 value;
         s16 delta;
@@ -2439,7 +2439,7 @@ static void (*gObjScriptHandlers[214])(void) = {
     script_setHitCylinder, script_removePartSet, script_jumpIfEnergy, script_startViewEnvelope,
     script_playPlayerSound, script_fadeFirstTwoChannels, script_jumpIfPlayerAttachedOrMultiplayer, script_setFacing,
     script_setWaypointRange, script_setTurnRatesWithFrac, script_jumpIfAngleInRange, script_setHitOffsetY,
-    script_startHoldTargetOffset, script_jumpIfNotHit, func_15077404, script_startIntercept,
+    script_startHoldTargetOffset, script_jumpIfNotHit, script_setOrStepAnimSpeed, script_startIntercept,
     func_15075BB8, NULL, script_startChaseAlt, script_spawnPuff,
     script_setFallScript, script_setFamily, script_jumpIfTargetType, script_setFaceTurnTime,
     script_setNearRange, script_setStunEndScript, script_setSpotHeightAlt, script_setHitRoute,

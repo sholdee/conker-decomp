@@ -8154,3 +8154,4 @@ event_releaseBeamTargetEffects = 0x150717E0; // type:func
 event_destroyActorEmitters = 0x15071860; // type:func
 event_spawnBonePointSegmentParticle = 0x15071888; // type:func
 event_attachTargetToBoneAndSetState = 0x1507266C; // type:func
+script_setOrStepAnimSpeed = 0x15077404; // type:func

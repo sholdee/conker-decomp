@@ -1987,7 +1987,7 @@ script_breakIntoParts	0x150772E8	48	game	c		build/src/game/Script/ObjScript/objs
 script_setHidden	0x15077318	68	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_doNothing	0x1507735C	8	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_setAnimSpeedAndAccel	0x15077364	160	game	c		build/src/game/Script/ObjScript/objscript.c.o
-func_15077404	0x15077404	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
+script_setOrStepAnimSpeed	0x15077404	176	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_jumpIfAtDestination	0x150774B4	84	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_stepPathGraph	0x15077508	1000	game	c		build/src/game/Script/ObjScript/objscript.c.o
 script_advanceWaypoint	0x150778F0	184	game	c		build/src/game/Script/ObjScript/objscript.c.o
