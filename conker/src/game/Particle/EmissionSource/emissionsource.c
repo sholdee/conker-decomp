@@ -14,7 +14,7 @@
 #include "libc/string.h"
 
 
-typedef struct Game113D60Source {
+typedef struct EmissionSourceDef {
     f32 chance;
     s8 start;
     s8 end;
@@ -24,19 +24,19 @@ typedef struct Game113D60Source {
     s16 durationRange;
     u8 color;
     u8 padD[3];
-} Game113D60Source;
+} EmissionSourceDef;
 
-typedef void (*Game113D60EndCallback)(Vec3f *, Actor *);
-typedef void (*Game113D60StartCallback)(Vec3f *);
-typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
+typedef void (*EmissionEndFunc)(Vec3f *, Actor *);
+typedef void (*EmissionStartFunc)(Vec3f *);
+typedef void (*EmissionMotionFunc)(Vec3f *, Vec3f *, Vec3f *, SourceEmission *);
 
-/* The start, end and motion callbacks of a source (Game113D60Source.start, .end, .motion). */
-static Game113D60StartCallback gEmissionStartFuncs[] = { particle_randomPointOnTwoSegments, particle_randomPointInSourceZones, particle_randomPointOnSixSegments };
-static Game113D60EndCallback gEmissionEndFuncs[] = { particle_randomPointAroundActorNode, particle_getEmissionActorPos };
-static Game113D60MotionCallback gEmissionMotionFuncs[] = { particle_aimEmissionAlongDelta, particle_aimEmissionTilted };
+/* The start, end and motion callbacks of a source (EmissionSourceDef.start, .end, .motion). */
+static EmissionStartFunc gEmissionStartFuncs[] = { particle_randomPointOnTwoSegments, particle_randomPointInSourceZones, particle_randomPointOnSixSegments };
+static EmissionEndFunc gEmissionEndFuncs[] = { particle_randomPointAroundActorNode, particle_getEmissionActorPos };
+static EmissionMotionFunc gEmissionMotionFuncs[] = { particle_aimEmissionAlongDelta, particle_aimEmissionTilted };
 
 /* The emission sources (particle_startSourceEmission's sourceIndex). */
-static const Game113D60Source gEmissionSources[] = {
+static const EmissionSourceDef gEmissionSources[] = {
     { 1.0f, -1, -1, -1, 0, 300, 0, 0 },
     { 0.1f, 0, 0, 0, 0, 120, 60, 0 },
     { 0.1f, 1, 0, 0, 0, 80, 40, 1 },
@@ -46,12 +46,12 @@ static const Game113D60Source gEmissionSources[] = {
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
 void particle_startSourceEmission(Actor *actor, s32 playerIndex, TriggerZone *zone, u8 sourceIndex) {
-    const Game113D60Source *source;
+    const EmissionSourceDef *source;
     Vec3f end;
     Vec3f start;
     Vec3f delta;
-    Game113D60Emission emission;
-    Game113D60Effect *effect;
+    SourceEmission emission;
+    SourceEmissionEffect *effect;
 
     if ((actor != NULL) && ((gCutsceneStates[0] != 1) || (gCutsceneIds[0] != 9))) {
         source = &gEmissionSources[sourceIndex];
@@ -93,9 +93,9 @@ void particle_startSourceEmission(Actor *actor, s32 playerIndex, TriggerZone *zo
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
                 effect = effect_newTimedEffectNoDraw(math_randomFloat() * 70.0f + 30.0f, -1, 15, 1, 11,
-                                                           sizeof(Game113D60Emission), 0xFF, 1);
+                                                           sizeof(SourceEmission), 0xFF, 1);
                 if (effect != NULL) {
-                    memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));
+                    memcpy(&effect->emission, &emission, sizeof(SourceEmission));
                 }
             }
         }
@@ -104,8 +104,8 @@ void particle_startSourceEmission(Actor *actor, s32 playerIndex, TriggerZone *zo
 
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
-void particle_updateSourceEmission(Game113D60Effect *effect) {
-    Game113D60Emission *emission;
+void particle_updateSourceEmission(SourceEmissionEffect *effect) {
+    SourceEmission *emission;
     f32 inverse;
     f32 time;
     f32 timeStep;
@@ -166,16 +166,16 @@ void particle_updateSourceEmission(Game113D60Effect *effect) {
 typedef struct {
     /* 0x00 */ Vec3f start;
     /* 0x0C */ Vec3f end;
-} Game113D60Segment;
+} EmissionSegment;
 
-static const Game113D60Segment D_800A11D0 = { { -2214.0f, 1150.0f, 4079.0f }, { -1230.0f, 1150.0f, 3722.0f } };
-static const Game113D60Segment D_800A11E8 = { { 261.0f, 1000.0f, 3971.0f }, { 1053.0f, 1000.0f, 4149.0f } };
-static const Game113D60Segment *D_80088A3C = &D_800A11D0;
-static const Game113D60Segment *D_80088A40 = &D_800A11E8;
+static const EmissionSegment D_800A11D0 = { { -2214.0f, 1150.0f, 4079.0f }, { -1230.0f, 1150.0f, 3722.0f } };
+static const EmissionSegment D_800A11E8 = { { 261.0f, 1000.0f, 3971.0f }, { 1053.0f, 1000.0f, 4149.0f } };
+static const EmissionSegment *D_80088A3C = &D_800A11D0;
+static const EmissionSegment *D_80088A40 = &D_800A11E8;
 
 /* Start callback: a random point on one of two segments. */
 void particle_randomPointOnTwoSegments(Vec3f *out) {
-    const Game113D60Segment *segment;
+    const EmissionSegment *segment;
     f32 t;
 
     if (math_randomFloat() < 0.5632223487f) {
@@ -197,7 +197,7 @@ void particle_randomPointInSourceZones(Vec3f *out) {
     math_randomPointInZone(gEmissionSourceZones[math_random() & 1], out);
 }
 
-static const Game113D60Segment gEmissionPathSegments[6] = {
+static const EmissionSegment gEmissionPathSegments[6] = {
     { { -5626.0f, 194.0f, 4084.0f }, { -6566.0f, 207.0f, 5929.0f } },
     { { -6566.0f, 207.0f, 5929.0f }, { -6830.0f, -231.0f, 8012.0f } },
     { { -6830.0f, -231.0f, 8012.0f }, { -6615.0f, -781.0f, 9425.0f } },
@@ -205,13 +205,13 @@ static const Game113D60Segment gEmissionPathSegments[6] = {
     { { 3843.0f, 240.0f, 6531.0f }, { 3730.0f, -266.0f, 8330.0f } },
     { { 3730.0f, -266.0f, 8330.0f }, { 3603.0f, -866.0f, 9595.0f } },
 };
-static const Game113D60Segment *gEmissionPathSegmentPtrs[] = {
+static const EmissionSegment *gEmissionPathSegmentPtrs[] = {
     &gEmissionPathSegments[0], &gEmissionPathSegments[1], &gEmissionPathSegments[2], &gEmissionPathSegments[3], &gEmissionPathSegments[4], &gEmissionPathSegments[5],
 };
 
 /* Start callback: a random point on one of six segments. */
 void particle_randomPointOnSixSegments(Vec3f *out) {
-    const Game113D60Segment *segment;
+    const EmissionSegment *segment;
     f32 t;
 
     segment = gEmissionPathSegmentPtrs[math_random() % 6];
@@ -256,7 +256,7 @@ void particle_getEmissionActorPos(Vec3f *out, Actor *actor) {
 }
 
 /* Motion callback: aims the emission along `delta` with a random wobble. */
-void particle_aimEmissionAlongDelta(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+void particle_aimEmissionAlongDelta(Vec3f *start, Vec3f *end, Vec3f *delta, SourceEmission *emission) {
     f32 dx;
     f32 dz;
 
@@ -273,7 +273,7 @@ void particle_aimEmissionAlongDelta(Vec3f *start, Vec3f *end, Vec3f *delta, Game
 }
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
-void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, SourceEmission *emission) {
     emission->stream.angleX = math_atan2(delta->x, delta->z);
     emission->stream.amplitudeX = 0.471238941f;
     emission->stream.phaseX = math_randomFloat() * 6.283185482f;
@@ -446,7 +446,7 @@ void particle_spawnScreenEdgeSprite(f32 size, s16 timer, u8 flags, u8 alpha, u8 
  * curve across the screen. */
 TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list) {
     TimedEffect *obj;
-    Game113D60BurstHead head;
+    ScreenBurstHead head;
     RumbleParams event;
     Vec2f control[4];
     f32 *points;
@@ -474,7 +474,7 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list) 
 
     obj = effect_newTimedEffectNoDraw(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, list);
     if (obj != NULL) {
-        memcpy(&((Game113D60BurstEffect *)obj)->burst.head, &head, sizeof(head));
+        memcpy(&((ScreenBurstEffect *)obj)->burst.head, &head, sizeof(head));
 
         control[0].x = -146.0f;
         control[0].y = (math_randomFloat() * 160.0f) - 80.0f;
@@ -486,7 +486,7 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list) 
         control[3].y = (math_randomFloat() * 160.0f) - 80.0f;
 
         t = -1.0f;
-        points = ((Game113D60BurstEffect *)obj)->burst.points;
+        points = ((ScreenBurstEffect *)obj)->burst.points;
         step = 3.0f / (count - 1);
 
         for (i = 0; i < count; i++) {
@@ -501,13 +501,13 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list) 
 }
 
 /* Spawns the burst's next points, `rate` per frame, and ends the effect after the last one. */
-void particle_updateScreenBurst(Game113D60BurstEffect *effect) {
+void particle_updateScreenBurst(ScreenBurstEffect *effect) {
     s32 pad[2]; // matching: unused stack slots
     Vec2f position;
     f32 randomSize;
     s32 flip2;
     s32 flip4;
-    Game113D60Burst *burst;
+    ScreenBurst *burst;
 
     burst = &effect->burst;
     burst->head.accum += burst->head.rate * gFrameDelta;
@@ -634,8 +634,8 @@ void particle_spawnFlashAndJetSprayAtPoint(index, owner, list)
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
 void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 list) {
-    Game113D60Emitter data;
-    Game113D60EmitterEffect *effect;
+    RandomEmitter data;
+    RandomEmitterEffect *effect;
 
     data.position = *position;
     data.accum = 0.0f;
@@ -648,14 +648,14 @@ void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, 
 }
 
 /* Spawns a random number of particles per frame at the effect's position. */
-void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
-    Game113D60Emitter *emitter;
+void particle_updateRandomEmitter(RandomEmitterEffect *effect) {
+    RandomEmitter *emitter;
 
     emitter = &effect->emitter;
     emitter->accum += (0.09999999404f + math_randomFloat() * 0.08789999783f) * gFrameDelta;
     if (emitter->accum > 1.0f) {
         ParticleDesc arg;
-        Game113D60ParticleExtra extra;
+        RandomEmitterWobble extra;
         SpriteParticle *particle;
 
         arg.texture = 0x6C;
@@ -720,7 +720,7 @@ s32 particle_wobbleRandomEmitterParticle(SpriteParticle *particle, Vec3f *prevPo
 
 /* Creates the timer effect (0x35) that particle_updateShakeTimer updates. */
 void particle_startShakeTimer(void) {
-    Game113D60TimerEffect *effect;
+    ShakeTimerEffect *effect;
     f32 timer;
 
     timer = 10.0f;
@@ -732,7 +732,7 @@ void particle_startShakeTimer(void) {
 }
 
 /* Counts the timer down and fires particle_fireShake each time it runs out (rearmed to 201-538). */
-void particle_updateShakeTimer(Game113D60TimerEffect *effect) {
+void particle_updateShakeTimer(ShakeTimerEffect *effect) {
     effect->timer -= gFrameDelta;
     if (effect->timer < 0.0f) {
         effect->timer = (math_randomFloat() * 337.0f) + 201.0f;
@@ -766,8 +766,8 @@ void particle_fireShake() {
 
 /* Creates effect 0x33 for 30-70 frames. */
 void particle_startDustRegionSpawner(void) {
-    Game113D60RegionSpawnerEffect *effect;
-    Game113D60Spawner data;
+    RegionSpawnerEffect *effect;
+    RegionSpawner data;
 
     data.rate = 1.199999957e-07f;
     data.rateRange = 3.199999981e-07f;
@@ -781,13 +781,13 @@ void particle_startDustRegionSpawner(void) {
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
  * position math_getCameraPos returns. */
-void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
+void particle_updateDustRegionSpawner(RegionSpawnerEffect *effect) {
     Vec3f *center;
-    Game113D60Spawner *spawner;
+    RegionSpawner *spawner;
     RegionNode *node;
     f32 pick;
-    Game113D60PointSpawner data;
-    Game113D60PointSpawner *dataPtr;
+    FallingSpawner data;
+    FallingSpawner *dataPtr;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -809,7 +809,7 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
-                Game113D60PointSpawnerEffect *child;
+                FallingSpawnerEffect *child;
 
                 data.rate = 0.3171199858f;
                 data.rateRange = 1.046509981f;
@@ -826,8 +826,8 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
 }
 
 /* Spawns particle_newOwnedSpriteParticle particles within 20 units of the spawner's position. */
-void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect) {
-    Game113D60PointSpawner *spawner;
+void particle_updateFallingDustSpawner(FallingSpawnerEffect *effect) {
+    FallingSpawner *spawner;
     TimedEffect *particle;
     s32 flip80;
     s32 flip40;
@@ -907,8 +907,8 @@ void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect) {
 
 /* Creates effect 0x36 for 5-30 frames. */
 void particle_startDebrisRegionSpawner(void) {
-    Game113D60RegionSpawnerEffect *effect;
-    Game113D60Spawner data;
+    RegionSpawnerEffect *effect;
+    RegionSpawner data;
 
     data.rate = 2.000000023e-07f;
     data.rateRange = 1.500000053e-07f;
@@ -920,26 +920,25 @@ void particle_startDebrisRegionSpawner(void) {
     }
 }
 
+/* The 0x3C bytes particle_updateDebrisRegionSpawner writes into each tick 0x37 child; particle_updateFallingDebrisSpawner
+ * reads only the spawner. */
 typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;
-    /* 0x10 */ f32 rateRange;
-    /* 0x14 */ f32 accum;
+    /* 0x00 */ FallingSpawner spawner;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ u8 pad1C[0x14];
     /* 0x30 */ s32 unk30;
     /* 0x34 */ u8 unk34;
     /* 0x35 */ u8 unk35;
     /* 0x38 */ s32 unk38;
-} Game113D60Data9178;
+} FallingDebrisSpawnerData;
 
 /* Like particle_updateDustRegionSpawner, but spawns effect 0x37 within 1400 units. */
-void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
+void particle_updateDebrisRegionSpawner(RegionSpawnerEffect *effect) {
     Vec3f *center;
-    Game113D60Spawner *spawner;
+    RegionSpawner *spawner;
     RegionNode *node;
     f32 pick;
-    Game113D60Data9178 data;
+    FallingDebrisSpawnerData data;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -955,16 +954,16 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            math_randomPointInZone(node->region, &data.position);
-            dx = data.position.x - center->x;
-            dy = data.position.y - center->y;
-            dz = data.position.z - center->z;
+            math_randomPointInZone(node->region, &data.spawner.position);
+            dx = data.spawner.position.x - center->x;
+            dy = data.spawner.position.y - center->y;
+            dz = data.spawner.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
-                Game113D60PointSpawnerEffect *child;
+                FallingSpawnerEffect *child;
 
-                data.rate = 0.1932400018f;
-                data.rateRange = 0.3140099943f;
-                data.accum = 0.0f;
+                data.spawner.rate = 0.1932400018f;
+                data.spawner.rateRange = 0.3140099943f;
+                data.spawner.accum = 0.0f;
                 data.unk18 = 99999.89844f;
                 data.unk30 = 0;
                 data.unk34 = 0;
@@ -973,7 +972,7 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
                 child = effect_newTimedEffect((math_random() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
-                    memcpy(&child->spawner, &data, sizeof(data)); /* Game113D60Data9178 starts with the spawner */
+                    memcpy(&child->spawner, &data, sizeof(data)); /* the whole block, spawner first */
                 }
             }
             spawner->accum -= 1.0f;
@@ -985,14 +984,15 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
 static const u8 gFallingDebrisModels[1] = { 7 };
 static const f32 gFallingDebrisScales[1] = { 0.1f };
 
-/* Spawns particle_newModelParticle debris particles (updated by particle_updateFallingDebris) within 50 units of the
- * spawner's position. */
-void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
-    Game113D60PointSpawner *spawner;
-    Game113D60Debris *debris;
+/* Spawns particle_newModelParticle debris particles within 50 units of the spawner's position. They move with update
+ * function 8 (particle_moveBallistic) and carry a FallingDebrisExtra; no C code sets update function 17
+ * (particle_updateFallingDebris), which reads that block. */
+void particle_updateFallingDebrisSpawner(FallingSpawnerEffect *effect) {
+    FallingSpawner *spawner;
+    FallingDebris *debris;
     ParticleSpawn78 arg;
     s32 i;
-    Game113D60DebrisExtra extra; // copied into the particle uninitialized
+    FallingDebrisExtra extra; // copied into the particle uninitialized
 
     spawner = &effect->spawner;
     spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta;
@@ -1052,10 +1052,10 @@ void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
     }
 }
 
-/* Update callback of the debris particles: when a particle falls below its floor height it
+/* Model particle update function 17, which reads a FallingDebrisExtra: when a particle falls below its floor height it
  * ends (returns 0), spawning a particle_spawnSurfaceQuadSpriteNoModel splash first if its type is 0xA. */
-s32 particle_updateFallingDebris(Game113D60Debris *debris) {
-    Game113D60DebrisExtra *extra;
+s32 particle_updateFallingDebris(FallingDebris *debris) {
+    FallingDebrisExtra *extra;
     SpriteDef splash;
 
     particle_moveBallistic(&debris->base);

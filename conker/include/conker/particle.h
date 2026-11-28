@@ -734,106 +734,106 @@ s32 particle_fadeImpactStreak(Streak *streak);
 s32 particle_spawnStreakImpact(Streak *streak);
 
 /* game/Particle/EmissionSource/emissionsource.c */
-typedef struct Game113D60Emission {
+typedef struct SourceEmission {
     /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 scale;
     /* 0x3C */ s16 duration, durationRange;
     /* 0x40 */ u8 color;
-} Game113D60Emission; // size 0x44
+} SourceEmission; // size 0x44
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Emission emission;
-} Game113D60Effect;
+    /* 0x28 */ SourceEmission emission;
+} SourceEmissionEffect;
 
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 accum;
     /* 0x08 */ s16 count;
     /* 0x0A */ s16 next;
-} Game113D60BurstHead;
+} ScreenBurstHead;
 
 typedef struct {
-    /* 0x00 */ Game113D60BurstHead head;
+    /* 0x00 */ ScreenBurstHead head;
     /* 0x0C */ s32 pad0C;
     /* 0x10 */ f32 points[2]; // `head.count` interleaved x, y pairs
-} Game113D60Burst;
+} ScreenBurst;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Burst burst;
-} Game113D60BurstEffect;
+    /* 0x28 */ ScreenBurst burst;
+} ScreenBurstEffect;
 
-/* Extra data of the particles particle_updateRandomEmitter spawns, stored at 0xA8 of each particle: effects.h WobbleData
- * without the drag (the particles are spawned with only these 0xC bytes). */
+/* Extra data of the particles particle_updateRandomEmitter spawns, stored at 0xA8 of each particle
+ * (SpriteParticle.data.wobble): WobbleData without the drag (the particles are spawned with only these 0xC bytes). */
 typedef struct {
     /* 0x0 */ u8 phase[2];
     /* 0x2 */ u8 phaseStep[2];
     /* 0x4 */ f32 amplitude[2];
-} Game113D60ParticleExtra;
+} RandomEmitterWobble;
 
 typedef struct {
     /* 0x0 */ Vec3f position;
     /* 0xC */ f32 accum;
-} Game113D60Emitter;
+} RandomEmitter;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Emitter emitter;
-} Game113D60EmitterEffect;
+    /* 0x28 */ RandomEmitter emitter;
+} RandomEmitterEffect;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ f32 timer;
-} Game113D60TimerEffect;
+} ShakeTimerEffect;
 
 /* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
 typedef struct {
     /* 0x0 */ f32 rate;
     /* 0x4 */ f32 rateRange;
     /* 0x8 */ f32 accum;
-} Game113D60Spawner;
+} RegionSpawner;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Spawner spawner;
-} Game113D60RegionSpawnerEffect;
+    /* 0x28 */ RegionSpawner spawner;
+} RegionSpawnerEffect;
 
-/* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
+/* A spawner at a fixed point: `position`, then the spawn rate as in RegionSpawner. */
 typedef struct {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
     /* 0x14 */ f32 accum;
-} Game113D60PointSpawner;
+} FallingSpawner;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60PointSpawner spawner;
-} Game113D60PointSpawnerEffect;
+    /* 0x28 */ FallingSpawner spawner;
+} FallingSpawnerEffect;
 
-/* Extra data of the particles particle_updateFallingDebrisSpawner spawns, stored at 0x170 of each particle. */
+/* Extra data at 0x170 of the particles particle_updateFallingDebrisSpawner spawns, read by particle_updateFallingDebris. */
 typedef struct {
     /* 0x00 */ f32 floorY;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ CollisionTri floorTri; /* never filled: the splash spawns with it as its surface */
     /* 0x1A */ u8 pad1A[2];
-} Game113D60DebrisExtra;
+} FallingDebrisExtra;
 
 typedef struct {
     /* 0x000 */ ModelParticle base;
-    /* 0x170 */ Game113D60DebrisExtra extra;
-} Game113D60Debris;
+    /* 0x170 */ FallingDebrisExtra extra;
+} FallingDebris;
 
 void particle_startSourceEmission(Actor *actor, s32 playerIndex, TriggerZone *zone, u8 sourceIndex);
-void particle_updateSourceEmission(Game113D60Effect *effect);
+void particle_updateSourceEmission(SourceEmissionEffect *effect);
 void particle_randomPointOnTwoSegments(Vec3f *out);
 void particle_randomPointInSourceZones(Vec3f *out);
 void particle_randomPointOnSixSegments(Vec3f *out);
 void particle_randomPointAroundActorNode(Vec3f *out, Actor *actor);
 void particle_getEmissionActorPos(Vec3f *out, Actor *actor);
-void particle_aimEmissionAlongDelta(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
-void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
+void particle_aimEmissionAlongDelta(Vec3f *start, Vec3f *end, Vec3f *delta, SourceEmission *emission);
+void particle_aimEmissionTilted(Vec3f *start, Vec3f *end, Vec3f *delta, SourceEmission *emission);
 /* (u8 playerIndex, u8 owner, s32 list); declared without a prototype: game/Zone/ZoneState/zonestate.c passes an s32 playerIndex without narrowing it */
 void func_150E7290();
 void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 timer, u8 flags, u8 alpha, u8 colorLevel, s16 fadeStart, s16 fadeRate, s32 *ids,
@@ -841,23 +841,23 @@ void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 timer, u8 flags, 
 void particle_spawnScreenEdgeSprite(f32 size, s16 timer, u8 flags, u8 alpha, u8 colorLevel, s16 fadeStart, s16 fadeRate, s32 *ids, s32 idCount,
                    u8 owner, s32 list);
 TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 list);
-void particle_updateScreenBurst(Game113D60BurstEffect *effect);
+void particle_updateScreenBurst(ScreenBurstEffect *effect);
 /* (u8 index, u8 owner, s32 list); declared without a prototype: the K&R definition changes with one */
 void particle_spawnFlashAndJetSprayAtPoint();
 void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 list);
-void particle_updateRandomEmitter(Game113D60EmitterEffect *effect);
+void particle_updateRandomEmitter(RandomEmitterEffect *effect);
 s32 particle_wobbleRandomEmitterParticle(SpriteParticle *particle, Vec3f *prevPos);
 void particle_startShakeTimer(void);
-void particle_updateShakeTimer(Game113D60TimerEffect *effect);
+void particle_updateShakeTimer(ShakeTimerEffect *effect);
 /* (void); declared without a prototype: particle_updateShakeTimer passes the effect */
 void particle_fireShake();
 void particle_startDustRegionSpawner(void);
-void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect);
-void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect);
+void particle_updateDustRegionSpawner(RegionSpawnerEffect *effect);
+void particle_updateFallingDustSpawner(FallingSpawnerEffect *effect);
 void particle_startDebrisRegionSpawner(void);
-void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect);
-void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect);
-s32 particle_updateFallingDebris(Game113D60Debris *debris);
+void particle_updateDebrisRegionSpawner(RegionSpawnerEffect *effect);
+void particle_updateFallingDebrisSpawner(FallingSpawnerEffect *effect);
+s32 particle_updateFallingDebris(FallingDebris *debris);
 extern TriggerZone *gEmissionSourceZones[2]; /* end points of source 1; level_registerEmissionSourceZone registers them (by unk18) */
 
 /* game/Particle/ImpactBurst/impactburst.c */

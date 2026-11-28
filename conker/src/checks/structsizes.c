@@ -365,7 +365,7 @@ STATIC_ASSERT(sizeof(PoolEmitter) == 0x48, PoolEmitter_size);
 STATIC_ASSERT(sizeof(QuadDriftMotion) == 0x40, QuadDriftMotion_size);
 STATIC_ASSERT(sizeof(RingSparkEmitter) == 0x60, RingSparkEmitter_size);
 STATIC_ASSERT(sizeof(StreakImpact) == 0x30, StreakImpact_size);
-STATIC_ASSERT(sizeof(Game113D60Emission) == 0x44, Game113D60Emission_size);
+STATIC_ASSERT(sizeof(SourceEmission) == 0x44, SourceEmission_size);
 STATIC_ASSERT(sizeof(TwoSidedEmitterState) == 0x20, TwoSidedEmitterState_size);
 STATIC_ASSERT(sizeof(ObjectEmitterData) == 0x14, ObjectEmitterData_size);
 STATIC_ASSERT(sizeof(MatrixEmitterData) == 0x10, MatrixEmitterData_size);
