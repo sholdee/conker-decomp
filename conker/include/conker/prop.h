@@ -73,49 +73,11 @@ typedef struct PropVtx {
     /* 0xC */ u8 cn[4];
 } PropVtx;
 
-typedef struct Game1483E0UvVertex {
-    s16 x, y, z;
-    u8 unknown06[2];
-    s16 s, t;
-    u32 unknown0C;
-} Game1483E0UvVertex;
-
-typedef struct Game1483E0UvPair {
-    s16 s, t;
-} Game1483E0UvPair;
-
-typedef struct Game1483E0State {
-    u8 unknown00[0x10];
-    s16 x, y, z;
-    u16 count;
-    u8 unknown18[8];
-    Game1483E0UvVertex *buffers[2];
-    Game1483E0UvVertex *source;
-    u8 unknown2C[0x13];
-    u8 reference_id;
-    u8 unknown40[0x3C];
-    Game1483E0UvPair *coords;
-    Actor *reference;
-} Game1483E0State;
-
 typedef struct Game1483E0WaveState {
-    Game1483E0UvPair *coords;
+    TexCoord *coords;
     s32 field4;
     s32 field8;
 } Game1483E0WaveState;
-
-typedef struct Game1483E0WaveMesh {
-    u8 pad0[0x16];
-    u16 count;
-    u8 pad18[8];
-    Game1483E0UvVertex *buffers[2];
-    Game1483E0UvVertex *source;
-    u8 pad2C[0x10];
-    s32 flags; /* bits 0-11: S amplitude, 12-23: T amplitude, 24-31: speed */
-    u8 pad40[0x3C];
-    Game1483E0WaveState *wave;
-    s32 phase;
-} Game1483E0WaveMesh;
 
 /* game/Prop/WaveChainStart/wavechainstart.c */
 void prop_clearWaveChains(void);
@@ -267,8 +229,8 @@ void prop_slideWaypoints(WorldObject *obj);
 void prop_swingAndFadeColours(WorldObject *obj);
 void prop_rotateAboutPivots(WorldObject *obj);
 void prop_setAlphaFromColorAnim(WorldObject *obj);
-void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT);
-void prop_projectTextureUnderRef(Game1483E0State *obj);
+void prop_projectTexture(WorldObject *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT);
+void prop_projectTextureUnderRef(WorldObject *obj);
 void prop_faceCamera(WorldObject *obj);
 void prop_grabAndLowerCharacter(WorldObject *obj);
 void prop_updateNone(void);
@@ -277,7 +239,7 @@ void prop_replaceNextWhenTriggered(WorldObject *obj);
 void prop_getWaveOriginZ(WorldObject *obj, f32 *originZ);
 void prop_animateWaveMesh(WorldObject *obj);
 void prop_scrollWithOwnerWave(WorldObject *obj);
-void prop_wobbleTexture(Game1483E0WaveMesh *mesh);
+void prop_wobbleTexture(WorldObject *mesh);
 void prop_rotateTexture(WorldObject *obj);
 void prop_swingOpen90(WorldObject *obj);
 void prop_playImpactSound(WorldObject *obj, Actor *character);

@@ -956,6 +956,20 @@ void trail_updateRetryTask(TrailRetryTask *task);
 void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type);
 
 /* game/Effects/Trail/RibbonTrail/ribbontrail.c */
+/* Particle a ribbon effect drags along (see trail_moveRibbon). */
+typedef struct LinkedParticle {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ Vec3f pos;
+} LinkedParticle;
+
+/* State block of a ribbon effect (trail_spawnRibbon). A copy of its arguments follows at +0x10. */
+typedef struct RibbonState {
+    /* 0x00 */ LinkedParticle *linked;
+    /* 0x04 */ void *args;
+    /* 0x08 */ u8 selector; /* index into gRibbonSourceProcs and gRibbonMessageProcs */
+    /* 0x09 */ u8 pad9[3];
+} RibbonState;
+
 void trail_spawnFollowTrail(Actor *target, u8 owner, s32 list);
 s32 trail_ageFollowTrail(EffectObj *obj);
 s32 trail_followTarget(EffectObj *obj);

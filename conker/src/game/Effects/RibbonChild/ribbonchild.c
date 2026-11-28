@@ -1,35 +1,26 @@
 #include <ultra64.h>
+#include "effects.h"
 #include "conker/effect.h"
+#include "conker/trail.h"
 
-/* User data of this effect kind: an object the effect owns. */
-typedef struct EffectUserData1E5820 {
-    /* 0x00 */ EffectHeader *child;
-} EffectUserData1E5820;
+/* Destroys the particle a ribbon effect (trail_spawnRibbon) drags along, if any. */
+void effect_destroyRibbonParticle(EffectObj *effect) {
+    RibbonState *state = effect->userData;
+    LinkedParticle *linked = state->linked;
 
-/* Effect object (see EffectObj in game/Effects/EffectObj/effectobj.c); only the user data pointer is used here. */
-struct Effect1E5820 {
-    /* 0x00 */ u8 pad0[0x98];
-    /* 0x98 */ EffectUserData1E5820 *userData;
-};
-
-/* Destroys the object owned by this effect, if any. */
-void effect_destroyRibbonParticle(Effect1E5820 *effect) {
-    EffectUserData1E5820 *userData = effect->userData;
-    EffectHeader *child = userData->child;
-
-    if (child != NULL) {
-        effect_destroyObject(child);
+    if (linked != NULL) {
+        effect_destroyObject(linked);
     }
 }
 
-/* Effect kind handler (gEffectObjDestroyFuncs): destroys the owned object, then runs the generic handler. */
-void effect_destroyRibbon(Effect1E5820 *effect) {
+/* Effect kind handler (gEffectObjDestroyFuncs[16], the ribbons): destroys the linked particle, then runs the generic handler. */
+void effect_destroyRibbon(EffectObj *effect) {
     effect_destroyRibbonParticle(effect);
     effect_defaultDestroyEffectObj(effect);
 }
 
-/* Effect kind handler (gEffectObjFreeFuncs): destroys the owned object, then runs the generic handler. */
-void effect_freeRibbon(Effect1E5820 *effect) {
+/* Effect kind handler (gEffectObjFreeFuncs[16], the ribbons): destroys the linked particle, then runs the generic handler. */
+void effect_freeRibbon(EffectObj *effect) {
     effect_destroyRibbonParticle(effect);
     effect_defaultFreeEffectObj(effect);
 }

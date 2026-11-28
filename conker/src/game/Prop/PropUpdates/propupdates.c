@@ -96,6 +96,14 @@ typedef union {
         /* 0x80 */ s32 unk80;
         /* 0x84 */ f32 phase; /* radians */
     } wobble; /* prop_swingHinge variants 10-13 */
+    struct {
+        /* 0x7C */ TexCoord *coords; /* the source vertices' texture coordinates, saved on the first update */
+        /* 0x80 */ Actor *reference; /* followed when set, else the object numbered moveData.bytes[3] */
+    } projectTexture; /* prop_projectTexture, prop_projectTextureUnderRef */
+    struct {
+        /* 0x7C */ Game1483E0WaveState *state;
+        /* 0x80 */ s32 phase;
+    } wobbleTexture; /* prop_wobbleTexture */
 } Work1483E0;
 
 #define WORK(obj) ((Work1483E0 *)&(obj)->touch)
@@ -429,32 +437,32 @@ void prop_setAlphaFromColorAnim(WorldObject *obj) {
  * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
  * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
  */
-void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
-    Game1483E0UvPair *coords;
+void prop_projectTexture(WorldObject *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
+    TexCoord *coords;
     s32 i;
     f32 s_offset;
     f32 t_offset;
     f32 s_scale;
     f32 t_scale;
 
-    if (obj->coords == NULL) {
-        coords = allocate_memory(obj->count * sizeof(Game1483E0UvPair), 1, 0, 0);
-        obj->coords = coords;
-        for (i = 0; i < obj->count; i++) {
-            coords[i].s = obj->source[i].s;
-            coords[i].t = obj->source[i].t;
-            obj->buffers[0][i] = obj->source[i];
-            obj->buffers[1][i] = obj->source[i];
-            obj->buffers[0][i].x += obj->x;
-            obj->buffers[0][i].y += obj->y;
-            obj->buffers[0][i].z += obj->z;
-            obj->buffers[1][i].x += obj->x;
-            obj->buffers[1][i].y += obj->y;
-            obj->buffers[1][i].z += obj->z;
+    if (WORK(obj)->projectTexture.coords == NULL) {
+        coords = allocate_memory(obj->numVertices * sizeof(TexCoord), 1, 0, 0);
+        WORK(obj)->projectTexture.coords = coords;
+        for (i = 0; i < obj->numVertices; i++) {
+            coords[i].s = obj->srcVertices[i].v.tc[0];
+            coords[i].t = obj->srcVertices[i].v.tc[1];
+            obj->vertices[0][i] = obj->srcVertices[i];
+            obj->vertices[1][i] = obj->srcVertices[i];
+            obj->vertices[0][i].v.ob[0] += obj->x;
+            obj->vertices[0][i].v.ob[1] += obj->y;
+            obj->vertices[0][i].v.ob[2] += obj->z;
+            obj->vertices[1][i].v.ob[0] += obj->x;
+            obj->vertices[1][i].v.ob[1] += obj->y;
+            obj->vertices[1][i].v.ob[2] += obj->z;
         }
     }
 
-    coords = obj->coords;
+    coords = WORK(obj)->projectTexture.coords;
     s_offset = refX - (obj->x + 3128.0f);
     t_offset = refZ - (obj->z + -2341.0f);
     s_offset = -s_offset;
@@ -470,20 +478,20 @@ void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f
     if (scaleT != 1.0f) {
         t_scale = 1.0f / scaleT;
     }
-    for (i = 0; i < obj->count; i++) {
-        obj->buffers[gDrawBufferIndex][i].s = ((coords[i].s + s_offset) * s_scale + 1024.0f);
-        obj->buffers[gDrawBufferIndex][i].t = ((coords[i].t + t_offset) * t_scale + 1024.0f);
+    for (i = 0; i < obj->numVertices; i++) {
+        obj->vertices[gDrawBufferIndex][i].v.tc[0] = ((coords[i].s + s_offset) * s_scale + 1024.0f);
+        obj->vertices[gDrawBufferIndex][i].v.tc[1] = ((coords[i].t + t_offset) * t_scale + 1024.0f);
     }
 }
 
-/* Projects the mesh texture under its reference object (or the object numbered reference_id). */
-void prop_projectTextureUnderRef(Game1483E0State *obj) {
+/* Projects the mesh texture under its reference object (or the object numbered moveData.bytes[3]). */
+void prop_projectTextureUnderRef(WorldObject *obj) {
     Actor *reference;
 
-    if (obj->reference != NULL) {
-        reference = obj->reference;
+    if (WORK(obj)->projectTexture.reference != NULL) {
+        reference = WORK(obj)->projectTexture.reference;
     } else {
-        reference = collision_findObjectById(obj->reference_id);
+        reference = collision_findObjectById(obj->moveData.bytes[3]);
     }
     if (reference != NULL) {
         prop_projectTexture(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
@@ -1080,11 +1088,12 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
     obj->alpha = (math_cosBinAngle(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
-/* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
-void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
+/* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from moveData.word (bits 0-11: S
+ * amplitude, 12-23: T amplitude, 24-31: speed). */
+void prop_wobbleTexture(WorldObject *mesh) {
     f32 sine;
     s32 index;
-    Game1483E0UvPair *coords;
+    TexCoord *coords;
     struct {
         s32 speed;
         s32 amplitude_t;
@@ -1096,35 +1105,35 @@ void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
     u8 angle;
     Game1483E0WaveState *state;
 
-    state = mesh->wave;
+    state = WORK(mesh)->wobbleTexture.state;
     if (state == NULL) {
         state = allocate_memory(sizeof(Game1483E0WaveState), 1, 0, 0);
-        mesh->wave = state;
+        WORK(mesh)->wobbleTexture.state = state;
         state->field4 = 0;
         state->field8 = 0;
-        coords = allocate_memory(mesh->count * sizeof(Game1483E0UvPair), 1, 0, 0);
+        coords = allocate_memory(mesh->numVertices * sizeof(TexCoord), 1, 0, 0);
         state->coords = coords;
-        for (index = 0; index < mesh->count; index++) {
-            coords[index].s = mesh->source[index].s;
-            coords[index].t = mesh->source[index].t;
+        for (index = 0; index < mesh->numVertices; index++) {
+            coords[index].s = mesh->srcVertices[index].v.tc[0];
+            coords[index].t = mesh->srcVertices[index].v.tc[1];
         }
     } else {
-        coords = mesh->wave->coords;
+        coords = WORK(mesh)->wobbleTexture.state->coords;
     }
-    parameters.amplitude_s = mesh->flags & 0xFFF;
-    parameters.amplitude_t = (mesh->flags >> 12) & 0xFFF;
-    parameters.speed = (mesh->flags >> 24) & 0xFF;
-    angle = mesh->phase >> 4;
+    parameters.amplitude_s = mesh->moveData.word & 0xFFF;
+    parameters.amplitude_t = (mesh->moveData.word >> 12) & 0xFFF;
+    parameters.speed = (mesh->moveData.word >> 24) & 0xFF;
+    angle = WORK(mesh)->wobbleTexture.phase >> 4;
     cosine = math_sinBinAngle(angle);
     sine = math_cosBinAngle(angle);
-    mesh->phase += parameters.speed * gFrameTicks;
+    WORK(mesh)->wobbleTexture.phase += parameters.speed * gFrameTicks;
     s_delta = parameters.amplitude_s * sine;
     t_delta = parameters.amplitude_t * cosine;
-    for (index = 0; index < mesh->count; index++) {
-        mesh->buffers[gDrawBufferIndex][index].s = coords[index].s + s_delta;
-        mesh->buffers[gDrawBufferIndex][index].t = coords[index].t + t_delta;
+    for (index = 0; index < mesh->numVertices; index++) {
+        mesh->vertices[gDrawBufferIndex][index].v.tc[0] = coords[index].s + s_delta;
+        mesh->vertices[gDrawBufferIndex][index].v.tc[1] = coords[index].t + t_delta;
     }
-    prop_animateTexture((WorldObject *)mesh, &state->field4, &state->field8);
+    prop_animateTexture(mesh, &state->field4, &state->field8);
 }
 
 /* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */

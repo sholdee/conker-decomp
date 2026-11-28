@@ -1646,10 +1646,9 @@ void effect_freeJointEmitterTask(Game1DD500Task *task);
 void func_151B5BA0();
 
 /* game/Effects/RibbonChild/ribbonchild.c */
-typedef struct Effect1E5820 Effect1E5820;
-void effect_destroyRibbonParticle(Effect1E5820 *effect);
-void effect_destroyRibbon(Effect1E5820 *effect);
-void effect_freeRibbon(Effect1E5820 *effect);
+void effect_destroyRibbonParticle(EffectObj *effect);
+void effect_destroyRibbon(EffectObj *effect);
+void effect_freeRibbon(EffectObj *effect);
 
 /* game/Effects/FollowEffects/followeffects.c */
 typedef struct SoundChannel SoundChannel;
