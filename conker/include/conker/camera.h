@@ -32,6 +32,7 @@
  *   game/Camera/LevelCamSetupRaptor/levelcamsetupraptor.c
  *   game/Camera/LevelCamSetup24/levelcamsetup24.c
  *   game/Camera/LevelCamSetup26/levelcamsetup26.c
+ *   game/Camera/LevelHookTheWindmill/levelhookthewindmill.c
  *   game/Camera/LevelHookBarnInside/levelhookbarninside.c
  *   game/Camera/LevelHookBarnOutside/levelhookbarnoutside.c
  *   game/Camera/LevelHookBullPaddock/levelhookbullpaddock.c
@@ -228,6 +229,9 @@ void camera_levelSetupDogFishNurseryPart1(Camera *camera);
 
 /* game/Camera/LevelCamSetup26/levelcamsetup26.c */
 void camera_levelSetup26(Camera *camera);
+
+/* game/Camera/LevelHookTheWindmill/levelhookthewindmill.c */
+void effect_levelHookTheWindmill(Camera *camera);
 
 /* game/Camera/LevelHookBarnInside/levelhookbarninside.c */
 void camera_levelHookBarnInside(Camera *camera);

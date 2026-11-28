@@ -217,7 +217,6 @@ Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of 
 
 /* game/Effects/AttachedBurst/attachedburst.c */
 typedef struct AttachedEffect AttachedEffect;
-void effect_levelHookTheWindmill(Camera *camera);
 void effect_updateAttachedBurst(AttachedEffect *effect);
 void effect_spawnAttachedBursts(Actor *actor);
 void func_150AECCC(struct42 *particle);

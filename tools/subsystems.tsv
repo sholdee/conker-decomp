@@ -247,7 +247,8 @@ src/game/Effects/ActorTasks/actortasks.c	effect	actor task effects: pulses, loop
 src/game/Effects/AmbientPulse/ambientpulse.c	light	ambient colour pulse
 src/game/Effects/AnchorLight/anchorlight.c	effect	effect bound to an actor
 src/game/Effects/AreaSpray/areaspray.c	effect	area effects with sounds and particle bursts
-src/game/Effects/AttachedBurst/attachedburst.c	effect	actor-attached effect lists; level flag hook; code checksum (anti-tamper)
+src/game/Camera/LevelHookTheWindmill/levelhookthewindmill.c	camera	per-level camera hook
+src/game/Effects/AttachedBurst/attachedburst.c	effect	actor-attached effect lists; code checksum (anti-tamper)
 src/game/Effects/AttachmentTables/attachmenttables.c	effect	data-only unit (effect tables)
 src/game/Effects/BeamZones/beamzones.c	effect	level setup of cylinders and light toggles
 src/game/Effects/Blood/blood.c	blood	blood effects (../Effects/Blood/blood.c)
