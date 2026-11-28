@@ -159,7 +159,7 @@ void (*gAnimCommandProcs[])(s32) = {
     event_spawnBonePointImpact1, event_spawnBonePointImpact2, event_emitLineBursts, func_15071A64,
     event_startDustEmitter, func_15071B18, event_spawnImpactBurstNearBone,
 };
-/* End-of-anim state handlers (run when the anim reaches its last frame), indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
+/* State handlers, run when an anim reaches its last frame; indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
     event_doNothing, anim_updateIdle, func_1506AF74, func_1506AFE0,
     func_1506B020, event_emptyAnimState05, func_1506B078, event_doNothing,
