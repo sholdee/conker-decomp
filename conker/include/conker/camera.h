@@ -47,6 +47,7 @@
  *   game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole.c
  *   game/Camera/LevelHookTankFactory/levelhooktankfactory.c
  *   game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c
+ *   game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c
  *   game/Camera/LevelHookBankEntrance/levelhookbankentrance.c
  *   game/Camera/SegmentProgress/segmentprogress.c
  *   game/Camera/LevelHookEndArena/levelhookendarena.c
@@ -272,6 +273,9 @@ void camera_levelHookTankFactory(Camera *camera);
 
 /* game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c */
 void camera_levelHookTankTunnel(Camera *camera);
+
+/* game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c */
+void player_levelHookHorrorIntro(Camera *actor);
 
 /* game/Camera/LevelHookBankEntrance/levelhookbankentrance.c */
 void camera_levelHookBankEntrance(Camera *camera);

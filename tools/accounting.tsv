@@ -3338,7 +3338,7 @@ particle_cullObjectByCameraZ	0x150F33B0	72	game	c		build/src/game/Particle/BoneB
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
-player_levelHookHorrorIntro	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
+player_levelHookHorrorIntro	0x150F43F0	384	game	c		build/src/game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c.o
 particle_spawnSpiral	0x150F4570	864	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_moveSpiral	0x150F48D0	360	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_updateSpiralFadeSound	0x150F4A38	708	game	c		build/src/game/Particle/Spiral/spiral.c.o

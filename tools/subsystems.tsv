@@ -112,6 +112,7 @@ src/game/Camera/LevelHookTankFactory/levelhooktankfactory.c	camera	per-level cam
 src/game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c	camera	per-level camera flag hook
 src/game/Effects/ActorExplosion/actorexplosion.c	effect	bone pulse, tilt commands, texture swaps, death explosion, random level sounds (update hook 25, LEVEL_W2_WARBOSS)
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
+src/game/Camera/LevelHookHorrorIntro/levelhookhorrorintro.c	camera	per-level camera hook
 src/game/Camera/LevelHookBankEntrance/levelhookbankentrance.c	camera	per-level camera flag hook
 src/game/Camera/LevelHookEndArena/levelhookendarena.c	camera	per-level camera hook
 src/game/Screen/StarSky/starsky.c	screen	black view fill with view-projection matrix

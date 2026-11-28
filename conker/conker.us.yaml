@@ -716,6 +716,7 @@ segments:
       - [0x11F780, c, game/Effects/SwayObject/swayobject]
       - [0x11FF10, c, game/Particle/BoneBurst/boneburst]
       - [0x120950, c, game/Player/FlyControl/flycontrol]
+      - [0x1218A0, c, game/Camera/LevelHookHorrorIntro/levelhookhorrorintro]
       - [0x121A20, c, game/Particle/Spiral/spiral]
       - [0x122650, c, game/Effects/SurfaceSound/surfacesound]
       - [0x122760, c, game/Camera/LevelHookBankEntrance/levelhookbankentrance]
