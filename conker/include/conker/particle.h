@@ -51,9 +51,6 @@
  *   game/Particle/ChannelParticle/channelparticle.c
  *   game/Particle/FlickerParticle/flickerparticle.c
  *   game/Particle/GroundCluster/groundcluster.c
- *   game/Particle/JitterUpdate/jitterupdate.c
- *   game/Particle/BendTarget/bendtarget.c
- *   game/Particle/JitterBallistic/jitterballistic.c
  *   game/Particle/SpawnShapes/spawnshapes.c
  *   game/Particle/BurstConfigs/burstconfigs.c
  *   game/Particle/StreakParticle/streakparticle.c
@@ -1417,14 +1414,8 @@ s32 particle_fadeTrailByLife(MotionTrail *trail);
 s32 particle_growQuadAtRate(Particle177B50 *p);
 s32 particle_capQuadAlphaByLife(Particle177B50 *p);
 s32 particle_updateJitter(JitterParticle *p, ParticleJitter *w);
-
-/* game/Particle/JitterUpdate/jitterupdate.c */
 void particle_updateJitterParticle(JitterParticle *p);
-
-/* game/Particle/BendTarget/bendtarget.c */
 void particle_easeBendTarget(void *arg);
-
-/* game/Particle/JitterBallistic/jitterballistic.c */
 void particle_resetBendTarget(JitterParticle *p);
 void particle_updateRelaunchedJitter(JitterParticle *p);
 void particle_moveJitterBallistic(JitterParticle *p);

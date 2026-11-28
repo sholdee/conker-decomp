@@ -470,7 +470,6 @@ src/game/Particle/ActorEmitterData/actoremitterdata.c	particle	data-only unit (w
 src/game/Particle/AnchorEmitter/anchoremitter.c	particle	anchored emitters and sprite particles; the emitter's light (flicker update, unlink, destroy, free) and its destroy
 src/game/Particle/AreaFlash/areaflash.c	particle	flash particle emitter
 src/game/Particle/AreaParticles/areaparticles.c	particle	ambient particles spawned over a region; random helpers
-src/game/Particle/BendTarget/bendtarget.c	particle	particle anchor easing
 src/game/Particle/BillboardBurst/billboardburst.c	particle	billboard particle spawn
 src/game/Particle/BillboardRenew/billboardrenew.c	particle	particle record init
 src/game/Particle/Bob/bob.c	particle	bobbing callbacks
@@ -496,13 +495,11 @@ src/game/Particle/FloorSprite/floorsprite.c	particle	floor sprite particles
 src/game/Particle/FogFlash/fogflash.c	particle	shape emitters and fog flash
 src/game/Particle/FollowEffect/followeffect.c	particle	follow effects with drifting and growing particles
 src/game/Particle/FootDust/footdust.c	particle	dust at an actor's feet
-src/game/Particle/GroundCluster/groundcluster.c	particle	shrinking particles and ground clusters
+src/game/Particle/GroundCluster/groundcluster.c	particle	shrinking particles and ground clusters; the jitter particle: easing, bend target, ballistic motion and relaunch
 src/game/Particle/GrowingBillboard/growingbillboard.c	particle	growing billboard particles
 src/game/Particle/HitImpact/hitimpact.c	particle	wobble particles and object emitters
 src/game/Particle/ImpactBurst/impactburst.c	particle	burst spawners and emitters
 src/game/Particle/ImpactStreak/impactstreak.c	particle	streak particles with surface hit records
-src/game/Particle/JitterBallistic/jitterballistic.c	particle	ballistic particle update
-src/game/Particle/JitterUpdate/jitterupdate.c	particle	particle jitter easing
 src/game/Particle/ModelParticle/modelparticle.c	particle	pooled physics particles (models, floors)
 src/game/Particle/MoveHitBurst/movehitburst.c	particle	particle motion and surface bursts on movement (with checksum range)
 src/game/Particle/ObjGroundEffects/objgroundeffects.c	particle	split from game_E7970.c; same subsystem

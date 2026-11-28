@@ -2580,14 +2580,14 @@ typedef struct ParticleJitter {
     /* 0x2C */ f32 speedTarget;
     /* 0x30 */ f32 speedTimer;
     /* 0x34 */ f32 speed;          /* eased value copied to def.frameSpeed */
-    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see game/Particle/JitterBallistic/jitterballistic.c's update) */
+    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see particle_moveJitterBallistic, game/Particle/GroundCluster/groundcluster.c) */
     /* 0x44 */ f32 gravity;
     /* 0x48 */ f32 drag;           /* velocity scale per tick */
     /* 0x4C */ f32 easeFactor;     /* particle_easeBendTarget eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
 
 /* Caller data at 0x160 of a JitterParticle spawned by beam_launchJitterParticle (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
- * (game/Particle/JitterBallistic/jitterballistic.c) relaunches the particle with this life and gravity. */
+ * (game/Particle/GroundCluster/groundcluster.c) relaunches the particle with this life and gravity. */
 typedef struct JitterRelaunch {
     /* 0x0 */ f32 gravity;
     /* 0x4 */ s16 lifetime;
