@@ -659,25 +659,21 @@ void func_1514D96C(Actor *obj) {
     SurfaceTrailOwner, then the ActorTaskFx slots. All of it is zero except the trail side offset (12). */
 void effect_attachSurfaceTrailWatcher(Actor *obj) {
     struct {
-        s32 unk0;
-        s32 unk4;
-        s32 unk8;
-        s32 unkC;
-        f32 unk10;
+        TrailSet trails;
         s32 unk14;
         s32 unk18;
         s32 unk1C;
     } payload;
     void *handle;
 
-    payload.unk0 = 0;
-    payload.unk4 = 0;
-    payload.unk8 = 0;
-    payload.unkC = 0;
+    payload.trails.sides[0].trail = NULL;
+    payload.trails.sides[0].spawner = NULL;
+    payload.trails.sides[1].trail = NULL;
+    payload.trails.sides[1].spawner = NULL;
     payload.unk14 = 0;
     payload.unk18 = 0;
     payload.unk1C = 0;
-    payload.unk10 = 12.0f;
+    payload.trails.sideOffset = 12.0f;
 
     handle = effect_newCharacterWatcher(obj, 1, sizeof(payload));
     if (handle != NULL) {
