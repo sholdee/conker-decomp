@@ -413,15 +413,15 @@ void event_clearScriptTimer(void) {
 }
 
 void func_1506B520(void) {
-    s32 id;
+    s32 anim;
 
     if (gCurrentActor->energy != 0) {
         if (gCurrentActor->mv != NULL && gCurrentActor->mv->rt_context_b == 0x25) {
-            id = 427;
+            anim = 427;
         } else {
-            id = 240;
+            anim = 240;
         }
-        actor_playAnim(gCurrentActor, id, 1.5f, 3.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(gCurrentActor, anim, 1.5f, 3.0f, 0.0f, 0.0f, 0);
     } else {
         actor_kill(gCurrentActor, 1);
     }
@@ -1336,12 +1336,12 @@ void event_doNothing(void) {
 void func_1506D958(void) {
     s32 i;
     s32 id = gEventParam & 0xFF;
-    s32 flag = (gEventParam >> 8) & 0xFF;
+    s32 flags = (gEventParam >> 8) & 0xFF;
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0 && id == movement_obj[i].unkAB &&
             dc_glbl_CharNum + 1 == movement_obj[i].attach_char) {
             movement_obj[i].unk101 &= ~1;
-            movement_obj[i].unk101 |= flag;
+            movement_obj[i].unk101 |= flags;
             return;
         }
     }
@@ -1387,20 +1387,20 @@ void event_removeWeaponProp(void) {
 }
 
 void func_1506DC10(void) {
-    s32 id;
+    s32 sound;
     s32 roll;
 
     if (gCurrentActor->waterHeight - 60.0f < gCurrentActor->ypos || gCurrentActor->waterHeight == -10000.0f) {
         roll = math_random() & 3;
         if (roll >= 2) {
-            id = roll + 0x612;
+            sound = roll + 0x612;
         } else {
-            id = roll + 0x8F;
+            sound = roll + 0x8F;
         }
     } else {
-        id = 9;
+        sound = 9;
     }
-    actor_playUntrackedSound(id, gCurrentActor);
+    actor_playUntrackedSound(sound, gCurrentActor);
 }
 
 void event_setTaskInt1(void) {
@@ -3151,8 +3151,8 @@ void event_respawnObject(void) {
 }
 
 void func_1507266C(void) {
-    u16 packed;
-    s32 angle;
+    u16 state;
+    s32 bone;
     Actor *obj;
 
     if (gIsMultiplayer == 0) {
@@ -3160,23 +3160,23 @@ void func_1507266C(void) {
             return;
         }
     }
-    packed = gEventParam;
-    angle = gEventParam >> 16;
+    state = gEventParam;
+    bone = gEventParam >> 16;
     obj = &movement_obj[gCurrentActor->targetIndex];
     obj->attach_char = dc_glbl_CharNum + 1;
-    obj->basemtx = angle;
+    obj->basemtx = bone;
     obj->unk101 = 4;
     obj->stunned = 0;
     obj->imune = 0xFF;
     obj->scriptCmd = NULL;
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
-    obj->intelwalk = packed;
+    obj->intelwalk = state;
     obj->bodyRadiusOverHeight = 1.0f;
     obj->bodyHeightOverRadius = 1.0f;
     obj->hitRadiusOverHeight = 1.0f;
     obj->hitHeightOverRadius = 1.0f;
-    func_151B5BA0(&movement_obj[dc_glbl_CharNum], obj, angle);
+    func_151B5BA0(&movement_obj[dc_glbl_CharNum], obj, bone);
 }
 
 void event_attachTargetToBone(void) {
@@ -3603,7 +3603,7 @@ void event_setStickSpeed(void) {
     gCurrentActor->stickspeed = gEventParam;
 }
 
-/* Applies actor_hitScripted (gEventParam & 0xFF00FF) to object unk124; bit 30 sets its fallStartY to our height. */
+/* Applies actor_hitScripted (gEventParam & 0xFF00FF) to movement_obj[owner]; bit 30 sets its fallStartY to our height. */
 void func_15073A50(void) {
     Actor *parent;
     s32 flags;
