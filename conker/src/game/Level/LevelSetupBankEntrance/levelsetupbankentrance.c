@@ -5,7 +5,7 @@
 #include "conker/script.h"
 
 
-void level_setup31(void) {
+void level_setupBankEntrance(void) {
     prop_clearWaveChains();
     prop_startWaveChain(2);
     prop_startWaveChain(3);

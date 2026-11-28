@@ -9,7 +9,7 @@ static s32 gLevelHook04TransportOn = 0; /* 1 while the camera is in the transpor
  * or cmdRunning is set) put the camera into its transport mode and set gLevelHook04TransportOn. Otherwise leave that
  * state, switch the flags off again and mirror query 0x4040 into bit 0x80 of AvailableModes.
  */
-void camera_levelHook04(Camera *camera)
+void camera_levelHookTankFactory(Camera *camera)
 {
     s32 firstResult;
     s32 secondResult;

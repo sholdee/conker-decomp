@@ -5,6 +5,6 @@
 #include "conker/weapon.h"
 
 
-void level_setup06(void) {
+void level_setupOutsideMolehole(void) {
     gProjectileHitCallback = func_150EA904;
 }

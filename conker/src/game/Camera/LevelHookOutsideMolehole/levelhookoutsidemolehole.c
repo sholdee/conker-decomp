@@ -12,7 +12,7 @@ static f32 gLevelHook35Velocities[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 static s32 gLevelHook35QueryIds[4] = { 0x4039, 0x403A, 0x403B, 0x403C };
 static s32 gLevelHook35TargetIds[4] = { 0x30E4, 0x30E5, 0x30E6, 0x30E7 };
 
-void camera_levelHook35(Camera *camera) {
+void camera_levelHookOutsideMolehole(Camera *camera) {
     s32 i;
     s32 flag;
 

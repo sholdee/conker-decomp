@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup17(Camera *camera) {
+void camera_levelSetupTraining(Camera *camera) {
     camera->DistIndex = 2;
     camera_loadDistancePreset(camera);
     camera->Snap = 1;

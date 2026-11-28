@@ -7,7 +7,7 @@
 #include "conker/sound.h"
 
 
-void level_setup37(void) {
+void level_setupHorrorIntro(void) {
     gZoneFlag = 0;
     particle_startCameraSpiralEmitter(camera_global_Cameras, 0, 0, 0xFF, 1);
     sound_addDynamicSound(108, -3580,  -546, -6129, 18000, 1111, 1100, sound_chirpCallback, 0, 0, 8, 0);

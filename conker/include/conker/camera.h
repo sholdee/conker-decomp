@@ -158,49 +158,49 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye);
 void camera_runLevelSetup(Camera *camera, s32 resource);
 
 /* game/Camera/LevelCamSetup01/levelcamsetup01.c */
-void camera_levelSetup01(Camera *camera);
-void camera_emptyLevelSetup02(Camera *camera);
+void camera_levelSetupCogLand(Camera *camera);
+void camera_emptyLevelSetupTheWindmill(Camera *camera);
 
 /* game/Camera/LevelCamSetupDogFish/levelcamsetupdogfish.c */
-void camera_emptyLevelSetup03(Camera *camera);
+void camera_emptyLevelSetupDogFish(Camera *camera);
 
 /* game/Camera/LevelCamSetupTankFactory/levelcamsetuptankfactory.c */
-void camera_levelSetup04(Camera *camera);
+void camera_levelSetupTankFactory(Camera *camera);
 
 /* game/Camera/LevelCamSetupBarnOutside/levelcamsetupbarnoutside.c */
-void camera_emptyLevelSetup05(Camera *camera);
+void camera_emptyLevelSetupBarnOutside(Camera *camera);
 
 /* game/Camera/LevelCamSetupDinoArena/levelcamsetupdinoarena.c */
-void camera_emptyLevelSetup06(Camera *camera);
+void camera_emptyLevelSetupDinoArena(Camera *camera);
 
 /* game/Camera/LevelCamSetupBarnInside/levelcamsetupbarninside.c */
-void camera_levelSetup07(Camera *camera);
+void camera_levelSetupBarnInside(Camera *camera);
 
 /* game/Camera/LevelCamSetupHeist/levelcamsetupheist.c */
-void camera_levelSetup08(Camera *camera);
+void camera_levelSetupHeist(Camera *camera);
 
 /* game/Camera/LevelCamSetup09/levelcamsetup09.c */
 void camera_levelSetup09(Camera *camera);
 
 /* game/Camera/LevelCamSetup10/levelcamsetup10.c */
-void camera_levelSetup10(Camera *camera);
-void camera_emptyLevelSetup11(Camera *camera);
+void camera_levelSetupTank(Camera *camera);
+void camera_emptyLevelSetupCanyon(Camera *camera);
 
 /* game/Camera/LevelCamSetup12/levelcamsetup12.c */
 void camera_levelSetup12(Camera *camera);
 
 /* game/Camera/LevelCamSetup13/levelcamsetup13.c */
-void camera_levelSetup13(Camera *camera);
-void camera_emptyLevelSetup14(Camera *camera);
+void camera_levelSetupPooCabin(Camera *camera);
+void camera_emptyLevelSetupWarboss(Camera *camera);
 
 /* game/Camera/LevelCamSetupArena/levelcamsetuparena.c */
-void camera_levelSetup15(Camera *camera);
+void camera_levelSetupArena(Camera *camera);
 
 /* game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c */
-void camera_levelSetup16(Camera *camera);
+void camera_levelSetupVolcanoRace(Camera *camera);
 
 /* game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c */
-void camera_levelSetup17(Camera *camera);
+void camera_levelSetupTraining(Camera *camera);
 void camera_levelSetup18(Camera *camera);
 
 /* game/Camera/LevelCamSetup19/levelcamsetup19.c */
@@ -210,78 +210,78 @@ void camera_levelSetup19(Camera *camera);
 void camera_levelSetup20(Camera *camera);
 
 /* game/Camera/LevelCamSetupUBend/levelcamsetupubend.c */
-void camera_levelSetup21(Camera *camera);
+void camera_levelSetupUBend(Camera *camera);
 
 /* game/Camera/LevelCamSetupHorrorIntro/levelcamsetuphorrorintro.c */
-void camera_emptyLevelSetup22(Camera *camera);
+void camera_emptyLevelSetupHorrorIntro(Camera *camera);
 
 /* game/Camera/LevelCamSetupRaptor/levelcamsetupraptor.c */
-void camera_levelSetup23(Camera *camera);
+void camera_levelSetupRaptor(Camera *camera);
 
 /* game/Camera/LevelCamSetup24/levelcamsetup24.c */
 void camera_levelSetup24(Camera *camera);
-void camera_levelSetup25(Camera *camera);
+void camera_levelSetupDogFishNurseryPart1(Camera *camera);
 
 /* game/Camera/LevelCamSetup26/levelcamsetup26.c */
 void camera_levelSetup26(Camera *camera);
 
 /* game/Camera/LevelHookBarnInside/levelhookbarninside.c */
-void camera_levelHook07(Camera *camera);
+void camera_levelHookBarnInside(Camera *camera);
 
 /* game/Camera/LevelHookBarnOutside/levelhookbarnoutside.c */
-void camera_levelHook05(Camera *camera);
+void camera_levelHookBarnOutside(Camera *camera);
 
 /* game/Camera/LevelHookBullPaddock/levelhookbullpaddock.c */
-void camera_levelHook18(Camera *camera);
+void camera_levelHookBullPaddock(Camera *camera);
 
 /* game/Camera/LevelHookDogFish/levelhookdogfish.c */
-void camera_levelHook03(Camera *camera);
+void camera_levelHookDogFish(Camera *camera);
 
 /* game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1.c */
-void camera_levelHook10(Camera *camera);
+void camera_levelHookDogFishNurseryPart1(Camera *camera);
 
 /* game/Camera/LevelHookCogLand/levelhookcogland.c */
-void camera_levelHook01(Camera *camera);
+void camera_levelHookCogLand(Camera *camera);
 
 /* game/Camera/LevelHookDinoArena/levelhookdinoarena.c */
-void camera_levelHook06(Camera *camera);
+void camera_levelHookDinoArena(Camera *camera);
 
 /* game/Camera/LevelHookInsideSafe/levelhookinsidesafe.c */
-void camera_levelHook13(Camera *camera);
+void camera_levelHookInsideSafe(Camera *camera);
 
 /* game/Camera/LevelHookTraining/levelhooktraining.c */
-void camera_levelHook22(Camera *camera);
+void camera_levelHookTraining(Camera *camera);
 
 /* game/Camera/SpeedDistance/speeddistance.c */
 void camera_scaleBySpeed(Camera *camera);
 
 /* game/Camera/LevelHookHarbour/levelhookharbour.c */
-void camera_levelHook09(Camera *camera);
+void camera_levelHookHarbour(Camera *camera);
 
 /* game/Camera/LevelHookMachineGunNest/levelhookmachinegunnest.c */
-void camera_levelHook33(Camera *camera);
+void camera_levelHookMachineGunNest(Camera *camera);
 
 /* game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole.c */
-void camera_levelHook35(Camera *camera);
+void camera_levelHookOutsideMolehole(Camera *camera);
 
 /* game/Camera/LevelHookTankFactory/levelhooktankfactory.c */
-void camera_levelHook04(Camera *camera);
+void camera_levelHookTankFactory(Camera *camera);
 
 /* game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c */
-void camera_levelHook32(Camera *camera);
+void camera_levelHookTankTunnel(Camera *camera);
 
 /* game/Camera/LevelHookBankEntrance/levelhookbankentrance.c */
-void camera_levelHook34(Camera *camera);
+void camera_levelHookBankEntrance(Camera *camera);
 void camera_levelUpdateWaveChains(s32 unused);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
 void camera_levelHook23(Camera *camera);
 
 /* game/Camera/LevelHookEndArena/levelhookendarena.c */
-void camera_levelHook28(Camera *camera);
+void camera_levelHookEndArena(Camera *camera);
 
 /* game/Camera/LevelHookArena/levelhookarena.c */
-void camera_levelHook19(Camera *camera);
+void camera_levelHookArena(Camera *camera);
 
 /* game/Camera/LevelHook15/levelhook15.c */
 void camera_levelHook15(Camera *camera);
@@ -290,7 +290,7 @@ void camera_levelHook15(Camera *camera);
 void camera_resetDistances(Camera *camera);
 
 /* game/Camera/LevelHookRaptor/levelhookraptor.c */
-void camera_levelHook25(Camera *camera);
+void camera_levelHookRaptor(Camera *camera);
 
 /* game/Camera/CameraData/cameradata.c (data only, linked after game/Prop/PropLinks/proplinks) */
 extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player

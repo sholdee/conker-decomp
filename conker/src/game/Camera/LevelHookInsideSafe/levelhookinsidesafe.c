@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelHook13(Camera *camera) {
+void camera_levelHookInsideSafe(Camera *camera) {
     camera->AvailableModes |= 0x10;
     if (camera->DistIndex == 3) {
         camera->DistMask = 5;

@@ -523,7 +523,7 @@ s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite);
 void effect_shrinkBillboard(BillboardParticle *particle);
 
 /* game/Effects/LevelHookCanyon/levelhookcanyon.c */
-void effect_emptyLevelHook14(s32 unused);
+void effect_emptyLevelHookCanyon(s32 unused);
 
 /* game/Effects/ZonePairEmitter/zonepairemitter.c */
 typedef struct ZonePairEffect ZonePairEffect;
@@ -794,7 +794,7 @@ void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId);
 void effect_updateOwnerEffect(OwnerEffect *effect);
 
 /* game/Effects/LevelHookHeist/levelhookheist.c */
-void effect_emptyLevelHook8(s32 unused);
+void effect_emptyLevelHookHeist(s32 unused);
 
 /* game/Effects/FlagLights/flaglights.c */
 void effect_levelUpdateFlagLights(s32 arg0);

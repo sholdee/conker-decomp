@@ -9,7 +9,7 @@
 #include "conker/particle.h"
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
-void level_setup13(void) {
+void level_setupThroneRoom(void) {
     GlowShape params;
     ParticleDef packet;
     GlowFlicker extra;

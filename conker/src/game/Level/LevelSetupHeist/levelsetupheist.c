@@ -5,6 +5,6 @@
 u8 gFlagLightStates[5]; /* level flags (game/Effects/FlagLights/flaglights toggles them) */
 
 
-void level_setup14(void) {
+void level_setupHeist(void) {
     bzero(&gFlagLightStates, 5); // bzero
 }

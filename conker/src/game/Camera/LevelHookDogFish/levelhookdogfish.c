@@ -4,7 +4,7 @@
 #include "conker/script.h"
 
 
-void camera_levelHook03(Camera *camera) {
+void camera_levelHookDogFish(Camera *camera) {
     if (script_query(1, 0x403F, 6, 0x2000)) {
         camera->AvailableModes |= 0x1000000;
     } else {

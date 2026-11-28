@@ -14,7 +14,7 @@
 
 /*
  * Placed among the LEVEL_W2_HARBOUR files: effect_levelUpdateMaterialScroll is level update hook 7, which only that
- * level's header selects, and that level's setup (level_setup15) clears gMaterialGlowLevels and gWarpModelSetupDone.
+ * level's header selects, and that level's setup (level_setupHarbour) clears gMaterialGlowLevels and gWarpModelSetupDone.
  * No table ties the other functions of the file to a level.
  */
 

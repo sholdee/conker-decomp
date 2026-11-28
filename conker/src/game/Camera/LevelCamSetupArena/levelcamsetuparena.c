@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup15(Camera *camera) {
+void camera_levelSetupArena(Camera *camera) {
     camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT);
     camera->AvailableModes |= 0x1000000;
     camera->AvailableModes &= -5;

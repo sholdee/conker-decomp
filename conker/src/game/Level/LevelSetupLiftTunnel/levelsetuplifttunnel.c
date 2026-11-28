@@ -5,7 +5,7 @@
 #include "conker/sound.h"
 
 
-void level_setup16(void) {
+void level_setupLiftTunnel(void) {
     particle_startShakeTimer();
     gSoundFxMixBoost = 0x10;
 }

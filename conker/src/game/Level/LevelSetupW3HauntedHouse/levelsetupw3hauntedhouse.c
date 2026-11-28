@@ -11,7 +11,7 @@
 struct TexScroll **gSetup33TexScrolls; /* four texture scrolls */
 
 
-void level_setup33(void) {
+void level_setupW3HauntedHouse(void) {
     gSetup33TexScrolls = allocate_memory(16, 1, 0, 0);
     gSetup33TexScrolls[0] = flamethrower_addTexScroll(gLevelDisplayLists[1], D_80090310, 1, -1, 0, 1, 0, 0);
     gSetup33TexScrolls[1] = flamethrower_addTexScroll(gLevelDisplayLists[0], D_80090314, 0, -1, 0, 0, 0, 0);

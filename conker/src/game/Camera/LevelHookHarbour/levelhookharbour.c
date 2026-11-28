@@ -2,7 +2,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelHook09(Camera *camera) {
+void camera_levelHookHarbour(Camera *camera) {
     camera->AvailableModes &= ~0x4000;
     camera->AvailableModes |= 0x4;
     camera->AvailableModes &= ~0x1010;

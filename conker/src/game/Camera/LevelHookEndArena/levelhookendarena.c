@@ -3,7 +3,7 @@
 #include "conker/script.h"
 
 
-void camera_levelHook28(Camera *camera) {
+void camera_levelHookEndArena(Camera *camera) {
     if (script_query(1, 0x4025, 6, 0x2000)) {
         camera->AvailableModes |= 0x80;
         camera->AvailableModes &= ~8;

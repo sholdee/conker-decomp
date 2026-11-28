@@ -3,7 +3,7 @@
 #include "conker/script.h"
 
 
-void camera_levelHook32(Camera *camera) {
+void camera_levelHookTankTunnel(Camera *camera) {
     if (script_query(1, 0x4023, 6, 0x2000) != 0) {
         camera->AvailableModes |= 0x1010;
     } else {

@@ -3,5 +3,5 @@
 #include "conker/camera.h"
 
 
-void camera_emptyLevelSetup22(Camera *camera) {
+void camera_emptyLevelSetupHorrorIntro(Camera *camera) {
 }

@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup23(Camera *camera) {
+void camera_levelSetupRaptor(Camera *camera) {
     camera->Mode = 8;
     camera->AvailableModes |= 0x300000;
     camera->AvailableModes &= -5;

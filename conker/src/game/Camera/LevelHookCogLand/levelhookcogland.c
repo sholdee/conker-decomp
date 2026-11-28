@@ -4,7 +4,7 @@
 
 
 
-void camera_levelHook01(Camera *camera) {
+void camera_levelHookCogLand(Camera *camera) {
     if (script_query(3, 0x2000, 0xAC, 0x401B, 0x401C, 0x401D) != 0) {
         script_command(1, 0x2000, 0x3B, 2);
     }

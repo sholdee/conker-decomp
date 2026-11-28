@@ -8,7 +8,7 @@
 #include "conker/light.h"
 #include "conker/texture.h"
 
-void level_setup05(void) {
+void level_setupBrontoCavern(void) {
     DiscEmitterEffect *effect; /* expire callback 5: particle_emitDiscParticle */
     DiscEmitter tmp;
 

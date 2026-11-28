@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelHook19(Camera *camera) {
+void camera_levelHookArena(Camera *camera) {
     camera->height = 500.0f;
     camera->idealHeight = 500.0f;
     camera->IdealTripodMagnitude = 800.0f;

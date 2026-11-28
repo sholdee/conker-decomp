@@ -27,18 +27,18 @@ void level_initBounceRecords(void) {
     }
 }
 
-void func_1500FF9C(void) {
+void level_addUvWobbleDinoArena(void) {
     texture_addUvWobble(D_800917B8, 0, 0xAD, 0x75);
 }
 
-void level_setup12(void) {
+void level_setupDinoArena(void) {
     f32 accum;
     TimedEffect *fx;
 
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902DC, 1, -1, 0, 0, 0, -4);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_800902DC, 1, -1, 0, 1, 0, -4);
     level_initBounceRecords();
-    func_1500FF9C();
+    level_addUvWobbleDinoArena();
     accum = 0.0f;
     fx = effect_newTimedEffectNoDraw(0x12C, -1, 0x12, 0, 0xE, 4, 0xFF, 0);
     if (fx != NULL) {

@@ -169,114 +169,114 @@ void level_setup01(void);
 void level_setup36(void);
 
 /* game_3BFD0.c */
-void level_emptySetup03(void);
+void level_emptySetupBarnInside(void);
 
 /* game_3BFE0.c */
-void level_queueObjectDrop04(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
-void level_setup04(void);
+void level_queueObjectDropBarnOutside(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
+void level_setupBarnOutside(void);
 
 /* game_3C230.c */
-void level_setup09(void);
+void level_setupBarnArena(void);
 void level_spawnObjBurst(Actor *obj, s32 owner, s32 list);
 void level_spawnBoltRingZone(TriggerZone *zone);
 
 /* game_3C3D0.c */
-void level_setup05(void);
+void level_setupBrontoCavern(void);
 
 /* game_3C6C0.c */
-void level_setup34(void);
+void level_setupBrontoThroat(void);
 
 /* game/Level/LevelSetupDogFish/levelsetupdogfish.c */
 void *level_spawnFlatSprite(f32 x, f32 y, f32 z);
-void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY);
-void level_setup08(void);
+void level_queueObjectDropDogFish(s32 x, s32 y, s32 z, s32 floorY);
+void level_setupDogFish(void);
 
 /* game/Level/LevelSetupCogLand/levelsetupcogland.c */
-void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
-void level_setup11(void);
+void level_queueObjectDropCogLand(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
+void level_setupCogLand(void);
 
 /* game/Level/LevelSetupDinoArena/levelsetupdinoarena.c */
 extern BounceRecord *gBounceRecords; /* ten bouncing cursors (level_initBounceRecords) */
 void level_initBounceRecords(void);
-void func_1500FF9C(void);
-void level_setup12(void);
+void level_addUvWobbleDinoArena(void);
+void level_setupDinoArena(void);
 
 /* game/Level/LevelSetupPooCabin/levelsetuppoocabin.c */
-void level_setup19(void);
+void level_setupPooCabin(void);
 
 /* game_3D6F0.c */
-void level_setup24(void);
+void level_setupW1VolcanoRace(void);
 
 /* game_3D770.c */
-void level_emptySetup27(void);
+void level_emptySetupRockSolid(void);
 
 /* game_3D780.c */
-void level_setup30(void);
-void level_setup32(void);
+void level_setupPooBoss(void);
+void level_setupUBend(void);
 
 /* game/Level/LevelSetupHarbour/levelsetupharbour.c */
-void level_setup15(void);
+void level_setupHarbour(void);
 void level_spawnBoltEmitter(Actor *obj);
 
 /* game/Level/LevelSetupBoilerRoom/levelsetupboilerroom.c */
-void level_setup02(void);
+void level_setupBoilerRoom(void);
 
 /* game_3DB30.c */
-void level_setup06(void);
+void level_setupOutsideMolehole(void);
 
 /* game_3DB50.c */
 void level_emptySetup07(void);
 
 /* game_3DB60.c */
-void level_setup10(void);
+void level_setupTankFactory(void);
 
 /* game_3DB80.c */
 s32 level_spawnShapeEmitterZone(TriggerZone *zone);
 
 /* game/Level/LevelSetup18/levelsetup18.c */
-void level_setup18(void);
-void level_setup20(void);
-void level_setup22(void);
+void level_setupWarboss(void);
+void level_setupCanyon(void);
+void level_setupMachineGunNest(void);
 
 /* game/Level/LevelSetupLab/levelsetuplab.c */
-void level_setup23(void);
+void level_setupLab(void);
 
 /* game_3E460.c */
-extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setup33) */
-void level_setup33(void);
+extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setupW3HauntedHouse) */
+void level_setupW3HauntedHouse(void);
 
 /* game_3E5A0.c */
-void level_setup35(void);
+void level_setupHauntedOuthouse(void);
 
 /* game_3E620.c */
-void level_setup37(void);
+void level_setupHorrorIntro(void);
 
 /* game_3E7E0.c */
-void level_setup16(void);
+void level_setupLiftTunnel(void);
 
 /* game_3E810.c */
-void level_setup31(void);
+void level_setupBankEntrance(void);
 
 /* game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c */
-void level_setup13(void);
+void level_setupThroneRoom(void);
 void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list);
 void level_spawnFlashBurst(Actor *owner, u8 fxOwner, s32 list);
 
 /* game_3EFB0.c */
-void level_queueObjectDrop17(s32 x, s32 y, s32 z, s32 floorY);
-void level_setup17(void);
+void level_queueObjectDropFrontEnd(s32 x, s32 y, s32 z, s32 floorY);
+void level_setupFrontEnd(void);
 
 /* game_3F0F0.c */
-extern u8 gFlagLightStates[5]; /* five level flags, cleared by level_setup14 */
-void level_setup14(void);
+extern u8 gFlagLightStates[5]; /* five level flags, cleared by level_setupHeist */
+void level_setupHeist(void);
 
 /* game_3F120.c */
 void level_setup28(void);
 void level_setup29(void);
-void level_setup25(void);
+void level_setupWmpVolcanoRace(void);
 
 /* game/Level/LevelSetupMainWar/levelsetupmainwar.c */
-void level_setup26(void);
+void level_setupMainWar(void);
 s32 level_spawnStageZone(TriggerZone *zone);
 
 /* game_3F3D0.c */
@@ -353,7 +353,7 @@ extern u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of t
 extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 /* game/Level/LevelHookUBend/levelhookubend.c */
-void level_hook30(Camera *camera);
+void level_hookUBend(Camera *camera);
 void level_updateHazardProps(s32 unused);
 void level_spawnBloodStrip(Actor *obj, u8 mirrored);
 s32 level_sampleBloodStripPower(BloodStrip *strip);

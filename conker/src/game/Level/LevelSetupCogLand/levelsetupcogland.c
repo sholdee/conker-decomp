@@ -14,7 +14,7 @@ static const RopeEnds gSetup11Rope4Ends = { { -2128.0f, -701.0f, 2129.0f }, { -2
 static const RopeEnds gSetup11Rope5Ends = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f, 2111.0f, 2174.0f } };
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */
-void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding) {
+void level_queueObjectDropCogLand(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding) {
     ObjectEmitter *emitter;
 
     emitter = effect_newTimedEffectNoDraw((math_random() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
@@ -27,7 +27,7 @@ void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding)
     }
 }
 
-void level_setup11(void) {
+void level_setupCogLand(void) {
     RopeSpawn tmp;
 
     tmp.unk20 = 0;
@@ -55,11 +55,11 @@ void level_setup11(void) {
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
     rope_create(&tmp, 0);
 
-    level_queueObjectDrop11(-0x6E7, -0x46A, 0x421, -0x648, 1);
-    level_queueObjectDrop11(-0xA71, 0x71B, 0x82B, -0x602, 2);
-    level_queueObjectDrop11(-0x870, 0x36E, 0x4E1, -0x602, 2);
-    level_queueObjectDrop11(-0xBD5, 0x3F1, 0x659, -0x602, 2);
-    level_queueObjectDrop11(-0xE6B, -0x263, -0x427, -0x647, 1);
+    level_queueObjectDropCogLand(-0x6E7, -0x46A, 0x421, -0x648, 1);
+    level_queueObjectDropCogLand(-0xA71, 0x71B, 0x82B, -0x602, 2);
+    level_queueObjectDropCogLand(-0x870, 0x36E, 0x4E1, -0x602, 2);
+    level_queueObjectDropCogLand(-0xBD5, 0x3F1, 0x659, -0x602, 2);
+    level_queueObjectDropCogLand(-0xE6B, -0x263, -0x427, -0x647, 1);
 
     gSavedAmbientRed = gAmbientColour[0];
     gSavedAmbientGreen = gAmbientColour[1];

@@ -5,6 +5,6 @@
 #include "conker/weapon.h"
 
 
-void level_setup10(void) {
+void level_setupTankFactory(void) {
     gBulletHitTest = prop_shotHitsCylinders;
 }

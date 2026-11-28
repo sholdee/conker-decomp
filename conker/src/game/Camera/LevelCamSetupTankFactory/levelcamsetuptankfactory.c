@@ -3,7 +3,7 @@
 #include "conker/camera.h"
 
 
-void camera_levelSetup04(Camera *camera) {
+void camera_levelSetupTankFactory(Camera *camera) {
     camera->DistMask = 8;
     camera->DistIndex = 3;
     camera->AvailableModes = camera->AvailableModes & -5;

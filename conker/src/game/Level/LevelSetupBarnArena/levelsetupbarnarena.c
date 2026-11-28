@@ -7,7 +7,7 @@
 #include "conker/view.h"
 
 
-void level_setup09(void) {
+void level_setupBarnArena(void) {
     prop_createWaveDeformer(1, 0xD8, -0xDAC, 0, 0x4BB, 0.0f, 15000, 30.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
     level_initPipeBurstPoints();
 }

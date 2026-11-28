@@ -7,7 +7,7 @@
 
 
 // ???
-void level_setup15(void) {
+void level_setupHarbour(void) {
     WorldObject *prop;
 
     gMaterialGlowLevels[0] = (gMaterialGlowLevels[1] = (gMaterialGlowLevels[2] = 0));

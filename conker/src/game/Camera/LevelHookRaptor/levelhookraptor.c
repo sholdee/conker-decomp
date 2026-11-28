@@ -3,7 +3,7 @@
 #include "conker/player.h"
 #include "conker/script.h"
 
-void camera_levelHook25(Camera *camera) {
+void camera_levelHookRaptor(Camera *camera) {
     if (player_getStat(camera->CharPtr->playernumber, 1) == 9) {
         camera_popMode(camera, CAMERA_MODE_ZONES);
         if (camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0) {

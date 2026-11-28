@@ -30,7 +30,7 @@ void *level_spawnFlatSprite(f32 x, f32 y, f32 z) {
 }
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */
-void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY) {
+void level_queueObjectDropDogFish(s32 x, s32 y, s32 z, s32 floorY) {
     ObjectEmitter *emitter;
 
     emitter = effect_newTimedEffectNoDraw((math_random() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
@@ -43,9 +43,9 @@ void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY) {
     }
 }
 
-void level_setup08(void) {
-    level_queueObjectDrop08(0x1612, -0x553, -0x2DC, -0x69F);
-    level_queueObjectDrop08(0x1633, -0x553, -0x3C2, -0x69F);
+void level_setupDogFish(void) {
+    level_queueObjectDropDogFish(0x1612, -0x553, -0x2DC, -0x69F);
+    level_queueObjectDropDogFish(0x1633, -0x553, -0x3C2, -0x69F);
     gLevelSprayEffects[0] = level_spawnFlatSprite(4054.0f, -1692.0f, 0.0f);
     gLevelSprayEffects[1] = level_spawnFlatSprite(3890.0f, -1692.0f, -78.0f);
     gLevelSprayEffects[2] = level_spawnFlatSprite(4380.0f, -1692.0f, -664.0f);

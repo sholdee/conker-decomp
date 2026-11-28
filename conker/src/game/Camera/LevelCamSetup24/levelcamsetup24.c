@@ -34,7 +34,7 @@ void camera_levelSetup24(Camera *camera) {
     }
 }
 
-void camera_levelSetup25(Camera *camera) {
+void camera_levelSetupDogFishNurseryPart1(Camera *camera) {
     camera->DistMask = 5;
     camera->DistIndex = 2;
     camera_loadDistancePreset(camera);

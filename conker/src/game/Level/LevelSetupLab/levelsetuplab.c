@@ -1,4 +1,4 @@
-/* game/Level/LevelSetupLab/levelsetuplab.c -- level_setup23: the level's six floating models, three of them with a light. */
+/* game/Level/LevelSetupLab/levelsetuplab.c -- level_setupLab: the level's six floating models, three of them with a light. */
 #include <ultra64.h>
 #include "effects.h"
 #include "conker/collision.h"
@@ -13,7 +13,7 @@ static const Vec3f gSetup23ModelPositions[6] = {
 };
 static const u8 gSetup23ModelLights[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
 
-void level_setup23(void) {
+void level_setupLab(void) {
     ModelParticle *result;
     ParticleSpawn78 part;
     s32 i;

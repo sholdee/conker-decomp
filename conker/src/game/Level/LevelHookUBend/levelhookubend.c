@@ -30,7 +30,7 @@ static s32 D_800888E4[7] = { 0 }; /* not referenced */
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
-void level_hook30(Camera *camera) {
+void level_hookUBend(Camera *camera) {
     if (script_query(1, 0x403D, 6, 0x9000)) {
         camera->AvailableModes |= 0x80021000;
         if (script_query(1, 0x4043, 6, 0x9000)) {

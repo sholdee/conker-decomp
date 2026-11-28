@@ -4,7 +4,7 @@
 #include "conker/script.h"
 
 
-void camera_levelHook22(Camera *camera) {
+void camera_levelHookTraining(Camera *camera) {
     if ((gTaskDoneBits[0x0] & 0x80) == 0) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
             if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_PICKED_UP) != 0) {

@@ -4,7 +4,7 @@
 #include "conker/game.h"
 
 
-void camera_levelSetup16(Camera *camera) {
+void camera_levelSetupVolcanoRace(Camera *camera) {
     if (level == LEVEL_W1_VOLCANO_RACE) {
         camera->DistIndex = 2;
         camera->DistMask = 4;

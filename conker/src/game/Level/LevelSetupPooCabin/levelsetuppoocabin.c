@@ -15,7 +15,7 @@ static const RopeEnds gSetup19RopeEnds[6] = {
     { { 440.0f, -260.0f, -601.0f }, { 440.0f, -1246.0f, -601.0f } },
 };
 
-void level_setup19(void) {
+void level_setupPooCabin(void) {
     RopeSpawn tmp;
     s32 i;
 

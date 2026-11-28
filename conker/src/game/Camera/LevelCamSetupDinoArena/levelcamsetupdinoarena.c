@@ -3,5 +3,5 @@
 #include "conker/camera.h"
 
 
-void camera_emptyLevelSetup06(Camera *camera) {
+void camera_emptyLevelSetupDinoArena(Camera *camera) {
 }

@@ -18,19 +18,19 @@
 /* Per-level setup routines, indexed by LevelHeader.setupCallback (0: none). */
 static void (*gLevelSetupFuncs[])(void) = {
     NULL,
-    level_setup01, level_setup02, level_emptySetup03,
-    level_setup04, level_setup05, level_setup06,
-    level_emptySetup07, level_setup08, level_setup09,
-    level_setup10, level_setup11, level_setup12,
-    level_setup13, level_setup14, level_setup15,
-    level_setup16, level_setup17, level_setup18,
-    level_setup19, level_setup20, level_setup21,
-    level_setup22, level_setup23, level_setup24,
-    level_setup25, level_setup26, level_emptySetup27,
-    level_setup28, level_setup29, level_setup30,
-    level_setup31, level_setup32, level_setup33,
-    level_setup34, level_setup35, level_setup36,
-    level_setup37,
+    level_setup01, level_setupBoilerRoom, level_emptySetupBarnInside,
+    level_setupBarnOutside, level_setupBrontoCavern, level_setupOutsideMolehole,
+    level_emptySetup07, level_setupDogFish, level_setupBarnArena,
+    level_setupTankFactory, level_setupCogLand, level_setupDinoArena,
+    level_setupThroneRoom, level_setupHeist, level_setupHarbour,
+    level_setupLiftTunnel, level_setupFrontEnd, level_setupWarboss,
+    level_setupPooCabin, level_setupCanyon, level_setup21,
+    level_setupMachineGunNest, level_setupLab, level_setupW1VolcanoRace,
+    level_setupWmpVolcanoRace, level_setupMainWar, level_emptySetupRockSolid,
+    level_setup28, level_setup29, level_setupPooBoss,
+    level_setupBankEntrance, level_setupUBend, level_setupW3HauntedHouse,
+    level_setupBrontoThroat, level_setupHauntedOuthouse, level_setup36,
+    level_setupHorrorIntro,
 };
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */

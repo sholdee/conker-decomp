@@ -3,7 +3,7 @@
 
 
 /* Clears the flag that script command 2 sets and the two 14-byte tables after it (as level_resetSetupState does). */
-void level_setup02(void) {
+void level_setupBoilerRoom(void) {
     s32 i;
 
     D_800D9921 = 0;

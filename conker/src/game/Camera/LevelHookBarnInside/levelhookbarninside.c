@@ -9,7 +9,7 @@ static s32 D_80088710 = 999; /* queued flag query (0x900x), 999 for none */
  * camera: Mode, DistIndex preset, IdealTripodMagnitude, height, SpecialFlags) or restores it,
  * then saves/restores slot 3 depending on the 0xBC/0xBB queries; YOffsetTget follows the C-down button.
  */
-void camera_levelHook07(Camera *camera) {
+void camera_levelHookBarnInside(Camera *camera) {
     s32 resultBC;
     s32 resultBB;
     s32 i;

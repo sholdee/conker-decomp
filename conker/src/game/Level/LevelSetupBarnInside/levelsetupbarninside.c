@@ -1,2 +1,2 @@
-void level_emptySetup03(void) {
+void level_emptySetupBarnInside(void) {
 }

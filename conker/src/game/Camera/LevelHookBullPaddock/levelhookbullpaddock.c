@@ -5,7 +5,7 @@
 
 // While the values queried through script_query allow it, sets 0x400E to 1 and resets the
 // camera's height/idealHeight/IdealTripodMagnitude; otherwise sets 0x400E back to 0 once camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds.
-void camera_levelHook18(Camera *camera) {
+void camera_levelHookBullPaddock(Camera *camera) {
     s32 flagValue;
     s32 flagSet;
 

@@ -7,7 +7,7 @@
 #include "conker/sound.h"
 #include "conker/zone.h"
 
-void level_setup26(void) {
+void level_setupMainWar(void) {
     sound_clearCooldowns();
 }
 

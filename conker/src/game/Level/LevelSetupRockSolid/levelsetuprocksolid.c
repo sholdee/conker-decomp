@@ -1,2 +1,2 @@
-void level_emptySetup27(void) {
+void level_emptySetupRockSolid(void) {
 }
