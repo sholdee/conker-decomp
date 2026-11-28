@@ -23,22 +23,27 @@ How it uses an older build:
 - It reads the code segments at the ROM offsets of conker.ects.yaml / conker.debug.yaml (the debug game
   code is decompressed with the key of game.debug.rzip.yaml).
 - It checks the pairs against the code. A pairs file can use other addresses than the build's own layout
-  (ects_pairs.json was made from the game segment read 0x19550 bytes too early, and its function list
+  (ects_pairs.json was made from the ECTS game segment read 0x19550 bytes too early, and its function list
   misses the ends of that segment); the tool finds that shift from the identical functions and corrects it.
+  It takes the end of each code segment from the code (the first `jr ra` at or after the list's end).
 - It adds the function starts that the code shows (jal targets, code addresses built in code or stored in
   data, the first word after padding) to the list from the pairs file.
-- It keeps the pairs whose code is the same (identical, or other only in offsets and constants). It keeps
-  any other pair only when it lies in order between two of those. It pairs the US functions that have no
-  partner with an identical function of the build (one match only), or by similar code in order between
-  two pairs.
+- It keeps the pairs whose code is the same (identical, or other only in offsets and constants; not the
+  pairs of code that the build has more than once). It keeps any other pair only when it lies in order
+  between two of those. It pairs the US functions that have no partner with an identical function of the
+  build (one match only), or by similar code in order between two pairs.
+- A pair whose whole US code is at its partner (immediates masked) is right: no start inside it counts,
+  and the next function starts after it. The other pairs are checked again against the extents that the
+  new starts give: a pair moves to the best matching function inside its old extent, or is dropped.
 
 The facts it uses (IDO 5.3):
-- IDO pads each object's .text to 16 bytes and puts no padding between the functions of one object. So
-  zero words between two functions mean a file boundary ("padding"). A function that starts on an address
-  that is not 16-aligned, right after the previous function, is in the same object ("join"). A function
-  that starts on a 16-aligned address with no zero words before it shows nothing ("flush").
-- Each object's .data, .rodata and .bss are each one block, in link order, and each block starts on a
-  16-aligned address.
+- IDO pads each C object's .text to 16 bytes and puts no padding between the functions of one object. So
+  zero words after a return, between two C functions, mean a file boundary ("padding"). A function that
+  starts on an address that is not 16-aligned, right after the previous function, is in the same object
+  ("join"). A function that starts on a 16-aligned address with no zero words before it shows nothing
+  ("flush"). Hand-written asm can hold .align, data words and nops, so padding next to asm is no proof.
+- Each C object's .data and .rodata are each one block, in link order, and each block starts on a
+  16-aligned address. Not so for hand-written asm (4-aligned) or .bss, which the tool leaves out.
 - One object is compiled once, with one set of flags, and C and hand-written asm are never one object.
 
 Evidence kinds for a boundary between objects L and R (X = last function of L, Y = first function of R):
@@ -46,12 +51,15 @@ Evidence kinds for a boundary between objects L and R (X = last function of L, Y
   padding-ects   the ECTS partners of the functions next to the boundary are in two objects there
   padding-debug  (padding between them), in the US order. "Pinned" when the paired functions are X and
                  Y, or are tied to X and Y by US joins; otherwise the boundary could be a function away.
-  data-edge      in .data, .rodata or .bss, R's block follows L's block directly and starts 16-aligned.
-  flags-change   L and R have other compiler flags, or one is C and the other hand-written asm.
+  data-edge      two C objects: in .data or .rodata, R's block follows L's block directly and starts
+                 16-aligned.
+  flags-change   L and R have other -O or -mips flags, or one is C and the other hand-written asm.
   rare-name      functions of L and of R use two different source path strings (in any build).
-Grades: proven = padding-us, flags-change, pinned padding-ects/padding-debug that the other old build does
-not contradict, or pinned rare-name. likely = any other evidence. unproven = none.
-Contradictions (the two sides are one object somewhere) go into the note and the merge candidates.
+Grades: proven = between two C objects, padding-us, or pinned padding-ects/padding-debug that the other old
+build does not contradict; flags-change (not when the asm side has only search evidence); pinned
+rare-name. likely = any other evidence. unproven = none.
+Contradictions (the two sides are one object somewhere) go into the note and the merge candidates. A C
+data block that starts unaligned where the code proves two objects is noted as "data split suspect".
 
 The output holds addresses, object names, function names and grades only: no ROM bytes.
 """
@@ -237,9 +245,9 @@ class Build:
       ("pad", gap, start)    zero words between them: two objects
       ("join", 0, start)     no gap, start not 16-aligned: one object
       ("flush", 0, start)    no gap, start 16-aligned: no evidence
-      ("odd", gap, start)    the code before does not end with a return or jump (a wrong start in a
-                             list from the pairs files; not checked for US, whose starts are exact),
-                             or zero words end on an unaligned start: no evidence
+      ("odd", gap, start)    the code before does not end with a return or jump (a wrong start, or
+                             hand-written asm that falls through, or data or nops in asm), or zero
+                             words end on an unaligned start: no evidence
     """
 
     def __init__(self, name, starts, code, exact_starts):
@@ -259,7 +267,7 @@ class Build:
                 continue
             s, e = self.real[i][0], self.real[i - 1][1]
             gap = s - e
-            ret = exact_starts or self.ends_like_return(self.starts[i][1], e)
+            ret = self.ends_like_return(self.starts[i][1], e)
             if not ret or (gap > 0 and s % 16):
                 kind = "odd"             # not a function end, or zero words before an unaligned start
             else:
@@ -342,6 +350,17 @@ def seg_ranges(funcs):
 VRAM = {"init": 0x10001000, "game": 0x15000000, "debugger": 0x16000000}
 
 
+def code_length(b, start, n):
+    """The length of a code segment that starts at b[start]: the end of the function list (n), moved on
+    to the first `jr ra` and its delay slot when the list cuts the last function."""
+    for p in range(n, n + 0x400, 4):
+        if start + p > len(b):
+            break
+        if struct.unpack_from(">I", b, start + p - 8)[0] == 0x03E00008:
+            return p
+    return n
+
+
 def load_ects(path, pairs_path):
     """Code, game data, list starts and raw pairs of the ECTS build."""
     e = json.load(open(pairs_path))
@@ -352,13 +371,14 @@ def load_ects(path, pairs_path):
     st = outer_starts(REPO / "conker.ects.yaml")
     rom_of = {"init": st["init.ects"], "game": st["game.ects"], "debugger": st["debugger.ects"]}
     code = {}
-    glen = rng["game"][1] - VRAM["game"]
     if form == "rom":
+        glen = code_length(b, rom_of["game"], rng["game"][1] - VRAM["game"])
         for seg in CODE_SEGMENTS:
-            n = rng[seg][1] - VRAM[seg]
+            n = code_length(b, rom_of[seg], rng[seg][1] - VRAM[seg])
             code[seg] = (b[rom_of[seg]:rom_of[seg] + n], VRAM[seg])
         data = b[rom_of["game"] + glen:st["debugger.ects"]]
     else:
+        glen = code_length(b, 0, rng["game"][1] - VRAM["game"])
         code["game"] = (b[:glen], VRAM["game"])
         data = b[glen:]
     starts = [(a, s) for a, n, s in flist]
@@ -396,7 +416,7 @@ def load_debug(path, pairs_path, funcs_path):
         game = b"".join(zlib.decompressobj(wbits=-15).decompress(blob[x + 4:y]) for x, y in zip(offs, offs[1:]))
         code["game"] = (game, VRAM["game"])
         for seg, key in (("init", "init.debug"), ("debugger", "debugger.debug")):
-            n = rng[seg][1] - VRAM[seg]
+            n = code_length(b, st[key], rng[seg][1] - VRAM[seg])
             code[seg] = (b[st[key]:st[key] + n], VRAM[seg])
         data = zlib.decompressobj(wbits=-15).decompress(b[g0 + data_at + 4:g0 + data_end])
     else:
@@ -661,7 +681,13 @@ def align_gaps(bld, us, real_us, min_ratio=0.5):
     return len(added)
 
 
-RELIABLE = ("ident", "imm", "imm*", "masked", "A ", "B ")   # tiers of pairs whose code is the same
+# Tiers of pairs whose code is the same. "identical-dup" (code found more than once) is not one.
+RELIABLE = ("identical", "identical*", "imm", "imm*", "masked")
+RELIABLE_DEBUG = ("A ", "B ")
+
+
+def reliable(t):
+    return t in RELIABLE or t.startswith(RELIABLE_DEBUG)
 
 
 def drop_unanchored_pairs(pairs, us, small=8):
@@ -671,8 +697,11 @@ def drop_unanchored_pairs(pairs, us, small=8):
     the same segment."""
     def size(ua):
         return len(masked_values(us_words(us, ua))) if ua in us.index else 0
+    shared = {}
+    for ua, ba, t in pairs:
+        shared[ba] = shared.get(ba, 0) + 1
     sure = sorted((ua, ba) for ua, ba, t in pairs
-                  if ua in us.index and t.startswith(RELIABLE) and size(ua) >= small)
+                  if ua in us.index and reliable(t) and size(ua) >= small and shared[ba] == 1)
     keys = [ua for ua, _ in sure]
     keep = set(keys)
     out = []
@@ -712,17 +741,110 @@ def make_old_build(name, form, code, data, starts, pairs, us, real_us):
     pairs = drop_unanchored_pairs(pairs + extra, us)
     extra = [p for p in pairs if p[2] == "masked"]
     pairs = [p for p in pairs if p[2] != "masked"]
-    all_starts = set(starts) | set(discover_starts(code, data))
+    found = set(discover_starts(code, data))
+    # A pair whose whole US code is at its partner (immediates masked) is right. No function starts
+    # inside it, and the next function starts at the first word after it that is not zero.
+    inside, whole = set(), set()
+    for ua, ba, _ in pairs + extra:
+        seg = SEG_OF_VRAM[ba >> 24]
+        if seg not in code:
+            continue
+        sk = skeleton(us_words(us, ua))
+        b, v = code[seg]
+        o = ba - v
+        if len(sk) < 4 or o + 4 * len(sk) > len(b):
+            continue
+        if skeleton(list(struct.unpack_from(">%dI" % len(sk), b, o))) != sk:
+            continue
+        whole.add((ua, ba))
+        inside |= {(a, seg) for a in range(ba + 4, ba + 4 * len(sk), 4)}
+        e = o + 4 * len(sk)
+        while e + 4 <= len(b) and struct.unpack_from(">I", b, e)[0] == 0:
+            e += 4
+        if e + 4 <= len(b):
+            found.add((v + e, seg))
+    all_starts = (set(starts) | found) - inside
     for ua, ba, _ in pairs + extra:
         all_starts.add((ba, SEG_OF_VRAM[ba >> 24]))
     bld = Build(name, sorted(all_starts), code, exact_starts=False)
+    listed = sorted(a for a, _ in starts)
+    moved = dropped = 0
     for ua, ba, _ in sorted(pairs + extra):
-        if ua in us.index:
-            add_pair(bld, ua, ba)
+        if ua not in us.index:
+            continue
+        nb = ba if (ua, ba) in whole else recheck_pair(bld, us, ua, ba, listed)
+        if nb is None:
+            dropped += 1
+            continue
+        moved += nb != ba
+        add_pair(bld, ua, nb)
     n_al = align_gaps(bld, us, real_us)
-    note("%s: %d functions, %d US functions paired (%d by identical code, %d by similar code in order)"
-         % (name, len(bld.starts), len(bld.partner), len(extra), n_al))
+    note("%s: %d functions, %d US functions paired (%d by identical code, %d by similar code in order); "
+         "after the new starts, %d pairs moved to the matching function and %d dropped"
+         % (name, len(bld.starts), len(bld.partner), len(extra), n_al, moved, dropped))
     return bld
+
+
+def skeleton(ws):
+    """The words with every immediate and jump target masked: opcode and registers only."""
+    out = []
+    for w in ws:
+        op = w >> 26
+        out.append(w if op == 0 else (op << 26 if op in (2, 3) else w & 0xFFFF0000))
+    while out and out[-1] == 0:
+        out.pop()
+    return out
+
+
+def opcodes(ws):
+    """The operation of each word only (opcode, function field, coprocessor format): no registers."""
+    out = []
+    for w in ws:
+        op = w >> 26
+        out.append((op, w & 0x3F) if op == 0 else (op, (w >> 21) & 31) if op in (0x10, 0x11) else (op,))
+    while out and out[-1] == (0, 0):
+        out.pop()
+    return out
+
+
+def pair_score(bld, us, ua, i, uw=None):
+    """How well the build's function i matches US function ua: the similarity of the sequences of
+    operations, and 0 when the sizes differ by more than 2x."""
+    if bld.real[i] is None:
+        return 0.0
+    uw = uw if uw is not None else opcodes(us_words(us, ua))
+    c, _ = bld.func_code(i)
+    bw = opcodes(list(struct.unpack(">%dI" % (len(c) // 4), c)))
+    if uw == bw:
+        return 1.0
+    if not uw or not bw or not (0.5 <= len(uw) / len(bw) <= 2.0):
+        return 0.0
+    sm = difflib.SequenceMatcher(None, uw, bw, autojunk=False)
+    if sm.real_quick_ratio() < 0.6 or sm.quick_ratio() < 0.6:
+        return 0.0
+    return sm.ratio()
+
+
+def recheck_pair(bld, us, ua, ba, listed, min_ratio=0.6):
+    """A pair from a pairs file points at a function of that file's list. The new starts can cut that
+    extent into several functions. Keep the pair when its own extent still matches; else move it to the
+    best matching function inside the old extent; else drop it (None)."""
+    i = bld.index.get(ba)
+    if i is None:
+        return None
+    uw = opcodes(us_words(us, ua))
+    if pair_score(bld, us, ua, i, uw) >= min_ratio:
+        return ba
+    k = bisect.bisect_right(listed, ba)
+    end = listed[k] if k < len(listed) else None
+    best, at = 0.0, None
+    j = i + 1
+    while j < len(bld.starts) and bld.starts[j][1] == bld.starts[i][1] and (end is None or bld.starts[j][0] < end):
+        sc = pair_score(bld, us, ua, j, uw)
+        if sc > best:
+            best, at = sc, bld.starts[j][0]
+        j += 1
+    return at if best >= min_ratio else None
 
 
 def add_pair(bld, ua, ba):
@@ -929,14 +1051,20 @@ def main():
                 contra.append("us: R starts at a non-16-aligned address after L%s" % (" (%s)" % asm if asm else ""))
                 us_merge = (X, Y, asm)
             # flags
+            flags_proof = False
+            both_c = t1 == "c" and t2 == "c"       # padding is proof only between two C objects
+            asm_note = {0: "", 1: "asm on one side", 2: "asm on both sides"}[(t1 == "hasm") + (t2 == "hasm")]
             f1, f2 = flags_of(L, t1), flags_of(R, t2)
             if f1 != f2 and f1.rsplit(" ", 1)[0] == f2.rsplit(" ", 1)[0]:
                 notes.append("CFLAGS differ (%s | %s), the -O and -mips flags do not"
                              % (f1.rsplit(" ", 1)[1], f2.rsplit(" ", 1)[1]))
             elif f1 != f2:
                 ev.append("flags-change")
-                weak = [fname[a] for a in (X, Y) if "s" == fproof.get(a)]
-                notes.append("flags %s | %s%s" % (f1, f2, (" (search-tier asm: %s)" % ",".join(weak)) if weak else ""))
+                # a hand-written side whose function next to the boundary has only search evidence
+                weak = [fname[a] for a, t in ((X, t1), (Y, t2)) if t == "hasm" and fproof.get(a) == "s"]
+                flags_proof = not weak
+                notes.append("flags %s | %s%s" % (f1, f2, (" (search-tier asm, not a proof: %s)"
+                                                           % ",".join(weak)) if weak else ""))
             # old builds
             proven_old = []
             rel_by = {}
@@ -983,10 +1111,13 @@ def main():
                                             "%s starts at %s right after %s, not 16-aligned"
                                             % (fname[r["uy"]], h(r["by"]), fname[r["ux"]]),
                                             order="yes", us_al=yn(Y % 16 == 0), other=oc, us=us_shows(j),
-                                            extra="" if r["pinned"] else "not pinned"))
-            # data edge
+                                            extra=", ".join(x for x in ("" if r["pinned"] else "not pinned",
+                                                                        asm_note) if x)))
+            # data edge: C objects only (hand-written asm data is 4-aligned), .data and .rodata only (the
+            # linker script places the sections with SUBALIGN(4), and .bss blocks need not be 16-aligned)
+            code_proof = (both_c and ("padding-us" in ev or proven_old)) or flags_proof
             for (group, kind), bl in sorted(dsec.items()):
-                if group != seg:
+                if group != seg or kind == "bss" or not both_c:
                     continue
                 rb = [k for k, (va, ow) in enumerate(bl) if ow == R]
                 if not rb or rb[0] == 0:
@@ -999,6 +1130,9 @@ def main():
                     if "data-edge" not in ev:
                         ev.append("data-edge")
                     notes.append("%s at %s" % (kind, h(va)))
+                elif code_proof:
+                    notes.append("data split suspect: R's .%s starts at %s, not 16-aligned, but the code shows"
+                                 " two objects" % (kind, h(va)))
                 else:
                     contra.append("%s: R's block starts at %s, not 16-aligned" % (kind, h(va)))
                     cands.append(merge_cand(va2, L, R, X, Y, "us-" + kind,
@@ -1043,20 +1177,26 @@ def main():
             # grade
             if contra and any(c.startswith("us:") for c in contra):
                 grade = "unproven"
-            elif "padding-us" in ev or "flags-change" in ev or proven_old or (pinned_name and pinned_name[0]):
+            elif (both_c and ("padding-us" in ev or proven_old)) or flags_proof or (pinned_name and pinned_name[0]):
                 grade = "proven"
             elif ev:
                 grade = "likely"
             else:
                 grade = "unproven"
+            if not both_c and any(k.startswith("padding-") for k in ev):
+                notes.append("padding next to hand-written asm is not a proof (asm can hold .align, data and nops)")
             if contra:
                 notes.append("against: " + "; ".join(contra))
             order = ["padding-us", "padding-ects", "padding-debug", "data-edge", "flags-change", "rare-name"]
             evs = ",".join(k for k in order if k in ev) or "none"
             rows.append((va2, L, R, grade, evs, "; ".join(notes)))
 
-    # ---- split candidates: two adjacent functions of one US object
+    # ---- split candidates: two adjacent functions of one US C object (padding inside hand-written asm
+    # can be .align, data or nops, so asm objects give none)
+    otype = {o[4]: o[3] for o in objects}
     for obj, fl in sorted(obj_funcs.items(), key=lambda t: t[1][0]):
+        if otype.get(obj) != "c":
+            continue
         # US padding inside the object
         for k in range(1, len(fl)):
             j = us_join(fl[k])
