@@ -1690,7 +1690,7 @@ void effect_destroyBurstGlow(BurstGlow *glow);
 void effect_freeBurstGlow(BurstGlow *glow);
 
 /* game/Effects/StatCounter/statcounter.c */
-/* The two-digit counter of effect_showStatCounter (game/Hud/CounterFree/counterfree.c frees it). The block copied to its panel's +0x120. */
+/* The two-digit counter of effect_showStatCounter (hud_freeCounter frees it). The block copied to its panel's +0x120. */
 typedef struct {
     /* 0x00 */ Vec3f rot;     /* math_mtxRotateRPYF angles of the panel's root matrix */
     /* 0x0C */ f32 scaleXZ;   /* scale of its X and Z axes */

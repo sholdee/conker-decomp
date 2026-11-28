@@ -329,7 +329,7 @@ src/game/Effects/SegmentTrail/segmenttrail.c	effect	split from game_E8C10.c; sam
 src/game/Effects/SpawnEmitterHook/spawnemitterhook.c	effect	emitter attachment hook
 src/game/Effects/SplashBurst/splashburst.c	effect	object burst and displacement update
 src/game/Effects/StageEffect/stageeffect.c	effect	split from game_124920.c; same subsystem
-src/game/Effects/StatCounter/statcounter.c	effect	effect variants with extension
+src/game/Effects/StatCounter/statcounter.c	effect	effect variants with extension; the counter's destructor and message handler
 src/game/Effects/SurfaceHandlers/surfacehandlers.c	effect	handlers by surface type
 src/game/Effects/SurfaceSound/surfacesound.c	effect	level effect flag helpers
 src/game/Effects/SwayObject/swayobject.c	effect	sway objects and light placement
@@ -368,7 +368,6 @@ src/game/Game/UpdateStub/updatestub.c	game	stub (empty)
 src/game/Gfx/DisplayListAlloc/displaylistalloc.c	gfx	allocates the per-frame display list buffers
 src/game/Gfx/Turret/turret.c	gfx	object visibility and per-view draw lists
 src/game/Gfx/WorldObject/worldobject.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
-src/game/Hud/CounterFree/counterfree.c	hud	counter destructor
 src/game/Hud/HudOverlay/hudoverlay.c	hud	HUD overlay, HUD models and sprites
 src/game/Hud/CodeFlags/codeflags.c	hud	clears the cheat-code flags at game start
 src/game/Hud/PlayerOverlay/playeroverlay.c	hud	per-player HUD overlay: blocks, water, bubbles, race time/laps

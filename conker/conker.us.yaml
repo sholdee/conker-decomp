@@ -938,7 +938,6 @@ segments:
       - [0x1E6B40, c, game/Particle/FallingParticle/fallingparticle]
       - [0x1E73B0, c, game/Effects/FollowEffects/followeffects]
       - [0x1EBD00, c, game/Effects/StatCounter/statcounter]
-      - [0x1ED080, c, game/Hud/CounterFree/counterfree]
       - [0x1ED0F0, c, game/Weapon/Bullet/bullet]
       - [0x1EF500, c, game/Weapon/Projectile/projectile]
       - [0x1F2730, c, game/Weapon/SegmentShot/segmentshot]
