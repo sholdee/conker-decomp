@@ -66,8 +66,6 @@
  *   game/Effects/StageEffect/stageeffect.c
  *   game/Effects/DelayedBurst/delayedburst.c
  *   game/Effects/StarField/starfield.s
- *   game/Effects/ChildEffect/childeffect.c
- *   game/Effects/ChildEffectFree/childeffectfree.c
  *   game/Effects/AreaSpray/areaspray.c
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
@@ -754,12 +752,10 @@ void effect_spawnBoneBeamAndDirParticle(Actor *actor, u8 owner, s32 list);
 /* game/Effects/StarField/starfield.s */
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
 
-/* game/Effects/ChildEffect/childeffect.c */
+/* game/Particle/TwoSidedEmitter/twosidedemitter.c */
 s32 effect_filterExcludedTargets(Actor *obj, s32 arg1, s32 arg2);
 void effect_destroyChildEffect(TwoSidedEmitter *effect);
 void effect_destroyWithChild(TwoSidedEmitter *effect);
-
-/* game/Effects/ChildEffectFree/childeffectfree.c */
 void effect_freeWithChild(TwoSidedEmitter *obj);
 
 /* game/Effects/AreaSpray/areaspray.c */

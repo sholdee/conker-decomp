@@ -3425,10 +3425,10 @@ particle_spawnHitEffectsHideOwnerSparks	0x150FC368	208	game	c		build/src/game/Pa
 particle_spawnTwoSidedEmitter	0x150FC438	476	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_updateTwoSidedEmitter	0x150FC614	516	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_onTwoSidedEmitterMsg	0x150FC818	280	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
-effect_filterExcludedTargets	0x150FC930	68	game	c		build/src/game/Effects/ChildEffect/childeffect.c.o
-effect_destroyChildEffect	0x150FC974	48	game	c		build/src/game/Effects/ChildEffect/childeffect.c.o
-effect_destroyWithChild	0x150FC9A4	44	game	c		build/src/game/Effects/ChildEffect/childeffect.c.o
-effect_freeWithChild	0x150FC9D0	48	game	c		build/src/game/Effects/ChildEffectFree/childeffectfree.c.o
+effect_filterExcludedTargets	0x150FC930	68	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
+effect_destroyChildEffect	0x150FC974	48	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
+effect_destroyWithChild	0x150FC9A4	44	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
+effect_freeWithChild	0x150FC9D0	48	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 camera_levelHookArena	0x150FCA00	48	game	c		build/src/game/Camera/LevelHookArena/levelhookarena.c.o
 effect_eruptSprayAreas	0x150FCA30	400	game	c		build/src/game/Effects/AreaSpray/areaspray.c.o
 effect_sprayFromArea	0x150FCBC0	860	game	c		build/src/game/Effects/AreaSpray/areaspray.c.o

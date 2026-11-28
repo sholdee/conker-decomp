@@ -731,8 +731,6 @@ segments:
       - [0x127060, c, game/Effects/DelayedBurst/delayedburst]
       - [0x128970, hasm, game/Effects/StarField/starfield]
       - [0x128D70, c, game/Particle/TwoSidedEmitter/twosidedemitter]
-      - [0x129DE0, c, game/Effects/ChildEffect/childeffect]
-      - [0x129E80, c, game/Effects/ChildEffectFree/childeffectfree]
       - [0x129EB0, c, game/Camera/LevelHookArena/levelhookarena]
       - [0x129EE0, c, game/Effects/AreaSpray/areaspray]
       - [0x12B1C0, c, game/Effects/TreadScroll/treadscroll]
