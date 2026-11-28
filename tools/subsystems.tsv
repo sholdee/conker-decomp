@@ -623,8 +623,7 @@ src/game/Text/TextBox/textbox.c	text	text box drawing and logic
 src/game/Text/TextBoxCreate/textboxcreate.c	text	text box creation
 src/game/Text/TextInit/textinit.c	text	text box config table setup
 src/game/Text/TextQueue/textqueue.c	text	queued HUD text lines and icons, formatting
-src/game/Texture/TextureLoad/textureload.c	texture	texture loading and display-list texture resolution
-src/game/Texture/TextureRelease/texturerelease.c	texture	id list reference release
+src/game/Texture/TextureLoad/textureload.c	texture	texture loading and display-list texture resolution; releases id lists and references
 src/game/Texture/TextureTables/texturetables.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
 src/game/Texture/TextureUse/textureuse.c	texture	texture use counts and aging
 src/game/Texture/UvWobble/uvwobble.c	texture	UV wobble on display-list vertices

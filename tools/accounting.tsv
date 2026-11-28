@@ -3627,8 +3627,8 @@ texture_getAddress	0x1510D0EC	648	game	c		build/src/game/Texture/TextureLoad/tex
 texture_getRomAddress	0x1510D374	144	game	c		build/src/game/Texture/TextureLoad/textureload.c.o
 texture_updateAging	0x1510D404	516	game	c		build/src/game/Texture/TextureLoad/textureload.c.o
 texture_setLifetime	0x1510D608	40	game	c		build/src/game/Texture/TextureLoad/textureload.c.o
-texture_releaseList	0x1510D630	100	game	c		build/src/game/Texture/TextureRelease/texturerelease.c.o
-texture_releaseId	0x1510D694	140	game	c		build/src/game/Texture/TextureRelease/texturerelease.c.o
+texture_releaseList	0x1510D630	100	game	c		build/src/game/Texture/TextureLoad/textureload.c.o
+texture_releaseId	0x1510D694	140	game	c		build/src/game/Texture/TextureLoad/textureload.c.o
 texture_dropUse	0x1510D720	140	game	c		build/src/game/Texture/TextureUse/textureuse.c.o
 texture_dropUseAndFree	0x1510D7AC	184	game	c		build/src/game/Texture/TextureUse/textureuse.c.o
 texture_clearBindings	0x1510D864	16	game	c		build/src/game/Texture/TextureUse/textureuse.c.o

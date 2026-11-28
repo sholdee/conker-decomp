@@ -763,7 +763,6 @@ segments:
       - [0x138520, c, game/View/Projection/projection]
       - [0x139410, c, game/Texture/UvWobble/uvwobble]
       - [0x139FC0, c, game/Texture/TextureLoad/textureload]
-      - [0x13AAE0, c, game/Texture/TextureRelease/texturerelease]
       - [0x13ABD0, c, game/Texture/TextureUse/textureuse]
       - [0x13AE20, c, game/Shadow/BlobShadow/blobshadow]
       - [0x13BB20, c, game/Collision/Floor/floor]
