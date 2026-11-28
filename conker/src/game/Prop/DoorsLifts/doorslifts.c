@@ -52,9 +52,9 @@ typedef union {
         f32 phase;
         s32 ready;
     } sway;
-} Work144C70;
+} DoorLiftWork;
 
-#define WORK(prop) ((Work144C70 *)&(prop)->touch)
+#define WORK(prop) ((DoorLiftWork *)&(prop)->touch)
 
 #define PROP_SET_MOTION(prop, motion) \
     ((prop)->task_flag &= ~TASK_FLAG_STATE, (prop)->task_flag |= (motion))

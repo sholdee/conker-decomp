@@ -24,12 +24,12 @@
 /*
  * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low
  * two bits of task_flag (TASK_FLAG_OFF closed, GOING_OFF closing, GOING_ON opening, ON open); per-type state lives in work
- * (Work1483E0, one member per routine).
+ * (PropUpdateWork, one member per routine).
  */
 
-struct Wave1511CB44;
-struct Swing1511DBC4;
-struct Pulse1511DF6C;
+struct WaveMeshState;
+struct SwingOpenState;
+struct TouchPulseState;
 
 /* Behaviour scratch state (WorldObject.touch) of the objects in this file, one member per routine. */
 typedef union {
@@ -37,55 +37,55 @@ typedef union {
         /* 0x7C */ f32 tilt;
         /* 0x80 */ f32 wobble;
         /* 0x84 */ f32 wobbleTarget;
-    } w1511AF30;
+    } wobbleTilt;
     struct {
         /* 0x7C */ s32 homeX;
         /* 0x80 */ s32 homeZ;
         /* 0x84 */ f32 speed;
-    } w1511B07C;
+    } slideWaypoints;
     struct {
         /* 0x7C */ f32 restitution;
         /* 0x80 */ f32 maxSpeed;
         /* 0x84 */ f32 velocity;
-    } w1511B51C;
+    } swingFade;
     struct {
         /* 0x7C */ s32 updates;
         /* 0x80 */ f32 prevAngle[2];
-    } w1511B7D4;
+    } rotatePivots;
     struct {
         /* 0x7C */ s32 restAndTimer;
         /* 0x80 */ s32 triggered;
         /* 0x84 */ f32 velocity;
-    } w1511BEBC;
+    } grabLower;
     struct {
         u8 pad7C[4];
         /* 0x80 */ f32 phaseX;
         /* 0x84 */ f32 phaseZ;
-    } w1511C548;
+    } sway;
     struct {
         /* 0x7C */ s32 delay;
         /* 0x80 */ s32 fade;
-    } w1511C638;
+    } replaceNext;
     struct {
-        /* 0x7C */ struct Wave1511CB44 *wave;
-    } w1511CB44;
+        /* 0x7C */ struct WaveMeshState *wave;
+    } waveMesh;
     struct {
         /* 0x7C */ s16 *baseS;
         /* 0x80 */ f32 velocity;
         /* 0x84 */ f32 level;
-    } w1511D394;
+    } ownerWave;
     struct {
         /* 0x7C */ s16 (*uv)[2];
         /* 0x80 */ f32 uvAngle;
-    } w1511D9E4;
+    } rotateTexture;
     struct {
-        /* 0x7C */ struct Swing1511DBC4 *swing;
-    } w1511DBC4;
+        /* 0x7C */ struct SwingOpenState *swing;
+    } swingOpen;
     struct {
-        /* 0x7C */ struct Pulse1511DF6C *pulse;
+        /* 0x7C */ struct TouchPulseState *pulse;
         /* 0x80 */ s32 lastCharacter;
         /* 0x84 */ s32 filter;
-    } w1511DF6C;
+    } touchPulse;
     struct {
         /* 0x7C */ s32 started;   /* set after the first update */
         /* 0x80 */ s32 triggered; /* 1: move away from home, 0: return home */
@@ -101,12 +101,12 @@ typedef union {
         /* 0x80 */ Actor *reference; /* followed when set, else the object numbered moveData.bytes[3] */
     } projectTexture; /* prop_projectTexture, prop_projectTextureUnderRef */
     struct {
-        /* 0x7C */ Game1483E0WaveState *state;
+        /* 0x7C */ WobbleTextureState *state;
         /* 0x80 */ s32 phase;
     } wobbleTexture; /* prop_wobbleTexture */
-} Work1483E0;
+} PropUpdateWork;
 
-#define WORK(obj) ((Work1483E0 *)&(obj)->touch)
+#define WORK(obj) ((PropUpdateWork *)&(obj)->touch)
 
 /* prop_swingHinge's row sound slots */
 #define PROP_SOUND_OPEN 0
@@ -122,23 +122,23 @@ void prop_wobbleTilt(WorldObject *obj) {
 
     intensity = obj->moveData.word;
     target = 75.0f * intensity * 0.009999999776f;
-    if (target != WORK(obj)->w1511AF30.tilt) {
-        diff = target - WORK(obj)->w1511AF30.tilt;
+    if (target != WORK(obj)->wobbleTilt.tilt) {
+        diff = target - WORK(obj)->wobbleTilt.tilt;
         if (fabsf(diff) < 1.0f) {
-            WORK(obj)->w1511AF30.tilt = target;
+            WORK(obj)->wobbleTilt.tilt = target;
         } else {
-            WORK(obj)->w1511AF30.tilt += (diff < 0.0f) ? -1 : 1;
+            WORK(obj)->wobbleTilt.tilt += (diff < 0.0f) ? -1 : 1;
         }
-        WORK(obj)->w1511AF30.wobble = 0.0f;
+        WORK(obj)->wobbleTilt.wobble = 0.0f;
     } else {
         roll = math_random() % 1000;
         if (roll < 500) {
-            WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * intensity * 0.002000000095f * 0.009999999776f;
+            WORK(obj)->wobbleTilt.wobbleTarget = roll * 5.0f * intensity * 0.002000000095f * 0.009999999776f;
         }
-        diff = WORK(obj)->w1511AF30.wobbleTarget - WORK(obj)->w1511AF30.wobble;
-        WORK(obj)->w1511AF30.wobble += diff * 0.400000006f;
+        diff = WORK(obj)->wobbleTilt.wobbleTarget - WORK(obj)->wobbleTilt.wobble;
+        WORK(obj)->wobbleTilt.wobble += diff * 0.400000006f;
     }
-    obj->t = WORK(obj)->w1511AF30.tilt + WORK(obj)->w1511AF30.wobble;
+    obj->t = WORK(obj)->wobbleTilt.tilt + WORK(obj)->wobbleTilt.wobble;
 }
 
 /* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
@@ -163,12 +163,12 @@ void prop_slideWaypoints(WorldObject *obj) {
             return;
         }
     }
-    if (WORK(obj)->w1511B07C.homeX == 0) {
-        WORK(obj)->w1511B07C.homeX = obj->x | 0x80000000;
-        WORK(obj)->w1511B07C.homeZ = obj->z;
+    if (WORK(obj)->slideWaypoints.homeX == 0) {
+        WORK(obj)->slideWaypoints.homeX = obj->x | 0x80000000;
+        WORK(obj)->slideWaypoints.homeZ = obj->z;
     }
-    targetX = (s16)WORK(obj)->w1511B07C.homeX;
-    targetZ = WORK(obj)->w1511B07C.homeZ;
+    targetX = (s16)WORK(obj)->slideWaypoints.homeX;
+    targetZ = WORK(obj)->slideWaypoints.homeZ;
     state = obj->moveData.word & 0x3FF;
     if (state >= 4 && state < 7) {
         prop_registerLink(obj, 1);
@@ -247,7 +247,7 @@ void prop_slideWaypoints(WorldObject *obj) {
     if (sound != 0) {
         gfx_playObjectSound(obj, sound, 0x7D00, 100, 2500, 1);
     }
-    speed = WORK(obj)->w1511B07C.speed;
+    speed = WORK(obj)->slideWaypoints.speed;
     if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         speed = 0.0f;
         obj->x = targetX;
@@ -287,7 +287,7 @@ void prop_slideWaypoints(WorldObject *obj) {
             gfx_playObjectSound(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
-    WORK(obj)->w1511B07C.speed = speed;
+    WORK(obj)->slideWaypoints.speed = speed;
 }
 
 
@@ -308,7 +308,7 @@ void prop_swingAndFadeColours(WorldObject *obj) {
     mode = obj->task_flag & TASK_FLAG_STATE;
     target = openAngle;
     angle = obj->v;
-    velocity = WORK(obj)->w1511B51C.velocity;
+    velocity = WORK(obj)->swingFade.velocity;
     if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_GOING_OFF) {
         target = 0.0f;
     }
@@ -317,11 +317,11 @@ void prop_swingAndFadeColours(WorldObject *obj) {
         velocity = 0.0f;
     }
     if (angle != target || velocity != 0.0f) {
-        restitution = WORK(obj)->w1511B51C.restitution;
+        restitution = WORK(obj)->swingFade.restitution;
         if (restitution == 0.0f) {
             restitution = 0.4499999881f;
         }
-        maxSpeed = WORK(obj)->w1511B51C.maxSpeed;
+        maxSpeed = WORK(obj)->swingFade.maxSpeed;
         if (maxSpeed == 0.0f) {
             maxSpeed = 0.5f;
         }
@@ -352,7 +352,7 @@ void prop_swingAndFadeColours(WorldObject *obj) {
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= mode;
     }
-    WORK(obj)->w1511B51C.velocity = velocity;
+    WORK(obj)->swingFade.velocity = velocity;
     if (gLevelLoadState != 0 || angle != obj->v) {
         obj->v = angle;
         sound = (obj->moveData.word >> 24) & 0xFF;
@@ -386,13 +386,13 @@ void prop_rotateAboutPivots(WorldObject *obj) {
         pivots[0] = obj - 1;
         pivots[1] = obj - 2;
     }
-    if (WORK(obj)->w1511B7D4.prevAngle[0] != pivots[0]->v || WORK(obj)->w1511B7D4.prevAngle[1] != pivots[1]->v) {
-        WORK(obj)->w1511B7D4.prevAngle[0] = pivots[0]->v;
-        WORK(obj)->w1511B7D4.prevAngle[1] = pivots[1]->v;
-        WORK(obj)->w1511B7D4.updates = 2;
+    if (WORK(obj)->rotatePivots.prevAngle[0] != pivots[0]->v || WORK(obj)->rotatePivots.prevAngle[1] != pivots[1]->v) {
+        WORK(obj)->rotatePivots.prevAngle[0] = pivots[0]->v;
+        WORK(obj)->rotatePivots.prevAngle[1] = pivots[1]->v;
+        WORK(obj)->rotatePivots.updates = 2;
     }
-    if (WORK(obj)->w1511B7D4.updates != 0) {
-        WORK(obj)->w1511B7D4.updates--;
+    if (WORK(obj)->rotatePivots.updates != 0) {
+        WORK(obj)->rotatePivots.updates--;
         while (count--) {
             dx = pivots[pair[1]]->x - obj->x;
             angle = -pivots[pair[1]]->v * 0.01745329238f;
@@ -530,22 +530,22 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
     mode = obj->task_flag & TASK_FLAG_STATE;
     flag4 = obj->task_flag & TASK_FLAG_LOCKED;
     flag8 = obj->task_flag & 8;
-    triggered = WORK(obj)->w1511BEBC.triggered;
-    velocity = WORK(obj)->w1511BEBC.velocity;
+    triggered = WORK(obj)->grabLower.triggered;
+    velocity = WORK(obj)->grabLower.velocity;
     if (level == LEVEL_W2_BOILERROOM) {
         radiusSq = (obj->zScale * 100.0f) * (obj->zScale * 100.0f);
-        if (WORK(obj)->w1511BEBC.restAndTimer == 0) {
+        if (WORK(obj)->grabLower.restAndTimer == 0) {
             if (obj->y == 0) {
                 obj->y = 1;
             }
-            WORK(obj)->w1511BEBC.restAndTimer = (u16)obj->y;
+            WORK(obj)->grabLower.restAndTimer = (u16)obj->y;
             restY = obj->y;
             if (mode == TASK_FLAG_ON) {
                 obj->y = restY;
             }
         }
-        restY = (WORK(obj)->w1511BEBC.restAndTimer & 0xFFFF);
-        timer = WORK(obj)->w1511BEBC.restAndTimer >> 16;
+        restY = (WORK(obj)->grabLower.restAndTimer & 0xFFFF);
+        timer = WORK(obj)->grabLower.restAndTimer >> 16;
         target = NULL;
         pos[0] = obj->x;
         pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
@@ -669,12 +669,12 @@ void prop_grabAndLowerCharacter(WorldObject *obj) {
                 target->mv->grabState = 0;
             }
         }
-        WORK(obj)->w1511BEBC.triggered = triggered;
+        WORK(obj)->grabLower.triggered = triggered;
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= mode;
-        WORK(obj)->w1511BEBC.restAndTimer &= 0xFFFF;
-        WORK(obj)->w1511BEBC.restAndTimer |= timer << 16;
-        WORK(obj)->w1511BEBC.velocity = velocity;
+        WORK(obj)->grabLower.restAndTimer &= 0xFFFF;
+        WORK(obj)->grabLower.restAndTimer |= timer << 16;
+        WORK(obj)->grabLower.velocity = velocity;
     }
 }
 
@@ -687,19 +687,19 @@ void prop_sway(WorldObject *obj) {
     f32 swayZ;
     f32 swayX;
 
-    swayX = sinf(WORK(obj)->w1511C548.phaseX);
-    swayZ = sinf(WORK(obj)->w1511C548.phaseZ);
+    swayX = sinf(WORK(obj)->sway.phaseX);
+    swayZ = sinf(WORK(obj)->sway.phaseZ);
     obj->t = swayX * 16.0f;
     obj->v = swayZ * 16.0f;
-    WORK(obj)->w1511C548.phaseX += 0.07299999893f * gFrameDelta;
-    WORK(obj)->w1511C548.phaseZ += 0.06499999762f * gFrameDelta;
-    WORK(obj)->w1511C548.phaseX = math_wrapRadians(WORK(obj)->w1511C548.phaseX);
+    WORK(obj)->sway.phaseX += 0.07299999893f * gFrameDelta;
+    WORK(obj)->sway.phaseZ += 0.06499999762f * gFrameDelta;
+    WORK(obj)->sway.phaseX = math_wrapRadians(WORK(obj)->sway.phaseX);
     {
-        f32 wrapped = math_wrapRadians(WORK(obj)->w1511C548.phaseZ);
+        f32 wrapped = math_wrapRadians(WORK(obj)->sway.phaseZ);
 
-        WORK(obj)->w1511C548.phaseZ = wrapped;
+        WORK(obj)->sway.phaseZ = wrapped;
     }
-    if (obj->v == 0.0f && WORK(obj)->w1511C548.phaseZ == 0.0f) {
+    if (obj->v == 0.0f && WORK(obj)->sway.phaseZ == 0.0f) {
         obj->t = 7.5f;
         obj->v = 8.0f;
     }
@@ -749,10 +749,10 @@ void prop_replaceNextWhenTriggered(WorldObject *obj) {
         }
     }
     if (mode == TASK_FLAG_GOING_ON) {
-        if (WORK(obj)->w1511C638.delay < 0) {
-            WORK(obj)->w1511C638.delay += gFrameTicks;
+        if (WORK(obj)->replaceNext.delay < 0) {
+            WORK(obj)->replaceNext.delay += gFrameTicks;
         } else {
-            if (WORK(obj)->w1511C638.fade == 0) {
+            if (WORK(obj)->replaceNext.fade == 0) {
                 switch (next->moveData.word & 0xFF) {
                 case 1:
                     effect_throwBurstPieces(next, 0xFF, 0);
@@ -791,17 +791,17 @@ void prop_replaceNextWhenTriggered(WorldObject *obj) {
             if (third != NULL) {
                 third->inactive = 1;
             }
-            WORK(obj)->w1511C638.fade += gFrameTicks * 30;
-            if (WORK(obj)->w1511C638.fade >= 0xFF) {
-                WORK(obj)->w1511C638.fade = 0xFF;
+            WORK(obj)->replaceNext.fade += gFrameTicks * 30;
+            if (WORK(obj)->replaceNext.fade >= 0xFF) {
+                WORK(obj)->replaceNext.fade = 0xFF;
                 mode = TASK_FLAG_ON;
             }
             if (obj->moveData.word != 0xFF) {
-                env_fadeLevelVtxColours(WORK(obj)->w1511C638.fade, obj->moveData.word);
+                env_fadeLevelVtxColours(WORK(obj)->replaceNext.fade, obj->moveData.word);
             }
             if (mode == TASK_FLAG_ON) {
-                WORK(obj)->w1511C638.delay = 0;
-                WORK(obj)->w1511C638.fade = 0;
+                WORK(obj)->replaceNext.delay = 0;
+                WORK(obj)->replaceNext.fade = 0;
             }
         }
     }
@@ -814,7 +814,8 @@ void prop_getWaveOriginZ(WorldObject *obj, f32 *originZ) {
     *originZ = 22000.0f;
 }
 
-struct Wave1511CB44 {
+/* Allocated once by prop_animateWaveMesh (WORK(obj)->waveMesh.wave); prop_scrollWithOwnerWave reads the owner's. */
+struct WaveMeshState {
     u8 *phases;
     u16 phase;
     u16 speed;
@@ -842,7 +843,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
     f32 originZ;
     s32 pad8C;
     s32 created;
-    struct Wave1511CB44 *wave;
+    struct WaveMeshState *wave;
     s32 i;
     f32 scale;
     f32 height;
@@ -874,10 +875,10 @@ void prop_animateWaveMesh(WorldObject *obj) {
     }
     prop_getWaveOriginZ(obj, &originZ);
     originZ -= obj->z;
-    if (WORK(obj)->w1511CB44.wave == NULL) {
+    if (WORK(obj)->waveMesh.wave == NULL) {
         created = TRUE;
-        WORK(obj)->w1511CB44.wave = allocate_memory(sizeof(struct Wave1511CB44), 1, 0, 0);
-        wave = WORK(obj)->w1511CB44.wave;
+        WORK(obj)->waveMesh.wave = allocate_memory(sizeof(struct WaveMeshState), 1, 0, 0);
+        wave = WORK(obj)->waveMesh.wave;
         wave->phases = allocate_memory(obj->numVertices, 1, 0, 0);
         if (uvRate != 0.0f) {
             wave->uv = allocate_memory(obj->numVertices * 4, 1, 0, 0);
@@ -890,7 +891,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
     } else {
         created = FALSE;
     }
-    wave = WORK(obj)->w1511CB44.wave;
+    wave = WORK(obj)->waveMesh.wave;
     if (created) {
         if (mode == 0) {
             wave->speed = 474;
@@ -981,7 +982,8 @@ void prop_animateWaveMesh(WorldObject *obj) {
     }
 }
 
-struct Entry1511D394 {
+/* A prop_scrollWithOwnerWave preset (gOwnerWaveScrollPresets). */
+struct OwnerWaveScrollPreset {
     f32 followRate;
     f32 accel;
     u16 baseS;
@@ -995,7 +997,7 @@ struct Entry1511D394 {
 };
 
 /* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
-static struct Entry1511D394 gOwnerWaveScrollPresets[2] = {
+static struct OwnerWaveScrollPreset gOwnerWaveScrollPresets[2] = {
     { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x00, 0, { 0, 0 } },
     { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x80, 0, { 0, 0 } },
 };
@@ -1005,7 +1007,7 @@ static struct Entry1511D394 gOwnerWaveScrollPresets[2] = {
  * byte): S eases toward the wave level, T drifts by a cosine amount, and the alpha pulses.
  */
 void prop_scrollWithOwnerWave(WorldObject *obj) {
-    struct Wave1511CB44 *ownerWave;
+    struct WaveMeshState *ownerWave;
     WorldObject *owner;
     s32 pad; // matching: unused stack slot keeps the original frame layout
     u8 phaseOffset;
@@ -1018,7 +1020,7 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
     s32 offsetT;
     s32 i;
     s16 *savedS;
-    struct Entry1511D394 *entry;
+    struct OwnerWaveScrollPreset *entry;
     f32 followRate;
     s32 init;
     s32 id;
@@ -1030,7 +1032,7 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
     if (owner == NULL) {
         return;
     }
-    ownerWave = WORK(owner)->w1511CB44.wave;
+    ownerWave = WORK(owner)->waveMesh.wave;
     if (ownerWave == NULL) {
         return;
     }
@@ -1041,9 +1043,9 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
     followRate = entry->followRate;
     accel = entry->accel;
     offsetT = entry->amplitudeT;
-    if (WORK(obj)->w1511D394.baseS == NULL) {
-        WORK(obj)->w1511D394.baseS = allocate_memory(obj->numVertices * sizeof(s16), 1, 0, 0);
-        savedS = WORK(obj)->w1511D394.baseS;
+    if (WORK(obj)->ownerWave.baseS == NULL) {
+        WORK(obj)->ownerWave.baseS = allocate_memory(obj->numVertices * sizeof(s16), 1, 0, 0);
+        savedS = WORK(obj)->ownerWave.baseS;
         for (i = 0; i < obj->numVertices; i++) {
             savedS[i] = obj->srcVertices[i].v.tc[0];
         }
@@ -1051,30 +1053,30 @@ void prop_scrollWithOwnerWave(WorldObject *obj) {
         init = TRUE;
     } else {
         init = FALSE;
-        savedS = WORK(obj)->w1511D394.baseS;
+        savedS = WORK(obj)->ownerWave.baseS;
     }
     wavePhase = ownerWave->phase;
     sine = (math_cosBinAngle(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
     cosine = (math_sinBinAngle(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
     if (init) {
-        WORK(obj)->w1511D394.level = sine;
-        WORK(obj)->w1511D394.velocity = 0.0f;
+        WORK(obj)->ownerWave.level = sine;
+        WORK(obj)->ownerWave.velocity = 0.0f;
     } else {
-        diff = (sine - WORK(obj)->w1511D394.level) * followRate;
+        diff = (sine - WORK(obj)->ownerWave.level) * followRate;
         if (diff > 0.0f) {
-            WORK(obj)->w1511D394.velocity += accel;
-            if (diff < WORK(obj)->w1511D394.velocity) {
-                WORK(obj)->w1511D394.velocity = diff;
+            WORK(obj)->ownerWave.velocity += accel;
+            if (diff < WORK(obj)->ownerWave.velocity) {
+                WORK(obj)->ownerWave.velocity = diff;
             }
         } else {
-            WORK(obj)->w1511D394.velocity -= accel;
-            if (WORK(obj)->w1511D394.velocity < diff) {
-                WORK(obj)->w1511D394.velocity = diff;
+            WORK(obj)->ownerWave.velocity -= accel;
+            if (WORK(obj)->ownerWave.velocity < diff) {
+                WORK(obj)->ownerWave.velocity = diff;
             }
         }
-        WORK(obj)->w1511D394.level += WORK(obj)->w1511D394.velocity;
+        WORK(obj)->ownerWave.level += WORK(obj)->ownerWave.velocity;
     }
-    offsetS = WORK(obj)->w1511D394.level * rangeS;
+    offsetS = WORK(obj)->ownerWave.level * rangeS;
     offsetS += baseS;
     offsetT = offsetT * cosine;
     if (obj->vertices[gDrawBufferIndex][0].v.tc[1] > 0x800) {
@@ -1103,14 +1105,14 @@ void prop_wobbleTexture(WorldObject *mesh) {
     s16 t_delta;
     f32 cosine;
     u8 angle;
-    Game1483E0WaveState *state;
+    WobbleTextureState *state;
 
     state = WORK(mesh)->wobbleTexture.state;
     if (state == NULL) {
-        state = allocate_memory(sizeof(Game1483E0WaveState), 1, 0, 0);
+        state = allocate_memory(sizeof(WobbleTextureState), 1, 0, 0);
         WORK(mesh)->wobbleTexture.state = state;
-        state->field4 = 0;
-        state->field8 = 0;
+        state->texIndices = 0;
+        state->animState = 0;
         coords = allocate_memory(mesh->numVertices * sizeof(TexCoord), 1, 0, 0);
         state->coords = coords;
         for (index = 0; index < mesh->numVertices; index++) {
@@ -1133,7 +1135,7 @@ void prop_wobbleTexture(WorldObject *mesh) {
         mesh->vertices[gDrawBufferIndex][index].v.tc[0] = coords[index].s + s_delta;
         mesh->vertices[gDrawBufferIndex][index].v.tc[1] = coords[index].t + t_delta;
     }
-    prop_animateTexture(mesh, &state->field4, &state->field8);
+    prop_animateTexture(mesh, &state->texIndices, &state->animState);
 }
 
 /* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
@@ -1144,8 +1146,8 @@ void prop_rotateTexture(WorldObject *obj) {
     s32 i;
     f32 speed;
 
-    if (WORK(obj)->w1511D9E4.uv == NULL) {
-        uv = WORK(obj)->w1511D9E4.uv = allocate_memory(obj->numVertices * 4, 1, 0, 0);
+    if (WORK(obj)->rotateTexture.uv == NULL) {
+        uv = WORK(obj)->rotateTexture.uv = allocate_memory(obj->numVertices * 4, 1, 0, 0);
         for (i = 0; i < obj->numVertices; i++) {
             uv[i][0] = obj->srcVertices[i].v.tc[0] - 0x2000;
             uv[i][1] = obj->srcVertices[i].v.tc[1] - 0x2000;
@@ -1156,16 +1158,17 @@ void prop_rotateTexture(WorldObject *obj) {
             obj->vertices[0][i].v.ob[2] = obj->vertices[1][i].v.ob[2] = obj->srcVertices[i].v.ob[2] + obj->z;
         }
     } else {
-        uv = WORK(obj)->w1511D9E4.uv;
+        uv = WORK(obj)->rotateTexture.uv;
     }
     uvArg4 = obj->moveData.word >> 24;
     uvArg5 = (obj->moveData.word >> 16) & 0xFF;
     speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
-    WORK(obj)->w1511D9E4.uvAngle += speed * gFrameTicks;
-    sprite_rotateTexcoords(obj->vertices[gDrawBufferIndex], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
+    WORK(obj)->rotateTexture.uvAngle += speed * gFrameTicks;
+    sprite_rotateTexcoords(obj->vertices[gDrawBufferIndex], uv, obj->numVertices, WORK(obj)->rotateTexture.uvAngle, uvArg4, uvArg5);
 }
 
-struct Swing1511DBC4 {
+/* State of prop_swingOpen90, allocated on its first update. */
+struct SwingOpenState {
     f32 time;
     f32 velocity;
     f32 accel;
@@ -1178,18 +1181,18 @@ struct Swing1511DBC4 {
  */
 void prop_swingOpen90(WorldObject *obj) {
     s32 mode;
-    struct Swing1511DBC4 *swing;
+    struct SwingOpenState *swing;
     f32 wobble;
 
-    if (WORK(obj)->w1511DBC4.swing == NULL) {
-        swing = allocate_memory(sizeof(struct Swing1511DBC4), 1, 0, 0);
-        WORK(obj)->w1511DBC4.swing = swing;
+    if (WORK(obj)->swingOpen.swing == NULL) {
+        swing = allocate_memory(sizeof(struct SwingOpenState), 1, 0, 0);
+        WORK(obj)->swingOpen.swing = swing;
         swing->time = 0.0f;
         swing->velocity = 0.0f;
         swing->accel = 0.0f;
         swing->jerk = 0.02500000037f;
     } else {
-        swing = WORK(obj)->w1511DBC4.swing;
+        swing = WORK(obj)->swingOpen.swing;
     }
 
     mode = obj->task_flag & TASK_FLAG_STATE;
@@ -1226,7 +1229,8 @@ void prop_swingOpen90(WorldObject *obj) {
     obj->task_flag |= mode;
 }
 
-struct Pulse1511DF6C {
+/* State of prop_pulseUntilTouched, allocated and zeroed on its first update. */
+struct TouchPulseState {
     u16 phaseX;
     u16 phaseZ;
     u16 state;
@@ -1344,7 +1348,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
     s16 height;
     s16 unused1;
     s16 unused2;
-    struct Pulse1511DF6C *pulse;
+    struct TouchPulseState *pulse;
     s32 skip;
     s32 anim;
     s32 i;
@@ -1352,16 +1356,16 @@ void prop_pulseUntilTouched(WorldObject *obj) {
     u8 *data; // matching: one pointer for both lookups; a second local grows the frame
     f32 y;
 
-    if (WORK(obj)->w1511DF6C.pulse == NULL) {
-        WORK(obj)->w1511DF6C.pulse = allocate_memory(sizeof(struct Pulse1511DF6C), 1, 0, 0);
-        pulse = WORK(obj)->w1511DF6C.pulse;
-        bzero(pulse, sizeof(struct Pulse1511DF6C));
+    if (WORK(obj)->touchPulse.pulse == NULL) {
+        WORK(obj)->touchPulse.pulse = allocate_memory(sizeof(struct TouchPulseState), 1, 0, 0);
+        pulse = WORK(obj)->touchPulse.pulse;
+        bzero(pulse, sizeof(struct TouchPulseState));
         pulse->fullScale = obj->xScale;
         obj->zScale = 0.0f;
         obj->yScale = 0.0f;
         obj->xScale = 0.0f;
     } else {
-        pulse = WORK(obj)->w1511DF6C.pulse;
+        pulse = WORK(obj)->touchPulse.pulse;
     }
     skip = FALSE;
     anim = -1;
@@ -1397,7 +1401,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
             if (character->moved == 0) {
                 continue;
             }
-            if ((WORK(obj)->w1511DF6C.filter == 1 && character->team != 0) || (WORK(obj)->w1511DF6C.filter == 2 && character->team == 0) || (WORK(obj)->w1511DF6C.filter == 3 && (character->team & 1))) {
+            if ((WORK(obj)->touchPulse.filter == 1 && character->team != 0) || (WORK(obj)->touchPulse.filter == 2 && character->team == 0) || (WORK(obj)->touchPulse.filter == 3 && (character->team & 1))) {
                 continue;
             }
             if (anim != -1 && attach_find(character, anim, 0) != NULL) {
@@ -1415,7 +1419,7 @@ void prop_pulseUntilTouched(WorldObject *obj) {
                 actor_computeSize(character, &height, &unused1, &unused2);
                 y = obj->y;
                 if (y < character->ceilingY && character->ypos < y + radius && y - radius < character->ypos + height) {
-                    WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
+                    WORK(obj)->touchPulse.lastCharacter = character->unique_id;
                     pulse->state = 3;
                     prop_playImpactSound(obj, character);
                     text_spawnVolcanoRaceTouchDrift(character, obj);

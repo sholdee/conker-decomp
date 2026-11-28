@@ -20,20 +20,20 @@ typedef struct {
     u8 active;
     s32 texIndices;
     s32 animState;
-} Game147C70Ripple;
+} RippleState;
 
 /* Behaviour scratch state (WorldObject.touch) of the rippling mesh. param bits 0-7: wobble size, 16-31: ripple radius. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
-    /* 0x80 */ Game147C70Ripple *ripple;
+    /* 0x80 */ RippleState *ripple;
     /* 0x84 */ s32 wobblePhases; /* four packed u8 phases */
-} Game147C70Work;
+} RippleMeshWork;
 
-#define WORK(obj) ((Game147C70Work *)&(obj)->touch)
+#define WORK(obj) ((RippleMeshWork *)&(obj)->touch)
 
 /* Starts a ripple: full amplitude, phase reset and all vertex heights cleared. */
 void prop_startRipple(WorldObject *mesh) {
-    Game147C70Ripple *ripple;
+    RippleState *ripple;
     s32 i;
 
     ripple = WORK(mesh)->ripple;
@@ -73,7 +73,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
     f32 *followRates;
     f32 *falloffs;
     Vtx_t *base;
-    Game147C70Ripple *ripple;
+    RippleState *ripple;
     s32 offsetY;
     f32 radius;
     f32 dist;
@@ -86,7 +86,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
     base = &mesh->srcVertices->v;
     wobbleSize = mesh->moveData.word & 0xFF;
     if (WORK(mesh)->ripple == NULL) {
-        WORK(mesh)->ripple = allocate_memory(sizeof(Game147C70Ripple), 1, 0, 0);
+        WORK(mesh)->ripple = allocate_memory(sizeof(RippleState), 1, 0, 0);
         ripple = WORK(mesh)->ripple;
         ripple->phaseOffsets = phaseOffsets = allocate_memory(mesh->numVertices, 1, 0, 0);
         ripple->heights = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);

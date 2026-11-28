@@ -18,9 +18,9 @@ typedef struct {
 typedef union {
     s32 count;        // func_150C7C90
     LinkedObj *link;  // prop_scrollTextureByObject3
-} F4D20Work;
+} LinkedSpinnerWork;
 
-#define WORK(obj) ((F4D20Work *)&(obj)->touch)
+#define WORK(obj) ((LinkedSpinnerWork *)&(obj)->touch)
 
 /* This file's .data. */
 static s32 D_800887F0 = 0; /* not referenced */

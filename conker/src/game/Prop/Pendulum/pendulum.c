@@ -26,9 +26,9 @@ typedef union {
     struct {
         /* 0x7C */ struct ScrollState *state; // allocated on first use
     } scroll;
-} WorkF21D0;
+} PendulumWork;
 
-#define WORK(obj) ((WorkF21D0 *)&(obj)->touch)
+#define WORK(obj) ((PendulumWork *)&(obj)->touch)
 
 /*
  * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward

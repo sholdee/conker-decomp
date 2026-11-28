@@ -68,11 +68,13 @@ typedef struct PropVtx {
     /* 0xC */ u8 cn[4];
 } PropVtx;
 
-typedef struct Game1483E0WaveState {
+/* State of prop_wobbleTexture, allocated on its first update: the saved texture coordinates and the pair it passes
+ * to prop_animateTexture. */
+typedef struct WobbleTextureState {
     TexCoord *coords;
-    s32 field4;
-    s32 field8;
-} Game1483E0WaveState;
+    s32 texIndices;
+    s32 animState;
+} WobbleTextureState;
 
 /* game/Prop/WaveChainStart/wavechainstart.c */
 void prop_clearWaveChains(void);
