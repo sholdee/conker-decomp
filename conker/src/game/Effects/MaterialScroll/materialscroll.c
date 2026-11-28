@@ -35,11 +35,11 @@ typedef struct {
     u8 values[3];
 } MaterialZoneIds;
 
-/* Set once the one-time setup of effect_setupWarpModelOnce has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+/* Set once the one-time setup of effect_setupWarpModelOnce has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetupHarbour/levelsetupharbour.c). */
 u8 gWarpModelSetupDone = 0;
 static MaterialZoneIds gMaterialZoneIds = { { 0x3B, 0x3C, 0x3D } };
 
-/* Per zone (gMaterialZoneIds): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+/* Per zone (gMaterialZoneIds): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetupHarbour/levelsetupharbour.c). */
 u8 gMaterialGlowLevels[3];
 
 /* Returns whether the zones record selected by gMaterialZoneIds[index] is active. */

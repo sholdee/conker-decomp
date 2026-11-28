@@ -16,24 +16,24 @@ src/init/Boot/FaultDebugger/faultdebugger.s	boot	hand-written asm (subsystem fro
 src/init/Audio/OutputMode/outputmode.c	audio	Rare audio output-mode setup
 src/game/Model/ActorQuadAlloc/actorquadalloc.c	model	per-view vertex buffer copies for actor quads
 src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup03/levelcamsetup03.c	camera	per-level camera hook (empty)
-src/game/Camera/LevelCamSetup04/levelcamsetup04.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup05/levelcamsetup05.c	camera	per-level camera hook (empty)
-src/game/Camera/LevelCamSetup06/levelcamsetup06.c	camera	per-level camera hook (empty)
-src/game/Camera/LevelCamSetup07/levelcamsetup07.c	camera	per-level camera hook: clears script flags 0x400C-0x4014
-src/game/Camera/LevelCamSetup08/levelcamsetup08.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupDogFish/levelcamsetupdogfish.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetupTankFactory/levelcamsetuptankfactory.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupBarnOutside/levelcamsetupbarnoutside.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetupDinoArena/levelcamsetupdinoarena.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetupBarnInside/levelcamsetupbarninside.c	camera	per-level camera hook: clears script flags 0x400C-0x4014
+src/game/Camera/LevelCamSetupHeist/levelcamsetupheist.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup09/levelcamsetup09.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup10/levelcamsetup10.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup12/levelcamsetup12.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup13/levelcamsetup13.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup15/levelcamsetup15.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup16/levelcamsetup16.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup17/levelcamsetup17.c	camera	per-level camera preset hooks
+src/game/Camera/LevelCamSetupArena/levelcamsetuparena.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupVolcanoRace/levelcamsetupvolcanorace.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupTraining/levelcamsetuptraining.c	camera	per-level camera preset hooks
 src/game/Camera/LevelCamSetup19/levelcamsetup19.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup20/levelcamsetup20.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup21/levelcamsetup21.c	camera	per-level camera preset hook
-src/game/Camera/LevelCamSetup22/levelcamsetup22.c	camera	per-level camera hook (empty)
-src/game/Camera/LevelCamSetup23/levelcamsetup23.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupUBend/levelcamsetupubend.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetupHorrorIntro/levelcamsetuphorrorintro.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetupRaptor/levelcamsetupraptor.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook with zone-dependent heights
 src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
 src/game/Sprite/LevelSpriteSetup/levelspritesetup.c	sprite	builds the level's sprites when a level loads: sprite type setup, placement on the level triangles, type textures
@@ -90,36 +90,36 @@ src/game/Script/TaskExit/taskexit.s	collision	hand-written asm (subsystem from i
 src/game/Actor/HoverUpdates/hoverupdates.c	actor	update handlers of actor types 7, 9, 10, 11 and 16: hover at a height, carry or sit on another actor
 src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-written asm)
 src/game/Effects/ObjBurst/objburst.c	effect	particle bursts at tracked objects, bolt rings, facing command
-src/game/Camera/LevelHook07/levelhook07.c	camera	per-level camera setup from game-flag queries
-src/game/Camera/LevelHook05/levelhook05.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookBarnInside/levelhookbarninside.c	camera	per-level camera setup from game-flag queries
+src/game/Camera/LevelHookBarnOutside/levelhookbarnoutside.c	camera	per-level camera flag hook
 src/game/Effects/DebrisSplash/debrissplash.c	effect	debris and splash sprays at an actor's death (func_150BE494), path mover, pushed turner (the file after effects_sfx_w1_bee_cavern.c)
-src/game/Camera/LevelHook18/levelhook18.c	camera	per-level camera hook
-src/game/Camera/LevelHook03/levelhook03.c	camera	per-level camera flag hook
-src/game/Camera/LevelHook10/levelhook10.c	camera	per-level camera flag hook
-src/game/Camera/LevelHook01/levelhook01.c	camera	per-level camera flag hook
-src/game/Camera/LevelHook06/levelhook06.c	camera	per-level camera flags and range from flag queries
+src/game/Camera/LevelHookBullPaddock/levelhookbullpaddock.c	camera	per-level camera hook
+src/game/Camera/LevelHookDogFish/levelhookdogfish.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookDogFishNurseryPart1/levelhookdogfishnurserypart1.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookCogLand/levelhookcogland.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookDinoArena/levelhookdinoarena.c	camera	per-level camera flags and range from flag queries
 src/game/Actor/MountControl/mountcontrol.c	actor	mount control
-src/game/Camera/LevelHook13/levelhook13.c	camera	per-level camera preset hook
-src/game/Camera/LevelHook22/levelhook22.c	camera	per-level camera hook
+src/game/Camera/LevelHookInsideSafe/levelhookinsidesafe.c	camera	per-level camera preset hook
+src/game/Camera/LevelHookTraining/levelhooktraining.c	camera	per-level camera hook
 src/game/Actor/SpinDown/spindown.c	actor	update handler of actor type 40: spins the actor down
-src/game/Effects/LevelHook14/levelhook14.c	effect	effect stub (empty)
-src/game/Camera/LevelHook09/levelhook09.c	camera	per-level camera hook (water)
+src/game/Effects/LevelHookCanyon/levelhookcanyon.c	effect	effect stub (empty)
+src/game/Camera/LevelHookHarbour/levelhookharbour.c	camera	per-level camera hook (water)
 src/game/Effects/MaterialScroll/materialscroll.c	effect	scrolling material textures (update hook 7, LEVEL_W2_HARBOUR), swing object, bolt emitter, blood drip, bone beam
-src/game/Camera/LevelHook33/levelhook33.c	camera	per-level camera flag hook
-src/game/Camera/LevelHook35/levelhook35.c	camera	per-level camera hook
-src/game/Camera/LevelHook04/levelhook04.c	camera	per-level camera hook
-src/game/Camera/LevelHook32/levelhook32.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookMachineGunNest/levelhookmachinegunnest.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookOutsideMolehole/levelhookoutsidemolehole.c	camera	per-level camera hook
+src/game/Camera/LevelHookTankFactory/levelhooktankfactory.c	camera	per-level camera hook
+src/game/Camera/LevelHookTankTunnel/levelhooktanktunnel.c	camera	per-level camera flag hook
 src/game/Effects/ActorExplosion/actorexplosion.c	effect	bone pulse, tilt commands, texture swaps, death explosion, random level sounds (update hook 25, LEVEL_W2_WARBOSS)
 src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
-src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
-src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook
+src/game/Camera/LevelHookBankEntrance/levelhookbankentrance.c	camera	per-level camera flag hook
+src/game/Camera/LevelHookEndArena/levelhookendarena.c	camera	per-level camera hook
 src/game/Screen/StarSky/starsky.c	screen	black view fill with view-projection matrix
 src/game/Effects/DelayedBurst/delayedburst.c	effect	delayed spark burst on an actor, light switch events, line emitter, cash sprites
 src/game/Effects/StarField/starfield.s	effect	hand-written asm (subsystem from its header group)
-src/game/Camera/LevelHook19/levelhook19.c	camera	per-level camera preset hook
-src/game/Effects/LevelHook08/levelhook08.c	effect	effect stub (empty)
+src/game/Camera/LevelHookArena/levelhookarena.c	camera	per-level camera preset hook
+src/game/Effects/LevelHookHeist/levelhookheist.c	effect	effect stub (empty)
 src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
-src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
+src/game/Camera/LevelHookRaptor/levelhookraptor.c	camera	per-level camera hook
 src/game/Effects/LevelUpdateStub/levelupdatestub.c	effect	empty hook that effect_updateLevel calls each frame
 src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game/Effects/ActorEventStub/actoreventstub.c	effect	empty hook that a timed event calls with the current actor
@@ -378,38 +378,38 @@ src/game/Level/AmbientColourCycle/ambientcolourcycle.c	level	per-level setup: ti
 src/game/Level/EffectKind/effectkind.c	level	per-level query by map id
 src/game/Level/GroundParticles/groundparticles.c	level	per-level setup: particles over ground triangles
 src/game/Level/HeightCheck/heightcheck.c	level	water height query
-src/game/Level/LevelHook30/levelhook30.c	level	level logic: channel easing, scroll counters, prop kills
+src/game/Level/LevelHookUBend/levelhookubend.c	level	level logic: channel easing, scroll counters, prop kills
 src/game/Level/LevelHooks/levelhooks.c	level	per-level hook dispatch
 src/game/Level/LevelModels/levelmodels.c	level	level model loading/rebasing, vertex colour groups, texture size table
 src/game/Level/LevelObjects/levelobjects.c	level	level object placements: spawning objects from the level's object lists
-src/game/Level/LevelSetup02/levelsetup02.c	level	per-level setup: object tables and timed effects
-src/game/Level/LevelSetup03/levelsetup03.c	level	per-level setup stub (empty)
-src/game/Level/LevelSetup04/levelsetup04.c	level	per-level setup: timed effects at fixed points
-src/game/Level/LevelSetup05/levelsetup05.c	level	per-level setup: timed effect carrying a struct
-src/game/Level/LevelSetup06/levelsetup06.c	level	per-level setup: installs a level hook
+src/game/Level/LevelSetupHarbour/levelsetupharbour.c	level	per-level setup: object tables and timed effects
+src/game/Level/LevelSetupBarnInside/levelsetupbarninside.c	level	per-level setup stub (empty)
+src/game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c	level	per-level setup: timed effects at fixed points
+src/game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern.c	level	per-level setup: timed effect carrying a struct
+src/game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c	level	per-level setup: installs a level hook
 src/game/Level/LevelSetup07/levelsetup07.c	level	per-level setup stub (empty)
-src/game/Level/LevelSetup08/levelsetup08.c	level	per-level setup: spray effects
-src/game/Level/LevelSetup09/levelsetup09.c	level	per-level setup: lights and timed effects
-src/game/Level/LevelSetup10/levelsetup10.c	level	per-level setup: installs a level hook
-src/game/Level/LevelSetup11/levelsetup11.c	level	per-level setup: timed effects and rope spawn
-src/game/Level/LevelSetup12/levelsetup12.c	level	per-level setup: bounce records and textures
-src/game/Level/LevelSetup13/levelsetup13.c	level	per-level setup: owner effects with moving child and light, emitters
-src/game/Level/LevelSetup14/levelsetup14.c	level	per-level setup: clears level flags
-src/game/Level/LevelSetup16/levelsetup16.c	level	per-level setup: effect init and sound flag
-src/game/Level/LevelSetup17/levelsetup17.c	level	per-level setup: timed effects and light toggles
+src/game/Level/LevelSetupDogFish/levelsetupdogfish.c	level	per-level setup: spray effects
+src/game/Level/LevelSetupBarnArena/levelsetupbarnarena.c	level	per-level setup: lights and timed effects
+src/game/Level/LevelSetupTankFactory/levelsetuptankfactory.c	level	per-level setup: installs a level hook
+src/game/Level/LevelSetupCogLand/levelsetupcogland.c	level	per-level setup: timed effects and rope spawn
+src/game/Level/LevelSetupDinoArena/levelsetupdinoarena.c	level	per-level setup: bounce records and textures
+src/game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c	level	per-level setup: owner effects with moving child and light, emitters
+src/game/Level/LevelSetupHeist/levelsetupheist.c	level	per-level setup: clears level flags
+src/game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel.c	level	per-level setup: effect init and sound flag
+src/game/Level/LevelSetupFrontEnd/levelsetupfrontend.c	level	per-level setup: timed effects and light toggles
 src/game/Level/LevelSetup18/levelsetup18.c	level	per-level setup: timed effects, lights
-src/game/Level/LevelSetup19/levelsetup19.c	level	per-level setup: texture scrolls and ropes
-src/game/Level/LevelSetup23/levelsetup23.c	level	per-level setup: dynamic model with light
-src/game/Level/LevelSetup24/levelsetup24.c	level	per-level setup: texture scrolls
+src/game/Level/LevelSetupPooCabin/levelsetuppoocabin.c	level	per-level setup: texture scrolls and ropes
+src/game/Level/LevelSetupLab/levelsetuplab.c	level	per-level setup: dynamic model with light
+src/game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace.c	level	per-level setup: texture scrolls
 src/game/Level/LevelSetup25/levelsetup25.c	level	per-level setup: area reset and texture scrolls
-src/game/Level/LevelSetup26/levelsetup26.c	level	per-level setup: stage parts objects
-src/game/Level/LevelSetup27/levelsetup27.c	level	per-level setup stub (empty)
+src/game/Level/LevelSetupMainWar/levelsetupmainwar.c	level	per-level setup: stage parts objects
+src/game/Level/LevelSetupRockSolid/levelsetuprocksolid.c	level	per-level setup stub (empty)
 src/game/Level/LevelSetup30/levelsetup30.c	level	per-level setup: texture scrolls, effects, lights
-src/game/Level/LevelSetup31/levelsetup31.c	level	per-level setup: wave chains and level colours
-src/game/Level/LevelSetup33/levelsetup33.c	level	per-level setup: texture scrolls and lookup
-src/game/Level/LevelSetup34/levelsetup34.c	level	per-level setup: flamethrower texture scrolls
-src/game/Level/LevelSetup35/levelsetup35.c	level	per-level setup: texture scrolls
-src/game/Level/LevelSetup37/levelsetup37.c	level	per-level setup: ambient positional sounds
+src/game/Level/LevelSetupBankEntrance/levelsetupbankentrance.c	level	per-level setup: wave chains and level colours
+src/game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse.c	level	per-level setup: texture scrolls and lookup
+src/game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat.c	level	per-level setup: flamethrower texture scrolls
+src/game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse.c	level	per-level setup: texture scrolls
+src/game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro.c	level	per-level setup: ambient positional sounds
 src/game/Level/LevelSetupReset/levelsetupreset.c	level	level module reset and per-level start effects
 src/game/Level/LevelTints/leveltints.c	level	per-level colour/parameter tables setup from the level header
 src/game/Level/ObjectTables/objecttables.c	level	data-only unit: level-object behaviour handlers and grouped-object defaults

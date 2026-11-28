@@ -301,7 +301,7 @@ typedef struct {
 
 typedef struct ModelBeamEffect ModelBeamEffect;
 
-/* The beam particle's data (at +0x110), set by level_spawnModelBeam (game/Level/LevelSetup13/levelsetup13.c). The
+/* The beam particle's data (at +0x110), set by level_spawnModelBeam (game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c). The
  * particle runs effect_updateBurstSpark and effect_buildBurstSparkVtx, so the fields up to beamLengthTarget are
  * BurstSparkData's. */
 typedef struct {

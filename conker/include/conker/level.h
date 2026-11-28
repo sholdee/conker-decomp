@@ -13,35 +13,35 @@
  *   game/Level/LevelObjects/levelobjects.c
  *   game/Level/ZoneSpray/zonespray.c
  *   game/Level/LevelSetupReset/levelsetupreset.c
- *   game/Level/LevelSetup03/levelsetup03.c
- *   game/Level/LevelSetup04/levelsetup04.c
- *   game/Level/LevelSetup09/levelsetup09.c
- *   game/Level/LevelSetup05/levelsetup05.c
- *   game/Level/LevelSetup34/levelsetup34.c
- *   game/Level/LevelSetup08/levelsetup08.c
- *   game/Level/LevelSetup11/levelsetup11.c
- *   game/Level/LevelSetup12/levelsetup12.c
- *   game/Level/LevelSetup19/levelsetup19.c
- *   game/Level/LevelSetup24/levelsetup24.c
- *   game/Level/LevelSetup27/levelsetup27.c
+ *   game/Level/LevelSetupBarnInside/levelsetupbarninside.c
+ *   game/Level/LevelSetupBarnOutside/levelsetupbarnoutside.c
+ *   game/Level/LevelSetupBarnArena/levelsetupbarnarena.c
+ *   game/Level/LevelSetupBrontoCavern/levelsetupbrontocavern.c
+ *   game/Level/LevelSetupBrontoThroat/levelsetupbrontothroat.c
+ *   game/Level/LevelSetupDogFish/levelsetupdogfish.c
+ *   game/Level/LevelSetupCogLand/levelsetupcogland.c
+ *   game/Level/LevelSetupDinoArena/levelsetupdinoarena.c
+ *   game/Level/LevelSetupPooCabin/levelsetuppoocabin.c
+ *   game/Level/LevelSetupW1VolcanoRace/levelsetupw1volcanorace.c
+ *   game/Level/LevelSetupRockSolid/levelsetuprocksolid.c
  *   game/Level/LevelSetup30/levelsetup30.c
- *   game/Level/LevelSetup02/levelsetup02.c
- *   game/Level/LevelSetup06/levelsetup06.c
+ *   game/Level/LevelSetupHarbour/levelsetupharbour.c
+ *   game/Level/LevelSetupOutsideMolehole/levelsetupoutsidemolehole.c
  *   game/Level/LevelSetup07/levelsetup07.c
- *   game/Level/LevelSetup10/levelsetup10.c
+ *   game/Level/LevelSetupTankFactory/levelsetuptankfactory.c
  *   game/Level/ZoneShapeEmitter/zoneshapeemitter.c
  *   game/Level/LevelSetup18/levelsetup18.c
- *   game/Level/LevelSetup23/levelsetup23.c
- *   game/Level/LevelSetup33/levelsetup33.c
- *   game/Level/LevelSetup35/levelsetup35.c
- *   game/Level/LevelSetup37/levelsetup37.c
- *   game/Level/LevelSetup16/levelsetup16.c
- *   game/Level/LevelSetup31/levelsetup31.c
- *   game/Level/LevelSetup13/levelsetup13.c
- *   game/Level/LevelSetup17/levelsetup17.c
- *   game/Level/LevelSetup14/levelsetup14.c
+ *   game/Level/LevelSetupLab/levelsetuplab.c
+ *   game/Level/LevelSetupW3HauntedHouse/levelsetupw3hauntedhouse.c
+ *   game/Level/LevelSetupHauntedOuthouse/levelsetuphauntedouthouse.c
+ *   game/Level/LevelSetupHorrorIntro/levelsetuphorrorintro.c
+ *   game/Level/LevelSetupLiftTunnel/levelsetuplifttunnel.c
+ *   game/Level/LevelSetupBankEntrance/levelsetupbankentrance.c
+ *   game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c
+ *   game/Level/LevelSetupFrontEnd/levelsetupfrontend.c
+ *   game/Level/LevelSetupHeist/levelsetupheist.c
  *   game/Level/LevelSetup25/levelsetup25.c
- *   game/Level/LevelSetup26/levelsetup26.c
+ *   game/Level/LevelSetupMainWar/levelsetupmainwar.c
  *   game/Level/AmbientAction3/ambientaction3.c
  *   game/Level/AmbientAction5/ambientaction5.c
  *   game/Level/ZoneAreaEmitter/zoneareaemitter.c
@@ -52,7 +52,7 @@
  *   game/Level/WaveReset/wavereset.c
  *   game/Level/ZoneSpawn/zonespawn.c
  *   game/Level/SpawnTable/spawntable.c
- *   game/Level/LevelHook30/levelhook30.c
+ *   game/Level/LevelHookUBend/levelhookubend.c
  *   game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock)
  *   game_data_800D9920.c (data only, owner unknown; linked after game/Effects/TintedObject/tintedobject)
  *   game/Level/LevelHooks/levelhooks.c
@@ -185,22 +185,22 @@ void level_setup05(void);
 /* game_3C6C0.c */
 void level_setup34(void);
 
-/* game/Level/LevelSetup08/levelsetup08.c */
+/* game/Level/LevelSetupDogFish/levelsetupdogfish.c */
 void *level_spawnFlatSprite(f32 x, f32 y, f32 z);
 void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY);
 void level_setup08(void);
 
-/* game/Level/LevelSetup11/levelsetup11.c */
+/* game/Level/LevelSetupCogLand/levelsetupcogland.c */
 void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
 void level_setup11(void);
 
-/* game/Level/LevelSetup12/levelsetup12.c */
+/* game/Level/LevelSetupDinoArena/levelsetupdinoarena.c */
 extern BounceRecord *gBounceRecords; /* ten bouncing cursors (level_initBounceRecords) */
 void level_initBounceRecords(void);
 void func_1500FF9C(void);
 void level_setup12(void);
 
-/* game/Level/LevelSetup19/levelsetup19.c */
+/* game/Level/LevelSetupPooCabin/levelsetuppoocabin.c */
 void level_setup19(void);
 
 /* game_3D6F0.c */
@@ -213,7 +213,7 @@ void level_emptySetup27(void);
 void level_setup30(void);
 void level_setup32(void);
 
-/* game/Level/LevelSetup02/levelsetup02.c */
+/* game/Level/LevelSetupHarbour/levelsetupharbour.c */
 void level_setup15(void);
 void level_spawnBoltEmitter(Actor *obj);
 void level_setup02(void);
@@ -235,7 +235,7 @@ void level_setup18(void);
 void level_setup20(void);
 void level_setup22(void);
 
-/* game/Level/LevelSetup23/levelsetup23.c */
+/* game/Level/LevelSetupLab/levelsetuplab.c */
 void level_setup23(void);
 
 /* game_3E460.c */
@@ -254,7 +254,7 @@ void level_setup16(void);
 /* game_3E810.c */
 void level_setup31(void);
 
-/* game/Level/LevelSetup13/levelsetup13.c */
+/* game/Level/LevelSetupThroneRoom/levelsetupthroneroom.c */
 void level_setup13(void);
 void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list);
 void level_spawnFlashBurst(Actor *owner, u8 fxOwner, s32 list);
@@ -272,7 +272,7 @@ void level_setup28(void);
 void level_setup29(void);
 void level_setup25(void);
 
-/* game/Level/LevelSetup26/levelsetup26.c */
+/* game/Level/LevelSetupMainWar/levelsetupmainwar.c */
 void level_setup26(void);
 s32 level_spawnStageZone(TriggerZone *zone);
 
@@ -349,7 +349,7 @@ extern u8 gSpawnModelTypeCount;      // number of distinct spawn model types in 
 extern u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of the level
 extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
-/* game/Level/LevelHook30/levelhook30.c */
+/* game/Level/LevelHookUBend/levelhookubend.c */
 void level_hook30(Camera *camera);
 void level_updateHazardProps(s32 unused);
 void level_spawnBloodStrip(Actor *obj, u8 mirrored);

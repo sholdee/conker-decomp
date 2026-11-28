@@ -44,7 +44,7 @@
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
  *   game/Effects/TrapEffect/trapeffect.c
- *   game/Effects/LevelHook14/levelhook14.c
+ *   game/Effects/LevelHookCanyon/levelhookcanyon.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
@@ -72,7 +72,7 @@
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
  *   game/Effects/OwnerEffect/ownereffect.c
- *   game/Effects/LevelHook08/levelhook08.c
+ *   game/Effects/LevelHookHeist/levelhookheist.c
  *   game/Effects/FlagLights/flaglights.c
  *   game/Effects/BoneBeamParticle/bonebeamparticle.c
  *   game/Effects/DebrisThrow/debristhrow.c
@@ -414,7 +414,7 @@ void effect_actorEmitterMessage(ActorEmitter *emitter, ActorMsg *msg, u8 type);
 
 /* game/Effects/HopSprite/hopsprite.c */
 typedef struct HopSprite HopSprite;
-extern s32 gTile0ScrollS; /* texture scroll offsets (also advanced by game/Level/LevelHook30/levelhook30.c) */
+extern s32 gTile0ScrollS; /* texture scroll offsets (also advanced by game/Level/LevelHookUBend/levelhookubend.c) */
 extern s32 gTile0ScrollT;
 extern s32 gTile1ScrollS;
 extern s32 gTile1ScrollT;
@@ -522,7 +522,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite);
 void effect_shrinkBillboard(BillboardParticle *particle);
 
-/* game/Effects/LevelHook14/levelhook14.c */
+/* game/Effects/LevelHookCanyon/levelhookcanyon.c */
 void effect_emptyLevelHook14(s32 unused);
 
 /* game/Effects/ZonePairEmitter/zonepairemitter.c */
@@ -793,7 +793,7 @@ void effect_spawnOwnerEffect(Actor *owner);
 void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId);
 void effect_updateOwnerEffect(OwnerEffect *effect);
 
-/* game/Effects/LevelHook08/levelhook08.c */
+/* game/Effects/LevelHookHeist/levelhookheist.c */
 void effect_emptyLevelHook8(s32 unused);
 
 /* game/Effects/FlagLights/flaglights.c */

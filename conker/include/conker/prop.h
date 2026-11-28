@@ -96,7 +96,7 @@ void prop_scatterPieces(Vec3f *origin, void *floor, s32 id, u8 lit, u8 owner, s3
 s32 prop_onPieceFloorHit(struct Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
 /* game/Prop/Pendulum/pendulum.c */
-extern EffectHeader *gLevelSprayEffects[4]; /* level spray effects (game/Level/LevelSetup08/levelsetup08.c), destroyed by prop_destroyLevelSprays */
+extern EffectHeader *gLevelSprayEffects[4]; /* level spray effects (game/Level/LevelSetupDogFish/levelsetupdogfish.c), destroyed by prop_destroyLevelSprays */
 void prop_swingPendulum(WorldObject *pendulum);
 void prop_rampTextureScroll(WorldObject *obj);
 void prop_destroyLevelSprays(void);

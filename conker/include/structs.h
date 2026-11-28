@@ -2753,7 +2753,7 @@ typedef struct ObjGroup {
     /* 0x08 */ u16 members[8];
 } ObjGroup; // size 0x18
 
-/* One of the 10 bouncing cursors in gBounceRecords (created by level_initBounceRecords in game/Level/LevelSetup12/levelsetup12, stepped in
+/* One of the 10 bouncing cursors in gBounceRecords (created by level_initBounceRecords in game/Level/LevelSetupDinoArena/levelsetupdinoarena, stepped in
  * game/Effects/BounceRecords/bouncerecords). */
 typedef struct BounceRecord {
     /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
