@@ -3426,6 +3426,14 @@ typedef struct IdList3 {
     /* 0x0 */ s32 ids[3];
 } IdList3;
 
+typedef struct IdList4 {
+    /* 0x0 */ s32 ids[4];
+} IdList4;
+
+typedef struct IdList6 {
+    /* 0x0 */ s32 ids[6];
+} IdList6;
+
 /* A file's range in the ROM (gRomFiles, the compressed game code). */
 typedef struct RomFile {
     /* 0x0 */ s32 start;

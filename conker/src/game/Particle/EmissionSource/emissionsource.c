@@ -14,12 +14,6 @@
 #include "libc/string.h"
 
 
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 data[1]; // effect-specific data
-} Game113D60AnyEffect;
-
 typedef struct Game113D60Source {
     f32 chance;
     s8 start;
@@ -227,14 +221,8 @@ void particle_randomPointOnSixSegments(Vec3f *out) {
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ Vec3f unk38;
-} Bone150E6FAC;
-
-
-/* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
- * position when the model has no such node. */
+/* End callback: a random point on a ring around the actor, moved back along the motion of its actor tracker
+ * (attachment 0x16), or the actor's position when it has no tracker. */
 void particle_randomPointAroundActorNode(Vec3f *out, Actor *actor) {
     Attachment *node;
     f32 sine;
@@ -243,16 +231,16 @@ void particle_randomPointAroundActorNode(Vec3f *out, Actor *actor) {
     f32 cosine;
 
     if (effect_findAttachmentByType(actor->attachments, 0x16, &node) != 0) {
-        Bone150E6FAC *bone;
+        ActorTracker *tracker;
 
         radius = (math_randomFloat() * 100.0f) + 80.0f;
         angle = math_random() & 0xFF;
         cosine = math_cosBinAngleMasked(angle - 0x40);
         sine = math_cosBinAngleMasked(angle);
-        bone = node->handle;
-        out->x = actor->xpos + (bone->unk38.x * -80.0f) + (cosine * radius);
-        out->y = actor->ypos + (bone->unk38.y * -80.0f) + 100.0f;
-        out->z = actor->zpos + (bone->unk38.z * -80.0f) + (sine * radius);
+        tracker = node->handle;
+        out->x = actor->xpos + (tracker->motion.x * -80.0f) + (cosine * radius);
+        out->y = actor->ypos + (tracker->motion.y * -80.0f) + 100.0f;
+        out->z = actor->zpos + (tracker->motion.z * -80.0f) + (sine * radius);
     } else {
         out->x = actor->xpos;
         out->y = actor->ypos;
@@ -644,15 +632,10 @@ void particle_spawnFlashAndJetSprayAtPoint(index, owner, list)
     }
 }
 
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 accum;
-} Game113D60PointData;
-
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
 void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 list) {
-    Game113D60PointData data;
-    TimedEffect *effect;
+    Game113D60Emitter data;
+    Game113D60EmitterEffect *effect;
 
     data.position = *position;
     data.accum = 0.0f;
@@ -660,7 +643,7 @@ void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, 
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
                            owner, list);
     if (effect != NULL) {
-        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->emitter, &data, sizeof(data));
     }
 }
 
@@ -673,7 +656,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
     if (emitter->accum > 1.0f) {
         ParticleDesc arg;
         Game113D60ParticleExtra extra;
-        Game113D60Particle *particle;
+        SpriteParticle *particle;
 
         arg.texture = 0x6C;
         arg.renderMode = 0x5103;
@@ -722,7 +705,7 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
             arg.width = arg.height = math_randomFloat() * 71.0f + 80.0f;
             particle = particle_newSpriteParticleWithFloor(&arg, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->extra, &extra, sizeof(extra));
+                memcpy(&particle->data.wobble, &extra, sizeof(extra));
             }
             emitter->accum -= 1.0f;
         } while (emitter->accum > 1.0f);
@@ -730,21 +713,21 @@ void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
 }
 
 /* Update callback of the particles particle_updateRandomEmitter spawns. */
-s32 particle_wobbleRandomEmitterParticle(Game113D60Particle *particle, Vec3f *prevPos) {
-    particle_wobbleSpriteOffset(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
+s32 particle_wobbleRandomEmitterParticle(SpriteParticle *particle, Vec3f *prevPos) {
+    particle_wobbleSpriteOffset(&particle->head, particle->data.wobble.amplitude, particle->data.wobble.phase, particle->data.wobble.phaseStep);
     return 1;
 }
 
 /* Creates the timer effect (0x35) that particle_updateShakeTimer updates. */
 void particle_startShakeTimer(void) {
-    TimedEffect *effect;
+    Game113D60TimerEffect *effect;
     f32 timer;
 
     timer = 10.0f;
 
     effect = effect_newTimedEffect(300, -1, 0x35, -1, 0, 0, sizeof(timer), 0xFF, 1);
     if (effect != NULL) {
-        memcpy(((Game113D60AnyEffect *)effect)->data, &timer, sizeof(timer));
+        memcpy(&effect->timer, &timer, sizeof(timer));
     }
 }
 
@@ -781,16 +764,10 @@ void particle_fireShake() {
     sound_play(0x4CD, 0x5DC0, 0x40, 0x200 - (math_random() & 0x400), 0);
 }
 
-typedef struct {
-    /* 0x0 */ f32 rate;
-    /* 0x4 */ f32 rateRange;
-    /* 0x8 */ f32 accum;
-} Game113D60Data8A80;
-
 /* Creates effect 0x33 for 30-70 frames. */
 void particle_startDustRegionSpawner(void) {
-    TimedEffect *effect;
-    Game113D60Data8A80 data;
+    Game113D60RegionSpawnerEffect *effect;
+    Game113D60Spawner data;
 
     data.rate = 1.199999957e-07f;
     data.rateRange = 3.199999981e-07f;
@@ -798,16 +775,9 @@ void particle_startDustRegionSpawner(void) {
 
     effect = effect_newTimedEffect((math_random() % 41) + 30, -1, 0x33, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
-        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->spawner, &data, sizeof(data));
     }
 }
-
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;
-    /* 0x10 */ f32 rateRange;
-    /* 0x14 */ f32 accum;
-} Game113D60Data8B1C;
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
  * position math_getCameraPos returns. */
@@ -816,8 +786,8 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
     Game113D60Spawner *spawner;
     RegionNode *node;
     f32 pick;
-    Game113D60Data8B1C data;
-    Game113D60Data8B1C *dataPtr;
+    Game113D60PointSpawner data;
+    Game113D60PointSpawner *dataPtr;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -839,7 +809,7 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
-                TimedEffect *child;
+                Game113D60PointSpawnerEffect *child;
 
                 data.rate = 0.3171199858f;
                 data.rateRange = 1.046509981f;
@@ -847,7 +817,7 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
                 child = effect_newTimedEffect((math_random() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
-                    memcpy(((Game113D60AnyEffect *)child)->data, dataPtr, sizeof(data));
+                    memcpy(&child->spawner, dataPtr, sizeof(data));
                 }
             }
             spawner->accum -= 1.0f;
@@ -935,16 +905,10 @@ void particle_updateFallingDustSpawner(Game113D60PointSpawnerEffect *effect) {
     }
 }
 
-typedef struct {
-    /* 0x0 */ f32 rate;
-    /* 0x4 */ f32 rateRange;
-    /* 0x8 */ f32 accum;
-} Game113D60Data90DC;
-
 /* Creates effect 0x36 for 5-30 frames. */
 void particle_startDebrisRegionSpawner(void) {
-    TimedEffect *effect;
-    Game113D60Data90DC data;
+    Game113D60RegionSpawnerEffect *effect;
+    Game113D60Spawner data;
 
     data.rate = 2.000000023e-07f;
     data.rateRange = 1.500000053e-07f;
@@ -952,7 +916,7 @@ void particle_startDebrisRegionSpawner(void) {
 
     effect = effect_newTimedEffect((math_random() % 26) + 5, -1, 0x36, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
-        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->spawner, &data, sizeof(data));
     }
 }
 
@@ -996,7 +960,7 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
-                TimedEffect *child;
+                Game113D60PointSpawnerEffect *child;
 
                 data.rate = 0.1932400018f;
                 data.rateRange = 0.3140099943f;
@@ -1009,7 +973,7 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
                 child = effect_newTimedEffect((math_random() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
-                    memcpy(((Game113D60AnyEffect *)child)->data, &data, sizeof(data));
+                    memcpy(&child->spawner, &data, sizeof(data)); /* Game113D60Data9178 starts with the spawner */
                 }
             }
             spawner->accum -= 1.0f;

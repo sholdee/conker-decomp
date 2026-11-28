@@ -6,15 +6,12 @@
 #include "conker/game.h"
 #include "conker/particle.h"
 
-typedef struct Vtx1514A6A0 {
-    s16 x, y, z, flag;
-    u8 other[8];
-} Vtx1514A6A0;
-
-/* Builds the four camera-facing vertices of a beam quad from start toward end. */
-void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
-    Vtx1514A6A0 *vertices;
-    void *result;
+/* Builds the four camera-facing vertices of a beam quad (gQuadParticleVertexFuncs[4]): from def.pos (its start) toward
+ * def.rot (its end), def.width wide, drawn def.height of the way to the end (its progress); within def.scale.x of the start
+ * the drawn part is stretched. */
+Vtx *particle_buildCameraFacingBeamQuad(DefParticleHead *beam, s16 cam) {
+    Vtx *vertices;
+    Vtx *result;
     f32 distanceSquared;
     Vec3f tip;
     f32 dx, dy, dz;
@@ -25,38 +22,38 @@ void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
     f32 radiusSquared;
     u8 fresh;
 
-    particle_getViewBuffer(beam->buffers, cam, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(beam->vtxBuffers, cam, sizeof(beam->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(beam->buffers[cam], beam->vertexTemplate, 0x40);
-            memcpy(beam->buffers[cam] + 0x40, beam->vertexTemplate, 0x40);
+            memcpy(beam->vtxBuffers[cam], beam->vtxTemplate, sizeof(beam->vtxTemplate));
+            memcpy(beam->vtxBuffers[cam] + 4, beam->vtxTemplate, sizeof(beam->vtxTemplate));
         }
     } else {
         return NULL;
     }
-    dx = beam->end.x - beam->start.x;
-    dy = beam->end.y - beam->start.y;
-    dz = beam->end.z - beam->start.z;
-    tip.x = beam->start.x + dx * beam->progress;
-    tip.y = beam->start.y + dy * beam->progress;
-    tip.z = beam->start.z + dz * beam->progress;
+    dx = beam->def.rot.x - beam->def.pos.x;
+    dy = beam->def.rot.y - beam->def.pos.y;
+    dz = beam->def.rot.z - beam->def.pos.z;
+    tip.x = beam->def.pos.x + dx * beam->def.height;
+    tip.y = beam->def.pos.y + dy * beam->def.height;
+    tip.z = beam->def.pos.z + dz * beam->def.height;
     eye = &camera_global_Cameras[cam].eye;
-    dx = tip.x - beam->start.x;
-    dy = tip.y - beam->start.y;
-    dz = tip.z - beam->start.z;
+    dx = tip.x - beam->def.pos.x;
+    dy = tip.y - beam->def.pos.y;
+    dz = tip.z - beam->def.pos.z;
     distanceSquared = dx * dx + dy * dy + dz * dz;
-    radiusSquared = beam->radius * beam->radius;
+    radiusSquared = beam->def.scale.x * beam->def.scale.x;
     if (distanceSquared < radiusSquared) {
-        f32 factor = 1.0f - sqrtf(distanceSquared) / beam->radius;
+        f32 factor = 1.0f - sqrtf(distanceSquared) / beam->def.scale.x;
 
         dx += dx * factor;
         dy += dy * factor;
         dz += dz * factor;
     }
-    vx = beam->start.x - eye->x;
-    vy = beam->start.y - eye->y;
-    vz = beam->start.z - eye->z;
+    vx = beam->def.pos.x - eye->x;
+    vy = beam->def.pos.y - eye->y;
+    vz = beam->def.pos.z - eye->z;
     nx = dy * vz - vy * dz;
     ny = dz * vx - vz * dx;
     nz = dx * vy - vx * dy;
@@ -66,21 +63,21 @@ void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        f32 scale = beam->width / sqrtf(lengthSquared);
+        f32 scale = beam->def.width / sqrtf(lengthSquared);
 
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = beam->start.x + nx;
-    vertices->y = beam->start.y + ny;
-    vertices->z = beam->start.z + nz;
-    vertices->flag = 0;
+    vertices->v.ob[0] = beam->def.pos.x + nx;
+    vertices->v.ob[1] = beam->def.pos.y + ny;
+    vertices->v.ob[2] = beam->def.pos.z + nz;
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = beam->start.x - nx;
-    vertices->y = beam->start.y - ny;
-    vertices->z = beam->start.z - nz;
-    vertices->flag = 0;
+    vertices->v.ob[0] = beam->def.pos.x - nx;
+    vertices->v.ob[1] = beam->def.pos.y - ny;
+    vertices->v.ob[2] = beam->def.pos.z - nz;
+    vertices->v.flag = 0;
     vertices++;
     dx = -dx;
     dy = -dy;
@@ -97,21 +94,21 @@ void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        f32 scale = beam->width / sqrtf(lengthSquared);
+        f32 scale = beam->def.width / sqrtf(lengthSquared);
 
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = tip.x + nx;
-    vertices->y = tip.y + ny;
-    vertices->z = tip.z + nz;
-    vertices->flag = 0;
+    vertices->v.ob[0] = tip.x + nx;
+    vertices->v.ob[1] = tip.y + ny;
+    vertices->v.ob[2] = tip.z + nz;
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = tip.x - nx;
-    vertices->y = tip.y - ny;
-    vertices->z = tip.z - nz;
-    vertices->flag = 0;
+    vertices->v.ob[0] = tip.x - nx;
+    vertices->v.ob[1] = tip.y - ny;
+    vertices->v.ob[2] = tip.z - nz;
+    vertices->v.flag = 0;
     return result;
 }
 

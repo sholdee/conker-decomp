@@ -385,40 +385,23 @@ void effect_spawnScatterTrailVariant(u8 variant) {
     trail_spawnScatterTrail(&params, &pos, gScatterTrailCapacities[variant]);
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x68];
-    /* 0x68 */ u8 mode;
-} Input150B66DC;
+/** Light attach callback (gLightAttachCallbacks[1]): by the attached actor's swapTexture[0], disables the light
+ * (15), or enables it with radius 20 (16) or 40 (any other texture). */
+s32 func_150B66DC(LightEffect *effect) {
+    Actor *actor = effect->data.attach.actor;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[9];
-    /* 0x09 */ u8 unk9;
-    /* 0x0A */ u8 padA[0x25];
-    /* 0x2F */ u8 unk2F;
-} Output150B66DC;
-
-struct Arg150B66DC {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ Output150B66DC *out;
-    /* 0x18 */ Input150B66DC *in;
-};
-
-/** Sets out->unk9 for mode 15; otherwise clears it and sets out->unk2F (20 for mode 16, else 40). */
-s32 func_150B66DC(Arg150B66DC *ctx) {
-    Input150B66DC *in = ctx->in;
-
-    switch (in->mode - 15) { // matching: `switch (in->mode)` with case 15-17 labels mismatches
-    case 0: /* mode 15 */
-        ctx->out->unk9 = 1;
+    switch (actor->swapTexture[0] - 15) { // matching: `switch (actor->swapTexture[0])` with case 15-17 labels mismatches
+    case 0: /* texture 15 */
+        effect->light->disabled = 1;
         break;
-    case 1: /* mode 16 */
-        ctx->out->unk9 = 0;
-        ctx->out->unk2F = 20;
+    case 1: /* texture 16 */
+        effect->light->disabled = 0;
+        effect->light->radius = 20;
         break;
-    case 2: /* mode 17 */
+    case 2: /* texture 17 */
     default:
-        ctx->out->unk9 = 0;
-        ctx->out->unk2F = 40;
+        effect->light->disabled = 0;
+        effect->light->radius = 40;
         break;
     }
     return 1;

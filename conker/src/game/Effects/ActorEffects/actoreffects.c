@@ -308,20 +308,11 @@ void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f
     particle_spawnSurfaceQuadSprite(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
-/* Template copied onto the stack for zone_findActorZone. */
-struct Args151420F8 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-};
-
-const Args151420F8 D_800A5200 = { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 };
+/* Zone ids copied onto the stack for zone_findActorZone. */
+const IdList6 D_800A5200 = { { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 } };
 
 s32 func_151420F8(Actor *actor) {
-    Args151420F8 args;
+    IdList6 args;
 
     args = D_800A5200;
     if (zone_findActorZone(actor - movement_obj, 6, &args, actor) == -1) {

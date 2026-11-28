@@ -250,7 +250,6 @@ void effect_ownerSparkMessage(OwnerSparkEffect *effect, ActorMsg *event, u8 even
 /* game/Effects/ObjBurst/objburst.c */
 typedef struct ObjBurstEffect ObjBurstEffect;
 typedef struct BoltRingEffect BoltRingEffect;
-typedef struct Arg150B66DC Arg150B66DC;
 GameCommand *effect_emitFacingCommand(GameCommand *cmd, s32 objIndex);
 void effect_updateObjBurst(ObjBurstEffect *effect);
 void effect_spawnObjBurstAt(Vec3f *pos, u8 owner, s32 kind);
@@ -261,7 +260,7 @@ void effect_getBone5Point(Actor *obj, Vec3f *out);
 void effect_updateBoltRing(BoltRingEffect *effect);
 void effect_boltRingMessage(EffectHeader *effect, s32 arg1, u8 msg);
 void effect_spawnScatterTrailVariant(u8 variant);
-s32 func_150B66DC(Arg150B66DC *ctx);
+s32 func_150B66DC(LightEffect *effect);
 void effect_flashViewLightBlue(u8 owner, s32 kind);
 
 /* game/Effects/BreakUp/breakup.c */
@@ -856,7 +855,6 @@ s32 effect_updateWarpModel(DynModel *obj);
 /* game/Effects/ActorEffects/actoreffects.c */
 typedef struct Msg151419D0 Msg151419D0;
 typedef struct LinkedObject151419D0 LinkedObject151419D0;
-typedef struct Args151420F8 Args151420F8;
 void effect_detachTimedHandler(LinkedObject151419D0 *obj);
 void effect_destroyTimedHandler(void *arg0);
 void effect_freeTimedHandler(void *arg0);
@@ -871,7 +869,7 @@ s32 func_151420F8(Actor *actor);
 void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
 extern void (*gProbeVisibleCallbacks[])(void *probe, s32 r, s32 g, s32 b); /* probe visible callbacks of game/Flare/VisProbe/visprobe.c */
 extern ActorEffectDef gActorEffects[20];
-extern const Args151420F8 D_800A5200;
+extern const IdList6 D_800A5200;
 
 /* game/Math/MathUtil/mathutil.c */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);

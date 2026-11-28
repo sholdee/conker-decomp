@@ -801,11 +801,6 @@ typedef struct {
 } Game113D60ParticleExtra;
 
 typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ Game113D60ParticleExtra extra;
-} Game113D60Particle;
-
-typedef struct {
     /* 0x0 */ Vec3f position;
     /* 0xC */ f32 accum;
 } Game113D60Emitter;
@@ -879,7 +874,7 @@ void particle_updateScreenBurst(Game113D60BurstEffect *effect);
 void particle_spawnFlashAndJetSprayAtPoint();
 void particle_startRandomEmitter(const Vec3f *position, s16 duration, u8 owner, s32 list);
 void particle_updateRandomEmitter(Game113D60EmitterEffect *effect);
-s32 particle_wobbleRandomEmitterParticle(Game113D60Particle *particle, Vec3f *prevPos);
+s32 particle_wobbleRandomEmitterParticle(SpriteParticle *particle, Vec3f *prevPos);
 void particle_startShakeTimer(void);
 void particle_updateShakeTimer(Game113D60TimerEffect *effect);
 /* (void); declared without a prototype: particle_updateShakeTimer passes the effect */
@@ -1432,18 +1427,6 @@ s32 particle_moveFlickerParticle(FlickerParticle *effect);
 s32 particle_moveFlickerTrail(FlickerParticle *effect);
 
 /* game/Particle/GroundCluster/groundcluster.c */
-typedef struct Beam1514A6A0 {
-    u8 unknown0[0x2C];
-    f32 width;
-    f32 progress;
-    Vec3f start;
-    Vec3f end;
-    f32 radius;
-    u8 unknown50[0x70];
-    u8 vertexTemplate[0x40];
-    u8 *buffers[1];
-} Beam1514A6A0;
-
 /* Common particle instance layout used by the update callbacks below. */
 typedef struct {
     /* 0x00 */ DefParticleHead head;
@@ -1451,7 +1434,7 @@ typedef struct {
     /* 0x150 */ f32 shrinkFraction; /* width and height lose this fraction every call (particle_shrinkBallisticQuad) */
 } Particle177B50;
 
-void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam);
+Vtx *particle_buildCameraFacingBeamQuad(DefParticleHead *beam, s16 cam);
 void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange, f32 heightBase,
                    f32 heightRange, s16 lifeBase, s16 lifeRange, u8 expireFn);
 void particle_spawnRandomChannelParticle(Vec3f *pos, u8 owner, s32 list);

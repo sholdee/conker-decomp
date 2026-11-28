@@ -60,12 +60,6 @@ const s32 *gBloodModelLists[20] = {
     gDecoratedSoldierBloodModels, gBroadTedizBloodModels, gGreggBloodModels, gHoodedGreggBloodModels, D_800A3ED4, D_800A3EF0,
 };
 
-
-typedef struct {
-    s32 value[4];
-} Struct15136698Table;
-
-
 /* Actor model ids (Actor::id) that have a blood profile. */
 enum {
     MODEL_CONKER = 0,
@@ -1139,7 +1133,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
     GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
-    Struct15136698Table textures = { { 0x3A, 0x3B, 0x3C, 0x3D } };
+    IdList4 textures = { { 0x3A, 0x3B, 0x3C, 0x3D } };
     s32 argB;
     s32 argC;
     s32 value;
@@ -1147,7 +1141,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 growth, u8 alpha,
     s32 random0;
 
     extra = growth;
-    desc.texture = textures.value[math_random() & 3];
+    desc.texture = textures.ids[math_random() & 3];
     if (arg7 != 0) {
         value = 2;
     } else {
