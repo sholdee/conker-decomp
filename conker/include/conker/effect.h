@@ -1646,7 +1646,6 @@ void effect_destroyRibbon(EffectObj *effect);
 void effect_freeRibbon(EffectObj *effect);
 
 /* game/Effects/FollowEffects/followeffects.c */
-typedef struct SoundChannel SoundChannel;
 typedef struct OwnedParticle OwnedParticle;
 void *effect_spawnOwnerModel(Actor *owner, u8 fxOwner, s32 fxList);
 s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport);
@@ -1654,7 +1653,7 @@ void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType);
 void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list);
 void effect_startTankSound(Actor *obj);
 /* sound update callback */
-s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan, s32 *speedOut, s32 mix, u16 *soundId);
+s32 effect_updateTankSound(SoundRecord *chan, s32 *active, u32 *volume, s32 *pan, s32 *speedOut, s32 *mix, u16 *soundId);
 void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 owner, s32 list);
 void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 owner, s32 list);
 void effect_spawnImpactLight(Vec3f *pos, u8 owner, s32 list);

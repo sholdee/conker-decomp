@@ -373,7 +373,8 @@ struct SoundRecord {
     /* 0x14 */ SoundRecordCallback callback_ptr;
     /* 0x18 */ union {
         void *ptr;
-        Actor *owner;   /* the object the sound follows (sound_followOwnerCallback, sound_followOwnerAnimsCallback) */
+        Actor *owner;   /* the object the sound follows (sound_followOwnerCallback, sound_followOwnerAnimsCallback,
+                         * effect_updateTankSound) */
         s32 timer;      /* countdown (sound_chirpCallback, sound_fadeOutCallback) */
         s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
         u16 half[2];
@@ -385,7 +386,8 @@ struct SoundRecord {
         Actor *obj;     /* the object the delayed sound plays on (sound_actorSound1DelayCallback, game/Audio/ObjectSound/objectsound.c) */
         u16 *ids;       /* sound_followOwnerAnimsCallback: 0-terminated list of the owner's animation ids (Actor.unk84) */
         u32 bits;       /* camera_onZoomSound: bit 31 the sound kind, bits 0-23 the last zoom; camera_onLookSound: bits 24-31 a
-                         * frame count, bits 0-23 the last aim key */
+                         * frame count, bits 0-23 the last aim key; effect_updateTankSound: bits 0-6 the state, 7 fading in,
+                         * 8-15 the fade volume, 16-27 a timer */
     } callback_param2;
     /* 0x20 */ s16 pitch_shift_cent;
     /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */

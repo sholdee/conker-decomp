@@ -423,30 +423,15 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
 /* Starts sound 0x4A7 at `obj`; effect_updateTankSound keeps it updated. */
 void effect_startTankSound(Actor *obj) {
     sound_addDynamicSound(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
-                  (SoundRecordCallback)effect_updateTankSound, obj, 0, 8, 0);
+                  effect_updateTankSound, obj, 0, 8, 0);
 }
-
-/* A playing positional sound, as seen by its update callback. */
-struct SoundChannel {
-    /* 0x00 */ u16 sample;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10 - 0x8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 pad14[0x18 - 0x14];
-    /* 0x18 */ Actor *obj;
-    /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
-    /* 0x20 */ u8 pad20[0x24 - 0x20];
-    /* 0x24 */ u16 sound_id; /* voice handle */
-};
 
 /*
  * Update callback of the sounds started by effect_startTankSound: follows the object, switches between the
  * 0x4A7/0x4A8/0x4A9 sounds by how it moves, and fades the volume. Returns 1 when the sound should stop.
  */
-s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan, s32 *speedOut,
-                  s32 mix, u16 *soundId) {
+s32 effect_updateTankSound(SoundRecord *chan, s32 *active, u32 *volume, s32 *pan, s32 *speedOut,
+                  s32 *mix, u16 *soundId) {
     Actor *obj;
     s32 state;
     s32 prevState;
@@ -456,14 +441,14 @@ s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan,
     s32 timer;
     s32 fadingIn;
 
-    obj = chan->obj;
+    obj = chan->callback_param1.owner;
     if ((obj != NULL) && (obj->energy != 0)) {
         state = 0;
         sound = 0;
-        prevState = chan->userData & 0x7F;
-        fade = (chan->userData >> 8) & 0xFF;
-        timer = (chan->userData >> 16) & 0xFFF;
-        fadingIn = (chan->userData >> 7) & 1;
+        prevState = chan->callback_param2.bits & 0x7F;
+        fade = (chan->callback_param2.bits >> 8) & 0xFF;
+        timer = (chan->callback_param2.bits >> 16) & 0xFFF;
+        fadingIn = (chan->callback_param2.bits >> 7) & 1;
         chan->x = obj->xpos;
         chan->y = obj->ypos;
         chan->z = obj->zpos;
@@ -500,7 +485,7 @@ s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan,
         }
         if (sound != 0) {
             sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
-                          (SoundRecordCallback)effect_updateTankSound, obj, state | 0x12CFF00, 8, 0);
+                          effect_updateTankSound, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
         if (*soundId != 0x4A7) {
@@ -525,14 +510,14 @@ s32 effect_updateTankSound(SoundChannel *chan, s32 active, u32 *volume, s32 pan,
                     timer = 0;
                     if (*soundId == 0x4A8) {
                         sound_addDynamicSound(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
-                                      0xC8, (SoundRecordCallback)effect_updateTankSound, obj, state | 0x880, 8, 0);
+                                      0xC8, effect_updateTankSound, obj, state | 0x880, 8, 0);
                         timer = (math_random() & 0x200) + 900;
                     }
                 }
             }
             *speedOut = fabsf(obj->speed) * obj->vtilt * 0.5f;
         }
-        chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
+        chan->callback_param2.bits = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
             if (chan->sound_id != 0) {
                 sound_stop(chan->sound_id);
